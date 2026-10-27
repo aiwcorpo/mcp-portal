@@ -25,6 +25,7 @@ export default defineConfig({
     command: `node scripts/serve-csp.mjs dist/e2e`,
     url: `http://localhost:${PORT}/`,
     env: { PORT: String(PORT) },
-    reuseExistingServer: !process.env['CI'],
+    // Always a fresh server: a leftover one could serve an older dist/e2e.
+    reuseExistingServer: false,
   },
 });

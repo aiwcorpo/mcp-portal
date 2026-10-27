@@ -45,11 +45,18 @@ export function stepUpUrlFor(
   return loginUrl(returnPath, true);
 }
 
-/** External redirects (OAuth provider) must be plain http(s); never javascript: or data:. */
-export function isHttpUrl(value: string): boolean {
+const LOOPBACK_HOSTS: ReadonlySet<string> = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+/**
+ * External redirects (OAuth provider): https only. Plain http is accepted for loopback hosts, where
+ * the local mocks of ws-01 run; never javascript:, data: or a relative URL.
+ */
+export function isAllowedRedirect(value: string): boolean {
   try {
-    const protocol = new URL(value).protocol;
-    return protocol === 'https:' || protocol === 'http:';
+    const url = new URL(value);
+    return (
+      url.protocol === 'https:' || (url.protocol === 'http:' && LOOPBACK_HOSTS.has(url.hostname))
+    );
   } catch {
     return false;
   }

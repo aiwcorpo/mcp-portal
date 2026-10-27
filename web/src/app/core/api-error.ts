@@ -1,21 +1,27 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorCode } from '../api/generated';
+import { ErrorCode, PutSecretError } from '../api/generated';
 
 /**
- * Codes the UI can explain: C10 plus the C12 codes from CC-012 and CC-022.
- * Anything else from the backend collapses to a generic code, so no backend text reaches the page.
+ * Codes the UI can explain. C10 and the PUT secret errors come from the generated client; the C12
+ * generic Error schema has `error: string`, so its codes from CC-012 and the OAuth callback codes from
+ * CC-022 are listed here. Anything else collapses to a status-based code, so no backend text reaches
+ * the page.
  */
+const C12_ERROR_CODES = ['invalid_request', 'csrf_invalid', 'slug_taken', 'hash_mismatch'] as const;
+const OAUTH_CALLBACK_ERROR_CODES = ['identity_mismatch', 'flow_invalid', 'provider_error'] as const;
+
 export const PORTAL_ERROR_CODES = [
   ...Object.values(ErrorCode),
-  'invalid_request',
-  'csrf_invalid',
-  'secret_invalid',
-  'identity_mismatch',
-  'slug_taken',
-  'hash_mismatch',
-  'flow_invalid',
-  'provider_error',
+  ...Object.values(PutSecretError.ErrorEnum),
+  ...C12_ERROR_CODES,
+  ...OAUTH_CALLBACK_ERROR_CODES,
 ] as const;
+
+export type OAuthCallbackErrorCode = (typeof OAUTH_CALLBACK_ERROR_CODES)[number];
+
+export function isOAuthCallbackErrorCode(value: unknown): value is OAuthCallbackErrorCode {
+  return (OAUTH_CALLBACK_ERROR_CODES as readonly unknown[]).includes(value);
+}
 
 export type PortalErrorCode = (typeof PORTAL_ERROR_CODES)[number];
 

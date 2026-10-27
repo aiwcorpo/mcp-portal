@@ -28,7 +28,12 @@ describe('ConnectPage', () => {
     expect(text()).toContain('Jak utworzyć możliwie wąski token');
     expect(text()).toContain('read_api');
     expect(tokenInput().type).toBe('password');
-    expect(tokenInput().autocomplete).toBe('off');
+    expect(tokenInput().getAttribute('autocomplete')).toBe('new-password');
+    expect(tokenInput().hasAttribute('maxlength')).toBe(false);
+    expect(tokenInput().hasAttribute('data-1p-ignore')).toBe(true);
+    expect(tokenInput().getAttribute('data-lpignore')).toBe('true');
+    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    expect(dateInput().min).toBe(tomorrow);
   });
 
   it('on step_up_required clears the token and sends the user to MFA with a way back to the form', async () => {
@@ -104,6 +109,34 @@ describe('ConnectPage', () => {
     await until(() => expect(text()).toContain('Wklej token.'));
     expect(text()).toContain('Data musi być w przyszłości.');
     expect(requests).toBe(0);
+  });
+
+  it('trims the pasted token and rejects one made of whitespace or longer than 4096 characters', async () => {
+    store.update({ mfaFresh: true });
+    const bodies: string[] = [];
+    server.events.on('request:start', async ({ request }) => {
+      if (request.method === 'PUT') {
+        bodies.push(await request.clone().text());
+      }
+    });
+    configureTestApp();
+    await openRoute('/connect/gitlab');
+    await until(() => expect(tokenInput()).toBeTruthy());
+
+    type(tokenInput(), '   ');
+    button('Zapisz token').click();
+    await until(() => expect(text()).toContain('Wklej token.'));
+
+    type(tokenInput(), 'x'.repeat(4097));
+    button('Zapisz token').click();
+    await until(() => expect(text()).toContain('Token jest za długi'));
+    expect(tokenInput().value).toHaveLength(4097);
+    expect(bodies).toEqual([]);
+
+    type(tokenInput(), '  glpat-trimmed-0003\n');
+    button('Zapisz token').click();
+    await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
+    expect(JSON.parse(bodies[0]).secret).toBe('glpat-trimmed-0003');
   });
 
   it('maps a CSRF rejection to its message', async () => {

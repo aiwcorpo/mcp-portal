@@ -35,6 +35,15 @@ function todayUtc(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function tomorrowUtc(): string {
+  return new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Pasted tokens often carry a trailing newline or space; a token of whitespace only is empty. */
+export function nonBlankValidator(control: AbstractControl<string>): ValidationErrors | null {
+  return control.value && !control.value.trim() ? { blank: true } : null;
+}
+
 export function futureDateValidator(control: AbstractControl<string>): ValidationErrors | null {
   const value = control.value;
   if (!value) {
@@ -82,14 +91,14 @@ export class SecretForm implements OnInit {
   readonly connected = output<PutSecretResponse>();
 
   protected readonly maxLength = SECRET_MAX_LENGTH;
-  protected readonly minDate = todayUtc();
+  protected readonly minDate = tomorrowUtc();
   protected readonly phase = signal<Phase>({ kind: 'idle' });
   protected readonly saving = computed(() => this.phase().kind === 'saving');
 
   protected readonly form = new FormGroup({
     secret: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(SECRET_MAX_LENGTH)],
+      validators: [Validators.required, nonBlankValidator, Validators.maxLength(SECRET_MAX_LENGTH)],
     }),
     expiresAt: new FormControl('', { nonNullable: true, validators: [futureDateValidator] }),
   });
@@ -109,7 +118,7 @@ export class SecretForm implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const secret = this.form.controls.secret.value;
+    const secret = this.form.controls.secret.value.trim();
     const expiresDate = this.form.controls.expiresAt.value;
     // The secret leaves the form before the request completes, whatever the outcome.
     this.form.controls.secret.reset('');

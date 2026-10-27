@@ -33,7 +33,11 @@ tbody th {
   text-align: right;
 }
 
-/* Below 720 px each connection becomes a stacked block labelled from data-label. */
+/*
+ * Below 720 px each connection becomes a stacked block labelled from data-label. The explicit table
+ * roles in the template keep the semantics that display: block/grid removes in some browsers, and the
+ * empty alternative text keeps screen readers from reading the visual label on top of the header.
+ */
 @media (max-width: 720px) {
   thead {
     position: absolute;
@@ -61,6 +65,7 @@ tbody th {
   th[data-label]::before,
   td[data-label]::before {
     content: attr(data-label);
+    content: attr(data-label) / '';
     font-weight: 400;
     color: var(--mat-sys-on-surface-variant);
   }

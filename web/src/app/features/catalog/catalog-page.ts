@@ -1,32 +1,17 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import {
-  CatalogService,
-  ConnectionsService,
-  PortalCatalogServer,
-  SystemId,
-} from '../../api/generated';
-import { ApiFailure, PortalErrorCode, toApiFailure } from '../../core/api-error';
-import { isHttpUrl } from '../../core/auth-urls';
-import { BrowserNavigation } from '../../core/browser-navigation';
+import { CatalogService, PortalCatalogServer, SystemId } from '../../api/generated';
+import { ApiFailure, isOAuthCallbackErrorCode, toApiFailure } from '../../core/api-error';
+import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
 import { isSystemId, systemName } from '../../shared/labels';
 import { Notice } from '../../shared/notice';
 import { CatalogActionEvent, CatalogServerCard } from './catalog-server-card';
-
-/** Codes the OAuth callback may put in ?connectError= (CC-022); anything else is shown generically. */
-const CONNECT_ERRORS: readonly PortalErrorCode[] = [
-  'identity_mismatch',
-  'flow_invalid',
-  'provider_error',
-];
 
 type Banner = { kind: 'success'; text: string } | { kind: 'error'; failure: ApiFailure };
 
@@ -39,13 +24,11 @@ type Banner = { kind: 'success'; text: string } | { kind: 'error'; failure: ApiF
 })
 export class CatalogPage {
   private readonly catalogApi = inject(CatalogService);
-  private readonly connectionsApi = inject(ConnectionsService);
+  private readonly connectionActions = inject(ConnectionActions);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly clipboard = inject(Clipboard);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly dialog = inject(MatDialog);
-  private readonly navigation = inject(BrowserNavigation);
 
   protected readonly catalog = signal<LoadState<PortalCatalogServer[]>>(LOADING);
   protected readonly banner = signal<Banner | null>(null);
@@ -67,6 +50,9 @@ export class CatalogPage {
   }
 
   protected async onAction({ server, action }: CatalogActionEvent): Promise<void> {
+    if (this.busyServer() === server.system) {
+      return;
+    }
     switch (action) {
       case 'copy_link':
         this.copyLink(server);
@@ -99,50 +85,22 @@ export class CatalogPage {
 
   private async startOAuth(system: SystemId): Promise<void> {
     this.busyServer.set(system);
-    try {
-      const { authorizeUrl } = await firstValueFrom(
-        this.connectionsApi.startConnectOAuth(system, { returnPath: '/catalog' }),
-      );
-      if (!isHttpUrl(authorizeUrl)) {
-        this.banner.set({ kind: 'error', failure: { code: 'internal_error', status: 200 } });
-        return;
-      }
-      this.navigation.assign(authorizeUrl);
-    } catch (error) {
-      this.banner.set({ kind: 'error', failure: toApiFailure(error) });
-    } finally {
-      this.busyServer.set(null);
+    const failure = await this.connectionActions.startOAuth(system, '/catalog');
+    this.busyServer.set(null);
+    if (failure) {
+      this.banner.set({ kind: 'error', failure });
     }
   }
 
   private async disconnect(system: SystemId): Promise<void> {
-    const name = systemName(system);
-    const confirmed = await firstValueFrom(
-      this.dialog
-        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
-          data: {
-            title: $localize`:@@disconnect.title:Odłączyć konto ${name}:system:?`,
-            message: $localize`:@@disconnect.message:Portal usunie zapisane poświadczenie. Narzędzia tego systemu przestaną działać, dopóki nie połączysz konta ponownie.`,
-            confirmLabel: $localize`:@@disconnect.confirm:Odłącz`,
-          },
-        })
-        .afterClosed(),
-    );
-    if (!confirmed) {
-      return;
-    }
     this.busyServer.set(system);
-    try {
-      await firstValueFrom(this.connectionsApi.disconnect(system));
-      this.banner.set({
-        kind: 'success',
-        text: $localize`:@@disconnect.done:Odłączono konto ${name}:system:.`,
-      });
+    const result = await this.connectionActions.confirmAndDisconnect(system);
+    this.busyServer.set(null);
+    if (result.kind === 'done') {
+      this.banner.set({ kind: 'success', text: disconnectedMessage(system) });
       await this.load();
-    } catch (error) {
-      this.banner.set({ kind: 'error', failure: toApiFailure(error) });
-    } finally {
-      this.busyServer.set(null);
+    } else if (result.kind === 'failed') {
+      this.banner.set({ kind: 'error', failure: result.failure });
     }
   }
 
@@ -155,9 +113,7 @@ export class CatalogPage {
       return;
     }
     if (connectError !== null) {
-      const code = (CONNECT_ERRORS as readonly string[]).includes(connectError)
-        ? (connectError as PortalErrorCode)
-        : 'internal_error';
+      const code = isOAuthCallbackErrorCode(connectError) ? connectError : 'internal_error';
       this.banner.set({ kind: 'error', failure: { code, status: 0 } });
     } else if (isSystemId(connected)) {
       this.banner.set({

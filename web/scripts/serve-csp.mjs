@@ -26,6 +26,7 @@ export function contentSecurityPolicy(nonce) {
     "img-src 'self'",
     "font-src 'self'",
     "connect-src 'self'",
+    // Only for the MSW service worker of the e2e build; the production policy in README.md omits it.
     "worker-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

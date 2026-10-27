@@ -1,14 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Connection, ConnectionsService, SystemId } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
+import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { ErrorNotice } from '../../shared/error-notice';
 import {
   connectionStatusLabel,
@@ -41,7 +40,7 @@ function canDisconnect(connection: Connection): boolean {
 })
 export class ConnectionsPage {
   private readonly connectionsApi = inject(ConnectionsService);
-  private readonly dialog = inject(MatDialog);
+  private readonly connectionActions = inject(ConnectionActions);
 
   protected readonly connections = signal<LoadState<Connection[]>>(LOADING);
   protected readonly busy = signal<SystemId | null>(null);
@@ -69,32 +68,19 @@ export class ConnectionsPage {
   }
 
   protected async disconnect(system: SystemId): Promise<void> {
-    const name = systemName(system);
-    const confirmed = await firstValueFrom(
-      this.dialog
-        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
-          data: {
-            title: $localize`:@@disconnect.title:Odłączyć konto ${name}:system:?`,
-            message: $localize`:@@disconnect.message:Portal usunie zapisane poświadczenie. Narzędzia tego systemu przestaną działać, dopóki nie połączysz konta ponownie.`,
-            confirmLabel: $localize`:@@disconnect.confirm:Odłącz`,
-          },
-        })
-        .afterClosed(),
-    );
-    if (!confirmed) {
+    if (this.busy()) {
       return;
     }
     this.busy.set(system);
     this.actionFailure.set(null);
     this.actionDone.set(null);
-    try {
-      await firstValueFrom(this.connectionsApi.disconnect(system));
-      this.actionDone.set($localize`:@@disconnect.done:Odłączono konto ${name}:system:.`);
+    const result = await this.connectionActions.confirmAndDisconnect(system);
+    this.busy.set(null);
+    if (result.kind === 'done') {
+      this.actionDone.set(disconnectedMessage(system));
       await this.load();
-    } catch (error) {
-      this.actionFailure.set(toApiFailure(error));
-    } finally {
-      this.busy.set(null);
+    } else if (result.kind === 'failed') {
+      this.actionFailure.set(result.failure);
     }
   }
 }

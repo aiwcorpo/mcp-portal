@@ -20,8 +20,7 @@ import {
   SystemId,
 } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
-import { isHttpUrl } from '../../core/auth-urls';
-import { BrowserNavigation } from '../../core/browser-navigation';
+import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import { isSystemId, systemName } from '../../shared/labels';
@@ -65,7 +64,7 @@ interface PageData {
 export class ConnectPage {
   private readonly catalogApi = inject(CatalogService);
   private readonly connectionsApi = inject(ConnectionsService);
-  private readonly navigation = inject(BrowserNavigation);
+  private readonly connectionActions = inject(ConnectionActions);
 
   /** Route parameter and query (withComponentInputBinding). */
   readonly system = input.required<string>();
@@ -134,21 +133,12 @@ export class ConnectPage {
   }
 
   protected async startOAuth(system: SystemId): Promise<void> {
+    if (this.oauthBusy()) {
+      return;
+    }
     this.oauthBusy.set(true);
     this.oauthFailure.set(null);
-    try {
-      const { authorizeUrl } = await firstValueFrom(
-        this.connectionsApi.startConnectOAuth(system, { returnPath: '/catalog' }),
-      );
-      if (isHttpUrl(authorizeUrl)) {
-        this.navigation.assign(authorizeUrl);
-      } else {
-        this.oauthFailure.set({ code: 'internal_error', status: 200 });
-      }
-    } catch (error) {
-      this.oauthFailure.set(toApiFailure(error));
-    } finally {
-      this.oauthBusy.set(false);
-    }
+    this.oauthFailure.set(await this.connectionActions.startOAuth(system, '/catalog'));
+    this.oauthBusy.set(false);
   }
 }

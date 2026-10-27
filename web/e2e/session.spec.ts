@@ -26,7 +26,10 @@ test('empty and error scenarios', async ({ page }) => {
   await expect(page.getByRole('alert')).toContainText('Usługa jest chwilowo niedostępna.');
 });
 
-test('dialog and snack bar work under the CSP: disconnect and copy link', async ({ page, context }) => {
+test('dialog and snack bar work under the CSP: disconnect and copy link', async ({
+  page,
+  context,
+}) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/catalog');
   await page.getByRole('button', { name: 'Kopiuj link (Jira)' }).click();

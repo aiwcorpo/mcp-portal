@@ -31,7 +31,7 @@
     type="button"
     class="tools-toggle"
     [attr.aria-expanded]="toolsOpen()"
-    [attr.aria-controls]="'tools-' + srv.serverId"
+    [attr.aria-controls]="toolsOpen() ? 'tools-' + srv.serverId : null"
     (click)="toggleTools()"
   >
     @if (toolsOpen()) {

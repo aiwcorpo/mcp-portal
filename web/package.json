@@ -16,7 +16,8 @@
     "start:mocks": "ng serve --configuration mocks",
     "build:e2e": "ng build --configuration e2e",
     "e2e": "npm run build:e2e && playwright test",
-    "i18n:extract": "ng extract-i18n"
+    "i18n:extract": "ng extract-i18n",
+    "i18n:check": "ng extract-i18n --output-path .angular/i18n-check && diff -u src/locale/messages.xlf .angular/i18n-check/messages.xlf"
   },
   "dependencies": {
     "@angular/cdk": "22.2.4",

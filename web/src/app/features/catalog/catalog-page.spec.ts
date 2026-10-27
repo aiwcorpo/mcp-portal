@@ -43,6 +43,7 @@ describe('CatalogPage', () => {
 
     const toggle = button(/^Pokaż narzędzia \(1\/2\) \(Jira\)$/, card('Jira'));
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.hasAttribute('aria-controls')).toBe(false);
     toggle.click();
     await harness.fixture.whenStable();
 

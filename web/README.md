@@ -76,7 +76,10 @@ Co BFF musi zrobić przy serwowaniu:
    przy `GET /api/v1/me`; `401 {"error":"unauthenticated"}` dla `/api/**` zamiast przekierowania do IdP.
 
 `scripts/serve-csp.mjs` to referencyjna implementacja punktów 1-3 (Node, bez zależności); na niej działają
-testy e2e.
+testy e2e. Jedyna różnica to `worker-src 'self'`, potrzebne tylko service workerowi MSW w buildzie e2e.
+
+Przekierowanie do dostawcy OAuth (`authorizeUrl`) frontend wykonuje tylko dla `https:`; `http:` wyłącznie dla
+`localhost`, `127.0.0.1` i `[::1]` (mocki ws-01).
 
 Frontend buduje `GET /api/v1/auth/login?returnPath=<ścieżka>&stepUp=true` przez `URLSearchParams`, więc
 `returnPath` przychodzi zakodowany w query (np. `%2Fconnect%2Fgitlab%3FstepUp%3Ddone`). BFF dekoduje parametr
@@ -104,7 +107,7 @@ jasnym i ciemnym.
 Nie edytować ręcznie.
 
 ```bash
-export JAVA_HOME=/opt/homebrew/Cellar/openjdk@25/25.0.4.1/libexec/openjdk.jdk/Contents/Home
+export JAVA_HOME="$(/usr/libexec/java_home -v 25)"   # macOS; gdzie indziej katalog dowolnego JDK 25
 npm run generate:api
 git diff --stat src/app/api/generated     # zmiany tylko po aktualizacji kontraktu
 ```
@@ -119,7 +122,9 @@ Zmiana wersji kontraktów: podmienić ścieżkę paczki w `package.json` (`@aiwc
 ## Teksty i i18n
 
 Teksty są w kodzie po polsku z identyfikatorami (`i18n="@@..."`, `` $localize`:@@...:` ``), `sourceLocale`
-to `pl`. Plik źródłowy do tłumaczeń: `npm run i18n:extract` -> `src/locale/messages.xlf` (XLIFF 2).
+to `pl` (z niego pochodzi też `LOCALE_ID`, np. format dat). Plik źródłowy do tłumaczeń:
+`npm run i18n:extract` -> `src/locale/messages.xlf` (XLIFF 2). `npm run i18n:check` kończy się błędem, gdy
+plik w repozytorium nie odpowiada tekstom w kodzie (do uruchamiania w CI).
 Komunikaty błędów pochodzą wyłącznie z kodów (C10 i kody C12 z CC-012/CC-022, `src/app/core/error-messages.ts`);
 pole `message` z odpowiedzi BFF nigdy nie jest wyświetlane.
 

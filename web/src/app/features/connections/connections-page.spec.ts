@@ -44,6 +44,22 @@ describe('ConnectionsPage', () => {
     await until(() => expect(document.querySelector('tbody tr')).toBeTruthy());
   });
 
+  it('maps 503 upstream_unavailable, also without a JSON body', async () => {
+    server.use(
+      http.get(
+        '/api/v1/connections',
+        () => new HttpResponse('<html>Bad gateway</html>', { status: 503 }),
+        {
+          once: true,
+        },
+      ),
+    );
+    configureTestApp();
+    await openRoute('/connections');
+    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    expect(text()).not.toContain('Bad gateway');
+  });
+
   it('disconnects after confirmation', async () => {
     configureTestApp();
     const harness = await openRoute('/connections');

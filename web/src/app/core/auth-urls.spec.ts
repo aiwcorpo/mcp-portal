@@ -1,4 +1,10 @@
-import { isHttpUrl, isValidReturnPath, loginUrl, safeReturnPath, stepUpUrlFor } from './auth-urls';
+import {
+  isAllowedRedirect,
+  isValidReturnPath,
+  loginUrl,
+  safeReturnPath,
+  stepUpUrlFor,
+} from './auth-urls';
 
 const ORIGIN = 'https://mcp-portal.internal';
 
@@ -39,10 +45,13 @@ describe('auth URLs', () => {
     expect(stepUpUrlFor(undefined, '/connect/jira', ORIGIN)).toBe(fallback);
   });
 
-  it('allows only http(s) redirects to OAuth providers', () => {
-    expect(isHttpUrl('https://gitlab.internal/oauth/authorize?x=1')).toBe(true);
-    expect(isHttpUrl('javascript:alert(1)')).toBe(false);
-    expect(isHttpUrl('data:text/html,x')).toBe(false);
-    expect(isHttpUrl('/relative')).toBe(false);
+  it('allows https redirects to OAuth providers, http only on loopback', () => {
+    expect(isAllowedRedirect('https://gitlab.internal/oauth/authorize?x=1')).toBe(true);
+    expect(isAllowedRedirect('http://localhost:18083/oauth/authorize')).toBe(true);
+    expect(isAllowedRedirect('http://127.0.0.1:18083/oauth/authorize')).toBe(true);
+    expect(isAllowedRedirect('http://gitlab.internal/oauth/authorize')).toBe(false);
+    expect(isAllowedRedirect('javascript:alert(1)')).toBe(false);
+    expect(isAllowedRedirect('data:text/html,x')).toBe(false);
+    expect(isAllowedRedirect('/relative')).toBe(false);
   });
 });

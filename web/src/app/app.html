@@ -37,9 +37,10 @@
         Tryb ciemny
       </button>
       @if (session.me(); as me) {
-        <span class="who" i18n-title="@@shell.loggedAs" title="Zalogowano jako">{{
-          me.displayName
-        }}</span>
+        <span class="who"
+          ><span class="visually-hidden" i18n="@@shell.loggedAs">Zalogowano jako </span
+          >{{ me.displayName }}</span
+        >
         <button mat-stroked-button type="button" (click)="logout()" i18n="@@shell.logout">
           Wyloguj
         </button>
