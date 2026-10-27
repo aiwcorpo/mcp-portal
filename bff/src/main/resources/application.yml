@@ -72,6 +72,8 @@ portal:
     truststore-password: ${PORTAL_TLS_TRUSTSTORE_PASSWORD:}
   web:
     dist-path: ${PORTAL_WEB_DIST:../web/dist/portal}
+    # Dev only (ng serve): e.g. http://localhost:4200. Empty: back to the BFF origin.
+    login-return-origin: ${PORTAL_WEB_LOGIN_RETURN_ORIGIN:}
   step-up:
     max-age: ${PORTAL_STEP_UP_MAX_AGE:5m}
     acr-values: ${PORTAL_STEP_UP_ACR_VALUES:}

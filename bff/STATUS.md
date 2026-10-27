@@ -9,7 +9,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 ## M1: wynik
 
-`./mvnw test`: 43 testy, 0 błędów. `./mvnw test -Pdev-env` (Keycloak i stuby z `mcp-platform-dev`
+`./mvnw test`: 45 testów, 0 błędów (w tym `FrontendBuildTest` na prawdziwym `../web/dist/portal` z ws-08). `./mvnw test -Pdev-env` (Keycloak i stuby z `mcp-platform-dev`
 8d459c1, `make up`): 5 testów, 0 błędów. Ręcznie: `./scripts/run-dev.sh` serwuje build `../web/dist/portal`
 z ws-08, nonce CSP podstawiony w `index.html` (5 wystąpień = nonce z nagłówka).
 
@@ -50,6 +50,15 @@ DoD briefu:
   ma uprawnienie bez wniosku w toku; `view_request` gdy wniosek w toku; `disconnect` gdy broker ma połączenie.
   System nieznany brokerowi: `not_connected` bez akcji połączenia (fail-closed).
 - `Me.groups`: tylko grupy z prefiksem `mcp-` (schemat `GroupName`).
+- Wymagania ws-08 (koordynator, 2026-10-27) spełnione: pliki `web/dist/portal` pod `/` z fallbackiem SPA,
+  `__CSP_NONCE__` -> nonce 128 bitów, CSP dokładnie jak w `web/README.md` (`script-src 'self'` bez nonce,
+  `img-src 'self'`), `index.html` z `no-store`; `XSRF-TOKEN` (Path=/) najpóźniej przy `GET /api/v1/me`;
+  `/api/**` bez sesji -> 401 JSON bez przekierowania; `returnPath` dekodowany raz (kontener) i walidowany
+  wzorcem z kontraktu; `stepUpUrl` wskazuje ten sam origin i `/api/v1/auth/login`. Dev: opcjonalne
+  `PORTAL_WEB_LOGIN_RETURN_ORIGIN` (np. `http://localhost:4200`), jedna wartość z konfiguracji, walidowana
+  przy starcie jako `scheme://host[:port]`.
+- `portal.web.dist-path` jest wiązany jako napis: konwersja Springa String -> Path przez `Resource` odrzuca
+  ścieżki z `../` (wyszło w teście z prawdziwym buildem).
 - Sesje w pamięci procesu (jedna instancja). Środowisko nie ma użytkownika Redis dla BFF; patrz niżej.
 
 ## Potrzeby wobec innych strumieni
@@ -59,8 +68,7 @@ DoD briefu:
   komendy `@read @write @keyspace @hash @string @scripting` bez `@dangerous`, bez pub/sub; (3) w profilu
   `full` usługa BFF z obrazem i zmiennymi `PORTAL_*` z README (port 18090, montowane `certs/mcp-portal-bff`
   i `certs/ca`).
-- ws-08: tekst `__CSP_NONCE__` w `index.html` jest podmieniany (już używany); `inlineCritical: false` w
-  buildzie produkcyjnym (inline `<style>`/`onload` złamałyby CSP); po 401 `unauthenticated` przejście na
+- ws-08: nic nowego poza tym, co już jest w `web/README.md`; po 401 `unauthenticated` przejście na
   `/api/v1/auth/login?returnPath=...`; `?loginError=true` na `/` po nieudanym logowaniu; 503
   `upstream_unavailable` z katalogu i połączeń.
 

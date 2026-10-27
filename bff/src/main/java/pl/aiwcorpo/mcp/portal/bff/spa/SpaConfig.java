@@ -23,7 +23,7 @@ class SpaConfig implements WebMvcConfigurer {
     private final Path distRoot;
 
     SpaConfig(PortalProperties properties) {
-        this.distRoot = properties.web().distPath().toAbsolutePath().normalize();
+        this.distRoot = Path.of(properties.web().distPath()).toAbsolutePath().normalize();
         if (!distRoot.resolve("index.html").toFile().isFile()) {
             log.warn("No index.html in {}; the frontend is not served until it is built there", distRoot);
         }

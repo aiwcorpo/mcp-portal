@@ -75,10 +75,14 @@ public record PortalProperties(
     /**
      * @param distPath         directory with the built frontend (the one that contains index.html)
      * @param cspNonceToken    text in index.html replaced with the per-response CSP nonce
+     * @param loginReturnOrigin dev only: origin of a separately served frontend (ng serve on :4200) that the
+     *                          browser returns to after login; never taken from the request
      */
     public record Web(
-            @DefaultValue("../web/dist/portal") Path distPath,
-            @DefaultValue("__CSP_NONCE__") String cspNonceToken) {
+            // String, not Path: Spring's String-to-Path conversion goes through Resource and rejects "../".
+            @DefaultValue("../web/dist/portal") String distPath,
+            @DefaultValue("__CSP_NONCE__") String cspNonceToken,
+            URI loginReturnOrigin) {
     }
 
     public record Iga(

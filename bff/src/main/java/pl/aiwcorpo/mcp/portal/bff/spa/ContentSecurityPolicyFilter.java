@@ -15,9 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * CSP without {@code unsafe-inline} on every response. Angular inserts component styles as {@code <style>}
- * elements at runtime; they pass through the per-response nonce that {@link SpaFallbackFilter} writes into
- * index.html ({@code ngCspNonce}).
+ * CSP without {@code unsafe-inline} on every response, as agreed with ws-08 (web/README.md): scripts only from
+ * files, styles from files or with the per-response nonce. Angular inserts component styles as {@code <style>}
+ * elements at runtime and takes the nonce from {@code ngCspNonce}, which {@link SpaFallbackFilter} writes into
+ * index.html.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
@@ -40,9 +41,9 @@ public class ContentSecurityPolicyFilter extends OncePerRequestFilter {
 
     static String policy(String nonce) {
         return "default-src 'self'; "
-                + "script-src 'self' 'nonce-" + nonce + "'; "
+                + "script-src 'self'; "
                 + "style-src 'self' 'nonce-" + nonce + "'; "
-                + "img-src 'self' data:; "
+                + "img-src 'self'; "
                 + "font-src 'self'; "
                 + "connect-src 'self'; "
                 + "object-src 'none'; "

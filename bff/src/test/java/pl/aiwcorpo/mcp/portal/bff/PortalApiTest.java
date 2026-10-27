@@ -538,8 +538,8 @@ class PortalApiTest {
             assertThat(response.headers().firstValue("Content-Type").orElse("")).startsWith("text/html");
             String csp = response.headers().firstValue("Content-Security-Policy").orElseThrow();
             assertThat(csp).doesNotContain("unsafe-inline").doesNotContain("unsafe-eval")
-                    .contains("default-src 'self'").contains("frame-ancestors 'none'");
-            String nonce = csp.replaceAll(".*'nonce-([^']+)'.*", "$1");
+                    .contains("default-src 'self'").contains("frame-ancestors 'none'").contains("script-src 'self';");
+            String nonce = csp.replaceAll(".*style-src 'self' 'nonce-([^']+)'.*", "$1");
             assertThat(response.body()).contains("ngCspNonce=\"" + nonce + "\"").doesNotContain("__CSP_NONCE__");
             assertThat(response.headers().firstValue("Strict-Transport-Security").orElseThrow())
                     .contains("max-age=31536000").contains("includeSubDomains");

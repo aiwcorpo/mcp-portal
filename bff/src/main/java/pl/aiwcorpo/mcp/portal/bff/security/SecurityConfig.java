@@ -55,7 +55,7 @@ public class SecurityConfig {
                                 .authorizationRequestResolver(loginResolvers.standard())
                                 .authorizationRequestRepository(authorizationRequests))
                         .authorizedClientRepository(authorizedClients)
-                        .successHandler(new LoginSuccessHandler())
+                        .successHandler(new LoginSuccessHandler(properties.web().loginReturnOrigin()))
                         .failureHandler((request, response, e) -> response.sendRedirect(
                                 request.getContextPath() + "/?loginError=true")))
                 .csrf(csrf -> csrf.spa().csrfTokenRepository(csrfTokens))
