@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: mcp-portal-bff
+  jackson:
+    deserialization:
+      # C12 request bodies are additionalProperties: false.
+      fail-on-unknown-properties: true
+  mvc:
+    log-request-details: false
+  web:
+    resources:
+      # The Angular build is served from portal.web.dist-path by SpaConfig only.
+      add-mappings: false
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: ${PORTAL_OIDC_CLIENT_ID:mcp-portal-bff}
+            client-secret: ${PORTAL_OIDC_CLIENT_SECRET:}
+            authorization-grant-type: authorization_code
+            # Explicit, because GET /api/v1/auth/login resolves the request outside the login filter.
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: ${PORTAL_OIDC_ISSUER_URI:}
+            user-name-attribute: sub
+
+server:
+  port: ${PORTAL_PORT:18090}
+  forward-headers-strategy: native
+  error:
+    whitelabel:
+      enabled: false
+    include-message: never
+    include-stacktrace: never
+  servlet:
+    session:
+      timeout: 30m
+      tracking-modes: cookie
+      persistent: false
+      cookie:
+        name: __Host-session
+        http-only: true
+        secure: true
+        same-site: lax
+        path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+portal:
+  broker:
+    base-url: ${PORTAL_BROKER_URL:}
+    tls-name: ${PORTAL_BROKER_TLS_NAME:}
+  gateway-admin:
+    base-url: ${PORTAL_GATEWAY_ADMIN_URL:}
+    tls-name: ${PORTAL_GATEWAY_ADMIN_TLS_NAME:}
+  gateway:
+    public-url: ${PORTAL_GATEWAY_PUBLIC_URL:}
+  tls:
+    keystore: ${PORTAL_TLS_KEYSTORE:}
+    keystore-password: ${PORTAL_TLS_KEYSTORE_PASSWORD:}
+    truststore: ${PORTAL_TLS_TRUSTSTORE:}
+    truststore-password: ${PORTAL_TLS_TRUSTSTORE_PASSWORD:}
+  web:
+    dist-path: ${PORTAL_WEB_DIST:../web/dist/portal}
+  step-up:
+    max-age: ${PORTAL_STEP_UP_MAX_AGE:5m}
+    acr-values: ${PORTAL_STEP_UP_ACR_VALUES:}
+  session:
+    absolute-timeout: 8h
+  iga:
+    adapter: mock

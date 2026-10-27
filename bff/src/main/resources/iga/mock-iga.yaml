@@ -1,0 +1,24 @@
+# Data of the C13 adapter "mock" for mcp-platform-dev (users from keycloak/realm-corp.json).
+# "user" is the login (preferred_username) or the IdP sub.
+entitlements:
+  jira: [mcp-jira-read, mcp-jira-write, mcp-jira-destructive, mcp-jira-proj-ABC, mcp-jira-proj-DEF, mcp-jira-proj-HR]
+  confluence: [mcp-confluence-read, mcp-confluence-write, mcp-confluence-space-ENG]
+  gitlab: [mcp-gitlab-read, mcp-gitlab-write, mcp-gitlab-grp-team-a]
+  servicedesk: [mcp-servicedesk-read, mcp-servicedesk-write, mcp-servicedesk-queue-IT]
+  opensearch: [mcp-opensearch-read, mcp-opensearch-idx-logs-team-a, mcp-opensearch-idx-logs-team-b]
+requests:
+  - user: bob
+    requestId: REQ-2026-0042
+    entitlement: mcp-jira-write
+    status: pending
+    createdAt: "2026-10-25T09:00:00Z"
+  - user: mallory
+    requestId: REQ-2026-0043
+    entitlement: mcp-gitlab-read
+    status: pending
+    createdAt: "2026-10-25T10:00:00Z"
+  - user: alice
+    requestId: REQ-2026-0040
+    entitlement: mcp-jira-destructive
+    status: rejected
+    createdAt: "2026-10-20T08:00:00Z"
