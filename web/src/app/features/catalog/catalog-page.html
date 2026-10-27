@@ -1,0 +1,38 @@
+<h1 i18n="@@catalog.title">Katalog serwerów MCP</h1>
+<p class="lead" i18n="@@catalog.lead">
+  Serwery, do których masz uprawnienia, i stan połączenia Twojego konta w każdym systemie.
+</p>
+
+@if (banner(); as b) {
+  @if (b.kind === 'success') {
+    <app-notice kind="success">{{ b.text }}</app-notice>
+  } @else {
+    <app-error-notice [failure]="b.failure" />
+  }
+}
+
+@let state = catalog();
+@if (state.status === 'loading') {
+  <mat-progress-bar
+    mode="indeterminate"
+    i18n-aria-label="@@common.loading"
+    aria-label="Wczytywanie"
+  />
+} @else if (state.status === 'error') {
+  <app-error-notice [failure]="state.failure" [retryable]="true" (retry)="load()" />
+} @else if (state.value.length) {
+  <div class="list">
+    @for (server of state.value; track server.serverId) {
+      <app-catalog-server-card
+        [server]="server"
+        [busy]="busyServer() === server.system"
+        (action)="onAction($event)"
+      />
+    }
+  </div>
+} @else {
+  <app-notice kind="info" i18n="@@catalog.empty">
+    Nie ma serwerów MCP do wyświetlenia. Jeśli spodziewasz się dostępu, skontaktuj się z
+    administratorem platformy.
+  </app-notice>
+}

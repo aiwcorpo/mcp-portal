@@ -1,0 +1,69 @@
+<button type="button" class="skip-link" (click)="focusMain()" i18n="@@shell.skip">
+  Przejdź do treści
+</button>
+
+<header>
+  <mat-toolbar class="toolbar">
+    <a class="brand" routerLink="/catalog">{{ appName }}</a>
+    @if (session.me(); as me) {
+      <nav class="nav" i18n-aria-label="@@shell.navLabel" aria-label="Nawigacja główna">
+        <a
+          mat-button
+          routerLink="/catalog"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          i18n="@@nav.catalog"
+          >Katalog</a
+        >
+        <a
+          mat-button
+          routerLink="/connections"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          i18n="@@nav.connections"
+          >Moje połączenia</a
+        >
+      </nav>
+    }
+    <span class="spacer"></span>
+    <div class="user">
+      <button
+        mat-button
+        type="button"
+        [attr.aria-pressed]="theme.mode() === 'dark'"
+        (click)="theme.toggle()"
+        i18n="@@shell.darkMode"
+      >
+        Tryb ciemny
+      </button>
+      @if (session.me(); as me) {
+        <span class="who" i18n-title="@@shell.loggedAs" title="Zalogowano jako">{{
+          me.displayName
+        }}</span>
+        <button mat-stroked-button type="button" (click)="logout()" i18n="@@shell.logout">
+          Wyloguj
+        </button>
+      }
+    </div>
+  </mat-toolbar>
+</header>
+
+<main id="main" tabindex="-1" class="main">
+  @if (logoutFailure(); as failure) {
+    <app-error-notice [failure]="failure" />
+  }
+  @let state = session.state();
+  @if (state.status === 'loading') {
+    <mat-progress-bar
+      mode="indeterminate"
+      i18n-aria-label="@@common.loading"
+      aria-label="Wczytywanie"
+    />
+  } @else if (state.status === 'anonymous') {
+    <app-login-panel [reason]="state.reason" />
+  } @else if (state.status === 'error') {
+    <app-error-notice [failure]="state.failure" [retryable]="true" (retry)="session.load()" />
+  } @else {
+    <router-outlet />
+  }
+</main>

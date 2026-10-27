@@ -1,0 +1,73 @@
+@let sys = validSystem();
+<p class="back"><a routerLink="/catalog" i18n="@@connect.back">Wróć do katalogu</a></p>
+<h1>
+  @if (sys) {
+    <ng-container i18n="@@connect.titleFor">Połącz konto: {{ name() }}</ng-container>
+  } @else {
+    <ng-container i18n="@@connect.title">Połącz konto</ng-container>
+  }
+</h1>
+
+@let state = data();
+@if (state.status === 'loading') {
+  <mat-progress-bar
+    mode="indeterminate"
+    i18n-aria-label="@@common.loading"
+    aria-label="Wczytywanie"
+  />
+} @else if (state.status === 'error') {
+  <app-error-notice
+    [failure]="state.failure"
+    [retryable]="state.failure.code !== 'not_found_or_denied'"
+    (retry)="load()"
+  />
+} @else if (!state.value || !sys) {
+  <app-notice kind="info" i18n="@@connect.nothing">
+    Tego systemu nie trzeba łączyć albo nie masz do niego dostępu. Stan znajdziesz w katalogu.
+  </app-notice>
+} @else {
+  @if (state.value.options.oauth) {
+    <section class="block" aria-labelledby="oauth-heading">
+      <h2 id="oauth-heading" i18n="@@connect.oauthHeading">Połącz przez OAuth</h2>
+      <p i18n="@@connect.oauthText">
+        Przejdziesz do strony logowania systemu {{ name() }}, a po zatwierdzeniu dostępu wrócisz do
+        katalogu. Portal nie widzi Twojego hasła.
+      </p>
+      @if (oauthFailure(); as failure) {
+        <app-error-notice [failure]="failure" />
+      }
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="oauthBusy()"
+        (click)="startOAuth(sys)"
+        i18n="@@connect.oauthButton"
+      >
+        Przejdź do logowania w systemie
+      </button>
+    </section>
+  }
+
+  @if (state.value.options.token) {
+    <section class="block" aria-labelledby="token-heading">
+      <h2 id="token-heading" i18n="@@connect.tokenHeading">Dodaj token</h2>
+      <h3 i18n="@@connect.howTo">Jak utworzyć możliwie wąski token</h3>
+      <ol class="steps">
+        @for (step of instructions(); track $index) {
+          <li>{{ step }}</li>
+        }
+      </ol>
+      <app-secret-form
+        [system]="sys"
+        [initialExpiresAt]="initialExpiresAt()"
+        [returnedFromStepUp]="returnedFromStepUp()"
+        (connected)="connectedOk.set(true)"
+      />
+      @if (connectedOk()) {
+        <p class="next">
+          <a routerLink="/connections" i18n="@@connect.toConnections">Przejdź do Moich połączeń</a>
+        </p>
+      }
+    </section>
+  }
+}

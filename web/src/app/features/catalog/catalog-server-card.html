@@ -1,0 +1,78 @@
+@let srv = server();
+<article class="card" [attr.aria-labelledby]="'server-' + srv.serverId">
+  <header class="head">
+    <div class="title">
+      <h2 [id]="'server-' + srv.serverId">{{ name() }}</h2>
+      <span class="meta">{{ srv.serverId }} &middot; v{{ srv.version }}</span>
+    </div>
+    <app-status-badge [label]="statusLabel()" [tone]="statusTone()" />
+  </header>
+
+  <p class="hint">{{ statusHint() }}</p>
+
+  @let acts = actions();
+  @if (acts.primary || acts.secondary.length) {
+    <div class="actions">
+      @if (acts.primary; as primary) {
+        <button mat-flat-button type="button" [disabled]="busy()" (click)="run(primary)">
+          {{ actionLabel(primary) }}<span class="visually-hidden"> ({{ name() }})</span>
+        </button>
+      }
+      @for (secondary of acts.secondary; track secondary) {
+        <button mat-stroked-button type="button" [disabled]="busy()" (click)="run(secondary)">
+          {{ actionLabel(secondary) }}<span class="visually-hidden"> ({{ name() }})</span>
+        </button>
+      }
+    </div>
+  }
+
+  <button
+    mat-button
+    type="button"
+    class="tools-toggle"
+    [attr.aria-expanded]="toolsOpen()"
+    [attr.aria-controls]="'tools-' + srv.serverId"
+    (click)="toggleTools()"
+  >
+    @if (toolsOpen()) {
+      <ng-container i18n="@@catalog.hideTools">Ukryj narzędzia</ng-container>
+    } @else {
+      <ng-container i18n="@@catalog.showTools">Pokaż narzędzia</ng-container>
+    }
+    ({{ grantedCount() }}/{{ srv.tools.length }})<span class="visually-hidden">
+      ({{ name() }})</span
+    >
+  </button>
+
+  @if (toolsOpen()) {
+    <ul class="tools" [id]="'tools-' + srv.serverId">
+      @for (tool of srv.tools; track tool.name) {
+        <li class="tool">
+          <div class="tool-head">
+            <code class="tool-name">{{ tool.name }}</code>
+            <span class="tag" [class.tag-danger]="tool.risk === 'DESTRUCTIVE'">
+              <span i18n="@@catalog.risk">Ryzyko:</span> {{ riskLabel(tool.risk) }}
+            </span>
+            <span class="tag" [class.tag-muted]="tool.access === 'denied'">
+              <span i18n="@@catalog.access">Dostęp:</span> {{ accessLabel(tool.access) }}
+            </span>
+          </div>
+          <p class="tool-desc">{{ tool.description }}</p>
+          <p class="tool-ent">
+            <span class="label" i18n="@@catalog.requiredEntitlement">Wymagane uprawnienie:</span>
+            @if (tool.requiredEntitlements.length) {
+              @for (ent of tool.requiredEntitlements; track ent; let last = $last) {
+                <code>{{ ent }}</code
+                >{{ last ? '' : ', ' }}
+              }
+            } @else {
+              <span i18n="@@catalog.noEntitlement">nie określono w polityce</span>
+            }
+          </p>
+        </li>
+      } @empty {
+        <li class="tool" i18n="@@catalog.noTools">Serwer nie udostępnia narzędzi.</li>
+      }
+    </ul>
+  }
+</article>

@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  margin-block: 12px;
+}
+
+.notice {
+  padding: 12px 16px;
+  border-left: 4px solid currentColor;
+  border-radius: 2px;
+  font: var(--mat-sys-body-medium);
+}
+
+.notice-success {
+  color: var(--tone-ok-fg);
+  background: var(--tone-ok-bg);
+}
+
+.notice-error {
+  color: var(--tone-error-fg);
+  background: var(--tone-error-bg);
+}
+
+.notice-info {
+  color: var(--tone-info-fg);
+  background: var(--tone-info-bg);
+}

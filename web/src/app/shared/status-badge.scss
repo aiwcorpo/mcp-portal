@@ -1,0 +1,33 @@
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font: var(--mat-sys-label-medium);
+  white-space: nowrap;
+}
+
+.tone-ok {
+  color: var(--tone-ok-fg);
+  background: var(--tone-ok-bg);
+}
+
+.tone-warn {
+  color: var(--tone-warn-fg);
+  background: var(--tone-warn-bg);
+}
+
+.tone-error {
+  color: var(--tone-error-fg);
+  background: var(--tone-error-bg);
+}
+
+.tone-info {
+  color: var(--tone-info-fg);
+  background: var(--tone-info-bg);
+}
+
+.tone-neutral {
+  color: var(--mat-sys-on-surface-variant);
+  background: var(--mat-sys-surface-container-high);
+}

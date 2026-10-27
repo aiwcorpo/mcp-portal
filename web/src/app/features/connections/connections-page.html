@@ -1,0 +1,99 @@
+<h1 i18n="@@connections.title">Moje połączenia</h1>
+<p class="lead" i18n="@@connections.lead">
+  Konta w systemach docelowych, z których korzysta platforma MCP w Twoim imieniu. Portal nie
+  pokazuje zapisanych tokenów.
+</p>
+
+@if (actionDone(); as done) {
+  <app-notice kind="success">{{ done }}</app-notice>
+}
+@if (actionFailure(); as failure) {
+  <app-error-notice [failure]="failure" />
+}
+
+@let state = connections();
+@if (state.status === 'loading') {
+  <mat-progress-bar
+    mode="indeterminate"
+    i18n-aria-label="@@common.loading"
+    aria-label="Wczytywanie"
+  />
+} @else if (state.status === 'error') {
+  <app-error-notice [failure]="state.failure" [retryable]="true" (retry)="load()" />
+} @else if (state.value.length) {
+  <table class="table">
+    <caption class="visually-hidden" i18n="@@connections.caption">
+      Połączone konta
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" i18n="@@connections.colSystem">System</th>
+        <th scope="col" i18n="@@connections.colType">Typ</th>
+        <th scope="col" i18n="@@connections.colAccount">Konto w systemie</th>
+        <th scope="col" i18n="@@connections.colStatus">Stan</th>
+        <th scope="col" i18n="@@connections.colExpires">Wygasa</th>
+        <th scope="col" i18n="@@connections.colLastUsed">Ostatnie użycie</th>
+        <th scope="col">
+          <span class="visually-hidden" i18n="@@connections.colActions">Akcje</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (connection of state.value; track connection.system) {
+        <tr>
+          <th scope="row" data-label="System" i18n-data-label="@@connections.colSystem">
+            {{ systemName(connection.system) }}
+          </th>
+          <td data-label="Typ" i18n-data-label="@@connections.colType">
+            {{ typeLabel(connection.type) }}
+          </td>
+          <td
+            data-label="Konto w systemie"
+            i18n-data-label="@@connections.colAccount"
+            class="account"
+          >
+            {{ connection.backendUser }}
+          </td>
+          <td data-label="Stan" i18n-data-label="@@connections.colStatus">
+            <app-status-badge
+              [label]="statusLabel(connection.status)"
+              [tone]="statusTone(connection.status)"
+            />
+          </td>
+          <td data-label="Wygasa" i18n-data-label="@@connections.colExpires">
+            @if (connection.expiresAt) {
+              {{ connection.expiresAt | date: 'd MMM y' : 'UTC' }}
+            } @else {
+              <span i18n="@@connections.noExpiry">bez terminu</span>
+            }
+          </td>
+          <td data-label="Ostatnie użycie" i18n-data-label="@@connections.colLastUsed">
+            @if (connection.lastUsedAt) {
+              {{ connection.lastUsedAt | date: 'd MMM y, HH:mm' }}
+            } @else {
+              <span i18n="@@connections.neverUsed">jeszcze nie</span>
+            }
+          </td>
+          <td class="actions">
+            @if (canDisconnect(connection)) {
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="busy() === connection.system"
+                (click)="disconnect(connection.system)"
+              >
+                <ng-container i18n="@@action.disconnect">Odłącz</ng-container
+                ><span class="visually-hidden"> ({{ systemName(connection.system) }})</span>
+              </button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <app-notice kind="info">
+    <ng-container i18n="@@connections.empty">Nie masz połączonych kont.</ng-container>
+    <a routerLink="/catalog" i18n="@@connections.toCatalog">Połącz konto w katalogu</a>
+  </app-notice>
+}

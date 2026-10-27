@@ -1,0 +1,28 @@
+.back {
+  margin: 0 0 8px;
+}
+
+.block {
+  margin-top: 24px;
+  padding-top: 8px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+h2 {
+  font: var(--mat-sys-title-large);
+}
+
+h3 {
+  font: var(--mat-sys-title-small);
+  margin-bottom: 4px;
+}
+
+.steps {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  max-width: 70ch;
+}
+
+.steps li {
+  margin-bottom: 4px;
+}
