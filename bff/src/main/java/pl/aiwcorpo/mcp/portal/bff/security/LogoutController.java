@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import pl.aiwcorpo.mcp.portal.bff.config.IdpClientConfig;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 
 /**
@@ -41,10 +43,11 @@ class LogoutController {
     private final OAuth2AuthorizedClientRepository authorizedClients;
     private final CookieCsrfTokenRepository csrfTokens;
     private final String registrationId;
-    private final RestClient idp = RestClient.create();
+    private final RestClient idp;
 
     LogoutController(OAuth2AuthorizedClientRepository authorizedClients, CookieCsrfTokenRepository csrfTokens,
-                     PortalProperties properties) {
+                     PortalProperties properties, @Qualifier(IdpClientConfig.IDP_REST_CLIENT) RestClient idp) {
+        this.idp = idp;
         this.authorizedClients = authorizedClients;
         this.csrfTokens = csrfTokens;
         this.registrationId = properties.registrationId();

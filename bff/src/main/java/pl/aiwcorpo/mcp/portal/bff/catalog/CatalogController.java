@@ -15,6 +15,7 @@ import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerClient;
+import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerData;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerModel;
 import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayAdminClient;
 import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayModel;
@@ -45,11 +46,12 @@ class CatalogController {
         String requestId = RequestIds.of(request);
         BearerToken adminToken = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
         BearerToken brokerToken = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
-        GatewayModel.Catalog catalog = gateway.catalog(adminToken, requestId);
-        List<BrokerModel.Connection> connections = broker.listConnections(brokerToken, requestId);
-        List<BrokerModel.SystemInfo> systems = broker.listSystems(brokerToken, requestId);
+        GatewayModel.Catalog catalog = BrokerData.validCatalog(gateway.catalog(adminToken, requestId));
+        List<BrokerModel.Connection> connections =
+                BrokerData.validConnections(broker.listConnections(brokerToken, requestId));
+        List<BrokerModel.SystemInfo> systems = BrokerData.validSystems(broker.listSystems(brokerToken, requestId));
         List<AccessGovernance.AccessRequest> requests =
-                iga.requestsOf(new AccessGovernance.Requester(user.sub(), user.username()));
+                iga.requestsOf(new AccessGovernance.Requester(user.sub(), user.username(), user.email(), user.claims()));
         return assembler.assemble(catalog, connections, systems, requests);
     }
 }

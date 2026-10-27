@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.ClientAuthorizationException;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -17,6 +18,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import pl.aiwcorpo.mcp.portal.bff.config.IdpClientConfig;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.security.SessionAttributes;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
@@ -37,9 +39,10 @@ public class UserTokens {
     private final String registrationId;
     private final Clock clock;
 
-    public UserTokens(OAuth2AuthorizedClientManager authorizedClients, PortalProperties properties, Clock clock) {
+    public UserTokens(OAuth2AuthorizedClientManager authorizedClients, PortalProperties properties, Clock clock,
+                      @Qualifier(IdpClientConfig.IDP_REST_CLIENT) RestClient idp) {
         this.authorizedClients = authorizedClients;
-        this.exchange = new TokenExchangeClient(RestClient.create(), clock);
+        this.exchange = new TokenExchangeClient(idp, clock);
         this.config = properties.tokenExchange();
         this.registrationId = properties.registrationId();
         this.clock = clock;

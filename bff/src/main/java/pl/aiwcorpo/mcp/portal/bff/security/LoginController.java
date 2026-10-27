@@ -4,9 +4,12 @@ import java.io.IOException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +37,7 @@ class LoginController {
     @GetMapping("/api/v1/auth/login")
     void login(@RequestParam(required = false) String returnPath,
                @RequestParam(defaultValue = "false") boolean stepUp,
+               Authentication authentication,
                HttpServletRequest request, HttpServletResponse response) throws IOException {
         String target = returnPath == null ? ReturnPaths.DEFAULT : returnPath;
         if (!ReturnPaths.isValid(target)) {
@@ -44,7 +48,13 @@ class LoginController {
         if (authorization == null) {
             throw new IllegalStateException("Unknown client registration " + registrationId);
         }
-        request.getSession(true).setAttribute(SessionAttributes.LOGIN_RETURN_PATH, target);
+        HttpSession session = request.getSession(true);
+        session.setAttribute(SessionAttributes.LOGIN_RETURN_PATH, target);
+        if (stepUp && authentication != null && authentication.getPrincipal() instanceof OidcUser current) {
+            session.setAttribute(SessionAttributes.STEP_UP_SUB, current.getSubject());
+        } else {
+            session.removeAttribute(SessionAttributes.STEP_UP_SUB);
+        }
         authorizationRequests.saveAuthorizationRequest(authorization, request, response);
         response.sendRedirect(authorization.getAuthorizationRequestUri());
     }

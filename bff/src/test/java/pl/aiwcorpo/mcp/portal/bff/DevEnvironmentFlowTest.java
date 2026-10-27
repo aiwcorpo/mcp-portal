@@ -5,18 +5,26 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.net.URI;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import pl.aiwcorpo.mcp.portal.bff.support.ContractSchemas;
 import pl.aiwcorpo.mcp.portal.bff.support.DevEnvironment;
+import pl.aiwcorpo.mcp.portal.bff.support.MutableClock;
 import pl.aiwcorpo.mcp.portal.bff.support.TestBrowser;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -29,7 +37,21 @@ import tools.jackson.databind.json.JsonMapper;
  */
 @Tag("dev-env")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("dev")
+@Import(DevEnvironmentFlowTest.TestClock.class)
 class DevEnvironmentFlowTest {
+
+    @TestConfiguration
+    static class TestClock {
+        @Bean
+        @Primary
+        MutableClock mutableClock() {
+            return new MutableClock();
+        }
+    }
+
+    @Autowired
+    MutableClock clock;
 
     static final DevEnvironment DEV = DevEnvironment.locate();
     static final ContractSchemas C12 = ContractSchemas.openApi(ContractSchemas.PORTAL_BFF);
@@ -54,7 +76,7 @@ class DevEnvironmentFlowTest {
         registry.add("portal.tls.truststore", () -> DEV.certs().resolve("ca/truststore.p12").toString());
         registry.add("portal.tls.truststore-password", () -> DEV.value("TLS_STORE_PASSWORD"));
         registry.add("portal.web.dist-path", () -> "src/test/resources/spa-fixture");
-        registry.add("portal.step-up.max-age", () -> "3s");
+        registry.add("portal.step-up.max-age", () -> "5m");
     }
 
     private static TestBrowser portal() {
@@ -77,7 +99,8 @@ class DevEnvironmentFlowTest {
     }
 
     @Test
-    void aliceUsesThePortalAgainstKeycloakAndContractStubs() throws InterruptedException {
+    void aliceUsesThePortalAgainstKeycloakAndContractStubs() {
+        clock.reset();
         TestBrowser portal = portal();
         TestBrowser keycloak = keycloak();
         login(portal, keycloak, "alice", "/api/v1/auth/login?returnPath=/catalog");
@@ -103,7 +126,7 @@ class DevEnvironmentFlowTest {
         C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", stored);
         assertThat(stored.statusCode()).isEqualTo(200);
 
-        Thread.sleep(4000);
+        clock.advance(Duration.ofMinutes(6));
         portal.setReferer("/connections/jira");
         HttpResponse<String> stale = portal.put("/api/v1/connections/jira/secret", "{\"secret\":\"alice-pat\"}", true);
         C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", stale);
@@ -118,6 +141,7 @@ class DevEnvironmentFlowTest {
         HttpResponse<String> back = portal.get(callback.toString());
         assertThat(back.headers().firstValue("Location").orElseThrow()).endsWith("/connections/jira");
 
+        clock.reset();
         HttpResponse<String> fresh = portal.put("/api/v1/connections/jira/secret", "{\"secret\":\"alice-pat\"}", true);
         C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", fresh);
         assertThat(fresh.statusCode()).isEqualTo(200);
@@ -140,6 +164,22 @@ class DevEnvironmentFlowTest {
             assertThat(response.body()).doesNotContain("alice-pat").doesNotContain("eyJ");
             assertThat(response.headers().map().toString()).doesNotContain("eyJ");
         }
+    }
+
+    @Test
+    void stepUpWithAnotherKeycloakAccountIsRejected() {
+        clock.reset();
+        TestBrowser portal = portal();
+        TestBrowser keycloak = keycloak();
+        login(portal, keycloak, "alice", "/api/v1/auth/login");
+        HttpResponse<String> stepUp = portal.get("/api/v1/auth/login?stepUp=true&returnPath=/connections");
+        // A browser without alice's SSO cookie, so Keycloak lets another account answer the step-up request.
+        URI callback = DEV.keycloakLogin(keycloak(), URI.create(stepUp.headers().firstValue("Location").orElseThrow()), "bob");
+
+        HttpResponse<String> back = portal.get(callback.toString());
+
+        assertThat(back.headers().firstValue("Location").orElseThrow()).endsWith("/?loginError=step_up_failed");
+        assertThat(portal.get("/api/v1/me").statusCode()).isEqualTo(401);
     }
 
     @Test

@@ -1,10 +1,11 @@
 package pl.aiwcorpo.mcp.portal.bff.iga;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * Port C13. The contract sketches {@code requestsOf(String sub)}; the BFF passes the whole identity because IGA
- * products key requests by login or e-mail as often as by IdP {@code sub}.
+ * Port C13. The port receives the whole identity from the login and each adapter picks the identifier its IGA
+ * product uses (decision of 2026-10-27; the contract sketch has only {@code sub}).
  */
 public interface AccessGovernance {
 
@@ -17,7 +18,17 @@ public interface AccessGovernance {
     /** Creates a request or returns where the IGA wants the user to go. */
     RequestResult request(Requester requester, String entitlement);
 
-    record Requester(String sub, String username) {
+    /**
+     * Identity of the requester, all from the OIDC login of the session.
+     *
+     * @param claims identity claims of the login (ID token and userinfo)
+     */
+    record Requester(String sub, String username, String email, Map<String, Object> claims) {
+
+        @Override
+        public String toString() {
+            return "Requester[sub=" + sub + "]";
+        }
     }
 
     /** C12 {@code AccessRequest}; status is one of pending, approved, rejected, cancelled. */

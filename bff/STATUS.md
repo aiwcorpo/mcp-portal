@@ -9,8 +9,9 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 ## M1: wynik
 
-`./mvnw test`: 45 testów, 0 błędów (w tym `FrontendBuildTest` na prawdziwym `../web/dist/portal` z ws-08). `./mvnw test -Pdev-env` (Keycloak i stuby z `mcp-platform-dev`
-8d459c1, `make up`): 5 testów, 0 błędów. Ręcznie: `./scripts/run-dev.sh` serwuje build `../web/dist/portal`
+Po poprawkach z przeglądu (niżej): `./mvnw test` 64 testy, 0 błędów (w tym `FrontendBuildTest` na prawdziwym
+`../web/dist/portal` z ws-08); `./mvnw test -Pdev-env` (Keycloak i stuby z `mcp-platform-dev` 8d459c1,
+`make up`): 6 testów, 0 błędów. Ręcznie: `./scripts/run-dev.sh` serwuje build `../web/dist/portal`
 z ws-08, nonce CSP podstawiony w `index.html` (5 wystąpień = nonce z nagłówka).
 
 DoD briefu:
@@ -29,7 +30,8 @@ DoD briefu:
   openapi-generatora: generator `java`/`native` daje modele na Jacksonie 2, a Boot 4 używa Jacksona 3.
   Zgodność pilnują testy na stubach z kontraktu i walidacja żądania schematem C4.
 - Callback logowania OIDC to `/login/oauth2/code/keycloak` (już zarejestrowany w realmie); nieudane logowanie
-  kończy się 302 na `/?loginError=true`. Propozycja CC (callback i błąd logowania).
+  kończy się 302 na `/?loginError=<kod>` z zamkniętej listy `cancelled`, `idp_error`, `session_expired`,
+  `step_up_failed` (decyzja człowieka 2026-10-27, wejdzie do mcp-contracts 2.0.0; CC-051).
 - `stepUpUrl` dla `PUT .../secret`: `returnPath` z nagłówka `Referer`, tylko gdy ten sam origin i poprawny
   `ReturnPath`, inaczej `/`. Zgodne z wariantem ws-08 (frontend i tak podmienia `returnPath`, CC zgłoszone
   przez ws-08).
@@ -41,8 +43,10 @@ DoD briefu:
   sesji, Keycloak to przyjmuje od klienta poufnego), bez przekierowania przeglądarki.
 - Błąd C4/C5/IdP: `503 {error: "upstream_unavailable"}`; katalog nie jest zwracany częściowo. C12 nie ma 503:
   propozycja CC.
-- Port C13: `Requester(sub, username)` zamiast samego `sub` (adapter mock dopasowuje po loginie, bo `sub`
-  w dev zmienia się przy imporcie realmu). Propozycja CC.
+- Port C13 (decyzja człowieka 2026-10-27): `Requester(sub, username, email, claims)` z logowania; adapter wybiera
+  identyfikator claimem `portal.iga.requester-id-claim` (domyślnie `preferred_username`), brak claimu = błąd
+  adaptera (503). Adapter `mock` tylko w profilu `dev`, dane w `dev/iga-mock.yaml` poza jarem; poza `dev` brak
+  adaptera = błąd startu.
 - `X-Request-Id`: BFF generuje UUIDv7 na każde żądanie (identyfikator od przeglądarki ignoruje), odsyła go
   w odpowiedzi i przekazuje do C4/C5; ten sam `requestId` jest w audycie. Zgodne z CC-047 (ws-06).
 - Akcje katalogu: `copy_link` gdy `connected`/`expiring`; `connect_oauth`/`add_secret` gdy `not_connected` i
@@ -59,7 +63,35 @@ DoD briefu:
   przy starcie jako `scheme://host[:port]`.
 - `portal.web.dist-path` jest wiązany jako napis: konwersja Springa String -> Path przez `Resource` odrzuca
   ścieżki z `../` (wyszło w teście z prawdziwym buildem).
+- Profil Spring `dev` (ustawia `run-dev.sh`) jest warunkiem ustawień tylko dla mcp-platform-dev: adapter IGA
+  `mock`, step-up bez `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN`, http do stubów w testach.
 - Sesje w pamięci procesu (jedna instancja). Środowisko nie ma użytkownika Redis dla BFF; patrz niżej.
+
+## Przegląd M1 (2026-10-27): znaleziska i poprawki
+
+| Znalezisko | Co zrobione |
+| --- | --- |
+| M1 step-up mógł zmienić `sub` sesji | `GET /api/v1/auth/login?stepUp=true` zapamiętuje `sub` sesji; inny `sub` w callbacku: sesja unieważniona, 302 `/?loginError=step_up_failed`. Po każdym logowaniu w sesji zostaje tylko kontekst bezpieczeństwa i tokeny. Testy: `stepUpAsAnotherUserEndsTheSession`, `ordinaryLoginAsAnotherUserKeepsNothingOfTheEarlierOne`, dev: `stepUpWithAnotherKeycloakAccountIsRejected` |
+| M2 dopuszczony http do C4/C5, brak keystore/truststore po cichu | błąd startu; wyjątek tylko `portal.tls.insecure-plain-http-for-tests=true` razem z profilem `dev`; truststore wyłącznie CA wewnętrzne (bez cacerts). `UpstreamGuardsTest` |
+| M3 step-up bez `acr` | puste `portal.step-up.acr-values` dozwolone tylko w profilu `dev`, inaczej błąd startu. `StepUpPolicyTest` |
+| M4 `RestClient.create()` do IdP bez timeoutów | wspólny klient IdP (`IdpClientConfig`): connect 5 s, odczyt 10 s, bez przekierowań, HTTP/1.1; używany przez wymianę tokenu i wylogowanie |
+| M5 mock IGA w jarze i domyślnie włączony | dane przeniesione do `dev/iga-mock.yaml`, adapter `mock` tylko w profilu `dev` (`application-dev.yml`), brak adaptera = błąd startu. `IgaConfigTest` |
+| L DELETE z nieznanym systemem -> 400 spoza C12 | bez zmian do przejścia na 2.0.0; propozycja CC (400 dla DELETE) |
+| L 503 bez `assertResponse` | bez zmian do przejścia na 2.0.0 (CC-050) |
+| L `XSRF-TOKEN` kasowany w callbacku | nowy token zapisywany w odpowiedzi kończącej logowanie; test sprawdza ciasteczko na callbacku |
+| L `returnPath` z `Referer` na `/api/...` | `/api` (bez względu na wielkość liter) daje `/`; test z obcym originem i `/api` |
+| L `PORTAL_WEB_LOGIN_RETURN_ORIGIN` poza dev | błąd startu poza profilem `dev`. `LoginRedirectsTest` |
+| L `Me.groups` tylko po prefiksie | wzorzec i długość `GroupName` z kontraktu |
+| L dane C4/C5 bez walidacji (`tools == null`, nieznany status) | `BrokerData`: nieznane systemy, typy, ryzyka, akcje odrzucane; nieznany status połączenia -> `error`; `null` -> puste listy. `UpstreamGuardsTest` |
+| L `_csrf` w parametrze, `XSRF-TOKEN` bez `__Host-` | token tylko z nagłówka (`HeaderOnlyCsrfTokenRequestHandler`), test `csrfTokenIsAcceptedOnlyFromTheHeader`; nazwa ciasteczka wg C12, propozycja CC `__Host-XSRF-TOKEN` |
+| L `/oauth2/authorization/keycloak` drugim wejściem | resolver filtra nic nie rozwiązuje, ścieżka daje 404 JSON; test |
+| L `forward-headers-strategy` ufa sieciom prywatnym | `server.tomcat.remoteip.internal-proxies` = `PORTAL_TRUSTED_PROXIES`, domyślnie tylko loopback |
+| L `/actuator` i `/API/v1/me` dostawały `index.html` | wykluczenia bez względu na wielkość liter i bez końcowego `/`; wyłączone odkrywanie `/actuator`; test |
+| L audyt: brak zdarzeń przy błędzie wymiany tokenu i walidacji 400, `allow` przy odrzuceniu, `ts` z `Instant.now()` | zdarzenia dla nieznanego systemu, złego body (body czytane w kontrolerze), błędu tokenu; odrzucenie = `deny`; `ts` z `Clock`. Test `rejectedInputIsAudited` |
+| L martwy kod, pełne nazwy klas, etykiety w testach | usunięte |
+| L odpowiedzi/żądania C4/C5 niewalidowane | `PortalApiTest` na końcu sprawdza każde żądanie BFF do stubów: operacja istnieje w C4/C5, body zgodne ze schematem, bearer z właściwym `aud`, `X-Request-Id` UUIDv7 |
+| L brak testów rotacji sesji, login CSRF, obcy `Referer`, `Thread.sleep` w dev, cichy skip builda | testy `loginRotatesTheSessionId`, `loginFailuresUseTheClosedListOfCodes` (cudzy callback -> `session_expired`, anulowanie -> `cancelled`), `stepUpReturnPathIgnoresForeignAndApiReferers`; dev test na przesuwanym zegarze zamiast `sleep`; `-Dportal.test.require-web-dist=true` |
+| L limit bezczynności 30 min bez testu | bez zmian (ustawienie kontenera, zegar Tomcata nie da się przesunąć w teście) |
 
 ## Potrzeby wobec innych strumieni
 
@@ -69,7 +101,7 @@ DoD briefu:
   `full` usługa BFF z obrazem i zmiennymi `PORTAL_*` z README (port 18090, montowane `certs/mcp-portal-bff`
   i `certs/ca`).
 - ws-08: nic nowego poza tym, co już jest w `web/README.md`; po 401 `unauthenticated` przejście na
-  `/api/v1/auth/login?returnPath=...`; `?loginError=true` na `/` po nieudanym logowaniu; 503
+  `/api/v1/auth/login?returnPath=...`; `?loginError=<kod>` na `/` po nieudanym logowaniu (cztery kody wyżej); 503
   `upstream_unavailable` z katalogu i połączeń.
 
 ## Niesprawdzone
@@ -78,6 +110,10 @@ DoD briefu:
 - Działanie za proxy TLS (`server.forward-headers-strategy=native`): redirect URI i `Secure` zależą od
   nagłówków `X-Forwarded-*`.
 - Limit bezczynności 30 min (ustawienie kontenera) nie ma testu; limit 8 h ma.
+- Wywołania IdP wykonywane przez samo Spring Security (wymiana kodu przy logowaniu, refresh) mają domyślne
+  timeouty klienta HTTP; własne wywołania BFF (wymiana tokenu, wylogowanie) mają 5 s / 10 s.
+- Keycloak przy step-upie w tej samej przeglądarce (ciasteczko SSO alice) nie przyjmuje innego konta; test
+  `stepUpWithAnotherKeycloakAccountIsRejected` używa osobnej przeglądarki, żeby dojść do sprawdzenia w BFF.
 
 ## Otwarte pytania
 

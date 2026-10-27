@@ -30,6 +30,8 @@ export PORTAL_TLS_KEYSTORE_PASSWORD="$(value TLS_STORE_PASSWORD)"
 export PORTAL_TLS_TRUSTSTORE="$dev_dir/certs/ca/truststore.p12"
 export PORTAL_TLS_TRUSTSTORE_PASSWORD="$PORTAL_TLS_KEYSTORE_PASSWORD"
 export PORTAL_WEB_DIST="${PORTAL_WEB_DIST:-$bff_dir/../web/dist/portal}"
+export PORTAL_IGA_MOCK_FILE="${PORTAL_IGA_MOCK_FILE:-$bff_dir/dev/iga-mock.yaml}"
+export SPRING_PROFILES_ACTIVE=dev
 
 cd "$bff_dir"
 exec ./mvnw -q spring-boot:run

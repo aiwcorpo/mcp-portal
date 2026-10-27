@@ -1,6 +1,6 @@
 package pl.aiwcorpo.mcp.portal.bff.audit;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.time.temporal.ChronoUnit;
 
 import org.slf4j.Logger;
@@ -24,21 +24,24 @@ public class AuditLog {
     private final JsonMapper mapper = JsonMapper.builder().enable(JsonWriteFeature.ESCAPE_NON_ASCII).build();
     private final String componentId;
 
-    public AuditLog(PortalProperties properties) {
+    private final Clock clock;
+
+    public AuditLog(PortalProperties properties, Clock clock) {
         this.componentId = properties.componentId();
+        this.clock = clock;
     }
 
-    /** {@code connection_change} of the current user for one system. */
+    /** {@code connection_change} of the current user; {@code system} is null when the request named no valid one. */
     public void connectionChange(String requestId, PortalUser user, String system, Outcome outcome, long latencyMs) {
         write(new AuditEvent(
-                Instant.now().truncatedTo(ChronoUnit.MILLIS).toString(),
+                clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
                 requestId,
                 "portal",
                 componentId,
                 "connection_change",
                 user.sub(),
                 user.username(),
-                "mcp-" + system,
+                system == null ? null : "mcp-" + system,
                 outcome.decision(),
                 outcome.reason(),
                 null,
@@ -64,8 +67,9 @@ public class AuditLog {
             return new Outcome("deny", "step_up_required", "denied", "step_up_required");
         }
 
+        /** The change was refused (invalid input, or the broker rejected the secret). */
         public static Outcome rejected(String reason) {
-            return new Outcome("allow", reason, "error", "invalid_argument");
+            return new Outcome("deny", reason, "error", "invalid_argument");
         }
 
         public static Outcome upstreamUnavailable() {

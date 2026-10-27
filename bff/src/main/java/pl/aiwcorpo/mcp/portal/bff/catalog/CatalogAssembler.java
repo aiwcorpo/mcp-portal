@@ -63,7 +63,7 @@ public final class CatalogAssembler {
             }
         }
         List<PortalCatalog.Server> servers = new ArrayList<>();
-        for (CatalogServer server : catalog.servers()) {
+        for (CatalogServer server : catalog.servers() == null ? List.<CatalogServer>of() : catalog.servers()) {
             servers.add(server(server, connectionBySystem.get(server.system()), systemById.get(server.system()),
                     pendingEntitlements));
         }
@@ -75,7 +75,8 @@ public final class CatalogAssembler {
         boolean granted = false;
         boolean pending = false;
         boolean requestable = false;
-        for (CatalogTool tool : server.tools()) {
+        List<CatalogTool> tools = server.tools() == null ? List.of() : server.tools();
+        for (CatalogTool tool : tools) {
             boolean toolGranted = "granted".equals(tool.access());
             boolean toolPending = entitlements(tool).stream().anyMatch(pendingEntitlements::contains);
             granted |= toolGranted;
@@ -108,7 +109,7 @@ public final class CatalogAssembler {
             actions.add("disconnect");
         }
         return new PortalCatalog.Server(server.serverId(), server.system(), server.version(),
-                link(server.serverId()), status, List.copyOf(actions), server.tools());
+                link(server.serverId()), status, List.copyOf(actions), tools);
     }
 
     private static String status(boolean granted, boolean pending, Connection connection, SystemInfo system) {

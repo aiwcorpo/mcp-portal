@@ -30,6 +30,10 @@ spring:
 server:
   port: ${PORTAL_PORT:18090}
   forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      # X-Forwarded-* only from these addresses (regex); Tomcat's default trusts all private networks.
+      internal-proxies: ${PORTAL_TRUSTED_PROXIES:127[.]0[.]0[.]1|0:0:0:0:0:0:0:1}
   error:
     whitelabel:
       enabled: false
@@ -50,6 +54,8 @@ server:
 management:
   endpoints:
     web:
+      discovery:
+        enabled: false
       exposure:
         include: health
   endpoint:
@@ -80,4 +86,6 @@ portal:
   session:
     absolute-timeout: 8h
   iga:
-    adapter: mock
+    # No default: a deployment must choose its C13 adapter (mock exists for the dev profile only).
+    adapter: ${PORTAL_IGA_ADAPTER:}
+    requester-id-claim: ${PORTAL_IGA_REQUESTER_ID_CLAIM:preferred_username}

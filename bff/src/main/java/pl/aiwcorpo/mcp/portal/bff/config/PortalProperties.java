@@ -34,12 +34,18 @@ public record PortalProperties(
             @DefaultValue("10s") Duration readTimeout) {
     }
 
-    /** Client certificate and trust anchors for C4 and C5. No keystore means no client certificate. */
+    /**
+     * Client certificate and trust anchors for C4 and C5, both required.
+     *
+     * @param insecurePlainHttpForTests allows http:// upstreams without mTLS; only with the dev profile, for tests
+     *                                  against plain WireMock stubs
+     */
     public record Tls(
             Path keystore,
             String keystorePassword,
             Path truststore,
-            String truststorePassword) {
+            String truststorePassword,
+            @DefaultValue("false") boolean insecurePlainHttpForTests) {
 
         @Override
         public String toString() {
@@ -85,8 +91,13 @@ public record PortalProperties(
             URI loginReturnOrigin) {
     }
 
+    /**
+     * @param adapter          C13 adapter; none configured is a start-up error ({@code mock} only in dev)
+     * @param requesterIdClaim identity claim the adapter uses to identify the requester
+     */
     public record Iga(
-            @DefaultValue("mock") String adapter,
-            @DefaultValue("classpath:iga/mock-iga.yaml") Resource mockFile) {
+            String adapter,
+            Resource mockFile,
+            @DefaultValue("preferred_username") String requesterIdClaim) {
     }
 }

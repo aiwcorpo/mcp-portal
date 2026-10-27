@@ -18,6 +18,7 @@ import javax.net.ssl.X509TrustManager;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
+import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 
 /** HTTP clients for C4 and C5: client certificate {@code CN=mcp-portal-bff}, internal CA, pinned server name. */
@@ -26,16 +27,30 @@ final class UpstreamHttp {
     private UpstreamHttp() {
     }
 
-    static RestClient restClient(String name, PortalProperties.Upstream upstream, PortalProperties.Tls tls) {
+    /**
+     * C4 carries PATs and both carry user tokens, so plain HTTP and a missing client certificate or trust anchor
+     * are start-up errors; the only exception is the explicit test flag together with the dev profile.
+     */
+    static RestClient restClient(String name, PortalProperties.Upstream upstream, PortalProperties.Tls tls,
+                                 DevMode devMode) {
         if (upstream == null || upstream.baseUrl() == null || !upstream.baseUrl().isAbsolute()) {
             throw new IllegalStateException("Base URL of the " + name + " is not configured");
+        }
+        boolean https = "https".equalsIgnoreCase(upstream.baseUrl().getScheme());
+        if (!https) {
+            if (!"http".equalsIgnoreCase(upstream.baseUrl().getScheme()) || !tls.insecurePlainHttpForTests()) {
+                throw new IllegalStateException("The " + name + " must be reached over https with mTLS");
+            }
+            devMode.require(true, "portal.tls.insecure-plain-http-for-tests");
+        } else if (!isSet(tls.keystore()) || !isSet(tls.truststore())) {
+            throw new IllegalStateException("mTLS to the " + name + " needs portal.tls.keystore and portal.tls.truststore");
         }
         HttpClient.Builder http = HttpClient.newBuilder()
                 .connectTimeout(upstream.connectTimeout())
                 .followRedirects(HttpClient.Redirect.NEVER)
                 // Without TLS the JDK client would try an h2c upgrade on requests with a body, which some servers drop.
                 .version(HttpClient.Version.HTTP_1_1);
-        if ("https".equalsIgnoreCase(upstream.baseUrl().getScheme())) {
+        if (https) {
             http.sslContext(sslContext(tls, upstream.tlsName()));
         }
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(http.build());
@@ -48,15 +63,12 @@ final class UpstreamHttp {
 
     private static SSLContext sslContext(PortalProperties.Tls tls, String tlsName) {
         try {
-            KeyManager[] keyManagers = null;
-            if (isSet(tls.keystore())) {
-                KeyStore keyStore = load(tls.keystore(), tls.keystorePassword());
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                kmf.init(keyStore, password(tls.keystorePassword()));
-                keyManagers = kmf.getKeyManagers();
-            }
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(load(tls.keystore(), tls.keystorePassword()), password(tls.keystorePassword()));
+            KeyManager[] keyManagers = kmf.getKeyManagers();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(isSet(tls.truststore()) ? load(tls.truststore(), tls.truststorePassword()) : null);
+            // Only the internal CA: the JDK default trust store would accept any public certificate.
+            tmf.init(load(tls.truststore(), tls.truststorePassword()));
             X509TrustManager chainValidator = x509(tmf.getTrustManagers());
             TrustManager trust = tlsName == null || tlsName.isBlank()
                     ? chainValidator

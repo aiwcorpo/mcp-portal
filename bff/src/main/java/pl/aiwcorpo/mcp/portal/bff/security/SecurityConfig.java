@@ -2,6 +2,8 @@ package pl.aiwcorpo.mcp.portal.bff.security;
 
 import java.time.Clock;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +18,7 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2Authorization
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
@@ -23,8 +26,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
+import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 
 @Configuration(proxyBeanMethods = false)
@@ -35,6 +40,18 @@ public class SecurityConfig {
     static final String CSRF_HEADER = "X-XSRF-TOKEN";
     static final long HSTS_MAX_AGE_SECONDS = 31_536_000;
 
+    private static final OAuth2AuthorizationRequestResolver NO_FILTER_ENTRY = new OAuth2AuthorizationRequestResolver() {
+        @Override
+        public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
+            return null;
+        }
+
+        @Override
+        public OAuth2AuthorizationRequest resolve(HttpServletRequest request, String clientRegistrationId) {
+            return null;
+        }
+    };
+
     @Bean
     SecurityFilterChain portalSecurity(HttpSecurity http,
                                        LoginResolvers loginResolvers,
@@ -42,7 +59,9 @@ public class SecurityConfig {
                                        AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequests,
                                        CookieCsrfTokenRepository csrfTokens,
                                        PortalProperties properties,
+                                       DevMode devMode,
                                        Clock clock) throws Exception {
+        LoginRedirects redirects = new LoginRedirects(properties.web().loginReturnOrigin(), devMode);
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/login").permitAll()
@@ -52,13 +71,16 @@ public class SecurityConfig {
                         // Also switches off Spring's generated HTML login page at /login, which is an SPA route.
                         .loginPage("/api/v1/auth/login")
                         .authorizationEndpoint(endpoint -> endpoint
-                                .authorizationRequestResolver(loginResolvers.standard())
+                                // GET /api/v1/auth/login is the only way into the login (C12, CC-023), so Spring's
+                                // own /oauth2/authorization/{id} entry resolves nothing.
+                                .authorizationRequestResolver(NO_FILTER_ENTRY)
                                 .authorizationRequestRepository(authorizationRequests))
                         .authorizedClientRepository(authorizedClients)
-                        .successHandler(new LoginSuccessHandler(properties.web().loginReturnOrigin()))
-                        .failureHandler((request, response, e) -> response.sendRedirect(
-                                request.getContextPath() + "/?loginError=true")))
-                .csrf(csrf -> csrf.spa().csrfTokenRepository(csrfTokens))
+                        .successHandler(new LoginSuccessHandler(redirects))
+                        .failureHandler(new LoginFailureHandler(redirects)))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokens)
+                        .csrfTokenRequestHandler(new HeaderOnlyCsrfTokenRequestHandler()))
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(JsonSecurityHandlers.unauthenticated())
                         .accessDeniedHandler(JsonSecurityHandlers.accessDenied()))
@@ -73,8 +95,7 @@ public class SecurityConfig {
                                 .includeSubDomains(true)
                                 .maxAgeInSeconds(HSTS_MAX_AGE_SECONDS))
                         .frameOptions(frame -> frame.deny())
-                        .referrerPolicy(referrer -> referrer.policy(
-                                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN)))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN)))
                 .addFilterBefore(new SessionLifetimeFilter(properties.session().absoluteTimeout(), clock),
                         SecurityContextHolderFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);

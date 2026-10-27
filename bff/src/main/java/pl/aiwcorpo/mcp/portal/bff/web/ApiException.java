@@ -22,10 +22,6 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.UNAUTHORIZED, ApiError.of(ApiError.UNAUTHENTICATED));
     }
 
-    public static ApiException upstreamUnavailable() {
-        return new ApiException(HttpStatus.SERVICE_UNAVAILABLE, ApiError.of(ApiError.UPSTREAM_UNAVAILABLE));
-    }
-
     public HttpStatus status() {
         return status;
     }

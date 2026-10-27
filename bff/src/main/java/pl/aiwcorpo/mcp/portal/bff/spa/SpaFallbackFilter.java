@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,7 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 class SpaFallbackFilter extends OncePerRequestFilter {
 
-    private static final List<String> NOT_SPA = List.of("/api/", "/oauth2/", "/login/oauth2/", "/actuator/", "/error");
+    private static final List<String> NOT_SPA = List.of("/api", "/oauth2", "/login/oauth2", "/actuator", "/error");
     private static final String INDEX = "index.html";
 
     private final Path distRoot;
@@ -39,8 +40,9 @@ class SpaFallbackFilter extends OncePerRequestFilter {
         if (!"GET".equals(method) && !"HEAD".equals(method)) {
             return true;
         }
-        String path = pathWithinApplication(request);
-        return path.equals("/api") || NOT_SPA.stream().anyMatch(path::startsWith);
+        // Case-insensitive, so /API/v1/me is not answered with HTML either (it ends as a JSON 404).
+        String path = pathWithinApplication(request).toLowerCase(Locale.ROOT);
+        return NOT_SPA.stream().anyMatch(prefix -> path.equals(prefix) || path.startsWith(prefix + "/"));
     }
 
     @Override

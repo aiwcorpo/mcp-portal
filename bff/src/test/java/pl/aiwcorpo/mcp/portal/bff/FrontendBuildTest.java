@@ -17,6 +17,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -28,6 +29,7 @@ import pl.aiwcorpo.mcp.portal.bff.support.TestBrowser;
  * dev-only return to a separately served frontend after login.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("dev")
 class FrontendBuildTest {
 
     static final Path DIST = Path.of("../web/dist/portal");
@@ -42,6 +44,7 @@ class FrontendBuildTest {
         // Upstreams are not called in this test.
         registry.add("portal.broker.base-url", () -> "http://127.0.0.1:9");
         registry.add("portal.gateway-admin.base-url", () -> "http://127.0.0.1:9");
+        registry.add("portal.tls.insecure-plain-http-for-tests", () -> "true");
         registry.add("portal.gateway.public-url", () -> "https://mcp-gateway.internal");
         registry.add("portal.web.dist-path", DIST::toString);
         registry.add("portal.web.login-return-origin", () -> "http://localhost:4200");
@@ -61,7 +64,12 @@ class FrontendBuildTest {
 
     @Test
     void servesTheAngularBuildWithNoncedStyles() {
-        assumeTrue(Files.isRegularFile(DIST.resolve("index.html")), "web/dist/portal not built (npm run build in web/)");
+        boolean built = Files.isRegularFile(DIST.resolve("index.html"));
+        // -Dportal.test.require-web-dist=true turns the skip into a failure (CI with the frontend built first).
+        if (Boolean.getBoolean("portal.test.require-web-dist")) {
+            assertThat(built).as("web/dist/portal/index.html").isTrue();
+        }
+        assumeTrue(built, "web/dist/portal not built (npm run build in web/)");
         TestBrowser browser = browser();
 
         for (String route : List.of("/", "/catalog", "/connect/jira", "/connections")) {

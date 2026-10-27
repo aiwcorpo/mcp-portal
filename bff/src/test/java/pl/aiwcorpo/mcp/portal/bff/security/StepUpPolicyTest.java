@@ -1,16 +1,19 @@
 package pl.aiwcorpo.mcp.portal.bff.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 
@@ -19,14 +22,17 @@ class StepUpPolicyTest {
     private static final Instant NOW = Instant.parse("2026-10-27T10:00:00Z");
     private static final Clock CLOCK = Clock.fixed(NOW, ZoneOffset.UTC);
 
-    private static StepUpPolicy policy(List<String> acrValues) {
-        PortalProperties properties = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
+    private static PortalProperties properties(List<String> acrValues) {
+        return new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
                 new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues), null, null, null);
-        return new StepUpPolicy(properties, CLOCK);
+    }
+
+    private static StepUpPolicy policy(List<String> acrValues) {
+        return new StepUpPolicy(properties(acrValues), new DevMode(true), CLOCK);
     }
 
     private static PortalUser user(Instant authTime, String acr) {
-        return new PortalUser("sub-1", "alice", "Alice", Set.of(), authTime, acr);
+        return new PortalUser("sub-1", "alice", "Alice", null, Set.of(), authTime, acr, Map.of());
     }
 
     @Test
@@ -47,6 +53,14 @@ class StepUpPolicyTest {
         assertThat(policy.isFresh(user(NOW, null))).isFalse();
         assertThat(policy.acrValuesParameter()).isEqualTo("mfa gold");
         assertThat(policy(List.of()).acrValuesParameter()).isNull();
+    }
+
+    @Test
+    void stepUpWithoutAcrLevelsIsRefusedOutsideDev() {
+        assertThatThrownBy(() -> new StepUpPolicy(properties(List.of()), new DevMode(false), CLOCK))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("acr-values");
+        assertThat(new StepUpPolicy(properties(List.of("mfa")), new DevMode(false), CLOCK).acrValuesParameter())
+                .isEqualTo("mfa");
     }
 
     @Test

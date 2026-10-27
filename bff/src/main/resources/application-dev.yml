@@ -1,0 +1,5 @@
+# Profile for mcp-platform-dev only (scripts/run-dev.sh). Settings here are refused without this profile.
+portal:
+  iga:
+    adapter: ${PORTAL_IGA_ADAPTER:mock}
+    mock-file: file:${PORTAL_IGA_MOCK_FILE:dev/iga-mock.yaml}

@@ -1,5 +1,5 @@
 # Data of the C13 adapter "mock" for mcp-platform-dev (users from keycloak/realm-corp.json).
-# "user" is the login (preferred_username) or the IdP sub.
+# "user" is the value of the claim portal.iga.requester-id-claim (default preferred_username).
 entitlements:
   jira: [mcp-jira-read, mcp-jira-write, mcp-jira-destructive, mcp-jira-proj-ABC, mcp-jira-proj-DEF, mcp-jira-proj-HR]
   confluence: [mcp-confluence-read, mcp-confluence-write, mcp-confluence-space-ENG]

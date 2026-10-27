@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import pl.aiwcorpo.mcp.portal.bff.iga.IgaUnavailableException;
 import pl.aiwcorpo.mcp.portal.bff.token.TokenUnavailableException;
 import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 
@@ -32,8 +35,8 @@ public class ApiExceptionHandler {
         return json(HttpStatus.SERVICE_UNAVAILABLE, ApiError.of(ApiError.UPSTREAM_UNAVAILABLE));
     }
 
-    @ExceptionHandler(UpstreamException.class)
-    ResponseEntity<Object> upstream(UpstreamException e) {
+    @ExceptionHandler({UpstreamException.class, IgaUnavailableException.class})
+    ResponseEntity<Object> upstream(RuntimeException e) {
         log.warn("{}", e.getMessage());
         return json(HttpStatus.SERVICE_UNAVAILABLE, ApiError.of(ApiError.UPSTREAM_UNAVAILABLE));
     }
@@ -46,8 +49,7 @@ public class ApiExceptionHandler {
                 return json(status, ApiError.of(ErrorCodes.forStatus(status.value())));
             }
         }
-        if (e instanceof org.springframework.http.converter.HttpMessageNotReadableException
-                || e instanceof org.springframework.web.method.annotation.MethodArgumentTypeMismatchException) {
+        if (e instanceof HttpMessageNotReadableException || e instanceof MethodArgumentTypeMismatchException) {
             return json(HttpStatus.BAD_REQUEST, ApiError.of(ApiError.INVALID_REQUEST));
         }
         log.error("Unhandled exception of type {}", e.getClass().getName());

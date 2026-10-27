@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.support.DevEnvironment;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
@@ -30,32 +31,32 @@ class UpstreamTlsDevEnvironmentTest {
         assumeTrue(DEV.keycloakReachable(), "mcp-platform-dev is not running (make up)");
     }
 
-    private static BrokerClient broker(String tlsName, boolean clientCertificate) {
+    private static BrokerClient broker(String tlsName, Path clientKeystore) {
         Path certs = DEV.certs();
-        PortalProperties.Tls tls = new PortalProperties.Tls(
-                clientCertificate ? certs.resolve("mcp-portal-bff/keystore.p12") : null, DEV.value("TLS_STORE_PASSWORD"),
-                certs.resolve("ca/truststore.p12"), DEV.value("TLS_STORE_PASSWORD"));
+        PortalProperties.Tls tls = new PortalProperties.Tls(clientKeystore, DEV.value("TLS_STORE_PASSWORD"),
+                certs.resolve("ca/truststore.p12"), DEV.value("TLS_STORE_PASSWORD"), false);
         PortalProperties.Upstream upstream = new PortalProperties.Upstream(
                 URI.create("https://localhost:" + DEV.value("BROKER_MOCK_PORT")), tlsName,
                 Duration.ofSeconds(3), Duration.ofSeconds(5));
-        return new BrokerClient(new UpstreamCalls("credential broker", UpstreamHttp.restClient("broker", upstream, tls)));
+        return new BrokerClient(new UpstreamCalls("credential broker", UpstreamHttp.restClient("broker", upstream, tls, new DevMode(true))));
     }
 
     @Test
     void acceptsTheBrokerUnderItsConfiguredName() {
-        assertThat(broker(DEV.value("MCP_BROKER_TLS_NAME"), true).listSystems(TOKEN, REQUEST_ID)).isNotEmpty();
+        assertThat(broker(DEV.value("MCP_BROKER_TLS_NAME"), DEV.certs().resolve("mcp-portal-bff/keystore.p12")).listSystems(TOKEN, REQUEST_ID)).isNotEmpty();
     }
 
     @Test
     void rejectsAServerCertificateWithoutTheConfiguredName() {
-        assertThatThrownBy(() -> broker("mcp-jira.internal", true).listSystems(TOKEN, REQUEST_ID))
+        assertThatThrownBy(() -> broker("mcp-jira.internal", DEV.certs().resolve("mcp-portal-bff/keystore.p12")).listSystems(TOKEN, REQUEST_ID))
                 .isInstanceOf(UpstreamException.class)
                 .hasMessageContaining("unreachable");
     }
 
     @Test
-    void stubRefusesACallWithoutClientCertificate() {
-        assertThatThrownBy(() -> broker(DEV.value("MCP_BROKER_TLS_NAME"), false).listSystems(TOKEN, REQUEST_ID))
+    void stubRefusesAClientCertificateOfAnotherCa() {
+        assertThatThrownBy(() -> broker(DEV.value("MCP_BROKER_TLS_NAME"),
+                DEV.certs().resolve("untrusted/mcp-gateway/keystore.p12")).listSystems(TOKEN, REQUEST_ID))
                 .isInstanceOf(UpstreamException.class);
     }
 }

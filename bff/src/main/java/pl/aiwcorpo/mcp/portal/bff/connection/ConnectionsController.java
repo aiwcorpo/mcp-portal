@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,12 +28,17 @@ import pl.aiwcorpo.mcp.portal.bff.security.StepUpPolicy;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerClient;
+import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerData;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerModel;
 import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
 import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Connections of the current user (C12 over C4). The secret of {@code PUT .../secret} lives only in the request
@@ -42,7 +48,6 @@ import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 @RestController
 class ConnectionsController {
 
-    private static final Set<String> SYSTEMS = Set.of("jira", "confluence", "gitlab", "servicedesk", "opensearch");
     private static final Set<String> BROKER_SECRET_ERRORS = Set.of("secret_invalid", "identity_mismatch");
     private static final int MAX_SECRET_LENGTH = 4096;
 
@@ -51,6 +56,9 @@ class ConnectionsController {
     private final StepUpPolicy stepUp;
     private final AuditLog audit;
     private final Clock clock;
+    private final ObjectReader secretReader = JsonMapper.builder().build()
+            .readerFor(BrokerModel.PutSecretRequest.class)
+            .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     ConnectionsController(UserTokens tokens, BrokerClient broker, StepUpPolicy stepUp, AuditLog audit, Clock clock) {
         this.tokens = tokens;
@@ -65,25 +73,31 @@ class ConnectionsController {
                                       HttpServletResponse response) {
         PortalUser.from(authentication);
         BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
-        return broker.listConnections(token, RequestIds.of(request));
+        return BrokerData.validConnections(broker.listConnections(token, RequestIds.of(request)));
     }
 
+    /** The body is read here rather than bound by Spring, so that malformed requests are audited as well. */
     @PutMapping("/api/v1/connections/{system}/secret")
-    ResponseEntity<Object> putSecret(@PathVariable String system, @RequestBody BrokerModel.PutSecretRequest body,
+    ResponseEntity<Object> putSecret(@PathVariable String system, @RequestBody(required = false) byte[] rawBody,
                                      Authentication authentication, HttpServletRequest request,
                                      HttpServletResponse response) {
         PortalUser user = PortalUser.from(authentication);
-        requireSystem(system);
         String requestId = RequestIds.of(request);
         long started = clock.millis();
+        requireSystem(system, user, requestId, started);
         if (!stepUp.isFresh(user)) {
             audit.connectionChange(requestId, user, system, AuditLog.Outcome.stepUpRequired(), clock.millis() - started);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new StepUpRequired("step_up_required", StepUpPolicy.stepUpUrl(returnPathFrom(request))));
         }
-        validate(body);
-        BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
+        BrokerModel.PutSecretRequest body = parse(rawBody);
+        if (body == null) {
+            audit.connectionChange(requestId, user, system, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
+                    clock.millis() - started);
+            throw ApiException.badRequest();
+        }
         try {
+            BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
             BrokerModel.PutSecretResponse stored = broker.putSecret(token, requestId, system, body);
             audit.connectionChange(requestId, user, system, AuditLog.Outcome.ok(), clock.millis() - started);
             return ResponseEntity.ok(stored);
@@ -99,6 +113,10 @@ class ConnectionsController {
             }
             audit.connectionChange(requestId, user, system, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
             throw e;
+        } catch (RuntimeException e) {
+            // Token refresh or exchange failed: the change did not happen and that is worth an event too.
+            audit.connectionChange(requestId, user, system, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
+            throw e;
         }
     }
 
@@ -106,13 +124,13 @@ class ConnectionsController {
     ResponseEntity<Void> disconnect(@PathVariable String system, Authentication authentication,
                                     HttpServletRequest request, HttpServletResponse response) {
         PortalUser user = PortalUser.from(authentication);
-        requireSystem(system);
         String requestId = RequestIds.of(request);
         long started = clock.millis();
-        BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
+        requireSystem(system, user, requestId, started);
         try {
+            BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
             broker.deleteConnection(token, requestId, system);
-        } catch (UpstreamException e) {
+        } catch (RuntimeException e) {
             audit.connectionChange(requestId, user, system, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
             throw e;
         }
@@ -120,25 +138,40 @@ class ConnectionsController {
         return ResponseEntity.noContent().build();
     }
 
-    private static void requireSystem(String system) {
-        if (!SYSTEMS.contains(system)) {
+    private void requireSystem(String system, PortalUser user, String requestId, long started) {
+        if (!BrokerData.SYSTEMS.contains(system)) {
+            audit.connectionChange(requestId, user, null, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
+                    clock.millis() - started);
             throw ApiException.badRequest();
         }
     }
 
-    private static void validate(BrokerModel.PutSecretRequest body) {
-        if (body == null || body.secret() == null || body.secret().isEmpty() || body.secret().length() > MAX_SECRET_LENGTH) {
-            throw ApiException.badRequest();
+    /** Strict parse of {@code PutSecretRequest}; null for anything the contract does not allow. */
+    private BrokerModel.PutSecretRequest parse(byte[] rawBody) {
+        if (rawBody == null || rawBody.length == 0) {
+            return null;
         }
-        if (body.expiresAt() != null) {
-            try {
-                if (!body.expiresAt().endsWith("Z")) {
-                    throw ApiException.badRequest();
-                }
-                Instant.parse(body.expiresAt());
-            } catch (DateTimeParseException e) {
-                throw ApiException.badRequest();
-            }
+        BrokerModel.PutSecretRequest body;
+        try {
+            body = secretReader.readValue(rawBody);
+        } catch (JacksonException e) {
+            return null;
+        }
+        return valid(body) ? body : null;
+    }
+
+    private static boolean valid(BrokerModel.PutSecretRequest body) {
+        if (body == null || body.secret() == null || body.secret().isEmpty() || body.secret().length() > MAX_SECRET_LENGTH) {
+            return false;
+        }
+        if (body.expiresAt() == null) {
+            return true;
+        }
+        try {
+            Instant.parse(body.expiresAt());
+            return body.expiresAt().endsWith("Z");
+        } catch (DateTimeParseException e) {
+            return false;
         }
     }
 
@@ -157,7 +190,9 @@ class ConnectionsController {
                     && request.getScheme().equalsIgnoreCase(uri.getScheme())
                     && request.getServerPort() == port(uri);
             String path = uri.getRawPath() + (uri.getRawQuery() == null ? "" : "?" + uri.getRawQuery());
-            return sameOrigin && ReturnPaths.isValid(path) ? path : ReturnPaths.DEFAULT;
+            // A Referer on /api/... is not a page to come back to (and could name e.g. the logout endpoint).
+            boolean api = path.toLowerCase(Locale.ROOT).startsWith("/api/") || path.equalsIgnoreCase("/api");
+            return sameOrigin && !api && ReturnPaths.isValid(path) ? path : ReturnPaths.DEFAULT;
         } catch (IllegalArgumentException e) {
             return ReturnPaths.DEFAULT;
         }

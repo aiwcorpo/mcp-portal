@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -113,7 +114,14 @@ public final class FakeIdp implements AutoCloseable {
         String code = random("code");
         codes.put(code, new Grant(user, query.get("nonce"), query.get("code_challenge"), authTime, acr, null));
         return URI.create(query.get("redirect_uri") + "?code=" + code + "&state="
-                + java.net.URLEncoder.encode(query.get("state"), StandardCharsets.UTF_8));
+                + URLEncoder.encode(query.get("state"), StandardCharsets.UTF_8));
+    }
+
+    /** The user cancels at the IdP: redirect back with {@code error=access_denied} and the original state. */
+    public URI deny(URI authorizationRequest) {
+        Map<String, String> query = parse(authorizationRequest.getRawQuery());
+        return URI.create(query.get("redirect_uri") + "?error=access_denied&state="
+                + URLEncoder.encode(query.get("state"), StandardCharsets.UTF_8));
     }
 
     private void discovery(HttpExchange exchange) throws IOException {

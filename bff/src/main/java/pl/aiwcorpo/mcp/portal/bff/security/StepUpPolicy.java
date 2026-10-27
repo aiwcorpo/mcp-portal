@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 
@@ -18,10 +19,12 @@ public class StepUpPolicy {
     private final List<String> acrValues;
     private final Clock clock;
 
-    public StepUpPolicy(PortalProperties properties, Clock clock) {
+    public StepUpPolicy(PortalProperties properties, DevMode devMode, Clock clock) {
         this.maxAge = properties.stepUp().maxAge();
-        this.acrValues = List.copyOf(properties.stepUp().acrValues());
+        this.acrValues = properties.stepUp().acrValues().stream().filter(value -> !value.isBlank()).toList();
         this.clock = clock;
+        // Without acr levels a "step-up" is only a repeated password; acceptable against the dev realm only.
+        devMode.require(acrValues.isEmpty(), "Step-up without portal.step-up.acr-values");
     }
 
     public boolean isFresh(PortalUser user) {

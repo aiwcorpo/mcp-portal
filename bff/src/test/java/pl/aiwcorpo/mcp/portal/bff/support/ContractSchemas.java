@@ -30,6 +30,7 @@ public final class ContractSchemas {
 
     public static final String PORTAL_BFF = "mcp-contracts/openapi/bundled/portal-bff.v1.bundled.yaml";
     public static final String CREDENTIAL_BROKER = "mcp-contracts/openapi/bundled/credential-broker.v1.bundled.yaml";
+    public static final String GATEWAY_ADMIN = "mcp-contracts/openapi/bundled/gateway-admin.v1.bundled.yaml";
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
     private static final SchemaRegistry REGISTRY = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12,
@@ -87,6 +88,37 @@ public final class ContractSchemas {
         assertThat(response.headers().firstValue("Content-Type").orElse(""))
                 .as("content type").startsWith("application/json");
         assertValid(schemaAt(content.path("schema")), JSON.readTree(response.body()));
+    }
+
+    /**
+     * Checks a request the BFF sent to C4/C5: the operation exists in the contract for this method and path, and
+     * a JSON body (required or present) matches the request schema.
+     */
+    public void assertRequest(String method, String path, String body) {
+        JsonNode operation = null;
+        for (var entry : document.path("paths").properties()) {
+            String pattern = entry.getKey().replaceAll("\\{[^}]+}", "[^/]+");
+            if (path.matches(pattern)) {
+                operation = entry.getValue().path(method.toLowerCase(Locale.ROOT));
+                break;
+            }
+        }
+        if (operation == null || operation.isMissingNode()) {
+            fail("request %s %s is not an operation of the contract", method, path);
+            return;
+        }
+        JsonNode requestBody = resolve(operation.path("requestBody"));
+        boolean hasBody = body != null && !body.isEmpty();
+        if (requestBody.isMissingNode()) {
+            assertThat(hasBody).as("body of %s %s", method, path).isFalse();
+            return;
+        }
+        if (requestBody.path("required").asBoolean(false)) {
+            assertThat(hasBody).as("required body of %s %s", method, path).isTrue();
+        }
+        if (hasBody) {
+            assertValid(schemaAt(requestBody.path("content").path("application/json").path("schema")), JSON.readTree(body));
+        }
     }
 
     /** Validates a JSON value against {@code #/components/schemas/<name>} of this document. */
