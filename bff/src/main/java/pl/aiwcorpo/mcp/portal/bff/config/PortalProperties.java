@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.core.io.Resource;
 
 @ConfigurationProperties("portal")
 public record PortalProperties(
@@ -93,11 +92,13 @@ public record PortalProperties(
 
     /**
      * @param adapter          C13 adapter; none configured is a start-up error ({@code mock} only in dev)
+     * @param mockFile         file system path of the mock data; a plain path, because the environment variable
+     *                         PORTAL_IGA_MOCK_FILE binds to this property directly (relaxed binding)
      * @param requesterIdClaim identity claim the adapter uses to identify the requester
      */
     public record Iga(
             String adapter,
-            Resource mockFile,
+            String mockFile,
             @DefaultValue("preferred_username") String requesterIdClaim) {
     }
 }

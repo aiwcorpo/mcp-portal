@@ -2,4 +2,5 @@
 portal:
   iga:
     adapter: ${PORTAL_IGA_ADAPTER:mock}
-    mock-file: file:${PORTAL_IGA_MOCK_FILE:dev/iga-mock.yaml}
+    # Plain path relative to the working directory (bff/); PORTAL_IGA_MOCK_FILE overrides it.
+    mock-file: dev/iga-mock.yaml

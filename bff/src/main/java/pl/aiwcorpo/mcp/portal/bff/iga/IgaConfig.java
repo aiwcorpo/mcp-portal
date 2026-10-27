@@ -1,9 +1,12 @@
 package pl.aiwcorpo.mcp.portal.bff.iga;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Clock;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResource;
 
 import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
@@ -21,10 +24,14 @@ class IgaConfig {
         }
         if ("mock".equals(adapter)) {
             devMode.require(true, "portal.iga.adapter=mock");
-            if (iga.mockFile() == null) {
+            if (iga.mockFile() == null || iga.mockFile().isBlank()) {
                 throw new IllegalStateException("portal.iga.mock-file is required for the mock adapter");
             }
-            return new MockAccessGovernance(iga.mockFile(), iga.requesterIdClaim(), clock);
+            Path file = Path.of(iga.mockFile()).toAbsolutePath().normalize();
+            if (!Files.isRegularFile(file)) {
+                throw new IllegalStateException("IGA mock file " + file + " does not exist");
+            }
+            return new MockAccessGovernance(new FileSystemResource(file), iga.requesterIdClaim(), clock);
         }
         throw new IllegalStateException("Unknown IGA adapter '" + adapter + "'; available: mock (dev only)");
     }

@@ -9,7 +9,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 ## M1: wynik
 
-Po poprawkach z przeglądu (niżej): `./mvnw test` 64 testy, 0 błędów (w tym `FrontendBuildTest` na prawdziwym
+Po poprawkach z przeglądu i testu integracyjnego koordynatora (niżej): `./mvnw test` 67 testów, 0 błędów (w tym `FrontendBuildTest` na prawdziwym
 `../web/dist/portal` z ws-08); `./mvnw test -Pdev-env` (Keycloak i stuby z `mcp-platform-dev` 8d459c1,
 `make up`): 6 testów, 0 błędów. Ręcznie: `./scripts/run-dev.sh` serwuje build `../web/dist/portal`
 z ws-08, nonce CSP podstawiony w `index.html` (5 wystąpień = nonce z nagłówka).
@@ -92,6 +92,16 @@ DoD briefu:
 | L odpowiedzi/żądania C4/C5 niewalidowane | `PortalApiTest` na końcu sprawdza każde żądanie BFF do stubów: operacja istnieje w C4/C5, body zgodne ze schematem, bearer z właściwym `aud`, `X-Request-Id` UUIDv7 |
 | L brak testów rotacji sesji, login CSRF, obcy `Referer`, `Thread.sleep` w dev, cichy skip builda | testy `loginRotatesTheSessionId`, `loginFailuresUseTheClosedListOfCodes` (cudzy callback -> `session_expired`, anulowanie -> `cancelled`), `stepUpReturnPathIgnoresForeignAndApiReferers`; dev test na przesuwanym zegarze zamiast `sleep`; `-Dportal.test.require-web-dist=true` |
 | L limit bezczynności 30 min bez testu | bez zmian (ustawienie kontenera, zegar Tomcata nie da się przesunąć w teście) |
+
+## Test integracyjny koordynatora (2026-10-27): BFF nie wstawał przez `run-dev.sh`
+
+| Błąd | Przyczyna | Poprawka |
+| --- | --- | --- |
+| `FileNotFoundException: ServletContext resource [.../dev/iga-mock.yaml]` | zmienna `PORTAL_IGA_MOCK_FILE` wiązała się przez relaxed binding wprost z `portal.iga.mock-file` (typ `Resource`) i nadpisywała wartość z `file:` w `application-dev.yml` | `portal.iga.mock-file` to zwykła ścieżka (`FileSystemResource`), brak pliku = czytelny błąd startu; test `RunDevConfigurationTest` startuje z wartościami skryptu podanymi jako zmienne środowiska i sprawdza dane mocka w katalogu |
+| `class file version 69.0` przy Javie 21 w `PATH` | skrypt nie sprawdzał Javy | `run-dev.sh` sprawdza `java.specification.version` >= 25 i podaje `JAVA_HOME`; wymaganie także w README przy komendzie |
+
+Sprawdzone ręcznie: `./scripts/run-dev.sh` z Javą 17 w `PATH` kończy się komunikatem (kod 1); z JDK 25 wstaje, `curl
+http://localhost:18090/api/v1/me` daje `401 {"error":"unauthenticated"}`, proces zatrzymany.
 
 ## Potrzeby wobec innych strumieni
 

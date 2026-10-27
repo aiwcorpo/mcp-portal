@@ -12,10 +12,11 @@ Wymagane: uruchomione środowisko `../../mcp-platform-dev` (`make up`: Keycloak 
 C5 :18444 z mTLS) oraz JDK 25.
 
 ```bash
-export JAVA_HOME=/opt/homebrew/Cellar/openjdk@25/25.0.4.1/libexec/openjdk.jdk/Contents/Home
+export JAVA_HOME=/opt/homebrew/Cellar/openjdk@25/25.0.4.1/libexec/openjdk.jdk/Contents/Home   # wymagana Java 25
 ./scripts/run-dev.sh            # BFF na http://localhost:18090
 ```
 
+Skrypt sprawdza wersję Javy (z `JAVA_HOME` albo `PATH`) i kończy się czytelnym komunikatem, gdy nie jest to 25.
 Skrypt włącza profil Spring `dev` i przy każdym starcie czyta z `mcp-platform-dev/.env` i `.secrets/dev.env` sekret klienta
 `mcp-portal-bff`, hasło keystore'ów i porty; nic nie jest kopiowane do tego repozytorium. Inny katalog
 środowiska: `MCP_PLATFORM_DEV_DIR=...`. Prawdziwy broker zamiast stuba:
@@ -41,6 +42,7 @@ open 'http://localhost:18090/api/v1/auth/login?returnPath=/'     # logowanie ali
 | Test | Co sprawdza |
 | --- | --- |
 | `PortalApiTest` | każda odpowiedź API walidowana schematem C12 (`portal-bff.v1.bundled.yaml` z jara kontraktów, status spoza kontraktu = błąd); logowanie z PKCE i nonce; ciasteczka `__Host-session` i `XSRF-TOKEN`; CSRF dla PUT/DELETE/POST; step-up (`step_up_required` + `stepUpUrl`, `max_age=0`, powrót); wymiana tokenów na `aud` brokera i gateway admin; audyt C8 walidowany `audit-event.schema.json`; SPA z fallbackiem, CSP z nonce, HSTS; `/api/**` nigdy HTML; na końcu: żadna odpowiedź ani linia logu nie zawiera tokenu IdP ani sekretu |
+| `RunDevConfigurationTest` | start z tą samą konfiguracją co `run-dev.sh` (profil `dev`, zmienne `PORTAL_*` jako zmienne środowiska z relaxed binding) i dane mocka IGA w katalogu |
 | `FrontendBuildTest` | prawdziwy build ws-08 z `../web/dist/portal` (pomijany, gdy nie zbudowany; `-Dportal.test.require-web-dist=true` robi z tego błąd): trasy SPA, nonce w stylach, pliki JS/CSS; powrót po logowaniu na `PORTAL_WEB_LOGIN_RETURN_ORIGIN` |
 | `CatalogAssemblerTest` | reguły statusów i akcji katalogu (CC-021); odtworzenie przykładu `mixed` z C12 z danych C5/C4/C13 |
 | `ReturnPathsTest` | wektory `test-vectors/return-paths` (CC-032) |
@@ -67,7 +69,7 @@ Wszystko przez zmienne środowiska (`application.yml`):
 | `PORTAL_WEB_LOGIN_RETURN_ORIGIN` | tylko dev: origin frontendu z `ng serve`, na który BFF wraca po logowaniu (`scheme://host:port`, z konfiguracji, nigdy z żądania) | puste; z `npm start` w `web/`: `http://localhost:4200` |
 | `SPRING_PROFILES_ACTIVE` | `dev` tylko dla mcp-platform-dev; bez niego BFF nie wstanie z adapterem IGA `mock`, step-up bez `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` ani `portal.tls.insecure-plain-http-for-tests` | `dev` (ustawia `run-dev.sh`) |
 | `PORTAL_IGA_ADAPTER` | adapter C13; brak = błąd startu | `mock` (profil `dev`) |
-| `PORTAL_IGA_MOCK_FILE` | dane adaptera `mock` (poza jarem) | `dev/iga-mock.yaml` |
+| `PORTAL_IGA_MOCK_FILE` | dane adaptera `mock` (poza jarem): zwykła ścieżka w systemie plików, bez `file:` | `dev/iga-mock.yaml` |
 | `PORTAL_IGA_REQUESTER_ID_CLAIM` | claim logowania identyfikujący wnioskodawcę w IGA; brak claimu u użytkownika = błąd adaptera (503) | `preferred_username` |
 | `PORTAL_TRUSTED_PROXIES` | regex adresów proxy, od których przyjmowane są `X-Forwarded-*` | `127[.]0[.]0[.]1\|0:0:0:0:0:0:0:1` |
 | `PORTAL_STEP_UP_MAX_AGE` | wiek ostatniego logowania dla operacji ze step-up | `5m` |
