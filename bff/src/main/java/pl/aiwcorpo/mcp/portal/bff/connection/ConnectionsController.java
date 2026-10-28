@@ -29,10 +29,10 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
+import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectReader;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Connections of the current user (C12 over C4). The secret of {@code PUT .../secret} lives only in the request
@@ -51,7 +51,7 @@ class ConnectionsController {
     private final BrokerClient broker;
     private final AuditLog audit;
     private final Clock clock;
-    private final ObjectReader secretReader = JsonMapper.builder().build()
+    private final ObjectReader secretReader = StrictJson.builder().build()
             .readerFor(BrokerModel.PutSecretRequest.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 

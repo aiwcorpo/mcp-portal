@@ -13,7 +13,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | w toku: M3.1 poniżej; wnioski IGA i admin zostają na M4 |
 | M3.1 | kontrakty 3.0.1, `ReturnPath` CC-099, `virtual_server_change`, potwierdzenia (podgląd, viewed, cancel), `activity/calls`, Authenticator ze step-up, `Me.mfaFreshUntil` | zrobione |
 | M3.2 | osobne adresy token/JWKS przy `issuer-uri` (bez `idp-relay`), higiena znaków ukrytych (CC-121) w podglądzie | zrobione |
-| M3.3 | poprawki po przeglądzie (koercja liczby na tekst w `PUT .../secret`), test na żywo ze stosem po zmianie compose przez ws-01 | otwarte |
+| M3.3 | brak koercji typów w ciałach żądań (`StrictJson`), test na żywo ze stosem po zmianie compose przez ws-01 | kod zrobiony, test na żywo przy integracji |
 
 ## M2: wynik (2026-10-28)
 
@@ -255,7 +255,7 @@ Decyzje:
 - `422 invalid_code` / `enrollment_invalid` mają ciało bez `requestId` (schemat `AuthenticatorEnrollmentError` jest zamknięty),
   id żądania jest w nagłówku.
 - Kod pierwszego potwierdzenia jako liczba JSON (`"code":123456`) jest odrzucany (bez koercji skalarów); `PUT .../secret` (M2)
-  nadal koerceuje liczbę na tekst, do poprawki w M3.3.
+  koercował liczbę na tekst; poprawione w M3.3 (`StrictJson` dla `PUT secret`, startu OAuth i potwierdzenia rejestracji; ciała wirtualnych serwerów były sprawdzane po typie węzła od M2).
 - Domyślna strona rejestracji do powrotu ze step-up: `/authenticator` (`portal.step-up.authenticator-return-path`); web ma ją
   ustawić w trasach albo podać własny `returnPath` (C12 na to pozwala).
 - Step-up w dev: realm `corp` nie ma poziomu `acr` dla MFA (STATUS mcp-platform-dev: "Poza M1", `acr` = `1`). Dopóki ws-01
@@ -266,7 +266,7 @@ Znalezisko w artefaktach: `mcp-contracts-3.0.1-test-vectors.jar` w `~/.m2` zawie
 (w repozytorium i tagu są tylko `invalid-identity-mismatch*.json`; jar zbudowany bez `clean`). `ConnectRedirectVectorsTest` pomija te
 dwa pliki. Wydanie jest niezmienne, więc do zgłoszenia ws-00 (kolejne wydanie albo przebudowa jara).
 
-Testy: `./mvnw test`: 312 testów, 0 błędów (po M3.2).
+Testy: `./mvnw test`: 314 testów, 0 błędów (po M3.3).
 
 Poprawka po przeglądzie bezpieczeństwa (GatewayData): nazwa argumentu podglądu musi pasować do `^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$`
 (inaczej cały podgląd to 503); w `value` znaki bidi (U+202A-202E, U+2066-2069, U+200E/200F, U+061C), sterujące C0/C1 poza

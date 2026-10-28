@@ -32,13 +32,10 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
+import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectReader;
-import tools.jackson.databind.cfg.CoercionAction;
-import tools.jackson.databind.cfg.CoercionInputShape;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.type.LogicalType;
 
 /**
  * Registration of the TOTP authenticator (C12 over C4, CC-093). Starting a registration and removing one need a
@@ -61,13 +58,7 @@ class AuthenticatorController {
     private final AuditLog audit;
     private final Clock clock;
     private final String returnPath;
-    // No scalar coercion: a code sent as a JSON number is not the string the contract asks for.
-    private final ObjectReader confirmReader = JsonMapper.builder()
-            .withCoercionConfig(LogicalType.Textual, config -> config
-                    .setCoercion(CoercionInputShape.Integer, CoercionAction.Fail)
-                    .setCoercion(CoercionInputShape.Float, CoercionAction.Fail)
-                    .setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail))
-            .build()
+    private final ObjectReader confirmReader = StrictJson.builder().build()
             .readerFor(BrokerModel.AuthenticatorEnrollmentConfirm.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 

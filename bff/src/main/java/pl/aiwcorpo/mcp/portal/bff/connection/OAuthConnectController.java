@@ -34,6 +34,7 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
 import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
+import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectReader;
@@ -67,7 +68,7 @@ class OAuthConnectController {
     private final AuditLog audit;
     private final DevMode devMode;
     private final Clock clock;
-    private final ObjectReader startReader = JsonMapper.builder().build()
+    private final ObjectReader startReader = StrictJson.builder().build()
             .readerFor(StartBody.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
