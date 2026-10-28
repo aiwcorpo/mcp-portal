@@ -507,5 +507,5 @@ export function completeMockOAuth(store: MockStore): string {
   });
   return outcome === 'ok'
     ? `${pending.returnPath}${separator}connected=${pending.system}`
-    : `${pending.returnPath}${separator}connectError=${outcome}`;
+    : `${pending.returnPath}${separator}connectError=${outcome}&system=${pending.system}`;
 }

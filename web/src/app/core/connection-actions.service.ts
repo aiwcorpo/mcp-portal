@@ -11,7 +11,6 @@ import {
 } from '../api/generated';
 import { ConfirmDialog, ConfirmDialogData } from '../shared/confirm-dialog';
 import { systemName } from '../shared/labels';
-import { oauthReturnPath } from '../shared/oauth-return';
 import { ApiFailure, toApiFailure } from './api-error';
 import { isAllowedRedirect } from './auth-urls';
 import { BrowserNavigation } from './browser-navigation';
@@ -54,14 +53,14 @@ export class ConnectionActions {
   private readonly router = inject(Router);
 
   /**
-   * Sends the browser to the provider; returns a failure only when it stays on the page. The return
-   * path carries the system so that the page can name it when the provider reports a failure.
+   * Sends the browser to the provider; returns a failure only when it stays on the page. The BFF adds
+   * `system` to the return path after a failed OAuth connection (CC-111).
    */
   async startOAuth(system: SystemId, returnPage: string): Promise<ApiFailure | null> {
     try {
       const { authorizeUrl } = await firstValueFrom(
         this.connectionsApi.startConnectOAuth(system, {
-          returnPath: oauthReturnPath(returnPage, system),
+          returnPath: returnPage,
         }),
       );
       if (!isAllowedRedirect(authorizeUrl)) {

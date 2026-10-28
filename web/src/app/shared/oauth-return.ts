@@ -21,9 +21,9 @@ const QUERY_KEYS = ['connected', 'connectError', 'system'];
 const SUCCESS_VISIBLE_MS = 10_000;
 
 /**
- * What the BFF appended to the return path after the provider redirect (CC-022, CC-086). The BFF adds
- * only `connected=<system>` or `connectError=<code>`; the portal puts `system=<system>` into the
- * returnPath it sends, so a failure can still name the system.
+ * What the BFF appended to the return path after the provider redirect (CC-022, CC-086, CC-111): `connected=<system>`,
+ * or `connectError=<code>` followed by `system=<system>` (absent when no flow was known). The portal adds nothing to
+ * the returnPath it sends, so there is a single source of `system`.
  */
 export function readOAuthReturn(params: ParamMap): OAuthReturn | null {
   const system = params.get('system');
@@ -41,10 +41,6 @@ export function readOAuthReturn(params: ParamMap): OAuthReturn | null {
     };
   }
   return null;
-}
-
-export function oauthReturnPath(base: string, system: SystemId): string {
-  return `${base}?system=${system}`;
 }
 
 /**

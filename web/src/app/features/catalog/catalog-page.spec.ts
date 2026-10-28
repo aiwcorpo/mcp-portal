@@ -227,7 +227,7 @@ describe('CatalogPage', () => {
     expect(navigation.assign.mock.calls[0][0]).toMatch(
       /^https:\/\/gitlab\.internal\/oauth\/authorize\?/,
     );
-    expect(bodies).toEqual([{ returnPath: '/catalog?system=gitlab' }]);
+    expect(bodies).toEqual([{ returnPath: '/catalog' }]);
   });
 
   it('opens the token form to renew a token', async () => {
@@ -271,7 +271,7 @@ describe('CatalogPage', () => {
       ['cancelled', 'Łączenie z GitLab anulowane.'],
     ])('connectError=%s', async (code, message) => {
       configureTestApp();
-      await openRoute(`/catalog?system=gitlab&connectError=${code}`);
+      await openRoute(`/catalog?connectError=${code}&system=gitlab`);
       await until(() => expect(text()).toContain(message));
       expect(document.querySelector('[role="alert"]')).toBeTruthy();
     });
@@ -303,7 +303,7 @@ describe('CatalogPage', () => {
 
     it('can be dismissed', async () => {
       configureTestApp();
-      await openRoute('/catalog?system=gitlab&connectError=cancelled');
+      await openRoute('/catalog?connectError=cancelled&system=gitlab');
       await until(() => expect(text()).toContain('anulowane'));
       labelled('Zamknij komunikat').click();
       await until(() => expect(text()).not.toContain('Łączenie z GitLab anulowane.'));
