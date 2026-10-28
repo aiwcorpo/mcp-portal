@@ -4,7 +4,7 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 1.1.0.
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 2.2.1.
 
 ## Uruchomienie lokalne (z mcp-platform-dev)
 
@@ -13,7 +13,7 @@ C5 :18444 z mTLS) oraz JDK 25.
 
 ```bash
 export JAVA_HOME=/opt/homebrew/Cellar/openjdk@25/25.0.4.1/libexec/openjdk.jdk/Contents/Home   # wymagana Java 25
-./scripts/run-dev.sh            # BFF na http://localhost:18090
+./scripts/run-dev.sh            # BFF na http://localhost:18720 (port ws-07)
 ```
 
 Skrypt sprawdza wersję Javy (z `JAVA_HOME` albo `PATH`) i kończy się czytelnym komunikatem, gdy nie jest to 25.
@@ -21,6 +21,11 @@ Skrypt włącza profil Spring `dev` i przy każdym starcie czyta z `mcp-platform
 `mcp-portal-bff`, hasło keystore'ów i porty; nic nie jest kopiowane do tego repozytorium. Inny katalog
 środowiska: `MCP_PLATFORM_DEV_DIR=...`. Prawdziwy broker zamiast stuba:
 `PORTAL_BROKER_URL=https://localhost:18100 ./scripts/run-dev.sh`.
+
+Bez brokera i gateway'a z M2: mocki WireMock C4/C5 z jara kontraktów jako procesy hosta
+(`./scripts/run-mocks.sh start`, porty 18721 i 18722, `stop` kończy), a BFF z `PORTAL_MOCKS=1 ./scripts/run-dev.sh`.
+Podmiana na prawdziwe usługi to zmiana dwóch adresów (`PORTAL_BROKER_URL`, `PORTAL_GATEWAY_ADMIN_URL`).
+Logowanie przez Keycloak wymaga w realmie `corp` redirect URI `<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`.
 
 Frontend: `cd ../web && npx ng build`, wynik w `../web/dist/portal` (domyślne `PORTAL_WEB_DIST`). Bez
 builda API działa, a trasy SPA odpowiadają 404.
@@ -41,7 +46,7 @@ open 'http://localhost:18090/api/v1/auth/login?returnPath=/'     # logowanie ali
 
 | Test | Co sprawdza |
 | --- | --- |
-| `PortalApiTest` | każda odpowiedź API walidowana schematem C12 (`portal-bff.v1.bundled.yaml` z jara kontraktów, status spoza kontraktu = błąd); logowanie z PKCE i nonce; ciasteczka `__Host-session` i `XSRF-TOKEN`; CSRF dla PUT/DELETE/POST; step-up (`step_up_required` + `stepUpUrl`, `max_age=0`, powrót); wymiana tokenów na `aud` brokera i gateway admin; audyt C8 walidowany `audit-event.schema.json`; SPA z fallbackiem, CSP z nonce, HSTS; `/api/**` nigdy HTML; na końcu: żadna odpowiedź ani linia logu nie zawiera tokenu IdP ani sekretu |
+| `PortalApiTest` | każda odpowiedź API walidowana schematem C12 (`portal-bff.v1.bundled.yaml` z jara kontraktów, status spoza kontraktu = błąd); logowanie z PKCE i nonce; ciasteczka `__Host-session` i `__Host-XSRF-TOKEN`; CSRF dla PUT/DELETE/POST; step-up (`step_up_required` + `stepUpUrl`, `max_age=0`, powrót); wymiana tokenów na `aud` brokera i gateway admin; audyt C8 walidowany `audit-event.schema.json`; SPA z fallbackiem, CSP z nonce, HSTS; `/api/**` nigdy HTML; na końcu: żadna odpowiedź ani linia logu nie zawiera tokenu IdP ani sekretu |
 | `RunDevConfigurationTest` | start z tą samą konfiguracją co `run-dev.sh` (profil `dev`, zmienne `PORTAL_*` jako zmienne środowiska z relaxed binding) i dane mocka IGA w katalogu |
 | `FrontendBuildTest` | prawdziwy build ws-08 z `../web/dist/portal` (pomijany, gdy nie zbudowany; `-Dportal.test.require-web-dist=true` robi z tego błąd): trasy SPA, nonce w stylach, pliki JS/CSS; powrót po logowaniu na `PORTAL_WEB_LOGIN_RETURN_ORIGIN` |
 | `CatalogAssemblerTest` | reguły statusów i akcji katalogu (CC-021); odtworzenie przykładu `mixed` z C12 z danych C5/C4/C13 |
@@ -57,12 +62,12 @@ Wszystko przez zmienne środowiska (`application.yml`):
 
 | Zmienna | Znaczenie | dev |
 | --- | --- | --- |
-| `PORTAL_PORT` | port HTTP | `18090` (redirect URI w realmie) |
+| `PORTAL_PORT` | port HTTP | `18720` |
 | `PORTAL_OIDC_ISSUER_URI` | issuer OIDC (discovery) | `http://localhost:18080/realms/corp` |
 | `PORTAL_OIDC_CLIENT_ID`, `PORTAL_OIDC_CLIENT_SECRET` | klient poufny | `mcp-portal-bff`, `KC_CLIENT_MCP_PORTAL_BFF_SECRET` |
 | `PORTAL_BROKER_URL`, `PORTAL_BROKER_TLS_NAME` | C4 i nazwa w certyfikacie brokera | `https://localhost:18443`, `MCP_BROKER_TLS_NAME` |
 | `PORTAL_GATEWAY_ADMIN_URL`, `PORTAL_GATEWAY_ADMIN_TLS_NAME` | C5 i nazwa w certyfikacie | `https://localhost:18444`, `MCP_GATEWAY_INTERNAL_TLS_NAME` |
-| `PORTAL_GATEWAY_PUBLIC_URL` | adres gateway'a dla klientów MCP (link `copy_link`) | `http://localhost:18000` |
+| `PORTAL_PUBLIC_BASE_URL` | origin jednej domeny (portal, `/api`, `/s/`, `/v/`): z niego redirect URI OIDC `<url>/api/v1/auth/callback`, linki `copy_link` i `clientConfigs`; nigdy z `Host`; poza `dev` tylko https (dawna nazwa: `PORTAL_GATEWAY_PUBLIC_URL`) | `http://localhost:18720` |
 | `PORTAL_TLS_KEYSTORE`, `PORTAL_TLS_KEYSTORE_PASSWORD` | certyfikat klienta `CN=mcp-portal-bff` (PKCS12) | `certs/mcp-portal-bff/keystore.p12` |
 | `PORTAL_TLS_TRUSTSTORE`, `PORTAL_TLS_TRUSTSTORE_PASSWORD` | CA wewnętrzne | `certs/ca/truststore.p12` |
 | `PORTAL_WEB_DIST` | katalog z `index.html` zbudowanego frontendu | `../web/dist/portal` |
@@ -86,7 +91,7 @@ kontekst bezpieczeństwa i tokeny. Błąd logowania: 302 na `/?loginError=<kod>`
 `session_expired`, `step_up_failed`.
 
 Sesja: ciasteczko `__Host-session` (Secure, HttpOnly, SameSite=Lax, Path=/), bezczynność 30 min, limit
-bezwzględny 8 h, sesje w pamięci procesu. CSRF: ciasteczko `XSRF-TOKEN` (Secure, SameSite=Strict, czytelne
+bezwzględny 8 h, sesje w pamięci procesu. CSRF: ciasteczko `__Host-XSRF-TOKEN` (Secure, SameSite=Strict, czytelne
 dla JS, ustawiane już w odpowiedzi kończącej logowanie) i nagłówek `X-XSRF-TOKEN` dla POST/PUT/DELETE; parametr
 `_csrf` nie jest przyjmowany.
 
@@ -100,6 +105,22 @@ Audyt C8: logger `pl.aiwcorpo.mcp.audit`, jedna linia JSON na zdarzenie na stdou
 `componentId: mcp-portal-bff`, zdarzenie `connection_change` dla zapisu sekretu i odłączenia (także odmowy
 step-up i odrzucenia przez broker).
 
+## M2: połączenia, wirtualne serwery, testy
+
+Callback OIDC to `/api/v1/auth/callback` (jedna domena, CC-089). Połączenie OAuth: `POST /connections/{system}/oauth`
+zapisuje w sesji `flowId`, `state` z `authorizeUrl` i `returnPath`; `GET /api/v1/oauth/callback` szuka przepływu po
+`state` w sesji bieżącego użytkownika (jednorazowo, 15 min, najwyżej 8 naraz), a kody `connectError` to
+`cancelled`, `provider_error`, `identity_mismatch`, `flow_invalid`. Wirtualne serwery: proxy do C5 z kontrolą
+`resourceDefaults` (CC-085) i `clientConfigs` z `PORTAL_PUBLIC_BASE_URL`.
+
+| Test | Co sprawdza |
+| --- | --- |
+| `OAuthConnectTest`, `ConnectRedirectVectorsTest` | start i callback, wszystkie kody, cudzy link, powtórzenie, brak sesji, wektory `connect-redirects/` |
+| `VirtualServersTest` | lista, utworzenie, usunięcie, 409/403/503, kolejność kontroli `resourceDefaults`, `clientConfigs` |
+| `NegativeSecurityTest` | `X-Request-Id` na każdej odpowiedzi i ignorowanie wartości klienta, brak XSRF, cudza sesja i token, sekret i kod OAuth w logach, `returnPath` poza wzorcem |
+| `PublicBaseUrlTest` | redirect URI z konfiguracji mimo `X-Forwarded-Host` |
+| `CatalogAssemblerTest` | wektory `catalog-actions/`, przykłady `mixed` i `states` z C12 |
+
 ## Struktura
 
 ```
@@ -109,6 +130,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   upstream/    klienci C4/C5 (mTLS, przypięta nazwa TLS)
   catalog/     GET /api/v1/catalog (reguły CC-021)
   connection/  GET/PUT/DELETE połączeń
+  virtualserver/ wirtualne serwery i clientConfigs
   me/          GET /api/v1/me
   iga/         port C13 i adapter mock (dane: dev/iga-mock.yaml, tylko profil dev)
   audit/       zdarzenia C8

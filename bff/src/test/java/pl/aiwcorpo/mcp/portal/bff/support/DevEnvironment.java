@@ -53,6 +53,25 @@ public final class DevEnvironment {
         }
     }
 
+    /**
+     * Whether the realm accepts this redirect URI for the BFF client: Keycloak answers an unknown one with 400 and
+     * its error page instead of redirecting to the login form. Needs no secret.
+     */
+    public boolean realmAcceptsRedirectUri(String redirectUri) {
+        try {
+            HttpResponse<Void> response = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build().send(
+                    HttpRequest.newBuilder(URI.create(issuer() + "/protocol/openid-connect/auth?client_id=mcp-portal-bff"
+                            + "&response_type=code&scope=openid&redirect_uri=" + enc(redirectUri))).build(),
+                    HttpResponse.BodyHandlers.discarding());
+            return response.statusCode() == 200 || response.statusCode() == 302;
+        } catch (IOException e) {
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
     public String value(String key) {
         String value = values.get(key);
         if (value == null) {

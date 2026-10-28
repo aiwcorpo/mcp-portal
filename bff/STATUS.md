@@ -8,8 +8,49 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M2.1 | przejście na mcp-contracts 2.2.1; callback OIDC pod `/api/v1/auth/callback`, `__Host-XSRF-TOKEN`, `publicBaseUrl`; katalog wg CC-080..083 (tabela akcji, wektory `catalog-actions/`); `PUT secret` bez step-up (CC-090); `Error.requestId` (CC-087) | zrobione |
 | M2.2 | połączenia OAuth: `POST .../oauth`, `GET /api/v1/oauth/callback` z `ConnectErrorCode`, `cancelled`, brak sesji -> `/?loginError=session_expired` (CC-086), cudzy link | zrobione |
 | M2.3 | wirtualne serwery: lista, utworzenie, usunięcie, `409 slug_taken`, kolejność kontroli `resourceDefaults` (CC-085), `clientConfigs` | zrobione |
-| M2.4 | mocki WireMock C4/C5 jako proces hosta (adresy w konfiguracji), testy negatywne (sekret w logach, returnPath, cudza sesja, brak XSRF), README, raport | w toku |
+| M2.4 | mocki WireMock C4/C5 jako proces hosta (adresy w konfiguracji), testy negatywne (sekret w logach, returnPath, cudza sesja, brak XSRF), README, raport | zrobione |
 | M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | nie zaczęte |
+
+## M2: wynik (2026-10-28)
+
+`./mvnw test`: 131 testów, 0 błędów. `-Pdev-env`: `DevEnvironmentFlowTest` pomija się (realm `corp` nie ma redirect URI
+`/api/v1/auth/callback`, patrz niżej); `UpstreamTlsDevEnvironmentTest` wymaga stubów mTLS na 18443, których w stosie
+`full` nie ma (stan sprzed M2). Ręcznie: `run-mocks.sh start` + `PORTAL_MOCKS=1 ./scripts/run-dev.sh` na 18720,
+`/api/v1/me` 401, `auth/login` przekierowuje do Keycloaka z `redirect_uri=.../api/v1/auth/callback`.
+
+Decyzje M2:
+- Tabela akcji katalogu dokładnie wg CC-083: `request_access` przy `no_access` także bez `requiredEntitlements`, przy
+  `connected` gdy któreś narzędzie odmówione; `view_request` tylko przy `request_pending`; `disconnect` tylko przy
+  `connection` != null. `credential` pomijane, gdy broker nie zna systemu. `requiresConfirmation` wymuszone dla `DESTRUCTIVE`.
+- `Location` przekierowań jest względny (Tomcat budował absolutny z `Host`); callback OAuth ma `Referrer-Policy: no-referrer`
+  i `Cache-Control: no-store`.
+- Błędy Tomcata sprzed servletu (zakodowane `/`, `..`) są JSON (`JsonErrorReportValve`): wcześniej HTML pod `/api/**`.
+- `expiresAt` w `PUT secret`: tylko składnia `Timestamp`, bez oceny daty.
+- Audyt wirtualnych serwerów: `admin_change` z `virtualServer`.
+- CSRF to nadal double-submit (ciasteczko = nagłówek); ochronę przed podrzuceniem ciasteczka daje prefiks `__Host-` (CC-055).
+  Wiązanie tokenu z sesją serwera możliwe, jeśli koordynator chce mocniej.
+- Step-up zostaje tylko w `GET /auth/login?stepUp=true` (potwierdzenia wracają w M3 z pivotem); `StepUpPolicy.isFresh` i
+  `stepUpUrl` nieużywane do tego czasu.
+
+## Propozycje CC
+
+1. C12 `deleteMyVirtualServer` i `disconnect`: dopisać `400 invalid_request` dla zakodowanych ścieżek odrzuconych przez firewall.
+2. C12: dopisać `503 upstream_unavailable` do `oauthCallback`? (nie dotyczy: callback przekierowuje) - zamiast tego opisać w
+   `oauthCallback`, że błąd brokera daje `connectError=provider_error`.
+3. Tabela CC-083: rozstrzygnąć `request_access` przy `no_access` bez `requiredEntitlements` i `view_request` przy `connected`
+   z oczekującym wnioskiem na odmówione narzędzie (dziś niedostępne).
+4. Audyt: wartość `event` dla zmian wirtualnych serwerów (dziś `admin_change`).
+
+## Potrzeby wobec innych strumieni (M2)
+
+- ws-01: w realmie `corp` redirect URI klienta `mcp-portal-bff` `<publicBaseUrl>/api/v1/auth/callback` (dla portu 18720 i
+  dla adresu nginx) oraz `post.logout`; nginx z trasami z README kontraktów; przekazanie `PORTAL_PUBLIC_BASE_URL`.
+- ws-05: `GET/POST/DELETE /admin/v1/virtual-servers` z kodami `slug_taken`, `access_denied`, 404 dla cudzego linku;
+  katalog z `title`, `disabled`, `requiresConfirmation`.
+- ws-06: `authorizeUrl` z parametrem `state` (BFF szuka przepływu po nim); `422 flow_invalid|identity_mismatch`.
+- ws-08: ciasteczko CSRF `__Host-XSRF-TOKEN`; po callbacku `?connected=<system>` lub `?connectError=<kod>` doklejane do
+  `returnPath` (`&` gdy ma query); `/?loginError=session_expired` bez sesji; 400 `resource_defaults_unsupported` nie
+  występuje przy kreatorze bez zawężenia.
 
 ## M1: wynik
 

@@ -37,6 +37,11 @@ public final class TestBrowser {
         return Optional.ofNullable(cookies.get(name));
     }
 
+    /** Plants a cookie the way a browser extension or an attacker on a sibling host would. */
+    public void setCookie(String name, String value) {
+        cookies.put(name, value);
+    }
+
     public void setReferer(String path) {
         this.referer = path == null ? null : origin.resolve(path).toString();
     }

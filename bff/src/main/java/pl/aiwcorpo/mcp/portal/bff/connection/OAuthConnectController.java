@@ -109,6 +109,8 @@ class OAuthConnectController {
                   @RequestParam(required = false) String error, Authentication authentication,
                   HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
+        // code and state are in this URL; nothing the browser loads next may receive it as Referer.
+        response.setHeader("Referrer-Policy", "no-referrer");
         if (authentication == null || !(authentication.getPrincipal() instanceof OidcUser)) {
             redirects.redirectToError(request, response, LoginRedirects.SESSION_EXPIRED);
             return;

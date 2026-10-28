@@ -1,7 +1,6 @@
 package pl.aiwcorpo.mcp.portal.bff;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.net.URI;
 import java.net.http.HttpResponse;
@@ -12,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -39,6 +39,8 @@ import tools.jackson.databind.json.JsonMapper;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("dev")
 @Import(DevEnvironmentFlowTest.TestClock.class)
+@EnabledIf(value = "realmIsReady", disabledReason = "mcp-platform-dev is not running, or realm corp does not list "
+        + "http://localhost:18090/api/v1/auth/callback for mcp-portal-bff (ws-01, CC-089)")
 class DevEnvironmentFlowTest {
 
     @TestConfiguration
@@ -53,6 +55,12 @@ class DevEnvironmentFlowTest {
     @Autowired
     MutableClock clock;
 
+    /** Evaluated before the application starts; the C12 callback under /api must be registered in the realm (CC-089). */
+    static boolean realmIsReady() {
+        return DevEnvironment.locate().keycloakReachable()
+                && DevEnvironment.locate().realmAcceptsRedirectUri("http://localhost:18090/api/v1/auth/callback");
+    }
+
     static final DevEnvironment DEV = DevEnvironment.locate();
     static final ContractSchemas C12 = ContractSchemas.openApi(ContractSchemas.PORTAL_BFF);
     static final JsonMapper JSON = JsonMapper.builder().build();
@@ -61,7 +69,7 @@ class DevEnvironmentFlowTest {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        assumeTrue(DEV.keycloakReachable(), "mcp-platform-dev is not running (make up)");
+
         registry.add("server.port", () -> "18090");
         registry.add("spring.security.oauth2.client.provider.keycloak.issuer-uri", DEV::issuer);
         registry.add("spring.security.oauth2.client.registration.keycloak.client-secret",
@@ -70,7 +78,7 @@ class DevEnvironmentFlowTest {
         registry.add("portal.broker.tls-name", () -> DEV.value("MCP_BROKER_TLS_NAME"));
         registry.add("portal.gateway-admin.base-url", () -> "https://localhost:" + DEV.value("GATEWAY_ADMIN_MOCK_PORT"));
         registry.add("portal.gateway-admin.tls-name", () -> DEV.value("MCP_GATEWAY_INTERNAL_TLS_NAME"));
-        registry.add("portal.public-base-url", () -> "http://localhost:" + DEV.value("GATEWAY_PORT"));
+        registry.add("portal.public-base-url", () -> PORTAL);
         registry.add("portal.tls.keystore", () -> DEV.certs().resolve("mcp-portal-bff/keystore.p12").toString());
         registry.add("portal.tls.keystore-password", () -> DEV.value("TLS_STORE_PASSWORD"));
         registry.add("portal.tls.truststore", () -> DEV.certs().resolve("ca/truststore.p12").toString());
@@ -93,7 +101,7 @@ class DevEnvironmentFlowTest {
         URI authorize = URI.create(start.headers().firstValue("Location").orElseThrow());
         assertThat(authorize.toString()).startsWith(DEV.issuer());
         URI callback = DEV.keycloakLogin(keycloak, authorize, user);
-        assertThat(callback.toString()).startsWith(PORTAL + "/login/oauth2/code/keycloak");
+        assertThat(callback.toString()).startsWith(PORTAL + "/api/v1/auth/callback");
         HttpResponse<String> back = portal.get(callback.toString());
         assertThat(back.statusCode()).as("callback answered %s", back.body()).isEqualTo(302);
     }
@@ -116,7 +124,7 @@ class DevEnvironmentFlowTest {
         C12.assertResponse("GET", "/api/v1/catalog", catalog);
         assertThat(catalog.statusCode()).isEqualTo(200);
         assertThat(JSON.readTree(catalog.body()).get("servers").get(0).get("url").asString())
-                .isEqualTo("http://localhost:" + DEV.value("GATEWAY_PORT") + "/s/mcp-jira/mcp");
+                .isEqualTo(PORTAL + "/s/mcp-jira/mcp");
 
         HttpResponse<String> connections = portal.get("/api/v1/connections");
         C12.assertResponse("GET", "/api/v1/connections", connections);
@@ -126,25 +134,20 @@ class DevEnvironmentFlowTest {
         C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", stored);
         assertThat(stored.statusCode()).isEqualTo(200);
 
+        // A token write needs no fresh login (CC-090).
         clock.advance(Duration.ofMinutes(6));
-        portal.setReferer("/connections/jira");
-        HttpResponse<String> stale = portal.put("/api/v1/connections/jira/secret", "{\"secret\":\"alice-pat\"}", true);
-        C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", stale);
-        assertThat(stale.statusCode()).isEqualTo(401);
-        String stepUpUrl = JSON.readTree(stale.body()).get("stepUpUrl").asString();
+        HttpResponse<String> later = portal.put("/api/v1/connections/jira/secret", "{\"secret\":\"alice-pat\"}", true);
+        C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", later);
+        assertThat(later.statusCode()).isEqualTo(200);
+        clock.reset();
 
         // max_age=0 must make Keycloak ask for credentials although the SSO session is alive.
-        HttpResponse<String> stepUp = portal.get(stepUpUrl);
+        HttpResponse<String> stepUp = portal.get("/api/v1/auth/login?stepUp=true&returnPath=/connections/jira");
         URI reauthorize = URI.create(stepUp.headers().firstValue("Location").orElseThrow());
         assertThat(reauthorize.getRawQuery()).contains("max_age=0");
-        URI callback = DEV.keycloakLogin(keycloak, reauthorize, "alice");
-        HttpResponse<String> back = portal.get(callback.toString());
+        URI callbackAgain = DEV.keycloakLogin(keycloak, reauthorize, "alice");
+        HttpResponse<String> back = portal.get(callbackAgain.toString());
         assertThat(back.headers().firstValue("Location").orElseThrow()).endsWith("/connections/jira");
-
-        clock.reset();
-        HttpResponse<String> fresh = portal.put("/api/v1/connections/jira/secret", "{\"secret\":\"alice-pat\"}", true);
-        C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", fresh);
-        assertThat(fresh.statusCode()).isEqualTo(200);
 
         HttpResponse<String> disconnect = portal.delete("/api/v1/connections/jira", true);
         C12.assertResponse("DELETE", "/api/v1/connections/{system}", disconnect);

@@ -26,14 +26,23 @@ value() {
   printf '%s' "$found"
 }
 
-export PORTAL_PORT="${PORTAL_PORT:-$(value PORTAL_PORT)}"
+# ws-07 owns host ports 18720-18729. The OIDC client of the realm lists the redirect URI of PORTAL_PORT from .env
+# (18090) and, since CC-089, needs <PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback registered for this port too.
+export PORTAL_PORT="${PORTAL_PORT:-18720}"
+# Origin of the one public domain (portal, /api, /s/, /v/): the reverse proxy in front, or the BFF itself.
+export PORTAL_PUBLIC_BASE_URL="${PORTAL_PUBLIC_BASE_URL:-http://localhost:$PORTAL_PORT}"
 export PORTAL_OIDC_ISSUER_URI="http://localhost:$(value KEYCLOAK_PORT)/realms/corp"
 export PORTAL_OIDC_CLIENT_SECRET="$(value KC_CLIENT_MCP_PORTAL_BFF_SECRET)"
 export PORTAL_BROKER_URL="${PORTAL_BROKER_URL:-https://localhost:$(value BROKER_MOCK_PORT)}"
 export PORTAL_BROKER_TLS_NAME="$(value MCP_BROKER_TLS_NAME)"
 export PORTAL_GATEWAY_ADMIN_URL="${PORTAL_GATEWAY_ADMIN_URL:-https://localhost:$(value GATEWAY_ADMIN_MOCK_PORT)}"
 export PORTAL_GATEWAY_ADMIN_TLS_NAME="$(value MCP_GATEWAY_INTERNAL_TLS_NAME)"
-export PORTAL_GATEWAY_PUBLIC_URL="${PORTAL_GATEWAY_PUBLIC_URL:-http://localhost:$(value GATEWAY_PORT)}"
+if [[ "${PORTAL_MOCKS:-}" == "1" ]]; then
+  # C4 and C5 from ./scripts/run-mocks.sh: plain http, accepted only together with the dev profile.
+  export PORTAL_BROKER_URL="http://127.0.0.1:${MOCK_BROKER_PORT:-18721}"
+  export PORTAL_GATEWAY_ADMIN_URL="http://127.0.0.1:${MOCK_GATEWAY_ADMIN_PORT:-18722}"
+  export PORTAL_TLS_INSECURE_PLAIN_HTTP_FOR_TESTS=true
+fi
 export PORTAL_TLS_KEYSTORE="$dev_dir/certs/mcp-portal-bff/keystore.p12"
 export PORTAL_TLS_KEYSTORE_PASSWORD="$(value TLS_STORE_PASSWORD)"
 export PORTAL_TLS_TRUSTSTORE="$dev_dir/certs/ca/truststore.p12"

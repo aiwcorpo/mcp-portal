@@ -170,6 +170,7 @@ class OAuthConnectTest extends PortalHarness {
         assertThat(location(back)).isEqualTo("/catalog?connected=gitlab");
         assertThat(ConnectRedirectRules.isValid(location(back))).isTrue();
         assertThat(back.headers().firstValue("Cache-Control").orElse("")).contains("no-store");
+        assertThat(back.headers().allValues("Referrer-Policy")).containsExactly("no-referrer");
         LoggedRequest sent = completions().getLast();
         C4.assertComponent("OAuthCompleteRequest", JSON.readTree(sent.getBodyAsString()));
         JsonNode body = JSON.readTree(sent.getBodyAsString());
