@@ -12,17 +12,17 @@ import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
  * Where the browser goes at the end of an OIDC login: the portal origin, or in dev a configured origin of a
  * separately served frontend (ng serve). The origin comes from configuration only, never from the request.
  */
-final class LoginRedirects {
+public final class LoginRedirects {
 
     /** Closed list of {@code loginError} codes (accepted 2026-10-27, mcp-contracts 2.0.0). */
-    static final String CANCELLED = "cancelled";
-    static final String IDP_ERROR = "idp_error";
-    static final String SESSION_EXPIRED = "session_expired";
-    static final String STEP_UP_FAILED = "step_up_failed";
+    public static final String CANCELLED = "cancelled";
+    public static final String IDP_ERROR = "idp_error";
+    public static final String SESSION_EXPIRED = "session_expired";
+    public static final String STEP_UP_FAILED = "step_up_failed";
 
     private final String origin;
 
-    LoginRedirects(URI configuredOrigin, DevMode devMode) {
+    public LoginRedirects(URI configuredOrigin, DevMode devMode) {
         this.origin = origin(configuredOrigin);
         devMode.require(this.origin != null, "portal.web.login-return-origin");
     }
@@ -41,11 +41,11 @@ final class LoginRedirects {
     }
 
     /** @param path a validated return path or a fixed portal path */
-    void redirect(HttpServletRequest request, HttpServletResponse response, String path) throws IOException {
+    public void redirect(HttpServletRequest request, HttpServletResponse response, String path) throws IOException {
         response.sendRedirect((origin != null ? origin : request.getContextPath()) + path);
     }
 
-    void redirectToError(HttpServletRequest request, HttpServletResponse response, String code) throws IOException {
+    public void redirectToError(HttpServletRequest request, HttpServletResponse response, String code) throws IOException {
         redirect(request, response, "/?loginError=" + code);
     }
 }

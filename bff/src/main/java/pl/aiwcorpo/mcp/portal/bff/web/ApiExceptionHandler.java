@@ -57,6 +57,7 @@ public class ApiExceptionHandler {
     }
 
     private static ResponseEntity<Object> json(HttpStatus status, Object body) {
-        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(body);
+        Object shown = body instanceof ApiError error ? error.withRequestId(RequestIds.current()) : body;
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(shown);
     }
 }

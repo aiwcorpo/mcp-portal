@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
+import pl.aiwcorpo.mcp.portal.bff.config.PublicUrls;
 import pl.aiwcorpo.mcp.portal.bff.iga.AccessGovernance;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
@@ -32,12 +32,12 @@ class CatalogController {
     private final CatalogAssembler assembler;
 
     CatalogController(UserTokens tokens, GatewayAdminClient gateway, BrokerClient broker, AccessGovernance iga,
-                      PortalProperties properties) {
+                      PublicUrls publicUrls) {
         this.tokens = tokens;
         this.gateway = gateway;
         this.broker = broker;
         this.iga = iga;
-        this.assembler = new CatalogAssembler(properties.gateway().publicUrl());
+        this.assembler = new CatalogAssembler(publicUrls);
     }
 
     @GetMapping("/api/v1/catalog")

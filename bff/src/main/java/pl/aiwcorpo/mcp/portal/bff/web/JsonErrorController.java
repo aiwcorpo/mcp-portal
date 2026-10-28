@@ -24,6 +24,6 @@ public class JsonErrorController implements ErrorController {
         HttpStatus resolved = HttpStatus.resolve(status);
         return ResponseEntity.status(resolved == null ? HttpStatus.INTERNAL_SERVER_ERROR : resolved)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiError.of(ErrorCodes.forStatus(status)));
+                .body(ApiError.of(ErrorCodes.forStatus(status)).withRequestId(RequestIds.of(request)));
     }
 }

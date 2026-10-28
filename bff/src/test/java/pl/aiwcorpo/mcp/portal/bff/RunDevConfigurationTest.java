@@ -78,7 +78,9 @@ class RunDevConfigurationTest {
         registry.add("spring.security.oauth2.client.registration.keycloak.client-secret", () -> FakeIdp.CLIENT_SECRET);
         registry.add("portal.broker.base-url", BROKER::baseUrl);
         registry.add("portal.gateway-admin.base-url", GATEWAY::baseUrl);
-        registry.add("portal.gateway.public-url", () -> "http://localhost:18000");
+        registry.add("portal.public-base-url", () -> "http://localhost:18000");
+        registry.add("spring.security.oauth2.client.registration.keycloak.redirect-uri",
+                () -> "{baseUrl}/api/v1/auth/callback");
         registry.add("portal.tls.insecure-plain-http-for-tests", () -> "true");
     }
 
@@ -114,15 +116,15 @@ class RunDevConfigurationTest {
     @Test
     void startsWithTheScriptConfigurationAndUsesTheIgaMockData() {
         TestBrowser browser = new TestBrowser(URI.create("http://localhost:" + port), new ArrayList<>());
-        assertThat(browser.get("/api/v1/me").body()).isEqualTo("{\"error\":\"unauthenticated\"}");
+        assertThat(browser.get("/api/v1/me").body()).contains("\"error\":\"unauthenticated\"");
 
         HttpResponse<String> start = browser.get("/api/v1/auth/login");
         URI callback = IDP.approve(URI.create(start.headers().firstValue("Location").orElseThrow()),
-                new FakeIdp.User("sub-bob", "bob", "Bob Reader", List.of("mcp-jira-read")), Instant.now(), "1");
+                new FakeIdp.User("sub-mallory", "mallory", "Mallory Nogroups", List.of()), Instant.now(), "1");
         browser.get(callback.toString());
-        JsonNode jira = JsonMapper.builder().build().readTree(browser.get("/api/v1/catalog").body()).get("servers").get(0);
+        JsonNode gitlab = JsonMapper.builder().build().readTree(browser.get("/api/v1/catalog").body()).get("servers").get(1);
 
-        // bob's pending request for mcp-jira-write comes from dev/iga-mock.yaml.
-        assertThat(jira.get("actions").valueStream().map(JsonNode::asString)).contains("view_request");
+        // mallory's pending request for mcp-gitlab-read comes from dev/iga-mock.yaml.
+        assertThat(gitlab.get("status").asString()).isEqualTo("request_pending");
     }
 }

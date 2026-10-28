@@ -45,7 +45,9 @@ class FrontendBuildTest {
         registry.add("portal.broker.base-url", () -> "http://127.0.0.1:9");
         registry.add("portal.gateway-admin.base-url", () -> "http://127.0.0.1:9");
         registry.add("portal.tls.insecure-plain-http-for-tests", () -> "true");
-        registry.add("portal.gateway.public-url", () -> "https://mcp-gateway.internal");
+        registry.add("portal.public-base-url", () -> "https://mcp-gateway.internal");
+        registry.add("spring.security.oauth2.client.registration.keycloak.redirect-uri",
+                () -> "{baseUrl}/api/v1/auth/callback");
         registry.add("portal.web.dist-path", DIST::toString);
         registry.add("portal.web.login-return-origin", () -> "http://localhost:4200");
     }

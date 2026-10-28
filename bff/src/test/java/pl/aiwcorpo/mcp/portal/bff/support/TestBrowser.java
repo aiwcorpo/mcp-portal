@@ -101,7 +101,7 @@ public final class TestBrowser {
         if (!withCsrf) {
             return Map.of();
         }
-        return Map.of("X-XSRF-TOKEN", cookies.getOrDefault("XSRF-TOKEN", ""));
+        return Map.of("X-XSRF-TOKEN", cookies.getOrDefault("__Host-XSRF-TOKEN", ""));
     }
 
     private HttpRequest.Builder request(String pathOrUrl) {

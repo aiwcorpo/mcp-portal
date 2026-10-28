@@ -20,4 +20,9 @@ class CoreConfig {
     DevMode devMode(Environment environment) {
         return DevMode.of(environment);
     }
+
+    @Bean
+    PublicUrls publicUrls(PortalProperties properties, DevMode devMode) {
+        return new PublicUrls(properties.publicBaseUrl(), devMode);
+    }
 }

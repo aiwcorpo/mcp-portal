@@ -19,8 +19,9 @@ spring:
             client-id: ${PORTAL_OIDC_CLIENT_ID:mcp-portal-bff}
             client-secret: ${PORTAL_OIDC_CLIENT_SECRET:}
             authorization-grant-type: authorization_code
-            # Explicit, because GET /api/v1/auth/login resolves the request outside the login filter.
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            # Under /api so that the reverse proxy routes the callback to the BFF (CC-089); built from the configured
+            # public address, not from the Host header. Register exactly this URI at the IdP.
+            redirect-uri: "${portal.public-base-url}/api/v1/auth/callback"
             scope: openid,profile,email
         provider:
           keycloak:
@@ -69,8 +70,8 @@ portal:
   gateway-admin:
     base-url: ${PORTAL_GATEWAY_ADMIN_URL:}
     tls-name: ${PORTAL_GATEWAY_ADMIN_TLS_NAME:}
-  gateway:
-    public-url: ${PORTAL_GATEWAY_PUBLIC_URL:}
+  # Origin of the one public domain (portal, /api, /s/, /v/); PORTAL_GATEWAY_PUBLIC_URL is the pre-M2 name.
+  public-base-url: ${PORTAL_PUBLIC_BASE_URL:${PORTAL_GATEWAY_PUBLIC_URL:}}
   tls:
     keystore: ${PORTAL_TLS_KEYSTORE:}
     keystore-password: ${PORTAL_TLS_KEYSTORE_PASSWORD:}

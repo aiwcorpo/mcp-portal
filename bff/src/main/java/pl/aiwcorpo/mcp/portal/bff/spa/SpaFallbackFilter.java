@@ -18,12 +18,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Serves index.html for every browser route of the SPA (deep links, page refresh) and lets existing build files
- * through to the static resource handler. API, OAuth and actuator paths are never touched, so /api/** cannot
- * answer with HTML.
+ * through to the static resource handler. API, gateway (/s, /v, /.well-known: routed elsewhere by the proxy),
+ * OAuth and actuator paths are never touched, so /api/** cannot answer with HTML.
  */
 class SpaFallbackFilter extends OncePerRequestFilter {
 
-    private static final List<String> NOT_SPA = List.of("/api", "/oauth2", "/login/oauth2", "/actuator", "/error");
+    private static final List<String> NOT_SPA = List.of("/api", "/s", "/v", "/.well-known", "/oauth2", "/actuator", "/error");
     private static final String INDEX = "index.html";
 
     private final Path distRoot;

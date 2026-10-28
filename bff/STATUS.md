@@ -4,8 +4,12 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 | Kamień | Zakres | Stan |
 | --- | --- | --- |
-| M1 | logowanie OIDC (`/api/v1/auth/login`, `logout`, callback), sesja `__Host-session`, CSRF `XSRF-TOKEN`/`X-XSRF-TOKEN`, `GET /api/v1/me`, token exchange na `aud` brokera i gateway admin, `GET /api/v1/catalog` (C5 + C4 + IGA mock, CC-021), `GET /api/v1/connections`, `PUT .../secret` ze step-up, `DELETE` połączenia, serwowanie SPA z fallbackiem, CSP bez `unsafe-inline`, HSTS, audyt C8; testy z DoD | zrobione |
-| M2+ | OAuth connect (`POST .../oauth`, `GET /api/v1/oauth/callback`), wnioski (`/api/v1/access-requests`), wirtualne serwery z `clientConfigs`, aktywność, potwierdzenia (`/api/v1/confirmations/{id}` ze step-up), admin (rejestr, pending, approve) | nie zaczęte |
+| M1 | logowanie OIDC, sesja `__Host-session`, CSRF, `GET /api/v1/me`, token exchange, `GET /api/v1/catalog`, `GET /api/v1/connections`, `PUT .../secret` ze step-up, `DELETE` połączenia, serwowanie SPA, CSP, HSTS, audyt C8 | zrobione |
+| M2.1 | przejście na mcp-contracts 2.2.1; callback OIDC pod `/api/v1/auth/callback`, `__Host-XSRF-TOKEN`, `publicBaseUrl`; katalog wg CC-080..083 (tabela akcji, wektory `catalog-actions/`); `PUT secret` bez step-up (CC-090); `Error.requestId` (CC-087) | zrobione |
+| M2.2 | połączenia OAuth: `POST .../oauth`, `GET /api/v1/oauth/callback` z `ConnectErrorCode`, `cancelled`, brak sesji -> `/?loginError=session_expired` (CC-086), cudzy link | w toku |
+| M2.3 | wirtualne serwery: lista, utworzenie, usunięcie, `409 slug_taken`, kolejność kontroli `resourceDefaults` (CC-085), `clientConfigs` | w toku |
+| M2.4 | mocki WireMock C4/C5 jako proces hosta (adresy w konfiguracji), testy negatywne (sekret w logach, returnPath, cudza sesja, brak XSRF), README, raport | w toku |
+| M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | nie zaczęte |
 
 ## M1: wynik
 

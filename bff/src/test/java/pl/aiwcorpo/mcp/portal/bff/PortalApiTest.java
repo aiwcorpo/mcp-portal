@@ -5,198 +5,27 @@ import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.networknt.schema.Schema;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import pl.aiwcorpo.mcp.portal.bff.support.ContractSchemas;
 import pl.aiwcorpo.mcp.portal.bff.support.FakeIdp;
-import pl.aiwcorpo.mcp.portal.bff.support.MutableClock;
 import pl.aiwcorpo.mcp.portal.bff.support.TestBrowser;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
-/**
- * The BFF over HTTP with a fake OIDC provider and the C4/C5 WireMock stubs of mcp-contracts 1.1.0. Every API
- * answer is checked against C12; at the end no recorded response or log line may contain a token or a secret.
- */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("dev")
-@Import(PortalApiTest.TestClock.class)
-class PortalApiTest {
-
-    static final FakeIdp IDP = new FakeIdp();
-    static final WireMockServer BROKER = new WireMockServer(options().dynamicPort()
-            .usingFilesUnderClasspath("mcp-contracts/mocks/wiremock/credential-broker"));
-    static final WireMockServer GATEWAY = new WireMockServer(options().dynamicPort()
-            .usingFilesUnderClasspath("mcp-contracts/mocks/wiremock/gateway-admin"));
-
-    static final List<HttpResponse<String>> RESPONSES = new CopyOnWriteArrayList<>();
-    static final List<String> SECRETS = new CopyOnWriteArrayList<>();
-    static final ListAppender<ILoggingEvent> LOGS = new ListAppender<>();
-
-    static final ContractSchemas C12 = ContractSchemas.openApi(ContractSchemas.PORTAL_BFF);
-    static final ContractSchemas C4 = ContractSchemas.openApi(ContractSchemas.CREDENTIAL_BROKER);
-    static final Schema AUDIT = ContractSchemas.jsonSchema("mcp-contracts/schemas/audit-event.schema.json");
-    static final JsonMapper JSON = JsonMapper.builder().build();
-
-    static final FakeIdp.User ALICE = new FakeIdp.User(UUID.randomUUID().toString(), "alice", "Alice Tester",
-            List.of("mcp-jira-read", "mcp-jira-write", "mcp-jira-proj-ABC", "offline_access", "/legacy-path"));
-    static final FakeIdp.User BOB = new FakeIdp.User(UUID.randomUUID().toString(), "bob", "Bob Reader",
-            List.of("mcp-jira-read"));
-    static final FakeIdp.User CAROL = new FakeIdp.User(UUID.randomUUID().toString(), "carol", "Carol Admin",
-            List.of("mcp-platform-admin"));
-
-    static {
-        BROKER.start();
-        GATEWAY.start();
-    }
-
-    @TestConfiguration
-    static class TestClock {
-        @Bean
-        @Primary
-        MutableClock mutableClock() {
-            return new MutableClock();
-        }
-    }
-
-    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.security.oauth2.client.provider.keycloak.issuer-uri", IDP::issuer);
-        registry.add("spring.security.oauth2.client.registration.keycloak.client-id", () -> FakeIdp.CLIENT_ID);
-        registry.add("spring.security.oauth2.client.registration.keycloak.client-secret", () -> FakeIdp.CLIENT_SECRET);
-        registry.add("portal.broker.base-url", BROKER::baseUrl);
-        registry.add("portal.gateway-admin.base-url", GATEWAY::baseUrl);
-        registry.add("portal.gateway.public-url", () -> "https://mcp-gateway.internal");
-        registry.add("portal.web.dist-path", () -> "src/test/resources/spa-fixture");
-        registry.add("portal.tls.insecure-plain-http-for-tests", () -> "true");
-    }
-
-    @LocalServerPort
-    int port;
-
-    @Autowired
-    MutableClock clock;
-
-    @BeforeEach
-    void setUp() {
-        clock.reset();
-        Logger root = ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger(Logger.ROOT_LOGGER_NAME);
-        Logger audit = ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("pl.aiwcorpo.mcp.audit");
-        if (!LOGS.isStarted()) {
-            LOGS.start();
-        }
-        if (root.getAppender(LOGS.getName()) == null) {
-            LOGS.setName("test-capture");
-            root.addAppender(LOGS);
-            audit.addAppender(LOGS);
-        }
-    }
-
-    @AfterAll
-    static void nothingLeaked() {
-        List<String> forbidden = new ArrayList<>(IDP.issuedTokens());
-        forbidden.addAll(SECRETS);
-        assertThat(forbidden).isNotEmpty();
-        assertThat(RESPONSES).isNotEmpty();
-        for (HttpResponse<String> response : RESPONSES) {
-            String everything = response.headers().map() + "\n" + response.body();
-            for (String value : forbidden) {
-                assertThat(everything).as("response of %s leaks a token or secret", response.uri()).doesNotContain(value);
-            }
-        }
-        for (ILoggingEvent event : LOGS.list) {
-            for (String value : forbidden) {
-                assertThat(event.getFormattedMessage()).as("log line leaks a token or secret").doesNotContain(value);
-            }
-        }
-        assertOutboundRequestsFollowContracts();
-        IDP.close();
-        BROKER.stop();
-        GATEWAY.stop();
-    }
-
-    /** Every request the BFF sent to the C4/C5 stubs is an operation of the contract with a valid body and a bearer token. */
-    private static void assertOutboundRequestsFollowContracts() {
-        ContractSchemas c5 = ContractSchemas.openApi(ContractSchemas.GATEWAY_ADMIN);
-        List<LoggedRequest> brokerRequests = BROKER.findAll(anyRequestedFor(anyUrl()));
-        List<LoggedRequest> gatewayRequests = GATEWAY.findAll(anyRequestedFor(anyUrl()));
-        assertThat(brokerRequests).isNotEmpty();
-        assertThat(gatewayRequests).isNotEmpty();
-        for (LoggedRequest request : brokerRequests) {
-            C4.assertRequest(request.getMethod().getName(), request.getUrl(), request.getBodyAsString());
-            assertThat(request.getHeader("Authorization")).startsWith("Bearer xt-mcp-credential-broker-");
-            assertThat(request.getHeader("X-Request-Id")).matches("^[0-9a-f]{8}-[0-9a-f]{4}-7.*");
-        }
-        for (LoggedRequest request : gatewayRequests) {
-            c5.assertRequest(request.getMethod().getName(), request.getUrl(), request.getBodyAsString());
-            assertThat(request.getHeader("Authorization")).startsWith("Bearer xt-mcp-gateway-admin-");
-        }
-    }
-
-    private TestBrowser browser() {
-        return new TestBrowser(URI.create("http://localhost:" + port), RESPONSES);
-    }
-
-    private TestBrowser login(FakeIdp.User user, Instant authTime) {
-        TestBrowser browser = browser();
-        HttpResponse<String> start = browser.get("/api/v1/auth/login?returnPath=/catalog");
-        assertThat(start.statusCode()).isEqualTo(302);
-        URI callback = IDP.approve(URI.create(start.headers().firstValue("Location").orElseThrow()), user, authTime, "1");
-        HttpResponse<String> back = browser.get(callback.toString());
-        assertThat(back.statusCode()).as("callback %s answered %s", callback.getPath(), back.body()).isEqualTo(302);
-        assertThat(back.headers().firstValue("Location").orElseThrow()).endsWith("/catalog");
-        return browser;
-    }
-
-    private static List<JsonNode> auditEvents() {
-        List<JsonNode> events = new ArrayList<>();
-        for (ILoggingEvent event : LOGS.list) {
-            if ("pl.aiwcorpo.mcp.audit".equals(event.getLoggerName())) {
-                events.add(JSON.readTree(event.getFormattedMessage()));
-            }
-        }
-        return events;
-    }
-
-    private static JsonNode lastAuditEvent() {
-        List<JsonNode> events = auditEvents();
-        assertThat(events).isNotEmpty();
-        return events.getLast();
-    }
+/** Operations of M1 (login, session, CSRF, connections) and the SPA, checked against C12. */
+class PortalApiTest extends PortalHarness {
 
     @Test
     void loginRedirectsStraightToTheIdpWithPkceAndNonce() {
@@ -239,11 +68,11 @@ class PortalApiTest {
                 .doesNotContain("domain=");
         assertThat(browser.setCookieHeaders(back, "JSESSIONID")).isEmpty();
 
-        String xsrf = browser.setCookieHeaders(back, "XSRF-TOKEN").stream()
+        String xsrf = browser.setCookieHeaders(back, "__Host-XSRF-TOKEN").stream()
                 .filter(header -> !header.toLowerCase().startsWith("xsrf-token=;"))
                 .findFirst().orElseThrow().toLowerCase();
         assertThat(xsrf).contains("; secure").contains("samesite=strict").contains("path=/").doesNotContain("httponly");
-        assertThat(browser.cookie("XSRF-TOKEN")).isPresent();
+        assertThat(browser.cookie("__Host-XSRF-TOKEN")).isPresent();
         assertThat(browser.get("/api/v1/me").statusCode()).isEqualTo(200);
     }
 
@@ -252,7 +81,9 @@ class PortalApiTest {
         HttpResponse<String> me = browser().get("/api/v1/me", Map.of("Accept", "text/html"));
         C12.assertResponse("GET", "/api/v1/me", me);
         assertThat(me.statusCode()).isEqualTo(401);
-        assertThat(me.body()).isEqualTo("{\"error\":\"unauthenticated\"}");
+        assertThat(JSON.readTree(me.body()).get("error").asString()).isEqualTo("unauthenticated");
+        assertThat(JSON.readTree(me.body()).get("requestId").asString())
+                .isEqualTo(me.headers().firstValue("X-Request-Id").orElseThrow());
 
         HttpResponse<String> catalog = browser().get("/api/v1/catalog");
         C12.assertResponse("GET", "/api/v1/catalog", catalog);
@@ -351,7 +182,8 @@ class PortalApiTest {
         JsonNode gitlab = servers.get(1);
         assertThat(gitlab.get("status").asString()).isEqualTo("no_access");
         assertThat(gitlab.get("actions").valueStream().map(JsonNode::asString))
-                .containsExactly("request_access", "disconnect");
+                .containsExactly("request_access");
+        assertThat(gitlab.get("connection").get("type").asString()).isEqualTo("user-oauth");
 
         assertThat(GATEWAY.findAll(anyRequestedFor(urlPathEqualTo("/admin/v1/catalog"))).getLast().getHeader("Authorization"))
                 .startsWith("Bearer xt-mcp-gateway-admin-");
@@ -367,13 +199,21 @@ class PortalApiTest {
     }
 
     @Test
-    void catalogShowsPendingRequestFromIga() {
+    void catalogShowsPendingRequestOnlyWhenNothingIsGranted() {
+        // The C5 stub grants jira__get_issue, so a pending request for another tool does not change the table row.
         HttpResponse<String> response = login(BOB, Instant.now()).get("/api/v1/catalog");
 
         C12.assertResponse("GET", "/api/v1/catalog", response);
         JsonNode jira = JSON.readTree(response.body()).get("servers").get(0);
+        assertThat(jira.get("status").asString()).isEqualTo("connected");
         assertThat(jira.get("actions").valueStream().map(JsonNode::asString))
-                .containsExactly("copy_link", "view_request", "disconnect");
+                .containsExactly("copy_link", "request_access", "disconnect");
+
+        HttpResponse<String> mallory = login(MALLORY, Instant.now()).get("/api/v1/catalog");
+        C12.assertResponse("GET", "/api/v1/catalog", mallory);
+        JsonNode gitlab = JSON.readTree(mallory.body()).get("servers").get(1);
+        assertThat(gitlab.get("status").asString()).isEqualTo("request_pending");
+        assertThat(gitlab.get("actions").valueStream().map(JsonNode::asString)).containsExactly("view_request");
     }
 
     @Test
@@ -409,7 +249,9 @@ class PortalApiTest {
         try {
             HttpResponse<String> response = login(ALICE, Instant.now()).get("/api/v1/catalog");
             assertThat(response.statusCode()).isEqualTo(503);
-            assertThat(response.body()).isEqualTo("{\"error\":\"upstream_unavailable\"}");
+            assertThat(response.body()).doesNotContain("stack trace").doesNotContain("internals");
+            C12.assertResponse("GET", "/api/v1/catalog", response);
+            assertThat(JSON.readTree(response.body()).get("error").asString()).isEqualTo("upstream_unavailable");
         } finally {
             GATEWAY.resetToDefaultMappings();
         }
@@ -445,40 +287,34 @@ class PortalApiTest {
     }
 
     @Test
-    void secretWithoutFreshMfaNeedsStepUpThenSucceeds() {
+    void secretNeedsNoFreshMfa() {
         String secret = "test-only-secret-" + UUID.randomUUID();
         SECRETS.add(secret);
-        TestBrowser browser = login(ALICE, Instant.now().minus(Duration.ofMinutes(10)));
+        TestBrowser browser = login(ALICE, Instant.now().minus(Duration.ofHours(3)));
         browser.get("/api/v1/me");
-        browser.setReferer("/connections/jira?step=token");
-        int brokerCallsBefore = BROKER.findAll(anyRequestedFor(urlPathEqualTo("/v1/connections/jira/secret"))).size();
 
-        HttpResponse<String> denied = browser.put("/api/v1/connections/jira/secret",
-                "{\"secret\":\"" + secret + "\"}", true);
-
-        C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", denied);
-        assertThat(denied.statusCode()).isEqualTo(401);
-        JsonNode body = JSON.readTree(denied.body());
-        assertThat(body.get("error").asString()).isEqualTo("step_up_required");
-        String stepUpUrl = body.get("stepUpUrl").asString();
-        assertThat(stepUpUrl).isEqualTo("/api/v1/auth/login?stepUp=true&returnPath=/connections/jira?step%3Dtoken");
-        assertThat(BROKER.findAll(anyRequestedFor(urlPathEqualTo("/v1/connections/jira/secret")))).hasSize(brokerCallsBefore);
-        JsonNode deniedEvent = lastAuditEvent();
-        ContractSchemas.assertValid(AUDIT, deniedEvent);
-        assertThat(deniedEvent.get("reason").asString()).isEqualTo("step_up_required");
-        assertThat(deniedEvent.get("outcome").asString()).isEqualTo("denied");
-
-        HttpResponse<String> stepUp = browser.get(stepUpUrl);
-        C12.assertResponse("GET", "/api/v1/auth/login", stepUp);
-        URI authorize = URI.create(stepUp.headers().firstValue("Location").orElseThrow());
-        assertThat(FakeIdp.parse(authorize.getRawQuery())).containsEntry("max_age", "0");
-        HttpResponse<String> back = browser.get(IDP.approve(authorize, ALICE, Instant.now(), "1").toString());
-        assertThat(back.headers().firstValue("Location").orElseThrow()).endsWith("/connections/jira?step=token");
-
-        browser.get("/api/v1/me");
         HttpResponse<String> stored = browser.put("/api/v1/connections/jira/secret", "{\"secret\":\"" + secret + "\"}", true);
+
         C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", stored);
         assertThat(stored.statusCode()).isEqualTo(200);
+        assertThat(lastAuditEvent().get("outcome").asString()).isEqualTo("ok");
+    }
+
+    @Test
+    void expiryDateIsNotJudgedByTheBff() {
+        // CC-084 (2.2.1): the date is the user's own note; past and distant dates reach the broker unchanged.
+        TestBrowser browser = login(ALICE, Instant.now());
+        browser.get("/api/v1/me");
+        for (String expiresAt : List.of("2020-01-01T00:00:00Z", "2099-12-31T23:59:59Z")) {
+            String secret = "test-only-secret-" + UUID.randomUUID();
+            SECRETS.add(secret);
+            HttpResponse<String> response = browser.put("/api/v1/connections/jira/secret",
+                    "{\"secret\":\"" + secret + "\",\"expiresAt\":\"" + expiresAt + "\"}", true);
+            C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", response);
+            assertThat(response.statusCode()).as(expiresAt).isEqualTo(200);
+            assertThat(JSON.readTree(BROKER.findAll(anyRequestedFor(urlPathEqualTo("/v1/connections/jira/secret")))
+                    .getLast().getBodyAsString()).get("expiresAt").asString()).isEqualTo(expiresAt);
+        }
     }
 
     @Test
@@ -647,25 +483,10 @@ class PortalApiTest {
     }
 
     @Test
-    void stepUpReturnPathIgnoresForeignAndApiReferers() {
-        TestBrowser browser = login(ALICE, Instant.now().minus(Duration.ofMinutes(10)));
-        browser.get("/api/v1/me");
-        for (String referer : List.of("https://evil.test/connect/jira", "/api/v1/auth/logout", "/API/v1/me")) {
-            HttpResponse<String> denied = browser.send(java.net.http.HttpRequest.newBuilder(
-                            browser.origin().resolve("/api/v1/connections/jira/secret"))
-                            .PUT(java.net.http.HttpRequest.BodyPublishers.ofString("{\"secret\":\"x\"}"))
-                            .header("Content-Type", "application/json"),
-                    Map.of("X-XSRF-TOKEN", browser.cookie("XSRF-TOKEN").orElseThrow(),
-                            "Referer", referer.startsWith("http") ? referer : browser.origin().resolve(referer).toString()));
-            assertThat(JSON.readTree(denied.body()).get("stepUpUrl").asString()).as(referer).endsWith("returnPath=/");
-        }
-    }
-
-    @Test
     void csrfTokenIsAcceptedOnlyFromTheHeader() {
         TestBrowser browser = login(ALICE, Instant.now());
         browser.get("/api/v1/me");
-        String token = browser.cookie("XSRF-TOKEN").orElseThrow();
+        String token = browser.cookie("__Host-XSRF-TOKEN").orElseThrow();
         HttpResponse<String> response = browser.send(java.net.http.HttpRequest.newBuilder(
                         browser.origin().resolve("/api/v1/connections/jira?_csrf=" + token)).DELETE(), Map.of());
         assertThat(response.statusCode()).isEqualTo(403);

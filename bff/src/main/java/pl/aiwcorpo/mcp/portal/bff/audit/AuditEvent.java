@@ -16,6 +16,7 @@ public record AuditEvent(
         String sub,
         String username,
         String server,
+        String virtualServer,
         String decision,
         String reason,
         String credentialType,

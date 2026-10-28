@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Checks C4 and C5 data against the 1.1.0 enums before it reaches the browser or the catalog rules. Unknown
+ * Checks C4 and C5 data against the contract enums before it reaches the browser or the catalog rules. Unknown
  * systems, types, risks and actions are dropped (fail-closed) instead of being passed on and breaking C12.
  */
 public final class BrokerData {
@@ -31,7 +31,7 @@ public final class BrokerData {
         for (BrokerModel.Connection c : connections == null ? List.<BrokerModel.Connection>of() : connections) {
             if (c == null || !SYSTEMS.contains(c.system()) || !CREDENTIAL_TYPES.contains(c.type())
                     || c.backendUser() == null || c.connectedAt() == null) {
-                log.warn("Dropping a C4 connection outside the 1.1.0 contract");
+                log.warn("Dropping a C4 connection outside the contract");
                 continue;
             }
             String status = CONNECTION_STATUSES.contains(c.status()) ? c.status() : "error";
@@ -62,7 +62,7 @@ public final class BrokerData {
             for (GatewayModel.CatalogServer server : catalog.servers()) {
                 if (server == null || !SYSTEMS.contains(server.system()) || server.serverId() == null
                         || server.version() == null) {
-                    log.warn("Dropping a C5 catalog server outside the 1.1.0 contract");
+                    log.warn("Dropping a C5 catalog server outside the contract");
                     continue;
                 }
                 servers.add(new GatewayModel.CatalogServer(server.serverId(), server.system(), server.version(),
@@ -76,12 +76,17 @@ public final class BrokerData {
         List<GatewayModel.CatalogTool> result = new ArrayList<>();
         for (GatewayModel.CatalogTool tool : tools == null ? List.<GatewayModel.CatalogTool>of() : tools) {
             if (tool == null || tool.name() == null || !RISKS.contains(tool.risk()) || !TOOL_ACTIONS.contains(tool.action())) {
-                log.warn("Dropping a C5 catalog tool outside the 1.1.0 contract");
+                log.warn("Dropping a C5 catalog tool outside the contract");
                 continue;
             }
             result.add(new GatewayModel.CatalogTool(tool.name(), tool.description() == null ? "" : tool.description(),
                     tool.risk(), tool.action(), "granted".equals(tool.access()) ? "granted" : "denied",
-                    tool.requiredEntitlements() == null ? List.of() : tool.requiredEntitlements()));
+                    tool.requiredEntitlements() == null ? List.of() : tool.requiredEntitlements(),
+                    tool.title() == null || tool.title().isEmpty() ? null : tool.title(),
+                    Boolean.TRUE.equals(tool.disabled()) ? Boolean.TRUE : null,
+                    // The gateway computes this flag; a DESTRUCTIVE tool is never shown without it.
+                    Boolean.TRUE.equals(tool.requiresConfirmation()) || "DESTRUCTIVE".equals(tool.risk())
+                            ? Boolean.TRUE : null));
         }
         return result;
     }

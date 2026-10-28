@@ -55,8 +55,8 @@ class UpstreamGuardsTest {
         GatewayModel.Catalog catalog = BrokerData.validCatalog(new GatewayModel.Catalog(List.of(
                 new GatewayModel.CatalogServer("mcp-jira", "jira", "1.0.0", null),
                 new GatewayModel.CatalogServer("mcp-gitlab", "gitlab", "1.0.0", List.of(
-                        new GatewayModel.CatalogTool("gitlab__a", null, "READ_ONLY", "read", "maybe", null),
-                        new GatewayModel.CatalogTool("gitlab__b", "b", "HARMLESS", "read", "granted", List.of()))),
+                        new GatewayModel.CatalogTool("gitlab__a", null, "READ_ONLY", "read", "maybe", null, "", false, null),
+                        new GatewayModel.CatalogTool("gitlab__b", "b", "HARMLESS", "read", "granted", List.of(), null, null, null))),
                 new GatewayModel.CatalogServer("mcp-x", "sharepoint", "1.0.0", List.of()))));
         assertThat(catalog.servers()).extracting(GatewayModel.CatalogServer::system).containsExactly("jira", "gitlab");
         assertThat(catalog.servers().getFirst().tools()).isEmpty();
@@ -65,6 +65,8 @@ class UpstreamGuardsTest {
             assertThat(tool.access()).isEqualTo("denied");
             assertThat(tool.requiredEntitlements()).isEmpty();
             assertThat(tool.description()).isEmpty();
+            assertThat(tool.title()).isNull();
+            assertThat(tool.disabled()).isNull();
         });
     }
 }

@@ -15,7 +15,7 @@ public record PortalProperties(
         Upstream broker,
         Upstream gatewayAdmin,
         @DefaultValue Tls tls,
-        Gateway gateway,
+        URI publicBaseUrl,
         @DefaultValue TokenExchange tokenExchange,
         @DefaultValue StepUp stepUp,
         @DefaultValue Session session,
@@ -50,10 +50,6 @@ public record PortalProperties(
         public String toString() {
             return "Tls[keystore=" + keystore + ", truststore=" + truststore + "]";
         }
-    }
-
-    /** @param publicUrl base URL of the gateway as MCP clients see it; catalog links are {publicUrl}/s/{serverId}/mcp */
-    public record Gateway(URI publicUrl) {
     }
 
     public record TokenExchange(

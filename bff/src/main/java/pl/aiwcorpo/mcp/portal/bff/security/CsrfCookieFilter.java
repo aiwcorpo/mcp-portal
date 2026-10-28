@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Spring Security creates CSRF tokens lazily; reading the token here makes the repository write the
- * {@code XSRF-TOKEN} cookie on the first response, so the SPA has it before its first POST/PUT/DELETE.
+ * {@code __Host-XSRF-TOKEN} cookie on the first response, so the SPA has it before its first POST/PUT/DELETE.
  */
 class CsrfCookieFilter extends OncePerRequestFilter {
 

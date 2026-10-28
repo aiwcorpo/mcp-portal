@@ -70,7 +70,7 @@ class DevEnvironmentFlowTest {
         registry.add("portal.broker.tls-name", () -> DEV.value("MCP_BROKER_TLS_NAME"));
         registry.add("portal.gateway-admin.base-url", () -> "https://localhost:" + DEV.value("GATEWAY_ADMIN_MOCK_PORT"));
         registry.add("portal.gateway-admin.tls-name", () -> DEV.value("MCP_GATEWAY_INTERNAL_TLS_NAME"));
-        registry.add("portal.gateway.public-url", () -> "http://localhost:" + DEV.value("GATEWAY_PORT"));
+        registry.add("portal.public-base-url", () -> "http://localhost:" + DEV.value("GATEWAY_PORT"));
         registry.add("portal.tls.keystore", () -> DEV.certs().resolve("mcp-portal-bff/keystore.p12").toString());
         registry.add("portal.tls.keystore-password", () -> DEV.value("TLS_STORE_PASSWORD"));
         registry.add("portal.tls.truststore", () -> DEV.certs().resolve("ca/truststore.p12").toString());

@@ -42,6 +42,27 @@ public class AuditLog {
                 user.sub(),
                 user.username(),
                 system == null ? null : "mcp-" + system,
+                null,
+                outcome.decision(),
+                outcome.reason(),
+                null,
+                outcome.outcome(),
+                outcome.errorCode(),
+                latencyMs));
+    }
+
+    /** {@code admin_change} for creating or deleting a virtual server; {@code slug} is null when none was valid. */
+    public void virtualServerChange(String requestId, PortalUser user, String slug, Outcome outcome, long latencyMs) {
+        write(new AuditEvent(
+                clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
+                requestId,
+                "portal",
+                componentId,
+                "admin_change",
+                user.sub(),
+                user.username(),
+                null,
+                slug,
                 outcome.decision(),
                 outcome.reason(),
                 null,
@@ -70,6 +91,11 @@ public class AuditLog {
         /** The change was refused (invalid input, or the broker rejected the secret). */
         public static Outcome rejected(String reason) {
             return new Outcome("deny", reason, "error", "invalid_argument");
+        }
+
+        /** The gateway refused the change for this user. */
+        public static Outcome accessDenied() {
+            return new Outcome("deny", "access_denied", "denied", "access_denied");
         }
 
         public static Outcome upstreamUnavailable() {

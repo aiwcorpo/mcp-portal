@@ -36,7 +36,8 @@ import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    static final String CSRF_COOKIE = "XSRF-TOKEN";
+    static final String CSRF_COOKIE = "__Host-XSRF-TOKEN";
+    static final String OIDC_CALLBACK = "/api/v1/auth/callback";
     static final String CSRF_HEADER = "X-XSRF-TOKEN";
     static final long HSTS_MAX_AGE_SECONDS = 31_536_000;
 
@@ -59,12 +60,13 @@ public class SecurityConfig {
                                        AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequests,
                                        CookieCsrfTokenRepository csrfTokens,
                                        PortalProperties properties,
-                                       DevMode devMode,
+                                       LoginRedirects redirects,
                                        Clock clock) throws Exception {
-        LoginRedirects redirects = new LoginRedirects(properties.web().loginReturnOrigin(), devMode);
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/login").permitAll()
+                        // Answers an anonymous browser with a redirect to /?loginError=session_expired itself (CC-086).
+                        .requestMatchers(HttpMethod.GET, "/api/v1/oauth/callback").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .oauth2Login(login -> login
@@ -75,6 +77,7 @@ public class SecurityConfig {
                                 // own /oauth2/authorization/{id} entry resolves nothing.
                                 .authorizationRequestResolver(NO_FILTER_ENTRY)
                                 .authorizationRequestRepository(authorizationRequests))
+                        .redirectionEndpoint(endpoint -> endpoint.baseUri(OIDC_CALLBACK))
                         .authorizedClientRepository(authorizedClients)
                         .successHandler(new LoginSuccessHandler(redirects))
                         .failureHandler(new LoginFailureHandler(redirects)))
@@ -100,6 +103,11 @@ public class SecurityConfig {
                         SecurityContextHolderFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
         return http.build();
+    }
+
+    @Bean
+    LoginRedirects loginRedirects(PortalProperties properties, DevMode devMode) {
+        return new LoginRedirects(properties.web().loginReturnOrigin(), devMode);
     }
 
     @Bean
