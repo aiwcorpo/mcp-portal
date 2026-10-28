@@ -12,7 +12,7 @@ import reconnectRequiredSecret from '@aiwcorpo/mcp-contracts/test-vectors/catalo
 import requestPending from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/request-pending.json';
 import type { CatalogAction, CatalogStatus, CredentialType } from '../app/api/generated';
 import { connectionFixture, serverFixture, toolFixture } from '../testing/fixtures';
-import { deriveRow } from './portal-mock';
+import { MockStore, completeMockOAuth, deriveRow } from './portal-mock';
 
 interface Vector {
   description: string;
@@ -75,5 +75,11 @@ describe('mock catalog rows follow the contract vectors', () => {
 
     expect(row.status).toBe(input.status);
     expect([...row.actions].sort()).toEqual([...expected.actions].sort());
+  });
+});
+
+describe('completeMockOAuth', () => {
+  it('sends an unknown flow to the root like the BFF does (C12 oauthCallback)', () => {
+    expect(completeMockOAuth(new MockStore())).toBe('/?connectError=flow_invalid');
   });
 });

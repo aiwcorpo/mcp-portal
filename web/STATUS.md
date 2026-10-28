@@ -1,7 +1,7 @@
 # STATUS: mcp-portal/web (ws-08)
 
-Stan na 2026-10-28. Kontrakty: `mcp-contracts` 2.2.1 (paczka `release/aiwcorpo-mcp-contracts-2.2.1.tgz`, tag
-`v2.2.1`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
+Stan na 2026-10-28. Kontrakty: `mcp-contracts` 2.2.3 (paczka `release/aiwcorpo-mcp-contracts-2.2.3.tgz`, tag
+`v2.2.3`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
 Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
 
 ## Kamienie M2
@@ -18,12 +18,12 @@ wnioski (ekran, M4), administracja (M4), zawężenie zasobów (uśpione, CC-085)
 ## Weryfikacja (2026-10-28, Node 24.18.0, npm 11.16.0)
 
 ```
-npm ci                 OK (czysty node_modules, paczka 2.2.1 z release/)
-npm test               Test Files 15 passed (15), Tests 132 passed (132)
+npm ci                 OK (czysty node_modules, paczka 2.2.3 z release/)
+npm test               Test Files 17 passed (17), Tests 149 passed (149)
 npm run lint           All files pass linting.
 npm run build          OK (bez MSW w bundlu)
-npm run e2e            90 passed, 2 skipped (zrzuty: tylko z SHOTS_DIR); Chromium, projekty desktop 1280 px i mobile-360
-npm run i18n:check     bez różnic (257 komunikatów)
+npm run e2e            88 passed, 2 skipped (zrzuty: tylko z SHOTS_DIR); Chromium, projekty desktop 1280 px i mobile-360
+npm run i18n:check     bez różnic (252 komunikaty)
 ```
 
 Zrzuty ekranów (1280 i 360 px, nazwy z numerem makiety): `<scratchpad>/m2-web-shots/`
@@ -37,14 +37,14 @@ Zrzuty ekranów (1280 i 360 px, nazwy z numerem makiety): `<scratchpad>/m2-web-s
   przyciski z `actions[]` wg tabeli CC-083, rozwijane wiersze z narzędziami (identyfikator czcionką stałą, tytuł,
   uprawnienie, ryzyko Odczyt/Zapis/Usuwanie, "Wymaga kodu z Authenticatora", "Wyłączone przez administratora"),
   szukanie po serwerze i narzędziu, kopiowanie linku, "Połącz przez OAuth" (przekierowanie na `authorizeUrl`),
-  "Złóż wniosek" (POST `/access-requests`, przekierowanie https na formularz IGA albo komunikat z id).
+  "Złóż wniosek" jest ukryte w M2 (patrz runda poprawek): wnioski wracają w M4.
 - Połączenia z systemami: jeden wiersz na system z jednego odczytu katalogu (CC-080): sposób, konto, ważne do,
-  ostatnie użycie, Odnów / Połącz / Dodaj token / Rozłącz (dialog) / Złóż wniosek.
+  ostatnie użycie, Odnów / Połącz / Dodaj token / Rozłącz (dialog).
 - Dodaj PAT: `type="password"`, `autocomplete="off"`, pole czyszczone przy każdym wysłaniu, bez MFA (CC-090),
   data opcjonalna (bez walidacji zakresu, CC-084), zdanie "Oznaczymy token jako wygasający 7 dni przed terminem."
-  tylko przy podanej dacie, `secret_invalid` i `identity_mismatch` pod polem; token poza `localStorage`,
+  tylko przy podanej dacie, `secret_invalid` pod polem, po zapisie "Połączono z <system> jako <backendUser>"; token poza `localStorage`,
   `sessionStorage`, ciasteczkami i DOM (test e2e).
-- Powrót z OAuth: `?connected=` i `?connectError=` (identity_mismatch, flow_invalid, provider_error, cancelled),
+- Powrót z OAuth: `?connected=` i `?connectError=` (flow_invalid, provider_error, cancelled),
   komunikat z nazwą systemu i kontem, parametry znikają z adresu, sukces znika po 10 s.
 - Moje linki: lista, pusty stan, usuwanie z dialogiem, kreator 3-krokowy (slug z nazwy, lokalna kontrola własnych
   linków, 409 wraca do kroku 1, narzędzia zablokowane z przyczyną i akcją, bez `resourceDefaults`), URL i
@@ -54,6 +54,23 @@ Zrzuty ekranów (1280 i 360 px, nazwy z numerem makiety): `<scratchpad>/m2-web-s
 - Router nie ma tras `/api`, `/s/`, `/v/`, `/.well-known/` (test).
 - Dostępność: axe WCAG 2.1 AA (ciemny i jasny; 1280, 360, 320 px), klawiatura, brak przewijania poziomego, nazwy
   zakładek nieucięte na 360 px.
+
+## Runda poprawek M2 (2026-10-28)
+
+Kontrakty 2.2.3, klient API wygenerowany ponownie. `npm test`: 149 testów, e2e: 88 przeszło, 2 pominięte.
+
+| Znalezisko | Status |
+| --- | --- |
+| M1 "Złóż wniosek" bez operacji w BFF | poprawione: `request_access` poza `SUPPORTED_ACTIONS` jak `view_request`; w katalogu, połączeniach i kreatorze nie ma przycisku (kreator pokazuje samo "Brak uprawnienia"). Przepływ zostaje w `ConnectionActions`, włączenie to jedna linia w `catalog-actions.ts`. Testy: katalog, połączenia, kreator, e2e |
+| M2 wniosek z kreatora o uprawnienie innego narzędzia | poprawione: `requestAccess(server, tool)` używa uprawnienia klikniętego narzędzia (`entitlementToRequest`), test z dwoma odmowionymi narzędziami (`connection-actions.service.spec.ts`); w kreatorze działa po włączeniu akcji w M4. Przy wierszu serwera (katalog) bez narzędzia nadal pierwsze odmowione: do rozstrzygnięcia w M4 (wybór uprawnienia przed wysłaniem) |
+| L1 narzędzie zablokowane po `access_denied` zostaje zaznaczone | poprawione: `selectedNames` pomija narzędzia z blokadą; test z przeładowaniem katalogu |
+| L2 nazwa z samych spacji | poprawione: `nonBlankValidator` na polu nazwy; test |
+| L3 komunikat sukcesu z samego `?connected=` | poprawione: tekst "Połączono z <system> jako <backendUser>" tylko gdy katalog pokazuje wiersz `connected`/`expiring` z kontem; inaczej brak komunikatu; test |
+| L4 różne reguły http web i BFF | poprawione po obu stronach: http tylko dla loopback (`localhost`, `127.0.0.1`, `[::1]`); mock GitLaba z mcp-platform-dev stoi na `http://localhost:18741`, więc dev działa. BFF: `OAuthConnectTest` |
+| L5 nieznany `loginError`, mock `connectError` | poprawione: `readLoginError` wyeksportowane i przetestowane (`session.service.spec.ts`), mock MSW kończy nieznany przepływ na `/?connectError=flow_invalid` jak BFF (test w `portal-mock.spec.ts`) |
+| Decyzja: bez sprawdzania tożsamości (2.2.3) | usunięte: komunikat przy tokenie, ekran 22 `identity_mismatch`, mock `other-user`, tekst w `error-messages.ts` i `oauth-return.ts`; obcy `identity_mismatch` traktowany jak nieznany kod (`invalid_request` / `provider_error`). "Połączono z <system> jako <backendUser>" po zapisie tokenu, po OAuth i kolumna "Konto w systemie" w Połączeniach (była) |
+| e2e mobile-360 `/catalog` (niestabilne także na kodzie sprzed zmian: AbortError z `getAnimations().finished`, zawieszona pętla rozwijania wierszy) | helper a11y czeka tylko na skończone animacje, z limitem 2 s, a rozwijanie wierszy potwierdza każdy klik; 3 przebiegi z rzędu 88/88 |
+| Gateway po M2 (8dc1d7a): limit 50 linków daje 400 `invalid_request` | kreator pokazuje przy 400 `invalid_request` na utworzeniu wskazówkę o limicie 50 linków obok `requestId` (bez zgadywania po treści); test |
 
 ## Różnice względem makiet
 
@@ -83,7 +100,7 @@ Zrzuty ekranów (1280 i 360 px, nazwy z numerem makiety): `<scratchpad>/m2-web-s
 
 ## Odstępstwa i decyzje
 
-- Zmiany kontraktu 2.2.1 zastosowane: pola z `default` opcjonalne (`disabled`, `requiresConfirmation`, `enabled`),
+- Zmiany kontraktu 2.2.1 zastosowane (obowiązują też w 2.2.3): pola z `default` opcjonalne (`disabled`, `requiresConfirmation`, `enabled`),
   `credential` i `connection` w katalogu, `title` narzędzia, `ConnectErrorCode` z `cancelled`, `X-Request-Id`
   i `Error.requestId`, brak `step_up_required` w `putMySecret`, brak `expires_at_invalid`.
 - Ciasteczko CSRF: kontrakt mówi `__Host-XSRF-TOKEN`, BFF (ws-07) w M1 ustawia `XSRF-TOKEN`. Interceptor

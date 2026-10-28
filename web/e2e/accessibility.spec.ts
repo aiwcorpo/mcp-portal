@@ -4,7 +4,20 @@ import { expect, test } from './fixtures';
 
 async function expectNoViolations(page: Page): Promise<void> {
   // Material fades messages in; axe would measure contrast mid-transition.
-  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+  // Only finite animations are awaited (a looping one never finishes); one cancelled meanwhile rejects `finished`.
+  // The wait is capped: an animation that is paused never finishes either.
+  await page.evaluate(() =>
+    Promise.race([
+      Promise.all(
+        document
+          .getAnimations()
+          .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+          .map((a) => a.finished.catch(() => undefined)),
+      ),
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+    ]),
+  );
+
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
@@ -41,8 +54,9 @@ for (const scheme of ['dark', 'light'] as const) {
       await useScheme(page, scheme);
       await expect(page.getByRole('heading', { level: 1, name: ready })).toBeVisible();
       const closed = page.getByRole('button', { name: /^Pokaż narzędzia/ });
-      while ((await closed.count()) > 0) {
+      for (let left = await closed.count(); left > 0; left = await closed.count()) {
         await closed.first().click();
+        await expect(closed).toHaveCount(left - 1);
       }
       await expectNoViolations(page);
     });
@@ -101,9 +115,9 @@ for (const scheme of ['dark', 'light'] as const) {
     await expect(page.getByText('Token nieprawidłowy albo wygasł.')).toBeVisible();
     await expectNoViolations(page);
 
-    await page.goto('/catalog?mockOAuth=identity_mismatch');
+    await page.goto('/catalog?mockOAuth=provider_error');
     await page.getByRole('button', { name: 'Połącz (GitLab)' }).click();
-    await expect(page.getByRole('alert')).toContainText('Zalogowano się w GitLab');
+    await expect(page.getByRole('alert')).toContainText('GitLab nie odpowiedział poprawnie');
     await expectNoViolations(page);
 
     await page.goto('/connections');

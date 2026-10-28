@@ -23,6 +23,7 @@ import { ConnectionsService, PutSecretResponse, SystemId } from '../../api/gener
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { errorMessage } from '../../core/error-messages';
 import { ErrorNotice } from '../../shared/error-notice';
+import { systemName } from '../../shared/labels';
 import { Notice } from '../../shared/notice';
 
 export const SECRET_MAX_LENGTH = 4096;
@@ -43,7 +44,7 @@ type Phase =
  * user's input and shows above the form.
  */
 function isFieldFailure(failure: ApiFailure): boolean {
-  return failure.code === 'secret_invalid' || failure.code === 'identity_mismatch';
+  return failure.code === 'secret_invalid';
 }
 
 @Component({
@@ -61,6 +62,7 @@ export class SecretForm {
 
   protected readonly maxLength = SECRET_MAX_LENGTH;
   protected readonly phase = signal<Phase>({ kind: 'idle' });
+  protected readonly systemLabel = computed(() => systemName(this.system()));
   protected readonly saving = computed(() => this.phase().kind === 'saving');
   protected readonly fieldError = computed(() => {
     const state = this.phase();

@@ -1,17 +1,20 @@
 import { CatalogAction, PortalCatalogServer } from '../../api/generated';
 
 /**
- * Actions this release can carry out. view_request needs the requests screen (M4), so it is not
- * offered even when the BFF lists it; the pending status is still shown as text.
+ * Actions this release can carry out. Access requests are an M4 topic: the BFF of M2 has no
+ * `POST /access-requests` and view_request needs the requests screen, so neither is offered even when
+ * the BFF lists them; the pending status is still shown as text. Add 'request_access' here when the BFF
+ * implements the operation (the flow in ConnectionActions is ready).
  */
 export const SUPPORTED_ACTIONS: readonly CatalogAction[] = [
   'copy_link',
   'connect_oauth',
   'add_secret',
   'reconnect',
-  'request_access',
   'disconnect',
 ];
+
+export const ACCESS_REQUESTS_AVAILABLE = SUPPORTED_ACTIONS.includes('request_access');
 
 const CATALOG_ORDER: readonly CatalogAction[] = [
   'reconnect',

@@ -8,14 +8,14 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { ConnectErrorCode, PortalCatalogServer, SystemId } from '../api/generated';
-import { isConnectErrorCode } from '../core/api-error';
+import { PortalCatalogServer, SystemId } from '../api/generated';
+import { ReturnErrorCode, isConnectErrorCode } from '../core/api-error';
 import { isSystemId, systemName } from './labels';
 import { Notice } from './notice';
 
 type OAuthReturn =
   | { kind: 'connected'; system: SystemId | null }
-  | { kind: 'failed'; code: ConnectErrorCode; system: SystemId | null };
+  | { kind: 'failed'; code: ReturnErrorCode; system: SystemId | null };
 
 const QUERY_KEYS = ['connected', 'connectError', 'system'];
 const SUCCESS_VISIBLE_MS = 10_000;
@@ -47,21 +47,25 @@ export function oauthReturnPath(base: string, system: SystemId): string {
   return `${base}?system=${system}`;
 }
 
-export function oauthReturnMessage(result: OAuthReturn, backendUser: string | null): string {
+/**
+ * Text of the banner. A success is worded only from the catalog (the URL alone proves nothing, anyone can
+ * send a link with `?connected=`): null while the catalog is missing or does not show the connection.
+ */
+export function oauthReturnMessage(
+  result: OAuthReturn,
+  servers: readonly PortalCatalogServer[] | null,
+): string | null {
   const named = result.system ? systemName(result.system) : null;
   if (result.kind === 'connected') {
-    if (!named) {
-      return $localize`:@@oauth.connectedUnknown:Konto zostało połączone.`;
+    const row = servers?.find((server) => server.system === result.system);
+    const backendUser = row?.connection?.backendUser;
+    const alive = row?.status === 'connected' || row?.status === 'expiring';
+    if (!named || !alive || !backendUser) {
+      return null;
     }
-    return backendUser
-      ? $localize`:@@oauth.connectedAs:Połączono z ${named}:system: jako ${backendUser}:user:.`
-      : $localize`:@@oauth.connected:Połączono z ${named}:system:.`;
+    return $localize`:@@oauth.connectedAs:Połączono z ${named}:system: jako ${backendUser}:user:.`;
   }
   switch (result.code) {
-    case 'identity_mismatch':
-      return named
-        ? $localize`:@@oauth.identityMismatch:Zalogowano się w ${named}:system: na inne konto niż Twoje. Wyloguj się z ${named}:system: i spróbuj ponownie.`
-        : $localize`:@@oauth.identityMismatchUnknown:Zalogowano się w systemie na inne konto niż Twoje. Wyloguj się z systemu i spróbuj ponownie.`;
     case 'flow_invalid':
       return $localize`:@@oauth.flowInvalid:Link połączenia wygasł albo był już użyty. Zacznij od nowa.`;
     case 'cancelled':
@@ -92,7 +96,7 @@ export class OAuthReturnBanner {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  /** Catalog rows, used to name the account the provider confirmed (connection.backendUser). */
+  /** Catalog rows: they confirm the connection and name the account (connection.backendUser). */
   readonly servers = input<readonly PortalCatalogServer[] | null>(null);
 
   protected readonly result = signal<OAuthReturn | null>(
@@ -103,15 +107,7 @@ export class OAuthReturnBanner {
   );
   protected readonly message = computed(() => {
     const result = this.result();
-    if (!result) {
-      return null;
-    }
-    const user =
-      result.system && result.kind === 'connected'
-        ? (this.servers()?.find((server) => server.system === result.system)?.connection
-            ?.backendUser ?? null)
-        : null;
-    return oauthReturnMessage(result, user);
+    return result ? oauthReturnMessage(result, this.servers()) : null;
   });
 
   constructor() {

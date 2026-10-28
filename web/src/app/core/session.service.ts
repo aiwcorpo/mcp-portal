@@ -84,7 +84,7 @@ export class SessionService {
   }
 }
 
-function readLoginError(search: string): LoginErrorCode | null {
+export function readLoginError(search: string): LoginErrorCode | null {
   const value = new URLSearchParams(search).get('loginError');
   return (Object.values(LoginErrorCode) as string[]).includes(value ?? '')
     ? (value as LoginErrorCode)

@@ -69,6 +69,12 @@
       }
       @if (failure(); as f) {
         <app-error-notice [failure]="f" />
+        @if (f.code === 'invalid_request' && f.status === 400) {
+          <p class="muted" i18n="@@wizard.limitHint">
+            Formularz jest wypełniony poprawnie, więc najczęstszą przyczyną jest limit 50 linków na
+            użytkownika. Usuń niepotrzebne linki w sekcji Moje linki i spróbuj ponownie.
+          </p>
+        }
       }
       <div class="toolbar">
         <input
@@ -114,12 +120,18 @@
                     @case ('denied') {
                       <span class="note muted"
                         ><ng-container i18n="@@wizard.denied">Brak uprawnienia</ng-container>
-                        &middot;
-                        <button type="button" class="linkish" (click)="requestAccess(group.server)">
-                          <ng-container i18n="@@wizard.request">Złóż wniosek</ng-container
-                          ><span class="visually-hidden"> ({{ group.name }})</span>
-                        </button></span
-                      >
+                        @if (accessRequests) {
+                          &middot;
+                          <button
+                            type="button"
+                            class="linkish"
+                            (click)="requestAccess(group.server, row.tool)"
+                          >
+                            <ng-container i18n="@@wizard.request">Złóż wniosek</ng-container
+                            ><span class="visually-hidden"> ({{ row.tool.name }})</span>
+                          </button>
+                        }
+                      </span>
                     }
                     @case ('not_connected') {
                       <span class="note muted"

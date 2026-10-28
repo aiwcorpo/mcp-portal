@@ -165,7 +165,7 @@ export class ConnectionsService extends BaseService {
 
     /**
      * redirect_uri registered at OAuth providers.
-     * The BFF checks that the flow belongs to the current session, calls C4 oauth/complete and redirects to &#x60;returnPath&#x60; with &#x60;connected&#x3D;&lt;system&gt;&#x60; appended (&#x60;?&#x60; when returnPath has no query, &#x60;&amp;&#x60; otherwise). On failure it appends &#x60;connectError&#x3D;&lt;code&gt;&#x60; the same way with a code from &#x60;ConnectErrorCode&#x60; only (CC-022, CC-086): &#x60;cancelled&#x60; when the provider reports &#x60;error&#x3D;access_denied&#x60;, &#x60;provider_error&#x60; for any other &#x60;error&#x60; or a failed exchange, &#x60;identity_mismatch&#x60;, &#x60;flow_invalid&#x60;. Provider details never appear in the URL. Without a valid session the browser goes to &#x60;/?loginError&#x3D;session_expired&#x60; (the BFF checks the session itself). Never returns JSON. 
+     * The BFF checks that the flow belongs to the current session, calls C4 oauth/complete and redirects to &#x60;returnPath&#x60; with &#x60;connected&#x3D;&lt;system&gt;&#x60; appended (&#x60;?&#x60; when returnPath has no query, &#x60;&amp;&#x60; otherwise). On failure it appends &#x60;connectError&#x3D;&lt;code&gt;&#x60; the same way with a code from &#x60;ConnectErrorCode&#x60; only (CC-022, CC-086): &#x60;cancelled&#x60; when the provider reports &#x60;error&#x3D;access_denied&#x60;, &#x60;provider_error&#x60; for any other &#x60;error&#x60; or a failed exchange, &#x60;flow_invalid&#x60;. &#x60;identity_mismatch&#x60; is deprecated and no longer returned (CC-101). Provider details never appear in the URL. Without a valid session the browser goes to &#x60;/?loginError&#x3D;session_expired&#x60; (the BFF checks the session itself). Never returns JSON. 
      * @endpoint get /api/v1/oauth/callback
      * @param code 
      * @param state 
@@ -249,7 +249,7 @@ export class ConnectionsService extends BaseService {
     }
 
     /**
-     * Store a PAT / API key. A valid session and the CSRF header are enough (CC-090); identity_mismatch (C4.1) protects the write.
+     * Store a PAT / API key. A valid session and the CSRF header are enough (CC-090). The response carries backendUser; the portal shows \&quot;Connected as &lt;backendUser&gt;\&quot; after the write and in the connections view (CC-101).
      * @endpoint put /api/v1/connections/{system}/secret
      * @param system 
      * @param putSecretRequest 

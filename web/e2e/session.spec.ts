@@ -47,8 +47,6 @@ test('connect GitLab through the provider: the result names the system and the a
 
 const OAUTH_FAILURES = {
   cancelled: 'Łączenie z GitLab anulowane.',
-  identity_mismatch:
-    'Zalogowano się w GitLab na inne konto niż Twoje. Wyloguj się z GitLab i spróbuj ponownie.',
   flow_invalid: 'Link połączenia wygasł albo był już użyty. Zacznij od nowa.',
   provider_error: 'GitLab nie odpowiedział poprawnie. Spróbuj za chwilę.',
 };
@@ -105,12 +103,10 @@ test('dialog and snack bar work under the CSP: copy link and disconnect', async 
   await expect(page.getByRole('row', { name: /Jira/ })).toContainText('Dodaj token');
 });
 
-test('request access for Confluence shows the pending state', async ({ page }) => {
+test('the catalog offers no access request while the BFF has none', async ({ page }) => {
   await page.goto('/catalog');
-  await page.getByRole('button', { name: 'Złóż wniosek (Confluence)' }).click();
-  await expect(page.getByText('Wniosek złożony (REQ-2026-0043).')).toBeVisible();
-  const row = page.locator('tbody', { has: page.getByRole('rowheader', { name: 'Confluence' }) });
-  await expect(row).toContainText('Wniosek oczekuje');
+  await expect(page.getByRole('rowheader', { name: 'Confluence' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Złóż wniosek/ })).toHaveCount(0);
 });
 
 test('the catalog filter finds a tool and opens its server', async ({ page }) => {

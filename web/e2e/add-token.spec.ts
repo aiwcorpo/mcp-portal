@@ -29,7 +29,7 @@ test('renew a Jira token without any MFA step and see it in the connections', as
   ).toBeVisible();
   await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
 
-  await expect(page.getByText('Połączono jako jkowalski.')).toBeVisible();
+  await expect(page.getByText('Połączono z Jira jako jkowalski.')).toBeVisible();
   await expect(page.getByText('Token ważny do 31.01.2099.')).toBeVisible();
 
   expect(await page.content()).not.toContain(TOKEN);
@@ -45,20 +45,13 @@ test('renew a Jira token without any MFA step and see it in the connections', as
   await expect(row).not.toContainText('za 5 dni');
 });
 
-test('a token the system rejects, and one that belongs to someone else, stay under the field', async ({
-  page,
-}) => {
+test('a token the system rejects stays under the field', async ({ page }) => {
   await page.goto('/connect/jira');
   const token = page.getByLabel('Token PAT', { exact: true });
 
   await token.fill('invalid-e2e-token');
   await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
   await expect(page.getByText('Token nieprawidłowy albo wygasł.')).toBeVisible();
-  await expect(token).toHaveValue('');
-
-  await token.fill('other-user-e2e-token');
-  await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
-  await expect(page.getByText('Token należy do innego konta.')).toBeVisible();
   await expect(token).toHaveValue('');
 });
 
@@ -69,5 +62,5 @@ test('the token is optional-dated and required', async ({ page }) => {
 
   await page.getByLabel('Token PAT', { exact: true }).fill('token-bez-daty');
   await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
-  await expect(page.getByText('Połączono jako jkowalski.')).toBeVisible();
+  await expect(page.getByText('Połączono z Jira jako jkowalski.')).toBeVisible();
 });

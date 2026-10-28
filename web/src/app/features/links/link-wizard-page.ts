@@ -13,12 +13,14 @@ import {
 } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { ConnectionActions } from '../../core/connection-actions.service';
+import { ACCESS_REQUESTS_AVAILABLE } from '../catalog/catalog-actions';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import { riskLabel, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
+import { nonBlankValidator } from '../connect/secret-form';
 import { LinkReady } from './link-ready';
 import { SLUG_PATTERN, suggestSlug } from './slug';
 
@@ -95,7 +97,7 @@ export class LinkWizardPage {
   protected readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(100)],
+      validators: [Validators.required, nonBlankValidator, Validators.maxLength(100)],
     }),
     slug: new FormControl('', {
       nonNullable: true,
@@ -138,12 +140,17 @@ export class LinkWizardPage {
     if (state.status !== 'ready') {
       return [];
     }
+    // A tool that became blocked after the selection (reload after access_denied) cannot be unticked in
+    // the list any more, so it must not stay in the request.
     return state.value.servers
-      .flatMap((server) => server.tools.map((tool) => tool.name))
+      .flatMap((server) =>
+        server.tools.filter((tool) => toolBlock(server, tool) === null).map((tool) => tool.name),
+      )
       .filter((name) => this.selected().has(name));
   });
 
   protected readonly riskLabel = riskLabel;
+  protected readonly accessRequests = ACCESS_REQUESTS_AVAILABLE;
 
   constructor() {
     void this.load();
@@ -264,10 +271,10 @@ export class LinkWizardPage {
     }
   }
 
-  protected async requestAccess(server: PortalCatalogServer): Promise<void> {
+  protected async requestAccess(server: PortalCatalogServer, tool: CatalogTool): Promise<void> {
     this.info.set(null);
     this.failure.set(null);
-    const result = await this.connectionActions.requestAccess(server);
+    const result = await this.connectionActions.requestAccess(server, tool);
     if (result.kind === 'created') {
       this.info.set($localize`:@@wizard.requestCreated:Wniosek złożony (${result.requestId}:id:).`);
     } else if (result.kind === 'failed') {

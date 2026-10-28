@@ -15,18 +15,33 @@ const C12_ERROR_CODES = [
   'resource_defaults_unsupported',
 ] as const;
 
-export const PORTAL_ERROR_CODES = [
+const DECLARED_ERROR_CODES = [
   ...Object.values(ErrorCode),
   ...Object.values(PutSecretError.ErrorEnum),
   ...C12_ERROR_CODES,
   ...Object.values(ConnectErrorCode),
 ] as const;
 
-export function isConnectErrorCode(value: unknown): value is ConnectErrorCode {
-  return (Object.values(ConnectErrorCode) as readonly unknown[]).includes(value);
-}
+/**
+ * identity_mismatch is deprecated since contracts 2.2.3 (CC-101): nobody compares the account with the
+ * SSO identity any more, so the UI has no state for it and a stray one is treated like any unknown code.
+ */
+type DeprecatedCode = 'identity_mismatch';
 
-export type PortalErrorCode = (typeof PORTAL_ERROR_CODES)[number];
+export type PortalErrorCode = Exclude<(typeof DECLARED_ERROR_CODES)[number], DeprecatedCode>;
+
+export const PORTAL_ERROR_CODES: readonly PortalErrorCode[] = DECLARED_ERROR_CODES.filter(
+  (code): code is PortalErrorCode => code !== 'identity_mismatch',
+);
+
+export type ReturnErrorCode = Exclude<ConnectErrorCode, DeprecatedCode>;
+
+export function isConnectErrorCode(value: unknown): value is ReturnErrorCode {
+  return (
+    value !== 'identity_mismatch' &&
+    (Object.values(ConnectErrorCode) as readonly unknown[]).includes(value)
+  );
+}
 
 export interface ApiFailure {
   code: PortalErrorCode;

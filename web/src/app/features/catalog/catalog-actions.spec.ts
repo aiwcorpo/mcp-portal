@@ -8,16 +8,19 @@ function offered(status: CatalogStatus, actions: CatalogAction[]) {
 
 describe('catalogRowActions', () => {
   it.each<[CatalogStatus, CatalogAction[], CatalogAction[]]>([
-    ['connected', ['copy_link', 'request_access', 'disconnect'], ['copy_link', 'request_access']],
+    ['connected', ['copy_link', 'request_access', 'disconnect'], ['copy_link']],
     ['expiring', ['copy_link', 'reconnect', 'disconnect'], ['reconnect', 'copy_link']],
     ['expiring', ['copy_link', 'add_secret', 'disconnect'], ['add_secret', 'copy_link']],
     ['reconnect_required', ['reconnect', 'disconnect'], ['reconnect']],
     ['not_connected', ['add_secret', 'connect_oauth'], ['connect_oauth', 'add_secret']],
     ['request_pending', ['view_request'], []],
-    ['no_access', ['request_access'], ['request_access']],
-  ])('%s offering %j shows %j (never disconnect, never view_request)', (status, actions, shown) => {
-    expect(catalogRowActions(offered(status, actions))).toEqual(shown);
-  });
+    ['no_access', ['request_access'], []],
+  ])(
+    '%s offering %j shows %j (never disconnect, view_request or request_access in M2)',
+    (status, actions, shown) => {
+      expect(catalogRowActions(offered(status, actions))).toEqual(shown);
+    },
+  );
 });
 
 describe('connectionRowActions', () => {

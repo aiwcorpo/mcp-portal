@@ -10,6 +10,9 @@
 
 
 export interface PutSecretError { 
+    /**
+     * identity_mismatch is deprecated and no longer returned (CC-101; removed in 3.0.0).
+     */
     error: PutSecretError.ErrorEnum;
 }
 export namespace PutSecretError {

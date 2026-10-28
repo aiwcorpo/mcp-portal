@@ -22,7 +22,6 @@ const SCENARIOS: readonly MockScenario[] = ['default', 'mixed', 'empty', 'nolink
 const OAUTH_OUTCOMES: readonly MockOAuthOutcome[] = [
   'ok',
   'cancelled',
-  'identity_mismatch',
   'flow_invalid',
   'provider_error',
 ];

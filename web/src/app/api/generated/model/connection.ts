@@ -17,7 +17,7 @@ export interface Connection {
     type: CredentialType;
     status: ConnectionStatus;
     /**
-     * User name in the target system confirmed by whoami (C4.1).
+     * User name in the target system read by whoami (C4.1, CC-101). Not compared with the SSO identity; the portal shows it as \"Connected as <backendUser>\".
      */
     backendUser: string;
     /**

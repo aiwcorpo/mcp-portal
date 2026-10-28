@@ -2,7 +2,7 @@
 
 Frontend portalu platformy MCP (strumień ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, teksty po polsku przez `$localize`. Rozmawia wyłącznie z BFF przez API C12
-(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 2.2.1). BFF (`../bff`, ws-07) serwuje zbudowane
+(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 2.2.3). BFF (`../bff`, ws-07) serwuje zbudowane
 pliki z tego samego originu.
 
 Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
@@ -11,7 +11,7 @@ Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
 
 - Node 24, npm 11.
 - Repozytorium `mcp-contracts` obok `mcp-portal` (`../../mcp-contracts` względem `web/`): paczka
-  `release/aiwcorpo-mcp-contracts-2.2.1.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
+  `release/aiwcorpo-mcp-contracts-2.2.3.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
 - Java 25 tylko do ponownego wygenerowania klienta API (`npm run generate:api`).
 - Chromium dla Playwright: `npx playwright install chromium` (raz).
 
@@ -37,10 +37,10 @@ Parametry adresu, ważne do końca sesji przeglądarki (stan w ciasteczku `mcp-p
 | Parametr | Wartości |
 | --- | --- |
 | `mockScenario` | `default` (przykład `states`: wygasający token, wymagane ponowne połączenie, brak uprawnień, konto serwisowe, wymiana tokenu), `mixed` (przykład `mixed`: połączone i niepołączone), `empty` (brak serwerów i linków), `nolinks` (puste Moje linki), `errors` (`503 upstream_unavailable` z `requestId`); zmiana scenariusza zeruje zmiany |
-| `mockOAuth` | wynik następnego powrotu od dostawcy: `ok`, `cancelled`, `identity_mismatch`, `flow_invalid`, `provider_error` |
+| `mockOAuth` | wynik następnego powrotu od dostawcy: `ok`, `cancelled`, `flow_invalid`, `provider_error` |
 | `mockSession` | `in` albo `out`: start z sesją albo bez niej (z `?loginError=<kod>` pokazuje błędy logowania) |
 
-Token zaczynający się od `invalid` daje `422 secret_invalid`, od `other-user` `422 identity_mismatch`. Identyfikator
+Token zaczynający się od `invalid` daje `422 secret_invalid`. Identyfikator
 linku `team-a-dev` jest "cudzy": POST odpowiada `409 slug_taken`.
 
 Z prawdziwym BFF (ws-01, port 18090):

@@ -10,7 +10,7 @@
 
 
 /**
- * Value of `connectError` appended to returnPath after a failed OAuth connection (CC-022, CC-086). Closed list. cancelled = the user cancelled at the provider (error=access_denied).
+ * Value of `connectError` appended to returnPath after a failed OAuth connection (CC-022, CC-086). Closed list. cancelled = the user cancelled at the provider (error=access_denied). identity_mismatch is deprecated and no longer returned (CC-101; removed in 3.0.0).
  */
 export const ConnectErrorCode = {
     IdentityMismatch: 'identity_mismatch',

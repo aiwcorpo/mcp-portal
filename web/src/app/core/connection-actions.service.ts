@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
   AccessRequestsService,
+  CatalogTool,
   ConnectionsService,
   PortalCatalogServer,
   SystemId,
@@ -21,11 +22,20 @@ export type AccessRequestResult =
   | { kind: 'unavailable' }
   | { kind: 'failed'; failure: ApiFailure };
 
-/** The entitlement to ask for: the first one that a denied tool of the server needs. */
-export function entitlementToRequest(server: PortalCatalogServer): string | null {
-  for (const tool of server.tools) {
-    if (tool.access === 'denied' && tool.requiredEntitlements.length) {
-      return tool.requiredEntitlements[0];
+/**
+ * The entitlement to ask for. With a tool (the wizard: the one that was clicked) it is that tool's;
+ * without one (a whole server row) the first denied tool's. Any one of a tool's entitlements grants it.
+ */
+export function entitlementToRequest(
+  server: PortalCatalogServer,
+  tool?: CatalogTool,
+): string | null {
+  if (tool) {
+    return tool.requiredEntitlements[0] ?? null;
+  }
+  for (const candidate of server.tools) {
+    if (candidate.access === 'denied' && candidate.requiredEntitlements.length) {
+      return candidate.requiredEntitlements[0];
     }
   }
   return null;
@@ -84,8 +94,11 @@ export class ConnectionActions {
   }
 
   /** The IGA either hands back a form to open (https only) or creates the request itself (C13). */
-  async requestAccess(server: PortalCatalogServer): Promise<AccessRequestResult> {
-    const entitlement = entitlementToRequest(server);
+  async requestAccess(
+    server: PortalCatalogServer,
+    tool?: CatalogTool,
+  ): Promise<AccessRequestResult> {
+    const entitlement = entitlementToRequest(server, tool);
     if (!entitlement) {
       return { kind: 'unavailable' };
     }

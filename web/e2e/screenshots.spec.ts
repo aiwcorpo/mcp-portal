@@ -62,16 +62,12 @@ test.describe('screenshots', () => {
     await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
     await expect(page.getByText('Token nieprawidłowy albo wygasł.')).toBeVisible();
     await shot(page, project, '05-token-pat-secret-invalid');
-    await page.getByLabel('Token PAT', { exact: true }).fill('other-user-token');
-    await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
-    await expect(page.getByText('Token należy do innego konta.')).toBeVisible();
-    await shot(page, project, '05-token-pat-identity-mismatch');
 
     await page.goto('/catalog?mockScenario=default&mockOAuth=ok');
     await page.getByRole('button', { name: 'Połącz (GitLab)' }).click();
     await expect(page.getByText('Połączono z GitLab jako jkowalski.')).toBeVisible();
     await shot(page, project, '21-powrot-z-oauth-sukces');
-    for (const outcome of ['identity_mismatch', 'flow_invalid', 'provider_error', 'cancelled']) {
+    for (const outcome of ['flow_invalid', 'provider_error', 'cancelled']) {
       await page.goto(`/catalog?mockScenario=default&mockOAuth=${outcome}`);
       await page.getByRole('button', { name: /^(Połącz|Połącz przez OAuth) \(GitLab\)$/ }).click();
       await expect(page.getByRole('alert')).toBeVisible();

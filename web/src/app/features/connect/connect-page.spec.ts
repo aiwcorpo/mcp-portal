@@ -97,7 +97,7 @@ describe('ConnectPage', () => {
     type(dateInput(), '2027-01-31');
     button('Sprawdź i zapisz').click();
 
-    await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
+    await until(() => expect(text()).toContain('Połączono z Jira jako jkowalski.'));
     expect(text()).toContain('Token ważny do 31.01.2027.');
     expect(tokenInput()).toBeNull();
     expect(JSON.parse(bodies[0])).toEqual({
@@ -123,7 +123,7 @@ describe('ConnectPage', () => {
 
     type(tokenInput(), 'token-without-date');
     button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
+    await until(() => expect(text()).toContain('Połączono z Jira jako jkowalski.'));
     expect(JSON.parse(bodies[0])).toEqual({ secret: 'token-without-date' });
   });
 
@@ -141,15 +141,21 @@ describe('ConnectPage', () => {
     expect(text()).not.toContain('invalid-token-value');
   });
 
-  it('shows "Token należy do innego konta." for identity_mismatch', async () => {
+  it('does not single out a stray identity_mismatch (deprecated since 2.2.3)', async () => {
+    server.use(
+      http.put('/api/v1/connections/jira/secret', () =>
+        HttpResponse.json({ error: 'identity_mismatch' }, { status: 422 }),
+      ),
+    );
     configureTestApp();
     await openRoute('/connect/jira');
     await until(() => expect(tokenInput()).toBeTruthy());
 
-    type(tokenInput(), 'other-user-token');
+    type(tokenInput(), 'some-token-value');
     button('Sprawdź i zapisz').click();
 
-    await until(() => expect(text()).toContain('Token należy do innego konta.'));
+    await until(() => expect(text()).toContain('Żądanie zostało odrzucone jako niepoprawne.'));
+    expect(text()).not.toContain('innego konta');
     expect(tokenInput().value).toBe('');
   });
 
@@ -200,7 +206,7 @@ describe('ConnectPage', () => {
 
     type(tokenInput(), '  glpat-trimmed-0003\n');
     button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
+    await until(() => expect(text()).toContain('Połączono z Jira jako jkowalski.'));
     expect(JSON.parse(bodies[0]).secret).toBe('glpat-trimmed-0003');
   });
 

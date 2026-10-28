@@ -28,7 +28,6 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
   csrf_invalid: () =>
     $localize`:@@error.csrf_invalid:Formularz stracił ważność. Odśwież stronę i spróbuj ponownie.`,
   secret_invalid: () => $localize`:@@error.secret_invalid:Token nieprawidłowy albo wygasł.`,
-  identity_mismatch: () => $localize`:@@error.identity_mismatch:Token należy do innego konta.`,
   slug_taken: () => $localize`:@@error.slug_taken:Ten identyfikator jest już zajęty. Wybierz inny.`,
   resource_defaults_unsupported: () =>
     $localize`:@@error.resource_defaults_unsupported:Zawężanie zasobów nie jest jeszcze dostępne.`,

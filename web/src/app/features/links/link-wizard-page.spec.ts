@@ -155,7 +155,7 @@ describe('LinkWizardPage', () => {
       expect(text()).not.toContain('jira__get_issue');
     });
 
-    it('leads to the connect page from a not-connected row and requests access from a denied one', async () => {
+    it('leads to the connect page from a not-connected row and offers no access request in M2', async () => {
       configureTestApp();
       await openRoute('/links/new');
       await toToolsStep('Zestaw');
@@ -165,9 +165,8 @@ describe('LinkWizardPage', () => {
       );
       expect(connect).toBeTruthy();
 
-      button('Złóż wniosek (Confluence)').click();
-      await until(() => expect(text()).toContain('Wniosek złożony (REQ-2026-0043).'));
-      expect(store.state.requested).toContain('confluence');
+      expect(text()).toContain('Brak uprawnienia');
+      expect(text()).not.toContain('Złóż wniosek');
     });
   });
 
@@ -201,6 +200,77 @@ describe('LinkWizardPage', () => {
     expect(text()).toContain('jira__search_issues, jira__get_issue');
     expect(text()).toContain('Konfiguracja nie zawiera tokenu ani hasła.');
     expect(store.state.links?.some((link) => link.slug === 'moj-zestaw')).toBe(true);
+  });
+
+  it('refuses a name made of spaces', async () => {
+    configureTestApp();
+    await openRoute('/links/new');
+    await until(() => expect(input('link-name')).toBeTruthy());
+
+    type(input('link-name'), '   ');
+    type(input('link-slug'), 'zestaw');
+    button('Dalej').click();
+
+    await until(() => expect(text()).toContain('Podaj nazwę'));
+    expect(text()).not.toContain('Wybierz narzędzia');
+  });
+
+  it('drops a tool that became blocked while the wizard was open, instead of failing again', async () => {
+    const bodies: { tools: string[] }[] = [];
+    server.events.on('request:start', async ({ request }) => {
+      if (request.method === 'POST' && request.url.endsWith('/api/v1/virtual-servers')) {
+        bodies.push((await request.clone().json()) as { tools: string[] });
+      }
+    });
+    const jira = (second: 'granted' | 'denied') =>
+      serverFixture('jira', {
+        tools: [
+          toolFixture('jira__get_issue'),
+          toolFixture('jira__delete_issue', { access: second }),
+        ],
+      });
+    server.use(
+      http.get('/api/v1/catalog', () => HttpResponse.json({ servers: [jira('granted')] })),
+      http.post(
+        '/api/v1/virtual-servers',
+        () => HttpResponse.json({ error: 'access_denied' }, { status: 403 }),
+        { once: true },
+      ),
+    );
+    configureTestApp();
+    await openRoute('/links/new');
+    await toToolsStep('Zestaw');
+    checkbox('jira__get_issue').click();
+    checkbox('jira__delete_issue').click();
+
+    server.use(http.get('/api/v1/catalog', () => HttpResponse.json({ servers: [jira('denied')] })));
+    button('Utwórz link').click();
+    await until(() => expect(checkbox('jira__delete_issue').disabled).toBe(true));
+
+    button('Utwórz link').click();
+
+    await until(() => expect(text()).toContain('jest gotowy'));
+    expect(bodies.at(-1)?.tools).toEqual(['jira__get_issue']);
+  });
+
+  it('explains a 400 on create (link limit of the gateway) next to the request id', async () => {
+    server.use(
+      http.post('/api/v1/virtual-servers', () =>
+        HttpResponse.json(
+          { error: 'invalid_request', requestId: '0192d1b2-7c3a' },
+          { status: 400 },
+        ),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/links/new');
+    await toToolsStep('Zestaw');
+    checkbox('jira__get_issue').click();
+
+    button('Utwórz link').click();
+
+    await until(() => expect(text()).toContain('limit 50 linków na użytkownika'));
+    expect(text()).toContain('0192d1b2');
   });
 
   it('switches between Claude Code, Copilot and Codex and copies the visible one', async () => {
@@ -242,8 +312,10 @@ describe('LinkWizardPage', () => {
 
   it('shows access_denied from the API on the tools step and reloads the catalog', async () => {
     server.use(
-      http.post('/api/v1/virtual-servers', () =>
-        HttpResponse.json({ error: 'access_denied' }, { status: 403 }),
+      http.post(
+        '/api/v1/virtual-servers',
+        () => HttpResponse.json({ error: 'access_denied' }, { status: 403 }),
+        { once: true },
       ),
     );
     configureTestApp();

@@ -20,15 +20,14 @@ import type {
 } from '../app/api/generated';
 
 /**
- * Stateful layer over the contract MSW handlers (@aiwcorpo/mcp-contracts 2.2.1). Response bodies come
+ * Stateful layer over the contract MSW handlers (@aiwcorpo/mcp-contracts 2.2.3). Response bodies come
  * from the C12 examples (catalog `states` or `mixed`); the layer tracks what the contract mock cannot:
  * the session, the connections the user adds or removes, access requests and virtual servers. Requests
  * it does not handle fall through to the contract handlers, which also enforce the CSRF rule.
  */
 
 export type MockScenario = 'default' | 'mixed' | 'empty' | 'nolinks' | 'errors';
-export type MockOAuthOutcome =
-  'ok' | 'cancelled' | 'identity_mismatch' | 'flow_invalid' | 'provider_error';
+export type MockOAuthOutcome = 'ok' | 'cancelled' | 'flow_invalid' | 'provider_error';
 
 /** A connection the user changed in the mock; `null` stands for "disconnected". */
 export interface MockConnection {
@@ -358,9 +357,6 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       if (body.secret.startsWith('invalid')) {
         return portalBffExample('putMySecret', 'secret_invalid');
       }
-      if (body.secret.startsWith('other-user')) {
-        return portalBffExample('putMySecret', 'identity_mismatch');
-      }
       const system = params['system'] as SystemId;
       const expiresAt = body.expiresAt ?? null;
       const soon =
@@ -486,7 +482,8 @@ export function completeMockLogin(store: MockStore): void {
 export function completeMockOAuth(store: MockStore): string {
   const pending = store.state.pendingOAuth;
   if (!pending) {
-    return '/catalog?connectError=flow_invalid';
+    // The BFF sends an unknown or used flow to the root, whatever the page the user started from (C12).
+    return '/?connectError=flow_invalid';
   }
   const separator = pending.returnPath.includes('?') ? '&' : '?';
   const outcome = store.state.oauthOutcome;

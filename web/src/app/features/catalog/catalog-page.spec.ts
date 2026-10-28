@@ -45,7 +45,7 @@ describe('CatalogPage', () => {
     expect(text(row('GitLab'))).toContain('Wymaga ponownego połączenia');
     expect(button('Połącz (GitLab)', row('GitLab'))).toBeTruthy();
     expect(text(row('Confluence'))).toContain('Brak uprawnienia');
-    expect(button('Złóż wniosek (Confluence)', row('Confluence'))).toBeTruthy();
+    expect(text(row('Confluence'))).not.toContain('Złóż wniosek');
     expect(text(row('Service Desk'))).toContain('Konto serwisowe');
     expect(text(row('Service Desk'))).toContain('Połączone');
     expect(document.body.textContent).not.toContain('Rozłącz');
@@ -113,7 +113,7 @@ describe('CatalogPage', () => {
           tools: [toolFixture('jira__get', { access: 'denied' })],
         }),
         'Brak uprawnienia',
-        ['Złóż wniosek (Jira)'],
+        [],
       ],
     ];
 
@@ -240,22 +240,12 @@ describe('CatalogPage', () => {
     await until(() => expect(TestBed.inject(Router).url).toBe('/connect/jira'));
   });
 
-  it('requests access for the entitlement a denied tool needs, then shows the pending status', async () => {
-    const bodies: unknown[] = [];
-    server.events.on('request:start', async ({ request }) => {
-      if (request.url.endsWith('/api/v1/access-requests') && request.method === 'POST') {
-        bodies.push(await request.clone().json());
-      }
-    });
+  it('does not offer access requests while the BFF has none (M4), even when it lists them', async () => {
     configureTestApp();
     await openRoute('/catalog');
     await until(() => expect(text()).toContain('Confluence'));
 
-    button('Złóż wniosek (Confluence)').click();
-
-    await until(() => expect(text()).toContain('Wniosek złożony (REQ-2026-0043).'));
-    expect(bodies).toEqual([{ entitlement: 'mcp-confluence-read' }]);
-    await until(() => expect(text(row('Confluence'))).toContain('Wniosek oczekuje'));
+    expect(text()).not.toContain('Złóż wniosek');
   });
 
   describe('return from the OAuth provider', () => {
@@ -275,18 +265,32 @@ describe('CatalogPage', () => {
     });
 
     it.each([
-      [
-        'identity_mismatch',
-        'Zalogowano się w GitLab na inne konto niż Twoje. Wyloguj się z GitLab i spróbuj ponownie.',
-      ],
       ['flow_invalid', 'Link połączenia wygasł albo był już użyty. Zacznij od nowa.'],
       ['provider_error', 'GitLab nie odpowiedział poprawnie. Spróbuj za chwilę.'],
+      ['identity_mismatch', 'GitLab nie odpowiedział poprawnie. Spróbuj za chwilę.'],
       ['cancelled', 'Łączenie z GitLab anulowane.'],
     ])('connectError=%s', async (code, message) => {
       configureTestApp();
       await openRoute(`/catalog?system=gitlab&connectError=${code}`);
       await until(() => expect(text()).toContain(message));
       expect(document.querySelector('[role="alert"]')).toBeTruthy();
+    });
+
+    it('says nothing about a success the catalog does not show', async () => {
+      server.use(
+        serve([
+          serverFixture('gitlab', {
+            status: 'not_connected',
+            actions: ['connect_oauth'],
+          }),
+        ]),
+      );
+      configureTestApp();
+      await openRoute('/catalog?system=gitlab&connected=gitlab');
+      await until(() => expect(text(row('GitLab'))).toContain('Niepołączone'));
+
+      expect(text()).not.toContain('Połączono z GitLab');
+      await until(() => expect(location.search).not.toContain('connected'));
     });
 
     it('does not trust an unknown connectError or system name', async () => {
