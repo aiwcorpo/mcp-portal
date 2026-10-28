@@ -28,11 +28,6 @@ class ConnectRedirectVectorsTest {
         JsonMapper json = JsonMapper.builder().build();
         List<Arguments> result = new ArrayList<>();
         for (Resource file : files) {
-            // The test-vectors jar of 3.0.1 in ~/.m2 still carries these two files from 2.x; the repository and its
-            // tag only have the negative invalid-identity-mismatch*.json (contracts must be rebuilt with clean).
-            if (file.getFilename().startsWith("valid-identity-mismatch")) {
-                continue;
-            }
             try (InputStream in = file.getInputStream()) {
                 JsonNode vector = json.readTree(in);
                 result.add(Arguments.of(file.getFilename(), vector.get("location").asString(),

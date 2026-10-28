@@ -3,7 +3,9 @@ package pl.aiwcorpo.mcp.portal.bff.config;
 import java.net.URI;
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +26,11 @@ import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
  * decide where keys and tokens are fetched from.
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = "portal.oidc", name = "token-uri")
+// An empty PORTAL_OIDC_TOKEN_URI (unset variable in a compose file) means discovery, not an incomplete setup.
+@ConditionalOnExpression("!'${portal.oidc.token-uri:}'.isBlank()")
 class OidcRegistrationConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(OidcRegistrationConfig.class);
 
     @Bean
     ClientRegistrationRepository clientRegistrationRepository(PortalProperties properties, Environment environment) {
@@ -64,7 +69,10 @@ class OidcRegistrationConfig {
             backChannel(oidc.userInfoUri(), "portal.oidc.user-info-uri", devMode);
             builder.userInfoUri(oidc.userInfoUri());
         }
-        if (!isBlank(oidc.endSessionUri())) {
+        if (isBlank(oidc.endSessionUri())) {
+            log.warn("portal.oidc.end-session-uri is not set: logout ends the portal session only, the SSO session"
+                    + " at the IdP stays and the next login may not ask for a password");
+        } else {
             backChannel(oidc.endSessionUri(), "portal.oidc.end-session-uri", devMode);
             builder.providerConfigurationMetadata(Map.of("end_session_endpoint", oidc.endSessionUri()));
         }

@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 /** C5 operations of the BFF. Every call carries the user's token exchanged for the gateway admin API. */
 public class GatewayAdminClient {
@@ -42,10 +43,10 @@ public class GatewayAdminClient {
                 response -> null);
     }
 
-    public GatewayModel.ConfirmationView confirmation(BearerToken token, String requestId, String confirmationId) {
+    public JsonNode confirmation(BearerToken token, String requestId, String confirmationId) {
         return calls.call(calls.authorize(calls.http().get().uri("/admin/v1/confirmations/{id}", confirmationId),
                         token, requestId),
-                response -> calls.read(response, GatewayModel.ConfirmationView.class));
+                response -> calls.read(response, JsonNode.class));
     }
 
     public void markConfirmationViewed(BearerToken token, String requestId, String confirmationId) {
@@ -67,7 +68,7 @@ public class GatewayAdminClient {
                     return builder.build(variables);
                 }), token, requestId),
                 response -> new GatewayModel.ActivityCallsPage(
-                        calls.read(response, new TypeReference<List<GatewayModel.ActivityCall>>() { }),
+                        calls.read(response, new TypeReference<List<JsonNode>>() { }),
                         response.getHeaders().getFirst("X-Next-Cursor")));
     }
 }

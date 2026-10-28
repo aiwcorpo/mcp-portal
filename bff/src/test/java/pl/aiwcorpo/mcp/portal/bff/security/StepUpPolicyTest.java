@@ -25,7 +25,7 @@ class StepUpPolicyTest {
 
     private static PortalProperties properties(List<String> acrValues) {
         return new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
-                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues, "/authenticator"), null, null, null, null, null);
+                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues, List.of(), "/authenticator"), null, null, null, null, null);
     }
 
     private static StepUpPolicy policy(List<String> acrValues) {
@@ -63,6 +63,24 @@ class StepUpPolicyTest {
                             "step_up_required", "/api/v1/auth/login?stepUp=true&returnPath=/authenticator"));
                 });
         policy.requireFresh(user(NOW, "1"), "/authenticator");
+    }
+
+    @Test
+    void amrFromTheIdTokenCountsAsMfaWhenConfigured() {
+        PortalProperties properties = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
+                new PortalProperties.StepUp(Duration.ofMinutes(5), List.of(), List.of("mfa"), "/authenticator"),
+                null, null, null, null, null);
+        StepUpPolicy policy = new StepUpPolicy(properties, new DevMode(false), CLOCK);
+        assertThat(policy.isFresh(withAmr(List.of("pwd", "mfa")))).isTrue();
+        assertThat(policy.isFresh(withAmr(List.of("pwd")))).isFalse();
+        assertThat(policy.isFresh(withAmr(null))).isFalse();
+        assertThat(policy.isFresh(withAmr("mfa"))).as("amr is a list").isFalse();
+        assertThat(policy.acrValuesParameter()).isNull();
+    }
+
+    private static PortalUser withAmr(Object amr) {
+        Map<String, Object> claims = amr == null ? Map.of() : Map.of("amr", amr);
+        return new PortalUser("sub-1", "alice", "Alice", null, Set.of(), NOW, "1", claims);
     }
 
     @Test

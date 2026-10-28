@@ -90,4 +90,20 @@ class BackchannelOidcTest extends PortalHarness {
                         "--portal.web.dist-path=src/test/resources/spa-fixture"))
                 .hasRootCauseMessage("portal.oidc.authorization-uri is required when portal.oidc is used instead of discovery");
     }
+
+    @Test
+    void anEmptyTokenUriMeansDiscovery() {
+        try (ConfigurableApplicationContext context = new SpringApplicationBuilder(PortalBffApplication.class)
+                .profiles("dev")
+                .run("--server.port=0",
+                        "--spring.security.oauth2.client.provider.keycloak.issuer-uri=" + IDP.issuer(),
+                        "--spring.security.oauth2.client.registration.keycloak.client-id=" + FakeIdp.CLIENT_ID,
+                        "--spring.security.oauth2.client.registration.keycloak.client-secret=" + FakeIdp.CLIENT_SECRET,
+                        "--portal.oidc.token-uri=",
+                        "--portal.broker.base-url=http://127.0.0.1:9", "--portal.gateway-admin.base-url=http://127.0.0.1:9",
+                        "--portal.tls.insecure-plain-http-for-tests=true", "--portal.public-base-url=https://mcp-gateway.internal",
+                        "--portal.web.dist-path=src/test/resources/spa-fixture")) {
+            assertThat(context.isRunning()).isTrue();
+        }
+    }
 }

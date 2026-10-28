@@ -79,6 +79,6 @@ public final class GatewayModel {
     }
 
     /** One page of {@code activity/calls}; {@code nextCursor} is the gateway's {@code X-Next-Cursor}, untouched. */
-    public record ActivityCallsPage(List<ActivityCall> calls, String nextCursor) {
+    public record ActivityCallsPage(List<tools.jackson.databind.JsonNode> calls, String nextCursor) {
     }
 }

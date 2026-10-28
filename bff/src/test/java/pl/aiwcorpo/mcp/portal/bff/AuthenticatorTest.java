@@ -262,6 +262,12 @@ class AuthenticatorTest extends PortalHarness {
         assertThat(foreign.statusCode()).isEqualTo(404);
         assertThat(JSON.readTree(foreign.body()).get("error").asString()).isEqualTo("not_found_or_denied");
         assertThat(brokerCalls("/v1/authenticator/enrollment/confirm")).isZero();
+        JsonNode refused = lastAuditEvent();
+        ContractSchemas.assertValid(AUDIT, refused);
+        assertThat(refused.get("event").asString()).isEqualTo("authenticator");
+        assertThat(refused.get("reason").asString()).isEqualTo("authenticator_enrollment_failed");
+        assertThat(refused.get("errorCode").asString()).isEqualTo("not_found_or_denied");
+        assertThat(refused.get("sub").asString()).isEqualTo(ALICE.sub());
 
         HttpResponse<String> wrongId = owner.post(CONFIRM,
                 "{\"enrollmentId\":\"enr_AAAAAAAAAAAAAAAA\",\"code\":\"" + CODE + "\"}", true);

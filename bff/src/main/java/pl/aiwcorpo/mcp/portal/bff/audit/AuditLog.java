@@ -83,6 +83,30 @@ public class AuditLog {
     }
 
     /**
+     * A write on a confirmation that the portal itself refused (the gateway audits the ones it accepts): a sign of a
+     * request that did not come from the preview page of the user.
+     */
+    public void confirmationRejected(String requestId, PortalUser user, String reason) {
+        write(new AuditEvent(
+                clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
+                requestId,
+                "portal",
+                componentId,
+                "confirmation",
+                user.sub(),
+                user.username(),
+                null,
+                null,
+                "deny",
+                reason,
+                null,
+                null,
+                "denied",
+                "access_denied",
+                0L));
+    }
+
+    /**
      * {@code authenticator} event of the portal (CC-094): registration started, completed or failed, registration
      * removed. The event schema has no field for a seed, an otpauth URI or a code, and none is ever passed here.
      */

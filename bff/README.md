@@ -4,11 +4,11 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 3.0.1 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 3.0.2 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
 
 ## Uruchomienie lokalne
 
-Wymagane: JDK 25 i `mcp-contracts` 3.0.1 w `~/.m2`. Dwa tryby.
+Wymagane: JDK 25 i `mcp-contracts` 3.0.2 w `~/.m2`. Dwa tryby.
 
 Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
@@ -168,15 +168,19 @@ BFF nie ma endpointu decyzji (`POST /api/v1/confirmations/{id}` to 405).
   audytu; w sesji zostaje `enrollmentId`, a cudzy lub zużyty to `404 not_found_or_denied`. Stan `disabled` z `disabledAt` i
   `disabledReason` jest przekazywany; start rejestracji ze stanu `disabled` nie woła wcześniej `DELETE`.
   `GET /api/v1/me` zwraca `mfaFreshUntil`, gdy ostatnie logowanie liczy się jako świeże.
-- Step-up w dev: `portal.step-up.acr-values` puste (realm dev nie ma jeszcze poziomu `acr` dla MFA), więc o świeżości
-  decyduje `auth_time` (`portal.step-up.max-age`, 5 min) i ponowne logowanie hasłem. Z poziomem MFA w Keycloaku:
-  `PORTAL_STEP_UP_ACR_VALUES`. Poza profilem dev puste `acr-values` to błąd startu.
+- Step-up: o świeżości decydują `auth_time` (`portal.step-up.max-age`, 5 min, ponowne logowanie z `max_age=0`) oraz dowód MFA.
+  Dowodem jest `acr` z listy `PORTAL_STEP_UP_ACR_VALUES` (Keycloak; wysyłane też jako `acr_values`; dev: `mfa`) albo `amr` z ID
+  tokenu zawierający wartość z `PORTAL_STEP_UP_AMR_VALUES` (Entra ID: `mfa`, gdy Conditional Access wymusiło drugi czynnik; polityka
+  musi obejmować aplikację portalu). Wystarczy jedno ze źródeł. Obie listy puste: tylko `auth_time`, dozwolone wyłącznie w profilu
+  `dev`, inaczej błąd startu.
 - Audyt: `authenticator` (`authenticator_enrollment_started`, `authenticator_registered`,
   `authenticator_enrollment_failed`, `authenticator_removed`, `step_up_required`, `upstream_unavailable`) i
   `virtual_server_change` zamiast `admin_change` (`vs_created`, `vs_deleted`, `slug_taken`, `not_granted`, `invalid_request`,
   `virtual_server_limit`, `not_found_or_denied`). Zdarzenia `confirmation` (w tym `cancelled_by_owner`) pisze gateway.
+- Podgląd: odpowiedź gateway'a jest czytana jako obiekt zamknięty (pole spoza schematu: 503), najwyżej 64 argumenty, wartość po
+  neutralizacji najwyżej 8192 znaki (dłuższa cięta, `truncated: true`).
 - Tekst w podglądzie: wartości argumentów ze znakami ukrytymi (`TextHygiene`: bidi, zero-width, tag, wypełniacze, sterujące poza
-  `\n` i `\t`, separatory, samotne surogaty, prywatne i nieprzypisane) trafiają do przeglądarki jako `<U+202E>`; nazwa
+  `\n` i `\t`, separatory, samotne surogaty, prywatne i nieprzypisane) trafiają do przeglądarki jako `<U+202E>` (literalne `<U+` w wartości dostaje `<U+003C>`, więc zapis zawsze znaczy znak, który tam był); nazwa
   argumentu, `resource.id`, `resource.parent` i `client` z takimi znakami powodują odrzucenie (podglądu albo wiersza). Definicja
   wg CC-121, ostrzejsza o U+200C..U+200F i CR.
 - `ReturnPath` (CC-099): bez średnika; pierwszy segment nie jest `api`, `s`, `v` ani `.well-known`; żaden segment ścieżki
@@ -204,7 +208,9 @@ działa discovery jak dotąd. Dla mcp-platform-dev (zmiana compose po stronie ws
 `PORTAL_OIDC_TOKEN_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/token`,
 `PORTAL_OIDC_JWK_SET_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/certs`,
 `PORTAL_OIDC_END_SESSION_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/logout`; po tym `idp-relay`
-i `JAVA_TOOL_OPTIONS` z truststore'em dev public CA w BFF są zbędne.
+i `JAVA_TOOL_OPTIONS` z truststore'em dev public CA w BFF są zbędne. Bez `PORTAL_OIDC_END_SESSION_URI` wylogowanie kończy
+tylko sesję BFF (sesja SSO w IdP zostaje), co BFF zgłasza ostrzeżeniem przy starcie. Pusta wartość `PORTAL_OIDC_TOKEN_URI`
+oznacza discovery.
 
 ## Struktura
 

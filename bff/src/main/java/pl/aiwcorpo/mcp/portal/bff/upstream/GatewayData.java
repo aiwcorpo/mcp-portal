@@ -8,6 +8,11 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
 /**
  * Checks the confirmation preview and the activity rows of C5 against the contract before they reach the browser,
  * which shows them in a trusted page. A preview that does not fit is not shown; a bad activity row is dropped.
@@ -30,16 +35,35 @@ public final class GatewayData {
     private static final Pattern ARGUMENT_NAME = Pattern.compile("^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$");
     private static final Pattern CLIENT = Pattern.compile("^[A-Za-z0-9._:-]{1,255}$");
     private static final int MAX_PARENT = 600;
+    private static final int MAX_ARGUMENTS = 64;
+    // Characters shown per argument value after hidden ones were written out; longer values are cut and marked.
+    static final int MAX_SHOWN_VALUE = 8192;
+    // Closed objects: a field the schema does not know is a contract breach, not something to drop quietly.
+    private static final JsonMapper CLOSED = StrictJson.builder()
+            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
     private static final int MAX_TOOL = 80;
 
     private GatewayData() {
+    }
+
+    /** The answer as {@code ConfirmationView}, or null when it has a field or a type the closed schema does not. */
+    public static GatewayModel.ConfirmationView closedConfirmation(JsonNode node) {
+        return closed(node, GatewayModel.ConfirmationView.class);
+    }
+
+    private static <T> T closed(JsonNode node, Class<T> type) {
+        try {
+            return node == null ? null : CLOSED.treeToValue(node, type);
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     /** The preview of {@code expectedId}, or null when the gateway's answer is not that call or breaks the schema. */
     public static GatewayModel.ConfirmationView validConfirmation(GatewayModel.ConfirmationView view, String expectedId) {
         if (view == null || !expectedId.equals(view.confirmationId()) || !validTool(view.tool())
                 || !BrokerData.SYSTEMS.contains(view.system()) || !ContractValues.isTimestamp(view.expiresAt())
-                || view.arguments() == null || !(view.resource() == null || validResource(view.resource()))) {
+                || view.arguments() == null || view.arguments().size() > MAX_ARGUMENTS || !(view.resource() == null || validResource(view.resource()))) {
             return null;
         }
         List<GatewayModel.ConfirmationArgument> arguments = new ArrayList<>();
@@ -48,8 +72,10 @@ public final class GatewayData {
                     || argument.value() == null || argument.truncated() == null) {
                 return null;
             }
-            arguments.add(new GatewayModel.ConfirmationArgument(argument.name(), neutralize(argument.value()),
-                    argument.truncated()));
+            String shown = TextHygiene.neutralize(argument.value());
+            boolean cut = shown.length() > MAX_SHOWN_VALUE;
+            arguments.add(new GatewayModel.ConfirmationArgument(argument.name(),
+                    cut ? TextHygiene.cutAtNotation(shown, MAX_SHOWN_VALUE) : shown, cut || argument.truncated()));
         }
         return new GatewayModel.ConfirmationView(view.confirmationId(), view.tool(), view.system(), view.resource(),
                 arguments, view.expiresAt());
@@ -67,9 +93,10 @@ public final class GatewayData {
     }
 
     /** Rows that fit {@code ActivityCall}; the others are left out with a warning that carries no value. */
-    public static List<GatewayModel.ActivityCall> validActivityCalls(List<GatewayModel.ActivityCall> calls) {
+    public static List<GatewayModel.ActivityCall> validActivityCalls(List<JsonNode> rows) {
         List<GatewayModel.ActivityCall> result = new ArrayList<>();
-        for (GatewayModel.ActivityCall call : calls == null ? List.<GatewayModel.ActivityCall>of() : calls) {
+        for (JsonNode row : rows == null ? List.<JsonNode>of() : rows) {
+            GatewayModel.ActivityCall call = closed(row, GatewayModel.ActivityCall.class);
             if (validActivityCall(call)) {
                 result.add(call);
             } else {

@@ -10,10 +10,11 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M2.3 | wirtualne serwery: lista, utworzenie, usunięcie, `409 slug_taken`, kolejność kontroli `resourceDefaults` (CC-085), `clientConfigs` | zrobione |
 | M2.4 | mocki WireMock C4/C5 jako proces hosta (adresy w konfiguracji), testy negatywne (sekret w logach, returnPath, cudza sesja, brak XSRF), README, raport | zrobione |
 | M2.5 | runda poprawek po przeglądzie Opus M2, smoke Haiku, decyzja o braku sprawdzania tożsamości (mcp-contracts 2.2.3) | zrobione |
-| M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | w toku: M3.1 poniżej; wnioski IGA i admin zostają na M4 |
+| M3 (poza M2) | potwierdzenia (pivot TOTP), aktywność, Authenticator, `ReturnPath` CC-099 | zrobione w M3.1-M3.4; wnioski IGA i admin zostają na M4 |
 | M3.1 | kontrakty 3.0.1, `ReturnPath` CC-099, `virtual_server_change`, potwierdzenia (podgląd, viewed, cancel), `activity/calls`, Authenticator ze step-up, `Me.mfaFreshUntil` | zrobione |
 | M3.2 | osobne adresy token/JWKS przy `issuer-uri` (bez `idp-relay`), higiena znaków ukrytych (CC-121) w podglądzie | zrobione |
-| M3.3 | brak koercji typów w ciałach żądań (`StrictJson`), test na żywo ze stosem po zmianie compose przez ws-01 | kod zrobiony, test na żywo przy integracji |
+| M3.3 | brak koercji typów w ciałach żądań (`StrictJson`), test na żywo ze stosem po zmianie compose przez ws-01 | zrobione; test na żywo przy integracji |
+| M3.4 | kontrakty 3.0.2 (czysty jar), poprawki przeglądu Opus M3 (L-1..L-8) | zrobione |
 
 ## M2: wynik (2026-10-28)
 
@@ -86,16 +87,6 @@ Kontrakty 2.2.5. `./mvnw test`: 177 testów, 0 błędów.
 - Do sprawdzenia przez ws-01 (klient `claude-code` w realmie `corp`, redirect `http://localhost:33418/callback`) i
   na żywo `claude mcp add ...` z tej komendy do końca Authenticate; do tego czasu komenda w dev jest sprawdzona tylko
   co do kształtu.
-
-## M3.2: OIDC bez discovery, higiena tekstu (2026-10-28)
-
-- `portal.oidc.*` (README, "OIDC z osobnymi adresami"): rejestracja klienta z jawnych adresów, `iss` nadal porównywany z `issuer-uri`.
-  Spring Boot 4.1 przy `issuer-uri` zawsze robi discovery i nadpisuje je jawnymi polami, więc samo ustawienie `token-uri` i
-  `jwk-set-uri` nie wystarcza; stąd własny `ClientRegistrationRepository`. Test: logowanie, wymiana tokenu i wylogowanie bez żadnego
-  żądania discovery; token z innym `iss` odrzucony. Nie sprawdzone na żywo z Keycloakiem (compose zmienia tylko ws-01).
-- `TextHygiene` wg CC-121 (wektory `text-hygiene/` w teście) zamiast ręcznej listy: Cf (zero-width, bidi, BOM, tag), Cc poza `\n`
-  i `\t`, separatory, surogaty, nieznaki, prywatne i nieprzypisane, selektory wariantu poza U+FE0F po emoji, wypełniacze. Ostrzejsza
-  od kontraktu o U+200C..U+200F i CR. `resource.id`/`parent` z takimi znakami: podgląd odrzucony (503), wiersz aktywności pominięty.
 
 ## Propozycje CC
 
@@ -295,3 +286,19 @@ długości `value`, więc BFF go nie wymyśla.
 - Brak innych. Uwaga do C8: powody `upstream_unavailable` dla `virtual_server_change` i `authenticator` (zob. wyżej).
 
 Obrazy: `mcp-portal-bff:m3-dd0ddff` (M3.1), `mcp-portal-bff:m3-c668b1e` (M3.2), skrypt `scripts/build-image.sh [ref]`.
+
+## M3.4: kontrakty 3.0.2, poprawki przeglądu M3 (2026-10-28)
+
+Zależność `mcp-contracts` 3.0.2 (czyste jary, zaostrzone wzorce C8, `503` w `viewed`). `./mvnw clean test`: 340 testów, 0 błędów;
+obejście stałych plików `valid-identity-mismatch*` w `ConnectRedirectVectorsTest` usunięte razem ze starym jarem.
+
+| Znalezisko | Poprawka |
+| --- | --- |
+| L-1 notacja `<U+XXXX>` niejednoznaczna | literalne `<` przed `U+` w wartości zamienia się na `<U+003C>`; test, że literał różni się od prawdziwego znaku |
+| L-2 brak limitu podglądu | najwyżej 64 argumenty (więcej: 503), wartość po neutralizacji najwyżej 8192 znaki, dłuższa jest cięta na granicy zapisu i dostaje `truncated: true` |
+| L-3 pola spoza schematu | `ConfirmationView` i `ActivityCall` (z `resource`) czytane jako zamknięte obiekty: nadmiarowe pole lub zły typ to 503 dla podglądu, pominięty wiersz dla aktywności; wektory `activity-calls/valid-*` i `invalid-*` w teście |
+| L-4 400 gateway'a jako 503 | każde 400 z `activity/calls` to `400 invalid_request` (BFF wysyła tylko sprawdzone filtry) |
+| L-5 end-session | pusty `PORTAL_OIDC_TOKEN_URI` oznacza discovery; brak `end-session-uri` w trybie jawnym daje ostrzeżenie przy starcie (README opisuje skutek) |
+| L-6 MFA tylko z `acr` | `portal.step-up.amr-values` (`PORTAL_STEP_UP_AMR_VALUES`): `amr` z ID tokenu zawierający wartość liczy się jak poziom `acr`; wystarczy jedno ze źródeł; poza `dev` któraś lista jest obowiązkowa. Nie sprawdzone z żywym Entra |
+| L-7 brak śladu odrzuceń | cudzy `enrollmentId` to zdarzenie `authenticator` (`authenticator_enrollment_failed`, `not_found_or_denied`); `viewed` odrzucone przez `Sec-Fetch-Site` to zdarzenie `confirmation` portalu (`fetch_site_not_same_origin`, deny) |
+| L-8 STATUS | jedna sekcja M3.2, zaktualizowana tabela |

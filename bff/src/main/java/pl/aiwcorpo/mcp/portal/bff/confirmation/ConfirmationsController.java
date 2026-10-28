@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
@@ -25,6 +26,7 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Pending confirmations of the current user (C12 over C5). A confirmation is the TOTP code typed in the MCP client,
@@ -38,10 +40,12 @@ class ConfirmationsController {
 
     private final UserTokens tokens;
     private final GatewayAdminClient gateway;
+    private final AuditLog audit;
 
-    ConfirmationsController(UserTokens tokens, GatewayAdminClient gateway) {
+    ConfirmationsController(UserTokens tokens, GatewayAdminClient gateway, AuditLog audit) {
         this.tokens = tokens;
         this.gateway = gateway;
+        this.audit = audit;
     }
 
     /** Read-only (CC-098): nothing here may change state at the gateway, so a prefetch of the page is harmless. */
@@ -50,14 +54,14 @@ class ConfirmationsController {
                                                           HttpServletRequest request, HttpServletResponse response) {
         PortalUser.from(authentication);
         requireKnownShape(id);
-        GatewayModel.ConfirmationView view;
+        JsonNode view;
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
             view = gateway.confirmation(token, RequestIds.of(request), id);
         } catch (UpstreamException e) {
             throw notFoundOr(e);
         }
-        GatewayModel.ConfirmationView checked = GatewayData.validConfirmation(view, id);
+        GatewayModel.ConfirmationView checked = GatewayData.validConfirmation(GatewayData.closedConfirmation(view), id);
         if (checked == null) {
             throw new UpstreamException("gateway admin", 502, null);
         }
@@ -75,8 +79,9 @@ class ConfirmationsController {
     @PostMapping("/api/v1/confirmations/{id}/viewed")
     ResponseEntity<Void> viewed(@PathVariable String id, Authentication authentication, HttpServletRequest request,
                                 HttpServletResponse response) {
-        PortalUser.from(authentication);
+        PortalUser user = PortalUser.from(authentication);
         if (!"same-origin".equals(request.getHeader("Sec-Fetch-Site"))) {
+            audit.confirmationRejected(RequestIds.of(request), user, "fetch_site_not_same_origin");
             throw new ApiException(HttpStatus.FORBIDDEN, ApiError.of(ApiError.CSRF_INVALID));
         }
         if (isSpeculative(request)) {

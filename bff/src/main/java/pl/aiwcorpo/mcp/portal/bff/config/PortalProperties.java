@@ -66,12 +66,16 @@ public record PortalProperties(
 
     /**
      * @param maxAge    how old the last interactive authentication may be for operations that need fresh MFA
-     * @param acrValues acr values that count as MFA; empty means any acr (only {@code auth_time} is checked)
+     * @param acrValues acr values that count as MFA (Keycloak levels); also sent as {@code acr_values} on step-up
+     * @param amrValues {@code amr} values that count as MFA (Entra ID reports {@code mfa} there); an ID token with
+     *                  one of them is fresh MFA evidence on its own. Both lists empty: only {@code auth_time} is
+     *                  checked, dev profile only
      * @param authenticatorReturnPath portal page of the registration, where a step-up for it comes back to
      */
     public record StepUp(
             @DefaultValue("5m") Duration maxAge,
             @DefaultValue List<String> acrValues,
+            @DefaultValue List<String> amrValues,
             @DefaultValue("/authenticator") String authenticatorReturnPath) {
 
         public StepUp {

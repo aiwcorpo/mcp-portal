@@ -91,4 +91,35 @@ class GatewayDataTest {
             assertThat(neutralized && !stricter).as(name + " must keep legitimate text").isFalse();
         }
     }
+
+    @Test
+    void aLiteralNotationIsNotTakenForTheRealThing() {
+        String literal = GatewayData.neutralize("file<U+202E>txt");
+        String real = GatewayData.neutralize("file\u202etxt");
+        assertThat(literal).isEqualTo("file<U+003C>U+202E>txt");
+        assertThat(real).isEqualTo("file<U+202E>txt");
+        assertThat(literal).isNotEqualTo(real);
+        assertThat(GatewayData.neutralize("a < b and U+0041")).isEqualTo("a < b and U+0041");
+    }
+
+    static Stream<Object[]> activityVectors() throws IOException {
+        JsonMapper json = JsonMapper.builder().build();
+        List<Object[]> vectors = new ArrayList<>();
+        for (Resource file : new PathMatchingResourcePatternResolver()
+                .getResources("classpath*:mcp-contracts/test-vectors/activity-calls/*.json")) {
+            String name = file.getFilename();
+            if (name.startsWith("valid-") || name.startsWith("invalid-")) {
+                try (InputStream in = file.getInputStream()) {
+                    vectors.add(new Object[] {name, json.readTree(in).get("value"), name.startsWith("valid-")});
+                }
+            }
+        }
+        return vectors.stream();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("activityVectors")
+    void activityRowsFollowTheContractVectors(String name, JsonNode row, boolean valid) {
+        assertThat(GatewayData.validActivityCalls(List.of(row))).as(name).hasSize(valid ? 1 : 0);
+    }
 }

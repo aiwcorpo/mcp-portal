@@ -13,7 +13,10 @@ public final class TextHygiene {
     private TextHygiene() {
     }
 
-    /** {@code text} with every hidden character written as {@code <U+XXXX>}; newline and tab stay. */
+    /**
+     * {@code text} with every hidden character written as {@code <U+XXXX>}; newline and tab stay. A literal
+     * {@code <} before {@code U+} is written as {@code <U+003C>}, so the notation always means a character that was there.
+     */
     public static String neutralize(String text) {
         StringBuilder out = null;
         int index = 0;
@@ -21,7 +24,8 @@ public final class TextHygiene {
         while (index < text.length()) {
             int cp = text.codePointAt(index);
             int width = Character.charCount(cp);
-            if (hidden(cp, previous, true)) {
+            // A literal "<U+" would read like the notation below; its "<" is written out too.
+            if (hidden(cp, previous, true) || cp == '<' && text.startsWith("U+", index + 1)) {
                 if (out == null) {
                     out = new StringBuilder(text.length() + 16).append(text, 0, index);
                 }
@@ -33,6 +37,25 @@ public final class TextHygiene {
             index += width;
         }
         return out == null ? text : out.toString();
+    }
+
+    /**
+     * Cuts text produced by {@link #neutralize} to at most {@code max} chars without splitting a surrogate pair or a
+     * {@code <U+XXXX>} notation.
+     */
+    public static String cutAtNotation(String neutralized, int max) {
+        if (neutralized.length() <= max) {
+            return neutralized;
+        }
+        int end = max;
+        int open = neutralized.lastIndexOf('<', end - 1);
+        if (open >= 0 && neutralized.startsWith("<U+", open) && neutralized.indexOf('>', open) >= end) {
+            end = open;
+        }
+        if (end > 0 && Character.isHighSurrogate(neutralized.charAt(end - 1))) {
+            end--;
+        }
+        return neutralized.substring(0, end);
     }
 
     /** True when {@code text} has no hidden character; with {@code lineBreaksAllowed} false newline and tab count too. */

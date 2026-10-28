@@ -121,9 +121,14 @@ class ActivityCallsTest extends PortalHarness {
         C12.assertResponse("GET", "/api/v1/activity/calls", tampered);
         assertThat(tampered.statusCode()).isEqualTo(400);
 
-        HttpResponse<String> withoutCursor = browser.get("/api/v1/activity/calls?limit=5");
-        C12.assertResponse("GET", "/api/v1/activity/calls", withoutCursor);
-        assertThat(withoutCursor.statusCode()).isEqualTo(503);
+        HttpResponse<String> badFilter = browser.get("/api/v1/activity/calls?from=2020-01-01T00:00:00Z");
+        C12.assertResponse("GET", "/api/v1/activity/calls", badFilter);
+        assertThat(badFilter.statusCode()).isEqualTo(400);
+
+        stub(500, null, "{\"error\":\"internal_error\"}");
+        HttpResponse<String> broken = browser.get("/api/v1/activity/calls?limit=5");
+        C12.assertResponse("GET", "/api/v1/activity/calls", broken);
+        assertThat(broken.statusCode()).isEqualTo(503);
     }
 
     @Test
@@ -151,6 +156,27 @@ class ActivityCallsTest extends PortalHarness {
 
         stub(200, "bad cursor with spaces", "[]");
         assertThat(browser.get("/api/v1/activity/calls").statusCode()).isEqualTo(503);
+    }
+
+    @Test
+    void rowsWithFieldsOutsideTheSchemaAreDropped() {
+        TestBrowser browser = session();
+        stub(200, null, """
+                [{"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e01","ts":"2026-10-26T20:00:00.000Z",
+                  "tool":"jira__get_issue","result":"ok","arguments":{"issueKey":"ABC-123"}},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e02","ts":"2026-10-26T20:00:00.000Z",
+                  "tool":"jira__get_issue","result":"ok","confirmation_code":"123456"},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e03","ts":"2026-10-26T20:00:00.000Z",
+                  "tool":"jira__get_issue","result":"ok","resource":{"type":"Jira::Issue","id":"ABC-1","name":"x"}},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e04","ts":"2026-10-26T20:00:00.000Z",
+                  "tool":"jira__get_issue","result":"ok"}]""");
+
+        HttpResponse<String> response = browser.get("/api/v1/activity/calls");
+
+        C12.assertResponse("GET", "/api/v1/activity/calls", response);
+        JsonNode rows = JSON.readTree(response.body());
+        assertThat(rows).hasSize(1);
+        assertThat(rows.get(0).get("requestId").asString()).endsWith("6e04");
     }
 
     @Test

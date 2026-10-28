@@ -3,6 +3,7 @@ package pl.aiwcorpo.mcp.portal.bff.security;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -19,14 +20,17 @@ public class StepUpPolicy {
 
     private final Duration maxAge;
     private final List<String> acrValues;
+    private final List<String> amrValues;
     private final Clock clock;
 
     public StepUpPolicy(PortalProperties properties, DevMode devMode, Clock clock) {
         this.maxAge = properties.stepUp().maxAge();
         this.acrValues = properties.stepUp().acrValues().stream().filter(value -> !value.isBlank()).toList();
         this.clock = clock;
-        // Without acr levels a "step-up" is only a repeated password; acceptable against the dev realm only.
-        devMode.require(acrValues.isEmpty(), "Step-up without portal.step-up.acr-values");
+        this.amrValues = properties.stepUp().amrValues().stream().filter(value -> !value.isBlank()).toList();
+        // Without an MFA marker a "step-up" is only a repeated password; acceptable against the dev realm only.
+        devMode.require(acrValues.isEmpty() && amrValues.isEmpty(),
+                "Step-up without portal.step-up.acr-values or portal.step-up.amr-values");
     }
 
     public boolean isFresh(PortalUser user) {
@@ -43,7 +47,7 @@ public class StepUpPolicy {
         if (authTime.isAfter(now.plusSeconds(30)) || Duration.between(authTime, now).compareTo(maxAge) > 0) {
             return null;
         }
-        if (!acrValues.isEmpty() && (user.acr() == null || !acrValues.contains(user.acr()))) {
+        if (!hasMfaEvidence(user)) {
             return null;
         }
         return authTime.plus(maxAge);
@@ -65,6 +69,18 @@ public class StepUpPolicy {
         StepUpRequired(String stepUpUrl) {
             this("step_up_required", stepUpUrl);
         }
+    }
+
+    // Either marker is enough: Keycloak states the level in acr, Entra ID lists the methods used in amr.
+    private boolean hasMfaEvidence(PortalUser user) {
+        if (acrValues.isEmpty() && amrValues.isEmpty()) {
+            return true;
+        }
+        if (user.acr() != null && acrValues.contains(user.acr())) {
+            return true;
+        }
+        return user.claims().get("amr") instanceof Collection<?> methods
+                && methods.stream().anyMatch(method -> method instanceof String name && amrValues.contains(name));
     }
 
     /** Space-separated acr_values for the step-up authorization request; null when none are configured. */

@@ -55,8 +55,9 @@ class ActivityCallsController {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
             page = gateway.activityCalls(token, RequestIds.of(request), query);
         } catch (UpstreamException e) {
-            // A cursor the gateway does not accept (changed, from another user) is the caller's mistake.
-            throw e.status() == 400 && query.containsKey("cursor") ? ApiException.badRequest() : e;
+            // The BFF sends only filters it has checked, so a 400 is about a value the user chose: a cursor the gateway
+            // does not accept, a window it does not keep, from after to.
+            throw e.status() == 400 ? ApiException.badRequest() : e;
         }
         if (page.nextCursor() != null && !CURSOR.matcher(page.nextCursor()).matches()) {
             throw new UpstreamException("gateway admin", 502, null);

@@ -147,6 +147,57 @@ class ConfirmationsTest extends PortalHarness {
     }
 
     @Test
+    void aPreviewWithAFieldOutsideTheSchemaOrTooManyArgumentsIsNotShown() {
+        TestBrowser browser = session();
+        stub(get(urlPathMatching("/admin/v1/confirmations/.*")), 200, """
+                {"confirmationId":"%s","tool":"jira__delete_issue","system":"jira","confirmation_code":"123456",
+                 "arguments":[],"expiresAt":"2026-10-26T20:02:00Z"}""".formatted(ID));
+        assertThat(browser.get(PREVIEW).statusCode()).isEqualTo(503);
+
+        stub(get(urlPathMatching("/admin/v1/confirmations/.*")), 200, """
+                {"confirmationId":"%s","tool":"jira__delete_issue","system":"jira",
+                 "arguments":[{"name":"a","value":"1","truncated":false,"extra":true}],"expiresAt":"2026-10-26T20:02:00Z"}"""
+                .formatted(ID));
+        assertThat(browser.get(PREVIEW).statusCode()).isEqualTo(503);
+
+        String many = String.join(",", java.util.Collections.nCopies(65, "{\"name\":\"a\",\"value\":\"1\",\"truncated\":false}"));
+        stub(get(urlPathMatching("/admin/v1/confirmations/.*")), 200, """
+                {"confirmationId":"%s","tool":"jira__delete_issue","system":"jira","arguments":[%s],
+                 "expiresAt":"2026-10-26T20:02:00Z"}""".formatted(ID, many));
+        assertThat(browser.get(PREVIEW).statusCode()).isEqualTo(503);
+    }
+
+    @Test
+    void aLongValueIsCutAndMarkedTruncated() {
+        TestBrowser browser = session();
+        stub(get(urlPathMatching("/admin/v1/confirmations/.*")), 200, """
+                {"confirmationId":"%s","tool":"jira__delete_issue","system":"jira",
+                 "arguments":[{"name":"a","value":"%s","truncated":false}],"expiresAt":"2026-10-26T20:02:00Z"}"""
+                .formatted(ID, "\\u200b".repeat(3000)));
+
+        HttpResponse<String> response = browser.get(PREVIEW);
+
+        C12.assertResponse("GET", "/api/v1/confirmations/{id}", response);
+        JsonNode argument = JSON.readTree(response.body()).get("arguments").get(0);
+        assertThat(argument.get("truncated").asBoolean()).isTrue();
+        assertThat(argument.get("value").asString().length()).isLessThanOrEqualTo(8192).isGreaterThan(8000);
+        assertThat(argument.get("value").asString()).endsWith(">").doesNotContain("\u200b");
+    }
+
+    @Test
+    void aRejectedViewedLeavesAnAuditTrace() {
+        TestBrowser browser = session();
+
+        browser.post(PREVIEW + "/viewed", null, true, Map.of("Sec-Fetch-Site", "cross-site"));
+
+        JsonNode event = lastAuditEvent();
+        pl.aiwcorpo.mcp.portal.bff.support.ContractSchemas.assertValid(AUDIT, event);
+        assertThat(event.get("event").asString()).isEqualTo("confirmation");
+        assertThat(event.get("decision").asString()).isEqualTo("deny");
+        assertThat(event.get("sub").asString()).isEqualTo(ALICE.sub());
+    }
+
+    @Test
     void thereIsNoDecisionEndpoint() {
         TestBrowser browser = session();
         int before = gatewayCalls();

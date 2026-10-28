@@ -154,6 +154,9 @@ class AuthenticatorController {
         HttpSession session = request.getSession(false);
         Object pending = session == null ? null : session.getAttribute(SessionAttributes.AUTHENTICATOR_ENROLLMENT_ID);
         if (!Objects.equals(pending, body.enrollmentId())) {
+            audit.authenticatorEvent(requestId, user,
+                    AuditLog.Outcome.denied("authenticator_enrollment_failed", ApiError.NOT_FOUND_OR_DENIED),
+                    clock.millis() - started);
             throw new ApiException(HttpStatus.NOT_FOUND, ApiError.of(ApiError.NOT_FOUND_OR_DENIED));
         }
         BrokerModel.AuthenticatorStatus registered;
