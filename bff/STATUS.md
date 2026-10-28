@@ -7,7 +7,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M1 | logowanie OIDC, sesja `__Host-session`, CSRF, `GET /api/v1/me`, token exchange, `GET /api/v1/catalog`, `GET /api/v1/connections`, `PUT .../secret` ze step-up, `DELETE` połączenia, serwowanie SPA, CSP, HSTS, audyt C8 | zrobione |
 | M2.1 | przejście na mcp-contracts 2.2.1; callback OIDC pod `/api/v1/auth/callback`, `__Host-XSRF-TOKEN`, `publicBaseUrl`; katalog wg CC-080..083 (tabela akcji, wektory `catalog-actions/`); `PUT secret` bez step-up (CC-090); `Error.requestId` (CC-087) | zrobione |
 | M2.2 | połączenia OAuth: `POST .../oauth`, `GET /api/v1/oauth/callback` z `ConnectErrorCode`, `cancelled`, brak sesji -> `/?loginError=session_expired` (CC-086), cudzy link | zrobione |
-| M2.3 | wirtualne serwery: lista, utworzenie, usunięcie, `409 slug_taken`, kolejność kontroli `resourceDefaults` (CC-085), `clientConfigs` | w toku |
+| M2.3 | wirtualne serwery: lista, utworzenie, usunięcie, `409 slug_taken`, kolejność kontroli `resourceDefaults` (CC-085), `clientConfigs` | zrobione |
 | M2.4 | mocki WireMock C4/C5 jako proces hosta (adresy w konfiguracji), testy negatywne (sekret w logach, returnPath, cudza sesja, brak XSRF), README, raport | w toku |
 | M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | nie zaczęte |
 
