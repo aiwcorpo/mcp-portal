@@ -250,4 +250,37 @@ class CatalogAssemblerTest {
         assertThat(only(result).credential()).isNull();
         assertThat(only(result).url()).isEqualTo("https://mcp.aiwcorpo.pl/s/mcp-jira/mcp");
     }
+
+    @Test
+    void aDeniedToolOffersRequestAccessOnlyWhenConnected() {
+        // CC-083: request_access beside a granted tool only for status connected, not for the statuses that need a
+        // connection step first.
+        Catalog c5 = new Catalog(List.of(server("jira",
+                tool("jira__get_issue", "granted", "mcp-jira-read"),
+                tool("jira__update_issue", "denied", "mcp-jira-write"))));
+
+        assertThat(only(ASSEMBLER.assemble(c5, List.of(connection("jira", "connected")), SYSTEMS, List.of())).actions())
+                .contains("request_access");
+        assertThat(only(ASSEMBLER.assemble(c5, List.of(connection("jira", "expiring")), SYSTEMS, List.of())).actions())
+                .containsExactly("copy_link", "add_secret", "disconnect");
+        assertThat(only(ASSEMBLER.assemble(c5, List.of(connection("jira", "revoked")), SYSTEMS, List.of())).actions())
+                .containsExactly("add_secret", "disconnect");
+        assertThat(only(ASSEMBLER.assemble(c5, List.of(), SYSTEMS, List.of())).actions())
+                .containsExactly("connect_oauth", "add_secret");
+    }
+
+    @Test
+    void aServiceAccountSystemShowsNoConnectionEvenIfTheBrokerListsOne() {
+        Catalog c5 = new Catalog(List.of(
+                server("servicedesk", tool("servicedesk__get_ticket", "granted", "mcp-servicedesk-read"),
+                        tool("servicedesk__close_ticket", "denied", "mcp-servicedesk-write"))));
+        Connection stray = new Connection("servicedesk", "service-account", "connected", "svc", null,
+                "2026-10-01T08:00:00Z", null);
+
+        PortalCatalog.Server server = only(ASSEMBLER.assemble(c5, List.of(stray), SYSTEMS, List.of()));
+
+        assertThat(server.connection()).isNull();
+        assertThat(server.actions()).doesNotContain("disconnect");
+        assertThat(server.actions()).containsExactlyInAnyOrder("copy_link", "request_access");
+    }
 }

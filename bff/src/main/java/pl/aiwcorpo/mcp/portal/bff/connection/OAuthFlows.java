@@ -39,6 +39,8 @@ class OAuthFlows {
                     .ifPresent(oldest -> pending.flows.remove(oldest.getKey()));
         }
         pending.flows.put(state, new Flow(flowId, system, returnPath, now));
+        // Stored again so that a session store that copies attributes (replication) sees the change.
+        session.setAttribute(ATTRIBUTE, pending);
     }
 
     /** The flow for this {@code state} of this session, removed from it; null when unknown, used or expired. */
@@ -47,6 +49,7 @@ class OAuthFlows {
             return null;
         }
         Flow flow = pending.flows.remove(state);
+        session.setAttribute(ATTRIBUTE, pending);
         return flow == null || flow.expired(clock.instant()) ? null : flow;
     }
 

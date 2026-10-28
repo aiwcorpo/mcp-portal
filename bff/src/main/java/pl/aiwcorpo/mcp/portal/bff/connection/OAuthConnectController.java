@@ -50,10 +50,11 @@ class OAuthConnectController {
 
     static final String CANCELLED = "cancelled";
     static final String PROVIDER_ERROR = "provider_error";
-    static final String IDENTITY_MISMATCH = "identity_mismatch";
     static final String FLOW_INVALID = "flow_invalid";
 
-    private static final Set<String> BROKER_COMPLETE_ERRORS = Set.of(IDENTITY_MISMATCH, FLOW_INVALID);
+    // identity_mismatch is deprecated since contracts 2.2.3 (no identity check, human decision 2026-10-28): the
+    // broker no longer returns it and the BFF does not pass it on; a stray one ends as provider_error.
+    private static final Set<String> BROKER_COMPLETE_ERRORS = Set.of(FLOW_INVALID);
     private static final int MAX_FLOW_ID = 128;
     private static final int MAX_STATE = 1024;
     private static final int MAX_CODE = 8192;
@@ -129,6 +130,8 @@ class OAuthConnectController {
         if (error != null) {
             // The user said no at the provider, or the provider failed; either way nothing was exchanged.
             String reason = "access_denied".equals(error) ? CANCELLED : PROVIDER_ERROR;
+            audit.connectionChange(requestId, user, flow.system(), AuditLog.Outcome.rejected(reason),
+                    clock.millis() - started);
             redirects.redirect(request, response, withParameter(flow.returnPath(), "connectError", reason));
             return;
         }

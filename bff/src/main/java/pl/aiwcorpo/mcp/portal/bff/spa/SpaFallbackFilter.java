@@ -40,15 +40,20 @@ class SpaFallbackFilter extends OncePerRequestFilter {
         if (!"GET".equals(method) && !"HEAD".equals(method)) {
             return true;
         }
-        // Case-insensitive, so /API/v1/me is not answered with HTML either (it ends as a JSON 404).
-        String path = pathWithinApplication(request).toLowerCase(Locale.ROOT);
-        return NOT_SPA.stream().anyMatch(prefix -> path.equals(prefix) || path.startsWith(prefix + "/"));
+        // Case-insensitive, so /API/v1/me is not answered with HTML either (it ends as a JSON 404). Both the raw and
+        // the decoded path are checked: Spring routes /%61pi/v1/me to the API, a proxy may do the same.
+        return isReserved(pathWithinApplication(request)) || isReserved(decodedPath(request));
+    }
+
+    private static boolean isReserved(String path) {
+        String lower = path.toLowerCase(Locale.ROOT);
+        return NOT_SPA.stream().anyMatch(prefix -> lower.equals(prefix) || lower.startsWith(prefix + "/"));
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String path = pathWithinApplication(request);
+        String path = decodedPath(request);
         if (!path.equals("/") && !path.equals("/" + INDEX) && isBuildFile(path)) {
             chain.doFilter(request, response);
             return;
@@ -78,6 +83,12 @@ class SpaFallbackFilter extends OncePerRequestFilter {
     private boolean isBuildFile(String path) {
         Path candidate = distRoot.resolve(path.substring(1)).normalize();
         return candidate.startsWith(distRoot) && Files.isRegularFile(candidate);
+    }
+
+    /** The container's decoded and normalized path, which is what the MVC and security matchers see. */
+    private static String decodedPath(HttpServletRequest request) {
+        String path = request.getServletPath() + (request.getPathInfo() == null ? "" : request.getPathInfo());
+        return path.isEmpty() ? "/" : path;
     }
 
     private static String pathWithinApplication(HttpServletRequest request) {

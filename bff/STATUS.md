@@ -9,6 +9,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M2.2 | połączenia OAuth: `POST .../oauth`, `GET /api/v1/oauth/callback` z `ConnectErrorCode`, `cancelled`, brak sesji -> `/?loginError=session_expired` (CC-086), cudzy link | zrobione |
 | M2.3 | wirtualne serwery: lista, utworzenie, usunięcie, `409 slug_taken`, kolejność kontroli `resourceDefaults` (CC-085), `clientConfigs` | zrobione |
 | M2.4 | mocki WireMock C4/C5 jako proces hosta (adresy w konfiguracji), testy negatywne (sekret w logach, returnPath, cudza sesja, brak XSRF), README, raport | zrobione |
+| M2.5 | runda poprawek po przeglądzie Opus M2, smoke Haiku, decyzja o braku sprawdzania tożsamości (mcp-contracts 2.2.3) | zrobione |
 | M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | nie zaczęte |
 
 ## M2: wynik (2026-10-28)
@@ -31,6 +32,28 @@ Decyzje M2:
   Wiązanie tokenu z sesją serwera możliwe, jeśli koordynator chce mocniej.
 - Step-up zostaje tylko w `GET /auth/login?stepUp=true` (potwierdzenia wracają w M3 z pivotem); `StepUpPolicy.isFresh` i
   `stepUpUrl` nieużywane do tego czasu.
+
+## Runda poprawek M2 (2026-10-28)
+
+Kontrakty 2.2.3. `./mvnw test`: 138 testów, 0 błędów, 1 pominięty (`DevEnvironmentFlowTest`).
+
+| Znalezisko | Status |
+| --- | --- |
+| L1 `SpaFallbackFilter` na surowym URI (`/%61pi/...` dawał HTML) | poprawione: filtr sprawdza ścieżkę surową i zdekodowaną z kontenera; testy `anEncodedApiPrefixIsNotAnSpaRoute` i dwa nowe wiersze w `apiPathsNeverAnswerWithHtml` |
+| L2 brak audytu przy `error` w callbacku OAuth | poprawione: `connection_change` z powodem `cancelled` / `provider_error`; test `aRefusalAtTheProviderIsAudited` |
+| L3 `defaultType` z C4 niewalidowany | poprawione: system z `defaultType` spoza `supportedTypes` (po odfiltrowaniu nieznanych typów) jest odrzucany jak nieznany brokerowi (bez `credential` i akcji połączenia); `BrokerDataTest` |
+| L4 `Pending` zmieniany w miejscu bez `setAttribute` | poprawione: `setAttribute` po `add` i `take`. Sesje nadal w pamięci jednej instancji; przy replikacji potrzebny magazyn z atomowym zużyciem `state` |
+| L5 luka testów tabeli CC-083 (m7, m15) | poprawione lokalnie: `aDeniedToolOffersRequestAccessOnlyWhenConnected`, `aServiceAccountSystemShowsNoConnectionEvenIfTheBrokerListsOne`. Wektory w kontrakcie (b): do ws-00, bez zmian poniżej |
+| L6 `request_access` bez `POST /access-requests` | uzgodnione z web: akcja ukryta w M2 po stronie web (wnioski w M4); BFF dalej zwraca `request_access` zgodnie z CC-083 |
+| Smoke Haiku FAIL: `PORTAL_MOCKS=1 ./scripts/run-dev.sh` wymagał `mcp-platform-dev` | poprawione: w trybie mocków skrypt nie czyta `mcp-platform-dev`, gdy go nie ma (sekret klienta generowany lokalnie, issuer z stubu discovery na :18723 startowanego przez `run-mocks.sh`, bez certyfikatów); tryb ze stosem dalej czyta `.env` i `.secrets` skryptem, brak katalogu lub klucza kończy się czytelnym błędem, ścieżka przez `MCP_PLATFORM_DEV_DIR`; każdą wartość można nadpisać zmienną `PORTAL_*`. Ograniczenie: bez Keycloaka nie da się zalogować |
+| Decyzja człowieka: bez sprawdzania tożsamości | przejście na 2.2.3; BFF nie przekazuje `identity_mismatch` (`PUT secret` -> 503, callback OAuth -> `provider_error`), `PUT secret` zwraca `backendUser` z brokera, callback `connected=<system>` (konto widać w katalogu i połączeniach) |
+
+Integracja z gateway'em M2 (C5): BFF składa katalog C12 sam: z C5 `GET /admin/v1/catalog` bierze tylko serwery i narzędzia
+(`description`, `risk`, `action`, `access`, `requiredEntitlements`, `title`, `disabled`, `requiresConfirmation`), a
+`credential` (C4 `/v1/systems`), `connection` (C4 `/v1/connections`), `status` i `actions` (tabela CC-083) wylicza
+`CatalogAssembler`. Na polach, których C5 nie ma, nic nie polega. Test na żywo z gateway'em na https://localhost:18701 nie
+był wykonany: wymaga zalogowanej sesji Keycloak i certyfikatu klienta z hasłem ze `.secrets`; do wykonania przez koordynatora
+(`./mvnw test -Pdev-env` z `PORTAL_GATEWAY_ADMIN_URL`).
 
 ## Propozycje CC
 

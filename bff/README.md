@@ -4,28 +4,43 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 2.2.1.
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 2.2.3 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
 
-## Uruchomienie lokalne (z mcp-platform-dev)
+## Uruchomienie lokalne
 
-Wymagane: uruchomione środowisko `../../mcp-platform-dev` (`make up`: Keycloak na :18080, stuby C4 :18443 i
-C5 :18444 z mTLS) oraz JDK 25.
+Wymagane: JDK 25 i `mcp-contracts` 2.2.3 w `~/.m2`. Dwa tryby.
+
+Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
 ```bash
 export JAVA_HOME=/opt/homebrew/Cellar/openjdk@25/25.0.4.1/libexec/openjdk.jdk/Contents/Home   # wymagana Java 25
+./mvnw -q test-compile                  # raz: pobiera jary WireMock i kontraktów do ~/.m2
+./scripts/run-mocks.sh start            # C4 :18721, C5 :18722, discovery OIDC :18723
+PORTAL_MOCKS=1 ./scripts/run-dev.sh     # BFF na http://localhost:18720
+./scripts/run-mocks.sh stop
+```
+
+Bez `mcp-platform-dev` nie ma Keycloaka: BFF startuje (stub discovery na :18723), `/api/v1/me` daje 401, a logowanie
+nie działa. Wartości można podać jawnie zmiennymi `PORTAL_OIDC_ISSUER_URI` i `PORTAL_OIDC_CLIENT_SECRET` (np. dla
+własnego Keycloaka); gdy katalog `mcp-platform-dev` istnieje (obok repozytorium albo `MCP_PLATFORM_DEV_DIR`), skrypt
+bierze z niego issuera i sekret klienta, więc logowanie działa po `make up` tam.
+
+Ze stosem `mcp-platform-dev` (`make up`: Keycloak :18080, stuby C4 i C5 z mTLS):
+
+```bash
 ./scripts/run-dev.sh            # BFF na http://localhost:18720 (port ws-07)
 ```
 
-Skrypt sprawdza wersję Javy (z `JAVA_HOME` albo `PATH`) i kończy się czytelnym komunikatem, gdy nie jest to 25.
-Skrypt włącza profil Spring `dev` i przy każdym starcie czyta z `mcp-platform-dev/.env` i `.secrets/dev.env` sekret klienta
-`mcp-portal-bff`, hasło keystore'ów i porty; nic nie jest kopiowane do tego repozytorium. Inny katalog
-środowiska: `MCP_PLATFORM_DEV_DIR=...`. Prawdziwy broker zamiast stuba:
+Tryb ze stosem wymaga katalogu `../../mcp-platform-dev` (inny: `MCP_PLATFORM_DEV_DIR=...`); brak katalogu albo
+klucza w `.env` / `.secrets/dev.env` kończy się czytelnym komunikatem. Skrypt czyta sekret klienta `mcp-portal-bff`,
+hasło keystore'ów i porty przy każdym starcie, nic nie jest kopiowane do tego repozytorium. Każdą wartość można
+nadpisać zmienną `PORTAL_*` (tabela niżej). Prawdziwy broker zamiast stuba:
 `PORTAL_BROKER_URL=https://localhost:18100 ./scripts/run-dev.sh`.
 
-Bez brokera i gateway'a z M2: mocki WireMock C4/C5 z jara kontraktów jako procesy hosta
-(`./scripts/run-mocks.sh start`, porty 18721 i 18722, `stop` kończy), a BFF z `PORTAL_MOCKS=1 ./scripts/run-dev.sh`.
-Podmiana na prawdziwe usługi to zmiana dwóch adresów (`PORTAL_BROKER_URL`, `PORTAL_GATEWAY_ADMIN_URL`).
-Logowanie przez Keycloak wymaga w realmie `corp` redirect URI `<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`.
+Skrypt sprawdza wersję Javy (z `JAVA_HOME` albo `PATH`) i kończy się czytelnym komunikatem, gdy nie jest to 25, oraz
+włącza profil Spring `dev`. Podmiana mocków na prawdziwe usługi to zmiana dwóch adresów (`PORTAL_BROKER_URL`,
+`PORTAL_GATEWAY_ADMIN_URL`). Logowanie przez Keycloak wymaga w realmie `corp` redirect URI
+`<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`.
 
 Frontend: `cd ../web && npx ng build`, wynik w `../web/dist/portal` (domyślne `PORTAL_WEB_DIST`). Bez
 builda API działa, a trasy SPA odpowiadają 404.
@@ -33,8 +48,8 @@ builda API działa, a trasy SPA odpowiadają 404.
 Szybkie sprawdzenie:
 
 ```bash
-curl -i http://localhost:18090/api/v1/me                         # 401 {"error":"unauthenticated"}
-open 'http://localhost:18090/api/v1/auth/login?returnPath=/'     # logowanie alice (hasło: make users)
+curl -i http://localhost:18720/api/v1/me                         # 401 {"error":"unauthenticated"}
+open 'http://localhost:18720/api/v1/auth/login?returnPath=/'     # logowanie alice (hasło: make users)
 ```
 
 ## Testy
@@ -110,7 +125,7 @@ step-up i odrzucenia przez broker).
 Callback OIDC to `/api/v1/auth/callback` (jedna domena, CC-089). Połączenie OAuth: `POST /connections/{system}/oauth`
 zapisuje w sesji `flowId`, `state` z `authorizeUrl` i `returnPath`; `GET /api/v1/oauth/callback` szuka przepływu po
 `state` w sesji bieżącego użytkownika (jednorazowo, 15 min, najwyżej 8 naraz), a kody `connectError` to
-`cancelled`, `provider_error`, `identity_mismatch`, `flow_invalid`. Wirtualne serwery: proxy do C5 z kontrolą
+`cancelled`, `provider_error`, `flow_invalid` (`identity_mismatch` jest deprecated od 2.2.3: broker go nie zwraca, a BFF nie przekazuje). Wirtualne serwery: proxy do C5 z kontrolą
 `resourceDefaults` (CC-085) i `clientConfigs` z `PORTAL_PUBLIC_BASE_URL`.
 
 | Test | Co sprawdza |

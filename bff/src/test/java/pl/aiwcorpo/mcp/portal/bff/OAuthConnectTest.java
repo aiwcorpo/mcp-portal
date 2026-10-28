@@ -284,9 +284,9 @@ class OAuthConnectTest extends PortalHarness {
     }
 
     @Test
-    void identityMismatchAndFlowInvalidFromTheBrokerArePassedAsCodes() {
+    void flowInvalidFromTheBrokerIsPassedAsCode() {
         TestBrowser browser = login(ALICE, Instant.now());
-        for (String error : List.of("identity_mismatch", "flow_invalid")) {
+        for (String error : List.of("flow_invalid")) {
             String state = state();
             stubStart(authorizeUrl(state), "flow-" + error);
             stubComplete(422, "{\"error\":\"" + error + "\"}");
@@ -300,6 +300,38 @@ class OAuthConnectTest extends PortalHarness {
             ContractSchemas.assertValid(AUDIT, event);
             assertThat(event.get("reason").asString()).isEqualTo(error);
             assertThat(event.get("outcome").asString()).isEqualTo("error");
+        }
+    }
+
+    @Test
+    void aStrayIdentityMismatchFromTheBrokerIsNotExposed() {
+        // Deprecated since contracts 2.2.3: the broker does not check the identity any more.
+        String state = state();
+        stubStart(authorizeUrl(state), "flow-im");
+        stubComplete(422, "{\"error\":\"identity_mismatch\"}");
+        TestBrowser browser = login(ALICE, Instant.now());
+        start(browser, "{\"returnPath\":\"/catalog\"}");
+
+        HttpResponse<String> back = browser.get(CALLBACK + "?code=c1&state=" + state);
+
+        assertThat(location(back)).isEqualTo("/catalog?connectError=provider_error");
+    }
+
+    @Test
+    void aRefusalAtTheProviderIsAudited() {
+        for (String error : List.of("access_denied", "server_error")) {
+            String state = state();
+            stubStart(authorizeUrl(state), "flow-a-" + error);
+            TestBrowser browser = login(ALICE, Instant.now());
+            start(browser, "{\"returnPath\":\"/catalog\"}");
+
+            browser.get(CALLBACK + "?error=" + error + "&state=" + state);
+
+            JsonNode event = lastAuditEvent();
+            ContractSchemas.assertValid(AUDIT, event);
+            assertThat(event.get("event").asString()).isEqualTo("connection_change");
+            assertThat(event.get("reason").asString())
+                    .isEqualTo(error.equals("access_denied") ? "cancelled" : "provider_error");
         }
     }
 

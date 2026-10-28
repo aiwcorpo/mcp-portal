@@ -49,6 +49,12 @@ public final class BrokerData {
             }
             List<String> supported = s.supportedTypes() == null ? List.of()
                     : s.supportedTypes().stream().filter(CREDENTIAL_TYPES::contains).toList();
+            // Without a valid defaultType among the supported types the catalog would break its schema, so the
+            // system is treated like one the broker does not know: no credential, no connect actions.
+            if (!supported.isEmpty() && !supported.contains(s.defaultType())) {
+                log.warn("Dropping a C4 system with defaultType outside its supportedTypes");
+                continue;
+            }
             result.add(new BrokerModel.SystemInfo(s.system(), supported, s.defaultType(),
                     s.oauthScopes() == null ? List.of() : s.oauthScopes()));
         }

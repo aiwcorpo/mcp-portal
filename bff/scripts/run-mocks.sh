@@ -6,13 +6,15 @@
 #   ./scripts/run-mocks.sh start|stop|status
 #
 # Ports 18721 (C4) and 18722 (C5) are in the range of ws-07 (18720-18729); override with MOCK_BROKER_PORT and
-# MOCK_GATEWAY_ADMIN_PORT. `Prefer: example=<name>` picks another stub example (README of mcp-contracts, "Mocki").
+# MOCK_GATEWAY_ADMIN_PORT. A third process on 18723 (MOCK_IDP_PORT) serves only the OIDC discovery document of the
+# realm, so that the BFF starts without Keycloak; logging in still needs a real Keycloak (mcp-platform-dev). `Prefer: example=<name>` picks another stub example (README of mcp-contracts, "Mocki").
 set -euo pipefail
 
 bff_dir="$(cd "$(dirname "$0")/.." && pwd)"
 state_dir="$bff_dir/target/mocks"
 broker_port="${MOCK_BROKER_PORT:-18721}"
 gateway_port="${MOCK_GATEWAY_ADMIN_PORT:-18722}"
+idp_port="${MOCK_IDP_PORT:-18723}"
 m2="${M2_REPO:-$HOME/.m2/repository}"
 
 pom_property() {
@@ -27,6 +29,7 @@ java_bin="${JAVA_HOME:+$JAVA_HOME/bin/}java"
 
 start_one() {
   local name="$1" port="$2" dir="$3"
+  shift 3
   if [[ -f "$state_dir/$name.pid" ]] && kill -0 "$(cat "$state_dir/$name.pid")" 2>/dev/null; then
     echo "$name already running (pid $(cat "$state_dir/$name.pid"), port $port)"
     return
@@ -36,6 +39,7 @@ start_one() {
     exit 1
   fi
   nohup "$java_bin" -jar "$wiremock_jar" --bind-address 127.0.0.1 --port "$port" --root-dir "$dir" \
+    "$@" \
     >"$state_dir/$name.log" 2>&1 &
   echo $! >"$state_dir/$name.pid"
   echo "$name on http://127.0.0.1:$port (pid $!)"
@@ -59,13 +63,15 @@ case "${1:-}" in
     unzip -oq "$contracts_jar" 'mcp-contracts/mocks/wiremock/*' -d "$state_dir/contracts"
     start_one credential-broker "$broker_port" "$state_dir/contracts/mcp-contracts/mocks/wiremock/credential-broker"
     start_one gateway-admin "$gateway_port" "$state_dir/contracts/mcp-contracts/mocks/wiremock/gateway-admin"
+    start_one idp-discovery "$idp_port" "$bff_dir/dev/idp-stub" --global-response-templating
     ;;
   stop)
     stop_one credential-broker
     stop_one gateway-admin
+    stop_one idp-discovery
     ;;
   status)
-    for name in credential-broker gateway-admin; do
+    for name in credential-broker gateway-admin idp-discovery; do
       if [[ -f "$state_dir/$name.pid" ]] && kill -0 "$(cat "$state_dir/$name.pid")" 2>/dev/null; then
         echo "$name running (pid $(cat "$state_dir/$name.pid"))"
       else

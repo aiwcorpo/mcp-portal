@@ -37,14 +37,14 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * Connections of the current user (C12 over C4). The secret of {@code PUT .../secret} lives only in the request
  * body object of this call: it goes to the broker and is dropped with the request; it is never logged, stored in
- * the session or echoed. Writing a token needs a session and the CSRF header only (CC-090); the broker's identity
- * check (C4.1) is what protects the write, and its {@code secret_invalid}/{@code identity_mismatch} are passed on
- * as codes without any text of the target system.
+ * the session or echoed. Writing a token needs a session and the CSRF header only (CC-090); the broker's validity
+ * check (C4.1) is what protects the write, and its {@code secret_invalid} is passed on as a code without any
+ * text of the target system. The answer carries {@code backendUser}: the portal shows which account was linked.
  */
 @RestController
 class ConnectionsController {
 
-    private static final Set<String> BROKER_SECRET_ERRORS = Set.of("secret_invalid", "identity_mismatch");
+    private static final Set<String> BROKER_SECRET_ERRORS = Set.of("secret_invalid");
     private static final int MAX_SECRET_LENGTH = 4096;
 
     private final UserTokens tokens;

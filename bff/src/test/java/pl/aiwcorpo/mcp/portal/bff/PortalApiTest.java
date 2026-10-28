@@ -322,7 +322,7 @@ class PortalApiTest extends PortalHarness {
         BROKER.stubFor(put(urlPathEqualTo("/v1/connections/confluence/secret")).atPriority(1)
                 .withHeader("Authorization", com.github.tomakehurst.wiremock.client.WireMock.matching("^Bearer .+$"))
                 .willReturn(aResponse().withStatus(422).withHeader("Content-Type", "application/json")
-                        .withBody("{\"error\":\"identity_mismatch\"}")));
+                        .withBody("{\"error\":\"secret_invalid\"}")));
         String secret = "test-only-secret-" + UUID.randomUUID();
         SECRETS.add(secret);
         try {
@@ -333,11 +333,11 @@ class PortalApiTest extends PortalHarness {
 
             C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", response);
             assertThat(response.statusCode()).isEqualTo(422);
-            assertThat(response.body()).isEqualTo("{\"error\":\"identity_mismatch\"}");
+            assertThat(response.body()).isEqualTo("{\"error\":\"secret_invalid\"}");
             JsonNode event = lastAuditEvent();
             ContractSchemas.assertValid(AUDIT, event);
             assertThat(event.get("outcome").asString()).isEqualTo("error");
-            assertThat(event.get("reason").asString()).isEqualTo("identity_mismatch");
+            assertThat(event.get("reason").asString()).isEqualTo("secret_invalid");
         } finally {
             BROKER.resetToDefaultMappings();
         }
@@ -412,6 +412,8 @@ class PortalApiTest extends PortalHarness {
                 browser.get("/api/v1/../v1/nothing", Map.of("Accept", "text/html")),
                 browser.get("/api", Map.of("Accept", "text/html")),
                 browser.get("/API/v1/me", Map.of("Accept", "text/html")),
+                browser.get("/%61pi/v1/does-not-exist", Map.of("Accept", "text/html")),
+                browser.get("/%61pi", Map.of("Accept", "text/html")),
                 browser.get("/actuator", Map.of("Accept", "text/html")),
                 browser.post("/api/v1/me", null, true),
                 browser().get("/api/v1/unknown", Map.of("Accept", "text/html")));
@@ -422,6 +424,14 @@ class PortalApiTest extends PortalHarness {
             assertThat(response.body()).doesNotContainIgnoringCase("<html");
             C12.assertComponent("Error", JSON.readTree(response.body()));
         }
+    }
+
+    @Test
+    void anEncodedApiPrefixIsNotAnSpaRoute() {
+        TestBrowser browser = login(ALICE, Instant.now());
+        HttpResponse<String> response = browser.get("/%61pi/v1/me", Map.of("Accept", "text/html"));
+        assertThat(response.headers().firstValue("Content-Type").orElse("")).startsWith("application/json");
+        assertThat(response.body()).doesNotContainIgnoringCase("<html");
     }
 
     @Test
