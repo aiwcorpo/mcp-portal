@@ -13,7 +13,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | w toku: M3.1 poniżej; wnioski IGA i admin zostają na M4 |
 | M3.1 | kontrakty 3.0.1, `ReturnPath` CC-099, `virtual_server_change`, potwierdzenia (podgląd, viewed, cancel), `activity/calls`, Authenticator ze step-up, `Me.mfaFreshUntil` | zrobione |
 | M3.2 | osobne adresy token/JWKS przy `issuer-uri` (bez `idp-relay`), higiena znaków ukrytych (CC-121) w podglądzie | zrobione |
-| M3.3 | poprawki po przeglądzie, README, raport | nie zaczęte |
+| M3.3 | poprawki po przeglądzie (koercja liczby na tekst w `PUT .../secret`), test na żywo ze stosem po zmianie compose przez ws-01 | otwarte |
 
 ## M2: wynik (2026-10-28)
 
@@ -293,3 +293,5 @@ długości `value`, więc BFF go nie wymyśla.
   U+200B..U+200F, U+061C, U+2060, U+FEFF i znaki tag; sugerowane wspólne odwołanie do higieny tekstu z CC-121 (3.0.2). Tak samo
   U+200C..U+200F w higienie argumentów (LRM/RLM przestawiają kolejność wyświetlania).
 - Brak innych. Uwaga do C8: powody `upstream_unavailable` dla `virtual_server_change` i `authenticator` (zob. wyżej).
+
+Obrazy: `mcp-portal-bff:m3-dd0ddff` (M3.1), `mcp-portal-bff:m3-c668b1e` (M3.2), skrypt `scripts/build-image.sh [ref]`.
