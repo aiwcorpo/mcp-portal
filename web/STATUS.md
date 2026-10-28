@@ -1,6 +1,6 @@
 # STATUS: mcp-portal/web (ws-08)
 
-Stan na 2026-10-28. Kontrakty: X`v3.0.1`; zalezność od 3.0.0 jest wykluczona, luka CC-127). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
+Stan na 2026-10-28. Kontrakty: `mcp-contracts` 3.0.2 (paczka `release/aiwcorpo-mcp-contracts-3.0.2.tgz`; z 3.0.1 bez zmian w kodzie: zaostrzone wzorce `resource.id`/`parent`, 503 w `viewed` obsługiwane jak każdy błąd `viewed`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
 Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
 
 ## Kamienie M3
