@@ -1,7 +1,6 @@
 # STATUS: mcp-portal/web (ws-08)
 
-Stan na 2026-10-28. Kontrakty: `mcp-contracts` 3.0.1 (paczka `release/aiwcorpo-mcp-contracts-3.0.1.tgz`, tag
-`v3.0.1`; zalezność od 3.0.0 jest wykluczona, luka CC-127). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
+Stan na 2026-10-28. Kontrakty: X`v3.0.1`; zalezność od 3.0.0 jest wykluczona, luka CC-127). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
 Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
 
 ## Kamienie M3
@@ -15,7 +14,7 @@ Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `
 
 ## M3: stan (2026-10-28)
 
-Kontrakty 3.0.1, klient wygenerowany ponownie (`npm run generate:api`), mock MSW rozszerzony o Authenticator,
+Kontrakty 3.0.2, klient wygenerowany ponownie (`npm run generate:api`), mock MSW rozszerzony o Authenticator,
 podgląd potwierdzeń i logi (`src/mocks/m3-mock.ts`, TOTP z ziarna w `src/mocks/totp.ts`, sprawdzony na wektorach
 RFC 6238). Usunięte: ekran decyzji i `identity_mismatch`, `confirmation_declined`.
 

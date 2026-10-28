@@ -39,7 +39,7 @@ export interface AuditEvent {
     sub?: string;
     username?: string;
     /**
-     * Account in the target system read by whoami (C4.1, CC-101), for connection_change: the only trace of which account a user connected (CC-117). Same length limit as username; C0 and C1 control characters, DEL, U+2028, U+2029 and the bidirectional controls are excluded like in resource.id. Never a secret.
+     * Account in the target system read by whoami (C4.1, CC-101), for connection_change: the only trace of which account a user connected (CC-117). Same length limit as username. Never a secret. Excluded characters: C0 and C1 control characters and DEL (also TAB, LF, CR), every Unicode format character (\\p{Cf}: zero-width characters U+200B..U+200F, U+2060, U+FEFF, soft hyphen, bidirectional controls, Arabic letter mark U+061C, tag characters U+E0000..U+E007F), surrogates, U+2028, U+2029, noncharacters (U+FDD0..U+FDEF, U+FFFE, U+FFFF), the invisible fillers U+034F, U+115F, U+1160, U+3164, U+FFA0, U+2800 and the variation selectors U+FE00..U+FE0F. This is the set of the text hygiene of the README (CC-121), stricter for log fields since 3.0.2 (zero-width, direction marks and tag characters used to pass), so that the line-oriented SIEM format and log viewers cannot be misled (CC-031).
      */
     backendUser?: string;
     client?: string;
