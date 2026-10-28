@@ -90,6 +90,20 @@ class OAuthConnectTest extends PortalHarness {
     }
 
     @Test
+    void plainHttpAuthorizeUrlIsAcceptedOnlyForLoopbackInTheDevProfile() {
+        TestBrowser browser = login(ALICE, Instant.now());
+        String loopback = state();
+        stubStart(authorizeUrl(loopback).replace("https://gitlab.internal", "http://localhost:18741"), "flow-l");
+        assertThat(start(browser, "{}").statusCode()).isEqualTo(200);
+
+        String foreign = state();
+        stubStart(authorizeUrl(foreign).replace("https://gitlab.internal", "http://gitlab.internal:8080"), "flow-f");
+        HttpResponse<String> refused = start(browser, "{}");
+        C12.assertResponse("POST", "/api/v1/connections/{system}/oauth", refused);
+        assertThat(refused.statusCode()).isEqualTo(503);
+    }
+
+    @Test
     void startWithoutBodyUsesTheStartPage() {
         stubStart(authorizeUrl(state()), "flow-1");
         TestBrowser browser = login(ALICE, Instant.now());

@@ -55,6 +55,7 @@ class OAuthConnectController {
     // identity_mismatch is deprecated since contracts 2.2.3 (no identity check, human decision 2026-10-28): the
     // broker no longer returns it and the BFF does not pass it on; a stray one ends as provider_error.
     private static final Set<String> BROKER_COMPLETE_ERRORS = Set.of(FLOW_INVALID);
+    private static final Set<String> LOOPBACK_HOSTS = Set.of("localhost", "127.0.0.1", "[::1]");
     private static final int MAX_FLOW_ID = 128;
     private static final int MAX_STATE = 1024;
     private static final int MAX_CODE = 8192;
@@ -216,7 +217,9 @@ class OAuthConnectController {
         }
         boolean https = "https".equalsIgnoreCase(url.getScheme());
         boolean http = "http".equalsIgnoreCase(url.getScheme());
-        if (!(https || (http && devMode.enabled())) || url.getHost() == null || url.getRawUserInfo() != null) {
+        // Same rule as the frontend (isAllowedRedirect): plain http only for a loopback host in the dev profile.
+        boolean plainDevHttp = http && devMode.enabled() && LOOPBACK_HOSTS.contains(String.valueOf(url.getHost()));
+        if (!(https || plainDevHttp) || url.getHost() == null || url.getRawUserInfo() != null) {
             throw new UpstreamException("credential broker", 502, null);
         }
         String query = url.getRawQuery() == null ? "" : url.getRawQuery();

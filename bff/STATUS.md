@@ -35,7 +35,7 @@ Decyzje M2:
 
 ## Runda poprawek M2 (2026-10-28)
 
-Kontrakty 2.2.3. `./mvnw test`: 138 testów, 0 błędów, 1 pominięty (`DevEnvironmentFlowTest`).
+Kontrakty 2.2.3. `./mvnw test`: 139 testów, 0 błędów, 1 pominięty (`DevEnvironmentFlowTest`).
 
 | Znalezisko | Status |
 | --- | --- |
@@ -46,7 +46,10 @@ Kontrakty 2.2.3. `./mvnw test`: 138 testów, 0 błędów, 1 pominięty (`DevEnvi
 | L5 luka testów tabeli CC-083 (m7, m15) | poprawione lokalnie: `aDeniedToolOffersRequestAccessOnlyWhenConnected`, `aServiceAccountSystemShowsNoConnectionEvenIfTheBrokerListsOne`. Wektory w kontrakcie (b): do ws-00, bez zmian poniżej |
 | L6 `request_access` bez `POST /access-requests` | uzgodnione z web: akcja ukryta w M2 po stronie web (wnioski w M4); BFF dalej zwraca `request_access` zgodnie z CC-083 |
 | Smoke Haiku FAIL: `PORTAL_MOCKS=1 ./scripts/run-dev.sh` wymagał `mcp-platform-dev` | poprawione: w trybie mocków skrypt nie czyta `mcp-platform-dev`, gdy go nie ma (sekret klienta generowany lokalnie, issuer z stubu discovery na :18723 startowanego przez `run-mocks.sh`, bez certyfikatów); tryb ze stosem dalej czyta `.env` i `.secrets` skryptem, brak katalogu lub klucza kończy się czytelnym błędem, ścieżka przez `MCP_PLATFORM_DEV_DIR`; każdą wartość można nadpisać zmienną `PORTAL_*`. Ograniczenie: bez Keycloaka nie da się zalogować |
+| L4 web (reguły http w dev) | po stronie BFF: `authorizeUrl` z http tylko dla loopback w profilu dev (jak `isAllowedRedirect` w web); `plainHttpAuthorizeUrlIsAcceptedOnlyForLoopbackInTheDevProfile` |
 | Decyzja człowieka: bez sprawdzania tożsamości | przejście na 2.2.3; BFF nie przekazuje `identity_mismatch` (`PUT secret` -> 503, callback OAuth -> `provider_error`), `PUT secret` zwraca `backendUser` z brokera, callback `connected=<system>` (konto widać w katalogu i połączeniach) |
+
+Gateway 8dc1d7a (komunikat koordynatora): C5 wymaga `azp=mcp-portal-bff` i odrzuca `aud` zawierające `mcp-gateway`. BFF wymienia token na samo `aud=mcp-gateway-admin` przez klienta `mcp-portal-bff`, więc `azp` pochodzi od IdP; nie sprawdzałem tego na żywo (procesy gateway'a zatrzymane). Limit 50 linków: 400 `invalid_request` z C5 jest przekazywany (z `requestId`), web pokazuje wskazówkę.
 
 Integracja z gateway'em M2 (C5): BFF składa katalog C12 sam: z C5 `GET /admin/v1/catalog` bierze tylko serwery i narzędzia
 (`description`, `risk`, `action`, `access`, `requiredEntitlements`, `title`, `disabled`, `requiresConfirmation`), a
