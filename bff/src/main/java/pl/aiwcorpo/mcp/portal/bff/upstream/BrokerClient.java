@@ -57,4 +57,28 @@ public class BrokerClient {
                                 .body(body), token, requestId),
                 response -> calls.read(response, BrokerModel.OAuthCompleteResponse.class));
     }
+
+    public BrokerModel.AuthenticatorStatus authenticatorStatus(BearerToken token, String requestId) {
+        return calls.call(calls.authorize(calls.http().get().uri("/v1/authenticator"), token, requestId),
+                response -> calls.read(response, BrokerModel.AuthenticatorStatus.class));
+    }
+
+    public void deleteAuthenticator(BearerToken token, String requestId) {
+        calls.call(calls.authorize(calls.http().delete().uri("/v1/authenticator"), token, requestId), response -> null);
+    }
+
+    /** The answer carries the seed: the caller hands it to the browser and keeps nothing but {@code enrollmentId}. */
+    public BrokerModel.AuthenticatorEnrollment startAuthenticatorEnrollment(BearerToken token, String requestId) {
+        return calls.call(calls.authorize(calls.http().post().uri("/v1/authenticator/enrollment"), token, requestId),
+                response -> calls.read(response, BrokerModel.AuthenticatorEnrollment.class));
+    }
+
+    public BrokerModel.AuthenticatorStatus confirmAuthenticatorEnrollment(BearerToken token, String requestId,
+                                                                          BrokerModel.AuthenticatorEnrollmentConfirm body) {
+        return calls.call(calls.authorize(calls.http().post()
+                                .uri("/v1/authenticator/enrollment/confirm")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(body), token, requestId),
+                response -> calls.read(response, BrokerModel.AuthenticatorStatus.class));
+    }
 }

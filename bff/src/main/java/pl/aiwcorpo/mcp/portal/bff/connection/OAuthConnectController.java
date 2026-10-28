@@ -52,8 +52,8 @@ class OAuthConnectController {
     static final String PROVIDER_ERROR = "provider_error";
     static final String FLOW_INVALID = "flow_invalid";
 
-    // identity_mismatch is deprecated since contracts 2.2.3 (no identity check, human decision 2026-10-28): the
-    // broker no longer returns it and the BFF does not pass it on; a stray one ends as provider_error.
+    // identity_mismatch left the contract in 3.0.0 (no identity check, human decision 2026-10-28): a stray one from
+    // an older broker ends as provider_error.
     private static final Set<String> BROKER_COMPLETE_ERRORS = Set.of(FLOW_INVALID);
     private static final Set<String> LOOPBACK_HOSTS = Set.of("localhost", "127.0.0.1", "[::1]");
     private static final int MAX_FLOW_ID = 128;

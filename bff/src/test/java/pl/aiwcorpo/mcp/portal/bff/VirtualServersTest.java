@@ -106,10 +106,11 @@ class VirtualServersTest extends PortalHarness {
 
         JsonNode event = lastAuditEvent();
         ContractSchemas.assertValid(AUDIT, event);
-        assertThat(event.get("event").asString()).isEqualTo("admin_change");
+        assertThat(event.get("event").asString()).isEqualTo("virtual_server_change");
         assertThat(event.get("virtualServer").asString()).isEqualTo("team-a-dev");
         assertThat(event.get("sub").asString()).isEqualTo(ALICE.sub());
         assertThat(event.get("outcome").asString()).isEqualTo("ok");
+        assertThat(event.get("reason").asString()).isEqualTo("vs_created");
     }
 
     @Test
@@ -207,6 +208,7 @@ class VirtualServersTest extends PortalHarness {
         JsonNode event = lastAuditEvent();
         ContractSchemas.assertValid(AUDIT, event);
         assertThat(event.get("decision").asString()).isEqualTo("deny");
+        assertThat(event.get("reason").asString()).isEqualTo("not_granted");
     }
 
     @Test
@@ -254,8 +256,9 @@ class VirtualServersTest extends PortalHarness {
         assertThat(GATEWAY.findAll(deleteRequestedFor(urlPathEqualTo(COLLECTION + "/team-a-dev")))).isNotEmpty();
         JsonNode event = lastAuditEvent();
         ContractSchemas.assertValid(AUDIT, event);
-        assertThat(event.get("event").asString()).isEqualTo("admin_change");
+        assertThat(event.get("event").asString()).isEqualTo("virtual_server_change");
         assertThat(event.get("virtualServer").asString()).isEqualTo("team-a-dev");
+        assertThat(event.get("reason").asString()).isEqualTo("vs_deleted");
 
         for (int status : List.of(404, 403)) {
             GATEWAY.stubFor(delete(urlPathEqualTo(COLLECTION + "/bobs-link")).atPriority(1).willReturn(aResponse()

@@ -8,6 +8,8 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
+import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
+
 @ConfigurationProperties("portal")
 public record PortalProperties(
         @DefaultValue("keycloak") String registrationId,
@@ -64,10 +66,18 @@ public record PortalProperties(
     /**
      * @param maxAge    how old the last interactive authentication may be for operations that need fresh MFA
      * @param acrValues acr values that count as MFA; empty means any acr (only {@code auth_time} is checked)
+     * @param authenticatorReturnPath portal page of the registration, where a step-up for it comes back to
      */
     public record StepUp(
             @DefaultValue("5m") Duration maxAge,
-            @DefaultValue List<String> acrValues) {
+            @DefaultValue List<String> acrValues,
+            @DefaultValue("/authenticator") String authenticatorReturnPath) {
+
+        public StepUp {
+            if (!ReturnPaths.isValid(authenticatorReturnPath)) {
+                throw new IllegalArgumentException("portal.step-up.authenticator-return-path is not a valid ReturnPath");
+            }
+        }
     }
 
     /** Idle timeout is server.servlet.session.timeout; this is the hard limit from login. */

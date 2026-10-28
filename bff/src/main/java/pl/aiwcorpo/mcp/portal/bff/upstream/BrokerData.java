@@ -1,6 +1,7 @@
 package pl.aiwcorpo.mcp.portal.bff.upstream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -95,5 +96,41 @@ public final class BrokerData {
                             ? Boolean.TRUE : null));
         }
         return result;
+    }
+
+    private static final Set<String> AUTHENTICATOR_STATES = Set.of("none", "active", "disabled");
+
+    /**
+     * Status of the registration as C12 may show it, or null when the broker's answer breaks the schema (state
+     * outside the enum, bad timestamp, {@code disabled} without its reason, a reason without {@code disabled}).
+     */
+    public static BrokerModel.AuthenticatorStatus validAuthenticatorStatus(BrokerModel.AuthenticatorStatus status) {
+        if (status == null || !AUTHENTICATOR_STATES.contains(status.state())) {
+            return null;
+        }
+        for (String time : Arrays.asList(status.registeredAt(), status.lastUsedAt(), status.lockedUntil(),
+                status.disabledAt())) {
+            if (time != null && !ContractValues.isTimestamp(time)) {
+                return null;
+            }
+        }
+        boolean disabled = "disabled".equals(status.state());
+        if (disabled != (status.disabledAt() != null) || disabled != (status.disabledReason() != null)
+                || disabled && !"daily_failure_limit".equals(status.disabledReason())) {
+            return null;
+        }
+        return status;
+    }
+
+    /** The answer of the registration start, or null when it does not fit {@code AuthenticatorEnrollment}. */
+    public static BrokerModel.AuthenticatorEnrollment validEnrollment(BrokerModel.AuthenticatorEnrollment enrollment) {
+        if (enrollment == null || enrollment.enrollmentId() == null
+                || !ContractValues.ENROLLMENT_ID.matcher(enrollment.enrollmentId()).matches()
+                || enrollment.secret() == null || !enrollment.secret().matches("^[A-Z2-7]{32}$")
+                || enrollment.otpauthUri() == null || !enrollment.otpauthUri().startsWith("otpauth://totp/")
+                || !ContractValues.isTimestamp(enrollment.expiresAt())) {
+            return null;
+        }
+        return enrollment;
     }
 }

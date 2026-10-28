@@ -43,4 +43,42 @@ public final class GatewayModel {
 
     public record VirtualServerCreated(String slug, String url) {
     }
+
+    /** {@code ConfirmationView}: what the pending call really is, as the gateway recorded it. */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record ConfirmationView(
+            String confirmationId,
+            String tool,
+            String system,
+            Resource resource,
+            List<ConfirmationArgument> arguments,
+            String expiresAt) {
+    }
+
+    /** {@code resource} of C8: type, id and optional parent, the same value the audit event carries. */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record Resource(String type, String id, String parent) {
+    }
+
+    public record ConfirmationArgument(String name, String value, Boolean truncated) {
+    }
+
+    /** {@code ActivityCall}: one row per tool call; a {@code null errorCode} is the same as an absent one. */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record ActivityCall(
+            String requestId,
+            String ts,
+            String client,
+            String virtualServer,
+            String tool,
+            String risk,
+            Resource resource,
+            String result,
+            Integer wrongCodeCount,
+            String errorCode) {
+    }
+
+    /** One page of {@code activity/calls}; {@code nextCursor} is the gateway's {@code X-Next-Cursor}, untouched. */
+    public record ActivityCallsPage(List<ActivityCall> calls, String nextCursor) {
+    }
 }

@@ -10,7 +10,10 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M2.3 | wirtualne serwery: lista, utworzenie, usunięcie, `409 slug_taken`, kolejność kontroli `resourceDefaults` (CC-085), `clientConfigs` | zrobione |
 | M2.4 | mocki WireMock C4/C5 jako proces hosta (adresy w konfiguracji), testy negatywne (sekret w logach, returnPath, cudza sesja, brak XSRF), README, raport | zrobione |
 | M2.5 | runda poprawek po przeglądzie Opus M2, smoke Haiku, decyzja o braku sprawdzania tożsamości (mcp-contracts 2.2.3) | zrobione |
-| M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | nie zaczęte |
+| M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | w toku: M3.1 poniżej; wnioski IGA i admin zostają na M4 |
+| M3.1 | kontrakty 3.0.1, `ReturnPath` CC-099, `virtual_server_change`, potwierdzenia (podgląd, viewed, cancel), `activity/calls`, Authenticator ze step-up, `Me.mfaFreshUntil` | zrobione |
+| M3.2 | osobne adresy token/JWKS przy `issuer-uri` (bez `idp-relay`) | w toku |
+| M3.3 | poprawki po przeglądzie, README, raport | nie zaczęte |
 
 ## M2: wynik (2026-10-28)
 
@@ -226,3 +229,35 @@ http://localhost:18090/api/v1/me` daje `401 {"error":"unauthenticated"}`, proces
 
 - Czy po step-up frontend ma wracać do formularza z zachowaniem stanu (CC ws-08), czy wystarczy `Referer`.
 - Docelowe wartości `acr` dla MFA (to samo pytanie co w ws-01 dla claimu `mfa` w C2).
+
+## M3.1: kontrakty 3.0.1, potwierdzenia, Authenticator (2026-10-28)
+
+Zależność `mcp-contracts` 3.0.1 (3.0.0 ma lukę G-H1). Szczegóły zachowania w README, sekcja M3.
+
+Decyzje:
+- Brak zdarzeń `confirmation` po stronie BFF: pisze je gateway (`cancelled_by_owner`, `user_confirmed*`), kontrakt oznacza je jako
+  zdarzenia gatewaya. BFF audytuje `authenticator` i `virtual_server_change`. `upstream_unavailable` jako powód
+  `virtual_server_change` i `authenticator` nie jest na liście znanych wartości C8 (pole nie ma enum, tylko wzorzec); do
+  rozważenia przez ws-00.
+- `Sec-Fetch-Site` inny niż `same-origin` albo brak nagłówka przy `viewed` to `403 csrf_invalid` (C12 nie podaje kodu; wybrany ten,
+  który C12 ma dla `CsrfInvalid`). Żądanie z `Sec-Purpose`/`Purpose: prefetch` dostaje 204 bez przekazania (idempotentne,
+  nic nie zostało zapisane).
+- `422 invalid_code` / `enrollment_invalid` mają ciało bez `requestId` (schemat `AuthenticatorEnrollmentError` jest zamknięty),
+  id żądania jest w nagłówku.
+- Kod pierwszego potwierdzenia jako liczba JSON (`"code":123456`) jest odrzucany (bez koercji skalarów); `PUT .../secret` (M2)
+  nadal koerceuje liczbę na tekst, do poprawki w M3.3.
+- Domyślna strona rejestracji do powrotu ze step-up: `/authenticator` (`portal.step-up.authenticator-return-path`); web ma ją
+  ustawić w trasach albo podać własny `returnPath` (C12 na to pozwala).
+- Step-up w dev: realm `corp` nie ma poziomu `acr` dla MFA (STATUS mcp-platform-dev: "Poza M1", `acr` = `1`). Dopóki ws-01
+  go nie doda, `PORTAL_STEP_UP_ACR_VALUES` zostaje puste i o świeżości decyduje `auth_time` z `max_age=0` (ponowne hasło).
+  Prośba do ws-01: poziom `acr` dla hasło+OTP w realmie i ustalenie wartości (BFF czyta ją z `PORTAL_STEP_UP_ACR_VALUES`).
+
+Znalezisko w artefaktach: `mcp-contracts-3.0.1-test-vectors.jar` w `~/.m2` zawiera jeszcze `connect-redirects/valid-identity-mismatch*.json`
+(w repozytorium i tagu są tylko `invalid-identity-mismatch*.json`; jar zbudowany bez `clean`). `ConnectRedirectVectorsTest` pomija te
+dwa pliki. Wydanie jest niezmienne, więc do zgłoszenia ws-00 (kolejne wydanie albo przebudowa jara).
+
+Testy: `./mvnw test`: 238 testów, 0 błędów.
+
+## Propozycje CC
+
+- Brak nowych. Uwaga do C8: powody `upstream_unavailable` dla `virtual_server_change` i `authenticator` (zob. wyżej).

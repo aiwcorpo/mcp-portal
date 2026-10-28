@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
+import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 
 class StepUpPolicyTest {
@@ -24,7 +25,7 @@ class StepUpPolicyTest {
 
     private static PortalProperties properties(List<String> acrValues) {
         return new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
-                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues), null, null, null, null);
+                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues, "/authenticator"), null, null, null, null);
     }
 
     private static StepUpPolicy policy(List<String> acrValues) {
@@ -43,6 +44,25 @@ class StepUpPolicyTest {
         assertThat(policy.isFresh(user(NOW.minus(Duration.ofMinutes(5)).minusSeconds(1), "1"))).isFalse();
         assertThat(policy.isFresh(user(null, "1"))).isFalse();
         assertThat(policy.isFresh(user(NOW.plus(Duration.ofHours(1)), "1"))).isFalse();
+    }
+
+    @Test
+    void freshnessEndsMaxAgeAfterTheLogin() {
+        StepUpPolicy policy = policy(List.of());
+        assertThat(policy.freshUntil(user(NOW.minusSeconds(60), "1"))).isEqualTo(NOW.plus(Duration.ofMinutes(4)));
+        assertThat(policy.freshUntil(user(NOW.minus(Duration.ofHours(1)), "1"))).isNull();
+    }
+
+    @Test
+    void aStaleLoginAnswersWithTheStepUpUrlOfTheRegistrationPage() {
+        StepUpPolicy policy = policy(List.of());
+        assertThatThrownBy(() -> policy.requireFresh(user(NOW.minus(Duration.ofHours(1)), "1"), "/authenticator"))
+                .isInstanceOfSatisfying(ApiException.class, e -> {
+                    assertThat(e.status().value()).isEqualTo(401);
+                    assertThat(e.body()).isEqualTo(new StepUpPolicy.StepUpRequired(
+                            "step_up_required", "/api/v1/auth/login?stepUp=true&returnPath=/authenticator"));
+                });
+        policy.requireFresh(user(NOW, "1"), "/authenticator");
     }
 
     @Test

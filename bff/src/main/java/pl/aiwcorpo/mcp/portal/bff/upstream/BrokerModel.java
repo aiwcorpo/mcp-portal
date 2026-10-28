@@ -65,4 +65,33 @@ public final class BrokerModel {
 
     public record OAuthCompleteResponse(String status, String backendUser) {
     }
+
+    /** {@code AuthenticatorStatus}; timestamps and the disabled reason pass through after {@link BrokerData} checked them. */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record AuthenticatorStatus(
+            String state,
+            String registeredAt,
+            String lastUsedAt,
+            String lockedUntil,
+            String disabledAt,
+            String disabledReason) {
+    }
+
+    /** {@code AuthenticatorEnrollment}: the only C4 answer with the TOTP seed. Never printed, logged or stored. */
+    public record AuthenticatorEnrollment(String enrollmentId, String otpauthUri, String secret, String expiresAt) {
+
+        @Override
+        public String toString() {
+            return "AuthenticatorEnrollment[enrollmentId=" + enrollmentId + ", otpauthUri=<redacted>, secret=<redacted>]";
+        }
+    }
+
+    /** {@code AuthenticatorEnrollmentConfirm}; the first code of a new seed is not logged either. */
+    public record AuthenticatorEnrollmentConfirm(String enrollmentId, String code) {
+
+        @Override
+        public String toString() {
+            return "AuthenticatorEnrollmentConfirm[enrollmentId=" + enrollmentId + ", code=<redacted>]";
+        }
+    }
 }

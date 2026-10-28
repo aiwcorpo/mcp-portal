@@ -66,6 +66,15 @@ public final class TestBrowser {
         return send(builder, csrf(withCsrf));
     }
 
+    public HttpResponse<String> post(String path, String json, boolean withCsrf, Map<String, String> extraHeaders) {
+        HttpRequest.Builder builder = request(path);
+        builder = json == null ? builder.POST(HttpRequest.BodyPublishers.noBody())
+                : builder.POST(HttpRequest.BodyPublishers.ofString(json)).header("Content-Type", "application/json");
+        Map<String, String> headers = new LinkedHashMap<>(csrf(withCsrf));
+        headers.putAll(extraHeaders);
+        return send(builder, headers);
+    }
+
     public HttpResponse<String> delete(String path, boolean withCsrf) {
         return send(request(path).DELETE(), csrf(withCsrf));
     }

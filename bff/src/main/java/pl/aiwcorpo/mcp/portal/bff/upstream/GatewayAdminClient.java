@@ -1,6 +1,8 @@
 package pl.aiwcorpo.mcp.portal.bff.upstream;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.MediaType;
 
@@ -38,5 +40,34 @@ public class GatewayAdminClient {
     public void deleteVirtualServer(BearerToken token, String requestId, String slug) {
         calls.call(calls.authorize(calls.http().delete().uri("/admin/v1/virtual-servers/{slug}", slug), token, requestId),
                 response -> null);
+    }
+
+    public GatewayModel.ConfirmationView confirmation(BearerToken token, String requestId, String confirmationId) {
+        return calls.call(calls.authorize(calls.http().get().uri("/admin/v1/confirmations/{id}", confirmationId),
+                        token, requestId),
+                response -> calls.read(response, GatewayModel.ConfirmationView.class));
+    }
+
+    public void markConfirmationViewed(BearerToken token, String requestId, String confirmationId) {
+        calls.call(calls.authorize(calls.http().post().uri("/admin/v1/confirmations/{id}/viewed", confirmationId),
+                token, requestId), response -> null);
+    }
+
+    public void cancelConfirmation(BearerToken token, String requestId, String confirmationId) {
+        calls.call(calls.authorize(calls.http().post().uri("/admin/v1/confirmations/{id}/cancel", confirmationId),
+                token, requestId), response -> null);
+    }
+
+    /** {@code query} holds only the already validated filters; the cursor goes through exactly as received. */
+    public GatewayModel.ActivityCallsPage activityCalls(BearerToken token, String requestId, Map<String, String> query) {
+        Map<String, String> variables = new LinkedHashMap<>(query);
+        return calls.call(calls.authorize(calls.http().get().uri(builder -> {
+                    builder.path("/admin/v1/activity/calls");
+                    variables.keySet().forEach(name -> builder.queryParam(name, "{" + name + "}"));
+                    return builder.build(variables);
+                }), token, requestId),
+                response -> new GatewayModel.ActivityCallsPage(
+                        calls.read(response, new TypeReference<List<GatewayModel.ActivityCall>>() { }),
+                        response.getHeaders().getFirst("X-Next-Cursor")));
     }
 }

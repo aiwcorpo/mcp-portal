@@ -61,18 +61,42 @@ public class AuditLog {
                 latencyMs));
     }
 
-    /** {@code admin_change} for creating or deleting a virtual server; {@code slug} is null when none was valid. */
+    /** {@code virtual_server_change} (CC-116) for creating or deleting a link; {@code slug} is null when none was valid. */
     public void virtualServerChange(String requestId, PortalUser user, String slug, Outcome outcome, long latencyMs) {
         write(new AuditEvent(
                 clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
                 requestId,
                 "portal",
                 componentId,
-                "admin_change",
+                "virtual_server_change",
                 user.sub(),
                 user.username(),
                 null,
                 slug,
+                outcome.decision(),
+                outcome.reason(),
+                null,
+                null,
+                outcome.outcome(),
+                outcome.errorCode(),
+                latencyMs));
+    }
+
+    /**
+     * {@code authenticator} event of the portal (CC-094): registration started, completed or failed, registration
+     * removed. The event schema has no field for a seed, an otpauth URI or a code, and none is ever passed here.
+     */
+    public void authenticatorEvent(String requestId, PortalUser user, Outcome outcome, long latencyMs) {
+        write(new AuditEvent(
+                clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
+                requestId,
+                "portal",
+                componentId,
+                "authenticator",
+                user.sub(),
+                user.username(),
+                null,
+                null,
                 outcome.decision(),
                 outcome.reason(),
                 null,
@@ -126,6 +150,16 @@ public class AuditLog {
             return new Outcome("allow", null, "ok", null);
         }
 
+        /** Success that C8 wants named, for example {@code vs_created}. */
+        public static Outcome ok(String reason) {
+            return new Outcome("allow", reason, "ok", null);
+        }
+
+        /** Refused, with the C8 reason and the C10 code (null when the contract has none for it). */
+        public static Outcome denied(String reason, String errorCode) {
+            return new Outcome("deny", reason, "denied", errorCode);
+        }
+
         public static Outcome stepUpRequired() {
             return new Outcome("deny", "step_up_required", "denied", "step_up_required");
         }
@@ -138,6 +172,16 @@ public class AuditLog {
         /** The gateway refused the change for this user. */
         public static Outcome accessDenied() {
             return new Outcome("deny", "access_denied", "denied", "access_denied");
+        }
+
+        /** The gateway answered 403 to a link change (C8 reason {@code not_granted}). */
+        public static Outcome notGranted() {
+            return new Outcome("deny", "not_granted", "denied", "access_denied");
+        }
+
+        /** A link that is missing or not the caller's; the browser cannot tell which. */
+        public static Outcome notFoundOrDenied() {
+            return new Outcome("deny", "not_found_or_denied", "denied", "not_found_or_denied");
         }
 
         public static Outcome upstreamUnavailable() {

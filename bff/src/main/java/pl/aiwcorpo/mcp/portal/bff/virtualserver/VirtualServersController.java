@@ -102,7 +102,7 @@ class VirtualServersController {
         long started = clock.millis();
         Checked checked = check(rawBody);
         if (checked.error() != null) {
-            audit.virtualServerChange(requestId, user, checked.slug(), AuditLog.Outcome.rejected(checked.error()),
+            audit.virtualServerChange(requestId, user, checked.slug(), AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
                     clock.millis() - started);
             return ResponseEntity.badRequest().body(ApiError.of(checked.error()).withRequestId(requestId));
         }
@@ -117,7 +117,7 @@ class VirtualServersController {
                     clock.millis() - started);
             throw e;
         }
-        audit.virtualServerChange(requestId, user, body.slug(), AuditLog.Outcome.ok(), clock.millis() - started);
+        audit.virtualServerChange(requestId, user, body.slug(), AuditLog.Outcome.ok("vs_created"), clock.millis() - started);
         String url = publicUrls.virtualServer(body.slug());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new PortalVirtualServerCreated(body.slug(), url, ClientConfigs.of(body.slug(), url, claudeCode)));
@@ -130,7 +130,7 @@ class VirtualServersController {
         String requestId = RequestIds.of(request);
         long started = clock.millis();
         if (!validSlug(slug)) {
-            audit.virtualServerChange(requestId, user, null, AuditLog.Outcome.rejected(ApiError.NOT_FOUND_OR_DENIED),
+            audit.virtualServerChange(requestId, user, null, AuditLog.Outcome.notFoundOrDenied(),
                     clock.millis() - started);
             throw notFound();
         }
@@ -140,7 +140,7 @@ class VirtualServersController {
         } catch (UpstreamException e) {
             // Someone else's link and a missing one look the same to the browser.
             if (e.status() == 404 || e.status() == 403) {
-                audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.accessDenied(), clock.millis() - started);
+                audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.notFoundOrDenied(), clock.millis() - started);
                 throw notFound();
             }
             audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.upstreamUnavailable(),
@@ -151,7 +151,7 @@ class VirtualServersController {
                     clock.millis() - started);
             throw e;
         }
-        audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.ok(), clock.millis() - started);
+        audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.ok("vs_deleted"), clock.millis() - started);
         return ResponseEntity.noContent().build();
     }
 
@@ -169,13 +169,13 @@ class VirtualServersController {
                     .body(ApiError.of(VIRTUAL_SERVER_LIMIT_REACHED).withRequestId(requestId));
         }
         if (e.status() == 403 && ApiError.ACCESS_DENIED.equals(e.error())) {
-            audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.accessDenied(), latency);
+            audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.notGranted(), latency);
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiError.of(ApiError.ACCESS_DENIED).withRequestId(requestId));
         }
         if (e.status() == 400 && (ApiError.INVALID_REQUEST.equals(e.error())
                 || RESOURCE_DEFAULTS_UNSUPPORTED.equals(e.error()))) {
-            audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.rejected(e.error()), latency);
+            audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST), latency);
             return ResponseEntity.badRequest().body(ApiError.of(e.error()).withRequestId(requestId));
         }
         audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.upstreamUnavailable(), latency);

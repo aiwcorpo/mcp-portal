@@ -5,10 +5,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
+import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 
 /** Decides whether the session's last interactive authentication is fresh enough for sensitive operations. */
@@ -28,15 +30,41 @@ public class StepUpPolicy {
     }
 
     public boolean isFresh(PortalUser user) {
+        return freshUntil(user) != null;
+    }
+
+    /** End of the freshness of the last interactive authentication, or null when it is not fresh now. */
+    public Instant freshUntil(PortalUser user) {
         Instant authTime = user.authTime();
         if (authTime == null) {
-            return false;
+            return null;
         }
         Instant now = clock.instant();
         if (authTime.isAfter(now.plusSeconds(30)) || Duration.between(authTime, now).compareTo(maxAge) > 0) {
-            return false;
+            return null;
         }
-        return acrValues.isEmpty() || (user.acr() != null && acrValues.contains(user.acr()));
+        if (!acrValues.isEmpty() && (user.acr() == null || !acrValues.contains(user.acr()))) {
+            return null;
+        }
+        return authTime.plus(maxAge);
+    }
+
+    /**
+     * Passes when the session's login is a fresh MFA; otherwise ends the call with {@code 401 step_up_required}
+     * pointing at the login that comes back to {@code returnPath} (C12 {@code StepUpRequired}, CC-048).
+     */
+    public void requireFresh(PortalUser user, String returnPath) {
+        if (!isFresh(user)) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, new StepUpRequired(stepUpUrl(returnPath)));
+        }
+    }
+
+    /** Body of {@code 401 step_up_required}; no {@code requestId} field, the schema is closed. */
+    public record StepUpRequired(String error, String stepUpUrl) {
+
+        StepUpRequired(String stepUpUrl) {
+            this("step_up_required", stepUpUrl);
+        }
     }
 
     /** Space-separated acr_values for the step-up authorization request; null when none are configured. */

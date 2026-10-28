@@ -12,6 +12,9 @@ public final class SessionAttributes {
     /** Tokens exchanged for the broker and gateway admin audiences (server side only). */
     public static final String EXCHANGED_TOKENS = "portal.exchangedTokens";
 
+    /** {@code enrollmentId} of the pending authenticator registration of this session; the seed is never stored. */
+    public static final String AUTHENTICATOR_ENROLLMENT_ID = "portal.authenticator.enrollmentId";
+
     private SessionAttributes() {
     }
 }

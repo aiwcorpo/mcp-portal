@@ -14,7 +14,7 @@ public final class ConnectRedirectRules {
 
     private static final Pattern CONNECTED = Pattern.compile("^connected=(jira|confluence|gitlab|servicedesk|opensearch)$");
     private static final Pattern SYSTEM = Pattern.compile("^system=(jira|confluence|gitlab|servicedesk|opensearch)$");
-    private static final List<String> ERRORS = List.of("identity_mismatch", "flow_invalid", "provider_error", "cancelled");
+    private static final List<String> ERRORS = List.of("flow_invalid", "provider_error", "cancelled");
 
     private ConnectRedirectRules() {
     }

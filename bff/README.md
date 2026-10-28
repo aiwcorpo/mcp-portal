@@ -4,11 +4,11 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 2.2.5 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 3.0.1 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
 
 ## Uruchomienie lokalne
 
-Wymagane: JDK 25 i `mcp-contracts` 2.2.5 w `~/.m2`. Dwa tryby.
+Wymagane: JDK 25 i `mcp-contracts` 3.0.1 w `~/.m2`. Dwa tryby.
 
 Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
@@ -127,7 +127,7 @@ step-up i odrzucenia przez broker).
 Callback OIDC to `/api/v1/auth/callback` (jedna domena, CC-089). Połączenie OAuth: `POST /connections/{system}/oauth`
 zapisuje w sesji `flowId`, `state` z `authorizeUrl` i `returnPath`; `GET /api/v1/oauth/callback` szuka przepływu po
 `state` w sesji bieżącego użytkownika (jednorazowo, 15 min, najwyżej 8 naraz), a kody `connectError` to
-`cancelled`, `provider_error`, `flow_invalid` (`identity_mismatch` jest deprecated od 2.2.3: broker go nie zwraca, a BFF nie przekazuje). Wirtualne serwery: proxy do C5 z kontrolą
+`cancelled`, `provider_error`, `flow_invalid` (`identity_mismatch` usunięte w kontraktach 3.0.0). Wirtualne serwery: proxy do C5 z kontrolą
 `resourceDefaults` (CC-085) i `clientConfigs` z `PORTAL_PUBLIC_BASE_URL`.
 
 `clientConfigs.claudeCode` to `claude mcp add --transport http [--client-id <id>] [--callback-port <port>] <slug> <url>`.
@@ -148,6 +148,43 @@ a zdarzenie `connection_change` niesie `backendUser` połączonego konta (CC-117
 | `PublicBaseUrlTest` | redirect URI z konfiguracji mimo `X-Forwarded-Host` |
 | `CatalogAssemblerTest` | wektory `catalog-actions/`, przykłady `mixed` i `states` z C12 |
 
+## M3: potwierdzenia, Authenticator, logi aktywności
+
+Kontrakty 3.0.1. Potwierdzenie akcji DESTRUCTIVE to kod TOTP wpisany w kliencie MCP i sprawdzany przez broker, więc
+BFF nie ma endpointu decyzji (`POST /api/v1/confirmations/{id}` to 405).
+
+- `GET /api/v1/confirmations/{id}`: podgląd tylko do odczytu (proxy do C5), sama sesja, bez MFA, `Cache-Control: no-store`.
+  Odpowiedź bez zgodności ze schematem albo dla innego `confirmationId` to 503, nie pusty podgląd. Id spoza wzorca,
+  cudze, wygasłe i unieważnione to ten sam `404 not_found_or_denied`.
+- `POST .../viewed`: XSRF oraz `Sec-Fetch-Site: same-origin` (brak nagłówka lub inna wartość: `403 csrf_invalid`);
+  żądanie z `Sec-Purpose` albo `Purpose` zawierającym `prefetch` dostaje 204 bez przekazania do gateway'a.
+- `POST .../cancel`: XSRF, bez MFA. Gdy gateway nie może spalić kodów u brokera, jest 503 i nic nie zostaje anulowane.
+- `GET /api/v1/activity/calls`: filtry `limit`, `from`, `to`, `result`, `q`, `cursor` są sprawdzane (jeden raz, w granicach
+  C12; reszta parametrów nie jest przekazywana), kursor `X-Next-Cursor` idzie w obie strony bez zmian. Wiersze poza
+  schematem są pomijane, kursor spoza `[\x21-\x7e]{1,256}` to 503. 400 gateway'a przy podanym kursorze to 400.
+- Authenticator (`/api/v1/authenticator`, `/enrollment`, `/enrollment/confirm`): start rejestracji i usunięcie wymagają
+  świeżego MFA (`401 step_up_required` ze `stepUpUrl`, powrót na `portal.step-up.authenticator-return-path`, domyślnie
+  `/authenticator`), pierwszy kod nie. Ziarno jest w jednej odpowiedzi `201` (`no-store`), nie trafia do sesji, logów ani
+  audytu; w sesji zostaje `enrollmentId`, a cudzy lub zużyty to `404 not_found_or_denied`. Stan `disabled` z `disabledAt` i
+  `disabledReason` jest przekazywany; start rejestracji ze stanu `disabled` nie woła wcześniej `DELETE`.
+  `GET /api/v1/me` zwraca `mfaFreshUntil`, gdy ostatnie logowanie liczy się jako świeże.
+- Step-up w dev: `portal.step-up.acr-values` puste (realm dev nie ma jeszcze poziomu `acr` dla MFA), więc o świeżości
+  decyduje `auth_time` (`portal.step-up.max-age`, 5 min) i ponowne logowanie hasłem. Z poziomem MFA w Keycloaku:
+  `PORTAL_STEP_UP_ACR_VALUES`. Poza profilem dev puste `acr-values` to błąd startu.
+- Audyt: `authenticator` (`authenticator_enrollment_started`, `authenticator_registered`,
+  `authenticator_enrollment_failed`, `authenticator_removed`, `step_up_required`, `upstream_unavailable`) i
+  `virtual_server_change` zamiast `admin_change` (`vs_created`, `vs_deleted`, `slug_taken`, `not_granted`, `invalid_request`,
+  `virtual_server_limit`, `not_found_or_denied`). Zdarzenia `confirmation` (w tym `cancelled_by_owner`) pisze gateway.
+- `ReturnPath` (CC-099): bez średnika; pierwszy segment nie jest `api`, `s`, `v` ani `.well-known`; żaden segment ścieżki
+  nie jest `.` ani `..`.
+
+| Test | Co sprawdza |
+| --- | --- |
+| `ConfirmationsTest` | podgląd bez skutków ubocznych, `viewed` (XSRF, `Sec-Fetch-Site`, prefetch), `cancel` bez MFA, 404 dla cudzych, brak endpointu decyzji |
+| `AuthenticatorTest` | step-up przy starcie i usunięciu, ziarno raz i `no-store`, brak ziarna i kodu w logach i audycie, `enrollmentId` związany z sesją, stan `disabled`, `mfaFreshUntil` |
+| `ActivityCallsTest` | filtry, kursor bez zmian, parametry spoza kontraktu, wiersze poza schematem |
+| `ReturnPathsTest`, `NegativeSecurityTest` | wektory `return-paths/` z 3.0.1 |
+
 ## Struktura
 
 ```
@@ -159,6 +196,9 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   connection/  GET/PUT/DELETE połączeń
   virtualserver/ wirtualne serwery i clientConfigs
   me/          GET /api/v1/me
+  confirmation/ podgląd, viewed, cancel
+  authenticator/ rejestracja Authenticatora (TOTP)
+  activity/    GET /api/v1/activity/calls
   iga/         port C13 i adapter mock (dane: dev/iga-mock.yaml, tylko profil dev)
   audit/       zdarzenia C8
   spa/         serwowanie frontendu, fallback tras, CSP
