@@ -160,6 +160,13 @@ tbody {
     padding-block: 6px 4px;
     text-align: left;
     white-space: normal;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .server .c-actions button + button {
+    margin-left: 0;
   }
 
   .server .c-login,

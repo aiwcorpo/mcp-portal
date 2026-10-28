@@ -72,6 +72,23 @@ Kontrakty 2.2.3, klient API wygenerowany ponownie. `npm test`: 149 testów, e2e:
 | e2e mobile-360 `/catalog` (niestabilne także na kodzie sprzed zmian: AbortError z `getAnimations().finished`, zawieszona pętla rozwijania wierszy) | helper a11y czeka tylko na skończone animacje, z limitem 2 s, a rozwijanie wierszy potwierdza każdy klik; 3 przebiegi z rzędu 88/88 |
 | Gateway po M2 (8dc1d7a): limit 50 linków daje 400 `invalid_request` | kreator pokazuje przy 400 `invalid_request` na utworzeniu wskazówkę o limicie 50 linków obok `requestId` (bez zgadywania po treści); test |
 
+## Scenariusz na żywym stosie M2 (2026-10-28)
+
+Osobny projekt Playwright bez MSW: `playwright.live.config.ts`, `e2e-live/scenario.spec.ts` (nie wchodzi do
+`npm run e2e`). Uruchomienie: `LIVE_ALICE_PASSWORD=<hasło z make users> LIVE_SHOTS_DIR=<katalog> npx playwright test -c playwright.live.config.ts`.
+Baza: `http://localhost:18740` (`LIVE_BASE_URL`). Przechodzi: logowanie Keycloak (alice), katalog z 5 systemami,
+rozłączenie i ponowny zapis PAT Jiry (`alice-pat`, "Połączono z Jira jako alice"), OAuth GitLab z odmową
+(`cancelled`) i powodzeniem, kreator Nazwa -> Narzędzia -> Gotowe z komendą Claude Code, usunięcie linku,
+rozłączenie GitLaba, wylogowanie. Sprawdza też: brak błędów konsoli i naruszeń CSP, brak odpowiedzi API >= 400
+(poza anonimowym `/api/v1/me` -> 401 na ekranie logowania), ciasteczka portalu tylko `__Host-*`, brak tokenów w
+storage i w DOM.
+
+Ustalenia: ze statusem `connected` katalog nie oferuje ponownego zapisu PAT (akcje `copy_link`, `disconnect`), więc
+scenariusz najpierw rozłącza Jirę w Połączeniach i zapisuje PAT od nowa (stan końcowy: Jira połączona). OpenSearch
+jest `not_connected` bez akcji (token-exchange w brokerze jeszcze nie istnieje, wg docs/m2.md). Poprawka w web:
+na 360 px drugi przycisk w wierszu serwera był przesunięty o 8 px (flex + gap w `catalog-table.scss`); proxy
+serwuje starszy build, więc zrzuty sprzed poprawki.
+
 ## Różnice względem makiet
 
 1. Przełącznik "Tryb ciemny" w nagłówku (makiety są tylko ciemne; domyślnie ciemny, jasny opcjonalnie).
@@ -160,4 +177,3 @@ Kontrakty 2.2.3, klient API wygenerowany ponownie. `npm test`: 149 testów, e2e:
 - Logi audytowe z filtrami (szukaj, okres, wynik, "Pokaż więcej").
 - Wnioski (lista, złożenie, `view_request` w katalogu).
 - Administracja (rejestr, różnice definicji, zatwierdzanie).
-- Testy e2e na prawdziwym BFF (ws-01, profil `full`).
