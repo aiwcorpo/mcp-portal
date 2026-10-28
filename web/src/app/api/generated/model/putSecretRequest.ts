@@ -10,6 +10,9 @@
 
 
 export interface PutSecretRequest { 
+    /**
+     * Single token (PAT or API key), never login and password (CC-049).
+     */
     secret: string;
     /**
      * ISO 8601 date-time in UTC (suffix Z).

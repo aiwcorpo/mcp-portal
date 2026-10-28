@@ -1,34 +1,79 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { LoginErrorCode } from '../../api/generated';
 import { SessionService } from '../../core/session.service';
-import { Notice } from '../../shared/notice';
 
+type Reason = 'not_logged_in' | 'expired' | 'logged_out';
+
+const LOGIN_ERROR_TEXT: Record<LoginErrorCode, () => string> = {
+  cancelled: () => $localize`:@@login.err.cancelled:Logowanie anulowane.`,
+  idp_error: () =>
+    $localize`:@@login.err.idp_error:Usługa logowania nie odpowiada. Spróbuj za chwilę.`,
+  session_expired: () =>
+    $localize`:@@login.err.session_expired:Sesja wygasła. Zaloguj się ponownie.`,
+  step_up_failed: () =>
+    $localize`:@@login.err.step_up_failed:Nie udało się potwierdzić tożsamości. Spróbuj zarejestrować ponownie.`,
+};
+
+/** Sign-in screen (mockups 00, 23, 25). The error line comes from a closed list, never from the URL text. */
 @Component({
   selector: 'app-login-panel',
-  imports: [MatButtonModule, Notice],
+  imports: [MatButtonModule],
   template: `
-    <h1 i18n="@@login.title">Zaloguj się do Portalu MCP</h1>
-    @switch (reason()) {
-      @case ('expired') {
-        <app-notice kind="info" i18n="@@login.expired"
-          >Sesja wygasła. Zaloguj się ponownie, żeby kontynuować.</app-notice
-        >
+    <section class="login" aria-labelledby="login-title">
+      <h1 id="login-title" i18n="@@login.title">Portal MCP</h1>
+      <p class="muted" i18n="@@login.text">Zaloguj się kontem firmowym.</p>
+      <button mat-flat-button type="button" class="login-button" (click)="session.login()">
+        <ng-container i18n="@@login.button">Zaloguj przez konto firmowe</ng-container>
+      </button>
+      @if (message(); as text) {
+        <p class="message" [class.info]="!error()" role="alert">{{ text }}</p>
       }
-      @case ('logged_out') {
-        <app-notice kind="success" i18n="@@login.loggedOut">Wylogowano.</app-notice>
-      }
+    </section>
+  `,
+  styles: `
+    .login {
+      display: grid;
+      align-content: center;
+      justify-items: start;
+      gap: 14px;
+      width: min(320px, 100%);
+      min-height: min(60vh, 520px);
+      margin: 0 auto;
     }
-    <p i18n="@@login.text">
-      Portal używa firmowego logowania (SSO). Po zalogowaniu zobaczysz serwery MCP, do których masz
-      uprawnienia, i połączysz z nimi swoje konta.
-    </p>
-    <button mat-flat-button type="button" (click)="session.login()" i18n="@@login.button">
-      Zaloguj się
-    </button>
+    h1 {
+      font-size: 18px;
+    }
+    .login-button {
+      width: 100%;
+      margin-top: 4px;
+    }
+    .message {
+      color: var(--pm-danger);
+    }
+    .message.info {
+      color: var(--pm-muted);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPanel {
   protected readonly session = inject(SessionService);
-  readonly reason = input<'not_logged_in' | 'expired' | 'logged_out'>('not_logged_in');
+  readonly reason = input<Reason>('not_logged_in');
+
+  protected readonly error = computed(() => this.session.loginError());
+  protected readonly message = computed(() => {
+    const code = this.error();
+    if (code) {
+      return LOGIN_ERROR_TEXT[code]();
+    }
+    switch (this.reason()) {
+      case 'expired':
+        return $localize`:@@login.expired:Sesja wygasła. Zaloguj się ponownie.`;
+      case 'logged_out':
+        return $localize`:@@login.loggedOut:Wylogowano.`;
+      default:
+        return null;
+    }
+  });
 }

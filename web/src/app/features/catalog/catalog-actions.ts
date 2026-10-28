@@ -1,48 +1,51 @@
-import { CatalogAction, CatalogStatus, PortalCatalogServer } from '../../api/generated';
+import { CatalogAction, PortalCatalogServer } from '../../api/generated';
 
 /**
- * Actions this release can carry out. request_access and view_request need the access-request
- * screen (next milestone), so they are not offered yet even when the BFF lists them.
+ * Actions this release can carry out. view_request needs the requests screen (M4), so it is not
+ * offered even when the BFF lists it; the pending status is still shown as text.
  */
 export const SUPPORTED_ACTIONS: readonly CatalogAction[] = [
   'copy_link',
   'connect_oauth',
   'add_secret',
   'reconnect',
+  'request_access',
   'disconnect',
 ];
 
-/** Preferred main action per status; the first one present in the server's actions[] wins. */
-const PRIMARY_BY_STATUS: Record<CatalogStatus, readonly CatalogAction[]> = {
-  connected: ['copy_link'],
-  expiring: ['reconnect', 'copy_link'],
-  reconnect_required: ['reconnect'],
-  not_connected: ['connect_oauth', 'add_secret'],
-  request_pending: ['view_request'],
-  no_access: ['request_access'],
-};
-
-const FALLBACK_ORDER: readonly CatalogAction[] = [
+const CATALOG_ORDER: readonly CatalogAction[] = [
+  'reconnect',
+  'connect_oauth',
+  'add_secret',
   'copy_link',
+  'request_access',
+];
+
+const CONNECTIONS_ORDER: readonly CatalogAction[] = [
   'reconnect',
   'connect_oauth',
   'add_secret',
   'request_access',
-  'view_request',
   'disconnect',
 ];
 
-export interface ServerActions {
-  primary: CatalogAction | null;
-  secondary: CatalogAction[];
+function pick(server: PortalCatalogServer, order: readonly CatalogAction[]): CatalogAction[] {
+  return order.filter(
+    (action) => server.actions.includes(action) && SUPPORTED_ACTIONS.includes(action),
+  );
 }
 
-export function serverActions(server: PortalCatalogServer): ServerActions {
-  const offered = server.actions.filter((action) => SUPPORTED_ACTIONS.includes(action));
-  const preferred = [...PRIMARY_BY_STATUS[server.status], ...FALLBACK_ORDER];
-  const primary = preferred.find((action) => offered.includes(action) && action !== 'disconnect');
-  return {
-    primary: primary ?? null,
-    secondary: FALLBACK_ORDER.filter((action) => action !== primary && offered.includes(action)),
-  };
+/** Buttons of a catalog row: everything the BFF offers except disconnect (that is on Connections). */
+export function catalogRowActions(server: PortalCatalogServer): CatalogAction[] {
+  return pick(server, CATALOG_ORDER);
+}
+
+/** Buttons of a connections row: how to (re)connect, request access, disconnect; no link copying. */
+export function connectionRowActions(server: PortalCatalogServer): CatalogAction[] {
+  return pick(server, CONNECTIONS_ORDER);
+}
+
+/** Actions that move the user forward get the filled button, the rest the outlined one (mockups). */
+export function isEmphasised(action: CatalogAction): boolean {
+  return action === 'reconnect' || action === 'connect_oauth' || action === 'add_secret';
 }

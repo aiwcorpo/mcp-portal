@@ -16,6 +16,10 @@ export interface RegistryServer {
     serverId: ServerId;
     system: SystemId;
     version: string;
+    /**
+     * False when the server is disabled in gateway configuration or by an overrides policy. All tools of a disabled server report disabled=true in the catalog (CC-081, CC-088). Read only; the portal has no switch.
+     */
+    enabled?: boolean;
     tools: Array<RegistryTool>;
 }
 export namespace RegistryServer {

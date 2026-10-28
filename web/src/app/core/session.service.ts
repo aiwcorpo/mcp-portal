@@ -1,7 +1,7 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { DOCUMENT, Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AuthService, Me, MeService } from '../api/generated';
+import { AuthService, LoginErrorCode, Me, MeService } from '../api/generated';
 import { ApiFailure, toApiFailure } from './api-error';
 import { loginUrl } from './auth-urls';
 import { BrowserNavigation } from './browser-navigation';
@@ -18,6 +18,15 @@ export class SessionService {
   private readonly authApi = inject(AuthService);
   private readonly navigation = inject(BrowserNavigation);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
+
+  /**
+   * `/?loginError=<code>` after a failed login (CC-051). Read once at start, before the router
+   * redirects `/` and drops the query, and shown only on the login screen.
+   */
+  readonly loginError = signal<LoginErrorCode | null>(
+    readLoginError(this.document.location?.search ?? ''),
+  );
 
   private readonly stateSignal = signal<SessionState>({ status: 'loading' });
   readonly state = this.stateSignal.asReadonly();
@@ -49,8 +58,15 @@ export class SessionService {
     }
   }
 
-  login(returnPath: string = this.router.url): void {
+  login(returnPath: string = this.returnPathWithoutLoginError()): void {
+    this.loginError.set(null);
     this.navigation.assign(loginUrl(returnPath));
+  }
+
+  private returnPathWithoutLoginError(): string {
+    const tree = this.router.parseUrl(this.router.url);
+    delete tree.queryParams['loginError'];
+    return tree.toString();
   }
 
   async logout(): Promise<ApiFailure | null> {
@@ -66,4 +82,11 @@ export class SessionService {
     await this.router.navigateByUrl('/');
     return null;
   }
+}
+
+function readLoginError(search: string): LoginErrorCode | null {
+  const value = new URLSearchParams(search).get('loginError');
+  return (Object.values(LoginErrorCode) as string[]).includes(value ?? '')
+    ? (value as LoginErrorCode)
+    : null;
 }

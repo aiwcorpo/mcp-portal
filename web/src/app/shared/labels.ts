@@ -1,7 +1,7 @@
 import {
-  Access,
   CatalogAction,
   CatalogStatus,
+  Connection,
   ConnectionStatus,
   CredentialType,
   Risk,
@@ -12,7 +12,7 @@ const SYSTEM_NAMES: Record<SystemId, string> = {
   jira: 'Jira',
   confluence: 'Confluence',
   gitlab: 'GitLab',
-  servicedesk: $localize`:@@system.servicedesk:Service desk`,
+  servicedesk: $localize`:@@system.servicedesk:Service Desk`,
   opensearch: 'OpenSearch',
 };
 
@@ -27,29 +27,51 @@ export function systemName(system: SystemId): string {
 }
 
 const STATUS_LABELS: Record<CatalogStatus, string> = {
-  connected: $localize`:@@catalogStatus.connected:Połączono`,
+  connected: $localize`:@@catalogStatus.connected:Połączone`,
   expiring: $localize`:@@catalogStatus.expiring:Wkrótce wygasa`,
   reconnect_required: $localize`:@@catalogStatus.reconnect_required:Wymaga ponownego połączenia`,
   not_connected: $localize`:@@catalogStatus.not_connected:Niepołączone`,
-  request_pending: $localize`:@@catalogStatus.request_pending:Wniosek w toku`,
-  no_access: $localize`:@@catalogStatus.no_access:Brak dostępu`,
-};
-
-const STATUS_HINTS: Record<CatalogStatus, string> = {
-  connected: $localize`:@@catalogHint.connected:Konto jest połączone. Skopiuj adres serwera do konfiguracji klienta AI.`,
-  expiring: $localize`:@@catalogHint.expiring:Połączenie wygasa w ciągu 7 dni. Odnów je, żeby uniknąć przerwy.`,
-  reconnect_required: $localize`:@@catalogHint.reconnect_required:Połączenie wygasło, zostało unieważnione albo zgłasza błąd. Połącz konto ponownie.`,
-  not_connected: $localize`:@@catalogHint.not_connected:Masz dostęp, ale konto w tym systemie nie jest jeszcze połączone.`,
-  request_pending: $localize`:@@catalogHint.request_pending:Twój wniosek o dostęp czeka na decyzję.`,
-  no_access: $localize`:@@catalogHint.no_access:Nie masz uprawnień do żadnego narzędzia tego serwera.`,
+  request_pending: $localize`:@@catalogStatus.request_pending:Wniosek oczekuje`,
+  no_access: $localize`:@@catalogStatus.no_access:Brak uprawnienia`,
 };
 
 export function catalogStatusLabel(status: CatalogStatus): string {
   return STATUS_LABELS[status];
 }
 
-export function catalogStatusHint(status: CatalogStatus): string {
-  return STATUS_HINTS[status];
+const DAY_MS = 86_400_000;
+
+/** Whole days from `now` to `iso`, never negative; null when the date is missing or unreadable. */
+export function daysUntil(iso: string | null | undefined, now: number = Date.now()): number | null {
+  const time = iso ? Date.parse(iso) : Number.NaN;
+  return Number.isNaN(time) ? null : Math.max(0, Math.ceil((time - now) / DAY_MS));
+}
+
+export function daysText(days: number): string {
+  if (days === 0) {
+    return $localize`:@@days.today:dziś`;
+  }
+  return days === 1
+    ? $localize`:@@days.one:za 1 dzień`
+    : $localize`:@@days.many:za ${days}:days: dni`;
+}
+
+/** Status line of a catalog row; an expiring connection says when (mockup 01: "Token wygasa za 5 dni"). */
+export function catalogStatusText(
+  status: CatalogStatus,
+  connection: Connection | null | undefined,
+  now: number = Date.now(),
+): string {
+  if (status === 'expiring') {
+    const days = daysUntil(connection?.expiresAt, now);
+    if (days !== null) {
+      const when = daysText(days);
+      return connection?.type === 'user-secret'
+        ? $localize`:@@catalogStatus.tokenExpiresIn:Token wygasa ${when}:when:`
+        : $localize`:@@catalogStatus.connectionExpiresIn:Połączenie wygasa ${when}:when:`;
+    }
+  }
+  return STATUS_LABELS[status];
 }
 
 const ACTION_LABELS: Record<CatalogAction, string> = {
@@ -59,35 +81,33 @@ const ACTION_LABELS: Record<CatalogAction, string> = {
   reconnect: $localize`:@@action.reconnect:Odnów`,
   request_access: $localize`:@@action.request_access:Złóż wniosek`,
   view_request: $localize`:@@action.view_request:Zobacz wniosek`,
-  disconnect: $localize`:@@action.disconnect:Odłącz`,
+  disconnect: $localize`:@@action.disconnect:Rozłącz`,
 };
 
-export function actionLabel(action: CatalogAction): string {
+export function actionLabel(action: CatalogAction, connection?: Connection | null): string {
+  if (action === 'reconnect' && connection?.type === 'user-oauth') {
+    return $localize`:@@action.reconnectOAuth:Połącz`;
+  }
+  // add_secret next to an existing connection means replacing an expiring or revoked token.
+  if (action === 'add_secret' && connection) {
+    return $localize`:@@action.renewSecret:Odnów`;
+  }
   return ACTION_LABELS[action];
 }
 
 const RISK_LABELS: Record<Risk, string> = {
   READ_ONLY: $localize`:@@risk.READ_ONLY:Odczyt`,
-  UPDATE: $localize`:@@risk.UPDATE:Zmiana`,
-  DESTRUCTIVE: $localize`:@@risk.DESTRUCTIVE:Destrukcyjne`,
+  UPDATE: $localize`:@@risk.UPDATE:Zapis`,
+  DESTRUCTIVE: $localize`:@@risk.DESTRUCTIVE:Usuwanie`,
 };
 
 export function riskLabel(risk: Risk): string {
   return RISK_LABELS[risk];
 }
 
-const ACCESS_LABELS: Record<Access, string> = {
-  granted: $localize`:@@access.granted:Przyznany`,
-  denied: $localize`:@@access.denied:Brak`,
-};
-
-export function accessLabel(access: Access): string {
-  return ACCESS_LABELS[access];
-}
-
 const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
   'user-oauth': 'OAuth',
-  'user-secret': $localize`:@@credentialType.user-secret:Token`,
+  'user-secret': $localize`:@@credentialType.user-secret:Token PAT`,
   'token-exchange': $localize`:@@credentialType.token-exchange:Wymiana tokenu`,
   'service-account': $localize`:@@credentialType.service-account:Konto serwisowe`,
 };
@@ -113,9 +133,9 @@ export type Tone = 'ok' | 'warn' | 'error' | 'info' | 'neutral';
 const CATALOG_STATUS_TONES: Record<CatalogStatus, Tone> = {
   connected: 'ok',
   expiring: 'warn',
-  reconnect_required: 'error',
+  reconnect_required: 'warn',
   not_connected: 'neutral',
-  request_pending: 'info',
+  request_pending: 'neutral',
   no_access: 'neutral',
 };
 
@@ -126,9 +146,9 @@ export function catalogStatusTone(status: CatalogStatus): Tone {
 const CONNECTION_STATUS_TONES: Record<ConnectionStatus, Tone> = {
   connected: 'ok',
   expiring: 'warn',
-  expired: 'error',
-  revoked: 'error',
-  error: 'error',
+  expired: 'warn',
+  revoked: 'warn',
+  error: 'warn',
 };
 
 export function connectionStatusTone(status: ConnectionStatus): Tone {

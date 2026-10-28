@@ -9,17 +9,24 @@
  */
 import { CatalogTool } from './catalogTool';
 import { ServerId } from './serverId';
+import { CatalogCredential } from './catalogCredential';
+import { Connection } from './connection';
 import { CatalogAction } from './catalogAction';
 import { SystemId } from './systemId';
 import { CatalogStatus } from './catalogStatus';
 
 
 export interface PortalCatalogServer { 
+    credential?: CatalogCredential;
+    /**
+     * The current user\'s connection to the system (C4 GET /v1/connections). null when there is none or when nothing is to be connected (service-account, token-exchange). Never contains a secret value (CC-080).
+     */
+    connection?: Connection | null;
     serverId: ServerId;
     system: SystemId;
     version: string;
     /**
-     * Full MCP endpoint https://<gateway>/s/<serverId>/mcp, used by copy_link (CC-021).
+     * Public MCP endpoint <publicBaseUrl>/s/<serverId>/mcp, used by copy_link (CC-021, CC-089).
      */
     url: string;
     status: CatalogStatus;

@@ -15,5 +15,9 @@
 export interface ModelError { 
     error: string;
     message?: string;
+    /**
+     * UUIDv7 request id (C2 rid, X-Request-Id).
+     */
+    requestId?: string;
 }
 

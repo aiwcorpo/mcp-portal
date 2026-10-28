@@ -2,8 +2,8 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './core/admin.guard';
 
 /**
- * Next milestones add: links (virtual servers), requests, activity, confirm/:id and admin children.
- * Each one is a lazy route here; see STATUS.md.
+ * No route starts with /api, /s/, /v/ or /.well-known/: the reverse proxy sends those to the BFF and the
+ * gateway (CC-089). Later milestones add requests, activity, confirm/:id and admin children.
  */
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'catalog' },
@@ -22,6 +22,21 @@ export const routes: Routes = [
     title: $localize`:@@route.connections:Moje połączenia`,
     loadComponent: () =>
       import('./features/connections/connections-page').then((m) => m.ConnectionsPage),
+  },
+  {
+    path: 'links',
+    title: $localize`:@@route.links:Moje linki`,
+    loadComponent: () => import('./features/links/links-page').then((m) => m.LinksPage),
+  },
+  {
+    path: 'links/new',
+    title: $localize`:@@route.linksNew:Nowy link`,
+    loadComponent: () => import('./features/links/link-wizard-page').then((m) => m.LinkWizardPage),
+  },
+  {
+    path: 'links/:slug',
+    title: $localize`:@@route.linkConfig:Konfiguracja linku`,
+    loadComponent: () => import('./features/links/link-config-page').then((m) => m.LinkConfigPage),
   },
   {
     path: 'admin',

@@ -9,23 +9,17 @@ import {
   untracked,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { RouterLink } from '@angular/router';
-import { firstValueFrom, forkJoin } from 'rxjs';
-import {
-  CatalogService,
-  Connection,
-  ConnectionsService,
-  PortalCatalogServer,
-  SystemId,
-} from '../../api/generated';
+import { firstValueFrom } from 'rxjs';
+import { CatalogService, Connection, PortalCatalogServer, SystemId } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import { isSystemId, systemName } from '../../shared/labels';
+import { LoadError } from '../../shared/load-error';
+import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
-import { SecretForm, isDateOnly } from './secret-form';
+import { SecretForm } from './secret-form';
 import { tokenInstructions } from './token-instructions';
 
 interface ConnectOptions {
@@ -39,7 +33,7 @@ interface ConnectOptions {
  */
 export function connectOptions(
   server: PortalCatalogServer,
-  connection: Connection | undefined,
+  connection: Connection | null | undefined,
 ): ConnectOptions {
   const reconnect = server.actions.includes('reconnect');
   const viaOAuth = connection?.type === 'user-oauth';
@@ -56,20 +50,17 @@ interface PageData {
 
 @Component({
   selector: 'app-connect-page',
-  imports: [MatButtonModule, MatProgressBarModule, RouterLink, SecretForm, Notice, ErrorNotice],
+  imports: [MatButtonModule, SecretForm, Notice, ErrorNotice, Loading, LoadError],
   templateUrl: './connect-page.html',
   styleUrl: './connect-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectPage {
   private readonly catalogApi = inject(CatalogService);
-  private readonly connectionsApi = inject(ConnectionsService);
   private readonly connectionActions = inject(ConnectionActions);
 
   /** Route parameter and query (withComponentInputBinding). */
   readonly system = input.required<string>();
-  readonly stepUp = input<string | undefined>();
-  readonly expiresAt = input<string | undefined>();
 
   protected readonly validSystem = computed<SystemId | null>(() => {
     const system = this.system();
@@ -83,16 +74,10 @@ export class ConnectPage {
     const system = this.validSystem();
     return system ? tokenInstructions(system) : [];
   });
-  protected readonly initialExpiresAt = computed(() => {
-    const value = this.expiresAt() ?? null;
-    return isDateOnly(value) ? value : null;
-  });
-  protected readonly returnedFromStepUp = computed(() => this.stepUp() === 'done');
 
   protected readonly data = signal<LoadState<PageData | null>>(LOADING);
   protected readonly oauthBusy = signal(false);
   protected readonly oauthFailure = signal<ApiFailure | null>(null);
-  protected readonly connectedOk = signal(false);
 
   constructor() {
     // Runs again when the router reuses this component for another system.
@@ -110,19 +95,13 @@ export class ConnectPage {
     }
     this.data.set(LOADING);
     try {
-      const { catalog, connections } = await firstValueFrom(
-        forkJoin({
-          catalog: this.catalogApi.getPortalCatalog(),
-          connections: this.connectionsApi.listMyConnections(),
-        }),
-      );
+      const catalog = await firstValueFrom(this.catalogApi.getPortalCatalog());
       const server = catalog.servers.find((candidate) => candidate.system === system);
       if (!server) {
         this.data.set({ status: 'error', failure: { code: 'not_found_or_denied', status: 404 } });
         return;
       }
-      const connection = connections.find((candidate) => candidate.system === system);
-      const options = connectOptions(server, connection);
+      const options = connectOptions(server, server.connection);
       this.data.set({
         status: 'ready',
         value: options.oauth || options.token ? { server, options } : null,
@@ -138,7 +117,7 @@ export class ConnectPage {
     }
     this.oauthBusy.set(true);
     this.oauthFailure.set(null);
-    this.oauthFailure.set(await this.connectionActions.startOAuth(system, '/catalog'));
+    this.oauthFailure.set(await this.connectionActions.startOAuth(system, '/connections'));
     this.oauthBusy.set(false);
   }
 }

@@ -7,11 +7,11 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { AuditEventErrorCode } from './auditEventErrorCode';
 import { ServerId } from './serverId';
 import { AuditEventResource } from './auditEventResource';
 import { CredentialType } from './credentialType';
 import { Risk } from './risk';
-import { ErrorCode } from './errorCode';
 
 
 /**
@@ -52,16 +52,16 @@ export interface AuditEvent {
     resource?: AuditEventResource;
     decision?: AuditEvent.DecisionEnum;
     /**
-     * Machine-readable reason, snake case. Known values: policy_forbid, not_granted, tool_disabled, user_confirmed, user_declined, confirmation_expired, credential_required, step_up_required, rate_limited.
+     * Machine-readable reason, snake case. Known values: policy_forbid, not_granted, tool_disabled, user_confirmed, user_declined, confirmation_expired, credential_required, step_up_required, rate_limited. For event authentication it is the rejection code of the internal JWT vectors (missing_token, bad_signature, unknown_kid, alg_not_allowed, wrong_issuer, wrong_audience, expired, replayed_jti, service_token_not_allowed, tool_mismatch, invalid_claims, lifetime_too_long, not_yet_valid, request_id_mismatch, tool_missing, tool_not_allowed, test_key_not_allowed, malformed).
      */
     reason?: string;
     /**
-     * Policy bundle revision YYYYMMDDHHMMSS-<sha7> (C7). Ordered by the timestamp part.
+     * Policy bundle revision YYYYMMDDHHMMSS-<sha7> (C7). Ordered by the timestamp part. The value 00000000000000-0000000 means \'gateway without a loaded bundle\' (M1 only, CC-068); it is not the revision of any bundle and a receiver must not infer anything about policy from it.
      */
     policyRevision?: string;
     credentialType?: CredentialType;
     outcome?: AuditEvent.OutcomeEnum;
-    errorCode?: ErrorCode | null;
+    errorCode?: AuditEventErrorCode | null;
     latencyMs?: number;
     /**
      * Length in bytes of the serialized arguments; the only trace of arguments allowed in audit.
@@ -83,6 +83,7 @@ export namespace AuditEvent {
         ConnectionChange: 'connection_change',
         Confirmation: 'confirmation',
         AdminChange: 'admin_change',
+        Authentication: 'authentication',
     } as const;
     export type EventEnum = typeof EventEnum[keyof typeof EventEnum];
     export const DecisionEnum = {

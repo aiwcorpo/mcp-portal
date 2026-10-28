@@ -4,23 +4,50 @@
 }
 
 .notice {
-  padding: 12px 16px;
-  border-left: 4px solid currentColor;
-  border-radius: 2px;
-  font: var(--mat-sys-body-medium);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--pm-border);
+  border-left: 3px solid var(--tone);
+  border-radius: var(--pm-radius);
+  background: var(--pm-surface);
+  color: var(--pm-text);
 }
 
 .notice-success {
-  color: var(--tone-ok-fg);
-  background: var(--tone-ok-bg);
+  --tone: var(--pm-ok);
 }
 
 .notice-error {
-  color: var(--tone-error-fg);
-  background: var(--tone-error-bg);
+  --tone: var(--pm-danger);
 }
 
 .notice-info {
-  color: var(--tone-info-fg);
-  background: var(--tone-info-bg);
+  --tone: var(--pm-link);
+}
+
+.body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.close {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -3px -6px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--pm-radius);
+  background: transparent;
+  color: var(--pm-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--pm-text);
 }

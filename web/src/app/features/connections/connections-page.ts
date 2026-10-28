@@ -1,86 +1,177 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { Connection, ConnectionsService, SystemId } from '../../api/generated';
+import { CatalogAction, CatalogService, PortalCatalogServer } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
-import { LOADING, LoadState } from '../../core/load-state';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
+import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import {
-  connectionStatusLabel,
-  connectionStatusTone,
+  actionLabel,
+  catalogStatusTone,
   credentialTypeLabel,
+  daysText,
+  daysUntil,
   systemName,
+  Tone,
 } from '../../shared/labels';
+import { LoadError } from '../../shared/load-error';
+import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
-import { StatusBadge } from '../../shared/status-badge';
+import { OAuthReturnBanner } from '../../shared/oauth-return';
+import { connectionRowActions, isEmphasised } from '../catalog/catalog-actions';
 
-/** Connections the user made in the portal; service accounts and token exchange are not theirs to remove. */
-function canDisconnect(connection: Connection): boolean {
-  return connection.type === 'user-oauth' || connection.type === 'user-secret';
+interface ConnectionRow {
+  server: PortalCatalogServer;
+  name: string;
+  type: string;
+  account: string | null;
+  validity: { text: string; date: string | null; tone: Tone };
+  lastUsed: string | null;
+  actions: CatalogAction[];
 }
 
+function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
+  const connection = server.connection;
+  switch (server.status) {
+    case 'reconnect_required':
+      return {
+        text: $localize`:@@conn.reconnectNeeded:wymaga ponownego połączenia`,
+        date: null,
+        tone: 'warn',
+      };
+    case 'request_pending':
+      return { text: $localize`:@@conn.pending:wniosek oczekuje`, date: null, tone: 'neutral' };
+    case 'no_access':
+      return { text: $localize`:@@conn.noAccess:brak uprawnienia`, date: null, tone: 'neutral' };
+    default:
+  }
+  if (!connection) {
+    return { text: '', date: null, tone: 'neutral' };
+  }
+  if (connection.expiresAt) {
+    const days = daysUntil(connection.expiresAt);
+    return {
+      text: server.status === 'expiring' && days !== null ? daysText(days) : '',
+      date: connection.expiresAt,
+      tone: server.status === 'expiring' ? 'warn' : 'neutral',
+    };
+  }
+  return {
+    text:
+      connection.type === 'user-oauth'
+        ? $localize`:@@conn.autoRefreshed:odświeżane automatycznie`
+        : $localize`:@@conn.noExpiry:bez terminu`,
+    date: null,
+    tone: 'neutral',
+  };
+}
+
+/** One row per system, from one consistent catalog read: connection, credential type and actions (CC-080). */
 @Component({
   selector: 'app-connections-page',
-  imports: [
-    DatePipe,
-    MatButtonModule,
-    MatProgressBarModule,
-    RouterLink,
-    ErrorNotice,
-    Notice,
-    StatusBadge,
-  ],
+  imports: [DatePipe, MatButtonModule, ErrorNotice, LoadError, Loading, Notice, OAuthReturnBanner],
   templateUrl: './connections-page.html',
   styleUrl: './connections-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectionsPage {
-  private readonly connectionsApi = inject(ConnectionsService);
+  private readonly catalogApi = inject(CatalogService);
   private readonly connectionActions = inject(ConnectionActions);
 
-  protected readonly connections = signal<LoadState<Connection[]>>(LOADING);
-  protected readonly busy = signal<SystemId | null>(null);
+  protected readonly catalog = signal<LoadState<PortalCatalogServer[]>>(LOADING);
+  protected readonly busy = signal<string | null>(null);
   protected readonly actionFailure = signal<ApiFailure | null>(null);
   protected readonly actionDone = signal<string | null>(null);
 
-  protected readonly systemName = systemName;
-  protected readonly typeLabel = credentialTypeLabel;
-  protected readonly statusLabel = connectionStatusLabel;
-  protected readonly statusTone = connectionStatusTone;
-  protected readonly canDisconnect = canDisconnect;
+  protected readonly servers = computed(() => {
+    const state = this.catalog();
+    return state.status === 'ready' ? state.value : null;
+  });
+  protected readonly rows = computed<ConnectionRow[]>(() =>
+    (this.servers() ?? []).map((server) => {
+      const type = server.connection?.type ?? server.credential?.defaultType;
+      return {
+        server,
+        name: systemName(server.system),
+        type: type ? credentialTypeLabel(type) : '',
+        account: server.connection?.backendUser ?? null,
+        validity: validityOf(server),
+        lastUsed: server.connection?.lastUsedAt ?? null,
+        actions: connectionRowActions(server),
+      };
+    }),
+  );
+
+  protected readonly actionLabel = actionLabel;
+  protected readonly isEmphasised = isEmphasised;
+  protected readonly statusTone = catalogStatusTone;
+  protected readonly today = new Date().toDateString();
 
   constructor() {
     void this.load();
   }
 
+  protected isToday(iso: string): boolean {
+    return new Date(iso).toDateString() === this.today;
+  }
+
   protected async load(): Promise<void> {
-    this.connections.set(LOADING);
+    this.catalog.set(LOADING);
     try {
-      const list = await firstValueFrom(this.connectionsApi.listMyConnections());
-      this.connections.set({ status: 'ready', value: list });
+      const catalog = await firstValueFrom(this.catalogApi.getPortalCatalog());
+      this.catalog.set({ status: 'ready', value: catalog.servers });
     } catch (error) {
-      this.connections.set({ status: 'error', failure: toApiFailure(error) });
+      this.catalog.set({ status: 'error', failure: toApiFailure(error) });
     }
   }
 
-  protected async disconnect(system: SystemId): Promise<void> {
+  protected async run(server: PortalCatalogServer, action: CatalogAction): Promise<void> {
     if (this.busy()) {
       return;
     }
-    this.busy.set(system);
     this.actionFailure.set(null);
     this.actionDone.set(null);
-    const result = await this.connectionActions.confirmAndDisconnect(system);
-    this.busy.set(null);
-    if (result.kind === 'done') {
-      this.actionDone.set(disconnectedMessage(system));
-      await this.load();
-    } else if (result.kind === 'failed') {
-      this.actionFailure.set(result.failure);
+    this.busy.set(server.serverId);
+    try {
+      switch (action) {
+        case 'connect_oauth':
+        case 'add_secret':
+        case 'reconnect':
+          this.actionFailure.set(
+            await this.connectionActions.connect(server, action, '/connections'),
+          );
+          return;
+        case 'request_access': {
+          const result = await this.connectionActions.requestAccess(server);
+          if (result.kind === 'created') {
+            this.actionDone.set(
+              $localize`:@@conn.requestCreated:Wniosek złożony (${result.requestId}:id:).`,
+            );
+            await this.load();
+          } else if (result.kind === 'failed') {
+            this.actionFailure.set(result.failure);
+          } else if (result.kind === 'unavailable') {
+            this.actionFailure.set({ code: 'internal_error', status: 0 });
+          }
+          return;
+        }
+        case 'disconnect': {
+          const result = await this.connectionActions.confirmAndDisconnect(server.system);
+          if (result.kind === 'done') {
+            this.actionDone.set(disconnectedMessage(server.system));
+            await this.load();
+          } else if (result.kind === 'failed') {
+            this.actionFailure.set(result.failure);
+          }
+          return;
+        }
+        default:
+          return;
+      }
+    } finally {
+      this.busy.set(null);
     }
   }
 }

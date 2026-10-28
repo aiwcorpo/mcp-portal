@@ -3,6 +3,7 @@ import { setupWorker } from 'msw/browser';
 import { LOGIN_PATH, safeReturnPath } from '../app/core/auth-urls';
 import { BrowserNavigation } from '../app/core/browser-navigation';
 import {
+  MockOAuthOutcome,
   MockScenario,
   MockState,
   MockStore,
@@ -17,7 +18,14 @@ import {
  * because login and OAuth are full page loads, as with the real BFF; it never holds a secret.
  */
 const STATE_COOKIE = 'mcp-portal-mock';
-const SCENARIOS: readonly MockScenario[] = ['default', 'empty', 'errors'];
+const SCENARIOS: readonly MockScenario[] = ['default', 'mixed', 'empty', 'nolinks', 'errors'];
+const OAUTH_OUTCOMES: readonly MockOAuthOutcome[] = [
+  'ok',
+  'cancelled',
+  'identity_mismatch',
+  'flow_invalid',
+  'provider_error',
+];
 
 function readState(): MockState {
   const raw = document.cookie
@@ -43,11 +51,28 @@ function writeState(state: MockState): void {
 
 const store = new MockStore(readState(), writeState);
 
-/** ?mockScenario=empty|errors|default switches the data set for the rest of the browser session. */
+/**
+ * ?mockScenario=default|mixed|empty|nolinks|errors switches the data set, ?mockOAuth=<outcome> the result
+ * of the next OAuth provider round trip and ?mockSession=in|out starts with or without a session, all for the rest
+ * of the browser session.
+ */
 function applyScenarioFromUrl(): void {
-  const requested = new URLSearchParams(location.search).get('mockScenario');
-  if (requested && (SCENARIOS as readonly string[]).includes(requested)) {
-    store.update({ scenario: requested as MockScenario });
+  const params = new URLSearchParams(location.search);
+  const scenario = params.get('mockScenario');
+  if (scenario && (SCENARIOS as readonly string[]).includes(scenario)) {
+    store.reset({
+      ...initialMockState(),
+      session: store.state.session,
+      scenario: scenario as MockScenario,
+    });
+  }
+  const session = params.get('mockSession');
+  if (session === 'out' || session === 'in') {
+    store.update({ session: session === 'in' });
+  }
+  const outcome = params.get('mockOAuth');
+  if (outcome && (OAUTH_OUTCOMES as readonly string[]).includes(outcome)) {
+    store.update({ oauthOutcome: outcome as MockOAuthOutcome });
   }
 }
 
@@ -57,7 +82,7 @@ class MockBrowserNavigation extends BrowserNavigation {
   override assign(url: string): void {
     const target = new URL(url, location.origin);
     if (target.origin === location.origin && target.pathname === LOGIN_PATH) {
-      completeMockLogin(store, target.searchParams.get('stepUp') === 'true');
+      completeMockLogin(store);
       super.assign(safeReturnPath(target.searchParams.get('returnPath')));
       return;
     }

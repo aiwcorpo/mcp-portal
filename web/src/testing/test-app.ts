@@ -44,3 +44,14 @@ export function button(name: string | RegExp, root: ParentNode = document): HTML
 export async function until(check: () => void): Promise<void> {
   await vi.waitFor(check, { timeout: 3000, interval: 10 });
 }
+
+/** Element with an exact aria-label, for controls that have no text of their own (icon buttons). */
+export function labelled(label: string, root: ParentNode = document): HTMLElement {
+  const found = Array.from(root.querySelectorAll<HTMLElement>('[aria-label]')).find(
+    (candidate) => candidate.getAttribute('aria-label') === label,
+  );
+  if (!found) {
+    throw new Error(`no element labelled ${label}`);
+  }
+  return found;
+}

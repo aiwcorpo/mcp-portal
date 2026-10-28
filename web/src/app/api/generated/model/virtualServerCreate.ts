@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ResourceDefaults } from './resourceDefaults';
 
 
 export interface VirtualServerCreate { 
@@ -17,8 +18,8 @@ export interface VirtualServerCreate {
     displayName: string;
     tools: Array<string>;
     /**
-     * Narrowing per resource type (C5). Becomes context.vsScopes in Cedar (cedar/entity-builder.md).
+     * Dormant (CC-085). The gateway answers 400 resource_defaults_unsupported for a non-empty value; absent or {} is accepted.
      */
-    resourceDefaults?: { [key: string]: Array<string>; };
+    resourceDefaults?: ResourceDefaults;
 }
 

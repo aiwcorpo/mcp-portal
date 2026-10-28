@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorCode, PutSecretError } from '../api/generated';
+import { ConnectErrorCode, ErrorCode, PutSecretError } from '../api/generated';
 
 /**
  * Codes the UI can explain. C10 and the PUT secret errors come from the generated client; the C12
@@ -7,20 +7,23 @@ import { ErrorCode, PutSecretError } from '../api/generated';
  * CC-022 are listed here. Anything else collapses to a status-based code, so no backend text reaches
  * the page.
  */
-const C12_ERROR_CODES = ['invalid_request', 'csrf_invalid', 'slug_taken', 'hash_mismatch'] as const;
-const OAUTH_CALLBACK_ERROR_CODES = ['identity_mismatch', 'flow_invalid', 'provider_error'] as const;
+const C12_ERROR_CODES = [
+  'invalid_request',
+  'csrf_invalid',
+  'slug_taken',
+  'hash_mismatch',
+  'resource_defaults_unsupported',
+] as const;
 
 export const PORTAL_ERROR_CODES = [
   ...Object.values(ErrorCode),
   ...Object.values(PutSecretError.ErrorEnum),
   ...C12_ERROR_CODES,
-  ...OAUTH_CALLBACK_ERROR_CODES,
+  ...Object.values(ConnectErrorCode),
 ] as const;
 
-export type OAuthCallbackErrorCode = (typeof OAUTH_CALLBACK_ERROR_CODES)[number];
-
-export function isOAuthCallbackErrorCode(value: unknown): value is OAuthCallbackErrorCode {
-  return (OAUTH_CALLBACK_ERROR_CODES as readonly unknown[]).includes(value);
+export function isConnectErrorCode(value: unknown): value is ConnectErrorCode {
+  return (Object.values(ConnectErrorCode) as readonly unknown[]).includes(value);
 }
 
 export type PortalErrorCode = (typeof PORTAL_ERROR_CODES)[number];
@@ -31,6 +34,8 @@ export interface ApiFailure {
   /** Only for step_up_required; the caller still validates it before navigating. */
   stepUpUrl?: string;
   retryAfterSeconds?: number;
+  /** X-Request-Id of the failed response (CC-087), shown shortened next to the error. */
+  requestId?: string;
 }
 
 const KNOWN_CODES: ReadonlySet<string> = new Set(PORTAL_ERROR_CODES);
@@ -66,6 +71,12 @@ function readBody(error: HttpErrorResponse): Record<string, unknown> {
   return body !== null && typeof body === 'object' ? (body as Record<string, unknown>) : {};
 }
 
+/** Only identifier characters pass, so nothing from the response can act as markup or text injection. */
+function requestIdOf(body: Record<string, unknown>, error: HttpErrorResponse): string | null {
+  const candidate = body['requestId'] ?? error.headers?.get('X-Request-Id');
+  return typeof candidate === 'string' && /^[A-Za-z0-9-]{1,64}$/.test(candidate) ? candidate : null;
+}
+
 export function toApiFailure(error: unknown): ApiFailure {
   if (!(error instanceof HttpErrorResponse)) {
     return { code: 'internal_error', status: -1 };
@@ -74,6 +85,10 @@ export function toApiFailure(error: unknown): ApiFailure {
   const bodyCode = body['error'];
   const code = isPortalErrorCode(bodyCode) ? bodyCode : codeFromStatus(error.status);
   const failure: ApiFailure = { code, status: error.status };
+  const requestId = requestIdOf(body, error);
+  if (requestId) {
+    failure.requestId = requestId;
+  }
   if (code === 'step_up_required' && typeof body['stepUpUrl'] === 'string') {
     failure.stepUpUrl = body['stepUpUrl'];
   }

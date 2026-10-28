@@ -4,7 +4,9 @@ import { MockStore, createMockHandlers } from '../mocks/portal-mock';
 
 /**
  * MSW in unit tests: the same stateful handlers as the dev mock, over the contract handlers, with the
- * CSRF rule enforced. jsdom gets the XSRF-TOKEN cookie the BFF would set on GET /me.
+ * CSRF rule enforced. jsdom gets the XSRF-TOKEN cookie (the name the BFF used up to M1); the contract
+ * handlers look for __Host-XSRF-TOKEN, so the cookie header is renamed on the way, which also checks that
+ * the interceptor accepts the older name.
  */
 export function useMockApi() {
   const store = new MockStore();
@@ -13,7 +15,10 @@ export function useMockApi() {
   // jsdom's XHR adds cookies after MSW intercepts, so hand the cookie jar to the handlers explicitly.
   server.events.on('request:start', ({ request }) => {
     if (!request.headers.has('cookie') && document.cookie) {
-      request.headers.set('cookie', document.cookie);
+      request.headers.set(
+        'cookie',
+        document.cookie.replace(/(^|;\s*)XSRF-TOKEN=/, '$1__Host-XSRF-TOKEN='),
+      );
     }
   });
   beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));

@@ -19,6 +19,8 @@ import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 // @ts-ignore
 import { ConfirmationDecision } from '../model/confirmationDecision';
 // @ts-ignore
+import { ConfirmationOutcome } from '../model/confirmationOutcome';
+// @ts-ignore
 import { ConfirmationView } from '../model/confirmationView';
 // @ts-ignore
 import { InlineObject } from '../model/inlineObject';
@@ -40,7 +42,7 @@ export class ConfirmationsService extends BaseService {
     }
 
     /**
-     * Approve or decline; requires fresh MFA.
+     * Approve or decline; requires fresh MFA. Approval returns the one-time confirmation code (CC-077).
      * @endpoint post /api/v1/confirmations/{id}
      * @param id 
      * @param confirmationDecision 
@@ -48,9 +50,9 @@ export class ConfirmationsService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ConfirmationOutcome>;
+    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ConfirmationOutcome>>;
+    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ConfirmationOutcome>>;
     public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling decideMyConfirmation.');
@@ -100,7 +102,7 @@ export class ConfirmationsService extends BaseService {
 
         let localVarPath = `/api/v1/confirmations/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
+        return this.httpClient.request<ConfirmationOutcome>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: confirmationDecision,
@@ -115,7 +117,7 @@ export class ConfirmationsService extends BaseService {
     }
 
     /**
-     * Confirmation page data (proxy to C5); owner only, fresh MFA required (CC-034).
+     * Confirmation page data (proxy to C5; tool, system and arguments come from the gateway, never from the client); owner only, fresh MFA required (CC-034, CC-077).
      * @endpoint get /api/v1/confirmations/{id}
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

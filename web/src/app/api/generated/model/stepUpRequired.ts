@@ -12,7 +12,7 @@
 export interface StepUpRequired { 
     error: any | null;
     /**
-     * Where the browser goes to re-authenticate with max_age / acr_values; normally GET /api/v1/auth/login with stepUp=true.
+     * Where the browser goes to re-authenticate with max_age / acr_values; normally GET /api/v1/auth/login with stepUp=true. The returnPath inside it is a default; the frontend may replace it with any portal path that matches ReturnPath (e.g. back to the form), keeping stepUp=true (CC-048).
      */
     stepUpUrl: string;
 }

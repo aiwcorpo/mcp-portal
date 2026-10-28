@@ -1,37 +1,32 @@
-<h1 i18n="@@connections.title">Moje połączenia</h1>
-<p class="lead" i18n="@@connections.lead">
-  Konta w systemach docelowych, z których korzysta platforma MCP w Twoim imieniu. Portal nie
-  pokazuje zapisanych tokenów.
-</p>
+<h1 class="visually-hidden" i18n="@@connections.title">Połączenia z systemami</h1>
+
+<app-oauth-return [servers]="servers()" />
 
 @if (actionDone(); as done) {
-  <app-notice kind="success">{{ done }}</app-notice>
+  <app-notice kind="success" [dismissible]="true" (dismiss)="actionDone.set(null)">{{
+    done
+  }}</app-notice>
 }
 @if (actionFailure(); as failure) {
   <app-error-notice [failure]="failure" />
 }
 
-@let state = connections();
+@let state = catalog();
 @if (state.status === 'loading') {
-  <mat-progress-bar
-    mode="indeterminate"
-    i18n-aria-label="@@common.loading"
-    aria-label="Wczytywanie"
-  />
+  <app-loading />
 } @else if (state.status === 'error') {
-  <app-error-notice [failure]="state.failure" [retryable]="true" (retry)="load()" />
-} @else if (state.value.length) {
+  <app-load-error [failure]="state.failure" (retry)="load()" />
+} @else if (rows().length) {
   <table class="table" role="table">
     <caption class="visually-hidden" i18n="@@connections.caption">
-      Połączone konta
+      Połączenia z systemami
     </caption>
     <thead role="rowgroup">
       <tr role="row">
         <th scope="col" role="columnheader" i18n="@@connections.colSystem">System</th>
-        <th scope="col" role="columnheader" i18n="@@connections.colType">Typ</th>
+        <th scope="col" role="columnheader" i18n="@@connections.colType">Sposób</th>
         <th scope="col" role="columnheader" i18n="@@connections.colAccount">Konto w systemie</th>
-        <th scope="col" role="columnheader" i18n="@@connections.colStatus">Stan</th>
-        <th scope="col" role="columnheader" i18n="@@connections.colExpires">Wygasa</th>
+        <th scope="col" role="columnheader" i18n="@@connections.colExpires">Ważne do</th>
         <th scope="col" role="columnheader" i18n="@@connections.colLastUsed">Ostatnie użycie</th>
         <th scope="col" role="columnheader">
           <span class="visually-hidden" i18n="@@connections.colActions">Akcje</span>
@@ -39,7 +34,7 @@
       </tr>
     </thead>
     <tbody role="rowgroup">
-      @for (connection of state.value; track connection.system) {
+      @for (row of rows(); track row.server.serverId) {
         <tr role="row">
           <th
             scope="row"
@@ -47,49 +42,68 @@
             data-label="System"
             i18n-data-label="@@connections.colSystem"
           >
-            {{ systemName(connection.system) }}
+            {{ row.name }}
           </th>
-          <td role="cell" data-label="Typ" i18n-data-label="@@connections.colType">
-            {{ typeLabel(connection.type) }}
+          <td role="cell" class="muted" data-label="Sposób" i18n-data-label="@@connections.colType">
+            {{ row.type }}
           </td>
           <td
             role="cell"
+            class="account"
             data-label="Konto w systemie"
             i18n-data-label="@@connections.colAccount"
-            class="account"
           >
-            {{ connection.backendUser }}
-          </td>
-          <td role="cell" data-label="Stan" i18n-data-label="@@connections.colStatus">
-            <app-status-badge
-              [label]="statusLabel(connection.status)"
-              [tone]="statusTone(connection.status)"
-            />
-          </td>
-          <td role="cell" data-label="Wygasa" i18n-data-label="@@connections.colExpires">
-            @if (connection.expiresAt) {
-              {{ connection.expiresAt | date: 'd MMM y' : 'UTC' }}
+            @if (row.account) {
+              {{ row.account }}
             } @else {
-              <span i18n="@@connections.noExpiry">bez terminu</span>
+              <span class="muted">&mdash;</span>
             }
           </td>
-          <td role="cell" data-label="Ostatnie użycie" i18n-data-label="@@connections.colLastUsed">
-            @if (connection.lastUsedAt) {
-              {{ connection.lastUsedAt | date: 'd MMM y, HH:mm' }}
+          <td
+            role="cell"
+            [class]="'state-' + row.validity.tone"
+            data-label="Ważne do"
+            i18n-data-label="@@connections.colExpires"
+          >
+            @if (row.validity.date) {
+              {{ row.validity.date | date: 'dd.MM.yyyy' : 'UTC' }}
+              @if (row.validity.text) {
+                &middot; {{ row.validity.text }}
+              }
+            } @else if (row.validity.text) {
+              {{ row.validity.text }}
             } @else {
-              <span i18n="@@connections.neverUsed">jeszcze nie</span>
+              <span class="muted">&mdash;</span>
+            }
+          </td>
+          <td
+            role="cell"
+            class="muted"
+            data-label="Ostatnie użycie"
+            i18n-data-label="@@connections.colLastUsed"
+          >
+            @if (row.lastUsed) {
+              @if (isToday(row.lastUsed)) {
+                <ng-container i18n="@@connections.today">dziś</ng-container>
+                {{ row.lastUsed | date: 'HH:mm' }}
+              } @else {
+                {{ row.lastUsed | date: 'dd.MM.yyyy' }}
+              }
+            } @else {
+              &mdash;
             }
           </td>
           <td role="cell" class="actions">
-            @if (canDisconnect(connection)) {
+            @for (act of row.actions; track act) {
               <button
-                mat-stroked-button
+                mat-flat-button
                 type="button"
-                [disabled]="busy() === connection.system"
-                (click)="disconnect(connection.system)"
+                [class.quiet]="!isEmphasised(act)"
+                [disabled]="busy() === row.server.serverId"
+                (click)="run(row.server, act)"
               >
-                <ng-container i18n="@@action.disconnect">Odłącz</ng-container
-                ><span class="visually-hidden"> ({{ systemName(connection.system) }})</span>
+                {{ actionLabel(act, row.server.connection)
+                }}<span class="visually-hidden"> ({{ row.name }})</span>
               </button>
             }
           </td>
@@ -98,8 +112,10 @@
     </tbody>
   </table>
 } @else {
-  <app-notice kind="info">
-    <ng-container i18n="@@connections.empty">Nie masz połączonych kont.</ng-container>
-    <a routerLink="/catalog" i18n="@@connections.toCatalog">Połącz konto w katalogu</a>
-  </app-notice>
+  <section class="empty">
+    <h2 i18n="@@connections.emptyTitle">Nie masz jeszcze żadnych połączeń</h2>
+    <p class="muted" i18n="@@connections.emptyText">
+      Systemy pojawią się tutaj, gdy dostaniesz dostęp do serwera MCP.
+    </p>
+  </section>
 }

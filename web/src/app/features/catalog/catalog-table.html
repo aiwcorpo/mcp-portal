@@ -1,0 +1,122 @@
+<table class="table" role="table">
+  <caption class="visually-hidden" i18n="@@catalog.caption">
+    Serwery MCP
+  </caption>
+  <thead role="rowgroup">
+    <tr role="row">
+      <th scope="col" role="columnheader" class="c-toggle">
+        <span class="visually-hidden" i18n="@@catalog.colToggle">Narzędzia</span>
+      </th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colServer">Serwer</th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colLogin">Logowanie</th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colTools">Narzędzia</th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colState">Stan</th>
+      <th scope="col" role="columnheader" class="c-actions">
+        <span class="visually-hidden" i18n="@@catalog.colActions">Akcje</span>
+      </th>
+    </tr>
+  </thead>
+  @for (row of rows(); track row.server.serverId) {
+    @let srv = row.server;
+    @let open = isOpen(srv);
+    <tbody role="rowgroup">
+      <tr role="row" class="server">
+        <td role="cell" class="c-toggle">
+          <button
+            type="button"
+            class="toggle"
+            [attr.aria-expanded]="open"
+            [attr.aria-controls]="open ? 'tools-' + srv.serverId : null"
+            [attr.aria-label]="(open ? hideLabel : showLabel) + ' (' + row.name + ')'"
+            (click)="toggle(srv)"
+          >
+            <svg
+              viewBox="0 0 12 12"
+              width="12"
+              height="12"
+              aria-hidden="true"
+              focusable="false"
+              [class.open]="open"
+            >
+              <path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+          </button>
+        </td>
+        <th scope="row" role="rowheader" class="c-name">{{ row.name }}</th>
+        <td role="cell" class="c-login muted">{{ row.login }}</td>
+        <td role="cell" class="c-count muted">
+          <ng-container i18n="@@catalog.toolCount">{{ srv.tools.length }} narz.</ng-container>
+        </td>
+        <td role="cell" [class]="'c-state state-' + row.tone">{{ row.status }}</td>
+        <td role="cell" class="c-actions">
+          @for (act of row.actions; track act) {
+            <button
+              mat-flat-button
+              type="button"
+              [class.quiet]="!isEmphasised(act)"
+              [disabled]="busy() === srv.serverId"
+              (click)="run(srv, act)"
+            >
+              {{ actionLabel(act, srv.connection)
+              }}<span class="visually-hidden"> ({{ row.name }})</span>
+            </button>
+          }
+          @if (!row.actions.length) {
+            <span class="muted" aria-hidden="true">&mdash;</span>
+          }
+        </td>
+      </tr>
+      @if (open) {
+        @for (tool of row.tools; track tool.name; let first = $first) {
+          <tr role="row" class="tool" [id]="first ? 'tools-' + srv.serverId : null">
+            <td role="cell" class="c-toggle"></td>
+            <td role="cell" class="c-tool-name">
+              <code class="tool-name" [class.off]="tool.disabled || tool.access === 'denied'">{{
+                tool.name
+              }}</code>
+            </td>
+            <td role="cell" class="c-tool-title" colspan="2">
+              <span [class.muted]="tool.disabled || tool.access === 'denied'">{{
+                tool.title || tool.description
+              }}</span>
+              @if (tool.disabled) {
+                <span class="note muted" i18n="@@catalog.toolDisabled"
+                  >Wyłączone przez administratora.</span
+                >
+              } @else if (tool.access === 'denied') {
+                <span class="note muted" i18n="@@catalog.toolDenied"
+                  >Brak uprawnienia do tego narzędzia.</span
+                >
+              } @else if (tool.requiresConfirmation) {
+                <span class="note muted" i18n="@@catalog.toolConfirm"
+                  >Wymaga kodu z Authenticatora.</span
+                >
+              }
+            </td>
+            <td role="cell" class="c-tool-meta">
+              @for (entitlement of tool.requiredEntitlements; track entitlement; let last = $last) {
+                <code class="muted">{{ entitlement }}</code
+                >{{ last ? '' : ', ' }}
+              }
+              @if (tool.requiredEntitlements.length) {
+                <span class="muted"> &middot; </span>
+              }
+              <span [class.state-danger]="tool.risk === 'DESTRUCTIVE'">{{
+                riskLabel(tool.risk)
+              }}</span>
+            </td>
+            <td role="cell" class="c-actions"></td>
+          </tr>
+        }
+        @if (!row.tools.length) {
+          <tr role="row" class="tool">
+            <td role="cell" class="c-toggle"></td>
+            <td role="cell" colspan="5" class="muted" i18n="@@catalog.noTools">
+              Serwer nie udostępnia narzędzi.
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  }
+</table>

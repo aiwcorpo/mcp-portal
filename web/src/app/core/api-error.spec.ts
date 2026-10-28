@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { toApiFailure } from './api-error';
+import { isConnectErrorCode, toApiFailure } from './api-error';
 import { failureMessage } from './error-messages';
 
 function httpError(status: number, error: unknown, headers?: Record<string, string>) {
@@ -39,6 +39,24 @@ describe('toApiFailure', () => {
     );
     expect(failure.retryAfterSeconds).toBe(12);
     expect(failureMessage(failure)).toBe('Za dużo żądań. Spróbuj ponownie za 12 s.');
+  });
+
+  it('keeps the request id from the body or X-Request-Id, and only when it is a plain identifier', () => {
+    expect(
+      toApiFailure(httpError(503, { error: 'upstream_unavailable', requestId: '0192d1b2-7c3a' }))
+        .requestId,
+    ).toBe('0192d1b2-7c3a');
+    expect(toApiFailure(httpError(503, null, { 'X-Request-Id': '0192d1b2-aaaa' })).requestId).toBe(
+      '0192d1b2-aaaa',
+    );
+    expect(
+      toApiFailure(httpError(503, { error: 'internal_error', requestId: '<img src=x>' })).requestId,
+    ).toBeUndefined();
+  });
+
+  it('knows the connect error codes, including cancelled', () => {
+    expect(isConnectErrorCode('cancelled')).toBe(true);
+    expect(isConnectErrorCode('access_denied')).toBe(false);
   });
 
   it('never carries the backend message', () => {

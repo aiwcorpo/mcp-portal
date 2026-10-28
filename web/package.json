@@ -12,7 +12,7 @@
     "build": "ng build",
     "test": "ng test --watch=false",
     "lint": "ng lint",
-    "generate:api": "rm -rf src/app/api/generated && openapi-generator-cli generate -i node_modules/@aiwcorpo/mcp-contracts/openapi/bundled/portal-bff.v1.bundled.yaml -g typescript-angular -o src/app/api/generated --type-mappings set=Array --global-property apiDocs=false,modelDocs=false --additional-properties ngVersion=22.2.3,supportsES6=true && rm -f src/app/api/generated/git_push.sh src/app/api/generated/README.md src/app/api/generated/.gitignore",
+    "generate:api": "rm -rf src/app/api/generated && openapi-generator-cli generate -i node_modules/@aiwcorpo/mcp-contracts/openapi/bundled/portal-bff.v1.bundled.yaml -g typescript-angular -o src/app/api/generated --type-mappings set=Array --global-property apiDocs=false,modelDocs=false --additional-properties ngVersion=22.2.3,supportsES6=true && rm -f src/app/api/generated/git_push.sh src/app/api/generated/README.md src/app/api/generated/.gitignore && perl -pi -e 's/\\| Null;/| null;/' src/app/api/generated/model/*.ts",
     "start:mocks": "ng serve --configuration mocks",
     "build:e2e": "ng build --configuration e2e",
     "e2e": "npm run build:e2e && playwright test",
@@ -33,7 +33,7 @@
     "tslib": "2.8.1"
   },
   "devDependencies": {
-    "@aiwcorpo/mcp-contracts": "file:../../mcp-contracts/release/aiwcorpo-mcp-contracts-1.1.0.tgz",
+    "@aiwcorpo/mcp-contracts": "file:../../mcp-contracts/release/aiwcorpo-mcp-contracts-2.2.1.tgz",
     "@angular/build": "22.2.4",
     "@angular/cli": "22.2.4",
     "@angular/compiler-cli": "22.2.3",

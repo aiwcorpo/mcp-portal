@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { SystemId } from './systemId';
 import { ConfirmationArgument } from './confirmationArgument';
 
 
@@ -20,6 +21,10 @@ export interface ConfirmationView {
      */
     tool: string;
     /**
+     * System the tool acts on; the portal shows it next to the tool (CC-077). Read by the gateway from its own record of the pending call, never from the client.
+     */
+    system: SystemId;
+    /**
      * Arguments sorted by name (fixed order), without confirmation_code.
      */
     arguments: Array<ConfirmationArgument>;
@@ -28,4 +33,7 @@ export interface ConfirmationView {
      */
     expiresAt: string;
 }
+export namespace ConfirmationView {
+}
+
 

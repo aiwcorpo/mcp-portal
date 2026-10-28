@@ -1,40 +1,41 @@
-import { CatalogAction, CatalogStatus, PortalCatalogServer } from '../../api/generated';
-import { serverActions } from './catalog-actions';
+import { CatalogAction, CatalogStatus } from '../../api/generated';
+import { serverFixture } from '../../../testing/fixtures';
+import { catalogRowActions, connectionRowActions, isEmphasised } from './catalog-actions';
 
-function server(status: CatalogStatus, actions: CatalogAction[]): PortalCatalogServer {
-  return {
-    serverId: 'mcp-gitlab',
-    system: 'gitlab',
-    version: '1.0.0',
-    url: 'https://mcp-gateway.internal/s/mcp-gitlab/mcp',
-    status,
-    actions,
-    tools: [],
-  };
+function offered(status: CatalogStatus, actions: CatalogAction[]) {
+  return serverFixture('gitlab', { status, actions });
 }
 
-describe('serverActions', () => {
-  it.each<[CatalogStatus, CatalogAction[], CatalogAction | null, CatalogAction[]]>([
-    ['connected', ['copy_link', 'request_access', 'disconnect'], 'copy_link', ['disconnect']],
-    [
-      'expiring',
-      ['copy_link', 'reconnect', 'disconnect'],
-      'reconnect',
-      ['copy_link', 'disconnect'],
-    ],
-    ['reconnect_required', ['reconnect', 'disconnect'], 'reconnect', ['disconnect']],
-    ['not_connected', ['connect_oauth', 'add_secret'], 'connect_oauth', ['add_secret']],
-    ['not_connected', ['add_secret'], 'add_secret', []],
-    ['request_pending', ['view_request'], null, []],
-    ['no_access', ['request_access'], null, []],
-  ])('%s with %j -> primary %s, secondary %j', (status, actions, primary, secondary) => {
-    expect(serverActions(server(status, actions))).toEqual({ primary, secondary });
+describe('catalogRowActions', () => {
+  it.each<[CatalogStatus, CatalogAction[], CatalogAction[]]>([
+    ['connected', ['copy_link', 'request_access', 'disconnect'], ['copy_link', 'request_access']],
+    ['expiring', ['copy_link', 'reconnect', 'disconnect'], ['reconnect', 'copy_link']],
+    ['expiring', ['copy_link', 'add_secret', 'disconnect'], ['add_secret', 'copy_link']],
+    ['reconnect_required', ['reconnect', 'disconnect'], ['reconnect']],
+    ['not_connected', ['add_secret', 'connect_oauth'], ['connect_oauth', 'add_secret']],
+    ['request_pending', ['view_request'], []],
+    ['no_access', ['request_access'], ['request_access']],
+  ])('%s offering %j shows %j (never disconnect, never view_request)', (status, actions, shown) => {
+    expect(catalogRowActions(offered(status, actions))).toEqual(shown);
   });
+});
 
-  it('never makes disconnect the main action', () => {
-    expect(serverActions(server('connected', ['disconnect']))).toEqual({
-      primary: null,
-      secondary: ['disconnect'],
-    });
+describe('connectionRowActions', () => {
+  it('keeps disconnect and drops link copying', () => {
+    expect(
+      connectionRowActions(offered('expiring', ['copy_link', 'add_secret', 'disconnect'])),
+    ).toEqual(['add_secret', 'disconnect']);
+    expect(connectionRowActions(offered('connected', ['copy_link']))).toEqual([]);
+  });
+});
+
+describe('isEmphasised', () => {
+  it('gives the filled button to the actions that connect an account', () => {
+    expect(isEmphasised('reconnect')).toBe(true);
+    expect(isEmphasised('connect_oauth')).toBe(true);
+    expect(isEmphasised('add_secret')).toBe(true);
+    expect(isEmphasised('copy_link')).toBe(false);
+    expect(isEmphasised('request_access')).toBe(false);
+    expect(isEmphasised('disconnect')).toBe(false);
   });
 });

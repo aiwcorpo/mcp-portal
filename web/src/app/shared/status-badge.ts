@@ -4,8 +4,7 @@ import { Tone } from './labels';
 /** Status shown as text with a colour, never colour alone (WCAG 1.4.1). */
 @Component({
   selector: 'app-status-badge',
-  template: `<span class="badge" [class]="'tone-' + tone()">{{ label() }}</span>`,
-  styleUrl: './status-badge.scss',
+  template: `<span [class]="'state-' + tone()">{{ label() }}</span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatusBadge {

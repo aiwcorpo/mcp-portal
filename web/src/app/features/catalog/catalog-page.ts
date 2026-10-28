@@ -1,23 +1,24 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CatalogService, PortalCatalogServer, SystemId } from '../../api/generated';
-import { ApiFailure, isOAuthCallbackErrorCode, toApiFailure } from '../../core/api-error';
+import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
-import { isSystemId, systemName } from '../../shared/labels';
+import { systemName } from '../../shared/labels';
+import { LoadError } from '../../shared/load-error';
+import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
-import { CatalogActionEvent, CatalogServerCard } from './catalog-server-card';
+import { OAuthReturnBanner } from '../../shared/oauth-return';
+import { CatalogActionEvent, CatalogTable, matchesServer } from './catalog-table';
 
 type Banner = { kind: 'success'; text: string } | { kind: 'error'; failure: ApiFailure };
 
 @Component({
   selector: 'app-catalog-page',
-  imports: [CatalogServerCard, ErrorNotice, Notice, MatProgressBarModule],
+  imports: [CatalogTable, ErrorNotice, LoadError, Loading, Notice, OAuthReturnBanner],
   templateUrl: './catalog-page.html',
   styleUrl: './catalog-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,18 +26,28 @@ type Banner = { kind: 'success'; text: string } | { kind: 'error'; failure: ApiF
 export class CatalogPage {
   private readonly catalogApi = inject(CatalogService);
   private readonly connectionActions = inject(ConnectionActions);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly clipboard = inject(Clipboard);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly catalog = signal<LoadState<PortalCatalogServer[]>>(LOADING);
   protected readonly banner = signal<Banner | null>(null);
   protected readonly busyServer = signal<string | null>(null);
+  protected readonly query = signal('');
+
+  protected readonly loadedServers = computed(() => {
+    const state = this.catalog();
+    return state.status === 'ready' ? state.value : null;
+  });
+  protected readonly visibleServers = computed(() =>
+    (this.loadedServers() ?? []).filter((server) => matchesServer(server, this.query())),
+  );
 
   constructor() {
-    this.readCallbackResult();
     void this.load();
+  }
+
+  protected onQuery(event: Event): void {
+    this.query.set((event.target as HTMLInputElement).value);
   }
 
   protected async load(): Promise<void> {
@@ -50,7 +61,7 @@ export class CatalogPage {
   }
 
   protected async onAction({ server, action }: CatalogActionEvent): Promise<void> {
-    if (this.busyServer() === server.system) {
+    if (this.busyServer() === server.serverId) {
       return;
     }
     switch (action) {
@@ -58,14 +69,15 @@ export class CatalogPage {
         this.copyLink(server);
         return;
       case 'connect_oauth':
-        await this.startOAuth(server.system);
-        return;
       case 'add_secret':
       case 'reconnect':
-        await this.router.navigate(['/connect', server.system]);
+        await this.connect(server, action);
+        return;
+      case 'request_access':
+        await this.requestAccess(server);
         return;
       case 'disconnect':
-        await this.disconnect(server.system);
+        await this.disconnect(server);
         return;
       default:
         return;
@@ -83,17 +95,44 @@ export class CatalogPage {
     );
   }
 
-  private async startOAuth(system: SystemId): Promise<void> {
-    this.busyServer.set(system);
-    const failure = await this.connectionActions.startOAuth(system, '/catalog');
+  private async connect(
+    server: PortalCatalogServer,
+    action: 'connect_oauth' | 'add_secret' | 'reconnect',
+  ): Promise<void> {
+    this.busyServer.set(server.serverId);
+    const failure = await this.connectionActions.connect(server, action, '/catalog');
     this.busyServer.set(null);
     if (failure) {
       this.banner.set({ kind: 'error', failure });
     }
   }
 
-  private async disconnect(system: SystemId): Promise<void> {
-    this.busyServer.set(system);
+  private async requestAccess(server: PortalCatalogServer): Promise<void> {
+    this.busyServer.set(server.serverId);
+    const result = await this.connectionActions.requestAccess(server);
+    this.busyServer.set(null);
+    switch (result.kind) {
+      case 'created':
+        this.banner.set({
+          kind: 'success',
+          text: $localize`:@@catalog.requestCreated:Wniosek złożony (${result.requestId}:id:).`,
+        });
+        await this.load();
+        return;
+      case 'failed':
+        this.banner.set({ kind: 'error', failure: result.failure });
+        return;
+      case 'unavailable':
+        this.banner.set({ kind: 'error', failure: { code: 'internal_error', status: 0 } });
+        return;
+      default:
+        return;
+    }
+  }
+
+  private async disconnect(server: PortalCatalogServer): Promise<void> {
+    const system: SystemId = server.system;
+    this.busyServer.set(server.serverId);
     const result = await this.connectionActions.confirmAndDisconnect(system);
     this.busyServer.set(null);
     if (result.kind === 'done') {
@@ -102,30 +141,5 @@ export class CatalogPage {
     } else if (result.kind === 'failed') {
       this.banner.set({ kind: 'error', failure: result.failure });
     }
-  }
-
-  /** Result of the OAuth callback redirect (CC-022), shown once and then removed from the URL. */
-  private readCallbackResult(): void {
-    const params = this.route.snapshot.queryParamMap;
-    const connected = params.get('connected');
-    const connectError = params.get('connectError');
-    if (connected === null && connectError === null) {
-      return;
-    }
-    if (connectError !== null) {
-      const code = isOAuthCallbackErrorCode(connectError) ? connectError : 'internal_error';
-      this.banner.set({ kind: 'error', failure: { code, status: 0 } });
-    } else if (isSystemId(connected)) {
-      this.banner.set({
-        kind: 'success',
-        text: $localize`:@@catalog.oauthConnected:Połączono konto ${systemName(connected)}:system:.`,
-      });
-    }
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { connected: null, connectError: null },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
   }
 }

@@ -2,52 +2,61 @@
   Przejdź do treści
 </button>
 
-<header>
-  <mat-toolbar class="toolbar">
-    <a class="brand" routerLink="/catalog">{{ appName }}</a>
-    @if (session.me(); as me) {
-      <nav class="nav" i18n-aria-label="@@shell.navLabel" aria-label="Nawigacja główna">
-        <a
-          mat-button
-          routerLink="/catalog"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          i18n="@@nav.catalog"
-          >Katalog</a
-        >
-        <a
-          mat-button
-          routerLink="/connections"
-          routerLinkActive="active"
-          ariaCurrentWhenActive="page"
-          i18n="@@nav.connections"
-          >Moje połączenia</a
-        >
-      </nav>
-    }
-    <span class="spacer"></span>
-    <div class="user">
-      <button
-        mat-button
-        type="button"
-        [attr.aria-pressed]="theme.mode() === 'dark'"
-        (click)="theme.toggle()"
-        i18n="@@shell.darkMode"
-      >
-        Tryb ciemny
-      </button>
-      @if (session.me(); as me) {
+@if (session.me(); as me) {
+  <header class="shell-head">
+    <div class="bar">
+      <a class="brand" routerLink="/catalog">{{ appName }}</a>
+      <div class="user">
         <span class="who"
           ><span class="visually-hidden" i18n="@@shell.loggedAs">Zalogowano jako </span
           >{{ me.displayName }}</span
         >
-        <button mat-stroked-button type="button" (click)="logout()" i18n="@@shell.logout">
+        <button
+          mat-button
+          type="button"
+          class="head-button"
+          [attr.aria-pressed]="theme.mode() === 'dark'"
+          (click)="theme.toggle()"
+          i18n="@@shell.darkMode"
+        >
+          Tryb ciemny
+        </button>
+        <button
+          mat-button
+          type="button"
+          class="head-button"
+          (click)="logout()"
+          i18n="@@shell.logout"
+        >
           Wyloguj
         </button>
-      }
+      </div>
     </div>
-  </mat-toolbar>
-</header>
+    <nav class="tabs" i18n-aria-label="@@shell.navLabel" aria-label="Nawigacja główna">
+      <a
+        routerLink="/catalog"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        i18n="@@nav.catalog"
+        >Serwery MCP</a
+      >
+      <a
+        routerLink="/connections"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        i18n="@@nav.connections"
+        >Połączenia z systemami</a
+      >
+      <a
+        routerLink="/links"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        i18n="@@nav.links"
+        >Moje linki</a
+      >
+    </nav>
+  </header>
+}
 
 <main id="main" tabindex="-1" class="main">
   @if (logoutFailure(); as failure) {
@@ -55,15 +64,11 @@
   }
   @let state = session.state();
   @if (state.status === 'loading') {
-    <mat-progress-bar
-      mode="indeterminate"
-      i18n-aria-label="@@common.loading"
-      aria-label="Wczytywanie"
-    />
+    <app-loading />
   } @else if (state.status === 'anonymous') {
     <app-login-panel [reason]="state.reason" />
   } @else if (state.status === 'error') {
-    <app-error-notice [failure]="state.failure" [retryable]="true" (retry)="session.load()" />
+    <app-load-error [failure]="state.failure" (retry)="session.load()" />
   } @else {
     <router-outlet />
   }

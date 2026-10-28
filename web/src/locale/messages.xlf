@@ -3,16 +3,40 @@
   <file id="ngi18n" original="ng.template">
     <unit id="shell.skip">
       <notes>
-        <note category="location">src/app/app.html:2,6</note>
+        <note category="location">src/app/app.html:2,5</note>
       </notes>
       <segment>
         <source> Przejdź do treści
 </source>
       </segment>
     </unit>
+    <unit id="shell.loggedAs">
+      <notes>
+        <note category="location">src/app/app.html:11,12</note>
+      </notes>
+      <segment>
+        <source>Zalogowano jako </source>
+      </segment>
+    </unit>
+    <unit id="shell.darkMode">
+      <notes>
+        <note category="location">src/app/app.html:22,24</note>
+      </notes>
+      <segment>
+        <source> Tryb ciemny </source>
+      </segment>
+    </unit>
+    <unit id="shell.logout">
+      <notes>
+        <note category="location">src/app/app.html:31,32</note>
+      </notes>
+      <segment>
+        <source> Wyloguj </source>
+      </segment>
+    </unit>
     <unit id="shell.navLabel">
       <notes>
-        <note category="location">src/app/app.html:9,11</note>
+        <note category="location">src/app/app.html:35,37</note>
       </notes>
       <segment>
         <source>Nawigacja główna</source>
@@ -20,53 +44,26 @@
     </unit>
     <unit id="nav.catalog">
       <notes>
-        <note category="location">src/app/app.html:16,19</note>
+        <note category="location">src/app/app.html:41,44</note>
       </notes>
       <segment>
-        <source>Katalog</source>
+        <source>Serwery MCP</source>
       </segment>
     </unit>
     <unit id="nav.connections">
       <notes>
-        <note category="location">src/app/app.html:24,27</note>
+        <note category="location">src/app/app.html:48,51</note>
       </notes>
       <segment>
-        <source>Moje połączenia</source>
+        <source>Połączenia z systemami</source>
       </segment>
     </unit>
-    <unit id="shell.darkMode">
+    <unit id="nav.links">
       <notes>
-        <note category="location">src/app/app.html:37,39</note>
+        <note category="location">src/app/app.html:55,58</note>
       </notes>
       <segment>
-        <source> Tryb ciemny </source>
-      </segment>
-    </unit>
-    <unit id="shell.loggedAs">
-      <notes>
-        <note category="location">src/app/app.html:41,42</note>
-      </notes>
-      <segment>
-        <source>Zalogowano jako </source>
-      </segment>
-    </unit>
-    <unit id="shell.logout">
-      <notes>
-        <note category="location">src/app/app.html:45,46</note>
-      </notes>
-      <segment>
-        <source> Wyloguj </source>
-      </segment>
-    </unit>
-    <unit id="common.loading">
-      <notes>
-        <note category="location">src/app/app.html:61,63</note>
-        <note category="location">src/app/features/catalog/catalog-page.html:19,21</note>
-        <note category="location">src/app/features/connect/connect-page.html:16,18</note>
-        <note category="location">src/app/features/connections/connections-page.html:19,21</note>
-      </notes>
-      <segment>
-        <source>Wczytywanie</source>
+        <source>Moje linki</source>
       </segment>
     </unit>
     <unit id="route.catalog">
@@ -93,9 +90,33 @@
         <source>Moje połączenia</source>
       </segment>
     </unit>
-    <unit id="route.notFound">
+    <unit id="route.links">
+      <notes>
+        <note category="location">src/app/app.routes.ts:28</note>
+      </notes>
+      <segment>
+        <source>Moje linki</source>
+      </segment>
+    </unit>
+    <unit id="route.linksNew">
       <notes>
         <note category="location">src/app/app.routes.ts:33</note>
+      </notes>
+      <segment>
+        <source>Nowy link</source>
+      </segment>
+    </unit>
+    <unit id="route.linkConfig">
+      <notes>
+        <note category="location">src/app/app.routes.ts:38</note>
+      </notes>
+      <segment>
+        <source>Konfiguracja linku</source>
+      </segment>
+    </unit>
+    <unit id="route.notFound">
+      <notes>
+        <note category="location">src/app/app.routes.ts:48</note>
       </notes>
       <segment>
         <source>Nie znaleziono</source>
@@ -103,15 +124,15 @@
     </unit>
     <unit id="disconnect.title">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:43</note>
+        <note category="location">src/app/core/connection-actions.service.ts:115</note>
       </notes>
       <segment>
-        <source>Odłączyć konto <ph id="0" equiv="system" disp="name"/>?</source>
+        <source>Rozłączyć konto <ph id="0" equiv="system" disp="name"/>?</source>
       </segment>
     </unit>
     <unit id="disconnect.message">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:44</note>
+        <note category="location">src/app/core/connection-actions.service.ts:116</note>
       </notes>
       <segment>
         <source>Portal usunie zapisane poświadczenie. Narzędzia tego systemu przestaną działać, dopóki nie połączysz konta ponownie.</source>
@@ -119,18 +140,18 @@
     </unit>
     <unit id="disconnect.confirm">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:45</note>
+        <note category="location">src/app/core/connection-actions.service.ts:117</note>
       </notes>
       <segment>
-        <source>Odłącz</source>
+        <source>Rozłącz</source>
       </segment>
     </unit>
     <unit id="disconnect.done">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:63</note>
+        <note category="location">src/app/core/connection-actions.service.ts:136</note>
       </notes>
       <segment>
-        <source>Odłączono konto <ph id="0" equiv="system" disp="systemName(system)"/>.</source>
+        <source>Rozłączono konto <ph id="0" equiv="system" disp="systemName(system)"/>.</source>
       </segment>
     </unit>
     <unit id="error.unauthenticated">
@@ -226,7 +247,7 @@
         <note category="location">src/app/core/error-messages.ts:23</note>
       </notes>
       <segment>
-        <source>Usługa jest chwilowo niedostępna. Spróbuj ponownie później.</source>
+        <source>Usługa jest chwilowo niedostępna.</source>
       </segment>
     </unit>
     <unit id="error.internal_error">
@@ -255,26 +276,34 @@
     </unit>
     <unit id="error.secret_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:31</note>
+        <note category="location">src/app/core/error-messages.ts:30</note>
       </notes>
       <segment>
-        <source>System odrzucił token. Sprawdź, czy jest aktualny i ma wymagane uprawnienia.</source>
+        <source>Token nieprawidłowy albo wygasł.</source>
       </segment>
     </unit>
     <unit id="error.identity_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:33</note>
+        <note category="location">src/app/core/error-messages.ts:31</note>
       </notes>
       <segment>
-        <source>Token należy do innego użytkownika niż zalogowany w portalu.</source>
+        <source>Token należy do innego konta.</source>
       </segment>
     </unit>
     <unit id="error.slug_taken">
       <notes>
+        <note category="location">src/app/core/error-messages.ts:32</note>
+      </notes>
+      <segment>
+        <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
+      </segment>
+    </unit>
+    <unit id="error.resource_defaults_unsupported">
+      <notes>
         <note category="location">src/app/core/error-messages.ts:34</note>
       </notes>
       <segment>
-        <source>Ta nazwa jest już zajęta.</source>
+        <source>Zawężanie zasobów nie jest jeszcze dostępne.</source>
       </segment>
     </unit>
     <unit id="error.hash_mismatch">
@@ -290,7 +319,7 @@
         <note category="location">src/app/core/error-messages.ts:38</note>
       </notes>
       <segment>
-        <source>Proces łączenia konta wygasł albo został przerwany. Spróbuj ponownie.</source>
+        <source>Link połączenia wygasł albo był już użyty. Zacznij od nowa.</source>
       </segment>
     </unit>
     <unit id="error.provider_error">
@@ -298,12 +327,20 @@
         <note category="location">src/app/core/error-messages.ts:40</note>
       </notes>
       <segment>
-        <source>System docelowy nie zakończył autoryzacji. Spróbuj ponownie.</source>
+        <source>System nie odpowiedział poprawnie. Spróbuj za chwilę.</source>
+      </segment>
+    </unit>
+    <unit id="error.cancelled">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:41</note>
+      </notes>
+      <segment>
+        <source>Łączenie anulowane.</source>
       </segment>
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:49</note>
+        <note category="location">src/app/core/error-messages.ts:50</note>
       </notes>
       <segment>
         <source>Za dużo żądań. Spróbuj ponownie za <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -319,32 +356,55 @@
     </unit>
     <unit id="catalog.title">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:1,2</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:1,3</note>
       </notes>
       <segment>
-        <source>Katalog serwerów MCP</source>
+        <source>Serwery MCP</source>
       </segment>
     </unit>
-    <unit id="catalog.lead">
+    <unit id="catalog.searchPlaceholder">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:3,6</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:27,28</note>
       </notes>
       <segment>
-        <source> Serwery, do których masz uprawnienia, i stan połączenia Twojego konta w każdym systemie.
-</source>
+        <source>Szukaj serwera lub narzędzia</source>
       </segment>
     </unit>
-    <unit id="catalog.empty">
+    <unit id="catalog.searchLabel">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:35,39</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:29,31</note>
       </notes>
       <segment>
-        <source> Nie ma serwerów MCP do wyświetlenia. Jeśli spodziewasz się dostępu, skontaktuj się z administratorem platformy. </source>
+        <source>Szukaj serwera lub narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="catalog.noMatches">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-page.html:40,44</note>
+      </notes>
+      <segment>
+        <source> Żaden serwer ani narzędzie nie pasuje do wyszukiwania. </source>
+      </segment>
+    </unit>
+    <unit id="catalog.emptyTitle">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-page.html:45,46</note>
+      </notes>
+      <segment>
+        <source>Nie masz jeszcze dostępu do żadnego serwera MCP</source>
+      </segment>
+    </unit>
+    <unit id="catalog.emptyText">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-page.html:47,51</note>
+      </notes>
+      <segment>
+        <source> Dostęp nadaje system uprawnień. Po akceptacji wniosku serwery pojawią się tutaj. </source>
       </segment>
     </unit>
     <unit id="catalog.linkCopied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:79</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:91</note>
       </notes>
       <segment>
         <source>Skopiowano adres serwera <ph id="0" equiv="system" disp="systemName(server.system)"/>.</source>
@@ -352,82 +412,130 @@
     </unit>
     <unit id="catalog.linkCopyFailed">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:80</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:92</note>
       </notes>
       <segment>
         <source>Nie udało się skopiować adresu. Adres: <ph id="0" equiv="url" disp="server.url"/></source>
       </segment>
     </unit>
-    <unit id="catalog.oauthConnected">
+    <unit id="catalog.requestCreated">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:121</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:118</note>
       </notes>
       <segment>
-        <source>Połączono konto <ph id="0" equiv="system" disp="systemName(connected)"/>.</source>
+        <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
       </segment>
     </unit>
-    <unit id="catalog.hideTools">
+    <unit id="catalog.caption">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-server-card.html:38,40</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:3,5</note>
       </notes>
       <segment>
-        <source>Ukryj narzędzia</source>
+        <source> Serwery MCP </source>
+      </segment>
+    </unit>
+    <unit id="catalog.colToggle">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:8,10</note>
+      </notes>
+      <segment>
+        <source>Narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="catalog.colServer">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:10,11</note>
+      </notes>
+      <segment>
+        <source>Serwer</source>
+      </segment>
+    </unit>
+    <unit id="catalog.colLogin">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:11,12</note>
+      </notes>
+      <segment>
+        <source>Logowanie</source>
+      </segment>
+    </unit>
+    <unit id="catalog.colTools">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:12,13</note>
+      </notes>
+      <segment>
+        <source>Narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="catalog.colState">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:13,14</note>
+      </notes>
+      <segment>
+        <source>Stan</source>
+      </segment>
+    </unit>
+    <unit id="catalog.colActions">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:15,18</note>
+      </notes>
+      <segment>
+        <source>Akcje</source>
+      </segment>
+    </unit>
+    <unit id="catalog.toolCount">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:48,49</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="INTERPOLATION" disp="{{ srv.tools.length }}"/> narz.</source>
+      </segment>
+    </unit>
+    <unit id="catalog.toolDisabled">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:84,86</note>
+      </notes>
+      <segment>
+        <source>Wyłączone przez administratora.</source>
+      </segment>
+    </unit>
+    <unit id="catalog.toolDenied">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:88,90</note>
+      </notes>
+      <segment>
+        <source>Brak uprawnienia do tego narzędzia.</source>
+      </segment>
+    </unit>
+    <unit id="catalog.toolConfirm">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:92,94</note>
+      </notes>
+      <segment>
+        <source>Wymaga kodu z Authenticatora.</source>
+      </segment>
+    </unit>
+    <unit id="catalog.noTools">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:115,116</note>
+      </notes>
+      <segment>
+        <source> Serwer nie udostępnia narzędzi. </source>
       </segment>
     </unit>
     <unit id="catalog.showTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-server-card.html:40,42</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:68</note>
       </notes>
       <segment>
         <source>Pokaż narzędzia</source>
       </segment>
     </unit>
-    <unit id="catalog.risk">
+    <unit id="catalog.hideTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-server-card.html:54</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:69</note>
       </notes>
       <segment>
-        <source>Ryzyko:</source>
-      </segment>
-    </unit>
-    <unit id="catalog.access">
-      <notes>
-        <note category="location">src/app/features/catalog/catalog-server-card.html:57</note>
-      </notes>
-      <segment>
-        <source>Dostęp:</source>
-      </segment>
-    </unit>
-    <unit id="catalog.requiredEntitlement">
-      <notes>
-        <note category="location">src/app/features/catalog/catalog-server-card.html:62,63</note>
-      </notes>
-      <segment>
-        <source>Wymagane uprawnienie:</source>
-      </segment>
-    </unit>
-    <unit id="catalog.noEntitlement">
-      <notes>
-        <note category="location">src/app/features/catalog/catalog-server-card.html:69,71</note>
-      </notes>
-      <segment>
-        <source>nie określono w polityce</source>
-      </segment>
-    </unit>
-    <unit id="catalog.noTools">
-      <notes>
-        <note category="location">src/app/features/catalog/catalog-server-card.html:74,78</note>
-      </notes>
-      <segment>
-        <source>Serwer nie udostępnia narzędzi.</source>
-      </segment>
-    </unit>
-    <unit id="connect.back">
-      <notes>
-        <note category="location">src/app/features/connect/connect-page.html:2,4</note>
-      </notes>
-      <segment>
-        <source>Wróć do katalogu</source>
+        <source>Ukryj narzędzia</source>
       </segment>
     </unit>
     <unit id="connect.titleFor">
@@ -435,12 +543,12 @@
         <note category="location">src/app/features/connect/connect-page.html:5,6</note>
       </notes>
       <segment>
-        <source>Połącz konto: <ph id="0" equiv="INTERPOLATION" disp="{{ name() }}"/></source>
+        <source>Połącz <ph id="0" equiv="INTERPOLATION" disp="{{ name() }}"/></source>
       </segment>
     </unit>
     <unit id="connect.title">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:7,11</note>
+        <note category="location">src/app/features/connect/connect-page.html:7,9</note>
       </notes>
       <segment>
         <source>Połącz konto</source>
@@ -448,7 +556,7 @@
     </unit>
     <unit id="connect.nothing">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:26,29</note>
+        <note category="location">src/app/features/connect/connect-page.html:22,24</note>
       </notes>
       <segment>
         <source> Tego systemu nie trzeba łączyć albo nie masz do niego dostępu. Stan znajdziesz w katalogu. </source>
@@ -456,7 +564,7 @@
     </unit>
     <unit id="connect.oauthHeading">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:31,32</note>
+        <note category="location">src/app/features/connect/connect-page.html:27,28</note>
       </notes>
       <segment>
         <source>Połącz przez OAuth</source>
@@ -464,15 +572,15 @@
     </unit>
     <unit id="connect.oauthText">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:33,35</note>
+        <note category="location">src/app/features/connect/connect-page.html:29,31</note>
       </notes>
       <segment>
-        <source> Przejdziesz do strony logowania systemu <ph id="0" equiv="INTERPOLATION" disp="{{ name() }}"/>, a po zatwierdzeniu dostępu wrócisz do katalogu. Portal nie widzi Twojego hasła. </source>
+        <source> Przejdziesz do strony logowania systemu <ph id="0" equiv="INTERPOLATION" disp="{{ name() }}"/>, a po zatwierdzeniu dostępu wrócisz do portalu. Portal nie widzi Twojego hasła. </source>
       </segment>
     </unit>
     <unit id="connect.oauthButton">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:46,48</note>
+        <note category="location">src/app/features/connect/connect-page.html:42,44</note>
       </notes>
       <segment>
         <source> Przejdź do logowania w systemie </source>
@@ -480,7 +588,7 @@
     </unit>
     <unit id="connect.tokenHeading">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:53,54</note>
+        <note category="location">src/app/features/connect/connect-page.html:49,50</note>
       </notes>
       <segment>
         <source>Dodaj token</source>
@@ -488,39 +596,15 @@
     </unit>
     <unit id="connect.howTo">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:54,55</note>
+        <note category="location">src/app/features/connect/connect-page.html:51,52</note>
       </notes>
       <segment>
         <source>Jak utworzyć możliwie wąski token</source>
       </segment>
     </unit>
-    <unit id="connect.toConnections">
-      <notes>
-        <note category="location">src/app/features/connect/connect-page.html:68,71</note>
-      </notes>
-      <segment>
-        <source>Przejdź do Moich połączeń</source>
-      </segment>
-    </unit>
-    <unit id="secret.stepUpNeeded">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.html:5,9</note>
-      </notes>
-      <segment>
-        <source> Zapisanie tokenu wymaga świeżego uwierzytelnienia (MFA). Wpisany token został usunięty z formularza; po powrocie wklej go ponownie. </source>
-      </segment>
-    </unit>
-    <unit id="secret.stepUpButton">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.html:14,16</note>
-      </notes>
-      <segment>
-        <source> Uwierzytelnij ponownie </source>
-      </segment>
-    </unit>
     <unit id="secret.saved">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:20,21</note>
+        <note category="location">src/app/features/connect/secret-form.html:5,6</note>
       </notes>
       <segment>
         <source>Połączono jako <ph id="0" equiv="INTERPOLATION" disp="{{ state.result.backendUser }}"/>.</source>
@@ -528,90 +612,98 @@
     </unit>
     <unit id="secret.savedExpires">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:24,25</note>
+        <note category="location">src/app/features/connect/secret-form.html:9,10</note>
       </notes>
       <segment>
-        <source>Token ważny do <ph id="0" equiv="INTERPOLATION" disp="{{ state.result.expiresAt | date: &apos;d MMMM y&apos; : &apos;UTC&apos; }}"/>.</source>
+        <source>Token ważny do <ph id="0" equiv="INTERPOLATION" disp="{{ state.result.expiresAt | date: &apos;dd.MM.yyyy&apos; : &apos;UTC&apos; }}"/>.</source>
       </segment>
     </unit>
-    <unit id="secret.stepUpDone">
+    <unit id="connect.toConnections">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:32,37</note>
+        <note category="location">src/app/features/connect/secret-form.html:14,17</note>
       </notes>
       <segment>
-        <source> Uwierzytelnienie odświeżone. Wklej token ponownie i zapisz: portal nie przechowuje go na czas logowania. </source>
+        <source>Przejdź do połączeń z systemami</source>
       </segment>
     </unit>
     <unit id="secret.tokenLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:39,41</note>
+        <note category="location">src/app/features/connect/secret-form.html:23,25</note>
       </notes>
       <segment>
-        <source>Token</source>
+        <source>Token PAT</source>
       </segment>
     </unit>
-    <unit id="secret.tokenHint">
+    <unit id="secret.tokenPlaceholder">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:54,56</note>
+        <note category="location">src/app/features/connect/secret-form.html:32,34</note>
       </notes>
       <segment>
-        <source>Wartość trafia tylko do magazynu poświadczeń i nie będzie ponownie wyświetlana.</source>
-      </segment>
-    </unit>
-    <unit id="secret.tokenRequired">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.html:57,59</note>
-      </notes>
-      <segment>
-        <source>Wklej token.</source>
+        <source>Wklej token</source>
       </segment>
     </unit>
     <unit id="secret.tokenTooLong">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:61,62</note>
+        <note category="location">src/app/features/connect/secret-form.html:52,54</note>
       </notes>
       <segment>
-        <source>Token jest za długi (maksymalnie <ph id="0" equiv="INTERPOLATION" disp="{{ maxLength }}"/> znaków).</source>
+        <source> Token jest za długi (maksymalnie <ph id="0" equiv="INTERPOLATION" disp="{{ maxLength }}"/> znaków). </source>
+      </segment>
+    </unit>
+    <unit id="secret.tokenRequired">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.html:56,58</note>
+      </notes>
+      <segment>
+        <source> Wklej token. </source>
       </segment>
     </unit>
     <unit id="secret.expiresLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:67,68</note>
+        <note category="location">src/app/features/connect/secret-form.html:64,67</note>
       </notes>
       <segment>
-        <source>Data wygaśnięcia tokenu</source>
+        <source>Data wygaśnięcia tokenu (opcjonalnie)</source>
       </segment>
     </unit>
     <unit id="secret.expiresHint">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:70,72</note>
+        <note category="location">src/app/features/connect/secret-form.html:73,74</note>
       </notes>
       <segment>
-        <source>Opcjonalnie. Ta sama data, którą ustawiono w systemie.</source>
+        <source>Ustaw najkrótszy możliwy termin.</source>
       </segment>
     </unit>
-    <unit id="secret.expiresPast">
+    <unit id="secret.expiresMark">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:73,75</note>
+        <note category="location">src/app/features/connect/secret-form.html:76,77</note>
       </notes>
       <segment>
-        <source>Data musi być w przyszłości.</source>
+        <source> Oznaczymy token jako wygasający 7 dni przed terminem.</source>
       </segment>
     </unit>
-    <unit id="secret.expiresInvalid">
+    <unit id="secret.noRedisplay">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:76,78</note>
+        <note category="location">src/app/features/connect/secret-form.html:83,86</note>
       </notes>
       <segment>
-        <source>Podaj poprawną datę.</source>
+        <source> Po zapisie token nie jest już nigdzie wyświetlany. </source>
+      </segment>
+    </unit>
+    <unit id="common.cancel2">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.html:87,88</note>
+      </notes>
+      <segment>
+        <source>Anuluj</source>
       </segment>
     </unit>
     <unit id="secret.save">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:82,84</note>
+        <note category="location">src/app/features/connect/secret-form.html:89,91</note>
       </notes>
       <segment>
-        <source> Zapisz token </source>
+        <source> Sprawdź i zapisz </source>
       </segment>
     </unit>
     <unit id="token.jira.1">
@@ -720,33 +812,24 @@
     </unit>
     <unit id="connections.title">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:1,2</note>
+        <note category="location">src/app/features/connections/connections-page.html:1,3</note>
       </notes>
       <segment>
-        <source>Moje połączenia</source>
-      </segment>
-    </unit>
-    <unit id="connections.lead">
-      <notes>
-        <note category="location">src/app/features/connections/connections-page.html:3,7</note>
-      </notes>
-      <segment>
-        <source> Konta w systemach docelowych, z których korzysta platforma MCP w Twoim imieniu. Portal nie pokazuje zapisanych tokenów.
-</source>
+        <source>Połączenia z systemami</source>
       </segment>
     </unit>
     <unit id="connections.caption">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:26,28</note>
+        <note category="location">src/app/features/connections/connections-page.html:22,24</note>
       </notes>
       <segment>
-        <source> Połączone konta </source>
+        <source> Połączenia z systemami </source>
       </segment>
     </unit>
     <unit id="connections.colSystem">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:30,31</note>
-        <note category="location">src/app/features/connections/connections-page.html:48</note>
+        <note category="location">src/app/features/connections/connections-page.html:26,27</note>
+        <note category="location">src/app/features/connections/connections-page.html:43</note>
       </notes>
       <segment>
         <source>System</source>
@@ -754,44 +837,35 @@
     </unit>
     <unit id="connections.colType">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:32</note>
-        <note category="location">src/app/features/connections/connections-page.html:52</note>
+        <note category="location">src/app/features/connections/connections-page.html:27,28</note>
+        <note category="location">src/app/features/connections/connections-page.html:47</note>
       </notes>
       <segment>
-        <source>Typ</source>
+        <source>Sposób</source>
       </segment>
     </unit>
     <unit id="connections.colAccount">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:32,33</note>
-        <note category="location">src/app/features/connections/connections-page.html:57,58</note>
+        <note category="location">src/app/features/connections/connections-page.html:28,29</note>
+        <note category="location">src/app/features/connections/connections-page.html:53,54</note>
       </notes>
       <segment>
         <source>Konto w systemie</source>
       </segment>
     </unit>
-    <unit id="connections.colStatus">
-      <notes>
-        <note category="location">src/app/features/connections/connections-page.html:33,34</note>
-        <note category="location">src/app/features/connections/connections-page.html:63</note>
-      </notes>
-      <segment>
-        <source>Stan</source>
-      </segment>
-    </unit>
     <unit id="connections.colExpires">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:34,35</note>
-        <note category="location">src/app/features/connections/connections-page.html:69</note>
+        <note category="location">src/app/features/connections/connections-page.html:29,30</note>
+        <note category="location">src/app/features/connections/connections-page.html:65,66</note>
       </notes>
       <segment>
-        <source>Wygasa</source>
+        <source>Ważne do</source>
       </segment>
     </unit>
     <unit id="connections.colLastUsed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:35,36</note>
-        <note category="location">src/app/features/connections/connections-page.html:76</note>
+        <note category="location">src/app/features/connections/connections-page.html:30,31</note>
+        <note category="location">src/app/features/connections/connections-page.html:82,83</note>
       </notes>
       <segment>
         <source>Ostatnie użycie</source>
@@ -799,128 +873,744 @@
     </unit>
     <unit id="connections.colActions">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:37,40</note>
+        <note category="location">src/app/features/connections/connections-page.html:32,35</note>
       </notes>
       <segment>
         <source>Akcje</source>
       </segment>
     </unit>
-    <unit id="connections.noExpiry">
+    <unit id="connections.today">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:73,75</note>
+        <note category="location">src/app/features/connections/connections-page.html:87,88</note>
+      </notes>
+      <segment>
+        <source>dziś</source>
+      </segment>
+    </unit>
+    <unit id="connections.emptyTitle">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.html:116,117</note>
+      </notes>
+      <segment>
+        <source>Nie masz jeszcze żadnych połączeń</source>
+      </segment>
+    </unit>
+    <unit id="connections.emptyText">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.html:118,122</note>
+      </notes>
+      <segment>
+        <source> Systemy pojawią się tutaj, gdy dostaniesz dostęp do serwera MCP. </source>
+      </segment>
+    </unit>
+    <unit id="conn.reconnectNeeded">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.ts:40</note>
+      </notes>
+      <segment>
+        <source>wymaga ponownego połączenia</source>
+      </segment>
+    </unit>
+    <unit id="conn.pending">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.ts:45</note>
+      </notes>
+      <segment>
+        <source>wniosek oczekuje</source>
+      </segment>
+    </unit>
+    <unit id="conn.noAccess">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.ts:47</note>
+      </notes>
+      <segment>
+        <source>brak uprawnienia</source>
+      </segment>
+    </unit>
+    <unit id="conn.autoRefreshed">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.ts:64</note>
+      </notes>
+      <segment>
+        <source>odświeżane automatycznie</source>
+      </segment>
+    </unit>
+    <unit id="conn.noExpiry">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.ts:65</note>
       </notes>
       <segment>
         <source>bez terminu</source>
       </segment>
     </unit>
-    <unit id="connections.neverUsed">
+    <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:80,82</note>
+        <note category="location">src/app/features/connections/connections-page.ts:150</note>
       </notes>
       <segment>
-        <source>jeszcze nie</source>
+        <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
       </segment>
     </unit>
-    <unit id="action.disconnect">
+    <unit id="linkConfig.back">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:91,92</note>
-        <note category="location">src/app/shared/labels.ts:62</note>
+        <note category="location">src/app/features/links/link-config-page.ts:25,26</note>
       </notes>
       <segment>
-        <source>Odłącz</source>
+        <source>← Moje linki</source>
       </segment>
     </unit>
-    <unit id="connections.empty">
+    <unit id="linkConfig.title">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:102,103</note>
+        <note category="location">src/app/features/links/link-config-page.ts:32,33</note>
       </notes>
       <segment>
-        <source>Nie masz połączonych kont.</source>
+        <source>Konfiguracja linku &quot;<ph id="0" equiv="INTERPOLATION" disp="{{ state.value.displayName }}"/>&quot;</source>
       </segment>
     </unit>
-    <unit id="connections.toCatalog">
+    <unit id="linkConfig.toList">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:103,106</note>
+        <note category="location">src/app/features/links/link-config-page.ts:41,45</note>
       </notes>
       <segment>
-        <source>Połącz konto w katalogu</source>
+        <source>Wróć do listy</source>
+      </segment>
+    </unit>
+    <unit id="ready.url">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.html:2,3</note>
+      </notes>
+      <segment>
+        <source>Adres linku</source>
+      </segment>
+    </unit>
+    <unit id="ready.copyUrl">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.html:6,8</note>
+      </notes>
+      <segment>
+        <source> Kopiuj<pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;visually-hidden&quot;&gt;" dispEnd="&lt;/span&gt;"> adres linku</pc></source>
+      </segment>
+    </unit>
+    <unit id="ready.configsLabel">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.html:19,21</note>
+      </notes>
+      <segment>
+        <source>Konfiguracja klienta</source>
+      </segment>
+    </unit>
+    <unit id="ready.copyConfig">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.html:26,27</note>
+      </notes>
+      <segment>
+        <source>Kopiuj</source>
+      </segment>
+    </unit>
+    <unit id="ready.note">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.html:36,40</note>
+      </notes>
+      <segment>
+        <source> Konfiguracja nie zawiera tokenu ani hasła. Przy pierwszym połączeniu klient poprosi o logowanie kontem firmowym.
+</source>
+      </segment>
+    </unit>
+    <unit id="ready.summary">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.html:40,42</note>
+      </notes>
+      <segment>
+        <source>Podsumowanie</source>
+      </segment>
+    </unit>
+    <unit id="ready.tools">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.html:42,43</note>
+      </notes>
+      <segment>
+        <source>Narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="ready.hintClaude">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.ts:34</note>
+      </notes>
+      <segment>
+        <source>Uruchom w terminalu</source>
+      </segment>
+    </unit>
+    <unit id="ready.hintCopilot">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.ts:39</note>
+      </notes>
+      <segment>
+        <source>Wklej do pliku .vscode/mcp.json</source>
+      </segment>
+    </unit>
+    <unit id="ready.hintCodex">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.ts:44</note>
+      </notes>
+      <segment>
+        <source>Dodaj do pliku ~/.codex/config.toml</source>
+      </segment>
+    </unit>
+    <unit id="ready.copied">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.ts:56</note>
+      </notes>
+      <segment>
+        <source>Skopiowano: <ph id="0" equiv="what" disp="what"/>.</source>
+      </segment>
+    </unit>
+    <unit id="ready.copyFailed">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.ts:57</note>
+      </notes>
+      <segment>
+        <source>Nie udało się skopiować. Zaznacz tekst i skopiuj go ręcznie.</source>
+      </segment>
+    </unit>
+    <unit id="ready.urlCopied">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.ts:63</note>
+      </notes>
+      <segment>
+        <source>adres linku</source>
+      </segment>
+    </unit>
+    <unit id="ready.configCopied">
+      <notes>
+        <note category="location">src/app/features/links/link-ready.ts:64</note>
+      </notes>
+      <segment>
+        <source>konfiguracja</source>
+      </segment>
+    </unit>
+    <unit id="wizard.back">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:1,3</note>
+      </notes>
+      <segment>
+        <source>← Moje linki</source>
+      </segment>
+    </unit>
+    <unit id="wizard.stepsLabel">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:3,4</note>
+      </notes>
+      <segment>
+        <source>Kroki kreatora</source>
+      </segment>
+    </unit>
+    <unit id="wizard.nameTitle">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:19,20</note>
+      </notes>
+      <segment>
+        <source>Nowy link</source>
+      </segment>
+    </unit>
+    <unit id="wizard.nameLabel">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:22,24</note>
+      </notes>
+      <segment>
+        <source>Nazwa</source>
+      </segment>
+    </unit>
+    <unit id="wizard.nameRequired">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:32,34</note>
+      </notes>
+      <segment>
+        <source> Podaj nazwę (do 100 znaków). </source>
+      </segment>
+    </unit>
+    <unit id="wizard.slugLabel">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:37,39</note>
+      </notes>
+      <segment>
+        <source>Identyfikator</source>
+      </segment>
+    </unit>
+    <unit id="wizard.slugHint">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:53,55</note>
+      </notes>
+      <segment>
+        <source> Małe litery, cyfry i myślnik. Podpowiadany z nazwy, będzie częścią adresu. </source>
+      </segment>
+    </unit>
+    <unit id="common.cancel3">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:57,58</note>
+      </notes>
+      <segment>
+        <source>Anuluj</source>
+      </segment>
+    </unit>
+    <unit id="wizard.next">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:58,60</note>
+      </notes>
+      <segment>
+        <source>Dalej</source>
+      </segment>
+    </unit>
+    <unit id="wizard.toolsTitle">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:64,65</note>
+      </notes>
+      <segment>
+        <source>Wybierz narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="wizard.search">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:80,81</note>
+      </notes>
+      <segment>
+        <source>Szukaj narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="wizard.searchLabel">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:82,84</note>
+      </notes>
+      <segment>
+        <source>Szukaj narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="wizard.selectedCount">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:85,87</note>
+      </notes>
+      <segment>
+        <source> Wybrano: <ph id="0" equiv="INTERPOLATION" disp="{{ selectedNames().length }}"/> </source>
+      </segment>
+    </unit>
+    <unit id="wizard.disabled">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:111,112</note>
+      </notes>
+      <segment>
+        <source>Narzędzie wyłączone przez administratora.</source>
+      </segment>
+    </unit>
+    <unit id="wizard.denied">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:116,117</note>
+      </notes>
+      <segment>
+        <source>Brak uprawnienia</source>
+      </segment>
+    </unit>
+    <unit id="wizard.request">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:119,120</note>
+      </notes>
+      <segment>
+        <source>Złóż wniosek</source>
+      </segment>
+    </unit>
+    <unit id="wizard.notConnected">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:127,128</note>
+      </notes>
+      <segment>
+        <source>Konto niepołączone</source>
+      </segment>
+    </unit>
+    <unit id="wizard.connect">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:131,132</note>
+      </notes>
+      <segment>
+        <source>Połącz</source>
+      </segment>
+    </unit>
+    <unit id="wizard.reconnect">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:139,140</note>
+      </notes>
+      <segment>
+        <source>Wymaga ponownego połączenia</source>
+      </segment>
+    </unit>
+    <unit id="wizard.connect2">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:143,144</note>
+      </notes>
+      <segment>
+        <source>Połącz</source>
+      </segment>
+    </unit>
+    <unit id="wizard.confirmNote">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:151,153</note>
+      </notes>
+      <segment>
+        <source>Wymaga kodu z Authenticatora.</source>
+      </segment>
+    </unit>
+    <unit id="wizard.noTools">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:169,172</note>
+      </notes>
+      <segment>
+        <source>Żadne narzędzie nie pasuje do wyszukiwania.</source>
+      </segment>
+    </unit>
+    <unit id="wizard.needOne">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:174,176</note>
+      </notes>
+      <segment>
+        <source> Wybierz co najmniej jedno narzędzie. </source>
+      </segment>
+    </unit>
+    <unit id="wizard.back2">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:179,180</note>
+      </notes>
+      <segment>
+        <source> Wstecz </source>
+      </segment>
+    </unit>
+    <unit id="wizard.create">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:188,190</note>
+      </notes>
+      <segment>
+        <source> Utwórz link </source>
+      </segment>
+    </unit>
+    <unit id="wizard.readyTitle">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:195,196</note>
+      </notes>
+      <segment>
+        <source>Link &quot;<ph id="0" equiv="INTERPOLATION" disp="{{ form.controls.name.value.trim() }}"/>&quot; jest gotowy</source>
+      </segment>
+    </unit>
+    <unit id="wizard.toList">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.html:203,204</note>
+      </notes>
+      <segment>
+        <source> Wróć do listy </source>
+      </segment>
+    </unit>
+    <unit id="wizard.step.name">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:108</note>
+      </notes>
+      <segment>
+        <source>Nazwa</source>
+      </segment>
+    </unit>
+    <unit id="wizard.step.tools">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:109</note>
+      </notes>
+      <segment>
+        <source>Narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="wizard.step.ready">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:110</note>
+      </notes>
+      <segment>
+        <source>Gotowe</source>
+      </segment>
+    </unit>
+    <unit id="wizard.slugTaken">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:189</note>
+      </notes>
+      <segment>
+        <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
+      </segment>
+    </unit>
+    <unit id="wizard.slugTaken2">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:192</note>
+      </notes>
+      <segment>
+        <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
+      </segment>
+    </unit>
+    <unit id="wizard.slugRequired">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:196</note>
+      </notes>
+      <segment>
+        <source>Podaj identyfikator.</source>
+      </segment>
+    </unit>
+    <unit id="wizard.slugPattern">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:197</note>
+      </notes>
+      <segment>
+        <source>Dozwolone są małe litery, cyfry i myślnik; identyfikator nie może zaczynać się ani kończyć myślnikiem (do 63 znaków).</source>
+      </segment>
+    </unit>
+    <unit id="wizard.requestCreated">
+      <notes>
+        <note category="location">src/app/features/links/link-wizard-page.ts:272</note>
+      </notes>
+      <segment>
+        <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
+      </segment>
+    </unit>
+    <unit id="links.title">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:1,3</note>
+      </notes>
+      <segment>
+        <source>Moje linki</source>
+      </segment>
+    </unit>
+    <unit id="links.lead">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:17,18</note>
+      </notes>
+      <segment>
+        <source>Własne zestawy narzędzi pod jednym adresem dla agenta.</source>
+      </segment>
+    </unit>
+    <unit id="links.new">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:18,20</note>
+      </notes>
+      <segment>
+        <source>Nowy link</source>
+      </segment>
+    </unit>
+    <unit id="links.caption">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:22,24</note>
+      </notes>
+      <segment>
+        <source> Moje linki </source>
+      </segment>
+    </unit>
+    <unit id="links.colName">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:26,27</note>
+      </notes>
+      <segment>
+        <source>Nazwa</source>
+      </segment>
+    </unit>
+    <unit id="links.colSlug">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:27,28</note>
+      </notes>
+      <segment>
+        <source>Identyfikator</source>
+      </segment>
+    </unit>
+    <unit id="links.colTools">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:28,29</note>
+      </notes>
+      <segment>
+        <source>Narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="links.colActions">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:30,32</note>
+      </notes>
+      <segment>
+        <source>Akcje</source>
+      </segment>
+    </unit>
+    <unit id="links.show">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:42,43</note>
+      </notes>
+      <segment>
+        <source>Pokaż konfigurację</source>
+      </segment>
+    </unit>
+    <unit id="links.delete">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:51,52</note>
+      </notes>
+      <segment>
+        <source>Usuń</source>
+      </segment>
+    </unit>
+    <unit id="links.emptyTitle">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:61,62</note>
+      </notes>
+      <segment>
+        <source>Nie masz jeszcze żadnych linków</source>
+      </segment>
+    </unit>
+    <unit id="links.emptyText">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:63,66</note>
+      </notes>
+      <segment>
+        <source> Link to własny serwer MCP złożony z wybranych narzędzi. Wklejasz jego adres w Claude Code, Copilot albo Codex. </source>
+      </segment>
+    </unit>
+    <unit id="links.new2">
+      <notes>
+        <note category="location">src/app/features/links/links-page.html:66,69</note>
+      </notes>
+      <segment>
+        <source>Nowy link</source>
+      </segment>
+    </unit>
+    <unit id="links.deleteTitle">
+      <notes>
+        <note category="location">src/app/features/links/links-page.ts:55</note>
+      </notes>
+      <segment>
+        <source>Usunąć link &quot;<ph id="0" equiv="name" disp="link.displayName"/>&quot;?</source>
+      </segment>
+    </unit>
+    <unit id="links.deleteMessage">
+      <notes>
+        <note category="location">src/app/features/links/links-page.ts:56</note>
+      </notes>
+      <segment>
+        <source>Agenci używający adresu /v/<ph id="0" equiv="slug" disp="link.slug"/>/mcp stracą dostęp. Tego nie można cofnąć.</source>
+      </segment>
+    </unit>
+    <unit id="links.deleteConfirm">
+      <notes>
+        <note category="location">src/app/features/links/links-page.ts:57</note>
+      </notes>
+      <segment>
+        <source>Usuń link</source>
+      </segment>
+    </unit>
+    <unit id="links.deleted">
+      <notes>
+        <note category="location">src/app/features/links/links-page.ts:71</note>
+      </notes>
+      <segment>
+        <source>Usunięto link &quot;<ph id="0" equiv="name" disp="link.displayName"/>&quot;.</source>
+      </segment>
+    </unit>
+    <unit id="login.err.cancelled">
+      <notes>
+        <note category="location">src/app/features/login/login-panel.ts:9</note>
+      </notes>
+      <segment>
+        <source>Logowanie anulowane.</source>
+      </segment>
+    </unit>
+    <unit id="login.err.idp_error">
+      <notes>
+        <note category="location">src/app/features/login/login-panel.ts:11</note>
+      </notes>
+      <segment>
+        <source>Usługa logowania nie odpowiada. Spróbuj za chwilę.</source>
+      </segment>
+    </unit>
+    <unit id="login.err.session_expired">
+      <notes>
+        <note category="location">src/app/features/login/login-panel.ts:13</note>
+      </notes>
+      <segment>
+        <source>Sesja wygasła. Zaloguj się ponownie.</source>
+      </segment>
+    </unit>
+    <unit id="login.err.step_up_failed">
+      <notes>
+        <note category="location">src/app/features/login/login-panel.ts:15</note>
+      </notes>
+      <segment>
+        <source>Nie udało się potwierdzić tożsamości. Spróbuj zarejestrować ponownie.</source>
       </segment>
     </unit>
     <unit id="login.title">
       <notes>
-        <note category="location">src/app/features/login/login-panel.ts:10,11</note>
+        <note category="location">src/app/features/login/login-panel.ts:24,25</note>
       </notes>
       <segment>
-        <source>Zaloguj się do Portalu MCP</source>
+        <source>Portal MCP</source>
+      </segment>
+    </unit>
+    <unit id="login.text">
+      <notes>
+        <note category="location">src/app/features/login/login-panel.ts:25,26</note>
+      </notes>
+      <segment>
+        <source>Zaloguj się kontem firmowym.</source>
+      </segment>
+    </unit>
+    <unit id="login.button">
+      <notes>
+        <note category="location">src/app/features/login/login-panel.ts:27,28</note>
+      </notes>
+      <segment>
+        <source>Zaloguj przez konto firmowe</source>
       </segment>
     </unit>
     <unit id="login.expired">
       <notes>
-        <note category="location">src/app/features/login/login-panel.ts:14,16</note>
+        <note category="location">src/app/features/login/login-panel.ts:72</note>
       </notes>
       <segment>
-        <source>Sesja wygasła. Zaloguj się ponownie, żeby kontynuować.</source>
+        <source>Sesja wygasła. Zaloguj się ponownie.</source>
       </segment>
     </unit>
     <unit id="login.loggedOut">
       <notes>
-        <note category="location">src/app/features/login/login-panel.ts:18,21</note>
+        <note category="location">src/app/features/login/login-panel.ts:74</note>
       </notes>
       <segment>
         <source>Wylogowano.</source>
       </segment>
     </unit>
-    <unit id="login.text">
-      <notes>
-        <note category="location">src/app/features/login/login-panel.ts:22,25</note>
-      </notes>
-      <segment>
-        <source> Portal używa firmowego logowania (SSO). Po zalogowaniu zobaczysz serwery MCP, do których masz uprawnienia, i połączysz z nimi swoje konta. </source>
-      </segment>
-    </unit>
-    <unit id="login.button">
-      <notes>
-        <note category="location">src/app/features/login/login-panel.ts:26,29</note>
-      </notes>
-      <segment>
-        <source> Zaloguj się </source>
-      </segment>
-    </unit>
     <unit id="notFound.title">
       <notes>
-        <note category="location">src/app/features/not-found/not-found-page.ts:8,10</note>
+        <note category="location">src/app/features/not-found/not-found-page.ts:10,11</note>
       </notes>
       <segment>
-        <source>Nie ma takiej strony</source>
-      </segment>
-    </unit>
-    <unit id="notFound.text">
-      <notes>
-        <note category="location">src/app/features/not-found/not-found-page.ts:11,13</note>
-      </notes>
-      <segment>
-        <source>Adres jest niepoprawny albo nie masz dostępu do tego widoku.</source>
+        <source>Nie ma takiej strony.</source>
       </segment>
     </unit>
     <unit id="notFound.toCatalog">
       <notes>
-        <note category="location">src/app/features/not-found/not-found-page.ts:13,16</note>
+        <note category="location">src/app/features/not-found/not-found-page.ts:11,14</note>
       </notes>
       <segment>
-        <source>Przejdź do katalogu</source>
+        <source>Wróć do serwerów</source>
       </segment>
     </unit>
     <unit id="common.cancel">
       <notes>
-        <note category="location">src/app/shared/confirm-dialog.ts:21,23</note>
+        <note category="location">src/app/shared/confirm-dialog.ts:23,25</note>
       </notes>
       <segment>
         <source> Anuluj </source>
       </segment>
     </unit>
-    <unit id="common.retry">
+    <unit id="common.requestRef">
       <notes>
         <note category="location">src/app/shared/error-notice.ts:16,17</note>
+      </notes>
+      <segment>
+        <source>Identyfikator do zgłoszenia:</source>
+      </segment>
+    </unit>
+    <unit id="common.retry">
+      <notes>
+        <note category="location">src/app/shared/error-notice.ts:22,23</note>
       </notes>
       <segment>
         <source> Spróbuj ponownie </source>
@@ -931,7 +1621,7 @@
         <note category="location">src/app/shared/labels.ts:15</note>
       </notes>
       <segment>
-        <source>Service desk</source>
+        <source>Service Desk</source>
       </segment>
     </unit>
     <unit id="catalogStatus.connected">
@@ -939,7 +1629,7 @@
         <note category="location">src/app/shared/labels.ts:30</note>
       </notes>
       <segment>
-        <source>Połączono</source>
+        <source>Połączone</source>
       </segment>
     </unit>
     <unit id="catalogStatus.expiring">
@@ -971,7 +1661,7 @@
         <note category="location">src/app/shared/labels.ts:34</note>
       </notes>
       <segment>
-        <source>Wniosek w toku</source>
+        <source>Wniosek oczekuje</source>
       </segment>
     </unit>
     <unit id="catalogStatus.no_access">
@@ -979,60 +1669,52 @@
         <note category="location">src/app/shared/labels.ts:35</note>
       </notes>
       <segment>
-        <source>Brak dostępu</source>
+        <source>Brak uprawnienia</source>
       </segment>
     </unit>
-    <unit id="catalogHint.connected">
+    <unit id="days.today">
       <notes>
-        <note category="location">src/app/shared/labels.ts:39</note>
+        <note category="location">src/app/shared/labels.ts:52</note>
       </notes>
       <segment>
-        <source>Konto jest połączone. Skopiuj adres serwera do konfiguracji klienta AI.</source>
+        <source>dziś</source>
       </segment>
     </unit>
-    <unit id="catalogHint.expiring">
+    <unit id="days.one">
       <notes>
-        <note category="location">src/app/shared/labels.ts:40</note>
+        <note category="location">src/app/shared/labels.ts:55</note>
       </notes>
       <segment>
-        <source>Połączenie wygasa w ciągu 7 dni. Odnów je, żeby uniknąć przerwy.</source>
+        <source>za 1 dzień</source>
       </segment>
     </unit>
-    <unit id="catalogHint.reconnect_required">
+    <unit id="days.many">
       <notes>
-        <note category="location">src/app/shared/labels.ts:41</note>
+        <note category="location">src/app/shared/labels.ts:56</note>
       </notes>
       <segment>
-        <source>Połączenie wygasło, zostało unieważnione albo zgłasza błąd. Połącz konto ponownie.</source>
+        <source>za <ph id="0" equiv="days" disp="days"/> dni</source>
       </segment>
     </unit>
-    <unit id="catalogHint.not_connected">
+    <unit id="catalogStatus.tokenExpiresIn">
       <notes>
-        <note category="location">src/app/shared/labels.ts:42</note>
+        <note category="location">src/app/shared/labels.ts:70</note>
       </notes>
       <segment>
-        <source>Masz dostęp, ale konto w tym systemie nie jest jeszcze połączone.</source>
+        <source>Token wygasa <ph id="0" equiv="when" disp="when"/></source>
       </segment>
     </unit>
-    <unit id="catalogHint.request_pending">
+    <unit id="catalogStatus.connectionExpiresIn">
       <notes>
-        <note category="location">src/app/shared/labels.ts:43</note>
+        <note category="location">src/app/shared/labels.ts:71</note>
       </notes>
       <segment>
-        <source>Twój wniosek o dostęp czeka na decyzję.</source>
-      </segment>
-    </unit>
-    <unit id="catalogHint.no_access">
-      <notes>
-        <note category="location">src/app/shared/labels.ts:44</note>
-      </notes>
-      <segment>
-        <source>Nie masz uprawnień do żadnego narzędzia tego serwera.</source>
+        <source>Połączenie wygasa <ph id="0" equiv="when" disp="when"/></source>
       </segment>
     </unit>
     <unit id="action.copy_link">
       <notes>
-        <note category="location">src/app/shared/labels.ts:56</note>
+        <note category="location">src/app/shared/labels.ts:78</note>
       </notes>
       <segment>
         <source>Kopiuj link</source>
@@ -1040,7 +1722,7 @@
     </unit>
     <unit id="action.connect_oauth">
       <notes>
-        <note category="location">src/app/shared/labels.ts:57</note>
+        <note category="location">src/app/shared/labels.ts:79</note>
       </notes>
       <segment>
         <source>Połącz przez OAuth</source>
@@ -1048,7 +1730,7 @@
     </unit>
     <unit id="action.add_secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:58</note>
+        <note category="location">src/app/shared/labels.ts:80</note>
       </notes>
       <segment>
         <source>Dodaj token</source>
@@ -1056,7 +1738,7 @@
     </unit>
     <unit id="action.reconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:59</note>
+        <note category="location">src/app/shared/labels.ts:81</note>
       </notes>
       <segment>
         <source>Odnów</source>
@@ -1064,7 +1746,7 @@
     </unit>
     <unit id="action.request_access">
       <notes>
-        <note category="location">src/app/shared/labels.ts:60</note>
+        <note category="location">src/app/shared/labels.ts:82</note>
       </notes>
       <segment>
         <source>Złóż wniosek</source>
@@ -1072,15 +1754,39 @@
     </unit>
     <unit id="action.view_request">
       <notes>
-        <note category="location">src/app/shared/labels.ts:61</note>
+        <note category="location">src/app/shared/labels.ts:83</note>
       </notes>
       <segment>
         <source>Zobacz wniosek</source>
       </segment>
     </unit>
+    <unit id="action.disconnect">
+      <notes>
+        <note category="location">src/app/shared/labels.ts:84</note>
+      </notes>
+      <segment>
+        <source>Rozłącz</source>
+      </segment>
+    </unit>
+    <unit id="action.reconnectOAuth">
+      <notes>
+        <note category="location">src/app/shared/labels.ts:89</note>
+      </notes>
+      <segment>
+        <source>Połącz</source>
+      </segment>
+    </unit>
+    <unit id="action.renewSecret">
+      <notes>
+        <note category="location">src/app/shared/labels.ts:93</note>
+      </notes>
+      <segment>
+        <source>Odnów</source>
+      </segment>
+    </unit>
     <unit id="risk.READ_ONLY">
       <notes>
-        <note category="location">src/app/shared/labels.ts:70</note>
+        <note category="location">src/app/shared/labels.ts:99</note>
       </notes>
       <segment>
         <source>Odczyt</source>
@@ -1088,47 +1794,31 @@
     </unit>
     <unit id="risk.UPDATE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:71</note>
+        <note category="location">src/app/shared/labels.ts:100</note>
       </notes>
       <segment>
-        <source>Zmiana</source>
+        <source>Zapis</source>
       </segment>
     </unit>
     <unit id="risk.DESTRUCTIVE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:72</note>
+        <note category="location">src/app/shared/labels.ts:101</note>
       </notes>
       <segment>
-        <source>Destrukcyjne</source>
-      </segment>
-    </unit>
-    <unit id="access.granted">
-      <notes>
-        <note category="location">src/app/shared/labels.ts:80</note>
-      </notes>
-      <segment>
-        <source>Przyznany</source>
-      </segment>
-    </unit>
-    <unit id="access.denied">
-      <notes>
-        <note category="location">src/app/shared/labels.ts:81</note>
-      </notes>
-      <segment>
-        <source>Brak</source>
+        <source>Usuwanie</source>
       </segment>
     </unit>
     <unit id="credentialType.user-secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:90</note>
+        <note category="location">src/app/shared/labels.ts:110</note>
       </notes>
       <segment>
-        <source>Token</source>
+        <source>Token PAT</source>
       </segment>
     </unit>
     <unit id="credentialType.token-exchange">
       <notes>
-        <note category="location">src/app/shared/labels.ts:91</note>
+        <note category="location">src/app/shared/labels.ts:111</note>
       </notes>
       <segment>
         <source>Wymiana tokenu</source>
@@ -1136,7 +1826,7 @@
     </unit>
     <unit id="credentialType.service-account">
       <notes>
-        <note category="location">src/app/shared/labels.ts:92</note>
+        <note category="location">src/app/shared/labels.ts:112</note>
       </notes>
       <segment>
         <source>Konto serwisowe</source>
@@ -1144,7 +1834,7 @@
     </unit>
     <unit id="connectionStatus.connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:100</note>
+        <note category="location">src/app/shared/labels.ts:120</note>
       </notes>
       <segment>
         <source>Aktywne</source>
@@ -1152,7 +1842,7 @@
     </unit>
     <unit id="connectionStatus.expiring">
       <notes>
-        <note category="location">src/app/shared/labels.ts:101</note>
+        <note category="location">src/app/shared/labels.ts:121</note>
       </notes>
       <segment>
         <source>Wkrótce wygasa</source>
@@ -1160,7 +1850,7 @@
     </unit>
     <unit id="connectionStatus.expired">
       <notes>
-        <note category="location">src/app/shared/labels.ts:102</note>
+        <note category="location">src/app/shared/labels.ts:122</note>
       </notes>
       <segment>
         <source>Wygasło</source>
@@ -1168,7 +1858,7 @@
     </unit>
     <unit id="connectionStatus.revoked">
       <notes>
-        <note category="location">src/app/shared/labels.ts:103</note>
+        <note category="location">src/app/shared/labels.ts:123</note>
       </notes>
       <segment>
         <source>Unieważnione</source>
@@ -1176,10 +1866,162 @@
     </unit>
     <unit id="connectionStatus.error">
       <notes>
-        <note category="location">src/app/shared/labels.ts:104</note>
+        <note category="location">src/app/shared/labels.ts:124</note>
       </notes>
       <segment>
         <source>Błąd</source>
+      </segment>
+    </unit>
+    <unit id="loadError.forbidden">
+      <notes>
+        <note category="location">src/app/shared/load-error.ts:16,17</note>
+      </notes>
+      <segment>
+        <source>Nie masz dostępu do tej strony.</source>
+      </segment>
+    </unit>
+    <unit id="loadError.toServers">
+      <notes>
+        <note category="location">src/app/shared/load-error.ts:18,21</note>
+      </notes>
+      <segment>
+        <source>Wróć do serwerów</source>
+      </segment>
+    </unit>
+    <unit id="loadError.notFound">
+      <notes>
+        <note category="location">src/app/shared/load-error.ts:22,23</note>
+      </notes>
+      <segment>
+        <source>Nie ma takiej strony.</source>
+      </segment>
+    </unit>
+    <unit id="loadError.toServers2">
+      <notes>
+        <note category="location">src/app/shared/load-error.ts:24,27</note>
+      </notes>
+      <segment>
+        <source>Wróć do serwerów</source>
+      </segment>
+    </unit>
+    <unit id="loadError.title">
+      <notes>
+        <note category="location">src/app/shared/load-error.ts:28,29</note>
+      </notes>
+      <segment>
+        <source>Nie udało się pobrać danych.</source>
+      </segment>
+    </unit>
+    <unit id="loadError.retry">
+      <notes>
+        <note category="location">src/app/shared/load-error.ts:37,38</note>
+      </notes>
+      <segment>
+        <source> Odśwież </source>
+      </segment>
+    </unit>
+    <unit id="common.requestRef2">
+      <notes>
+        <note category="location">src/app/shared/load-error.ts:42,43</note>
+      </notes>
+      <segment>
+        <source>Identyfikator do zgłoszenia:</source>
+      </segment>
+    </unit>
+    <unit id="common.loadingText">
+      <notes>
+        <note category="location">src/app/shared/loading.ts:8,9</note>
+      </notes>
+      <segment>
+        <source>Ładowanie...</source>
+      </segment>
+    </unit>
+    <unit id="notice.close">
+      <notes>
+        <note category="location">src/app/shared/notice.ts:23,24</note>
+      </notes>
+      <segment>
+        <source>Zamknij komunikat</source>
+      </segment>
+    </unit>
+    <unit id="oauth.connectedUnknown">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:54</note>
+      </notes>
+      <segment>
+        <source>Konto zostało połączone.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.connectedAs">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:57</note>
+      </notes>
+      <segment>
+        <source>Połączono z <ph id="0" equiv="system" disp="named"/> jako <ph id="1" equiv="user" disp="backendUser"/>.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.connected">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:58</note>
+      </notes>
+      <segment>
+        <source>Połączono z <ph id="0" equiv="system" disp="named"/>.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.identityMismatch">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:63</note>
+      </notes>
+      <segment>
+        <source>Zalogowano się w <ph id="0" equiv="system" disp="named"/> na inne konto niż Twoje. Wyloguj się z <ph id="1" equiv="system" disp="named"/> i spróbuj ponownie.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.identityMismatchUnknown">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:64</note>
+      </notes>
+      <segment>
+        <source>Zalogowano się w systemie na inne konto niż Twoje. Wyloguj się z systemu i spróbuj ponownie.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.flowInvalid">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:66</note>
+      </notes>
+      <segment>
+        <source>Link połączenia wygasł albo był już użyty. Zacznij od nowa.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.cancelled">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:69</note>
+      </notes>
+      <segment>
+        <source>Łączenie z <ph id="0" equiv="system" disp="named"/> anulowane.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.cancelledUnknown">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:70</note>
+      </notes>
+      <segment>
+        <source>Łączenie anulowane.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.providerError">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:73</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="system" disp="named"/> nie odpowiedział poprawnie. Spróbuj za chwilę.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.providerErrorUnknown">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:74</note>
+      </notes>
+      <segment>
+        <source>System nie odpowiedział poprawnie. Spróbuj za chwilę.</source>
       </segment>
     </unit>
   </file>

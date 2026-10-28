@@ -33,25 +33,108 @@ html {
     )
   );
 
+  /*
+   * Palette sampled from the human-approved mockups (design/*.png): flat near-black surface, one border
+   * colour, light primary button. Text and status colours keep at least 4.5:1 on the surface; borders of
+   * form fields use the stronger tone (3:1) because they are the only boundary of the control.
+   */
+  --pm-bg: light-dark(#fbfbfa, #0b0c0e);
+  --pm-surface: light-dark(#ffffff, #141619);
+  --pm-surface-2: light-dark(#eff0f2, #1a1d21);
+  --pm-border: light-dark(#d8dade, #2a2e34);
+  --pm-border-strong: light-dark(#7d838d, #596069);
+  --pm-text: light-dark(#16181b, #edeef0);
+  --pm-muted: light-dark(#585e68, #9097a1);
+  --pm-ok: light-dark(#1d6b45, #4fb286);
+  --pm-warn: light-dark(#8a5a00, #e8a93a);
+  --pm-danger: light-dark(#b3261e, #f0645a);
+  --pm-link: light-dark(#1f4fd1, #5b8cff);
+  --pm-on-strong: light-dark(#ffffff, #0b0c0e);
+  --pm-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --pm-radius: 6px;
+  --pm-gutter: 24px;
+
+  --mat-sys-surface: var(--pm-bg);
+  --mat-sys-background: var(--pm-bg);
+  --mat-sys-on-surface: var(--pm-text);
+  --mat-sys-on-background: var(--pm-text);
+  --mat-sys-on-surface-variant: var(--pm-muted);
+  --mat-sys-surface-variant: var(--pm-surface-2);
+  --mat-sys-surface-container-lowest: var(--pm-bg);
+  --mat-sys-surface-container-low: var(--pm-surface);
+  --mat-sys-surface-container: var(--pm-surface);
+  --mat-sys-surface-container-high: var(--pm-surface-2);
+  --mat-sys-surface-container-highest: var(--pm-surface-2);
+  --mat-sys-outline: var(--pm-border-strong);
+  --mat-sys-outline-variant: var(--pm-border);
+  --mat-sys-primary: var(--pm-text);
+  --mat-sys-on-primary: var(--pm-on-strong);
+  --mat-sys-primary-container: var(--pm-surface-2);
+  --mat-sys-on-primary-container: var(--pm-text);
+  --mat-sys-secondary-container: var(--pm-surface-2);
+  --mat-sys-on-secondary-container: var(--pm-text);
+  --mat-sys-error: var(--pm-danger);
+  --mat-sys-on-error: var(--pm-on-strong);
+  --mat-sys-inverse-surface: var(--pm-text);
+  --mat-sys-inverse-on-surface: var(--pm-bg);
+  --mat-sys-inverse-primary: var(--pm-link);
+  --mat-sys-surface-tint: transparent;
+
   @include mat.button-overrides(
     (
-      filled-container-shape: 4px,
-      outlined-container-shape: 4px,
-      text-container-shape: 4px,
-      protected-container-shape: 4px,
-      tonal-container-shape: 4px,
+      filled-container-shape: var(--pm-radius),
+      outlined-container-shape: var(--pm-radius),
+      text-container-shape: var(--pm-radius),
+      protected-container-shape: var(--pm-radius),
+      tonal-container-shape: var(--pm-radius),
+      filled-container-height: 38px,
+      outlined-container-height: 38px,
+      text-container-height: 38px,
+      filled-label-text-weight: 500,
+      outlined-label-text-weight: 500,
+      text-label-text-weight: 500,
+      filled-label-text-size: 14px,
+      outlined-label-text-size: 14px,
+      text-label-text-size: 14px,
+      outlined-outline-color: var(--pm-border),
+      outlined-label-text-color: var(--pm-text),
+      filled-container-color: var(--pm-text),
+      filled-label-text-color: var(--pm-on-strong),
     )
   );
 
-  /* Status colours; every pair meets 4.5:1 in its scheme. */
-  --tone-ok-fg: light-dark(#1d5a2c, #a6e3b4);
-  --tone-ok-bg: light-dark(#e3f2e6, #15301c);
-  --tone-warn-fg: light-dark(#6b4400, #ffd28a);
-  --tone-warn-bg: light-dark(#fff1d6, #352500);
-  --tone-error-fg: light-dark(#8c1d18, #ffb4ab);
-  --tone-error-bg: light-dark(#fde8e6, #40100d);
-  --tone-info-fg: light-dark(#0b4a7a, #a8d1ff);
-  --tone-info-bg: light-dark(#e2effa, #0c2940);
+  @include mat.dialog-overrides(
+    (
+      container-shape: 8px,
+      container-color: var(--pm-surface),
+      subhead-size: 18px,
+      subhead-weight: 500,
+    )
+  );
+
+  @include mat.checkbox-overrides(
+    (
+      selected-icon-color: var(--pm-text),
+      selected-hover-icon-color: var(--pm-text),
+      selected-focus-icon-color: var(--pm-text),
+      selected-pressed-icon-color: var(--pm-text),
+      selected-checkmark-color: var(--pm-on-strong),
+      unselected-icon-color: var(--pm-border-strong),
+      unselected-hover-icon-color: var(--pm-text),
+      unselected-focus-icon-color: var(--pm-text),
+      disabled-unselected-icon-color: var(--pm-border),
+      label-text-color: var(--pm-text),
+      disabled-label-color: var(--pm-muted),
+    )
+  );
+
+  @include mat.snack-bar-overrides(
+    (
+      container-shape: var(--pm-radius),
+      container-color: var(--pm-surface-2),
+      supporting-text-color: var(--pm-text),
+    )
+  );
 }
 
 html.theme-light {
@@ -64,28 +147,60 @@ html.theme-dark {
 
 body {
   margin: 0;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-large);
+  background: var(--pm-bg);
+  color: var(--pm-text);
+  font:
+    400 14px / 1.5 system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 h1 {
-  font: var(--mat-sys-headline-small);
-  margin: 8px 0 12px;
+  font-size: 20px;
+}
+
+h2 {
+  font-size: 16px;
+}
+
+p {
+  margin: 0;
 }
 
 a {
-  color: var(--mat-sys-primary);
+  color: var(--pm-link);
 }
 
-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.92em;
+code,
+.mono {
+  font-family: var(--pm-mono);
+  font-size: 13px;
+}
+
+button {
+  font-family: inherit;
 }
 
 :focus-visible {
-  outline: 2px solid var(--mat-sys-primary);
+  outline: 2px solid var(--pm-link);
   outline-offset: 2px;
+}
+
+.muted {
+  color: var(--pm-muted);
 }
 
 .visually-hidden {
@@ -98,4 +213,93 @@ code {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+  margin-bottom: 20px;
+
+  label {
+    font-weight: 500;
+  }
+
+  input[type='text'],
+  input[type='password'],
+  input[type='date'],
+  input[type='search'] {
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--pm-border-strong);
+    border-radius: var(--pm-radius);
+    background: var(--pm-bg);
+    color: var(--pm-text);
+    font: inherit;
+  }
+
+  input::placeholder {
+    color: var(--pm-muted);
+    opacity: 1;
+  }
+
+  input.invalid,
+  input[aria-invalid='true'] {
+    border-color: var(--pm-danger);
+  }
+
+  .hint {
+    color: var(--pm-muted);
+    font-size: 13px;
+  }
+
+  .error {
+    color: var(--pm-danger);
+    font-size: 13px;
+  }
+}
+
+.searchbox {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 320px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--pm-border-strong);
+  border-radius: var(--pm-radius);
+  background: var(--pm-bg);
+  color: var(--pm-text);
+  font: inherit;
+}
+
+.searchbox::placeholder {
+  color: var(--pm-muted);
+  opacity: 1;
+}
+
+.state-danger {
+  color: var(--pm-danger);
+}
+
+.state-warn {
+  color: var(--pm-warn);
+}
+
+.state-ok {
+  color: var(--pm-text);
+}
+
+.state-neutral {
+  color: var(--pm-muted);
 }

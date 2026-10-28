@@ -1,0 +1,209 @@
+<p class="back"><a routerLink="/links" i18n="@@wizard.back">&larr; Moje linki</a></p>
+
+<ol class="steps" i18n-aria-label="@@wizard.stepsLabel" aria-label="Kroki kreatora">
+  @for (s of steps; track s.key; let i = $index) {
+    <li [attr.aria-current]="step() === s.key ? 'step' : null" [class.current]="step() === s.key">
+      {{ i + 1 }}. {{ s.label }}
+    </li>
+  }
+</ol>
+
+@let state = data();
+@if (state.status === 'loading') {
+  <app-loading />
+} @else if (state.status === 'error') {
+  <app-load-error [failure]="state.failure" (retry)="load()" />
+} @else {
+  @switch (step()) {
+    @case ('name') {
+      <h1 i18n="@@wizard.nameTitle">Nowy link</h1>
+      <form class="narrow" (ngSubmit)="toToolsStep()" [formGroup]="form" novalidate>
+        <div class="form-field">
+          <label for="link-name" i18n="@@wizard.nameLabel">Nazwa</label>
+          <input
+            id="link-name"
+            type="text"
+            formControlName="name"
+            autocomplete="off"
+            [attr.aria-invalid]="nameAttempted() && form.controls.name.invalid ? 'true' : null"
+          />
+          @if (nameAttempted() && form.controls.name.invalid) {
+            <p class="error" role="alert" i18n="@@wizard.nameRequired">
+              Podaj nazwę (do 100 znaków).
+            </p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="link-slug" i18n="@@wizard.slugLabel">Identyfikator</label>
+          <input
+            id="link-slug"
+            type="text"
+            class="mono"
+            formControlName="slug"
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="slug-hint slug-error"
+            [attr.aria-invalid]="slugError() ? 'true' : null"
+            (input)="onSlugInput()"
+          />
+          @if (slugError(); as message) {
+            <p id="slug-error" class="error" role="alert">{{ message }}</p>
+          }
+          <p id="slug-hint" class="hint" i18n="@@wizard.slugHint">
+            Małe litery, cyfry i myślnik. Podpowiadany z nazwy, będzie częścią adresu.
+          </p>
+        </div>
+        <div class="actions">
+          <a mat-stroked-button routerLink="/links" i18n="@@common.cancel3">Anuluj</a>
+          <button mat-flat-button type="submit" i18n="@@wizard.next">Dalej</button>
+        </div>
+      </form>
+    }
+
+    @case ('tools') {
+      <h1 i18n="@@wizard.toolsTitle">Wybierz narzędzia</h1>
+      @if (info(); as text) {
+        <app-notice kind="success" [dismissible]="true" (dismiss)="info.set(null)">{{
+          text
+        }}</app-notice>
+      }
+      @if (failure(); as f) {
+        <app-error-notice [failure]="f" />
+      }
+      <div class="toolbar">
+        <input
+          type="search"
+          class="searchbox"
+          [value]="query()"
+          (input)="onQuery($event)"
+          i18n-placeholder="@@wizard.search"
+          placeholder="Szukaj narzędzia"
+          i18n-aria-label="@@wizard.searchLabel"
+          aria-label="Szukaj narzędzia"
+        />
+        <p class="muted" role="status" i18n="@@wizard.selectedCount">
+          Wybrano: {{ selectedNames().length }}
+        </p>
+      </div>
+
+      @for (group of groups(); track group.server.serverId) {
+        <section class="group" [attr.aria-labelledby]="'group-' + group.server.serverId">
+          <h2 [id]="'group-' + group.server.serverId">{{ group.name }}</h2>
+          <ul class="tool-list">
+            @for (row of group.rows; track row.tool.name) {
+              <li class="tool-row" [class.blocked]="row.block">
+                <div class="pick">
+                  <mat-checkbox
+                    [checked]="isSelected(row.tool.name)"
+                    [disabled]="row.block !== null"
+                    (change)="toggleTool(row.tool.name, $event.checked)"
+                  >
+                    <code class="tool-name">{{ row.tool.name }}</code>
+                  </mat-checkbox>
+                </div>
+                <div class="what">
+                  <span [class.muted]="row.block">{{
+                    row.tool.title || row.tool.description
+                  }}</span>
+                  @switch (row.block) {
+                    @case ('disabled') {
+                      <span class="note muted" i18n="@@wizard.disabled"
+                        >Narzędzie wyłączone przez administratora.</span
+                      >
+                    }
+                    @case ('denied') {
+                      <span class="note muted"
+                        ><ng-container i18n="@@wizard.denied">Brak uprawnienia</ng-container>
+                        &middot;
+                        <button type="button" class="linkish" (click)="requestAccess(group.server)">
+                          <ng-container i18n="@@wizard.request">Złóż wniosek</ng-container
+                          ><span class="visually-hidden"> ({{ group.name }})</span>
+                        </button></span
+                      >
+                    }
+                    @case ('not_connected') {
+                      <span class="note muted"
+                        ><ng-container i18n="@@wizard.notConnected"
+                          >Konto niepołączone</ng-container
+                        >
+                        &middot;
+                        <a [routerLink]="['/connect', group.server.system]"
+                          ><ng-container i18n="@@wizard.connect">Połącz</ng-container
+                          ><span class="visually-hidden"> ({{ group.name }})</span></a
+                        ></span
+                      >
+                    }
+                    @case ('reconnect_required') {
+                      <span class="note muted"
+                        ><ng-container i18n="@@wizard.reconnect"
+                          >Wymaga ponownego połączenia</ng-container
+                        >
+                        &middot;
+                        <a [routerLink]="['/connect', group.server.system]"
+                          ><ng-container i18n="@@wizard.connect2">Połącz</ng-container
+                          ><span class="visually-hidden"> ({{ group.name }})</span></a
+                        ></span
+                      >
+                    }
+                    @default {
+                      @if (row.tool.requiresConfirmation) {
+                        <span class="note muted" i18n="@@wizard.confirmNote"
+                          >Wymaga kodu z Authenticatora.</span
+                        >
+                      }
+                    }
+                  }
+                </div>
+                <div
+                  class="risk"
+                  [class.state-danger]="row.tool.risk === 'DESTRUCTIVE'"
+                  [class.muted]="row.tool.risk === 'READ_ONLY' || row.block"
+                >
+                  {{ riskLabel(row.tool.risk) }}
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      } @empty {
+        <p class="muted" i18n="@@wizard.noTools">Żadne narzędzie nie pasuje do wyszukiwania.</p>
+      }
+
+      @if (toolsAttempted() && !selectedNames().length) {
+        <p class="error need-one" role="alert" i18n="@@wizard.needOne">
+          Wybierz co najmniej jedno narzędzie.
+        </p>
+      }
+      <div class="actions wide">
+        <button mat-stroked-button type="button" (click)="toNameStep()" i18n="@@wizard.back2">
+          Wstecz
+        </button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="saving()"
+          (click)="create()"
+          i18n="@@wizard.create"
+        >
+          Utwórz link
+        </button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (created(); as result) {
+        <h1 i18n="@@wizard.readyTitle">Link "{{ form.controls.name.value.trim() }}" jest gotowy</h1>
+        <app-link-ready
+          [url]="result.url"
+          [clientConfigs]="result.clientConfigs"
+          [tools]="selectedNames()"
+        />
+        <div class="actions wide end">
+          <button mat-flat-button type="button" (click)="finish()" i18n="@@wizard.toList">
+            Wróć do listy
+          </button>
+        </div>
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+<div class="form-field url-field">
+  <label for="link-url" i18n="@@ready.url">Adres linku</label>
+  <div class="url-row">
+    <input id="link-url" type="text" class="mono" readonly [value]="url()" />
+    <button mat-stroked-button type="button" (click)="copy(url(), urlLabel)" i18n="@@ready.copyUrl">
+      Kopiuj<span class="visually-hidden"> adres linku</span>
+    </button>
+  </div>
+</div>
+
+<mat-tab-group
+  class="configs"
+  animationDuration="0ms"
+  mat-stretch-tabs="false"
+  mat-align-tabs="start"
+  [selectedIndex]="active()"
+  (selectedIndexChange)="active.set($event)"
+  i18n-aria-label="@@ready.configsLabel"
+  aria-label="Konfiguracja klienta"
+>
+  @for (tab of tabs; track tab.key) {
+    <mat-tab [label]="tab.label">
+      <div class="config-head">
+        <span class="muted">{{ tab.hint }}</span>
+        <button mat-stroked-button type="button" (click)="copy(activeConfig(), configLabel)">
+          <ng-container i18n="@@ready.copyConfig">Kopiuj</ng-container
+          ><span class="visually-hidden"> ({{ tab.label }})</span>
+        </button>
+      </div>
+      <pre class="config"><code>{{ clientConfigs()[tab.key] }}</code></pre>
+    </mat-tab>
+  }
+</mat-tab-group>
+
+<p class="muted note" i18n="@@ready.note">
+  Konfiguracja nie zawiera tokenu ani hasła. Przy pierwszym połączeniu klient poprosi o logowanie
+  kontem firmowym.
+</p>
+
+<h2 class="summary-title" i18n="@@ready.summary">Podsumowanie</h2>
+<dl class="summary">
+  <dt class="muted" i18n="@@ready.tools">Narzędzia</dt>
+  <dd class="mono">{{ tools().join(', ') }}</dd>
+</dl>

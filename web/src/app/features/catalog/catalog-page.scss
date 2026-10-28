@@ -1,9 +1,18 @@
-.lead {
-  margin-top: 0;
-  color: var(--mat-sys-on-surface-variant);
+.searchbox {
+  margin-bottom: 20px;
 }
 
-.list {
+.none {
+  margin-top: 24px;
+}
+
+.empty {
   display: grid;
-  gap: 16px;
+  gap: 8px;
+  max-width: 520px;
+  padding-top: 16px;
+}
+
+.empty h2 {
+  font-size: 18px;
 }

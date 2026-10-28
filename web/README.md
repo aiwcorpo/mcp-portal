@@ -2,7 +2,7 @@
 
 Frontend portalu platformy MCP (strumień ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, teksty po polsku przez `$localize`. Rozmawia wyłącznie z BFF przez API C12
-(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 1.1.0). BFF (`../bff`, ws-07) serwuje zbudowane
+(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 2.2.1). BFF (`../bff`, ws-07) serwuje zbudowane
 pliki z tego samego originu.
 
 Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
@@ -11,7 +11,7 @@ Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
 
 - Node 24, npm 11.
 - Repozytorium `mcp-contracts` obok `mcp-portal` (`../../mcp-contracts` względem `web/`): paczka
-  `release/aiwcorpo-mcp-contracts-1.1.0.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
+  `release/aiwcorpo-mcp-contracts-2.2.1.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
 - Java 25 tylko do ponownego wygenerowania klienta API (`npm run generate:api`).
 - Chromium dla Playwright: `npx playwright install chromium` (raz).
 
@@ -24,24 +24,34 @@ npm ci
 Na mockach (bez BFF), MSW w przeglądarce:
 
 ```bash
-npm run start:mocks          # http://localhost:4200
+npm run start:mocks          # http://localhost:18730
 ```
 
-Mock jest stanowy: logowanie, wylogowanie, step-up MFA, zapis i usunięcie połączenia, powrót z OAuth.
-Odpowiedzi pochodzą z przykładów C12 (`@aiwcorpo/mcp-contracts/msw`), ich handlery pilnują też CSRF.
-Inny zestaw danych: `?mockScenario=empty` (puste listy), `?mockScenario=errors` (`503 upstream_unavailable`),
-`?mockScenario=default`. Wybór trzyma ciasteczko `mcp-portal-mock` do końca sesji przeglądarki. Token zaczynający
-się od `invalid` daje `422 secret_invalid`.
+Mock jest stanowy: logowanie i wylogowanie, zapis (bez MFA) i usunięcie połączenia, powrót z OAuth, wniosek o
+dostęp, tworzenie i usuwanie linków. Odpowiedzi pochodzą z przykładów C12 (`@aiwcorpo/mcp-contracts/msw`; katalog
+z przykładu `states`, rozszerzony o kilka narzędzi), ich handlery pilnują też CSRF. Statusy wierszy i akcje
+liczy `deriveRow` według tabeli z kontraktu (test na wektorach `catalog-actions/`).
+
+Parametry adresu, ważne do końca sesji przeglądarki (stan w ciasteczku `mcp-portal-mock`, bez sekretów):
+
+| Parametr | Wartości |
+| --- | --- |
+| `mockScenario` | `default` (przykład `states`: wygasający token, wymagane ponowne połączenie, brak uprawnień, konto serwisowe, wymiana tokenu), `mixed` (przykład `mixed`: połączone i niepołączone), `empty` (brak serwerów i linków), `nolinks` (puste Moje linki), `errors` (`503 upstream_unavailable` z `requestId`); zmiana scenariusza zeruje zmiany |
+| `mockOAuth` | wynik następnego powrotu od dostawcy: `ok`, `cancelled`, `identity_mismatch`, `flow_invalid`, `provider_error` |
+| `mockSession` | `in` albo `out`: start z sesją albo bez niej (z `?loginError=<kod>` pokazuje błędy logowania) |
+
+Token zaczynający się od `invalid` daje `422 secret_invalid`, od `other-user` `422 identity_mismatch`. Identyfikator
+linku `team-a-dev` jest "cudzy": POST odpowiada `409 slug_taken`.
 
 Z prawdziwym BFF (ws-01, port 18090):
 
 ```bash
-npm start                    # http://localhost:4200, proxy /api -> http://localhost:18090 (proxy.conf.json)
+npm start                    # http://localhost:18730, proxy /api -> http://localhost:18090 (proxy.conf.json)
 ```
 
 Klient `mcp-portal-bff` w Keycloak ma redirect URI na `http://localhost:18090`, więc po zalogowaniu
 przeglądarka wraca na port 18090. Ciasteczka na `localhost` nie zależą od portu: wystarczy wrócić na
-`http://localhost:4200`, sesja działa przez proxy.
+`http://localhost:18730`, sesja działa przez proxy.
 
 ## Build dla BFF (ws-07)
 
@@ -81,11 +91,15 @@ testy e2e. Jedyna różnica to `worker-src 'self'`, potrzebne tylko service work
 Przekierowanie do dostawcy OAuth (`authorizeUrl`) frontend wykonuje tylko dla `https:`; `http:` wyłącznie dla
 `localhost`, `127.0.0.1` i `[::1]` (mocki ws-01).
 
-Frontend buduje `GET /api/v1/auth/login?returnPath=<ścieżka>&stepUp=true` przez `URLSearchParams`, więc
-`returnPath` przychodzi zakodowany w query (np. `%2Fconnect%2Fgitlab%3FstepUp%3Ddone`). BFF dekoduje parametr
-raz, standardowo, i waliduje wynik wzorcem `ReturnPath` (CC-032). W `stepUpUrl` z odpowiedzi
-`401 step_up_required` frontend podmienia `returnPath` na ścieżkę formularza (propozycja CC w
-`mcp-contracts/CONTRACT_CHANGES.md`).
+Frontend buduje `GET /api/v1/auth/login?returnPath=<ścieżka>` przez `URLSearchParams`, więc `returnPath`
+przychodzi zakodowany w query. BFF dekoduje parametr raz, standardowo, i waliduje wynik wzorcem `ReturnPath`
+(CC-032). Zapis tokenu nie wymaga step-up MFA (CC-090); `stepUpUrlFor` w `core/auth-urls.ts` zostaje dla
+potwierdzeń (M3).
+
+Powrót z dostawcy OAuth: frontend wysyła `returnPath=/catalog?system=<system>` (albo `/connections?...`), bo BFF
+dopisuje tylko `connected=<system>` albo `connectError=<kod>` (kody `ConnectErrorCode`, w tym `cancelled`), a
+komunikat błędu ma nazwać system. Wartości z adresu są sprawdzane względem zamkniętych list; nieznane dają
+ogólny komunikat.
 
 ## Testy i lint
 
@@ -98,7 +112,16 @@ npm run e2e                  # build konfiguracji e2e + Playwright (Chromium, 12
 `npm run e2e` buduje aplikację w trybie zoptymalizowanym z MSW (`dist/e2e/`) i serwuje ją przez
 `scripts/serve-csp.mjs` z powyższą polityką CSP. Każdy test e2e kończy się błędem, jeśli przeglądarka zgłosi
 naruszenie CSP albo nieobsłużony wyjątek. Testy dostępności używają axe-core (WCAG 2.1 A/AA) w trybie
-jasnym i ciemnym.
+ciemnym (domyślnym) i jasnym (przełącznik w nagłówku).
+
+Zrzuty ekranów kluczowych widoków do porównania z makietami (`mcp-platform-plan/design/`), 1280 i 360 px:
+
+```bash
+SHOTS_DIR=/ścieżka/do/katalogu npx playwright test e2e/screenshots.spec.ts   # po npm run build:e2e
+```
+
+Nazwy plików zaczynają się od numeru makiety, np. `01-serwery-mcp-rozwiniete-desktop.png` albo
+`08-moje-linki-lista-mobile-360.png`.
 
 ## Klient API
 
@@ -114,7 +137,9 @@ git diff --stat src/app/api/generated     # zmiany tylko po aktualizacji kontrak
 
 `--type-mappings set=Array`: tablice z `uniqueItems` przychodzą w JSON jako tablice, a domyślny `Set` w
 typach kłamałby. `basePath` klienta jest pusty (`provideApi({ basePath: '' })`), więc wywołania są względne
-i `HttpClient` dokleja `X-XSRF-TOKEN` z ciasteczka `XSRF-TOKEN` (domyślny mechanizm Angulara).
+i `xsrfInterceptor` (`src/app/core/xsrf.interceptor.ts`) dokleja `X-XSRF-TOKEN` do POST, PUT i DELETE. Wartość
+czyta z ciasteczka `__Host-XSRF-TOKEN` (kontrakt, CC-055), a gdy go nie ma, z `XSRF-TOKEN` (nazwa, której BFF
+używał do M1); wbudowany mechanizm Angulara (jedna nazwa) jest wyłączony przez `withNoXsrfProtection()`.
 
 Zmiana wersji kontraktów: podmienić ścieżkę paczki w `package.json` (`@aiwcorpo/mcp-contracts`),
 `npm install`, `npm run generate:api`, testy.
@@ -133,11 +158,13 @@ pole `message` z odpowiedzi BFF nigdy nie jest wyświetlane.
 ```
 src/app/
   api/generated/        klient C12 (generowany)
-  core/                 sesja, mapowanie błędów, URL-e logowania, guard admina, motyw, interceptor
-  shared/               komunikaty, etykiety, odznaka stanu, dialog potwierdzenia
-  features/catalog/     Katalog
-  features/connect/     Połącz konto (OAuth, token ze step-up)
-  features/connections/ Moje połączenia
+  core/                 sesja, mapowanie błędów, URL-e logowania, guard admina, motyw, interceptory (sesja, XSRF)
+  shared/               komunikaty, etykiety, stan wiersza, powrót z OAuth, ładowanie i błąd ładowania, dialog
+  features/login/       ekran logowania i błędy loginError
+  features/catalog/     Serwery MCP (tabela z rozwijanymi wierszami)
+  features/connect/     Połącz konto (OAuth, token PAT)
+  features/connections/ Połączenia z systemami
+  features/links/       Moje linki: lista, kreator Nazwa -> Narzędzia -> Gotowe, konfiguracja klienta
   features/admin/       trasy admina (lazy, na razie puste)
 src/mocks/              warstwa stanowa nad handlerami MSW z kontraktów; start MSW w przeglądarce
 src/testing/            pomocnicze dla testów jednostkowych (MSW w Node, TestBed)

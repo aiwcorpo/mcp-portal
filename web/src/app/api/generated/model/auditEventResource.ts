@@ -13,7 +13,7 @@ import { ResourceType } from './resourceType';
 export interface AuditEventResource { 
     type: ResourceType;
     /**
-     * Resource id as the system knows it (Jira key, GitLab path, index name, page id). Free-form because ids of the five systems use different alphabets (slashes, dots, spaces in some service desks), but C0 and C1 control characters, DEL, U+2028 and U+2029 are excluded so the line-oriented SIEM format cannot be broken (CC-031). Independently of this, the audit JSON serializer must escape every control character and U+2028/U+2029.
+     * Resource id as the system knows it (Jira key, GitLab path, index name, page id). Free-form because ids of the five systems use different alphabets (slashes, dots, spaces in some service desks), but C0 and C1 control characters, DEL, U+2028, U+2029 and the bidirectional controls U+202A..U+202E and U+2066..U+2069 are excluded so the line-oriented SIEM format and log viewers cannot be misled (CC-031). The length limit counts UTF-16 code units (JSON Schema validators in Java and JavaScript); producers should keep ids below 512 characters. Independently of this, the audit JSON serializer must escape every control character and U+2028/U+2029.
      */
     id: string;
     /**

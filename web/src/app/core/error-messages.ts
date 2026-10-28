@@ -20,24 +20,25 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
   step_up_required: () =>
     $localize`:@@error.step_up_required:Ta operacja wymaga ponownego uwierzytelnienia (MFA).`,
   upstream_unavailable: () =>
-    $localize`:@@error.upstream_unavailable:Usługa jest chwilowo niedostępna. Spróbuj ponownie później.`,
+    $localize`:@@error.upstream_unavailable:Usługa jest chwilowo niedostępna.`,
   internal_error: () =>
     $localize`:@@error.internal_error:Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.`,
   invalid_request: () =>
     $localize`:@@error.invalid_request:Żądanie zostało odrzucone jako niepoprawne.`,
   csrf_invalid: () =>
     $localize`:@@error.csrf_invalid:Formularz stracił ważność. Odśwież stronę i spróbuj ponownie.`,
-  secret_invalid: () =>
-    $localize`:@@error.secret_invalid:System odrzucił token. Sprawdź, czy jest aktualny i ma wymagane uprawnienia.`,
-  identity_mismatch: () =>
-    $localize`:@@error.identity_mismatch:Token należy do innego użytkownika niż zalogowany w portalu.`,
-  slug_taken: () => $localize`:@@error.slug_taken:Ta nazwa jest już zajęta.`,
+  secret_invalid: () => $localize`:@@error.secret_invalid:Token nieprawidłowy albo wygasł.`,
+  identity_mismatch: () => $localize`:@@error.identity_mismatch:Token należy do innego konta.`,
+  slug_taken: () => $localize`:@@error.slug_taken:Ten identyfikator jest już zajęty. Wybierz inny.`,
+  resource_defaults_unsupported: () =>
+    $localize`:@@error.resource_defaults_unsupported:Zawężanie zasobów nie jest jeszcze dostępne.`,
   hash_mismatch: () =>
     $localize`:@@error.hash_mismatch:Definicja zmieniła się w międzyczasie. Odśwież widok.`,
   flow_invalid: () =>
-    $localize`:@@error.flow_invalid:Proces łączenia konta wygasł albo został przerwany. Spróbuj ponownie.`,
+    $localize`:@@error.flow_invalid:Link połączenia wygasł albo był już użyty. Zacznij od nowa.`,
   provider_error: () =>
-    $localize`:@@error.provider_error:System docelowy nie zakończył autoryzacji. Spróbuj ponownie.`,
+    $localize`:@@error.provider_error:System nie odpowiedział poprawnie. Spróbuj za chwilę.`,
+  cancelled: () => $localize`:@@error.cancelled:Łączenie anulowane.`,
 };
 
 export function errorMessage(code: PortalErrorCode): string {

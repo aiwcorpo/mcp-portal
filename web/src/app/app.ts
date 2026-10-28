@@ -9,8 +9,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, skip } from 'rxjs';
 import { ApiFailure } from './core/api-error';
@@ -19,6 +17,8 @@ import { SessionService } from './core/session.service';
 import { ThemeService } from './core/theme.service';
 import { LoginPanel } from './features/login/login-panel';
 import { ErrorNotice } from './shared/error-notice';
+import { LoadError } from './shared/load-error';
+import { Loading } from './shared/loading';
 
 @Component({
   selector: 'app-root',
@@ -26,11 +26,11 @@ import { ErrorNotice } from './shared/error-notice';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
     MatButtonModule,
-    MatProgressBarModule,
     LoginPanel,
     ErrorNotice,
+    Loading,
+    LoadError,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

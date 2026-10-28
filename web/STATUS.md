@@ -1,118 +1,146 @@
 # STATUS: mcp-portal/web (ws-08)
 
-Stan na 2026-10-27. Kontrakty: `mcp-contracts` 1.1.0 (paczka `release/aiwcorpo-mcp-contracts-1.1.0.tgz`,
-zgodna z tagiem `v1.1.0`). Brief ws-08 nie ma kamieni milowych; podział poniżej ustalił koordynator.
+Stan na 2026-10-28. Kontrakty: `mcp-contracts` 2.2.1 (paczka `release/aiwcorpo-mcp-contracts-2.2.1.tgz`, tag
+`v2.2.1`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
+Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
 
-## M1: zrobione
+## Kamienie M2
 
-| Element | Gdzie |
-| --- | --- |
-| Szkielet: Angular 22.2.3 / CLI 22.2.4, standalone, signals, zoneless, Router z lazy loading, Angular Material 22.2.4 (M3), tryb ciemny (systemowy + przełącznik), teksty po polsku przez `$localize`/`i18n` | `src/app`, `angular.json` |
-| Klient i modele z `portal-bff.v1.bundled.yaml` (openapi-generator 7.26.0, `typescript-angular`); brak ręcznych typów API | `src/app/api/generated`, `npm run generate:api` |
-| MSW w dev (`npm run start:mocks`), w testach jednostkowych (`msw/node`) i w e2e; warstwa stanowa nad handlerami z kontraktów | `src/mocks`, `src/testing` |
-| Logowanie i wylogowanie przez `GET /api/v1/auth/login` i `POST /api/v1/auth/logout`; wygasła sesja (401 z dowolnego wywołania) przełącza na ekran logowania | `core/session.service.ts`, `core/session-expiry.interceptor.ts` |
-| Katalog: sześć statusów (tekst + kolor), główna akcja wg statusu i `actions[]`, akcje dodatkowe, rozwinięcie narzędzi (ryzyko, dostęp, wymagane uprawnienie), komunikat z `?connected=` / `?connectError=` | `features/catalog` |
-| Połącz konto: przycisk OAuth (przekierowanie na `authorizeUrl`, tylko https, http tylko loopback), formularz tokenu z instrukcją per system i datą wygaśnięcia, obsługa `step_up_required` z powrotem do formularza, czyszczenie pola tokenu przy każdym wysłaniu | `features/connect` |
-| Moje połączenia: tabela (system, typ, konto, stan, wygasa, ostatnie użycie) z "Odłącz" i potwierdzeniem | `features/connections` |
-| Stany błędów z kodów C10/C12 (bez tekstu backendu), puste listy, ponawianie | `core/api-error.ts`, `core/error-messages.ts` |
-| Routing pod M2+: trasa `admin` z `canMatch` (czeka na `/me`) i osobnym chunkiem; trasa `**` | `app.routes.ts`, `features/admin/admin.routes.ts` |
-| Bezpieczeństwo: CSRF domyślnym mechanizmem Angulara, względne URL-e, brak tokenów w `localStorage`/`sessionStorage` (jedyny wpis to wybór motywu), CSP bez `unsafe-inline` (nonce tylko dla stylów, `inlineCritical: false`, bez SRI-importmap inline) | `app.config.ts`, `angular.json`, `scripts/serve-csp.mjs` |
+| Kamień | Zakres | Stan |
+| --- | --- | --- |
+| K1 | Kontrakty 2.2.1 i regeneracja klienta; mock stanowy na `states`; motyw z makiet; powłoka (zakładki, Wyloguj); logowanie i `loginError` (00, 23, 25); katalog z 6 statusami i akcjami z tabeli (01, 02, 26); połączenia z "Ostatnie użycie" (03); formularz PAT bez MFA (04, 05); powroty z OAuth z `ConnectErrorCode` (21, 22) | zrobiony (commit "Portal web M2", patrz niżej) |
+| K2 | Moje linki: lista, pusty stan, usuwanie, kreator Nazwa -> Narzędzia -> Gotowe z konfiguracją Claude Code / Copilot / Codex, 409, konfiguracja istniejącego linku (08-12, 14, 27) | zrobiony (ten sam commit co K1, bo powłoka, trasy i warstwa mocków są wspólne) |
+| K3 | Stany ogólne z `requestId` (24), e2e na mockach, axe, zrzuty 1280 i 360 px, README, STATUS | zrobiony |
 
-Weryfikacja (2026-10-27, Node 24.18.0, npm 11.16.0):
+Poza M2 (nie ma w kodzie): potwierdzenia akcji i rejestracja Authenticatora (3.0.0, M3), logi z filtrami (M3),
+wnioski (ekran, M4), administracja (M4), zawężenie zasobów (uśpione, CC-085).
+
+## Weryfikacja (2026-10-28, Node 24.18.0, npm 11.16.0)
 
 ```
-npm ci          (czysty node_modules, paczka mcp-contracts 1.1.0 z release/) OK
-npm test        Test Files 8 passed (8), Tests 51 passed (51)
-npm run lint    All files pass linting.
-npm run build   Output location: .../mcp-portal/web/dist/portal
-npm run e2e     38 passed (Chromium; projekty desktop 1280 px i mobile-360)
-npm run i18n:check  bez różnic
+npm ci                 OK (czysty node_modules, paczka 2.2.1 z release/)
+npm test               Test Files 15 passed (15), Tests 132 passed (132)
+npm run lint           All files pass linting.
+npm run build          OK (bez MSW w bundlu)
+npm run e2e            90 passed, 2 skipped (zrzuty: tylko z SHOTS_DIR); Chromium, projekty desktop 1280 px i mobile-360
+npm run i18n:check     bez różnic (257 komunikatów)
 ```
 
-E2E obejmuje ścieżkę "dodaj token ze step-up" (`e2e/add-token-step-up.spec.ts`): katalog -> Dodaj token ->
-PUT -> `401 step_up_required` -> pole wyczyszczone -> ponowne MFA (mock IdP) -> powrót do formularza z datą
--> zapis -> token nie występuje w DOM, storage ani ciasteczkach -> wiersz w Moich połączeniach -> status w
-katalogu. Poza tym: wylogowanie/logowanie, połączenie przez OAuth na mockach (start -> mock dostawcy ->
-`?connected=` -> komunikat), scenariusze puste i błędne, dialog i snackbar pod CSP, axe-core WCAG 2.1 AA
-(ekrany z danymi, błąd, pusta lista, błędy walidacji, step-up, otwarty dialog; jasny/ciemny; 1280, 360 i
-320 px), obsługa klawiaturą, fokus po zmianie trasy, brak poziomego przewijania przy 360 i 320 px. Każdy test e2e failuje przy naruszeniu CSP (sprawdzone: zły nonce daje 11 naruszeń).
+Zrzuty ekranów (1280 i 360 px, nazwy z numerem makiety): `<scratchpad>/m2-web-shots/`
+(52 pliki; generuje je `e2e/screenshots.spec.ts` przy ustawionym `SHOTS_DIR`).
 
-## Podział na kamienie (M2+, nie zaimplementowane)
+## Co działa z kryterium M2 (zakres web, na mockach)
 
-| Ekran (brief) | Trasa do dodania w `app.routes.ts` | API C12 | Uwagi |
-| --- | --- | --- | --- |
-| 4. Moje linki (kreator wirtualnych serwerów) | `links`, `links/new` | `GET/POST /virtual-servers`, `DELETE /virtual-servers/{slug}` | wynik z `clientConfigs` i kopiowaniem; e2e "utwórz link i skopiuj konfigurację" |
-| 5. Wnioski | `requests` | `GET/POST /access-requests` | po nim w katalogu włączyć akcje `request_access` i `view_request` (`SUPPORTED_ACTIONS` w `catalog-actions.ts`); e2e "złóż wniosek" |
-| 6. Aktywność | `activity` | `GET /activity?limit=` | |
-| 6a. Potwierdzenie akcji | `confirm/:id` | `GET/POST /confirmations/{id}` | step-up już przy GET (CC-034); użyć `stepUpUrlFor` z `core/auth-urls.ts` |
-| 7. Admin | dzieci w `features/admin/admin.routes.ts` | `/admin/registry`, `.../pending`, `.../approve` | lazy chunk i `adminGuard` już są; link w nawigacji tylko dla `isAdmin` |
-| e2e "połącz OAuth" z prawdziwym dostawcą | | | na mockach jest w `e2e/session.spec.ts`; z mockiem GitLaba z ws-01 po M2 backendu |
-| e2e na ws-01 profilu `full` | | | po M2 backendu: ten sam zestaw Playwright z `baseURL` na BFF |
+- Logowanie przez BFF (`/api/v1/auth/login`), błędy `/?loginError=<kod>` z zamkniętej listy (cancelled, idp_error,
+  session_expired, step_up_failed), wylogowanie, wygasła sesja.
+- Katalog: sześć statusów, tekst stanu (wygasający token: "Token wygasa za 5 dni" z `connection.expiresAt`),
+  przyciski z `actions[]` wg tabeli CC-083, rozwijane wiersze z narzędziami (identyfikator czcionką stałą, tytuł,
+  uprawnienie, ryzyko Odczyt/Zapis/Usuwanie, "Wymaga kodu z Authenticatora", "Wyłączone przez administratora"),
+  szukanie po serwerze i narzędziu, kopiowanie linku, "Połącz przez OAuth" (przekierowanie na `authorizeUrl`),
+  "Złóż wniosek" (POST `/access-requests`, przekierowanie https na formularz IGA albo komunikat z id).
+- Połączenia z systemami: jeden wiersz na system z jednego odczytu katalogu (CC-080): sposób, konto, ważne do,
+  ostatnie użycie, Odnów / Połącz / Dodaj token / Rozłącz (dialog) / Złóż wniosek.
+- Dodaj PAT: `type="password"`, `autocomplete="off"`, pole czyszczone przy każdym wysłaniu, bez MFA (CC-090),
+  data opcjonalna (bez walidacji zakresu, CC-084), zdanie "Oznaczymy token jako wygasający 7 dni przed terminem."
+  tylko przy podanej dacie, `secret_invalid` i `identity_mismatch` pod polem; token poza `localStorage`,
+  `sessionStorage`, ciasteczkami i DOM (test e2e).
+- Powrót z OAuth: `?connected=` i `?connectError=` (identity_mismatch, flow_invalid, provider_error, cancelled),
+  komunikat z nazwą systemu i kontem, parametry znikają z adresu, sukces znika po 10 s.
+- Moje linki: lista, pusty stan, usuwanie z dialogiem, kreator 3-krokowy (slug z nazwy, lokalna kontrola własnych
+  linków, 409 wraca do kroku 1, narzędzia zablokowane z przyczyną i akcją, bez `resourceDefaults`), URL i
+  konfiguracje klientów z kopiowaniem, ekran konfiguracji istniejącego linku.
+- Stany ogólne: ładowanie (szkielet), 503 z "Identyfikator do zgłoszenia" (8 znaków `requestId`), 404, 403, pusta
+  lista.
+- Router nie ma tras `/api`, `/s/`, `/v/`, `/.well-known/` (test).
+- Dostępność: axe WCAG 2.1 AA (ciemny i jasny; 1280, 360, 320 px), klawiatura, brak przewijania poziomego, nazwy
+  zakładek nieucięte na 360 px.
+
+## Różnice względem makiet
+
+1. Przełącznik "Tryb ciemny" w nagłówku (makiety są tylko ciemne; domyślnie ciemny, jasny opcjonalnie).
+2. Zakładki: tylko Serwery MCP, Połączenia z systemami, Moje linki. Wnioski, Logi audytowe i Administracja dojdą z
+   M3/M4. Na ekranie 02 nie ma przycisku "Złóż wniosek" (prowadziłby do ekranu Wnioski).
+3. Formularz PAT (04, 05) to osobna strona `/connect/<system>` w formie karty, nie okno modalne nad tabelą; ma
+   rozwijaną instrukcję tworzenia wąskiego tokenu (wymóg briefu) i, gdy system oferuje OAuth, sekcję OAuth.
+4. Kreator: krok "Narzędzia" kończy się przyciskiem "Utwórz link" (zamiast "Dalej", bo nie ma kroku Zawężenie),
+   numeracja 1. Nazwa, 2. Narzędzia, 3. Gotowe.
+5. Dane: z przykładu `states` kontraktu (Jira = wygasający token PAT, GitLab = wymaga ponownego połączenia,
+   Confluence = brak uprawnień, Service Desk = konto serwisowe, OpenSearch = wymiana tokenu), użytkownik "Jan
+   Kowalski" z przykładu `me`; jest 5 systemów, bez SonarQube. Przykład `mixed` pod `?mockScenario=mixed`.
+   Do Jiry i GitLaba dodałem kilka narzędzi w warstwie mocków, żeby lista wyglądała jak w makiecie.
+6. Wiersz `expiring` w katalogu ma obok "Odnów" także "Kopiuj link" (tabela CC-083 daje oba); katalog nie ma
+   "Rozłącz" (jest w Połączeniach, jak w makiecie).
+7. Połączenia (03) są liczone z katalogu, więc pokazują też systemy bez połączenia; kolumna "Ważne do" ma datę
+   dd.mm.rrrr i "za N dni" dla wygasającego.
+8. Cudzysłowy proste (`"Code review"`) zamiast typograficznych; strzałka "<-" w linku powrotu rysowana jako
+   `&larr;`.
+9. Pole wyboru narzędzia to Material (MatCheckbox), obwódka pól formularza ciemniejsza o jeden ton niż w
+   makiecie (kontrast 3:1 dla granicy kontrolki).
+10. Na 360 px zakładki zawijają się do drugiej linii zamiast przewijać (nazwy nie są ucinane, wymóg z poprawek);
+    w katalogu znikają kolumny Logowanie i Narzędzia (jak w makiecie 26).
+11. Ekran logowania ma mniejszy odstęp pionowy (treść wyśrodkowana w ok. 60% wysokości), bez ramki.
+12. "Sesja wygasła" (24) to ekran logowania z tym komunikatem, a nie osobna karta w treści strony.
 
 ## Odstępstwa i decyzje
 
-- Akcje katalogu `request_access` i `view_request` nie są pokazywane w M1 (wymagają ekranu Wnioski). Status
-  `request_pending` / `no_access` jest widoczny z opisem.
-- Po `step_up_required` frontend nie przekierowuje automatycznie: pokazuje komunikat i przycisk
-  "Uwierzytelnij ponownie", bo token i tak trzeba wkleić drugi raz. `returnPath` w `stepUpUrl` jest podmieniany
-  na `/connect/<system>?stepUp=done&expiresAt=<data>` (tylko dane niepoufne); obcy origin albo inna ścieżka niż
-  `/api/v1/auth/login` są ignorowane. Propozycja CC w `mcp-contracts/CONTRACT_CHANGES.md` (ws-08, `returnPath`
-  w `stepUpUrl`).
-- Logowanie nie startuje samo: przy braku sesji ekran z przyciskiem "Zaloguj się" (po wylogowaniu nie ma
-  pętli z powrotem do IdP).
-- `expiresAt` z formularza to `<data>T00:00:00Z` (jak w przykładzie kontraktu).
-- Instrukcje tworzenia tokenu są statyczne per system (C12 nie ma takich danych). Dla Jiry, Confluence i GitLaba
-  opisują konkretne miejsca w UI; dla service desku i OpenSearch są ogólne, bo produkt nie jest ustalony.
-  Do weryfikacji z właścicielami systemów.
-- Formularz obsługuje jeden token (PAT/klucz API). Format Basic w `PutSecretRequest` jest nieokreślony:
-  propozycja CC (ws-08, "Poświadczenie typu Basic").
-- Wygenerowany klient jest w repozytorium (build bez Javy i sieci). Testy jednostkowe używają MSW zamiast
-  `HttpTestingController`, żeby sprawdzać też regułę CSRF z handlerów kontraktu.
-- W testach jednostkowych (jsdom) ciasteczka trafiają do MSW przez `request:start` w `src/testing/mock-api.ts`,
-  bo XHR jsdom dokłada je dopiero po przechwyceniu.
+- Zmiany kontraktu 2.2.1 zastosowane: pola z `default` opcjonalne (`disabled`, `requiresConfirmation`, `enabled`),
+  `credential` i `connection` w katalogu, `title` narzędzia, `ConnectErrorCode` z `cancelled`, `X-Request-Id`
+  i `Error.requestId`, brak `step_up_required` w `putMySecret`, brak `expires_at_invalid`.
+- Ciasteczko CSRF: kontrakt mówi `__Host-XSRF-TOKEN`, BFF (ws-07) w M1 ustawia `XSRF-TOKEN`. Interceptor
+  (`core/xsrf.interceptor.ts`) czyta pierwszą nazwę, a gdy jej nie ma, drugą, więc działa z oboma. Wbudowany
+  mechanizm Angulara (jedna nazwa) wyłączony.
+- Powrót z OAuth po błędzie nie niesie nazwy systemu (kontrakt: tylko `connectError=<kod>`), więc frontend
+  wysyła `returnPath=/catalog?system=<system>` (BFF dopisuje swoje parametry po `&`), co pozwala napisać
+  "GitLab nie odpowiedział poprawnie". Wartość `system` jest sprawdzana względem listy systemów.
+- `reconnect` na połączeniu OAuth idzie od razu do dostawcy; z tokenem (`add_secret` przy istniejącym połączeniu
+  albo `reconnect` na tokenie) otwiera formularz. Przy istniejącym połączeniu `add_secret` ma etykietę "Odnów".
+- Kreator blokuje narzędzia systemów w stanie `not_connected` i `reconnect_required` (makieta 12: "Konto
+  niepołączone · Połącz"), choć kontrakt tego w POST nie odrzuca: do potwierdzenia, czy to zamierzona reguła.
+- `autocomplete="off"` na polu tokenu i formularzu (wymóg M2) zamiast `new-password` z M1; zostają atrybuty
+  `data-1p-ignore`, `data-lpignore`, `data-bwignore`, `data-form-type`. Przeglądarki mogą ignorować `off` dla
+  `type="password"`; token i tak jest czyszczony po wysłaniu i nie ma pola loginu. Do ręcznej weryfikacji w
+  Chrome, Edge, Firefox z menedżerem haseł.
+- Klient API jest generowany z poprawką: generator 7.26.0 zapisuje `Null` zamiast `null` w unii z `oneOf`;
+  skrypt `generate:api` zamienia to `perl`em (bez tego `tsc` nie przechodzi).
+- Port dev: `ng serve` na 18730, serwer e2e na 18731 (zakres ws-08: 18730-18739).
+- `node_modules` w katalogu miał podkatalog `@aiwcorpo` należący do roota, więc `npm install` nie mógł go
+  podmienić; stary katalog przeniosłem poza repo (scratchpad) i zainstalowałem od zera.
+- Kod nieużywany w M2, a potrzebny w M3: `stepUpUrlFor` w `core/auth-urls.ts` (potwierdzenia, wymagają step-up
+  przy GET, CC-034).
 
-## Pole tokenu a menedżery haseł (przegląd M1, M-2)
+## Czego potrzebuję od innych strumieni
 
-Wybór: zostaje `type="password"` z `autocomplete="new-password"` oraz `data-1p-ignore`, `data-lpignore="true"`,
-`data-bwignore`, `data-form-type="other"` (1Password, LastPass, Bitwarden, Dashlane); formularz ma
-`autocomplete="off"`. Powody:
+- ws-07 (BFF): nazwa ciasteczka CSRF (kontrakt `__Host-XSRF-TOKEN`); `Set-Cookie` najpóźniej przy `GET /me`;
+  `requestId` w ciele błędów i `X-Request-Id` na każdej odpowiedzi (frontend pokazuje 8 znaków); przyjęcie
+  `returnPath` z zapytaniem (`/catalog?system=gitlab`) i doklejanie `&connected=`/`&connectError=`; `__CSP_NONCE__`
+  w `index.html` (jak w README).
+- ws-01 / proxy: trasy jak w CC-089 (`/` web, `/api` BFF); po M2 backendu ten sam zestaw Playwright z `baseURL` na
+  BFF (obecny zestaw używa MSW w przeglądarce, więc wymaga osobnego projektu bez mocków).
+- ws-00: decyzja o regule kreatora (narzędzia systemów bez połączenia) i o tekstach "Przypomnimy o odnowieniu" (nie
+  ma ich w M2; zostało "Oznaczymy token jako wygasający 7 dni przed terminem").
 
-- `type="text"` z maskowaniem `-webkit-text-security` czytniki ekranu odczytują na głos (wartość nie jest
-  traktowana jako hasło), a przeglądarki bez tej właściwości pokazałyby token jawnie;
-- `autocomplete="off"` przeglądarki ignorują dla haseł, `new-password` mówi, że to nie jest zapisane hasło do
-  podpowiadania; formularz nie ma pola loginu, a po wysłaniu pole jest czyszczone, więc heurystyki "zapisz
-  hasło" nie mają pary login/hasło.
+## Propozycje CC
 
-Nie da się tego sprawdzić w trybie headless (monity menedżerów się nie pokazują); testy sprawdzają atrybuty.
-Do ręcznej weryfikacji w Chrome, Edge i Firefox z włączonym menedżerem haseł.
-
-## Przegląd M1 (2026-10-27): co zrobione
-
-| Znalezisko | Stan |
-| --- | --- |
-| M-1 brak paczki 1.1.0 | ws-00 przywrócił `release/aiwcorpo-mcp-contracts-1.1.0.tgz`; `rm -rf node_modules && npm ci` OK, zawartość = tag `v1.1.0`, regeneracja klienta bez różnic |
-| M-2 menedżery haseł | jak wyżej |
-| LOW-1 sekret przed step-up | czeka na decyzję człowieka (kontrakt) |
-| LOW-2 `?loginError=true` | czeka na decyzję człowieka; 503 `upstream_unavailable` z katalogu i połączeń obsłużone (także bez JSON), testy |
-| LOW-3 `http:` w `authorizeUrl` | tylko `https:`, `http:` wyłącznie dla hostów loopback (`isAllowedRedirect`) |
-| LOW-4 `min` daty | `min` = jutro (UTC), zgodnie z walidatorem |
-| LOW-5 `maxlength` | atrybut usunięty, walidator pokazuje błąd; token przycinany (`trim`), same spacje = puste |
-| LOW-6 ręczne kody | C10 i błędy `PUT secret` z enumów klienta; ręcznie tylko kody CC-012 (schemat `Error` ma `error: string`) i CC-022 |
-| LOW-7 `messages.xlf` | wygenerowany ponownie; `npm run i18n:check` |
-| LOW-8 `LOCALE_ID` | usunięty, locale z `i18n.sourceLocale` |
-| LOW-9 `aria-controls` | tylko gdy lista jest rozwinięta |
-| LOW-10 fokus | po nawigacji w aplikacji fokus na `<main>`; zajęte przyciski `disabledInteractive` (aria-disabled, fokus zostaje), handlery sprawdzają stan |
-| LOW-11 tabela | jawne role tabeli przy układzie blokowym, etykiety `::before` z pustym tekstem alternatywnym |
-| LOW-12 `title` | tekst `visually-hidden` |
-| LOW-13 axe | dodane stany: błąd, pusta lista, walidacja, step-up, dialog; przebieg 320 px |
-| LOW-14 duplikacja | `core/connection-actions.service.ts` (start OAuth, odłączenie z dialogiem) |
-| LOW-15 drobne | `JAVA_HOME` ogólnie w README, `reuseExistingServer: false`, `worker-src` opisany jako wyłącznie e2e, STATUS poprawiony |
+1. `GET /api/v1/oauth/callback`, błąd: dopisywać do przekierowania także `system=<system>` (albo zachować
+   zapytanie z `returnPath`, co BFF już robi), żeby komunikat mógł nazwać system bez obejścia po stronie frontendu.
+   Obejście działa, więc niski priorytet.
+2. `PutSecretRequest`: nadal brak formatu dla poświadczenia Basic (jak w propozycji z M1); formularz obsługuje jeden
+   token.
+3. `CatalogTool.title` jest opcjonalne i w przykładach prawie nigdy nie ma go poza Jirą; opis (`description`) bywa
+   angielski. UI pokazuje `title`, a bez niego `description`. Do rozważenia: wymagać `title` w manifeście.
 
 ## Otwarte pytania
 
-1. CSP: czy BFF (ws-07) przyjmuje podmianę `__CSP_NONCE__` w `index.html` na każdą odpowiedź (opis w
-   README)? Alternatywą byłoby `style-src 'unsafe-inline'`, czego brief zabrania.
-2. Kiedy BFF ustawia `XSRF-TOKEN`? Frontend zakłada, że najpóźniej przy `GET /api/v1/me` (tak robi mock z
-   kontraktów); pierwszy POST/PUT/DELETE zawsze następuje po `/me`.
-3. Dev: redirect URI Keycloak wskazuje na :18090, więc po logowaniu z `ng serve` trzeba wrócić ręcznie na
-   :4200. Jeśli to przeszkadza, BFF mógłby mieć w profilu dev konfigurowalny adres frontendu dla `returnPath`.
+1. CSP: czy BFF przyjmuje podmianę `__CSP_NONCE__` w `index.html` na każdą odpowiedź (opis w README)?
+2. Dev: redirect URI Keycloak wskazuje na :18090, więc po logowaniu z `ng serve` trzeba wrócić ręcznie na
+   :18730. Jeśli to przeszkadza, BFF mógłby mieć w profilu dev konfigurowalny adres frontendu dla `returnPath`.
+3. Czy "Wnioski" i "Logi audytowe" mają być w nawigacji już w M2 jako zablokowane pozycje? Obecnie ich nie ma.
+
+## Zostało (M3 i dalej)
+
+- Potwierdzenia akcji z kodem z Authenticatora (podgląd `/confirm/<id>`, rejestracja, baner "Zarejestruj
+  Authenticator", wersje 360 px) po wydaniu kontraktów 3.0.0.
+- Logi audytowe z filtrami (szukaj, okres, wynik, "Pokaż więcej").
+- Wnioski (lista, złożenie, `view_request` w katalogu).
+- Administracja (rejestr, różnice definicji, zatwierdzanie).
+- Testy e2e na prawdziwym BFF (ws-01, profil `full`).

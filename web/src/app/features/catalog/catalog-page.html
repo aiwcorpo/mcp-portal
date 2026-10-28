@@ -1,11 +1,12 @@
-<h1 i18n="@@catalog.title">Katalog serwerów MCP</h1>
-<p class="lead" i18n="@@catalog.lead">
-  Serwery, do których masz uprawnienia, i stan połączenia Twojego konta w każdym systemie.
-</p>
+<h1 class="visually-hidden" i18n="@@catalog.title">Serwery MCP</h1>
+
+<app-oauth-return [servers]="loadedServers()" />
 
 @if (banner(); as b) {
   @if (b.kind === 'success') {
-    <app-notice kind="success">{{ b.text }}</app-notice>
+    <app-notice kind="success" [dismissible]="true" (dismiss)="banner.set(null)">{{
+      b.text
+    }}</app-notice>
   } @else {
     <app-error-notice [failure]="b.failure" />
   }
@@ -13,26 +14,37 @@
 
 @let state = catalog();
 @if (state.status === 'loading') {
-  <mat-progress-bar
-    mode="indeterminate"
-    i18n-aria-label="@@common.loading"
-    aria-label="Wczytywanie"
-  />
+  <app-loading />
 } @else if (state.status === 'error') {
-  <app-error-notice [failure]="state.failure" [retryable]="true" (retry)="load()" />
+  <app-load-error [failure]="state.failure" (retry)="load()" />
 } @else if (state.value.length) {
-  <div class="list">
-    @for (server of state.value; track server.serverId) {
-      <app-catalog-server-card
-        [server]="server"
-        [busy]="busyServer() === server.system"
-        (action)="onAction($event)"
-      />
-    }
-  </div>
+  <input
+    type="search"
+    class="searchbox"
+    [value]="query()"
+    (input)="onQuery($event)"
+    i18n-placeholder="@@catalog.searchPlaceholder"
+    placeholder="Szukaj serwera lub narzędzia"
+    i18n-aria-label="@@catalog.searchLabel"
+    aria-label="Szukaj serwera lub narzędzia"
+  />
+  @if (visibleServers().length) {
+    <app-catalog-table
+      [servers]="visibleServers()"
+      [query]="query()"
+      [busy]="busyServer()"
+      (action)="onAction($event)"
+    />
+  } @else {
+    <p class="muted none" role="status" i18n="@@catalog.noMatches">
+      Żaden serwer ani narzędzie nie pasuje do wyszukiwania.
+    </p>
+  }
 } @else {
-  <app-notice kind="info" i18n="@@catalog.empty">
-    Nie ma serwerów MCP do wyświetlenia. Jeśli spodziewasz się dostępu, skontaktuj się z
-    administratorem platformy.
-  </app-notice>
+  <section class="empty">
+    <h2 i18n="@@catalog.emptyTitle">Nie masz jeszcze dostępu do żadnego serwera MCP</h2>
+    <p class="muted" i18n="@@catalog.emptyText">
+      Dostęp nadaje system uprawnień. Po akceptacji wniosku serwery pojawią się tutaj.
+    </p>
+  </section>
 }

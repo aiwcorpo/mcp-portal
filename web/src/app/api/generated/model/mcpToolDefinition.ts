@@ -10,13 +10,17 @@
 
 
 /**
- * Full MCP tool definition as returned by tools/list (CC-005). Input of definitionHash together with risk, action, resourceRefs and the server fields system and credential.
+ * Full MCP tool definition as returned by tools/list (CC-005). Input of definitionHash together with risk, action, resourceRefs and the server fields system and credential. title is hashed like description (CC-042); icons and _meta are not allowed in v1, because they would reach the client without being pinned.
  */
 export interface McpToolDefinition { 
     /**
      * Server-side tool name (without the gateway prefix). Snake case; a double underscore is forbidden because the gateway uses it as the <system>__<tool> separator (C5).
      */
     name: string;
+    /**
+     * Display name shown by MCP clients; part of definitionHash (CC-042).
+     */
+    title?: string;
     description: string;
     /**
      * JSON Schema of the arguments. Must not declare confirmation_code (reserved for the gateway, C11).

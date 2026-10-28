@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ResourceDefaults } from './resourceDefaults';
 
 
 /**
@@ -19,10 +20,7 @@ export interface VirtualServerFields {
     slug: string;
     displayName: string;
     tools: Array<string>;
-    /**
-     * Narrowing per resource type (C5). Becomes context.vsScopes in Cedar (cedar/entity-builder.md).
-     */
-    resourceDefaults?: { [key: string]: Array<string>; };
+    resourceDefaults?: ResourceDefaults;
     url: string;
 }
 

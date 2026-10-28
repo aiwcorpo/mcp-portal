@@ -6,6 +6,8 @@ export interface ConfirmDialogData {
   title: string;
   message: string;
   confirmLabel: string;
+  /** Red confirm button for actions that cannot be undone. */
+  destructive?: boolean;
 }
 
 @Component({
@@ -17,13 +19,24 @@ export interface ConfirmDialogData {
       <p>{{ data.message }}</p>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button type="button" [mat-dialog-close]="false" i18n="@@common.cancel">
+      <button mat-stroked-button type="button" [mat-dialog-close]="false" i18n="@@common.cancel">
         Anuluj
       </button>
-      <button mat-flat-button type="button" [mat-dialog-close]="true">
+      <button
+        mat-flat-button
+        type="button"
+        [class.danger]="data.destructive"
+        [mat-dialog-close]="true"
+      >
         {{ data.confirmLabel }}
       </button>
     </mat-dialog-actions>
+  `,
+  styles: `
+    .danger {
+      --mat-button-filled-container-color: var(--pm-danger);
+      --mat-button-filled-label-text-color: var(--pm-on-strong);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

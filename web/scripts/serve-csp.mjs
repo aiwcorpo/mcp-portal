@@ -7,7 +7,7 @@ import { createServer } from 'node:http';
 import { extname, join, normalize, resolve } from 'node:path';
 
 const root = resolve(process.argv[2] ?? 'dist/e2e');
-const port = Number(process.env.PORT ?? 4300);
+const port = Number(process.env.PORT ?? 18731);
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',

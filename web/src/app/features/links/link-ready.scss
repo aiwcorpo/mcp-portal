@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  max-width: 860px;
+}
+
+.url-field {
+  max-width: none;
+}
+
+.url-row {
+  display: flex;
+  gap: 10px;
+}
+
+.url-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.configs {
+  --mat-tab-active-indicator-color: var(--pm-text);
+  --mat-tab-active-label-text-color: var(--pm-text);
+  --mat-tab-inactive-label-text-color: var(--pm-muted);
+  --mat-tab-divider-color: var(--pm-border);
+  --mat-tab-active-hover-label-text-color: var(--pm-text);
+  --mat-tab-active-focus-label-text-color: var(--pm-text);
+  --mat-tab-inactive-hover-label-text-color: var(--pm-text);
+  --mat-tab-inactive-focus-label-text-color: var(--pm-text);
+  --mat-tab-active-focus-indicator-color: var(--pm-text);
+  --mat-tab-active-hover-indicator-color: var(--pm-text);
+  --mat-tab-active-ripple-color: transparent;
+  margin-top: 8px;
+}
+
+.config-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 14px 10px;
+}
+
+.config {
+  margin: 0;
+  padding: 14px;
+  overflow-x: auto;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius);
+  background: var(--pm-surface);
+  font-family: var(--pm-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin-top: 12px;
+}
+
+.summary-title {
+  margin-top: 24px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: minmax(90px, 160px) 1fr;
+  gap: 10px 16px;
+  margin: 10px 0 0;
+}
+
+.summary dt,
+.summary dd {
+  margin: 0;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--pm-border);
+  overflow-wrap: anywhere;
+}

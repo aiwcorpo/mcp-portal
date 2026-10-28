@@ -1,3 +1,5 @@
+import { HttpResponse, http } from 'msw';
+import { connectionFixture, serverFixture } from '../../../testing/fixtures';
 import { useMockApi } from '../../../testing/mock-api';
 import { button, configureTestApp, openRoute, text, until } from '../../../testing/test-app';
 import { PortalCatalogServer } from '../../api/generated';
@@ -19,100 +21,68 @@ function type(input: HTMLInputElement, value: string): void {
 describe('ConnectPage', () => {
   const { server, store } = useMockApi();
 
-  it('offers OAuth and a token form for GitLab, with token instructions', async () => {
+  it('offers the token form of Jira (PAT, renewal) with instructions and no MFA step', async () => {
     configureTestApp();
-    await openRoute('/connect/gitlab');
-    await until(() => expect(text()).toContain('Połącz konto: GitLab'));
+    await openRoute('/connect/jira');
+    await until(() => expect(text()).toContain('Połącz Jira'));
 
-    expect(text()).toContain('Połącz przez OAuth');
     expect(text()).toContain('Jak utworzyć możliwie wąski token');
-    expect(text()).toContain('read_api');
+    expect(text()).toContain('Token PAT');
+    expect(text()).toContain('Data wygaśnięcia tokenu (opcjonalnie)');
+    expect(text()).toContain('Po zapisie token nie jest już nigdzie wyświetlany.');
+    expect(text()).not.toContain('MFA');
     expect(tokenInput().type).toBe('password');
-    expect(tokenInput().getAttribute('autocomplete')).toBe('new-password');
+    expect(tokenInput().getAttribute('autocomplete')).toBe('off');
+    expect(tokenInput().placeholder).toBe('Wklej token');
     expect(tokenInput().hasAttribute('maxlength')).toBe(false);
     expect(tokenInput().hasAttribute('data-1p-ignore')).toBe(true);
-    expect(tokenInput().getAttribute('data-lpignore')).toBe('true');
-    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
-    expect(dateInput().min).toBe(tomorrow);
+    expect(dateInput().hasAttribute('min')).toBe(false);
+    expect(document.querySelector('form')?.getAttribute('autocomplete')).toBe('off');
   });
 
-  it('on step_up_required clears the token and sends the user to MFA with a way back to the form', async () => {
-    const navigation = configureTestApp();
-    const harness = await openRoute('/connect/gitlab');
-    await until(() => expect(tokenInput()).toBeTruthy());
-
-    type(tokenInput(), 'glpat-test-value-0001');
-    type(dateInput(), '2099-01-31');
-    button('Zapisz token').click();
-
-    await until(() => expect(text()).toContain('wymaga świeżego uwierzytelnienia (MFA)'));
-    expect(tokenInput().value).toBe('');
-    expect(text()).not.toContain('glpat-test-value-0001');
-
-    button('Uwierzytelnij ponownie').click();
-    const target = new URL(navigation.assign.mock.calls[0][0], location.origin);
-    expect(target.pathname).toBe('/api/v1/auth/login');
-    expect(target.searchParams.get('stepUp')).toBe('true');
-    expect(target.searchParams.get('returnPath')).toBe(
-      '/connect/gitlab?stepUp=done&expiresAt=2099-01-31',
+  it('offers OAuth and a token form for GitLab', async () => {
+    server.use(
+      http.get('/api/v1/catalog', () =>
+        HttpResponse.json({
+          servers: [
+            serverFixture('gitlab', {
+              status: 'not_connected',
+              actions: ['connect_oauth', 'add_secret'],
+            }),
+          ],
+        }),
+      ),
     );
-    harness.fixture.destroy();
-  });
-
-  it('after step-up keeps the date, asks for the token again and saves it', async () => {
-    store.update({ mfaFresh: true });
-    configureTestApp();
-    await openRoute('/connect/gitlab?stepUp=done&expiresAt=2099-01-31');
-    await until(() => expect(text()).toContain('Uwierzytelnienie odświeżone.'));
-    expect(dateInput().value).toBe('2099-01-31');
-    expect(tokenInput().value).toBe('');
-
-    type(tokenInput(), 'glpat-test-value-0002');
-    button('Zapisz token').click();
-
-    await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
-    expect(text()).toContain('Token ważny do 31 stycznia 2099.');
-    expect(tokenInput().value).toBe('');
-    expect(store.state.connections.find((c) => c.system === 'gitlab')?.expiresAt).toBe(
-      '2099-01-31T00:00:00Z',
-    );
-  });
-
-  it('shows the system rejection without echoing the token', async () => {
-    store.update({ mfaFresh: true });
     configureTestApp();
     await openRoute('/connect/gitlab');
-    await until(() => expect(tokenInput()).toBeTruthy());
+    await until(() => expect(text()).toContain('Połącz GitLab'));
 
-    type(tokenInput(), 'invalid-token-value');
-    button('Zapisz token').click();
-
-    await until(() => expect(text()).toContain('System odrzucił token.'));
-    expect(tokenInput().value).toBe('');
-    expect(text()).not.toContain('invalid-token-value');
+    expect(text()).toContain('Połącz przez OAuth');
+    expect(text()).toContain('read_api');
+    expect(tokenInput()).toBeTruthy();
   });
 
-  it('validates required token and a future expiry date before sending', async () => {
-    let requests = 0;
-    server.events.on('request:start', ({ request }) => {
-      if (request.method === 'PUT') {
-        requests++;
-      }
-    });
+  it('says the date is optional and mentions the 7-day mark only when a date is given', async () => {
     configureTestApp();
-    await openRoute('/connect/gitlab');
+    await openRoute('/connect/jira');
     await until(() => expect(tokenInput()).toBeTruthy());
 
-    type(dateInput(), '2001-01-01');
-    button('Zapisz token').click();
+    expect(text()).toContain('Ustaw najkrótszy możliwy termin.');
+    expect(text()).not.toContain('Oznaczymy token jako wygasający 7 dni przed terminem.');
 
-    await until(() => expect(text()).toContain('Wklej token.'));
-    expect(text()).toContain('Data musi być w przyszłości.');
-    expect(requests).toBe(0);
+    type(dateInput(), '2027-01-15');
+    dateInput().dispatchEvent(new Event('change'));
+    await until(() =>
+      expect(text()).toContain('Oznaczymy token jako wygasający 7 dni przed terminem.'),
+    );
+
+    type(dateInput(), '');
+    await until(() =>
+      expect(text()).not.toContain('Oznaczymy token jako wygasający 7 dni przed terminem.'),
+    );
   });
 
-  it('trims the pasted token and rejects one made of whitespace or longer than 4096 characters', async () => {
-    store.update({ mfaFresh: true });
+  it('saves without any MFA, sends the date, clears the field and keeps the token out of storage', async () => {
     const bodies: string[] = [];
     server.events.on('request:start', async ({ request }) => {
       if (request.method === 'PUT') {
@@ -120,39 +90,146 @@ describe('ConnectPage', () => {
       }
     });
     configureTestApp();
-    await openRoute('/connect/gitlab');
+    await openRoute('/connect/jira');
     await until(() => expect(tokenInput()).toBeTruthy());
 
+    type(tokenInput(), 'jira-pat-test-value-0001');
+    type(dateInput(), '2027-01-31');
+    button('Sprawdź i zapisz').click();
+
+    await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
+    expect(text()).toContain('Token ważny do 31.01.2027.');
+    expect(tokenInput()).toBeNull();
+    expect(JSON.parse(bodies[0])).toEqual({
+      secret: 'jira-pat-test-value-0001',
+      expiresAt: '2027-01-31T00:00:00Z',
+    });
+    expect(text()).not.toContain('jira-pat-test-value-0001');
+    expect(localStorage.length).toBe(0);
+    expect(sessionStorage.length).toBe(0);
+    expect(store.state.connections.jira?.expiresAt).toBe('2027-01-31T00:00:00Z');
+  });
+
+  it('accepts a missing date and any date, including a past one (CC-084)', async () => {
+    const bodies: string[] = [];
+    server.events.on('request:start', async ({ request }) => {
+      if (request.method === 'PUT') {
+        bodies.push(await request.clone().text());
+      }
+    });
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(tokenInput()).toBeTruthy());
+
+    type(tokenInput(), 'token-without-date');
+    button('Sprawdź i zapisz').click();
+    await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
+    expect(JSON.parse(bodies[0])).toEqual({ secret: 'token-without-date' });
+  });
+
+  it('shows "Token nieprawidłowy albo wygasł." under the field and clears it', async () => {
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(tokenInput()).toBeTruthy());
+
+    type(tokenInput(), 'invalid-token-value');
+    button('Sprawdź i zapisz').click();
+
+    await until(() => expect(text()).toContain('Token nieprawidłowy albo wygasł.'));
+    expect(tokenInput().value).toBe('');
+    expect(tokenInput().getAttribute('aria-invalid')).toBe('true');
+    expect(text()).not.toContain('invalid-token-value');
+  });
+
+  it('shows "Token należy do innego konta." for identity_mismatch', async () => {
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(tokenInput()).toBeTruthy());
+
+    type(tokenInput(), 'other-user-token');
+    button('Sprawdź i zapisz').click();
+
+    await until(() => expect(text()).toContain('Token należy do innego konta.'));
+    expect(tokenInput().value).toBe('');
+  });
+
+  it('shows other failures above the form, with the request id', async () => {
+    server.use(
+      http.put('/api/v1/connections/jira/secret', () =>
+        HttpResponse.json(
+          { error: 'upstream_unavailable', requestId: '0192d1b2-7c3a-7d4e' },
+          { status: 503 },
+        ),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(tokenInput()).toBeTruthy());
+
+    type(tokenInput(), 'some-token');
+    button('Sprawdź i zapisz').click();
+
+    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    expect(text()).toContain('0192d1b2');
+    expect(tokenInput().value).toBe('');
+  });
+
+  it('requires a token before sending, trims it and rejects whitespace or more than 4096 characters', async () => {
+    const bodies: string[] = [];
+    server.events.on('request:start', async ({ request }) => {
+      if (request.method === 'PUT') {
+        bodies.push(await request.clone().text());
+      }
+    });
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(tokenInput()).toBeTruthy());
+
+    button('Sprawdź i zapisz').click();
+    await until(() => expect(text()).toContain('Wklej token.'));
+
     type(tokenInput(), '   ');
-    button('Zapisz token').click();
+    button('Sprawdź i zapisz').click();
     await until(() => expect(text()).toContain('Wklej token.'));
 
     type(tokenInput(), 'x'.repeat(4097));
-    button('Zapisz token').click();
+    button('Sprawdź i zapisz').click();
     await until(() => expect(text()).toContain('Token jest za długi'));
     expect(tokenInput().value).toHaveLength(4097);
     expect(bodies).toEqual([]);
 
     type(tokenInput(), '  glpat-trimmed-0003\n');
-    button('Zapisz token').click();
+    button('Sprawdź i zapisz').click();
     await until(() => expect(text()).toContain('Połączono jako jkowalski.'));
     expect(JSON.parse(bodies[0]).secret).toBe('glpat-trimmed-0003');
   });
 
   it('maps a CSRF rejection to its message', async () => {
-    store.update({ mfaFresh: true });
     configureTestApp();
-    await openRoute('/connect/gitlab');
+    await openRoute('/connect/jira');
     await until(() => expect(tokenInput()).toBeTruthy());
     document.cookie = 'XSRF-TOKEN=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
     type(tokenInput(), 'some-token');
-    button('Zapisz token').click();
+    button('Sprawdź i zapisz').click();
 
     await until(() => expect(text()).toContain('Formularz stracił ważność.'));
   });
 
   it('says there is nothing to connect when the catalog offers no way to connect', async () => {
+    server.use(
+      http.get('/api/v1/catalog', () =>
+        HttpResponse.json({
+          servers: [
+            serverFixture('jira', {
+              status: 'connected',
+              actions: ['copy_link', 'disconnect'],
+              connection: connectionFixture('jira'),
+            }),
+          ],
+        }),
+      ),
+    );
     configureTestApp();
     await openRoute('/connect/jira');
     await until(() => expect(text()).toContain('Tego systemu nie trzeba łączyć'));
@@ -162,44 +239,24 @@ describe('ConnectPage', () => {
   it('reports an unknown system as not found', async () => {
     configureTestApp();
     await openRoute('/connect/sharepoint');
-    await until(() =>
-      expect(text()).toContain('Nie znaleziono zasobu albo nie masz do niego dostępu.'),
-    );
+    await until(() => expect(text()).toContain('Nie ma takiej strony.'));
   });
 });
 
 describe('connectOptions', () => {
-  const server = (actions: PortalCatalogServer['actions']): PortalCatalogServer => ({
-    serverId: 'mcp-jira',
-    system: 'jira',
-    version: '1.0.0',
-    url: 'https://mcp-gateway.internal/s/mcp-jira/mcp',
-    status: 'reconnect_required',
-    actions,
-    tools: [],
-  });
-  const connection = (type: 'user-oauth' | 'user-secret') => ({
-    system: 'jira' as const,
-    type,
-    status: 'expired' as const,
-    backendUser: 'jkowalski',
-    expiresAt: null,
-    connectedAt: '2026-10-01T08:00:00Z',
-    lastUsedAt: null,
-  });
+  const server = (actions: PortalCatalogServer['actions']): PortalCatalogServer =>
+    serverFixture('jira', { status: 'reconnect_required', actions });
+  const connection = (type: 'user-oauth' | 'user-secret') => connectionFixture('jira', { type });
 
   it('follows the catalog actions', () => {
-    expect(connectOptions(server(['connect_oauth', 'add_secret']), undefined)).toEqual({
+    expect(connectOptions(server(['connect_oauth', 'add_secret']), null)).toEqual({
       oauth: true,
       token: true,
     });
-    expect(connectOptions(server(['add_secret']), undefined)).toEqual({
-      oauth: false,
-      token: true,
-    });
+    expect(connectOptions(server(['add_secret']), null)).toEqual({ oauth: false, token: true });
   });
 
-  it('reconnects the same way the existing connection was made', () => {
+  it('lets the connection type decide for reconnect', () => {
     expect(connectOptions(server(['reconnect']), connection('user-oauth'))).toEqual({
       oauth: true,
       token: false,
@@ -208,5 +265,10 @@ describe('connectOptions', () => {
       oauth: false,
       token: true,
     });
+    expect(connectOptions(server(['reconnect']), undefined)).toEqual({ oauth: true, token: true });
+  });
+
+  it('offers nothing when the catalog offers nothing', () => {
+    expect(connectOptions(server(['copy_link']), null)).toEqual({ oauth: false, token: false });
   });
 });

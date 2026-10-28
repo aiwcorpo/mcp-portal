@@ -8,21 +8,17 @@ const STORAGE_KEY = 'mcp-portal-theme';
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly document = inject(DOCUMENT);
-  private readonly media = this.document.defaultView?.matchMedia?.('(prefers-color-scheme: dark)');
-  private readonly systemDark = signal(this.media?.matches ?? false);
   private readonly chosen = signal<ThemeMode | null>(this.readStored());
 
-  readonly mode = computed<ThemeMode>(
-    () => this.chosen() ?? (this.systemDark() ? 'dark' : 'light'),
-  );
+  /** The mockups are dark, so dark is the default whatever the system prefers; light is opt-in. */
+  readonly mode = computed<ThemeMode>(() => this.chosen() ?? 'dark');
 
   constructor() {
-    this.media?.addEventListener?.('change', (event) => this.systemDark.set(event.matches));
     effect(() => {
       const root = this.document.documentElement;
-      const chosen = this.chosen();
-      root.classList.toggle('theme-dark', chosen === 'dark');
-      root.classList.toggle('theme-light', chosen === 'light');
+      const mode = this.mode();
+      root.classList.toggle('theme-dark', mode === 'dark');
+      root.classList.toggle('theme-light', mode === 'light');
     });
   }
 

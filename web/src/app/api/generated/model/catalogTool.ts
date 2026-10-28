@@ -28,6 +28,18 @@ export interface CatalogTool {
      * Groups (C9) that grant this tool according to policy; empty when policy names none.
      */
     requiredEntitlements: Array<string>;
+    /**
+     * definition.title of the approved manifest entry (CC-042, CC-082), a short display name for the UI. Absent when the tool has no title; the UI then falls back to description.
+     */
+    title?: string;
+    /**
+     * True when an administrator disabled the tool or its server (C10 tool_disabled; a hash pending approval counts) (CC-081). A disabled tool cannot be added to a virtual server (POST /virtual-servers answers 403 access_denied).
+     */
+    disabled?: boolean;
+    /**
+     * True when every call needs a confirmation (C11), risk DESTRUCTIVE or a policy requires it. Computed by the gateway (CC-081).
+     */
+    requiresConfirmation?: boolean;
 }
 export namespace CatalogTool {
 }
