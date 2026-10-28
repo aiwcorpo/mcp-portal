@@ -1,0 +1,134 @@
+@let current = phase();
+@switch (current.kind) {
+  @case ('loading') {
+    <app-loading />
+  }
+  @case ('error') {
+    <app-load-error [failure]="current.failure" (retry)="load()" />
+  }
+  @case ('stale') {
+    <section class="panel" role="status">
+      <h1 i18n="@@confirm.staleTitle">Ten link jest nieaktualny.</h1>
+      <p class="muted" i18n="@@confirm.staleText">
+        Operacja została zastąpiona, wykonana albo wygasła. Nie wpisuj kodu dla tej operacji.
+      </p>
+    </section>
+  }
+  @case ('cancelled') {
+    <section class="panel" role="status">
+      <h1 i18n="@@confirm.cancelledTitle">Operacja anulowana.</h1>
+      <p class="muted" i18n="@@confirm.cancelledText">
+        Agent nie wykona jej bez nowego wywołania. Kody z aplikacji, które były ważne do tej chwili,
+        przestały działać: przy następnej operacji poczekaj na nowy kod (30 do 60 s).
+      </p>
+    </section>
+  }
+  @case ('ready') {
+    @if (expired()) {
+      <section class="panel" role="status">
+        <h1 i18n="@@confirm.expiredTitle">Czas minął.</h1>
+        <p class="muted" i18n="@@confirm.expiredText">
+          Poproś agenta o ponowienie. Nie wpisuj kodu dla tej operacji.
+        </p>
+      </section>
+    } @else {
+      <header class="head">
+        <h1 i18n="@@confirm.title">Operacja nieodwracalna czeka na kod</h1>
+        <p class="timer mono">
+          <ng-container i18n="@@confirm.expiresIn">wygasa za</ng-container>
+          {{ remainingText() }}
+        </p>
+      </header>
+
+      @if (viewedFailed()) {
+        <app-notice kind="warning" i18n="@@confirm.viewedFailed">
+          Nie udało się zapisać otwarcia podglądu. Ochrona "pierwsza wygrywa" nie jest teraz
+          aktywna: inna operacja nieodwracalna może zastąpić tę.
+        </app-notice>
+      }
+      @if (refreshFailed()) {
+        <app-notice kind="warning" i18n="@@confirm.refreshFailed">
+          Nie udało się sprawdzić, czy operacja jest nadal aktualna. Poczekaj chwilę.
+        </app-notice>
+      }
+      @if (cancelFailure(); as failure) {
+        @if (failure.code === 'not_found_or_denied') {
+          <app-notice kind="error">
+            <ng-container i18n="@@confirm.cancelNotFound"
+              >Nie udało się anulować: operacja mogła zostać wykonana albo wygasła.</ng-container
+            >&ngsp;<a routerLink="/logs" i18n="@@confirm.toLogs">Sprawdź w logach aktywności</a>
+          </app-notice>
+        } @else {
+          <app-error-notice [failure]="failure" />
+        }
+      }
+      @if (anyNeutralised()) {
+        <app-notice kind="warning" i18n="@@confirm.neutralised">
+          Wartości zawierają znaki sterujące. Pokazano je w nawiasach kwadratowych jako [U+XXXX].
+        </app-notice>
+      }
+
+      <dl class="facts">
+        <div class="fact">
+          <dt i18n="@@confirm.system">System</dt>
+          <dd>{{ systemLabel() }}</dd>
+        </div>
+        <div class="fact">
+          <dt i18n="@@confirm.tool">Narzędzie</dt>
+          <dd>
+            <code dir="ltr" class="untrusted">{{ view()!.tool }}</code>
+          </dd>
+        </div>
+        @if (resourceText().text) {
+          <div class="fact">
+            <dt i18n="@@confirm.resource">Zasób</dt>
+            <dd dir="ltr" class="untrusted">{{ resourceText().text }}</dd>
+          </div>
+        }
+      </dl>
+
+      <h2 class="args-title" i18n="@@confirm.args">Argumenty</h2>
+      <dl class="facts">
+        @for (row of rows(); track row.name) {
+          <div class="fact">
+            <dt>
+              <code dir="ltr" class="untrusted">{{ row.name }}</code>
+            </dt>
+            <dd>
+              <span dir="ltr" class="untrusted value" data-testid="argument-value">{{
+                row.value
+              }}</span>
+              @if (row.truncated) {
+                &ngsp;<span class="truncated" i18n="@@confirm.truncated">(obcięto)</span>
+              }
+            </dd>
+          </div>
+        } @empty {
+          <p class="muted" i18n="@@confirm.noArgs">Operacja nie ma argumentów.</p>
+        }
+      </dl>
+
+      <div class="after">
+        <p class="lead" i18n="@@confirm.instruction">
+          Jeśli to się zgadza, wpisz w sesji agenta kod z aplikacji MCP Platform.
+        </p>
+        <p class="muted" i18n="@@confirm.optional">
+          Ten podgląd jest opcjonalny: kod działa także bez otwierania tej strony.
+        </p>
+        <p class="muted" i18n="@@confirm.notThis">
+          Jeśli to nie ta operacja, nie wpisuj kodu i anuluj ją.
+        </p>
+        <button
+          mat-stroked-button
+          type="button"
+          class="cancel"
+          [disabled]="busy()"
+          (click)="cancel()"
+          i18n="@@confirm.cancel"
+        >
+          Anuluj operację
+        </button>
+      </div>
+    }
+  }
+}

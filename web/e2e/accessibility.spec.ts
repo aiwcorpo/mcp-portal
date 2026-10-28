@@ -86,6 +86,22 @@ for (const scheme of ['dark', 'light'] as const) {
     await expectNoViolations(page);
   });
 
+  test(`the preview in every state has no violations (${scheme})`, async ({ page }) => {
+    await page.goto('/confirm/cnf_4k9Qe2LxW7tB3mZp');
+    await useScheme(page, scheme);
+    await expect(page.getByRole('button', { name: 'Anuluj operację' })).toBeVisible();
+    await expectNoViolations(page);
+    await page.getByRole('button', { name: 'Anuluj operację' }).click();
+    await expect(page.getByText('Operacja anulowana.')).toBeVisible();
+    await expectNoViolations(page);
+    await page.goto('/confirm/cnf_Zb3Qm8TnR5vKd2Wy');
+    await expect(page.getByText('Wartości zawierają znaki sterujące.')).toBeVisible();
+    await expectNoViolations(page);
+    await page.goto('/confirm/cnf_nie_ma');
+    await expect(page.getByText('Ten link jest nieaktualny.')).toBeVisible();
+    await expectNoViolations(page);
+  });
+
   test(`the tool step of the wizard and the ready step have no violations (${scheme})`, async ({
     page,
   }) => {

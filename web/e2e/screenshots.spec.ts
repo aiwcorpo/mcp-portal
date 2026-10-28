@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import type { Page } from '@playwright/test';
-import { MOCK_TOTP_SEED } from '../src/mocks/m3-mock';
+import { BIDI_CONFIRMATION_ID, DEMO_CONFIRMATION_ID, MOCK_TOTP_SEED } from '../src/mocks/m3-mock';
 import { currentCode } from '../src/mocks/totp';
 import { expect, test } from './fixtures';
 
@@ -197,5 +197,26 @@ test.describe('screenshots', () => {
     await page.getByRole('button', { name: 'Dalej' }).click();
     await expect(page.getByText('Narzędzia "Usuwanie" wymagają kodu')).toBeVisible();
     await shot(page, project, '12-kreator-narzedzia-baner');
+  });
+
+  test('preview (M3)', async ({ page }, info) => {
+    const project = info.project.name;
+    const preview = `/confirm/${DEMO_CONFIRMATION_ID}`;
+
+    await page.goto(preview);
+    await expect(page.getByRole('button', { name: 'Anuluj operację' })).toBeVisible();
+    await shot(page, project, '14-podglad-operacji');
+
+    await page.getByRole('button', { name: 'Anuluj operację' }).click();
+    await expect(page.getByText('Operacja anulowana.')).toBeVisible();
+    await shot(page, project, '15-podglad-anulowana');
+
+    await page.goto('/confirm/cnf_does_not_exist');
+    await expect(page.getByText('Ten link jest nieaktualny.')).toBeVisible();
+    await shot(page, project, '15-podglad-nieaktualny');
+
+    await page.goto(`/confirm/${BIDI_CONFIRMATION_ID}?mockSession=in`);
+    await expect(page.getByText('Wartości zawierają znaki sterujące.')).toBeVisible();
+    await shot(page, project, '14-podglad-znaki-sterujace');
   });
 });

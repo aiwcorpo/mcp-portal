@@ -20,6 +20,9 @@ export const ENROLLMENT_START_LIMIT = 5;
 export const CONFIRMATION_TTL_MS = 120_000;
 /** Id of the pending Confluence delete shown by the preview (the id of the C12 example). */
 export const DEMO_CONFIRMATION_ID = 'cnf_4k9Qe2LxW7tB3mZp';
+/** Pending operation whose argument carries a right-to-left override, a line break and a control character. */
+export const BIDI_CONFIRMATION_ID = 'cnf_Zb3Qm8TnR5vKd2Wy';
+const KNOWN_CONFIRMATIONS: readonly string[] = [DEMO_CONFIRMATION_ID, BIDI_CONFIRMATION_ID];
 
 export interface MockEnrollment {
   id: string;
@@ -64,7 +67,27 @@ export interface MockContext {
 
 const iso = (time: number): string => new Date(time).toISOString().replace(/\.\d{3}Z$/, 'Z');
 
-export function demoConfirmation(seenAt: number): ConfirmationView {
+export function demoConfirmation(
+  seenAt: number,
+  id: string = DEMO_CONFIRMATION_ID,
+): ConfirmationView {
+  if (id === BIDI_CONFIRMATION_ID) {
+    return {
+      confirmationId: id,
+      tool: 'jira__delete_issue',
+      system: 'jira',
+      resource: { type: 'Jira::Issue', id: 'ABC-123', parent: 'Jira::Project::ABC' },
+      arguments: [
+        { name: 'issueKey', value: '"ABC-123"', truncated: false },
+        {
+          name: 'reason',
+          value: '"cleanup\u202Egnp.exe\u2066 first line\nsecond line\u0007"',
+          truncated: false,
+        },
+      ],
+      expiresAt: iso(seenAt + CONFIRMATION_TTL_MS),
+    };
+  }
   return {
     confirmationId: DEMO_CONFIRMATION_ID,
     tool: 'confluence__delete_page',
@@ -333,6 +356,10 @@ export function createM3Handlers(store: MockStore, ctx: MockContext): HttpHandle
   const m3 = (): M3State => store.state;
   const isUnavailable = () => store.state.scenario === 'errors';
   const unavailable = () => ctx.failure('upstream_unavailable', 503);
+  /** A known operation counts as pending from the first call that mentions it, as the gateway's record would. */
+  const knownConfirmation = (id: string): MockConfirmation | undefined =>
+    m3().confirmations[id] ??
+    (KNOWN_CONFIRMATIONS.includes(id) ? { seenAt: Date.now() } : undefined);
 
   return [
     http.get(at('/api/v1/authenticator'), () => {
@@ -454,7 +481,7 @@ export function createM3Handlers(store: MockStore, ctx: MockContext): HttpHandle
       }
       const id = String(params['id']);
       const known = m3().confirmations[id];
-      if (id !== DEMO_CONFIRMATION_ID || known?.cancelled || known?.superseded) {
+      if (!KNOWN_CONFIRMATIONS.includes(id) || known?.cancelled || known?.superseded) {
         return ctx.failure('not_found_or_denied', 404);
       }
       const seenAt = known?.seenAt ?? Date.now();
@@ -464,7 +491,7 @@ export function createM3Handlers(store: MockStore, ctx: MockContext): HttpHandle
       if (Date.now() > seenAt + CONFIRMATION_TTL_MS) {
         return ctx.failure('not_found_or_denied', 404);
       }
-      return HttpResponse.json(demoConfirmation(seenAt), {
+      return HttpResponse.json(demoConfirmation(seenAt, id), {
         headers: { ...headers, 'Cache-Control': 'no-store', Pragma: 'no-cache' },
       });
     }),
@@ -477,7 +504,7 @@ export function createM3Handlers(store: MockStore, ctx: MockContext): HttpHandle
         return gone;
       }
       const id = String(params['id']);
-      const known = m3().confirmations[id];
+      const known = knownConfirmation(id);
       if (!known || known.cancelled || known.superseded) {
         return ctx.failure('not_found_or_denied', 404);
       }
@@ -496,7 +523,7 @@ export function createM3Handlers(store: MockStore, ctx: MockContext): HttpHandle
         return unavailable();
       }
       const id = String(params['id']);
-      const known = m3().confirmations[id];
+      const known = knownConfirmation(id);
       if (!known || known.superseded || Date.now() > known.seenAt + CONFIRMATION_TTL_MS) {
         return ctx.failure('not_found_or_denied', 404);
       }

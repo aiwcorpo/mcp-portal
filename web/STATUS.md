@@ -9,7 +9,7 @@ Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `
 | Kamień | Zakres | Stan |
 | --- | --- | --- |
 | K1 | Kontrakty 3.0.1, klient i mock (Authenticator, potwierdzenia, logi); Authenticator: status w Połączeniach (brak, aktywny, zablokowany, wyłączony z banerem), kreator rejestracji 4 kroki z QR rysowanym lokalnie, błędy rejestracji, usunięcie, baner w katalogu i kreatorze linków (23-30, m33, m36-m39) | zrobiony |
-| K2 | Podgląd operacji `/confirm/<id>` (14, 15, m35): tylko odczyt, licznik, `viewed`, odpytywanie, "Anuluj operację", stany końcowe, argumenty jako niezaufany tekst | w toku |
+| K2 | Podgląd operacji `/confirm/<id>` (14, 15, m35): tylko odczyt, licznik, `viewed`, odpytywanie, "Anuluj operację", stany końcowe, argumenty jako niezaufany tekst | zrobiony |
 | K3 | Zakładka Logi (06): filtry, "Pokaż więcej", etykiety wyników, błędne kody w szczegółach | do zrobienia |
 | K4 | a11y AA, 360 px, e2e na MSW 3.0.1, README i STATUS | do zrobienia |
 

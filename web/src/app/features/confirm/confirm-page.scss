@@ -1,0 +1,106 @@
+:host {
+  display: block;
+  max-width: 680px;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 20px;
+}
+
+.timer {
+  margin: 0;
+  color: var(--pm-warn);
+}
+
+.facts {
+  margin: 0;
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  gap: 4px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--pm-border);
+}
+
+dt {
+  color: var(--pm-muted);
+}
+
+dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.args-title {
+  margin-top: 24px;
+  color: var(--pm-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/*
+ * Values come from an AI agent: plain text only, isolated from the page's own direction, line breaks kept,
+ * long unbroken strings wrapped instead of widening the page.
+ */
+.untrusted {
+  unicode-bidi: isolate;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.value,
+code {
+  font-family: var(--pm-mono);
+  font-size: 13px;
+}
+
+.truncated {
+  color: var(--pm-muted);
+  font-size: 12px;
+}
+
+.after {
+  display: grid;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.lead {
+  font-weight: 500;
+}
+
+.cancel {
+  justify-self: start;
+  margin-top: 12px;
+}
+
+.panel {
+  display: grid;
+  gap: 8px;
+  max-width: 600px;
+  padding: 20px;
+  border: 1px solid var(--pm-border);
+  border-radius: 8px;
+  background: var(--pm-surface);
+}
+
+.panel h1 {
+  font-size: 17px;
+}
+
+@media (max-width: 719px) {
+  .fact {
+    grid-template-columns: 1fr;
+  }
+}

@@ -122,9 +122,17 @@
         <source>Rejestracja Authenticatora</source>
       </segment>
     </unit>
+    <unit id="route.confirm">
+      <notes>
+        <note category="location">src/app/app.routes.ts:49</note>
+      </notes>
+      <segment>
+        <source>Operacja czeka na kod</source>
+      </segment>
+    </unit>
     <unit id="route.notFound">
       <notes>
-        <note category="location">src/app/app.routes.ts:54</note>
+        <note category="location">src/app/app.routes.ts:59</note>
       </notes>
       <segment>
         <source>Nie znaleziono</source>
@@ -1121,6 +1129,190 @@
       </notes>
       <segment>
         <source>Ukryj narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="confirm.staleTitle">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:11,12</note>
+      </notes>
+      <segment>
+        <source>Ten link jest nieaktualny.</source>
+      </segment>
+    </unit>
+    <unit id="confirm.staleText">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:13,15</note>
+      </notes>
+      <segment>
+        <source> Operacja została zastąpiona, wykonana albo wygasła. Nie wpisuj kodu dla tej operacji. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.cancelledTitle">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:19,20</note>
+      </notes>
+      <segment>
+        <source>Operacja anulowana.</source>
+      </segment>
+    </unit>
+    <unit id="confirm.cancelledText">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:21,24</note>
+      </notes>
+      <segment>
+        <source> Agent nie wykona jej bez nowego wywołania. Kody z aplikacji, które były ważne do tej chwili, przestały działać: przy następnej operacji poczekaj na nowy kod (30 do 60 s). </source>
+      </segment>
+    </unit>
+    <unit id="confirm.expiredTitle">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:29,30</note>
+      </notes>
+      <segment>
+        <source>Czas minął.</source>
+      </segment>
+    </unit>
+    <unit id="confirm.expiredText">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:31,33</note>
+      </notes>
+      <segment>
+        <source> Poproś agenta o ponowienie. Nie wpisuj kodu dla tej operacji. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.title">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:36,37</note>
+      </notes>
+      <segment>
+        <source>Operacja nieodwracalna czeka na kod</source>
+      </segment>
+    </unit>
+    <unit id="confirm.expiresIn">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:38,39</note>
+      </notes>
+      <segment>
+        <source>wygasa za</source>
+      </segment>
+    </unit>
+    <unit id="confirm.viewedFailed">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:45,47</note>
+      </notes>
+      <segment>
+        <source> Nie udało się zapisać otwarcia podglądu. Ochrona &quot;pierwsza wygrywa&quot; nie jest teraz aktywna: inna operacja nieodwracalna może zastąpić tę. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.refreshFailed">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:51,53</note>
+      </notes>
+      <segment>
+        <source> Nie udało się sprawdzić, czy operacja jest nadal aktualna. Poczekaj chwilę. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.cancelNotFound">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:58,59</note>
+      </notes>
+      <segment>
+        <source>Nie udało się anulować: operacja mogła zostać wykonana albo wygasła.</source>
+      </segment>
+    </unit>
+    <unit id="confirm.toLogs">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:59,61</note>
+      </notes>
+      <segment>
+        <source>Sprawdź w logach aktywności</source>
+      </segment>
+    </unit>
+    <unit id="confirm.neutralised">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:67,69</note>
+      </notes>
+      <segment>
+        <source> Wartości zawierają znaki sterujące. Pokazano je w nawiasach kwadratowych jako [U+XXXX]. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.system">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:73,74</note>
+      </notes>
+      <segment>
+        <source>System</source>
+      </segment>
+    </unit>
+    <unit id="confirm.tool">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:77,79</note>
+      </notes>
+      <segment>
+        <source>Narzędzie</source>
+      </segment>
+    </unit>
+    <unit id="confirm.resource">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:84,85</note>
+      </notes>
+      <segment>
+        <source>Zasób</source>
+      </segment>
+    </unit>
+    <unit id="confirm.args">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:90,91</note>
+      </notes>
+      <segment>
+        <source>Argumenty</source>
+      </segment>
+    </unit>
+    <unit id="confirm.truncated">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:102,104</note>
+      </notes>
+      <segment>
+        <source>(obcięto)</source>
+      </segment>
+    </unit>
+    <unit id="confirm.noArgs">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:107,111</note>
+      </notes>
+      <segment>
+        <source>Operacja nie ma argumentów.</source>
+      </segment>
+    </unit>
+    <unit id="confirm.instruction">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:113,115</note>
+      </notes>
+      <segment>
+        <source> Jeśli to się zgadza, wpisz w sesji agenta kod z aplikacji MCP Platform. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.optional">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:116,118</note>
+      </notes>
+      <segment>
+        <source> Ten podgląd jest opcjonalny: kod działa także bez otwierania tej strony. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.notThis">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:119,121</note>
+      </notes>
+      <segment>
+        <source> Jeśli to nie ta operacja, nie wpisuj kodu i anuluj ją. </source>
+      </segment>
+    </unit>
+    <unit id="confirm.cancel">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.html:129,131</note>
+      </notes>
+      <segment>
+        <source> Anuluj operację </source>
       </segment>
     </unit>
     <unit id="connect.titleFor">

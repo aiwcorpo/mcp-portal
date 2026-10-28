@@ -45,6 +45,11 @@ export const routes: Routes = [
       import('./features/authenticator/register-page').then((m) => m.AuthenticatorRegisterPage),
   },
   {
+    path: 'confirm/:id',
+    title: $localize`:@@route.confirm:Operacja czeka na kod`,
+    loadComponent: () => import('./features/confirm/confirm-page').then((m) => m.ConfirmPage),
+  },
+  {
     path: 'admin',
     canMatch: [adminGuard],
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
