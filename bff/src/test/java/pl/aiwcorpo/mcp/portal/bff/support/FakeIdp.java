@@ -57,6 +57,7 @@ public final class FakeIdp implements AutoCloseable {
     private final Set<String> issued = ConcurrentHashMap.newKeySet();
     private final List<Map<String, String>> tokenRequests = new CopyOnWriteArrayList<>();
     private final List<Map<String, String>> logoutRequests = new CopyOnWriteArrayList<>();
+    private final java.util.concurrent.atomic.AtomicInteger discoveryRequests = new java.util.concurrent.atomic.AtomicInteger();
 
     public record User(String sub, String username, String name, List<String> groups) {
     }
@@ -124,7 +125,12 @@ public final class FakeIdp implements AutoCloseable {
                 + URLEncoder.encode(query.get("state"), StandardCharsets.UTF_8));
     }
 
+    public int discoveryRequests() {
+        return discoveryRequests.get();
+    }
+
     private void discovery(HttpExchange exchange) throws IOException {
+        discoveryRequests.incrementAndGet();
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("issuer", issuer);
         body.put("authorization_endpoint", authorizationEndpoint());

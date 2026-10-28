@@ -56,42 +56,14 @@ public final class GatewayData {
     }
 
     /**
-     * Argument values come from an untrusted agent and are shown in the trusted preview. Bidi controls, other
-     * C0/C1 controls (newline and tab stay), U+2028/2029 and lone surrogates would let a value pose as something
-     * else, so each becomes its visible code point notation, {@code <U+202E>}. C12 has no flag for this (the
+     * Argument values come from an untrusted agent and are shown in the trusted preview. Hidden characters
+     * ({@link TextHygiene}: bidi and zero-width characters, controls other than newline and tab, separators, lone
+     * surrogates, tag characters and the like) would let a value pose as something else, so each becomes its visible
+     * code point notation, {@code <U+202E>}. C12 has no flag for this (the
      * argument schema is closed); the notation itself is what the reader sees.
      */
     static String neutralize(String value) {
-        StringBuilder out = null;
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            boolean pair = Character.isHighSurrogate(c) && i + 1 < value.length()
-                    && Character.isLowSurrogate(value.charAt(i + 1));
-            if (pair) {
-                if (out != null) {
-                    out.append(c).append(value.charAt(i + 1));
-                }
-                i++;
-                continue;
-            }
-            if (isHidden(c)) {
-                if (out == null) {
-                    out = new StringBuilder(value.length() + 16).append(value, 0, i);
-                }
-                out.append(String.format("<U+%04X>", (int) c));
-            } else if (out != null) {
-                out.append(c);
-            }
-        }
-        return out == null ? value : out.toString();
-    }
-
-    private static boolean isHidden(char c) {
-        if (c == '\n' || c == '\t') {
-            return false;
-        }
-        return c <= 0x1f || c >= 0x7f && c <= 0x9f || c == 0x2028 || c == 0x2029 || c == 0x200e || c == 0x200f
-                || c == 0x061c || c >= 0x202a && c <= 0x202e || c >= 0x2066 && c <= 0x2069 || Character.isSurrogate(c);
+        return TextHygiene.neutralize(value);
     }
 
     /** Rows that fit {@code ActivityCall}; the others are left out with a warning that carries no value. */
@@ -128,7 +100,9 @@ public final class GatewayData {
     private static boolean validResource(GatewayModel.Resource resource) {
         return RESOURCE_TYPES.contains(resource.type())
                 && resource.id() != null && RESOURCE_ID.matcher(resource.id()).matches()
+                && TextHygiene.isClean(resource.id(), false)
                 && (resource.parent() == null
-                        || resource.parent().length() <= MAX_PARENT && RESOURCE_PARENT.matcher(resource.parent()).matches());
+                        || resource.parent().length() <= MAX_PARENT && RESOURCE_PARENT.matcher(resource.parent()).matches()
+                                && TextHygiene.isClean(resource.parent(), false));
     }
 }

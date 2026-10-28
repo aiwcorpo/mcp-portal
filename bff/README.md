@@ -175,6 +175,10 @@ BFF nie ma endpointu decyzji (`POST /api/v1/confirmations/{id}` to 405).
   `authenticator_enrollment_failed`, `authenticator_removed`, `step_up_required`, `upstream_unavailable`) i
   `virtual_server_change` zamiast `admin_change` (`vs_created`, `vs_deleted`, `slug_taken`, `not_granted`, `invalid_request`,
   `virtual_server_limit`, `not_found_or_denied`). Zdarzenia `confirmation` (w tym `cancelled_by_owner`) pisze gateway.
+- Tekst w podglądzie: wartości argumentów ze znakami ukrytymi (`TextHygiene`: bidi, zero-width, tag, wypełniacze, sterujące poza
+  `\n` i `\t`, separatory, samotne surogaty, prywatne i nieprzypisane) trafiają do przeglądarki jako `<U+202E>`; nazwa
+  argumentu, `resource.id`, `resource.parent` i `client` z takimi znakami powodują odrzucenie (podglądu albo wiersza). Definicja
+  wg CC-121, ostrzejsza o U+200C..U+200F i CR.
 - `ReturnPath` (CC-099): bez średnika; pierwszy segment nie jest `api`, `s`, `v` ani `.well-known`; żaden segment ścieżki
   nie jest `.` ani `..`.
 
@@ -183,7 +187,24 @@ BFF nie ma endpointu decyzji (`POST /api/v1/confirmations/{id}` to 405).
 | `ConfirmationsTest` | podgląd bez skutków ubocznych, `viewed` (XSRF, `Sec-Fetch-Site`, prefetch), `cancel` bez MFA, 404 dla cudzych, brak endpointu decyzji |
 | `AuthenticatorTest` | step-up przy starcie i usunięciu, ziarno raz i `no-store`, brak ziarna i kodu w logach i audycie, `enrollmentId` związany z sesją, stan `disabled`, `mfaFreshUntil` |
 | `ActivityCallsTest` | filtry, kursor bez zmian, parametry spoza kontraktu, wiersze poza schematem |
+| `GatewayDataTest` | neutralizacja ukrytych znaków, zgodność z wektorami `text-hygiene/` |
+| `BackchannelOidcTest` | logowanie bez discovery (`portal.oidc.*`), `iss` nadal sprawdzany, błąd startu przy niepełnym zestawie adresów |
 | `ReturnPathsTest`, `NegativeSecurityTest` | wektory `return-paths/` z 3.0.1 |
+
+## OIDC z osobnymi adresami (bez discovery)
+
+Gdy BFF w kontenerze widzi IdP pod innym adresem niż przeglądarka, discovery pod `issuer-uri` wymagało przekaźnika
+na publicznym adresie (`idp-relay` w mcp-platform-dev). Zamiast tego: `PORTAL_OIDC_TOKEN_URI` włącza rejestrację z jawnych
+adresów, a wtedy obowiązkowe są też `PORTAL_OIDC_AUTHORIZATION_URI` (adres publiczny, dla przeglądarki) i
+`PORTAL_OIDC_JWK_SET_URI`; opcjonalne `PORTAL_OIDC_USER_INFO_URI` i `PORTAL_OIDC_END_SESSION_URI` (logowanie z IdP przez
+back channel). `PORTAL_OIDC_ISSUER_URI` zostaje oczekiwanym `iss` (porównywanym, nie pobieranym). Adresy tylko http są
+dopuszczone w profilu `dev`; adres dla przeglądarki jest https albo http na loopbacku w dev. Bez `PORTAL_OIDC_TOKEN_URI`
+działa discovery jak dotąd. Dla mcp-platform-dev (zmiana compose po stronie ws-01):
+`PORTAL_OIDC_AUTHORIZATION_URI=https://localhost:18746/realms/corp/protocol/openid-connect/auth`,
+`PORTAL_OIDC_TOKEN_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/token`,
+`PORTAL_OIDC_JWK_SET_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/certs`,
+`PORTAL_OIDC_END_SESSION_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/logout`; po tym `idp-relay`
+i `JAVA_TOOL_OPTIONS` z truststore'em dev public CA w BFF są zbędne.
 
 ## Struktura
 

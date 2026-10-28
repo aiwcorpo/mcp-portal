@@ -12,7 +12,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M2.5 | runda poprawek po przeglądzie Opus M2, smoke Haiku, decyzja o braku sprawdzania tożsamości (mcp-contracts 2.2.3) | zrobione |
 | M3 (poza M2) | potwierdzenia (pivot TOTP, mcp-contracts 3.0.0), wnioski IGA (`/access-requests`), aktywność, admin; `ReturnPath` bez zarezerwowanych prefiksów (CC-099) | w toku: M3.1 poniżej; wnioski IGA i admin zostają na M4 |
 | M3.1 | kontrakty 3.0.1, `ReturnPath` CC-099, `virtual_server_change`, potwierdzenia (podgląd, viewed, cancel), `activity/calls`, Authenticator ze step-up, `Me.mfaFreshUntil` | zrobione |
-| M3.2 | osobne adresy token/JWKS przy `issuer-uri` (bez `idp-relay`) | w toku |
+| M3.2 | osobne adresy token/JWKS przy `issuer-uri` (bez `idp-relay`), higiena znaków ukrytych (CC-121) w podglądzie | zrobione |
 | M3.3 | poprawki po przeglądzie, README, raport | nie zaczęte |
 
 ## M2: wynik (2026-10-28)
@@ -86,6 +86,16 @@ Kontrakty 2.2.5. `./mvnw test`: 177 testów, 0 błędów.
 - Do sprawdzenia przez ws-01 (klient `claude-code` w realmie `corp`, redirect `http://localhost:33418/callback`) i
   na żywo `claude mcp add ...` z tej komendy do końca Authenticate; do tego czasu komenda w dev jest sprawdzona tylko
   co do kształtu.
+
+## M3.2: OIDC bez discovery, higiena tekstu (2026-10-28)
+
+- `portal.oidc.*` (README, "OIDC z osobnymi adresami"): rejestracja klienta z jawnych adresów, `iss` nadal porównywany z `issuer-uri`.
+  Spring Boot 4.1 przy `issuer-uri` zawsze robi discovery i nadpisuje je jawnymi polami, więc samo ustawienie `token-uri` i
+  `jwk-set-uri` nie wystarcza; stąd własny `ClientRegistrationRepository`. Test: logowanie, wymiana tokenu i wylogowanie bez żadnego
+  żądania discovery; token z innym `iss` odrzucony. Nie sprawdzone na żywo z Keycloakiem (compose zmienia tylko ws-01).
+- `TextHygiene` wg CC-121 (wektory `text-hygiene/` w teście) zamiast ręcznej listy: Cf (zero-width, bidi, BOM, tag), Cc poza `\n`
+  i `\t`, separatory, surogaty, nieznaki, prywatne i nieprzypisane, selektory wariantu poza U+FE0F po emoji, wypełniacze. Ostrzejsza
+  od kontraktu o U+200C..U+200F i CR. `resource.id`/`parent` z takimi znakami: podgląd odrzucony (503), wiersz aktywności pominięty.
 
 ## Propozycje CC
 
@@ -256,7 +266,7 @@ Znalezisko w artefaktach: `mcp-contracts-3.0.1-test-vectors.jar` w `~/.m2` zawie
 (w repozytorium i tagu są tylko `invalid-identity-mismatch*.json`; jar zbudowany bez `clean`). `ConnectRedirectVectorsTest` pomija te
 dwa pliki. Wydanie jest niezmienne, więc do zgłoszenia ws-00 (kolejne wydanie albo przebudowa jara).
 
-Testy: `./mvnw test`: 238 testów, 0 błędów.
+Testy: `./mvnw test`: 312 testów, 0 błędów (po M3.2).
 
 Poprawka po przeglądzie bezpieczeństwa (GatewayData): nazwa argumentu podglądu musi pasować do `^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$`
 (inaczej cały podgląd to 503); w `value` znaki bidi (U+202A-202E, U+2066-2069, U+200E/200F, U+061C), sterujące C0/C1 poza
@@ -265,8 +275,21 @@ Poprawka po przeglądzie bezpieczeństwa (GatewayData): nazwa argumentu podgląd
 oznaczenie), więc znacznikiem jest sam widoczny zapis, a `truncated` zostaje tylko dla przycięcia. Kontrakt nie podaje limitu
 długości `value`, więc BFF go nie wymyśla.
 
+## M3.2: OIDC bez discovery, higiena tekstu (2026-10-28)
+
+- `portal.oidc.*` (README, "OIDC z osobnymi adresami"): rejestracja klienta z jawnych adresów, `iss` nadal porównywany z `issuer-uri`.
+  Spring Boot 4.1 przy `issuer-uri` zawsze robi discovery i nadpisuje je jawnymi polami, więc samo ustawienie `token-uri` i
+  `jwk-set-uri` nie wystarcza; stąd własny `ClientRegistrationRepository`. Test: logowanie, wymiana tokenu i wylogowanie bez żadnego
+  żądania discovery; token z innym `iss` odrzucony. Nie sprawdzone na żywo z Keycloakiem (compose zmienia tylko ws-01).
+- `TextHygiene` wg CC-121 (wektory `text-hygiene/` w teście) zamiast ręcznej listy: Cf (zero-width, bidi, BOM, tag), Cc poza `\n`
+  i `\t`, separatory, surogaty, nieznaki, prywatne i nieprzypisane, selektory wariantu poza U+FE0F po emoji, wypełniacze. Ostrzejsza
+  od kontraktu o U+200C..U+200F i CR. `resource.id`/`parent` z takimi znakami: podgląd odrzucony (503), wiersz aktywności pominięty.
+
 ## Propozycje CC
 
 - C12/C5 `ConfirmationArgument`: opcjonalne pole (np. `neutralized: boolean`), by UI mogło oznaczyć argument, w którym BFF
   zamienił znaki ukryte na zapis `<U+XXXX>`; oraz limit długości `value` i wzorzec `name` w schemacie.
+- C8/C5 `resource.id`, `resource.parent`, `ActivityCall.client`: wzorzec zakazuje bidi U+202A..202E i U+2066..2069, ale przepuszcza
+  U+200B..U+200F, U+061C, U+2060, U+FEFF i znaki tag; sugerowane wspólne odwołanie do higieny tekstu z CC-121 (3.0.2). Tak samo
+  U+200C..U+200F w higienie argumentów (LRM/RLM przestawiają kolejność wyświetlania).
 - Brak innych. Uwaga do C8: powody `upstream_unavailable` dla `virtual_server_change` i `authenticator` (zob. wyżej).

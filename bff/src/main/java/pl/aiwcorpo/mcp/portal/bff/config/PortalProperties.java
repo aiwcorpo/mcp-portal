@@ -23,7 +23,8 @@ public record PortalProperties(
         @DefaultValue Session session,
         @DefaultValue Web web,
         @DefaultValue Iga iga,
-        @DefaultValue ClientConfigs clientConfigs) {
+        @DefaultValue ClientConfigs clientConfigs,
+        @DefaultValue Oidc oidc) {
 
     /**
      * @param tlsName name that must appear as DNS SAN in the server certificate, independent of the host in
@@ -78,6 +79,21 @@ public record PortalProperties(
                 throw new IllegalArgumentException("portal.step-up.authenticator-return-path is not a valid ReturnPath");
             }
         }
+    }
+
+    /**
+     * Explicit IdP addresses, used instead of discovery when {@code tokenUri} is set. For a container that reaches the
+     * IdP on an internal address while the browser and the {@code iss} claim use the public one: the issuer stays
+     * {@code spring.security.oauth2.client.provider.<id>.issuer-uri} (compared with {@code iss}, never fetched).
+     *
+     * @param authorizationUri public address the browser is sent to
+     * @param tokenUri         back-channel token endpoint (code exchange, refresh, token exchange)
+     * @param jwkSetUri        back-channel keys for the ID token
+     * @param userInfoUri      optional back-channel userinfo endpoint
+     * @param endSessionUri    optional back-channel logout endpoint
+     */
+    public record Oidc(String authorizationUri, String tokenUri, String jwkSetUri, String userInfoUri,
+                       String endSessionUri) {
     }
 
     /** Idle timeout is server.servlet.session.timeout; this is the hard limit from login. */
