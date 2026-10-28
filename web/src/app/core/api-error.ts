@@ -11,6 +11,7 @@ const C12_ERROR_CODES = [
   'invalid_request',
   'csrf_invalid',
   'slug_taken',
+  'virtual_server_limit_reached',
   'hash_mismatch',
   'resource_defaults_unsupported',
 ] as const;

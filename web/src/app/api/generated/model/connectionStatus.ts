@@ -10,7 +10,7 @@
 
 
 /**
- * expiring = expires in less than 7 days.
+ * expiring = expires in less than 7 days; only for `user-secret` with a declared `expiresAt` (CC-103). A `user-oauth` connection has expiresAt null (the token is refreshed by the broker) and never becomes expiring.
  */
 export const ConnectionStatus = {
     Connected: 'connected',

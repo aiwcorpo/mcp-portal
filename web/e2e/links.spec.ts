@@ -36,7 +36,7 @@ test('create a link, then copy the Claude Code, Copilot and Codex configuration'
 
   await page.getByRole('button', { name: 'Kopiuj (Claude Code)' }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-    `claude mcp add --transport http moj-zestaw ${url}`,
+    `claude mcp add --transport http --client-id claude-code --callback-port 33418 moj-zestaw ${url}`,
   );
 
   await page.getByRole('tab', { name: 'Copilot' }).click();

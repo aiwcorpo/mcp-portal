@@ -38,6 +38,10 @@ export interface AuditEvent {
     event: AuditEvent.EventEnum;
     sub?: string;
     username?: string;
+    /**
+     * Account in the target system read by whoami (C4.1, CC-101), for connection_change: the only trace of which account a user connected (CC-117). Same length limit as username; C0 and C1 control characters, DEL, U+2028, U+2029 and the bidirectional controls are excluded like in resource.id. Never a secret.
+     */
+    backendUser?: string;
     client?: string;
     /**
      * Virtual server slug; used in the URL path /v/<slug>/mcp (C5).
@@ -52,7 +56,7 @@ export interface AuditEvent {
     resource?: AuditEventResource;
     decision?: AuditEvent.DecisionEnum;
     /**
-     * Machine-readable reason, snake case. Known values: policy_forbid, not_granted, tool_disabled, user_confirmed, user_declined, confirmation_expired, credential_required, step_up_required, rate_limited. For event authentication it is the rejection code of the internal JWT vectors (missing_token, bad_signature, unknown_kid, alg_not_allowed, wrong_issuer, wrong_audience, expired, replayed_jti, service_token_not_allowed, tool_mismatch, invalid_claims, lifetime_too_long, not_yet_valid, request_id_mismatch, tool_missing, tool_not_allowed, test_key_not_allowed, malformed).
+     * Machine-readable reason, snake case. Known values: policy_forbid, not_granted, tool_disabled, user_confirmed, user_declined, confirmation_expired, credential_required, step_up_required, rate_limited. For event admin_change of the gateway\'s virtual server changes (CC-107): vs_created, vs_deleted, slug_taken, not_granted, invalid_request, virtual_server_limit, not_found_or_denied (the list of tools of a link is not a field of this schema). For event authentication it is the rejection code: for the internal JWT (receiver: server, broker) one of the vectors (missing_token, bad_signature, unknown_kid, alg_not_allowed, wrong_issuer, wrong_audience, expired, replayed_jti, service_token_not_allowed, tool_mismatch, invalid_claims, lifetime_too_long, not_yet_valid, request_id_mismatch, tool_missing, tool_not_allowed, test_key_not_allowed, malformed); for the token of the AI client at the gateway (C1, CC-120): missing_token, malformed, bad_signature, unknown_kid, alg_not_allowed, wrong_issuer, wrong_audience, expired, not_yet_valid, invalid_claims, and for infrastructure failures client_certificate_rejected, jwks_unavailable, replay_store_unavailable (the last two with errorCode upstream_unavailable).
      */
     reason?: string;
     /**

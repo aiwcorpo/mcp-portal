@@ -153,6 +153,19 @@ serwuje starszy build, więc zrzuty sprzed poprawki.
 - ws-00: decyzja o regule kreatora (narzędzia systemów bez połączenia) i o tekstach "Przypomnimy o odnowieniu" (nie
   ma ich w M2; zostało "Oznaczymy token jako wygasający 7 dni przed terminem").
 
+## Domkniecie M2: contracts 2.2.5 (2026-10-28)
+
+Kontrakty 2.2.5 (tarball w `package.json`, klient wygenerowany ponownie). `npm test`: 150 testow, `npm run e2e`: 88 przeszlo, 2 pominiete.
+
+- CC-119: `409 virtual_server_limit_reached` w kreatorze: komunikat "Osiagnieto limit linkow. Usun nieuzywany link." z
+  odnosnikiem "Przejdz do listy linkow" (`/links`), kreator zostaje na kroku narzedzi z zachowanym wyborem. Dawna wskazowka
+  dla `400` (limit jako `invalid_request`) usunieta: od 2.2.5 limit ma wlasny kod. MSW odpowiada limitem od 50 linkow
+  (`LINK_LIMIT`); testy `link-wizard-page.spec.ts` ustawiaja odpowiedz wprost.
+- Komenda Claude Code jest pokazywana tak, jak przyszla z BFF (`clientConfigs.claudeCode`), takze z `--client-id` i
+  `--callback-port`; mock MSW ma ksztalt komendy z dev BFF, testy sprawdzaja ten sam ciag.
+- Przekierowanie po bledzie OAuth z `system=` (CC-111, dolozone w BFF) jest juz czytane przez web (propozycja CC 1 z
+  poprzedniej rundy zrealizowana po stronie kontraktu i BFF).
+
 ## Propozycje CC
 
 1. `GET /api/v1/oauth/callback`, błąd: dopisywać do przekierowania także `system=<system>` (albo zachować

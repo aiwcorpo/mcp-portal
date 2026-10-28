@@ -60,6 +60,9 @@ const MOCK_REQUEST_ID = '0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e7f';
 const PUBLIC_BASE = 'https://mcp.aiwcorpo.pl';
 /** A slug owned by somebody else (the C12 example), so that a 409 can be shown. */
 export const FOREIGN_SLUG = 'team-a-dev';
+
+/** Default per-user limit of the gateway (CC-119); the real one is gateway configuration. */
+export const LINK_LIMIT = 50;
 const DAY_MS = 86_400_000;
 const EXPIRING_WITHIN_DAYS = 7;
 
@@ -290,7 +293,8 @@ export function mockLinks(state: MockState): MockLink[] {
 export function clientConfigsFor(slug: string): ClientConfigs {
   const url = `${PUBLIC_BASE}/v/${slug}/mcp`;
   return {
-    claudeCode: `claude mcp add --transport http ${slug} ${url}`,
+    // Same shape as the dev BFF (client id and port of the dev Keycloak); the UI shows it as received.
+    claudeCode: `claude mcp add --transport http --client-id claude-code --callback-port 33418 ${slug} ${url}`,
     copilot: JSON.stringify({ servers: { [slug]: { type: 'http', url } } }),
     codex: `[mcp_servers.${slug}]\nurl = "${url}"\n`,
   };
@@ -433,6 +437,9 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       const links = mockLinks(store.state);
       if (body.slug === FOREIGN_SLUG || links.some((link) => link.slug === body.slug)) {
         return failure('slug_taken', 409);
+      }
+      if (links.length >= LINK_LIMIT) {
+        return failure('virtual_server_limit_reached', 409);
       }
       const usable = new Set(
         mockCatalog(store.state)

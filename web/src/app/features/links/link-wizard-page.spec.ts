@@ -195,7 +195,7 @@ describe('LinkWizardPage', () => {
     ]);
     expect(input('link-url').value).toBe('https://mcp.aiwcorpo.pl/v/moj-zestaw/mcp');
     expect(text()).toContain(
-      'claude mcp add --transport http moj-zestaw https://mcp.aiwcorpo.pl/v/moj-zestaw/mcp',
+      'claude mcp add --transport http --client-id claude-code --callback-port 33418 moj-zestaw https://mcp.aiwcorpo.pl/v/moj-zestaw/mcp',
     );
     expect(text()).toContain('jira__search_issues, jira__get_issue');
     expect(text()).toContain('Konfiguracja nie zawiera tokenu ani hasła.');
@@ -253,12 +253,12 @@ describe('LinkWizardPage', () => {
     expect(bodies.at(-1)?.tools).toEqual(['jira__get_issue']);
   });
 
-  it('explains a 400 on create (link limit of the gateway) next to the request id', async () => {
+  it('tells the user to delete an unused link when the gateway reports the limit (CC-119)', async () => {
     server.use(
       http.post('/api/v1/virtual-servers', () =>
         HttpResponse.json(
-          { error: 'invalid_request', requestId: '0192d1b2-7c3a' },
-          { status: 400 },
+          { error: 'virtual_server_limit_reached', requestId: '0192d1b2-7c3a' },
+          { status: 409 },
         ),
       ),
     );
@@ -269,8 +269,30 @@ describe('LinkWizardPage', () => {
 
     button('Utwórz link').click();
 
-    await until(() => expect(text()).toContain('limit 50 linków na użytkownika'));
+    await until(() => expect(text()).toContain('Osiągnięto limit linków. Usuń nieużywany link.'));
     expect(text()).toContain('0192d1b2');
+    const link = Array.from(document.querySelectorAll('a')).find((a) =>
+      a.textContent?.includes('Przejdź do listy linków'),
+    );
+    expect(link?.getAttribute('href')).toBe('/links');
+    expect(text()).not.toContain('jest gotowy');
+  });
+
+  it('keeps the wizard on the tools step with the selection after a limit error', async () => {
+    server.use(
+      http.post('/api/v1/virtual-servers', () =>
+        HttpResponse.json({ error: 'virtual_server_limit_reached' }, { status: 409 }),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/links/new');
+    await toToolsStep('Zestaw');
+    checkbox('jira__get_issue').click();
+
+    button('Utwórz link').click();
+
+    await until(() => expect(text()).toContain('Osiągnięto limit linków'));
+    expect(checkbox('jira__get_issue').checked).toBe(true);
   });
 
   it('switches between Claude Code, Copilot and Codex and copies the visible one', async () => {

@@ -69,10 +69,9 @@
       }
       @if (failure(); as f) {
         <app-error-notice [failure]="f" />
-        @if (f.code === 'invalid_request' && f.status === 400) {
-          <p class="muted" i18n="@@wizard.limitHint">
-            Formularz jest wypełniony poprawnie, więc najczęstszą przyczyną jest limit 50 linków na
-            użytkownika. Usuń niepotrzebne linki w sekcji Moje linki i spróbuj ponownie.
+        @if (f.code === 'virtual_server_limit_reached') {
+          <p class="muted">
+            <a routerLink="/links" i18n="@@wizard.limitLink">Przejdź do listy linków</a>
           </p>
         }
       }

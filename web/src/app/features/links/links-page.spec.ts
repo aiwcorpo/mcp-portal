@@ -113,7 +113,7 @@ describe('LinkConfigPage', () => {
     expect(text()).toContain('Copilot');
     expect(text()).toContain('Codex');
     expect(text()).toContain(
-      'claude mcp add --transport http przeglad-zgloszen https://mcp.aiwcorpo.pl/v/przeglad-zgloszen/mcp',
+      'claude mcp add --transport http --client-id claude-code --callback-port 33418 przeglad-zgloszen https://mcp.aiwcorpo.pl/v/przeglad-zgloszen/mcp',
     );
     expect(text()).toContain('Konfiguracja nie zawiera tokenu ani hasła.');
     expect(text()).toContain('jira__search_issues, jira__get_issue');

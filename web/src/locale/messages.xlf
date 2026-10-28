@@ -290,9 +290,17 @@
         <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
       </segment>
     </unit>
-    <unit id="error.resource_defaults_unsupported">
+    <unit id="error.virtual_server_limit_reached">
       <notes>
         <note category="location">src/app/core/error-messages.ts:33</note>
+      </notes>
+      <segment>
+        <source>Osiągnięto limit linków. Usuń nieużywany link.</source>
+      </segment>
+    </unit>
+    <unit id="error.resource_defaults_unsupported">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:35</note>
       </notes>
       <segment>
         <source>Zawężanie zasobów nie jest jeszcze dostępne.</source>
@@ -300,7 +308,7 @@
     </unit>
     <unit id="error.hash_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:35</note>
+        <note category="location">src/app/core/error-messages.ts:37</note>
       </notes>
       <segment>
         <source>Definicja zmieniła się w międzyczasie. Odśwież widok.</source>
@@ -308,7 +316,7 @@
     </unit>
     <unit id="error.flow_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:37</note>
+        <note category="location">src/app/core/error-messages.ts:39</note>
       </notes>
       <segment>
         <source>Link połączenia wygasł albo był już użyty. Zacznij od nowa.</source>
@@ -316,7 +324,7 @@
     </unit>
     <unit id="error.provider_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:39</note>
+        <note category="location">src/app/core/error-messages.ts:41</note>
       </notes>
       <segment>
         <source>System nie odpowiedział poprawnie. Spróbuj za chwilę.</source>
@@ -324,7 +332,7 @@
     </unit>
     <unit id="error.cancelled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:40</note>
+        <note category="location">src/app/core/error-messages.ts:42</note>
       </notes>
       <segment>
         <source>Łączenie anulowane.</source>
@@ -332,7 +340,7 @@
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:49</note>
+        <note category="location">src/app/core/error-messages.ts:51</note>
       </notes>
       <segment>
         <source>Za dużo żądań. Spróbuj ponownie za <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -1160,17 +1168,17 @@
         <source>Wybierz narzędzia</source>
       </segment>
     </unit>
-    <unit id="wizard.limitHint">
+    <unit id="wizard.limitLink">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:74,76</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:74,77</note>
       </notes>
       <segment>
-        <source> Formularz jest wypełniony poprawnie, więc najczęstszą przyczyną jest limit 50 linków na użytkownika. Usuń niepotrzebne linki w sekcji Moje linki i spróbuj ponownie. </source>
+        <source>Przejdź do listy linków</source>
       </segment>
     </unit>
     <unit id="wizard.search">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:86,87</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:85,86</note>
       </notes>
       <segment>
         <source>Szukaj narzędzia</source>
@@ -1178,7 +1186,7 @@
     </unit>
     <unit id="wizard.searchLabel">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:88,90</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:87,89</note>
       </notes>
       <segment>
         <source>Szukaj narzędzia</source>
@@ -1186,7 +1194,7 @@
     </unit>
     <unit id="wizard.selectedCount">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:91,93</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:90,92</note>
       </notes>
       <segment>
         <source> Wybrano: <ph id="0" equiv="INTERPOLATION" disp="{{ selectedNames().length }}"/> </source>
@@ -1194,7 +1202,7 @@
     </unit>
     <unit id="wizard.disabled">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:117,118</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:116,117</note>
       </notes>
       <segment>
         <source>Narzędzie wyłączone przez administratora.</source>
@@ -1202,7 +1210,7 @@
     </unit>
     <unit id="wizard.denied">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:122,123</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:121,122</note>
       </notes>
       <segment>
         <source>Brak uprawnienia</source>
@@ -1210,7 +1218,7 @@
     </unit>
     <unit id="wizard.request">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:130,131</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:129,130</note>
       </notes>
       <segment>
         <source>Złóż wniosek</source>
@@ -1218,7 +1226,7 @@
     </unit>
     <unit id="wizard.notConnected">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:139,140</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:138,139</note>
       </notes>
       <segment>
         <source>Konto niepołączone</source>
@@ -1226,7 +1234,7 @@
     </unit>
     <unit id="wizard.connect">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:143,144</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:142,143</note>
       </notes>
       <segment>
         <source>Połącz</source>
@@ -1234,7 +1242,7 @@
     </unit>
     <unit id="wizard.reconnect">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:151,152</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:150,151</note>
       </notes>
       <segment>
         <source>Wymaga ponownego połączenia</source>
@@ -1242,7 +1250,7 @@
     </unit>
     <unit id="wizard.connect2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:155,156</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:154,155</note>
       </notes>
       <segment>
         <source>Połącz</source>
@@ -1250,7 +1258,7 @@
     </unit>
     <unit id="wizard.confirmNote">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:163,165</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:162,164</note>
       </notes>
       <segment>
         <source>Wymaga kodu z Authenticatora.</source>
@@ -1258,7 +1266,7 @@
     </unit>
     <unit id="wizard.noTools">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:181,184</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:180,183</note>
       </notes>
       <segment>
         <source>Żadne narzędzie nie pasuje do wyszukiwania.</source>
@@ -1266,7 +1274,7 @@
     </unit>
     <unit id="wizard.needOne">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:186,188</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:185,187</note>
       </notes>
       <segment>
         <source> Wybierz co najmniej jedno narzędzie. </source>
@@ -1274,7 +1282,7 @@
     </unit>
     <unit id="wizard.back2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:191,192</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:190,191</note>
       </notes>
       <segment>
         <source> Wstecz </source>
@@ -1282,7 +1290,7 @@
     </unit>
     <unit id="wizard.create">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:200,202</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:199,201</note>
       </notes>
       <segment>
         <source> Utwórz link </source>
@@ -1290,7 +1298,7 @@
     </unit>
     <unit id="wizard.readyTitle">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:207,208</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:206,207</note>
       </notes>
       <segment>
         <source>Link &quot;<ph id="0" equiv="INTERPOLATION" disp="{{ form.controls.name.value.trim() }}"/>&quot; jest gotowy</source>
@@ -1298,7 +1306,7 @@
     </unit>
     <unit id="wizard.toList">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:215,216</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:214,215</note>
       </notes>
       <segment>
         <source> Wróć do listy </source>
