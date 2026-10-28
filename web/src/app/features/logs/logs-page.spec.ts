@@ -1,0 +1,250 @@
+import { HttpResponse, http } from 'msw';
+import { ActivityCall } from '../../api/generated';
+import { useMockApi } from '../../../testing/mock-api';
+import {
+  button,
+  configureTestApp,
+  labelled,
+  openRoute,
+  text,
+  until,
+} from '../../../testing/test-app';
+import { resultInfo } from './activity-labels';
+
+function call(overrides: Partial<ActivityCall> = {}): ActivityCall {
+  return {
+    requestId: '0192d1b2-7c3a-7d4e-8f10-000000000001',
+    ts: '2026-10-28T10:05:00.000Z',
+    client: 'claude-code',
+    tool: 'jira__get_issue',
+    risk: 'READ_ONLY',
+    result: 'ok',
+    errorCode: null,
+    ...overrides,
+  };
+}
+
+function select(id: string, value: string): void {
+  const element = document.getElementById(id) as HTMLSelectElement;
+  element.value = value;
+  element.dispatchEvent(new Event('change'));
+}
+
+describe('LogsPage', () => {
+  const { server } = useMockApi();
+
+  function recordQueries() {
+    const queries: URLSearchParams[] = [];
+    server.events.on('request:start', ({ request }) => {
+      const url = new URL(request.url);
+      if (url.pathname === '/api/v1/activity/calls') {
+        queries.push(url.searchParams);
+      }
+    });
+    return queries;
+  }
+
+  it('lists one row per call with time, client, tool, resource and result', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('confluence__delete_page'));
+
+    expect(text()).toContain('Czeka na potwierdzenie');
+    expect(text()).toContain('Claude Code');
+    expect(text()).toContain('Confluence DEV / 48213');
+    expect(text()).toContain('Wykonano');
+    expect(text()).toContain('Tylko Twoje wywołania. Wartości argumentów nie są tu pokazywane.');
+    expect(document.getElementById('logs-q')).toBeTruthy();
+    expect((document.getElementById('logs-period') as HTMLSelectElement).value).toBe('7d');
+    expect(text()).toContain('Wszystkie wyniki');
+    const ids = Array.from(document.querySelectorAll('tbody tr:not(.details) code')).map(
+      (node) => node.textContent,
+    );
+    expect(ids.filter((tool) => tool === 'jira__delete_issue').length).toBeGreaterThan(3);
+  });
+
+  it('shows the contract labels for every confirmation outcome, including unknown values', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Czeka na potwierdzenie'));
+
+    for (const label of [
+      'Potwierdzone kodem',
+      'Wygasło',
+      'Błędny kod',
+      'Unieważnione',
+      'Anulowane',
+      'Zablokowane przez oczekującą',
+      'Odmowa (brak uprawnienia)',
+      'Odmowa (poza zakresem linku)',
+      'Błąd',
+      'Inny wynik',
+    ]) {
+      expect(text(), label).toContain(label);
+    }
+    expect(resultInfo('result_from_a_newer_gateway').label).toBe('Inny wynik');
+    expect(resultInfo('constructor').label).toBe('Inny wynik');
+  });
+
+  it('shows the count of wrong codes and the explanation in the details of a row', async () => {
+    server.use(
+      http.get('/api/v1/activity/calls', () =>
+        HttpResponse.json([
+          call({
+            tool: 'jira__delete_issue',
+            risk: 'DESTRUCTIVE',
+            result: 'confirmed',
+            wrongCodeCount: 2,
+            virtualServer: 'przeglad-zgloszen',
+          }),
+          call({
+            requestId: '0192d1b2-7c3a-7d4e-8f10-000000000002',
+            result: 'blocked_by_pending',
+            errorCode: 'confirmation_blocked',
+          }),
+        ]),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Potwierdzone kodem'));
+    expect(document.querySelector('[data-testid="wrong-code-count"]')).toBeNull();
+
+    labelled('Pokaż szczegóły: jira__delete_issue').click();
+    await until(() =>
+      expect(document.querySelector('[data-testid="wrong-code-count"]')?.textContent).toBe('2'),
+    );
+    expect(text()).toContain('przeglad-zgloszen');
+    expect(text()).toContain('Usuwanie');
+    expect(labelled('Ukryj szczegóły: jira__delete_issue').getAttribute('aria-expanded')).toBe(
+      'true',
+    );
+  });
+
+  it('sends the filters to the API and starts again from the first page', async () => {
+    const queries = recordQueries();
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('confluence__delete_page'));
+    expect(queries[0].get('limit')).toBe('50');
+    expect(Date.parse(queries[0].get('from')!)).toBeLessThan(Date.now() - 6 * 86_400_000);
+    expect(queries[0].has('result')).toBe(false);
+    expect(queries[0].has('q')).toBe(false);
+
+    select('logs-group', 'confirmation');
+    await until(() => expect(queries.at(-1)?.get('result')).toBe('confirmation'));
+    await until(() => expect(text()).toContain('Czeka na potwierdzenie'));
+    expect(text()).not.toContain('Wykonano');
+
+    select('logs-period', '24h');
+    await until(() =>
+      expect(Date.parse(queries.at(-1)!.get('from')!)).toBeGreaterThan(Date.now() - 2 * 86_400_000),
+    );
+
+    const input = document.getElementById('logs-q') as HTMLInputElement;
+    input.value = '  ABC-1190 ';
+    input.dispatchEvent(new Event('input'));
+    await until(() => expect(queries.at(-1)?.get('q')).toBe('ABC-1190'));
+    expect(queries.at(-1)?.get('cursor')).toBeNull();
+  });
+
+  it('says so when no call matches the filters', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('confluence__delete_page'));
+    const input = document.getElementById('logs-q') as HTMLInputElement;
+    input.value = 'nothing-called-this';
+    input.dispatchEvent(new Event('input'));
+    await until(() => expect(text()).toContain('Żadne wywołanie nie pasuje do filtrów.'));
+  });
+
+  it('adds the next page with the cursor of the last answer', async () => {
+    const queries = recordQueries();
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Pokaż więcej'));
+    const before = document.querySelectorAll('tbody tr:not(.details)').length;
+    expect(before).toBe(50);
+
+    button('Pokaż więcej').click();
+    await until(() =>
+      expect(document.querySelectorAll('tbody tr:not(.details)').length).toBeGreaterThan(before),
+    );
+    expect(queries.at(-1)?.get('cursor')).toBe('c50');
+    await until(() => expect(text()).not.toContain('Pokaż więcej'));
+  });
+
+  it('keeps the rows and offers a retry when "Pokaż więcej" fails', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Pokaż więcej'));
+    server.use(
+      http.get(
+        '/api/v1/activity/calls',
+        () => HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
+        { once: true },
+      ),
+    );
+    button('Pokaż więcej').click();
+    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    expect(document.querySelectorAll('tbody tr:not(.details)').length).toBe(50);
+    button('Spróbuj ponownie').click();
+    await until(() => expect(text()).not.toContain('Usługa jest chwilowo niedostępna.'));
+  });
+
+  it('shows one error for the whole page when the list cannot be read', async () => {
+    server.use(
+      http.get('/api/v1/activity/calls', () =>
+        HttpResponse.json(
+          { error: 'upstream_unavailable', requestId: 'abcdef12-0000-0000-0000-000000000000' },
+          { status: 503 },
+        ),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Nie udało się pobrać danych.'));
+    expect(text()).toContain('abcdef12');
+    expect(document.querySelector('table')).toBeNull();
+  });
+
+  it('shows an empty state', async () => {
+    server.use(http.get('/api/v1/activity/calls', () => HttpResponse.json([])));
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Brak wywołań w wybranym okresie.'));
+  });
+
+  it('ignores an answer to a filter the user has already changed', async () => {
+    let first = true;
+    server.use(
+      http.get('/api/v1/activity/calls', async () => {
+        if (first) {
+          first = false;
+          await new Promise((resolve) => setTimeout(resolve, 150));
+          return HttpResponse.json([call({ tool: 'jira__stale_answer' })]);
+        }
+        return HttpResponse.json([call({ tool: 'jira__fresh_answer' })]);
+      }),
+    );
+    configureTestApp();
+    await openRoute('/logs');
+    select('logs-group', 'ok');
+    await until(() => expect(text()).toContain('jira__fresh_answer'));
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(text()).not.toContain('jira__stale_answer');
+  });
+
+  it('shows control characters in a resource as markers, not as invisible text', async () => {
+    server.use(
+      http.get('/api/v1/activity/calls', () =>
+        HttpResponse.json([
+          call({ resource: { type: 'Jira::Issue', id: `ABC${String.fromCodePoint(0x202e)}1` } }),
+        ]),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Jira ABC[U+202E]1'));
+  });
+});

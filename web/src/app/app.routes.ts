@@ -39,6 +39,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/links/link-config-page').then((m) => m.LinkConfigPage),
   },
   {
+    path: 'logs',
+    title: $localize`:@@route.logs:Logi audytowe`,
+    loadComponent: () => import('./features/logs/logs-page').then((m) => m.LogsPage),
+  },
+  {
     path: 'authenticator',
     pathMatch: 'full',
     title: $localize`:@@route.authenticatorMfa:Rejestracja Authenticatora`,

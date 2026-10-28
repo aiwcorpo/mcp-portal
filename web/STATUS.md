@@ -10,8 +10,68 @@ Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `
 | --- | --- | --- |
 | K1 | Kontrakty 3.0.1, klient i mock (Authenticator, potwierdzenia, logi); Authenticator: status w Połączeniach (brak, aktywny, zablokowany, wyłączony z banerem), kreator rejestracji 4 kroki z QR rysowanym lokalnie, błędy rejestracji, usunięcie, baner w katalogu i kreatorze linków (23-30, m33, m36-m39) | zrobiony |
 | K2 | Podgląd operacji `/confirm/<id>` (14, 15, m35): tylko odczyt, licznik, `viewed`, odpytywanie, "Anuluj operację", stany końcowe, argumenty jako niezaufany tekst | zrobiony |
-| K3 | Zakładka Logi (06): filtry, "Pokaż więcej", etykiety wyników, błędne kody w szczegółach | do zrobienia |
-| K4 | a11y AA, 360 px, e2e na MSW 3.0.1, README i STATUS | do zrobienia |
+| K3 | Zakładka Logi (06): filtry, "Pokaż więcej", etykiety wyników, błędne kody w szczegółach; "Ostatnie użycie" konta serwisowego z logów | zrobiony |
+| K4 | a11y AA, 360 px, e2e na MSW 3.0.1, README i STATUS | zrobiony |
+
+## M3: stan (2026-10-28)
+
+Kontrakty 3.0.1, klient wygenerowany ponownie (`npm run generate:api`), mock MSW rozszerzony o Authenticator,
+podgląd potwierdzeń i logi (`src/mocks/m3-mock.ts`, TOTP z ziarna w `src/mocks/totp.ts`, sprawdzony na wektorach
+RFC 6238). Usunięte: ekran decyzji i `identity_mismatch`, `confirmation_declined`.
+
+```
+npm test               Test Files 22 passed, Tests 223 passed
+npm run lint           All files pass linting.
+npm run i18n:check     bez różnic
+npm run e2e            144 passed, 8 skipped (zrzuty: tylko z SHOTS_DIR); desktop 1280 px i mobile-360; axe AA ciemny i jasny
+```
+
+Zrzuty: `<scratchpad>/m3-web-shots/`
+(`SHOTS_DIR=... npx playwright test e2e/screenshots.spec.ts` po `npm run build:e2e`). Obrazy: `mcp-portal-web:m3-<sha>`
+(skrypt w scratchpadzie koordynatora: `build-web-image.sh`, buduje z `git archive HEAD`).
+
+Co działa (zakres web, na mockach):
+- Authenticator (23-30, m33, m36-m39): sekcja w Połączeniach (brak, aktywny, zablokowany do HH:MM, wyłączony po
+  limicie dziennym z banerem i akcją "Zarejestruj ponownie"; bez odblokowania), kreator 4 kroków pod
+  `/authenticator/register` (i alias `/authenticator`), QR rysowany lokalnie jako SVG (biblioteka `qrcode-generator`
+  2.0.4; CSP blokuje obrazy `data:`), klucz i QR tylko w pamięci komponentu: czyszczone przy opuszczeniu kroku 2,
+  po zakończeniu, po wygaśnięciu, przy zniszczeniu komponentu i przy `pagehide`; po odświeżeniu kroku 2 wraca krok 1.
+  Klucza nie ma w URL, tytule, powiadomieniu, storage ani `history.state` (testy jednostkowe i e2e). Brak "pokaż
+  ponownie". Step-up MFA: `401 step_up_required` -> przekierowanie z `returnPath=/authenticator/register?mfa=ok`,
+  po powrocie rejestracja rusza sama; drugi `step_up_required` zaraz po powrocie to błąd, nie pętla. Usunięcie:
+  ostrzeżenie, MFA, powrót na `/connections?mfa=ok` i ponowne kliknięcie "Usuń" (celowo bez automatycznego
+  wykonania destrukcyjnej akcji z parametru adresu). Błędy: wygasła / 3 błędne kody (`enrollment_invalid`),
+  `invalid_code`, `already_registered`, 429, 503.
+- Baner "Zarejestruj Authenticator" w katalogu i w kroku narzędzi kreatora linków (warianty: brak, wyłączony,
+  zablokowany); tylko gdy jest użyteczne narzędzie z `requiresConfirmation`. Nieczytelny status Authenticatora nie
+  psuje katalogu (baner tylko podpowiada), a w Połączeniach daje błąd całej strony.
+- Podgląd `/confirm/<id>` (14, 15, m35): tylko odczyt; system, narzędzie, zasób, argumenty posortowane po nazwie
+  (także po stronie klienta), licznik, instrukcja "wpisz kod w sesji agenta", "Anuluj operację" (bez dialogu, bez
+  MFA; 404 -> komunikat z linkiem do logów; 503 -> nic nie anulowane), `viewed` jawnym POST dopiero po
+  wyrenderowaniu, gdy `document.visibilityState === 'visible'` i nie ma `prerendering`, ponawiany co poll przy błędzie
+  (ostrzeżenie, że "pierwsza wygrywa" nie działa), odpytywanie co 5 s i po powrocie na kartę, 404 -> "Ten link jest
+  nieaktualny.", po `expiresAt` "Czas minął." z "nie wpisuj kodu dla tej operacji". Bez nawigacji zakładkami (jak
+  makieta 14). Wartości od agenta: tylko interpolacja tekstu, `dir="ltr"`, `unicode-bidi: isolate`, `white-space:
+  pre-wrap`; znaki sterujące i bidi zamieniane na widoczne `[U+XXXX]`, a zapis `<U+XXXX>` z BFF też daje ostrzeżenie.
+  Test e2e z U+202E sprawdza, że kolejność wyświetlana zgadza się z logiczną.
+- Logi (06): filtry szukaj (debounce 300 ms, do 64 znaków), okres (24 h, 7 dni, 30 dni), grupa wyniku; "Pokaż
+  więcej" po `X-Next-Cursor`; etykiety z kontraktu (w tym Anulowane, Zablokowane przez oczekującą, Unieważnione),
+  nieznany wynik jako "Inny wynik" z surową wartością w szczegółach; szczegóły wiersza: liczba błędnych kodów,
+  ryzyko, link, kod błędu, identyfikator żądania; odpowiedź na nieaktualny filtr jest ignorowana; błąd całej strony.
+  "Ostatnie użycie" konta serwisowego w Połączeniach z najnowszego wywołania w logach (decyzja z 2026-10-28).
+- Katalog i kreator: "Wymaga kodu z Authenticatora", "Wyłączone przez administratora" (ten sam tekst w obu).
+
+## Różnice względem makiet v3 (M3)
+
+1. Zgodnie z decyzjami: bez `identity_mismatch`; "Połączono jako <konto>" także po zapisie PAT; bez "Odrzuć", za to
+   "Anuluj operację" w podglądzie; błąd całej strony; jeden wiersz logu na wywołanie; argumenty po nazwie (R-6).
+2. Argumenty w podglądzie pokazują serializację JSON z gatewaya (z cudzysłowami, np. `"DEV"`), nie wartość bez
+   cudzysłowów: odróżnia tekst od liczby i pokazuje spacje na brzegach.
+3. Etykiety wyników wg tabeli kontraktu (np. "Odmowa (brak uprawnienia)" zamiast samego "Odmowa"); wyniki
+   pomocnicze (`tool_disabled`, `credential_required`, `rate_limited`, `step_up_required`) mają własne etykiety.
+4. Krok 3 kreatora: "Wstecz" prowadzi do kroku 1 (klucza z kroku 2 nie da się pokazać drugi raz).
+5. Dodane stany spoza makiet: baner "zablokowany do HH:MM" (L-4), "już zarejestrowany" (L-7), powrót z MFA, 429.
+6. Logi: na 360 px wiersze są kartami z etykietami pól, szczegóły pod przyciskiem na prawej krawędzi karty.
 
 ## Kamienie M2
 
@@ -176,6 +236,12 @@ Kontrakty 2.2.5 (tarball w `package.json`, klient wygenerowany ponownie).
 
 ## Propozycje CC
 
+0. (M3) `ConfirmationArgument` nie ma pola o zneutralizowanych znakach; BFF zapisuje je w tekście jako `<U+XXXX>`
+   (ustalenie z koordynatorem), a web wykrywa wzorzec. Do rozważenia: pole `neutralised: boolean` albo opis wzorca
+   w kontrakcie, żeby nie zależeć od konwencji tekstowej. Ta sama uwaga dla `ActivityCall.resource.id`.
+0a. (M3) `ActivityCall` nie mówi, czy wywołanie dotarło do systemu docelowego; "Ostatnie użycie" konta serwisowego
+   liczone z najnowszego wywołania w logach obejmuje też odmowy i wygasłe potwierdzenia.
+
 1. (zamknięta, CC-111 w 2.2.4) `system=<system>` w przekierowaniu po błędzie OAuth.
 2. `PutSecretRequest`: nadal brak formatu dla poświadczenia Basic (jak w propozycji z M1); formularz obsługuje jeden
    token.
@@ -189,10 +255,7 @@ Kontrakty 2.2.5 (tarball w `package.json`, klient wygenerowany ponownie).
    :18730. Jeśli to przeszkadza, BFF mógłby mieć w profilu dev konfigurowalny adres frontendu dla `returnPath`.
 3. Czy "Wnioski" i "Logi audytowe" mają być w nawigacji już w M2 jako zablokowane pozycje? Obecnie ich nie ma.
 
-## Zostało (M3 i dalej)
+## Zostało (po M3)
 
-- Potwierdzenia akcji z kodem z Authenticatora (podgląd `/confirm/<id>`, rejestracja, baner "Zarejestruj
-  Authenticator", wersje 360 px) po wydaniu kontraktów 3.0.0.
-- Logi audytowe z filtrami (szukaj, okres, wynik, "Pokaż więcej").
 - Wnioski (lista, złożenie, `view_request` w katalogu).
 - Administracja (rejestr, różnice definicji, zatwierdzanie).

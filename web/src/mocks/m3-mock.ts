@@ -286,7 +286,7 @@ export function mockCalls(now: number): ActivityCall[] {
           resource: { type: 'Jira::Issue', id: `PAY-${100 + index}` },
           result: 'ok',
         },
-        now - 1_000 * 60 * 60 * 16 - index * (day / 3),
+        now - 1_000 * 60 * 60 * 16 - index * (day / 12),
         100 + index,
       ),
     );

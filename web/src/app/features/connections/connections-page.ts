@@ -12,11 +12,13 @@ import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import {
+  ActivityService,
   AuthenticatorService,
   AuthenticatorStatus,
   CatalogAction,
   CatalogService,
   PortalCatalogServer,
+  SystemId,
 } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
@@ -86,6 +88,8 @@ function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
 
 interface ConnectionsData {
   servers: PortalCatalogServer[];
+  /** Time of the newest call per system without a user connection (service account), from the activity log. */
+  lastCalls: Partial<Record<SystemId, string>>;
   authenticator: AuthenticatorStatus;
 }
 
@@ -113,6 +117,7 @@ interface ConnectionsData {
 export class ConnectionsPage implements OnInit {
   private readonly catalogApi = inject(CatalogService);
   private readonly authenticatorApi = inject(AuthenticatorService);
+  private readonly activityApi = inject(ActivityService);
   private readonly connectionActions = inject(ConnectionActions);
   private readonly router = inject(Router);
 
@@ -133,6 +138,10 @@ export class ConnectionsPage implements OnInit {
     const state = this.catalog();
     return state.status === 'ready' ? state.value.authenticator : null;
   });
+  private readonly lastCalls = computed(() => {
+    const state = this.catalog();
+    return state.status === 'ready' ? state.value.lastCalls : {};
+  });
   protected readonly rows = computed<ConnectionRow[]>(() =>
     (this.servers() ?? []).map((server) => {
       const type = server.connection?.type ?? server.credential?.defaultType;
@@ -142,7 +151,7 @@ export class ConnectionsPage implements OnInit {
         type: type ? credentialTypeLabel(type) : '',
         account: server.connection?.backendUser ?? null,
         validity: validityOf(server),
-        lastUsed: server.connection?.lastUsedAt ?? null,
+        lastUsed: server.connection?.lastUsedAt ?? this.lastCalls()[server.system] ?? null,
         actions: connectionRowActions(server),
       };
     }),
@@ -175,10 +184,50 @@ export class ConnectionsPage implements OnInit {
         firstValueFrom(this.catalogApi.getPortalCatalog()),
         firstValueFrom(this.authenticatorApi.getMyAuthenticator()),
       ]);
-      this.catalog.set({ status: 'ready', value: { servers: catalog.servers, authenticator } });
+      const lastCalls = await this.loadLastCalls(catalog.servers);
+      this.catalog.set({
+        status: 'ready',
+        value: { servers: catalog.servers, authenticator, lastCalls },
+      });
     } catch (error) {
       this.catalog.set({ status: 'error', failure: toApiFailure(error) });
     }
+  }
+
+  /**
+   * A service account has no connection record, so "Ostatnie użycie" comes from the newest call in the
+   * activity log (decision of 2026-10-28). The column is extra information: when the log cannot be read the
+   * cell stays empty and the rest of the page is shown.
+   */
+  private async loadLastCalls(
+    servers: PortalCatalogServer[],
+  ): Promise<Partial<Record<SystemId, string>>> {
+    const result: Partial<Record<SystemId, string>> = {};
+    await Promise.all(
+      servers
+        .filter(
+          (server) => !server.connection && server.credential?.defaultType === 'service-account',
+        )
+        .map(async (server) => {
+          try {
+            const [latest] = await firstValueFrom(
+              this.activityApi.listMyActivityCalls(
+                1,
+                undefined,
+                undefined,
+                undefined,
+                `${server.system}__`,
+              ),
+            );
+            if (latest) {
+              result[server.system] = latest.ts;
+            }
+          } catch {
+            // Left empty on purpose, see above.
+          }
+        }),
+    );
+    return result;
   }
 
   /** After a removal: only the registration is read again, so the section keeps its confirmation message. */

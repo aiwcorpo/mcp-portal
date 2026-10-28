@@ -219,4 +219,25 @@ test.describe('screenshots', () => {
     await expect(page.getByText('Wartości zawierają znaki sterujące.')).toBeVisible();
     await shot(page, project, '14-podglad-znaki-sterujace');
   });
+
+  test('logs (M3)', async ({ page }, info) => {
+    const project = info.project.name;
+    await page.goto('/logs?mockScenario=default');
+    await expect(page.getByText('Czeka na potwierdzenie')).toBeVisible();
+    await shot(page, project, '06-logi-audytowe');
+    await page.getByRole('button', { name: 'Pokaż szczegóły: jira__delete_issue' }).first().click();
+    await shot(page, project, '06-logi-szczegoly-bledne-kody');
+    await page.getByLabel('Wynik').selectOption({ label: 'Potwierdzenia kodem' });
+    await expect(page.getByRole('cell', { name: 'Wykonano' })).toHaveCount(0);
+    await shot(page, project, '06-logi-filtr-potwierdzenia');
+    await page.getByPlaceholder('Szukaj w logach').fill('nothing-called-this');
+    await expect(page.getByText('Żadne wywołanie nie pasuje do filtrów.')).toBeVisible();
+    await shot(page, project, '06-logi-brak-wynikow');
+    await page.goto('/logs?mockScenario=errors');
+    await expect(page.getByText('Nie udało się pobrać danych.')).toBeVisible();
+    await shot(page, project, '06-logi-blad-503');
+    await page.goto('/connections?mockScenario=default');
+    await expect(page.getByRole('rowheader', { name: 'Service Desk' })).toBeVisible();
+    await shot(page, project, '03-polaczenia-ostatnie-uzycie-z-logow');
+  });
 });

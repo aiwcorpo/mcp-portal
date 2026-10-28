@@ -1,0 +1,196 @@
+<h1 class="visually-hidden" i18n="@@logs.title">Logi audytowe</h1>
+
+<div class="filters" role="search">
+  <div class="field search">
+    <label for="logs-q" class="visually-hidden" i18n="@@logs.searchLabel">Szukaj w logach</label>
+    <input
+      id="logs-q"
+      type="search"
+      autocomplete="off"
+      [attr.maxlength]="searchMax"
+      [value]="search()"
+      (input)="onSearch($event)"
+      i18n-placeholder="@@logs.searchPlaceholder"
+      placeholder="Szukaj w logach"
+    />
+  </div>
+  <div class="field">
+    <label for="logs-period" class="visually-hidden" i18n="@@logs.periodLabel">Okres</label>
+    <select id="logs-period" [value]="period()" (change)="onPeriod($event)">
+      @for (option of periods; track option) {
+        <option [value]="option" [selected]="option === period()">{{ periodLabel(option) }}</option>
+      }
+    </select>
+  </div>
+  <div class="field">
+    <label for="logs-group" class="visually-hidden" i18n="@@logs.groupLabel">Wynik</label>
+    <select id="logs-group" [value]="group()" (change)="onGroup($event)">
+      @for (option of groups; track option) {
+        <option [value]="option" [selected]="option === group()">{{ groupLabel(option) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+@let state = page();
+@if (state.status === 'loading') {
+  <app-loading />
+} @else if (state.status === 'error') {
+  <app-load-error [failure]="state.failure" (retry)="load()" />
+} @else {
+  @if (moreFailure(); as failure) {
+    <app-error-notice [failure]="failure" [retryable]="true" (retry)="more()" />
+  }
+  @if (rows().length) {
+    <table class="table" role="table">
+      <caption class="visually-hidden" i18n="@@logs.caption">
+        Moje wywołania narzędzi, od najnowszych
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader" class="c-toggle">
+            <span class="visually-hidden" i18n="@@logs.colDetails">Szczegóły</span>
+          </th>
+          <th scope="col" role="columnheader" i18n="@@logs.colTime">Czas</th>
+          <th scope="col" role="columnheader" i18n="@@logs.colClient">Klient</th>
+          <th scope="col" role="columnheader" i18n="@@logs.colTool">Narzędzie</th>
+          <th scope="col" role="columnheader" i18n="@@logs.colResource">Zasób</th>
+          <th scope="col" role="columnheader" i18n="@@logs.colResult">Wynik</th>
+        </tr>
+      </thead>
+      @for (row of rows(); track row.key) {
+        @let open = expanded().has(row.key);
+        <tbody role="rowgroup">
+          <tr role="row">
+            <td role="cell" class="c-toggle">
+              <button
+                type="button"
+                class="toggle"
+                [attr.aria-expanded]="open"
+                [attr.aria-controls]="'details-' + row.key"
+                [attr.aria-label]="(open ? hideLabel : showLabel) + ': ' + row.call.tool"
+                (click)="toggle(row.key)"
+              >
+                <svg
+                  viewBox="0 0 12 12"
+                  width="12"
+                  height="12"
+                  aria-hidden="true"
+                  focusable="false"
+                  [class.open]="open"
+                >
+                  <path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </button>
+            </td>
+            <td
+              role="cell"
+              class="mono muted c-time"
+              data-label="Czas"
+              i18n-data-label="@@logs.colTime"
+            >
+              <time [attr.datetime]="row.call.ts">{{ row.call.ts | date: 'dd.MM HH:mm' }}</time>
+            </td>
+            <td role="cell" data-label="Klient" i18n-data-label="@@logs.colClient">
+              {{ row.client }}
+            </td>
+            <td role="cell" data-label="Narzędzie" i18n-data-label="@@logs.colTool">
+              <code class="tool">{{ row.call.tool }}</code>
+            </td>
+            <td
+              role="cell"
+              class="muted"
+              data-label="Zasób"
+              i18n-data-label="@@logs.colResource"
+              dir="ltr"
+            >
+              {{ row.resource }}
+            </td>
+            <td
+              role="cell"
+              [class]="'tone-' + row.result.tone"
+              data-label="Wynik"
+              i18n-data-label="@@logs.colResult"
+            >
+              {{ row.result.label }}
+            </td>
+          </tr>
+          @if (open) {
+            <tr role="row" class="details" [id]="'details-' + row.key">
+              <td role="cell" class="c-toggle"></td>
+              <td role="cell" colspan="5">
+                <dl class="facts">
+                  @if (row.result.explanation) {
+                    <p class="explain">{{ row.result.explanation }}</p>
+                  }
+                  @if (row.call.wrongCodeCount !== undefined) {
+                    <div>
+                      <dt i18n="@@logs.wrongCodes">Błędne kody</dt>
+                      <dd data-testid="wrong-code-count">{{ row.call.wrongCodeCount }}</dd>
+                    </div>
+                  }
+                  <div>
+                    <dt i18n="@@logs.risk">Ryzyko</dt>
+                    <dd>{{ row.call.risk ? riskLabel(row.call.risk) : '' }}</dd>
+                  </div>
+                  @if (row.call.virtualServer) {
+                    <div>
+                      <dt i18n="@@logs.link">Link</dt>
+                      <dd>{{ row.call.virtualServer }}</dd>
+                    </div>
+                  }
+                  @if (row.call.errorCode) {
+                    <div>
+                      <dt i18n="@@logs.errorCode">Kod błędu</dt>
+                      <dd>
+                        <code>{{ row.call.errorCode }}</code>
+                      </dd>
+                    </div>
+                  }
+                  @if (row.unknownResult) {
+                    <div>
+                      <dt i18n="@@logs.rawResult">Wynik (wartość z gatewaya)</dt>
+                      <dd>
+                        <code>{{ row.call.result }}</code>
+                      </dd>
+                    </div>
+                  }
+                  <div>
+                    <dt i18n="@@logs.requestId">Identyfikator żądania</dt>
+                    <dd>
+                      <code>{{ row.call.requestId }}</code>
+                    </dd>
+                  </div>
+                </dl>
+              </td>
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+    @if (cursor()) {
+      <div class="more">
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="moreBusy()"
+          (click)="more()"
+          i18n="@@logs.more"
+        >
+          Pokaż więcej
+        </button>
+      </div>
+    }
+  } @else {
+    <p class="muted none" role="status">
+      @if (filtered()) {
+        <ng-container i18n="@@logs.noMatches">Żadne wywołanie nie pasuje do filtrów.</ng-container>
+      } @else {
+        <ng-container i18n="@@logs.empty">Brak wywołań w wybranym okresie.</ng-container>
+      }
+    </p>
+  }
+  <p class="muted note" i18n="@@logs.note">
+    Tylko Twoje wywołania. Wartości argumentów nie są tu pokazywane.
+  </p>
+}

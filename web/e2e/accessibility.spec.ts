@@ -43,6 +43,7 @@ const PAGES = [
   { path: '/connect/jira', ready: 'Połącz Jira' },
   { path: '/connections', ready: 'Połączenia z systemami' },
   { path: '/authenticator/register', ready: 'Zarejestruj Authenticator' },
+  { path: '/logs', ready: 'Logi audytowe' },
   { path: '/links', ready: 'Moje linki' },
   { path: '/links/new', ready: 'Nowy link' },
   { path: '/links/przeglad-zgloszen', ready: 'Konfiguracja linku "Przegląd zgłoszeń"' },
@@ -99,6 +100,20 @@ for (const scheme of ['dark', 'light'] as const) {
     await expectNoViolations(page);
     await page.goto('/confirm/cnf_nie_ma');
     await expect(page.getByText('Ten link jest nieaktualny.')).toBeVisible();
+    await expectNoViolations(page);
+  });
+
+  test(`the log with details and filters has no violations (${scheme})`, async ({ page }) => {
+    await page.goto('/logs');
+    await useScheme(page, scheme);
+    await expect(page.getByText('Czeka na potwierdzenie')).toBeVisible();
+    await page.getByRole('button', { name: 'Pokaż szczegóły: jira__delete_issue' }).first().click();
+    await expectNoViolations(page);
+    await page.getByLabel('Wynik').selectOption({ label: 'Błędy' });
+    await expect(page.getByRole('cell', { name: 'Błąd' }).first()).toBeVisible();
+    await expectNoViolations(page);
+    await page.getByPlaceholder('Szukaj w logach').fill('nothing-called-this');
+    await expect(page.getByText('Żadne wywołanie nie pasuje do filtrów.')).toBeVisible();
     await expectNoViolations(page);
   });
 

@@ -137,6 +137,41 @@ describe('ConnectionsPage', () => {
     await until(() => expect(text()).toContain('Nie masz jeszcze żadnych połączeń'));
   });
 
+  describe('last use of a service account', () => {
+    function lastUseCell(): string {
+      return row('Service Desk').querySelectorAll('td')[3].textContent!.trim();
+    }
+
+    it('comes from the newest call in the activity log', async () => {
+      const queries: URLSearchParams[] = [];
+      server.events.on('request:start', ({ request }) => {
+        const url = new URL(request.url);
+        if (url.pathname === '/api/v1/activity/calls') {
+          queries.push(url.searchParams);
+        }
+      });
+      configureTestApp();
+      await openRoute('/connections');
+      await until(() => expect(text()).toContain('Service Desk'));
+      await until(() => expect(lastUseCell()).toMatch(/\d{2}\.\d{2}\.\d{4}|dziś \d{2}:\d{2}/));
+      expect(queries.map((query) => query.get('q'))).toEqual(['servicedesk__']);
+      expect(queries[0].get('limit')).toBe('1');
+    });
+
+    it('stays empty, without an error, when the log cannot be read', async () => {
+      server.use(
+        http.get('/api/v1/activity/calls', () =>
+          HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
+        ),
+      );
+      configureTestApp();
+      await openRoute('/connections');
+      await until(() => expect(text()).toContain('Service Desk'));
+      expect(lastUseCell()).toBe('—');
+      expect(text()).not.toContain('Nie udało się pobrać danych');
+    });
+  });
+
   describe('Authenticator section', () => {
     async function open(status: AuthenticatorStatus) {
       store.update({ authenticator: status });
