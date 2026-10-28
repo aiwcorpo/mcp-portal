@@ -106,12 +106,10 @@ describe('ConfirmPage', () => {
 
   it('warns that "first wins" is off when the view cannot be recorded, and retries', async () => {
     fast();
-    let failures = 1;
+    let failing = true;
     server.use(
       http.post(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}/viewed`, () =>
-        failures-- > 0
-          ? HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 })
-          : undefined,
+        failing ? HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }) : undefined,
       ),
     );
     configureTestApp();
@@ -119,6 +117,7 @@ describe('ConfirmPage', () => {
     await until(() =>
       expect(text()).toContain('Ochrona "pierwsza wygrywa" nie jest teraz aktywna'),
     );
+    failing = false;
     await until(() =>
       expect(text()).not.toContain('Ochrona "pierwsza wygrywa" nie jest teraz aktywna'),
     );
@@ -252,7 +251,9 @@ describe('ConfirmPage', () => {
       .map((node) => node.textContent ?? '')
       .join('|');
     expect(value).toContain('cleanup[U+202E]gnp.exe[U+2066] first line\nsecond line[U+0007]');
-    expect(document.body.textContent).not.toMatch(/[‮⁦\u0007]/u);
+    for (const code of [0x202e, 0x2066, 0x07]) {
+      expect(document.body.textContent).not.toContain(String.fromCodePoint(code));
+    }
     expect(text()).toContain('Wartości zawierają znaki sterujące.');
     for (const node of document.querySelectorAll('.untrusted')) {
       expect(node.getAttribute('dir')).toBe('ltr');
@@ -283,16 +284,14 @@ describe('neutraliseText', () => {
     });
   });
 
-  it.each([
-    ['‮', '[U+202E]'],
-    ['⁦', '[U+2066]'],
-    ['‏', '[U+200F]'],
-    [' ', '[U+2028]'],
-    ['\u0000', '[U+0000]'],
-    ['\u0085', '[U+0085]'],
-    ['\u007F', '[U+007F]'],
-    ['﻿', '[U+FEFF]'],
-  ])('replaces %j by a visible marker', (char, marker) => {
-    expect(neutraliseText(`a${char}b`)).toEqual({ text: `a${marker}b`, neutralised: true });
-  });
+  it.each([0x202e, 0x2066, 0x200f, 0x2028, 0x0000, 0x0085, 0x007f, 0xfeff])(
+    'replaces U+%s by a visible marker',
+    (code) => {
+      const marker = `[U+${code.toString(16).toUpperCase().padStart(4, '0')}]`;
+      expect(neutraliseText(`a${String.fromCodePoint(code)}b`)).toEqual({
+        text: `a${marker}b`,
+        neutralised: true,
+      });
+    },
+  );
 });

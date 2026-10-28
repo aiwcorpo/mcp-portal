@@ -50,7 +50,7 @@ export class App {
   protected readonly previewOpen = computed(() => this.path().startsWith('/confirm/'));
   /** Registering the Authenticator belongs to "Połączenia z systemami" (mockups 25-28). */
   protected readonly connectionsActive = computed(
-    () => this.path().startsWith('/connections') || this.path().startsWith('/authenticator/'),
+    () => this.path().startsWith('/connections') || this.path().startsWith('/authenticator'),
   );
 
   constructor() {

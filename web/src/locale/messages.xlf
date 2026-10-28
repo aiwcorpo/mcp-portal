@@ -114,9 +114,17 @@
         <source>Konfiguracja linku</source>
       </segment>
     </unit>
+    <unit id="route.authenticatorMfa">
+      <notes>
+        <note category="location">src/app/app.routes.ts:44</note>
+      </notes>
+      <segment>
+        <source>Rejestracja Authenticatora</source>
+      </segment>
+    </unit>
     <unit id="route.authenticatorRegister">
       <notes>
-        <note category="location">src/app/app.routes.ts:43</note>
+        <note category="location">src/app/app.routes.ts:50</note>
       </notes>
       <segment>
         <source>Rejestracja Authenticatora</source>
@@ -124,7 +132,7 @@
     </unit>
     <unit id="route.confirm">
       <notes>
-        <note category="location">src/app/app.routes.ts:49</note>
+        <note category="location">src/app/app.routes.ts:56</note>
       </notes>
       <segment>
         <source>Operacja czeka na kod</source>
@@ -132,7 +140,7 @@
     </unit>
     <unit id="route.notFound">
       <notes>
-        <note category="location">src/app/app.routes.ts:59</note>
+        <note category="location">src/app/app.routes.ts:66</note>
       </notes>
       <segment>
         <source>Nie znaleziono</source>
@@ -1229,10 +1237,10 @@
     </unit>
     <unit id="confirm.neutralised">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:67,69</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:67,68</note>
       </notes>
       <segment>
-        <source> Wartości zawierają znaki sterujące. Pokazano je w nawiasach kwadratowych jako [U+XXXX]. </source>
+        <source> Wartości zawierają znaki sterujące. Pokazano je jako [U+XXXX] albo &lt;U+XXXX&gt;. </source>
       </segment>
     </unit>
     <unit id="confirm.system">

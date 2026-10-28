@@ -90,7 +90,9 @@ test('a right-to-left override in an argument is shown as a marker and keeps the
     bidi: getComputedStyle(node).unicodeBidi,
     whiteSpace: getComputedStyle(node).whiteSpace,
   }));
-  expect(characters.text).not.toMatch(/[‮⁦\u0007]/u);
+  for (const code of [0x202e, 0x2066, 0x07]) {
+    expect(characters.text).not.toContain(String.fromCodePoint(code));
+  }
   expect(characters.text.indexOf('cleanup')).toBeLessThan(characters.text.indexOf('gnp.exe'));
   expect(characters.direction).toBe('ltr');
   expect(characters.bidi).toBe('isolate');

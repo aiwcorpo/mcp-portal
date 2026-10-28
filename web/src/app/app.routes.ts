@@ -39,6 +39,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/links/link-config-page').then((m) => m.LinkConfigPage),
   },
   {
+    path: 'authenticator',
+    pathMatch: 'full',
+    title: $localize`:@@route.authenticatorMfa:Rejestracja Authenticatora`,
+    loadComponent: () =>
+      import('./features/authenticator/register-page').then((m) => m.AuthenticatorRegisterPage),
+  },
+  {
     path: 'authenticator/register',
     title: $localize`:@@route.authenticatorRegister:Rejestracja Authenticatora`,
     loadComponent: () =>

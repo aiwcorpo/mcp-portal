@@ -24,8 +24,11 @@ export interface SafeText {
   neutralised: boolean;
 }
 
+/** The BFF may already have written a neutralised character as <U+202E>; that counts as neutralised too. */
+const WRITTEN_MARKER = /<U\+[0-9A-F]{4,6}>/;
+
 export function neutraliseText(value: string): SafeText {
-  let neutralised = false;
+  let neutralised = WRITTEN_MARKER.test(value);
   const text = value.replace(INVISIBLE, (char) => {
     neutralised = true;
     return `[U+${char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0')}]`;
