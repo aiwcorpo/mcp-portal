@@ -8,7 +8,7 @@ Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `
 
 | Kamień | Zakres | Stan |
 | --- | --- | --- |
-| K1 | Kontrakty 2.2.1 i regeneracja klienta; mock stanowy na `states`; motyw z makiet; powłoka (zakładki, Wyloguj); logowanie i `loginError` (00, 23, 25); katalog z 6 statusami i akcjami z tabeli (01, 02, 26); połączenia z "Ostatnie użycie" (03); formularz PAT bez MFA (04, 05); powroty z OAuth z `ConnectErrorCode` (21, 22) | zrobiony (commit "Portal web M2", patrz niżej) |
+| K1 | Kontrakty 2.2.1 i regeneracja klienta; mock stanowy na `states`; motyw z makiet; powłoka (zakładki, Wyloguj); logowanie i `loginError` (00, 23, 25); katalog z 6 statusami i akcjami z tabeli (01, 02, 26); połączenia z "Ostatnie użycie" (03); formularz PAT bez MFA (04, 05); powroty z OAuth z `ConnectErrorCode` (21, 22) | zrobiony (commit 31c23d8) |
 | K2 | Moje linki: lista, pusty stan, usuwanie, kreator Nazwa -> Narzędzia -> Gotowe z konfiguracją Claude Code / Copilot / Codex, 409, konfiguracja istniejącego linku (08-12, 14, 27) | zrobiony (ten sam commit co K1, bo powłoka, trasy i warstwa mocków są wspólne) |
 | K3 | Stany ogólne z `requestId` (24), e2e na mockach, axe, zrzuty 1280 i 360 px, README, STATUS | zrobiony |
 
