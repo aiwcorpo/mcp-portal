@@ -30,7 +30,7 @@ function serve(servers: PortalCatalogServer[]) {
 }
 
 describe('CatalogPage', () => {
-  const { server } = useMockApi();
+  const { server, store } = useMockApi();
 
   it('shows the example rows of the contract with status text and actions', async () => {
     configureTestApp();
@@ -49,6 +49,99 @@ describe('CatalogPage', () => {
     expect(text(row('Service Desk'))).toContain('Konto serwisowe');
     expect(text(row('Service Desk'))).toContain('Połączone');
     expect(document.body.textContent).not.toContain('Rozłącz');
+  });
+
+  describe('Authenticator banner', () => {
+    const destructive = serverFixture('jira', {
+      tools: [
+        toolFixture('jira__delete_issue', {
+          risk: 'DESTRUCTIVE',
+          action: 'delete',
+          requiresConfirmation: true,
+        }),
+      ],
+    });
+
+    it('asks to register when a tool needs a code and there is no registration', async () => {
+      server.use(serve([destructive]));
+      configureTestApp();
+      await openRoute('/catalog');
+      await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
+      expect(text()).toContain(
+        'Narzędzia "Usuwanie" wymagają kodu z Authenticatora, a nie masz go jeszcze zarejestrowanego.',
+      );
+      const link = Array.from(document.querySelectorAll('app-authenticator-banner a')).find(
+        (candidate) => candidate.textContent?.includes('Zarejestruj Authenticator'),
+      );
+      expect(link?.getAttribute('href')).toBe('/authenticator/register');
+    });
+
+    it('offers to register again when the daily limit switched it off', async () => {
+      store.update({
+        authenticator: {
+          state: 'disabled',
+          registeredAt: '2026-10-27T09:00:00Z',
+          disabledAt: '2026-10-28T11:00:00Z',
+          disabledReason: 'daily_failure_limit',
+        },
+      });
+      server.use(serve([destructive]));
+      configureTestApp();
+      await openRoute('/catalog');
+      await until(() => expect(text()).toContain('Zarejestruj ponownie'));
+      expect(text()).toContain('wyłączony po 20 błędnych kodach w ciągu doby');
+    });
+
+    it('names the end of a block and offers no unlock', async () => {
+      store.update({
+        authenticator: {
+          state: 'active',
+          registeredAt: '2026-10-27T09:00:00Z',
+          lockedUntil: '2026-10-28T14:35:00Z',
+        },
+      });
+      server.use(serve([destructive]));
+      configureTestApp();
+      await openRoute('/catalog');
+      await until(() => expect(text()).toMatch(/zablokowany do \d{2}:\d{2} po 5 błędnych kodach/));
+      expect(text()).not.toContain('Zarejestruj');
+      expect(text()).not.toContain('Odblokuj');
+    });
+
+    it('stays away when the registration is active or no tool needs a code', async () => {
+      store.update({ authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' } });
+      server.use(serve([destructive]));
+      configureTestApp();
+      await openRoute('/catalog');
+      await until(() => expect(text()).toContain('Jira'));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(text()).not.toContain('Authenticator jest');
+      expect(text()).not.toContain('Zarejestruj');
+    });
+
+    it('stays away when no tool needs a code', async () => {
+      server.use(serve([serverFixture('jira')]));
+      configureTestApp();
+      await openRoute('/catalog');
+      await until(() => expect(text()).toContain('Jira'));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(text()).not.toContain('Zarejestruj');
+    });
+
+    it('does not break the catalog when the registration cannot be read', async () => {
+      server.use(
+        serve([destructive]),
+        http.get('/api/v1/authenticator', () =>
+          HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
+        ),
+      );
+      configureTestApp();
+      await openRoute('/catalog');
+      await until(() => expect(text()).toContain('Jira'));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(text()).not.toContain('Zarejestruj');
+      expect(text()).not.toContain('Nie udało się pobrać danych');
+    });
   });
 
   describe('every status of a row', () => {

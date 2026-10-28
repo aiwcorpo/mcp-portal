@@ -1,0 +1,192 @@
+<p class="back">
+  <a routerLink="/connections" i18n="@@enroll.back">&larr; Połączenia z systemami</a>
+</p>
+
+@if (loadFailure(); as loadProblem) {
+  <app-load-error [failure]="loadProblem" (retry)="retryLoad()" />
+} @else if (step() === 'checking') {
+  <app-loading />
+} @else {
+  @let index = currentIndex();
+  @if (step() !== 'already' && step() !== 'failed') {
+    <ol class="steps" i18n-aria-label="@@enroll.stepsLabel" aria-label="Kroki rejestracji">
+      @for (item of steps; track item.key; let position = $index) {
+        <li
+          [attr.aria-current]="position === index ? 'step' : null"
+          [class.current]="position === index"
+        >
+          {{ position + 1 }}. {{ item.label() }}
+        </li>
+      }
+    </ol>
+  }
+
+  @if (failure(); as problem) {
+    <app-error-notice [failure]="problem" />
+  }
+
+  @switch (step()) {
+    @case ('already') {
+      <h1 i18n="@@enroll.alreadyTitle">Authenticator jest już zarejestrowany</h1>
+      <p class="lead" i18n="@@enroll.alreadyText">
+        Żeby zarejestrować go od nowa, najpierw usuń obecną rejestrację w Połączeniach z systemami.
+        Usunięcie wymaga potwierdzenia tożsamości (MFA).
+      </p>
+      <div class="actions end">
+        <a mat-flat-button routerLink="/connections" i18n="@@enroll.toConnections">
+          Wróć do połączeń
+        </a>
+      </div>
+    }
+    @case ('failed') {
+      <section class="panel" role="alert">
+        <h1 i18n="@@enroll.failedTitle">Rejestracja wygasła albo wpisano 3 błędne kody.</h1>
+        <p class="muted" i18n="@@enroll.failedText">
+          Zacznij od nowa. Usuń w aplikacji konto "MCP Platform" dodane przed chwilą.
+        </p>
+        <button mat-flat-button type="button" (click)="restart()" i18n="@@enroll.restart">
+          Zacznij od nowa
+        </button>
+      </section>
+    }
+    @case ('info') {
+      <h1 i18n="@@enroll.infoTitle">Zarejestruj Authenticator</h1>
+      <div class="text">
+        <p class="lead" i18n="@@enroll.infoLead">
+          Gdy agent chce wykonać operację nieodwracalną, na przykład usunąć stronę, wpisujesz w
+          sesji agenta 6-cyfrowy kod z aplikacji.
+        </p>
+        <p class="muted" i18n="@@enroll.infoApp">
+          Dodasz w Microsoft Authenticator osobne konto "MCP Platform". Robisz to raz.
+        </p>
+        <p class="muted" i18n="@@enroll.infoMfa">
+          "Dalej" poprosi o potwierdzenie tożsamości (MFA). Potrzebne tylko przy rejestracji i
+          usunięciu.
+        </p>
+      </div>
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="cancel()" i18n="@@enroll.cancel">
+          Anuluj
+        </button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="busy()"
+          (click)="start()"
+          i18n="@@enroll.next"
+        >
+          Dalej
+        </button>
+      </div>
+    }
+    @case ('starting') {
+      <app-loading />
+    }
+    @case ('scan') {
+      @let secret = seed();
+      <h1 i18n="@@enroll.scanTitle">Dodaj konto w aplikacji</h1>
+      @if (secret) {
+        <div class="scan">
+          <div class="qr">
+            <app-qr-code [value]="secret.otpauthUri" />
+          </div>
+          <div class="how">
+            <ol class="instructions">
+              <li i18n="@@enroll.how1">Otwórz Microsoft Authenticator.</li>
+              <li i18n="@@enroll.how2">Dodaj konto, a potem Inne konto.</li>
+              <li i18n="@@enroll.how3">Zeskanuj kod QR.</li>
+            </ol>
+            <p class="muted" i18n="@@enroll.manual">Nie możesz zeskanować? Wpisz klucz ręcznie.</p>
+            <div class="key-row">
+              <code class="key" data-testid="enrollment-key">{{ keyGroups() }}</code>
+              <button mat-stroked-button type="button" (click)="copyKey()" i18n="@@enroll.copy">
+                Kopiuj
+              </button>
+            </div>
+            <p class="copy-state" role="status">
+              @switch (copyState()) {
+                @case ('copied') {
+                  <ng-container i18n="@@enroll.copied">Klucz skopiowany do schowka.</ng-container>
+                }
+                @case ('failed') {
+                  <ng-container i18n="@@enroll.copyFailed"
+                    >Nie udało się skopiować. Zaznacz klucz i skopiuj go ręcznie.</ng-container
+                  >
+                }
+              }
+            </p>
+            <p class="warn-text" i18n="@@enroll.once">
+              Kod QR i klucz pokazujemy tylko teraz. Rejestracja ważna jeszcze
+              <span class="mono timer">{{ remainingText() }}</span
+              >.
+            </p>
+          </div>
+        </div>
+      }
+      <div class="actions wide">
+        <button mat-stroked-button type="button" (click)="cancel()" i18n="@@enroll.cancel2">
+          Anuluj
+        </button>
+        <button mat-flat-button type="button" (click)="toCodeStep()" i18n="@@enroll.next2">
+          Dalej
+        </button>
+      </div>
+    }
+    @case ('code') {
+      <h1 i18n="@@enroll.codeTitle">Wpisz pierwszy kod</h1>
+      <form class="narrow" (submit)="$event.preventDefault(); submit()" novalidate>
+        <div class="form-field">
+          <label for="enroll-code" i18n="@@enroll.codeLabel">Kod z aplikacji (6 cyfr)</label>
+          <input
+            id="enroll-code"
+            type="text"
+            class="mono"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="off"
+            spellcheck="false"
+            [formControl]="code"
+            aria-describedby="enroll-code-hint enroll-code-error"
+            [attr.aria-invalid]="codeWrong() || (codeAttempted() && code.invalid) ? 'true' : null"
+          />
+          @if (codeWrong()) {
+            <p id="enroll-code-error" class="error" role="alert" i18n="@@enroll.codeWrong">
+              Kod nieprawidłowy.
+            </p>
+          } @else if (codeAttempted() && code.invalid) {
+            <p id="enroll-code-error" class="error" role="alert" i18n="@@enroll.codeFormat">
+              Kod ma 6 cyfr.
+            </p>
+          }
+          <p id="enroll-code-hint" class="hint" i18n="@@enroll.codeHint">
+            Wpisz kod widoczny w aplikacji przy koncie "MCP Platform".
+          </p>
+        </div>
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="backToInfo()" i18n="@@enroll.back2">
+            Wstecz
+          </button>
+          <button mat-flat-button type="submit" [disabled]="busy()" i18n="@@enroll.check">
+            Sprawdź
+          </button>
+        </div>
+      </form>
+    }
+    @case ('done') {
+      <h1 i18n="@@enroll.doneTitle">Authenticator zarejestrowany</h1>
+      <div class="text">
+        <p class="lead" i18n="@@enroll.doneLead">
+          Od teraz operacje nieodwracalne potwierdzasz kodem z aplikacji.
+        </p>
+        <p class="muted" i18n="@@enroll.doneText">
+          Kod wpisujesz w sesji agenta, gdy o niego poprosi.
+        </p>
+      </div>
+      <div class="actions end">
+        <a mat-flat-button routerLink="/connections" i18n="@@enroll.toConnections2">
+          Wróć do połączeń
+        </a>
+      </div>
+    }
+  }
+}

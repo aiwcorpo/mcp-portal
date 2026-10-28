@@ -19,6 +19,18 @@ describe('auth URLs', () => {
     expect(safeReturnPath('//evil')).toBe('/');
   });
 
+  it('refuses the prefixes of the proxy, dot segments and semicolons (CC-099)', () => {
+    for (const path of ['/api', '/api/v1/me', '/s/mcp-jira/mcp', '/v/x/mcp', '/.well-known/x']) {
+      expect(isValidReturnPath(path)).toBe(false);
+    }
+    for (const path of ['/./catalog', '/a/../api', '/a/..', '/api;x', '/catalog;x=1']) {
+      expect(isValidReturnPath(path)).toBe(false);
+    }
+    for (const path of ['/apiary', '/vault', '/catalog?x=/api', '/authenticator/register?mfa=ok']) {
+      expect(isValidReturnPath(path)).toBe(true);
+    }
+  });
+
   it('builds the BFF login URL', () => {
     expect(loginUrl('/catalog')).toBe('/api/v1/auth/login?returnPath=%2Fcatalog');
     expect(loginUrl('/catalog', true)).toBe('/api/v1/auth/login?returnPath=%2Fcatalog&stepUp=true');

@@ -17,13 +17,7 @@ import { Observable }                                        from 'rxjs';
 import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 
 // @ts-ignore
-import { ConfirmationDecision } from '../model/confirmationDecision';
-// @ts-ignore
-import { ConfirmationOutcome } from '../model/confirmationOutcome';
-// @ts-ignore
 import { ConfirmationView } from '../model/confirmationView';
-// @ts-ignore
-import { InlineObject } from '../model/inlineObject';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -42,23 +36,20 @@ export class ConfirmationsService extends BaseService {
     }
 
     /**
-     * Approve or decline; requires fresh MFA. Approval returns the one-time confirmation code (CC-077).
-     * @endpoint post /api/v1/confirmations/{id}
+     * Cancel a pending confirmation from the preview (\&quot;Anuluj\&quot;; proxy to C5 cancelConfirmation, CC-128).
+     * A valid session and the CSRF header are enough, no fresh MFA: the call removes a pending operation and approves nothing. It is not a decision endpoint (the confirmation is still only the TOTP code typed in the client). Ends the \&quot;first wins after the preview\&quot; block and makes the next retry of the call fail with &#x60;confirmation_cancelled&#x60;. The gateway also burns the owner\&#39;s current TOTP codes at the broker, so a code typed for this operation and kept by the agent cannot confirm a new one; the user waits for the next code (30 to 60 s). &#x60;503&#x60; when that fails (nothing is cancelled). Idempotent; &#x60;404 not_found_or_denied&#x60; for a foreign, unknown, expired or superseded call. 
+     * @endpoint post /api/v1/confirmations/{id}/cancel
      * @param id 
-     * @param confirmationDecision 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ConfirmationOutcome>;
-    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ConfirmationOutcome>>;
-    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ConfirmationOutcome>>;
-    public decideMyConfirmation(id: string, confirmationDecision: ConfirmationDecision, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public cancelMyConfirmation(id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public cancelMyConfirmation(id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public cancelMyConfirmation(id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public cancelMyConfirmation(id: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling decideMyConfirmation.');
-        }
-        if (confirmationDecision === null || confirmationDecision === undefined) {
-            throw new Error('Required parameter confirmationDecision was null or undefined when calling decideMyConfirmation.');
+            throw new Error('Required parameter id was null or undefined when calling cancelMyConfirmation.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -80,15 +71,6 @@ export class ConfirmationsService extends BaseService {
         const localVarTransferCache: boolean = options?.transferCache ?? true;
 
 
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected !== undefined) {
-            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
-        }
-
         let responseType_: 'text' | 'json' | 'blob' = 'json';
         if (localVarHttpHeaderAcceptSelected) {
             if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
@@ -100,12 +82,11 @@ export class ConfirmationsService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/confirmations/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/confirmations/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/cancel`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<ConfirmationOutcome>('post', `${basePath}${localVarPath}`,
+        return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: confirmationDecision,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -117,7 +98,8 @@ export class ConfirmationsService extends BaseService {
     }
 
     /**
-     * Confirmation page data (proxy to C5; tool, system and arguments come from the gateway, never from the client); owner only, fresh MFA required (CC-034, CC-077).
+     * Read-only preview of a pending confirmation (proxy to C5; tool, system, resource and arguments come from the gateway, never from the client); owner only, a valid session is enough.
+     * Optional (CC-091): the code from the authenticator is accepted without opening this page. The page shows what the pending call really is, so a user who opens it sees the operation in a trusted channel and not only in the description given by the AI client. No buttons: the confirmation is the code typed in the client. A successful call has no side effect (a prefetch or prerender cannot mark the preview as viewed); the view is recorded by &#x60;markMyConfirmationViewed&#x60;. 
      * @endpoint get /api/v1/confirmations/{id}
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -162,6 +144,68 @@ export class ConfirmationsService extends BaseService {
         let localVarPath = `/api/v1/confirmations/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ConfirmationView>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Record that the preview is open and visible (proxy to C5 markConfirmationViewed, CC-127).
+     * The web app calls it once, only after the preview is rendered and visible (&#x60;document.prerendering&#x60; is false and &#x60;document.visibilityState&#x60; is &#x60;visible&#x60;), never during prefetch or prerender, and the BFF rejects the call unless &#x60;Sec-Fetch-Site&#x60; is &#x60;same-origin&#x60; and forwards no view for a request with &#x60;Sec-Purpose: prefetch&#x60; (defence in depth; the protection is the check in the web app and the CSRF header). Idempotent. Owner only. After it, a different DESTRUCTIVE operation of the user is refused with &#x60;confirmation_blocked&#x60; instead of superseding this one (CC-127). A &#x60;404&#x60; (the call was superseded or expired) is the cue to show \&quot;this link is out of date\&quot;. 
+     * @endpoint post /api/v1/confirmations/{id}/viewed
+     * @param id 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public markMyConfirmationViewed(id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public markMyConfirmationViewed(id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public markMyConfirmationViewed(id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public markMyConfirmationViewed(id: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling markMyConfirmationViewed.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/confirmations/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/viewed`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,

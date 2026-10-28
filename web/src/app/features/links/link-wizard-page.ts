@@ -21,6 +21,7 @@ import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { nonBlankValidator } from '../connect/secret-form';
+import { AuthenticatorBanner } from '../authenticator/authenticator-banner';
 import { LinkReady } from './link-ready';
 import { SLUG_PATTERN, suggestSlug } from './slug';
 
@@ -66,6 +67,7 @@ interface WizardData {
     MatButtonModule,
     MatCheckboxModule,
     RouterLink,
+    AuthenticatorBanner,
     ErrorNotice,
     LinkReady,
     LoadError,
@@ -133,6 +135,16 @@ export class LinkWizardPage {
           .map((tool) => ({ tool, block: toolBlock(server, tool) })),
       }))
       .filter((group) => group.rows.length);
+  });
+
+  protected readonly needsAuthenticator = computed(() => {
+    const state = this.data();
+    return (
+      state.status === 'ready' &&
+      state.value.servers.some((server) =>
+        server.tools.some((tool) => tool.requiresConfirmation && toolBlock(server, tool) === null),
+      )
+    );
   });
 
   protected readonly selectedNames = computed(() => {

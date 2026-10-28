@@ -1,5 +1,10 @@
-/** ReturnPath from the C4/C12 contract (CC-032): portal-relative, no percent-encoding, no backslash. */
-const RETURN_PATH = /^\/(?!\/)[A-Za-z0-9._~!$&'()*+,;=:@/?-]*$/;
+/**
+ * ReturnPath from the C4/C12 contract (CC-032, CC-099): portal-relative, no percent-encoding, no backslash,
+ * no semicolon, no dot segment, and none of the prefixes the reverse proxy sends to the BFF or the gateway
+ * (/api, /s, /v, /.well-known as whole segments).
+ */
+const RETURN_PATH =
+  /^(?![^?]*\/\.\.?(?:[/?]|$))(?!\/(?:api|s|v|\.well-known)(?:[/?]|$))\/(?!\/)[A-Za-z0-9._~!$&'()*+,=:@/?-]*$/;
 const RETURN_PATH_MAX = 512;
 
 export const LOGIN_PATH = '/api/v1/auth/login';

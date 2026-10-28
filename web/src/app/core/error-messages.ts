@@ -9,8 +9,17 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
     $localize`:@@error.confirmation_required:Ta operacja wymaga potwierdzenia.`,
   confirmation_failed: () =>
     $localize`:@@error.confirmation_failed:Potwierdzenie nie powiodło się lub wygasło.`,
-  confirmation_declined: () =>
-    $localize`:@@error.confirmation_declined:Operacja została odrzucona.`,
+  confirmation_superseded: () =>
+    $localize`:@@error.confirmation_superseded:Operacja została zastąpiona nowszą.`,
+  confirmation_cancelled: () =>
+    $localize`:@@error.confirmation_cancelled:Operacja została anulowana.`,
+  confirmation_blocked: () =>
+    $localize`:@@error.confirmation_blocked:Inna operacja nieodwracalna czeka na kod.`,
+  already_registered: () =>
+    $localize`:@@error.already_registered:Authenticator jest już zarejestrowany. Usuń go, żeby zarejestrować od nowa.`,
+  invalid_code: () => $localize`:@@error.invalid_code:Kod nieprawidłowy.`,
+  enrollment_invalid: () =>
+    $localize`:@@error.enrollment_invalid:Rejestracja wygasła albo wpisano 3 błędne kody.`,
   credential_required: () =>
     $localize`:@@error.credential_required:Najpierw połącz konto w tym systemie.`,
   not_found_or_denied: () =>

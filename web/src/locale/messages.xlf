@@ -36,7 +36,7 @@
     </unit>
     <unit id="shell.navLabel">
       <notes>
-        <note category="location">src/app/app.html:35,37</note>
+        <note category="location">src/app/app.html:36,38</note>
       </notes>
       <segment>
         <source>Nawigacja główna</source>
@@ -44,7 +44,7 @@
     </unit>
     <unit id="nav.catalog">
       <notes>
-        <note category="location">src/app/app.html:41,44</note>
+        <note category="location">src/app/app.html:42,45</note>
       </notes>
       <segment>
         <source>Serwery MCP</source>
@@ -52,7 +52,7 @@
     </unit>
     <unit id="nav.connections">
       <notes>
-        <note category="location">src/app/app.html:48,51</note>
+        <note category="location">src/app/app.html:49,52</note>
       </notes>
       <segment>
         <source>Połączenia z systemami</source>
@@ -60,7 +60,7 @@
     </unit>
     <unit id="nav.links">
       <notes>
-        <note category="location">src/app/app.html:55,58</note>
+        <note category="location">src/app/app.html:56,58</note>
       </notes>
       <segment>
         <source>Moje linki</source>
@@ -114,9 +114,17 @@
         <source>Konfiguracja linku</source>
       </segment>
     </unit>
+    <unit id="route.authenticatorRegister">
+      <notes>
+        <note category="location">src/app/app.routes.ts:43</note>
+      </notes>
+      <segment>
+        <source>Rejestracja Authenticatora</source>
+      </segment>
+    </unit>
     <unit id="route.notFound">
       <notes>
-        <note category="location">src/app/app.routes.ts:48</note>
+        <note category="location">src/app/app.routes.ts:54</note>
       </notes>
       <segment>
         <source>Nie znaleziono</source>
@@ -124,7 +132,7 @@
     </unit>
     <unit id="disconnect.title">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:128</note>
+        <note category="location">src/app/core/connection-actions.service.ts:127</note>
       </notes>
       <segment>
         <source>Rozłączyć konto <ph id="0" equiv="system" disp="name"/>?</source>
@@ -132,7 +140,7 @@
     </unit>
     <unit id="disconnect.message">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:129</note>
+        <note category="location">src/app/core/connection-actions.service.ts:128</note>
       </notes>
       <segment>
         <source>Portal usunie zapisane poświadczenie. Narzędzia tego systemu przestaną działać, dopóki nie połączysz konta ponownie.</source>
@@ -140,7 +148,7 @@
     </unit>
     <unit id="disconnect.confirm">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:130</note>
+        <note category="location">src/app/core/connection-actions.service.ts:129</note>
       </notes>
       <segment>
         <source>Rozłącz</source>
@@ -148,7 +156,7 @@
     </unit>
     <unit id="disconnect.done">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:149</note>
+        <note category="location">src/app/core/connection-actions.service.ts:148</note>
       </notes>
       <segment>
         <source>Rozłączono konto <ph id="0" equiv="system" disp="systemName(system)"/>.</source>
@@ -194,17 +202,57 @@
         <source>Potwierdzenie nie powiodło się lub wygasło.</source>
       </segment>
     </unit>
-    <unit id="error.confirmation_declined">
+    <unit id="error.confirmation_superseded">
       <notes>
         <note category="location">src/app/core/error-messages.ts:13</note>
       </notes>
       <segment>
-        <source>Operacja została odrzucona.</source>
+        <source>Operacja została zastąpiona nowszą.</source>
+      </segment>
+    </unit>
+    <unit id="error.confirmation_cancelled">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:15</note>
+      </notes>
+      <segment>
+        <source>Operacja została anulowana.</source>
+      </segment>
+    </unit>
+    <unit id="error.confirmation_blocked">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:17</note>
+      </notes>
+      <segment>
+        <source>Inna operacja nieodwracalna czeka na kod.</source>
+      </segment>
+    </unit>
+    <unit id="error.already_registered">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:19</note>
+      </notes>
+      <segment>
+        <source>Authenticator jest już zarejestrowany. Usuń go, żeby zarejestrować od nowa.</source>
+      </segment>
+    </unit>
+    <unit id="error.invalid_code">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:20</note>
+      </notes>
+      <segment>
+        <source>Kod nieprawidłowy.</source>
+      </segment>
+    </unit>
+    <unit id="error.enrollment_invalid">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:22</note>
+      </notes>
+      <segment>
+        <source>Rejestracja wygasła albo wpisano 3 błędne kody.</source>
       </segment>
     </unit>
     <unit id="error.credential_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:15</note>
+        <note category="location">src/app/core/error-messages.ts:24</note>
       </notes>
       <segment>
         <source>Najpierw połącz konto w tym systemie.</source>
@@ -212,7 +260,7 @@
     </unit>
     <unit id="error.not_found_or_denied">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:17</note>
+        <note category="location">src/app/core/error-messages.ts:26</note>
       </notes>
       <segment>
         <source>Nie znaleziono zasobu albo nie masz do niego dostępu.</source>
@@ -220,7 +268,7 @@
     </unit>
     <unit id="error.invalid_argument">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:18</note>
+        <note category="location">src/app/core/error-messages.ts:27</note>
       </notes>
       <segment>
         <source>Niepoprawne dane wejściowe.</source>
@@ -228,7 +276,7 @@
     </unit>
     <unit id="error.rate_limited">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:19</note>
+        <note category="location">src/app/core/error-messages.ts:28</note>
       </notes>
       <segment>
         <source>Za dużo żądań. Spróbuj ponownie za chwilę.</source>
@@ -236,7 +284,7 @@
     </unit>
     <unit id="error.step_up_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:21</note>
+        <note category="location">src/app/core/error-messages.ts:30</note>
       </notes>
       <segment>
         <source>Ta operacja wymaga ponownego uwierzytelnienia (MFA).</source>
@@ -244,7 +292,7 @@
     </unit>
     <unit id="error.upstream_unavailable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:23</note>
+        <note category="location">src/app/core/error-messages.ts:32</note>
       </notes>
       <segment>
         <source>Usługa jest chwilowo niedostępna.</source>
@@ -252,7 +300,7 @@
     </unit>
     <unit id="error.internal_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:25</note>
+        <note category="location">src/app/core/error-messages.ts:34</note>
       </notes>
       <segment>
         <source>Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.</source>
@@ -260,7 +308,7 @@
     </unit>
     <unit id="error.invalid_request">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:27</note>
+        <note category="location">src/app/core/error-messages.ts:36</note>
       </notes>
       <segment>
         <source>Żądanie zostało odrzucone jako niepoprawne.</source>
@@ -268,7 +316,7 @@
     </unit>
     <unit id="error.csrf_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:29</note>
+        <note category="location">src/app/core/error-messages.ts:38</note>
       </notes>
       <segment>
         <source>Formularz stracił ważność. Odśwież stronę i spróbuj ponownie.</source>
@@ -276,7 +324,7 @@
     </unit>
     <unit id="error.secret_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:30</note>
+        <note category="location">src/app/core/error-messages.ts:39</note>
       </notes>
       <segment>
         <source>Token nieprawidłowy albo wygasł.</source>
@@ -284,7 +332,7 @@
     </unit>
     <unit id="error.slug_taken">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:31</note>
+        <note category="location">src/app/core/error-messages.ts:40</note>
       </notes>
       <segment>
         <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
@@ -292,7 +340,7 @@
     </unit>
     <unit id="error.virtual_server_limit_reached">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:33</note>
+        <note category="location">src/app/core/error-messages.ts:42</note>
       </notes>
       <segment>
         <source>Osiągnięto limit linków. Usuń nieużywany link.</source>
@@ -300,7 +348,7 @@
     </unit>
     <unit id="error.resource_defaults_unsupported">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:35</note>
+        <note category="location">src/app/core/error-messages.ts:44</note>
       </notes>
       <segment>
         <source>Zawężanie zasobów nie jest jeszcze dostępne.</source>
@@ -308,7 +356,7 @@
     </unit>
     <unit id="error.hash_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:37</note>
+        <note category="location">src/app/core/error-messages.ts:46</note>
       </notes>
       <segment>
         <source>Definicja zmieniła się w międzyczasie. Odśwież widok.</source>
@@ -316,7 +364,7 @@
     </unit>
     <unit id="error.flow_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:39</note>
+        <note category="location">src/app/core/error-messages.ts:48</note>
       </notes>
       <segment>
         <source>Link połączenia wygasł albo był już użyty. Zacznij od nowa.</source>
@@ -324,7 +372,7 @@
     </unit>
     <unit id="error.provider_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:41</note>
+        <note category="location">src/app/core/error-messages.ts:50</note>
       </notes>
       <segment>
         <source>System nie odpowiedział poprawnie. Spróbuj za chwilę.</source>
@@ -332,7 +380,7 @@
     </unit>
     <unit id="error.cancelled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:42</note>
+        <note category="location">src/app/core/error-messages.ts:51</note>
       </notes>
       <segment>
         <source>Łączenie anulowane.</source>
@@ -340,7 +388,7 @@
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:51</note>
+        <note category="location">src/app/core/error-messages.ts:60</note>
       </notes>
       <segment>
         <source>Za dużo żądań. Spróbuj ponownie za <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -354,6 +402,543 @@
         <source>Portal MCP</source>
       </segment>
     </unit>
+    <unit id="authBanner.none">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-banner.ts:22,24</note>
+      </notes>
+      <segment>
+        <source>Narzędzia &quot;Usuwanie&quot; wymagają kodu z Authenticatora, a nie masz go jeszcze zarejestrowanego.</source>
+      </segment>
+    </unit>
+    <unit id="authBanner.register">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-banner.ts:25,27</note>
+      </notes>
+      <segment>
+        <source>Zarejestruj Authenticator</source>
+      </segment>
+    </unit>
+    <unit id="authBanner.disabled">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-banner.ts:31,33</note>
+      </notes>
+      <segment>
+        <source>Authenticator jest wyłączony po 20 błędnych kodach w ciągu doby, więc narzędzia &quot;Usuwanie&quot; nie zadziałają.</source>
+      </segment>
+    </unit>
+    <unit id="authBanner.registerAgain">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-banner.ts:34,37</note>
+      </notes>
+      <segment>
+        <source>Zarejestruj ponownie</source>
+      </segment>
+    </unit>
+    <unit id="authBanner.locked">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-banner.ts:40,41</note>
+      </notes>
+      <segment>
+        <source>Authenticator jest zablokowany do <ph id="0" equiv="INTERPOLATION" disp="{{ current.lockedUntil | date: &apos;HH:mm&apos; }}"/> po 5 błędnych kodach. Narzędzia &quot;Usuwanie&quot; zadziałają po tym czasie.</source>
+      </segment>
+    </unit>
+    <unit id="auth.title">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:2,3</note>
+      </notes>
+      <segment>
+        <source>Authenticator</source>
+      </segment>
+    </unit>
+    <unit id="auth.intro">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:4,8</note>
+      </notes>
+      <segment>
+        <source> Konto &quot;MCP Platform&quot; w Microsoft Authenticator. Kodem z niego potwierdzasz operacje nieodwracalne agentów. </source>
+      </segment>
+    </unit>
+    <unit id="auth.mfaDone">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:10,12</note>
+      </notes>
+      <segment>
+        <source> Tożsamość potwierdzona. Możesz teraz usunąć Authenticator. </source>
+      </segment>
+    </unit>
+    <unit id="auth.removed">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:15,17</note>
+      </notes>
+      <segment>
+        <source> Authenticator usunięty. Agent nie wykona operacji nieodwracalnych, dopóki nie zarejestrujesz go ponownie. </source>
+      </segment>
+    </unit>
+    <unit id="auth.disabledBanner">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:26,30</note>
+      </notes>
+      <segment>
+        <source> Authenticator został wyłączony po 20 błędnych kodach w ciągu doby. Agent nie wykona operacji nieodwracalnych, dopóki nie zarejestrujesz go ponownie. </source>
+      </segment>
+    </unit>
+    <unit id="auth.stateNone">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:36,38</note>
+      </notes>
+      <segment>
+        <source>Nie zarejestrowano</source>
+      </segment>
+    </unit>
+    <unit id="auth.stateDisabled">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:39,40</note>
+      </notes>
+      <segment>
+        <source>Wyłączony</source>
+      </segment>
+    </unit>
+    <unit id="auth.stateLocked">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:47,48</note>
+      </notes>
+      <segment>
+        <source>Zablokowany do <ph id="0" equiv="INTERPOLATION" disp="{{ current.lockedUntil | date: &apos;HH:mm&apos; }}"/></source>
+      </segment>
+    </unit>
+    <unit id="auth.lockReason">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:50,51</note>
+      </notes>
+      <segment>
+        <source>5 błędnych kodów w 15 minut</source>
+      </segment>
+    </unit>
+    <unit id="auth.stateActive">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:52,53</note>
+      </notes>
+      <segment>
+        <source>Aktywny</source>
+      </segment>
+    </unit>
+    <unit id="auth.since">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:56,57</note>
+      </notes>
+      <segment>
+        <source>od <ph id="0" equiv="INTERPOLATION" disp="{{ current.registeredAt | date: &apos;dd.MM.yyyy&apos; }}"/></source>
+      </segment>
+    </unit>
+    <unit id="auth.lastUsedToday">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:63,64</note>
+      </notes>
+      <segment>
+        <source>ostatnie użycie dziś <ph id="0" equiv="INTERPOLATION" disp="{{ lastUsed | date: &apos;HH:mm&apos; }}"/></source>
+      </segment>
+    </unit>
+    <unit id="auth.lastUsedOn">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:67,68</note>
+      </notes>
+      <segment>
+        <source>ostatnie użycie <ph id="0" equiv="INTERPOLATION" disp="{{ lastUsed | date: &apos;dd.MM.yyyy&apos; }}"/></source>
+      </segment>
+    </unit>
+    <unit id="auth.neverUsed">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:71,72</note>
+      </notes>
+      <segment>
+        <source>jeszcze nieużywany</source>
+      </segment>
+    </unit>
+    <unit id="auth.register">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:81,84</note>
+      </notes>
+      <segment>
+        <source>Zarejestruj</source>
+      </segment>
+    </unit>
+    <unit id="auth.registerAgain">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:86,89</note>
+      </notes>
+      <segment>
+        <source>Zarejestruj ponownie</source>
+      </segment>
+    </unit>
+    <unit id="auth.remove">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:98,99</note>
+      </notes>
+      <segment>
+        <source> Usuń </source>
+      </segment>
+    </unit>
+    <unit id="auth.lockHint">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:106,109</note>
+      </notes>
+      <segment>
+        <source> Blokadę zdejmuje tylko upływ czasu. Usunięcie i ponowna rejestracja jej nie skracają. </source>
+      </segment>
+    </unit>
+    <unit id="authRemove.title">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:59</note>
+      </notes>
+      <segment>
+        <source>Usunąć Authenticator?</source>
+      </segment>
+    </unit>
+    <unit id="authRemove.message">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:60</note>
+      </notes>
+      <segment>
+        <source>Bez Authenticatora agent nie wykona operacji nieodwracalnych. Usunięcie wymaga potwierdzenia tożsamości (MFA).</source>
+      </segment>
+    </unit>
+    <unit id="authRemove.confirm">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:61</note>
+      </notes>
+      <segment>
+        <source>Usuń</source>
+      </segment>
+    </unit>
+    <unit id="qr.label">
+      <notes>
+        <note category="location">src/app/features/authenticator/qr-code.ts:19,20</note>
+      </notes>
+      <segment>
+        <source>Kod QR do zeskanowania w aplikacji Authenticator</source>
+      </segment>
+    </unit>
+    <unit id="enroll.back">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:2,5</note>
+      </notes>
+      <segment>
+        <source>← Połączenia z systemami</source>
+      </segment>
+    </unit>
+    <unit id="enroll.stepsLabel">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:12,13</note>
+      </notes>
+      <segment>
+        <source>Kroki rejestracji</source>
+      </segment>
+    </unit>
+    <unit id="enroll.alreadyTitle">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:30,31</note>
+      </notes>
+      <segment>
+        <source>Authenticator jest już zarejestrowany</source>
+      </segment>
+    </unit>
+    <unit id="enroll.alreadyText">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:32,35</note>
+      </notes>
+      <segment>
+        <source> Żeby zarejestrować go od nowa, najpierw usuń obecną rejestrację w Połączeniach z systemami. Usunięcie wymaga potwierdzenia tożsamości (MFA). </source>
+      </segment>
+    </unit>
+    <unit id="enroll.toConnections">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:37,39</note>
+      </notes>
+      <segment>
+        <source> Wróć do połączeń </source>
+      </segment>
+    </unit>
+    <unit id="enroll.failedTitle">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:43,44</note>
+      </notes>
+      <segment>
+        <source>Rejestracja wygasła albo wpisano 3 błędne kody.</source>
+      </segment>
+    </unit>
+    <unit id="enroll.failedText">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:45,47</note>
+      </notes>
+      <segment>
+        <source> Zacznij od nowa. Usuń w aplikacji konto &quot;MCP Platform&quot; dodane przed chwilą. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.restart">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:48,50</note>
+      </notes>
+      <segment>
+        <source> Zacznij od nowa </source>
+      </segment>
+    </unit>
+    <unit id="enroll.infoTitle">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:53,55</note>
+      </notes>
+      <segment>
+        <source>Zarejestruj Authenticator</source>
+      </segment>
+    </unit>
+    <unit id="enroll.infoLead">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:56,58</note>
+      </notes>
+      <segment>
+        <source> Gdy agent chce wykonać operację nieodwracalną, na przykład usunąć stronę, wpisujesz w sesji agenta 6-cyfrowy kod z aplikacji. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.infoApp">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:60,62</note>
+      </notes>
+      <segment>
+        <source> Dodasz w Microsoft Authenticator osobne konto &quot;MCP Platform&quot;. Robisz to raz. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.infoMfa">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:63,65</note>
+      </notes>
+      <segment>
+        <source> &quot;Dalej&quot; poprosi o potwierdzenie tożsamości (MFA). Potrzebne tylko przy rejestracji i usunięciu. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.cancel">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:69,71</note>
+      </notes>
+      <segment>
+        <source> Anuluj </source>
+      </segment>
+    </unit>
+    <unit id="enroll.next">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:78,79</note>
+      </notes>
+      <segment>
+        <source> Dalej </source>
+      </segment>
+    </unit>
+    <unit id="enroll.scanTitle">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:87,89</note>
+      </notes>
+      <segment>
+        <source>Dodaj konto w aplikacji</source>
+      </segment>
+    </unit>
+    <unit id="enroll.how1">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:95,96</note>
+      </notes>
+      <segment>
+        <source>Otwórz Microsoft Authenticator.</source>
+      </segment>
+    </unit>
+    <unit id="enroll.how2">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:96,97</note>
+      </notes>
+      <segment>
+        <source>Dodaj konto, a potem Inne konto.</source>
+      </segment>
+    </unit>
+    <unit id="enroll.how3">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:97,99</note>
+      </notes>
+      <segment>
+        <source>Zeskanuj kod QR.</source>
+      </segment>
+    </unit>
+    <unit id="enroll.manual">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:99,100</note>
+      </notes>
+      <segment>
+        <source>Nie możesz zeskanować? Wpisz klucz ręcznie.</source>
+      </segment>
+    </unit>
+    <unit id="enroll.copy">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:103,104</note>
+      </notes>
+      <segment>
+        <source> Kopiuj </source>
+      </segment>
+    </unit>
+    <unit id="enroll.copied">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:109,110</note>
+      </notes>
+      <segment>
+        <source>Klucz skopiowany do schowka.</source>
+      </segment>
+    </unit>
+    <unit id="enroll.copyFailed">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:113,114</note>
+      </notes>
+      <segment>
+        <source>Nie udało się skopiować. Zaznacz klucz i skopiuj go ręcznie.</source>
+      </segment>
+    </unit>
+    <unit id="enroll.once">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:119,123</note>
+      </notes>
+      <segment>
+        <source> Kod QR i klucz pokazujemy tylko teraz. Rejestracja ważna jeszcze <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;mono timer&quot;&gt;" dispEnd="&lt;/span
+              &gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ remainingText() }}"/></pc>. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.cancel2">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:128,130</note>
+      </notes>
+      <segment>
+        <source> Anuluj </source>
+      </segment>
+    </unit>
+    <unit id="enroll.next2">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:131,132</note>
+      </notes>
+      <segment>
+        <source> Dalej </source>
+      </segment>
+    </unit>
+    <unit id="enroll.codeTitle">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:136,137</note>
+      </notes>
+      <segment>
+        <source>Wpisz pierwszy kod</source>
+      </segment>
+    </unit>
+    <unit id="enroll.codeLabel">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:139,141</note>
+      </notes>
+      <segment>
+        <source>Kod z aplikacji (6 cyfr)</source>
+      </segment>
+    </unit>
+    <unit id="enroll.codeWrong">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:154,156</note>
+      </notes>
+      <segment>
+        <source> Kod nieprawidłowy. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.codeFormat">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:158,160</note>
+      </notes>
+      <segment>
+        <source> Kod ma 6 cyfr. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.codeHint">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:162,164</note>
+      </notes>
+      <segment>
+        <source> Wpisz kod widoczny w aplikacji przy koncie &quot;MCP Platform&quot;. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.back2">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:167,168</note>
+      </notes>
+      <segment>
+        <source> Wstecz </source>
+      </segment>
+    </unit>
+    <unit id="enroll.check">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:170,171</note>
+      </notes>
+      <segment>
+        <source> Sprawdź </source>
+      </segment>
+    </unit>
+    <unit id="enroll.doneTitle">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:176,178</note>
+      </notes>
+      <segment>
+        <source>Authenticator zarejestrowany</source>
+      </segment>
+    </unit>
+    <unit id="enroll.doneLead">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:179,181</note>
+      </notes>
+      <segment>
+        <source> Od teraz operacje nieodwracalne potwierdzasz kodem z aplikacji. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.doneText">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:182,184</note>
+      </notes>
+      <segment>
+        <source> Kod wpisujesz w sesji agenta, gdy o niego poprosi. </source>
+      </segment>
+    </unit>
+    <unit id="enroll.toConnections2">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:187,190</note>
+      </notes>
+      <segment>
+        <source> Wróć do połączeń </source>
+      </segment>
+    </unit>
+    <unit id="enroll.stepInfo">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.ts:37</note>
+      </notes>
+      <segment>
+        <source>Informacja</source>
+      </segment>
+    </unit>
+    <unit id="enroll.stepScan">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.ts:38</note>
+      </notes>
+      <segment>
+        <source>Skanowanie</source>
+      </segment>
+    </unit>
+    <unit id="enroll.stepCode">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.ts:39</note>
+      </notes>
+      <segment>
+        <source>Pierwszy kod</source>
+      </segment>
+    </unit>
+    <unit id="enroll.stepDone">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.ts:40</note>
+      </notes>
+      <segment>
+        <source>Gotowe</source>
+      </segment>
+    </unit>
     <unit id="catalog.title">
       <notes>
         <note category="location">src/app/features/catalog/catalog-page.html:1,3</note>
@@ -364,7 +949,7 @@
     </unit>
     <unit id="catalog.searchPlaceholder">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:27,28</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:28,29</note>
       </notes>
       <segment>
         <source>Szukaj serwera lub narzędzia</source>
@@ -372,7 +957,7 @@
     </unit>
     <unit id="catalog.searchLabel">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:29,31</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:30,32</note>
       </notes>
       <segment>
         <source>Szukaj serwera lub narzędzia</source>
@@ -380,7 +965,7 @@
     </unit>
     <unit id="catalog.noMatches">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:40,44</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:41,45</note>
       </notes>
       <segment>
         <source> Żaden serwer ani narzędzie nie pasuje do wyszukiwania. </source>
@@ -388,7 +973,7 @@
     </unit>
     <unit id="catalog.emptyTitle">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:45,46</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:46,47</note>
       </notes>
       <segment>
         <source>Nie masz jeszcze dostępu do żadnego serwera MCP</source>
@@ -396,7 +981,7 @@
     </unit>
     <unit id="catalog.emptyText">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:47,51</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:48,52</note>
       </notes>
       <segment>
         <source> Dostęp nadaje system uprawnień. Po akceptacji wniosku serwery pojawią się tutaj. </source>
@@ -404,7 +989,7 @@
     </unit>
     <unit id="catalog.linkCopied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:91</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:108</note>
       </notes>
       <segment>
         <source>Skopiowano adres serwera <ph id="0" equiv="system" disp="systemName(server.system)"/>.</source>
@@ -412,7 +997,7 @@
     </unit>
     <unit id="catalog.linkCopyFailed">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:92</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:109</note>
       </notes>
       <segment>
         <source>Nie udało się skopiować adresu. Adres: <ph id="0" equiv="url" disp="server.url"/></source>
@@ -420,7 +1005,7 @@
     </unit>
     <unit id="catalog.requestCreated">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:118</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:135</note>
       </notes>
       <segment>
         <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
@@ -897,7 +1482,7 @@
     </unit>
     <unit id="connections.emptyText">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:118,122</note>
+        <note category="location">src/app/features/connections/connections-page.html:118,123</note>
       </notes>
       <segment>
         <source> Systemy pojawią się tutaj, gdy dostaniesz dostęp do serwera MCP. </source>
@@ -905,7 +1490,7 @@
     </unit>
     <unit id="conn.reconnectNeeded">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:40</note>
+        <note category="location">src/app/features/connections/connections-page.ts:56</note>
       </notes>
       <segment>
         <source>wymaga ponownego połączenia</source>
@@ -913,7 +1498,7 @@
     </unit>
     <unit id="conn.pending">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:45</note>
+        <note category="location">src/app/features/connections/connections-page.ts:61</note>
       </notes>
       <segment>
         <source>wniosek oczekuje</source>
@@ -921,7 +1506,7 @@
     </unit>
     <unit id="conn.noAccess">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:47</note>
+        <note category="location">src/app/features/connections/connections-page.ts:63</note>
       </notes>
       <segment>
         <source>brak uprawnienia</source>
@@ -929,7 +1514,7 @@
     </unit>
     <unit id="conn.autoRefreshed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:64</note>
+        <note category="location">src/app/features/connections/connections-page.ts:80</note>
       </notes>
       <segment>
         <source>odświeżane automatycznie</source>
@@ -937,7 +1522,7 @@
     </unit>
     <unit id="conn.noExpiry">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:65</note>
+        <note category="location">src/app/features/connections/connections-page.ts:81</note>
       </notes>
       <segment>
         <source>bez terminu</source>
@@ -945,7 +1530,7 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:150</note>
+        <note category="location">src/app/features/connections/connections-page.ts:217</note>
       </notes>
       <segment>
         <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
@@ -1170,7 +1755,7 @@
     </unit>
     <unit id="wizard.limitLink">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:74,77</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:75,78</note>
       </notes>
       <segment>
         <source>Przejdź do listy linków</source>
@@ -1178,7 +1763,7 @@
     </unit>
     <unit id="wizard.search">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:85,86</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:86,87</note>
       </notes>
       <segment>
         <source>Szukaj narzędzia</source>
@@ -1186,7 +1771,7 @@
     </unit>
     <unit id="wizard.searchLabel">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:87,89</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:88,90</note>
       </notes>
       <segment>
         <source>Szukaj narzędzia</source>
@@ -1194,7 +1779,7 @@
     </unit>
     <unit id="wizard.selectedCount">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:90,92</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:91,93</note>
       </notes>
       <segment>
         <source> Wybrano: <ph id="0" equiv="INTERPOLATION" disp="{{ selectedNames().length }}"/> </source>
@@ -1202,15 +1787,15 @@
     </unit>
     <unit id="wizard.disabled">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:116,117</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:117,118</note>
       </notes>
       <segment>
-        <source>Narzędzie wyłączone przez administratora.</source>
+        <source>Wyłączone przez administratora.</source>
       </segment>
     </unit>
     <unit id="wizard.denied">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:121,122</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:122,123</note>
       </notes>
       <segment>
         <source>Brak uprawnienia</source>
@@ -1218,7 +1803,7 @@
     </unit>
     <unit id="wizard.request">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:129,130</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:130,131</note>
       </notes>
       <segment>
         <source>Złóż wniosek</source>
@@ -1226,7 +1811,7 @@
     </unit>
     <unit id="wizard.notConnected">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:138,139</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:139,140</note>
       </notes>
       <segment>
         <source>Konto niepołączone</source>
@@ -1234,7 +1819,7 @@
     </unit>
     <unit id="wizard.connect">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:142,143</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:143,144</note>
       </notes>
       <segment>
         <source>Połącz</source>
@@ -1242,7 +1827,7 @@
     </unit>
     <unit id="wizard.reconnect">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:150,151</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:151,152</note>
       </notes>
       <segment>
         <source>Wymaga ponownego połączenia</source>
@@ -1250,7 +1835,7 @@
     </unit>
     <unit id="wizard.connect2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:154,155</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:155,156</note>
       </notes>
       <segment>
         <source>Połącz</source>
@@ -1258,7 +1843,7 @@
     </unit>
     <unit id="wizard.confirmNote">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:162,164</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:163,165</note>
       </notes>
       <segment>
         <source>Wymaga kodu z Authenticatora.</source>
@@ -1266,7 +1851,7 @@
     </unit>
     <unit id="wizard.noTools">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:180,183</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:181,184</note>
       </notes>
       <segment>
         <source>Żadne narzędzie nie pasuje do wyszukiwania.</source>
@@ -1274,7 +1859,7 @@
     </unit>
     <unit id="wizard.needOne">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:185,187</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:186,188</note>
       </notes>
       <segment>
         <source> Wybierz co najmniej jedno narzędzie. </source>
@@ -1282,7 +1867,7 @@
     </unit>
     <unit id="wizard.back2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:190,191</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:191,192</note>
       </notes>
       <segment>
         <source> Wstecz </source>
@@ -1290,7 +1875,7 @@
     </unit>
     <unit id="wizard.create">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:199,201</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:200,202</note>
       </notes>
       <segment>
         <source> Utwórz link </source>
@@ -1298,7 +1883,7 @@
     </unit>
     <unit id="wizard.readyTitle">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:206,207</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:207,208</note>
       </notes>
       <segment>
         <source>Link &quot;<ph id="0" equiv="INTERPOLATION" disp="{{ form.controls.name.value.trim() }}"/>&quot; jest gotowy</source>
@@ -1306,7 +1891,7 @@
     </unit>
     <unit id="wizard.toList">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:214,215</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:215,216</note>
       </notes>
       <segment>
         <source> Wróć do listy </source>
@@ -1314,7 +1899,7 @@
     </unit>
     <unit id="wizard.step.name">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:110</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:112</note>
       </notes>
       <segment>
         <source>Nazwa</source>
@@ -1322,7 +1907,7 @@
     </unit>
     <unit id="wizard.step.tools">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:111</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:113</note>
       </notes>
       <segment>
         <source>Narzędzia</source>
@@ -1330,7 +1915,7 @@
     </unit>
     <unit id="wizard.step.ready">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:112</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:114</note>
       </notes>
       <segment>
         <source>Gotowe</source>
@@ -1338,7 +1923,7 @@
     </unit>
     <unit id="wizard.slugTaken">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:196</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:208</note>
       </notes>
       <segment>
         <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
@@ -1346,7 +1931,7 @@
     </unit>
     <unit id="wizard.slugTaken2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:199</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:211</note>
       </notes>
       <segment>
         <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
@@ -1354,7 +1939,7 @@
     </unit>
     <unit id="wizard.slugRequired">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:203</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:215</note>
       </notes>
       <segment>
         <source>Podaj identyfikator.</source>
@@ -1362,7 +1947,7 @@
     </unit>
     <unit id="wizard.slugPattern">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:204</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:216</note>
       </notes>
       <segment>
         <source>Dozwolone są małe litery, cyfry i myślnik; identyfikator nie może zaczynać się ani kończyć myślnikiem (do 63 znaków).</source>
@@ -1370,7 +1955,7 @@
     </unit>
     <unit id="wizard.requestCreated">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:279</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:291</note>
       </notes>
       <segment>
         <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
@@ -1954,7 +2539,7 @@
     </unit>
     <unit id="oauth.connectedAs">
       <notes>
-        <note category="location">src/app/shared/oauth-return.ts:66</note>
+        <note category="location">src/app/shared/oauth-return.ts:62</note>
       </notes>
       <segment>
         <source>Połączono z <ph id="0" equiv="system" disp="named"/> jako <ph id="1" equiv="user" disp="backendUser"/>.</source>
@@ -1962,7 +2547,7 @@
     </unit>
     <unit id="oauth.flowInvalid">
       <notes>
-        <note category="location">src/app/shared/oauth-return.ts:70</note>
+        <note category="location">src/app/shared/oauth-return.ts:66</note>
       </notes>
       <segment>
         <source>Link połączenia wygasł albo był już użyty. Zacznij od nowa.</source>
@@ -1970,7 +2555,7 @@
     </unit>
     <unit id="oauth.cancelled">
       <notes>
-        <note category="location">src/app/shared/oauth-return.ts:73</note>
+        <note category="location">src/app/shared/oauth-return.ts:69</note>
       </notes>
       <segment>
         <source>Łączenie z <ph id="0" equiv="system" disp="named"/> anulowane.</source>
@@ -1978,7 +2563,7 @@
     </unit>
     <unit id="oauth.cancelledUnknown">
       <notes>
-        <note category="location">src/app/shared/oauth-return.ts:74</note>
+        <note category="location">src/app/shared/oauth-return.ts:70</note>
       </notes>
       <segment>
         <source>Łączenie anulowane.</source>
@@ -1986,7 +2571,7 @@
     </unit>
     <unit id="oauth.providerError">
       <notes>
-        <note category="location">src/app/shared/oauth-return.ts:77</note>
+        <note category="location">src/app/shared/oauth-return.ts:73</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="system" disp="named"/> nie odpowiedział poprawnie. Spróbuj za chwilę.</source>
@@ -1994,7 +2579,7 @@
     </unit>
     <unit id="oauth.providerErrorUnknown">
       <notes>
-        <note category="location">src/app/shared/oauth-return.ts:78</note>
+        <note category="location">src/app/shared/oauth-return.ts:74</note>
       </notes>
       <segment>
         <source>System nie odpowiedział poprawnie. Spróbuj za chwilę.</source>

@@ -17,7 +17,7 @@ export interface AuditEventResource {
      */
     id: string;
     /**
-     * Parent as <Namespace>::<Type>::<id>, e.g. Jira::Project::ABC (C8 example format).
+     * Parent as <Namespace>::<Type>::<id>, e.g. Jira::Project::ABC (C8 example format). The id part has the same exclusions as resource.id: C0 and C1 control characters, DEL, U+2028, U+2029 and the bidirectional controls U+202A..U+202E and U+2066..U+2069 (CC-031), because the value reaches the trusted preview and the activity view.
      */
     parent?: string;
 }

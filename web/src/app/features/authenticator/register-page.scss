@@ -1,0 +1,155 @@
+.back {
+  margin-bottom: 14px;
+}
+
+.back a {
+  color: var(--pm-muted);
+  text-decoration: none;
+}
+
+.back a:hover {
+  color: var(--pm-text);
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+  color: var(--pm-muted);
+  font-size: 13px;
+}
+
+.steps li:not(:last-child)::after {
+  content: '\00b7';
+  margin-inline: 6px;
+}
+
+.steps li.current {
+  color: var(--pm-text);
+  font-weight: 500;
+}
+
+h1 {
+  margin-bottom: 24px;
+}
+
+.text {
+  display: grid;
+  gap: 14px;
+  max-width: 540px;
+  margin-bottom: 28px;
+}
+
+.lead {
+  max-width: 540px;
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.narrow {
+  max-width: 420px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 820px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pm-border);
+}
+
+.actions.end {
+  justify-content: flex-end;
+}
+
+.narrow .actions {
+  margin-top: 24px;
+}
+
+.scan {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  gap: 32px;
+  max-width: 820px;
+  margin-bottom: 24px;
+}
+
+.qr {
+  padding: 0;
+  width: 264px;
+}
+
+.instructions {
+  margin: 0 0 16px;
+  padding-left: 20px;
+}
+
+.instructions li {
+  margin-bottom: 6px;
+}
+
+.key-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.key {
+  padding: 8px 12px;
+  border: 1px solid var(--pm-border-strong);
+  border-radius: var(--pm-radius);
+  background: var(--pm-surface);
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.copy-state {
+  min-height: 1.5em;
+  margin-top: 6px;
+  color: var(--pm-muted);
+  font-size: 13px;
+}
+
+.warn-text {
+  margin-top: 8px;
+  color: var(--pm-warn);
+}
+
+.timer {
+  margin-left: 0.3em;
+}
+
+.panel {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  max-width: 560px;
+  padding: 20px;
+  border: 1px solid var(--pm-border);
+  border-radius: 8px;
+  background: var(--pm-surface);
+}
+
+.panel h1 {
+  margin: 0;
+  font-size: 16px;
+}
+
+@media (max-width: 719px) {
+  .scan {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .qr {
+    width: min(264px, 100%);
+  }
+}

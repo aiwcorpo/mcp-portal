@@ -42,6 +42,7 @@ const PAGES = [
   { path: '/catalog', ready: 'Serwery MCP' },
   { path: '/connect/jira', ready: 'Połącz Jira' },
   { path: '/connections', ready: 'Połączenia z systemami' },
+  { path: '/authenticator/register', ready: 'Zarejestruj Authenticator' },
   { path: '/links', ready: 'Moje linki' },
   { path: '/links/new', ready: 'Nowy link' },
   { path: '/links/przeglad-zgloszen', ready: 'Konfiguracja linku "Przegląd zgłoszeń"' },
@@ -61,6 +62,29 @@ for (const scheme of ['dark', 'light'] as const) {
       await expectNoViolations(page);
     });
   }
+
+  test(`the registration steps and every Authenticator state have no violations (${scheme})`, async ({
+    page,
+  }) => {
+    await page.goto('/authenticator/register');
+    await useScheme(page, scheme);
+    await page.getByRole('button', { name: 'Dalej' }).click();
+    await expect(page.getByTestId('enrollment-key')).toBeVisible();
+    await expectNoViolations(page);
+    await page.getByRole('button', { name: 'Dalej' }).click();
+    await page.getByLabel('Kod z aplikacji (6 cyfr)').fill('000000');
+    await page.getByRole('button', { name: 'Sprawdź' }).click();
+    await expect(page.getByText('Kod nieprawidłowy.')).toBeVisible();
+    await expectNoViolations(page);
+    for (const state of ['none', 'active', 'locked', 'disabled']) {
+      await page.goto(`/connections?mockAuthenticator=${state}`);
+      await expect(page.getByRole('heading', { name: 'Authenticator' })).toBeVisible();
+      await expectNoViolations(page);
+    }
+    await page.goto('/catalog?mockAuthenticator=none');
+    await expect(page.getByText('Narzędzia "Usuwanie" wymagają kodu')).toBeVisible();
+    await expectNoViolations(page);
+  });
 
   test(`the tool step of the wizard and the ready step have no violations (${scheme})`, async ({
     page,

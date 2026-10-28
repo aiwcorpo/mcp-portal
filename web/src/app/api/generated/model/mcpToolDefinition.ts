@@ -10,7 +10,7 @@
 
 
 /**
- * Full MCP tool definition as returned by tools/list (CC-005). Input of definitionHash together with risk, action, resourceRefs and the server fields system and credential. title is hashed like description (CC-042); icons and _meta are not allowed in v1, because they would reach the client without being pinned.
+ * Full MCP tool definition as returned by tools/list (CC-005). Input of definitionHash together with risk, action, resourceRefs and the server fields system and credential. title is required (CC-115) and hashed like description (CC-042); icons and _meta are not allowed in v1, because they would reach the client without being pinned.
  */
 export interface McpToolDefinition { 
     /**
@@ -18,12 +18,12 @@ export interface McpToolDefinition {
      */
     name: string;
     /**
-     * Display name shown by MCP clients; part of definitionHash (CC-042).
+     * Display name shown by MCP clients; required since 3.0.0 (CC-115) and part of definitionHash (CC-042).
      */
-    title?: string;
+    title: string;
     description: string;
     /**
-     * JSON Schema of the arguments. Must not declare confirmation_code (reserved for the gateway, C11).
+     * JSON Schema of the arguments. Must not declare confirmation_code (reserved for the gateway, C11). Closed and bounded (CC-078, CC-123); checked by the semantic rules, because JSON Schema cannot express them for arbitrary nesting.
      */
     inputSchema: object;
     outputSchema?: object;

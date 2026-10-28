@@ -12,13 +12,22 @@ import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { OAuthReturnBanner } from '../../shared/oauth-return';
+import { AuthenticatorBanner } from '../authenticator/authenticator-banner';
 import { CatalogActionEvent, CatalogTable, matchesServer } from './catalog-table';
 
 type Banner = { kind: 'success'; text: string } | { kind: 'error'; failure: ApiFailure };
 
 @Component({
   selector: 'app-catalog-page',
-  imports: [CatalogTable, ErrorNotice, LoadError, Loading, Notice, OAuthReturnBanner],
+  imports: [
+    AuthenticatorBanner,
+    CatalogTable,
+    ErrorNotice,
+    LoadError,
+    Loading,
+    Notice,
+    OAuthReturnBanner,
+  ],
   templateUrl: './catalog-page.html',
   styleUrl: './catalog-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +47,14 @@ export class CatalogPage {
     const state = this.catalog();
     return state.status === 'ready' ? state.value : null;
   });
+  /** Tools the user can use but only with a code from the Authenticator (mockup 23). */
+  protected readonly needsAuthenticator = computed(() =>
+    (this.loadedServers() ?? []).some((server) =>
+      server.tools.some(
+        (tool) => tool.requiresConfirmation && !tool.disabled && tool.access === 'granted',
+      ),
+    ),
+  );
   protected readonly visibleServers = computed(() =>
     (this.loadedServers() ?? []).filter((server) => matchesServer(server, this.query())),
   );

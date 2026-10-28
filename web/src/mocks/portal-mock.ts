@@ -4,6 +4,7 @@ import {
   portalBffExamples,
 } from '@aiwcorpo/mcp-contracts/msw';
 import { http, HttpResponse, type HttpHandler } from 'msw';
+import { M3State, createM3Handlers, initialM3State } from './m3-mock';
 import type {
   CatalogAction,
   CatalogCredential,
@@ -20,7 +21,7 @@ import type {
 } from '../app/api/generated';
 
 /**
- * Stateful layer over the contract MSW handlers (@aiwcorpo/mcp-contracts 2.2.3). Response bodies come
+ * Stateful layer over the contract MSW handlers (@aiwcorpo/mcp-contracts 3.0.1). Response bodies come
  * from the C12 examples (catalog `states` or `mixed`); the layer tracks what the contract mock cannot:
  * the session, the connections the user adds or removes, access requests and virtual servers. Requests
  * it does not handle fall through to the contract handlers, which also enforce the CSRF rule.
@@ -42,7 +43,7 @@ export interface MockLink {
   tools: string[];
 }
 
-export interface MockState {
+export interface MockState extends M3State {
   session: boolean;
   scenario: MockScenario;
   oauthOutcome: MockOAuthOutcome;
@@ -84,6 +85,7 @@ export function initialMockState(): MockState {
     requested: [],
     links: null,
     pendingOAuth: null,
+    ...initialM3State(),
   };
 }
 
@@ -315,9 +317,9 @@ function csrfValid(request: Request, cookies: Record<string, string>): boolean {
   return Boolean(header) && header === cookies['__Host-XSRF-TOKEN'];
 }
 
-function failure(error: string, status: number): Response {
+function failure(error: string, status: number, extra: Record<string, unknown> = {}): Response {
   return HttpResponse.json(
-    { error, requestId: MOCK_REQUEST_ID },
+    { error, requestId: MOCK_REQUEST_ID, ...extra },
     { status, headers: { 'X-Request-Id': MOCK_REQUEST_ID } },
   );
 }
@@ -474,7 +476,15 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       return new HttpResponse(null, { status: 204 });
     }),
   ];
-  return [...stateful, ...createPortalBffHandlers({ baseUrl })];
+  const m3 = createM3Handlers(store, {
+    at,
+    csrfValid,
+    failure,
+    unauthenticated: () =>
+      store.state.session ? undefined : portalBffExample('getMe', 'unauthenticated'),
+    requestId: MOCK_REQUEST_ID,
+  });
+  return [...stateful, ...m3, ...createPortalBffHandlers({ baseUrl })];
 }
 
 /** What the BFF and the IdP would do after a successful login. */

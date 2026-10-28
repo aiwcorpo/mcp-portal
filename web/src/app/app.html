@@ -32,29 +32,31 @@
         </button>
       </div>
     </div>
-    <nav class="tabs" i18n-aria-label="@@shell.navLabel" aria-label="Nawigacja główna">
-      <a
-        routerLink="/catalog"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        i18n="@@nav.catalog"
-        >Serwery MCP</a
-      >
-      <a
-        routerLink="/connections"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        i18n="@@nav.connections"
-        >Połączenia z systemami</a
-      >
-      <a
-        routerLink="/links"
-        routerLinkActive="active"
-        ariaCurrentWhenActive="page"
-        i18n="@@nav.links"
-        >Moje linki</a
-      >
-    </nav>
+    @if (!previewOpen()) {
+      <nav class="tabs" i18n-aria-label="@@shell.navLabel" aria-label="Nawigacja główna">
+        <a
+          routerLink="/catalog"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          i18n="@@nav.catalog"
+          >Serwery MCP</a
+        >
+        <a
+          routerLink="/connections"
+          [class.active]="connectionsActive()"
+          [attr.aria-current]="connectionsActive() ? 'page' : null"
+          i18n="@@nav.connections"
+          >Połączenia z systemami</a
+        >
+        <a
+          routerLink="/links"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          i18n="@@nav.links"
+          >Moje linki</a
+        >
+      </nav>
+    }
   </header>
 }
 

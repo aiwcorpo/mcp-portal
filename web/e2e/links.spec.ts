@@ -15,7 +15,7 @@ test('create a link, then copy the Claude Code, Copilot and Codex configuration'
 
   await expect(page.getByRole('heading', { level: 1, name: 'Wybierz narzędzia' })).toBeVisible();
   await expect(page.getByRole('checkbox', { name: /gitlab__get_project/ })).toBeDisabled();
-  await expect(page.getByText('Narzędzie wyłączone przez administratora.')).toBeVisible();
+  await expect(page.getByText('Wyłączone przez administratora.')).toBeVisible();
   await expect(
     page.getByText('Konto niepołączone').or(page.getByText('Wymaga ponownego połączenia')).first(),
   ).toBeVisible();

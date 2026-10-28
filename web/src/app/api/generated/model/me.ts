@@ -18,7 +18,7 @@ export interface Me {
      */
     isAdmin: boolean;
     /**
-     * Until when the last MFA authentication counts as fresh for step-up protected operations (CC-053). Absent when MFA is not fresh or unknown. Informational only; the BFF still enforces step-up on the operations that need it (confirmations until the confirmation channel changes; PUT secret does not, CC-090), so the frontend uses it to start step-up before showing a form that needs it.
+     * Until when the last MFA authentication counts as fresh for step-up protected operations (CC-053). Absent when MFA is not fresh or unknown. Informational only; the BFF still enforces step-up on the operations that need it (registering and removing the authenticator, CC-093; PUT secret does not, CC-090), so the frontend uses it to start step-up before showing a form that needs it.
      */
     mfaFreshUntil?: string;
 }

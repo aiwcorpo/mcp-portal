@@ -18,6 +18,7 @@
 } @else if (state.status === 'error') {
   <app-load-error [failure]="state.failure" (retry)="load()" />
 } @else if (state.value.length) {
+  <app-authenticator-banner [needed]="needsAuthenticator()" />
   <input
     type="search"
     class="searchbox"

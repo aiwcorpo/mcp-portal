@@ -1,5 +1,7 @@
 import { join } from 'node:path';
 import type { Page } from '@playwright/test';
+import { MOCK_TOTP_SEED } from '../src/mocks/m3-mock';
+import { currentCode } from '../src/mocks/totp';
 import { expect, test } from './fixtures';
 
 /**
@@ -112,5 +114,88 @@ test.describe('screenshots', () => {
     await page.goto('/nie-ma-takiej-strony');
     await expect(page.getByText('Nie ma takiej strony.')).toBeVisible();
     await shot(page, project, '24-stan-404');
+  });
+
+  test('authenticator (M3)', async ({ page, context }, info) => {
+    const project = info.project.name;
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+
+    await page.goto('/catalog?mockScenario=default');
+    await page.getByRole('button', { name: /^Pokaż narzędzia \(Jira\)/ }).click();
+    await expect(page.getByText('Narzędzia "Usuwanie" wymagają kodu')).toBeVisible();
+    await shot(page, project, '23-baner-zarejestruj-authenticator');
+
+    for (const [state, name] of [
+      ['none', '24-authenticator-nie-zarejestrowano'],
+      ['active', '24-authenticator-aktywny'],
+      ['locked', '24-authenticator-zablokowany'],
+      ['disabled', '24-authenticator-wylaczony'],
+    ] as const) {
+      await page.goto(`/connections?mockAuthenticator=${state}`);
+      await expect(page.getByRole('heading', { name: 'Authenticator' })).toBeVisible();
+      await shot(page, project, name);
+    }
+
+    await page.goto('/catalog?mockAuthenticator=locked');
+    await expect(page.getByText(/Authenticator jest zablokowany do/)).toBeVisible();
+    await shot(page, project, '23-baner-zablokowany');
+    await page.goto('/catalog?mockAuthenticator=disabled');
+    await expect(page.getByText(/Authenticator jest wyłączony/)).toBeVisible();
+    await shot(page, project, '23-baner-wylaczony');
+
+    await page.goto('/authenticator/register?mockAuthenticator=none');
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Zarejestruj Authenticator' }),
+    ).toBeVisible();
+    await shot(page, project, '25-rejestracja-1-informacja');
+    await page.getByRole('button', { name: 'Dalej' }).click();
+    await expect(page.getByTestId('enrollment-key')).toBeVisible();
+    await shot(page, project, '26-rejestracja-2-qr-i-klucz');
+    const key = (await page.getByTestId('enrollment-key').innerText()).replace(/\s/g, '');
+    expect(key).toBe(MOCK_TOTP_SEED);
+    await page.getByRole('button', { name: 'Dalej' }).click();
+    await expect(page.getByLabel('Kod z aplikacji (6 cyfr)')).toBeVisible();
+    await page.getByLabel('Kod z aplikacji (6 cyfr)').fill('481');
+    await page.getByRole('button', { name: 'Sprawdź' }).click();
+    await expect(page.getByText('Kod ma 6 cyfr.')).toBeVisible();
+    await page.getByLabel('Kod z aplikacji (6 cyfr)').fill('481000');
+    await page.getByRole('button', { name: 'Sprawdź' }).click();
+    await expect(page.getByText('Kod nieprawidłowy.')).toBeVisible();
+    await shot(page, project, '27-rejestracja-3-pierwszy-kod-blad');
+    await page.getByLabel('Kod z aplikacji (6 cyfr)').fill(await currentCode(MOCK_TOTP_SEED));
+    await page.getByRole('button', { name: 'Sprawdź' }).click();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Authenticator zarejestrowany' }),
+    ).toBeVisible();
+    await shot(page, project, '28-rejestracja-4-gotowe');
+
+    await page.goto('/authenticator/register?mockAuthenticator=none');
+    await page.getByRole('button', { name: 'Dalej' }).click();
+    await page.getByRole('button', { name: 'Dalej' }).click();
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await page.getByLabel('Kod z aplikacji (6 cyfr)').fill('000000');
+      await page.getByRole('button', { name: 'Sprawdź' }).click();
+      if (attempt === 0) {
+        await expect(page.getByText('Kod nieprawidłowy.')).toBeVisible();
+      }
+    }
+    await expect(page.getByText('Rejestracja wygasła albo wpisano 3 błędne kody.')).toBeVisible();
+    await shot(page, project, '29-rejestracja-wygasla-lub-3-bledne-kody');
+
+    await page.goto('/authenticator/register?mockAuthenticator=active');
+    await expect(page.getByText('Authenticator jest już zarejestrowany')).toBeVisible();
+    await shot(page, project, '29-rejestracja-already-registered');
+
+    await page.goto('/connections?mockAuthenticator=active');
+    await page.getByRole('button', { name: 'Usuń', exact: true }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await shot(page, project, '30-usuniecie-authenticatora');
+    await page.getByRole('button', { name: 'Anuluj' }).click();
+
+    await page.goto('/links/new?mockScenario=default&mockAuthenticator=none');
+    await page.getByLabel('Nazwa').fill('Zestaw');
+    await page.getByRole('button', { name: 'Dalej' }).click();
+    await expect(page.getByText('Narzędzia "Usuwanie" wymagają kodu')).toBeVisible();
+    await shot(page, project, '12-kreator-narzedzia-baner');
   });
 });

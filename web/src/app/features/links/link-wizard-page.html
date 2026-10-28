@@ -62,6 +62,7 @@
 
     @case ('tools') {
       <h1 i18n="@@wizard.toolsTitle">Wybierz narzędzia</h1>
+      <app-authenticator-banner [needed]="needsAuthenticator()" />
       @if (info(); as text) {
         <app-notice kind="success" [dismissible]="true" (dismiss)="info.set(null)">{{
           text
@@ -113,7 +114,7 @@
                   @switch (row.block) {
                     @case ('disabled') {
                       <span class="note muted" i18n="@@wizard.disabled"
-                        >Narzędzie wyłączone przez administratora.</span
+                        >Wyłączone przez administratora.</span
                       >
                     }
                     @case ('denied') {

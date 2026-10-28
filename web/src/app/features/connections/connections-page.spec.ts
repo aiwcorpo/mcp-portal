@@ -1,4 +1,5 @@
 import { HttpResponse, http } from 'msw';
+import { AuthenticatorStatus } from '../../api/generated';
 import { connectionFixture, serverFixture, toolFixture } from '../../../testing/fixtures';
 import { useMockApi } from '../../../testing/mock-api';
 import { button, configureTestApp, openRoute, text, until } from '../../../testing/test-app';
@@ -20,7 +21,7 @@ function serve(servers: PortalCatalogServer[]) {
 }
 
 describe('ConnectionsPage', () => {
-  const { server } = useMockApi();
+  const { server, store } = useMockApi();
 
   it('lists every system from the catalog with account, validity and last use', async () => {
     const soon = new Date(Date.now() + 5 * 86_400_000).toISOString();
@@ -134,5 +135,131 @@ describe('ConnectionsPage', () => {
     configureTestApp();
     await openRoute('/connections');
     await until(() => expect(text()).toContain('Nie masz jeszcze żadnych połączeń'));
+  });
+
+  describe('Authenticator section', () => {
+    async function open(status: AuthenticatorStatus) {
+      store.update({ authenticator: status });
+      const navigation = configureTestApp();
+      const harness = await openRoute('/connections');
+      await until(() => expect(text()).toContain('MCP Platform'));
+      return { navigation, harness };
+    }
+
+    it('offers registration when there is none', async () => {
+      await open({ state: 'none' });
+      expect(text()).toContain('Konto "MCP Platform" w Microsoft Authenticator.');
+      expect(text()).toContain('Nie zarejestrowano');
+      expect(document.querySelector('app-authenticator-section a')?.getAttribute('href')).toBe(
+        '/authenticator/register',
+      );
+      expect(text()).not.toContain('Usuń');
+    });
+
+    it('shows an active registration with its dates and a removal button', async () => {
+      await open({
+        state: 'active',
+        registeredAt: '2026-10-27T09:00:00Z',
+        lastUsedAt: new Date().toISOString(),
+      });
+      expect(text()).toMatch(/Aktywny · od 27\.10\.2026 · ostatnie użycie dziś \d{2}:\d{2}/);
+      expect(button('Usuń')).toBeTruthy();
+    });
+
+    it('says when an active registration was never used', async () => {
+      await open({ state: 'active', registeredAt: '2026-10-27T09:00:00Z' });
+      expect(text()).toContain('jeszcze nieużywany');
+    });
+
+    it('shows the end of a block, without an unlock action', async () => {
+      await open({
+        state: 'active',
+        registeredAt: '2026-10-27T09:00:00Z',
+        lockedUntil: new Date(Date.now() + 600_000).toISOString(),
+      });
+      expect(text()).toMatch(/Zablokowany do \d{2}:\d{2} · 5 błędnych kodów w 15 minut/);
+      expect(text()).toContain('Blokadę zdejmuje tylko upływ czasu.');
+      expect(text()).not.toMatch(/Odblokuj/);
+      expect(button('Usuń')).toBeTruthy();
+    });
+
+    it('shows a switched-off authenticator with the banner and the single action', async () => {
+      await open({
+        state: 'disabled',
+        registeredAt: '2026-10-27T09:00:00Z',
+        disabledAt: '2026-10-28T11:00:00Z',
+        disabledReason: 'daily_failure_limit',
+      });
+      expect(text()).toContain(
+        'Authenticator został wyłączony po 20 błędnych kodach w ciągu doby.',
+      );
+      expect(text()).toContain('Wyłączony · 28.10.2026');
+      expect(document.querySelector('app-authenticator-section a')?.textContent).toContain(
+        'Zarejestruj ponownie',
+      );
+      expect(text()).not.toContain('Usuń');
+    });
+
+    it('removes the registration after a warning and a fresh MFA', async () => {
+      store.update({ mfaFresh: true });
+      const { harness } = await open({ state: 'active', registeredAt: '2026-10-27T09:00:00Z' });
+      button('Usuń').click();
+      await harness.fixture.whenStable();
+      const dialog = document.querySelector('mat-dialog-container')!;
+      expect(text(dialog)).toContain('Usunąć Authenticator?');
+      expect(text(dialog)).toContain(
+        'Bez Authenticatora agent nie wykona operacji nieodwracalnych.',
+      );
+      expect(text(dialog)).toContain('Usunięcie wymaga potwierdzenia tożsamości (MFA).');
+      button('Usuń', dialog).click();
+
+      await until(() => expect(text()).toContain('Authenticator usunięty.'));
+      await until(() => expect(text()).toContain('Nie zarejestrowano'));
+      expect(store.state.authenticator.state).toBe('none');
+    });
+
+    it('keeps the registration when the warning is cancelled', async () => {
+      const { harness } = await open({ state: 'active', registeredAt: '2026-10-27T09:00:00Z' });
+      button('Usuń').click();
+      await harness.fixture.whenStable();
+      button('Anuluj', document.querySelector('mat-dialog-container')!).click();
+      await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
+      expect(store.state.authenticator.state).toBe('active');
+    });
+
+    it('asks the IdP for a fresh MFA first and returns to this page', async () => {
+      const { navigation, harness } = await open({
+        state: 'active',
+        registeredAt: '2026-10-27T09:00:00Z',
+      });
+      button('Usuń').click();
+      await harness.fixture.whenStable();
+      button('Usuń', document.querySelector('mat-dialog-container')!).click();
+
+      await until(() => expect(navigation.assign).toHaveBeenCalled());
+      const target = new URL(navigation.assign.mock.calls[0][0], location.origin);
+      expect(target.searchParams.get('stepUp')).toBe('true');
+      expect(target.searchParams.get('returnPath')).toBe('/connections?mfa=ok');
+      expect(store.state.authenticator.state).toBe('active');
+    });
+
+    it('tells the user the MFA counted after the return', async () => {
+      store.update({ authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' } });
+      configureTestApp();
+      await openRoute('/connections?mfa=ok');
+      await until(() => expect(text()).toContain('Tożsamość potwierdzona.'));
+    });
+
+    it('shows one error for the whole page when the registration cannot be read', async () => {
+      server.use(
+        http.get('/api/v1/authenticator', () =>
+          HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
+        ),
+      );
+      configureTestApp();
+      await openRoute('/connections');
+      await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+      expect(document.querySelector('table')).toBeNull();
+    });
   });
 });

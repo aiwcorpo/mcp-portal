@@ -1,8 +1,17 @@
 # STATUS: mcp-portal/web (ws-08)
 
-Stan na 2026-10-28. Kontrakty: `mcp-contracts` 2.2.5 (paczka `release/aiwcorpo-mcp-contracts-2.2.5.tgz`, tag
-`v2.2.5`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
+Stan na 2026-10-28. Kontrakty: `mcp-contracts` 3.0.1 (paczka `release/aiwcorpo-mcp-contracts-3.0.1.tgz`, tag
+`v3.0.1`; zalezność od 3.0.0 jest wykluczona, luka CC-127). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
 Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
+
+## Kamienie M3
+
+| Kamień | Zakres | Stan |
+| --- | --- | --- |
+| K1 | Kontrakty 3.0.1, klient i mock (Authenticator, potwierdzenia, logi); Authenticator: status w Połączeniach (brak, aktywny, zablokowany, wyłączony z banerem), kreator rejestracji 4 kroki z QR rysowanym lokalnie, błędy rejestracji, usunięcie, baner w katalogu i kreatorze linków (23-30, m33, m36-m39) | zrobiony |
+| K2 | Podgląd operacji `/confirm/<id>` (14, 15, m35): tylko odczyt, licznik, `viewed`, odpytywanie, "Anuluj operację", stany końcowe, argumenty jako niezaufany tekst | w toku |
+| K3 | Zakładka Logi (06): filtry, "Pokaż więcej", etykiety wyników, błędne kody w szczegółach | do zrobienia |
+| K4 | a11y AA, 360 px, e2e na MSW 3.0.1, README i STATUS | do zrobienia |
 
 ## Kamienie M2
 

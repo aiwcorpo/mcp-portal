@@ -1,0 +1,109 @@
+<section class="authenticator" aria-labelledby="authenticator-title">
+  <h2 id="authenticator-title" i18n="@@auth.title">Authenticator</h2>
+  <p class="muted" i18n="@@auth.intro">
+    Konto "MCP Platform" w Microsoft Authenticator. Kodem z niego potwierdzasz operacje
+    nieodwracalne agentów.
+  </p>
+
+  @if (mfaConfirmed()) {
+    <app-notice kind="info" i18n="@@auth.mfaDone">
+      Tożsamość potwierdzona. Możesz teraz usunąć Authenticator.
+    </app-notice>
+  }
+  @if (removed()) {
+    <app-notice kind="success" i18n="@@auth.removed">
+      Authenticator usunięty. Agent nie wykona operacji nieodwracalnych, dopóki nie zarejestrujesz
+      go ponownie.
+    </app-notice>
+  }
+  @if (failure(); as problem) {
+    <app-error-notice [failure]="problem" />
+  }
+
+  @let current = status();
+  @if (current.state === 'disabled') {
+    <app-notice kind="warning" i18n="@@auth.disabledBanner">
+      Authenticator został wyłączony po 20 błędnych kodach w ciągu doby. Agent nie wykona operacji
+      nieodwracalnych, dopóki nie zarejestrujesz go ponownie.
+    </app-notice>
+  }
+
+  <div class="row">
+    <span class="name">MCP Platform</span>
+    <span class="state" [class.warn]="current.state !== 'active' || current.lockedUntil">
+      @switch (current.state) {
+        @case ('none') {
+          <ng-container i18n="@@auth.stateNone">Nie zarejestrowano</ng-container>
+        }
+        @case ('disabled') {
+          <ng-container i18n="@@auth.stateDisabled">Wyłączony</ng-container>
+          @if (current.disabledAt) {
+            &middot; {{ current.disabledAt | date: 'dd.MM.yyyy HH:mm' }}
+          }
+        }
+        @default {
+          @if (current.lockedUntil) {
+            <ng-container i18n="@@auth.stateLocked"
+              >Zablokowany do {{ current.lockedUntil | date: 'HH:mm' }}</ng-container
+            >
+            &middot;
+            <ng-container i18n="@@auth.lockReason">5 błędnych kodów w 15 minut</ng-container>
+          } @else {
+            <ng-container i18n="@@auth.stateActive">Aktywny</ng-container>
+            @if (current.registeredAt) {
+              &middot;
+              <ng-container i18n="@@auth.since"
+                >od {{ current.registeredAt | date: 'dd.MM.yyyy' }}</ng-container
+              >
+            }
+            &middot;
+            @if (current.lastUsedAt; as lastUsed) {
+              @if (isToday(lastUsed)) {
+                <ng-container i18n="@@auth.lastUsedToday"
+                  >ostatnie użycie dziś {{ lastUsed | date: 'HH:mm' }}</ng-container
+                >
+              } @else {
+                <ng-container i18n="@@auth.lastUsedOn"
+                  >ostatnie użycie {{ lastUsed | date: 'dd.MM.yyyy' }}</ng-container
+                >
+              }
+            } @else {
+              <ng-container i18n="@@auth.neverUsed">jeszcze nieużywany</ng-container>
+            }
+          }
+        }
+      }
+    </span>
+    <span class="actions">
+      @switch (current.state) {
+        @case ('none') {
+          <a mat-flat-button routerLink="/authenticator/register" i18n="@@auth.register"
+            >Zarejestruj</a
+          >
+        }
+        @case ('disabled') {
+          <a mat-flat-button routerLink="/authenticator/register" i18n="@@auth.registerAgain"
+            >Zarejestruj ponownie</a
+          >
+        }
+        @default {
+          <button
+            mat-flat-button
+            type="button"
+            class="quiet"
+            [disabled]="busy()"
+            (click)="remove()"
+            i18n="@@auth.remove"
+          >
+            Usuń
+          </button>
+        }
+      }
+    </span>
+  </div>
+  @if (current.lockedUntil) {
+    <p class="muted hint" i18n="@@auth.lockHint">
+      Blokadę zdejmuje tylko upływ czasu. Usunięcie i ponowna rejestracja jej nie skracają.
+    </p>
+  }
+</section>

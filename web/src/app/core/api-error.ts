@@ -1,5 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ConnectErrorCode, ErrorCode, PutSecretError } from '../api/generated';
+import {
+  AuthenticatorEnrollmentError,
+  ConnectErrorCode,
+  ErrorCode,
+  PutSecretError,
+} from '../api/generated';
 
 /**
  * Codes the UI can explain. C10 and the PUT secret errors come from the generated client; the C12
@@ -14,34 +19,26 @@ const C12_ERROR_CODES = [
   'virtual_server_limit_reached',
   'hash_mismatch',
   'resource_defaults_unsupported',
+  'already_registered',
 ] as const;
 
 const DECLARED_ERROR_CODES = [
   ...Object.values(ErrorCode),
   ...Object.values(PutSecretError.ErrorEnum),
+  ...Object.values(AuthenticatorEnrollmentError.ErrorEnum),
   ...C12_ERROR_CODES,
   ...Object.values(ConnectErrorCode),
 ] as const;
 
-/**
- * identity_mismatch is deprecated since contracts 2.2.3 (CC-101): nobody compares the account with the
- * SSO identity any more, so the UI has no state for it and a stray one is treated like any unknown code.
- */
-type DeprecatedCode = 'identity_mismatch';
+export type PortalErrorCode = (typeof DECLARED_ERROR_CODES)[number];
 
-export type PortalErrorCode = Exclude<(typeof DECLARED_ERROR_CODES)[number], DeprecatedCode>;
+export const PORTAL_ERROR_CODES: readonly PortalErrorCode[] = [...new Set(DECLARED_ERROR_CODES)];
 
-export const PORTAL_ERROR_CODES: readonly PortalErrorCode[] = DECLARED_ERROR_CODES.filter(
-  (code): code is PortalErrorCode => code !== 'identity_mismatch',
-);
-
-export type ReturnErrorCode = Exclude<ConnectErrorCode, DeprecatedCode>;
+/** Contracts 3.0.0 removed identity_mismatch (CC-101): a stray one is an unknown code like any other. */
+export type ReturnErrorCode = ConnectErrorCode;
 
 export function isConnectErrorCode(value: unknown): value is ReturnErrorCode {
-  return (
-    value !== 'identity_mismatch' &&
-    (Object.values(ConnectErrorCode) as readonly unknown[]).includes(value)
-  );
+  return (Object.values(ConnectErrorCode) as readonly unknown[]).includes(value);
 }
 
 export interface ApiFailure {

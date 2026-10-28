@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
-export type NoticeKind = 'success' | 'error' | 'info';
+export type NoticeKind = 'success' | 'error' | 'info' | 'warning';
 
 /**
  * Inline message. Errors use role=alert so screen readers announce them at once; the rest use

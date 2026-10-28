@@ -24,6 +24,10 @@
   --tone: var(--pm-danger);
 }
 
+.notice-warning {
+  --tone: var(--pm-warn);
+}
+
 .notice-info {
   --tone: var(--pm-link);
 }

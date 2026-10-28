@@ -121,7 +121,7 @@ describe('LinkWizardPage', () => {
       expect(checkbox('jira__search_issues').disabled).toBe(false);
       expect(text()).toContain('Wymaga kodu z Authenticatora.');
       expect(checkbox('gitlab__get_project').disabled).toBe(true);
-      expect(text()).toContain('Narzędzie wyłączone przez administratora.');
+      expect(text()).toContain('Wyłączone przez administratora.');
       expect(checkbox('gitlab__list_merge_requests').disabled).toBe(true);
       expect(text()).toContain('Wymaga ponownego połączenia');
       expect(checkbox('confluence__get_page').disabled).toBe(true);

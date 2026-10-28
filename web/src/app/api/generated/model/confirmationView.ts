@@ -7,13 +7,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Resource } from './resource';
 import { SystemId } from './systemId';
 import { ConfirmationArgument } from './confirmationArgument';
 
 
 export interface ConfirmationView { 
     /**
-     * Opaque, unguessable id of a pending confirmation (C11); used in URL paths.
+     * Opaque, unguessable id of a pending confirmation (C11); used in URL paths and as the key of the portal preview.
      */
     confirmationId: string;
     /**
@@ -25,11 +26,15 @@ export interface ConfirmationView {
      */
     system: SystemId;
     /**
+     * Main resource of the call from resourceRefs (type, id, parent), computed by the gateway, the same value that goes to the audit event (CC-098); absent when the tool takes no resource identifier. Same limits as in C8, including the exclusion of control and bidirectional characters in id.
+     */
+    resource?: Resource;
+    /**
      * Arguments sorted by name (fixed order), without confirmation_code.
      */
     arguments: Array<ConfirmationArgument>;
     /**
-     * End of the confirmation TTL (C11, 120 s after creation); the portal shows a countdown.
+     * End of the validity of the pending call (C11, 120 s after creation, not extended by a repeated first call); the portal shows a countdown.
      */
     expiresAt: string;
 }

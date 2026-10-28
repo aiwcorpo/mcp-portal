@@ -10,15 +10,11 @@
 
 
 export interface PutSecretError { 
-    /**
-     * identity_mismatch is deprecated and no longer returned (CC-101; removed in 3.0.0).
-     */
     error: PutSecretError.ErrorEnum;
 }
 export namespace PutSecretError {
     export const ErrorEnum = {
         SecretInvalid: 'secret_invalid',
-        IdentityMismatch: 'identity_mismatch',
     } as const;
     export type ErrorEnum = typeof ErrorEnum[keyof typeof ErrorEnum];
 }
