@@ -1,7 +1,7 @@
 # STATUS: mcp-portal/web (ws-08)
 
-Stan na 2026-10-28. Kontrakty: `mcp-contracts` 2.2.3 (paczka `release/aiwcorpo-mcp-contracts-2.2.3.tgz`, tag
-`v2.2.3`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
+Stan na 2026-10-28. Kontrakty: `mcp-contracts` 2.2.5 (paczka `release/aiwcorpo-mcp-contracts-2.2.5.tgz`, tag
+`v2.2.5`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
 Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
 
 ## Kamienie M2

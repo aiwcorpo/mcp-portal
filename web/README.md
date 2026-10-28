@@ -2,7 +2,7 @@
 
 Frontend portalu platformy MCP (strumień ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, teksty po polsku przez `$localize`. Rozmawia wyłącznie z BFF przez API C12
-(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 2.2.3). BFF (`../bff`, ws-07) serwuje zbudowane
+(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 2.2.5). BFF (`../bff`, ws-07) serwuje zbudowane
 pliki z tego samego originu.
 
 Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
@@ -11,7 +11,7 @@ Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
 
 - Node 24, npm 11.
 - Repozytorium `mcp-contracts` obok `mcp-portal` (`../../mcp-contracts` względem `web/`): paczka
-  `release/aiwcorpo-mcp-contracts-2.2.3.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
+  `release/aiwcorpo-mcp-contracts-2.2.5.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
 - Java 25 tylko do ponownego wygenerowania klienta API (`npm run generate:api`).
 - Chromium dla Playwright: `npx playwright install chromium` (raz).
 
