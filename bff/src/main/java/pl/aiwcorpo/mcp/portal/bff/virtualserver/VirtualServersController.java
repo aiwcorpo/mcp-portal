@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
+import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.config.PublicUrls;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
@@ -45,6 +46,7 @@ class VirtualServersController {
 
     static final String RESOURCE_DEFAULTS_UNSUPPORTED = "resource_defaults_unsupported";
     static final String SLUG_TAKEN = "slug_taken";
+    static final String VIRTUAL_SERVER_LIMIT_REACHED = "virtual_server_limit_reached";
 
     private static final Pattern SLUG = Pattern.compile("^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$");
     private static final Pattern TOOL = Pattern
@@ -58,15 +60,17 @@ class VirtualServersController {
     private final PublicUrls publicUrls;
     private final AuditLog audit;
     private final Clock clock;
+    private final PortalProperties.ClaudeCode claudeCode;
     private final JsonMapper json = JsonMapper.builder().build();
 
     VirtualServersController(UserTokens tokens, GatewayAdminClient gateway, PublicUrls publicUrls, AuditLog audit,
-                             Clock clock) {
+                             Clock clock, PortalProperties properties) {
         this.tokens = tokens;
         this.gateway = gateway;
         this.publicUrls = publicUrls;
         this.audit = audit;
         this.clock = clock;
+        this.claudeCode = properties.clientConfigs().claudeCode();
     }
 
     @GetMapping("/api/v1/virtual-servers")
@@ -83,7 +87,7 @@ class VirtualServersController {
             }
             String url = publicUrls.virtualServer(server.slug());
             result.add(new PortalVirtualServer(server.slug(), server.displayName(), List.copyOf(server.tools()), url,
-                    ClientConfigs.of(server.slug(), url)));
+                    ClientConfigs.of(server.slug(), url, claudeCode)));
         }
         return result;
     }
@@ -114,7 +118,7 @@ class VirtualServersController {
         audit.virtualServerChange(requestId, user, body.slug(), AuditLog.Outcome.ok(), clock.millis() - started);
         String url = publicUrls.virtualServer(body.slug());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new PortalVirtualServerCreated(body.slug(), url, ClientConfigs.of(body.slug(), url)));
+                .body(new PortalVirtualServerCreated(body.slug(), url, ClientConfigs.of(body.slug(), url, claudeCode)));
     }
 
     @DeleteMapping("/api/v1/virtual-servers/{slug}")
@@ -155,6 +159,12 @@ class VirtualServersController {
         if (e.status() == 409 && SLUG_TAKEN.equals(e.error())) {
             audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.rejected(SLUG_TAKEN), latency);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(SLUG_TAKEN).withRequestId(requestId));
+        }
+        if (e.status() == 409 && VIRTUAL_SERVER_LIMIT_REACHED.equals(e.error())) {
+            audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.rejected(VIRTUAL_SERVER_LIMIT_REACHED),
+                    latency);
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiError.of(VIRTUAL_SERVER_LIMIT_REACHED).withRequestId(requestId));
         }
         if (e.status() == 403 && ApiError.ACCESS_DENIED.equals(e.error())) {
             audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.accessDenied(), latency);

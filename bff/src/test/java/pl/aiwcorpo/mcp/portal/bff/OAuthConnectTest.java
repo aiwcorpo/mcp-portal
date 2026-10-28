@@ -198,6 +198,7 @@ class OAuthConnectTest extends PortalHarness {
         ContractSchemas.assertValid(AUDIT, event);
         assertThat(event.get("event").asString()).isEqualTo("connection_change");
         assertThat(event.get("server").asString()).isEqualTo("mcp-gitlab");
+        assertThat(event.get("backendUser").asString()).isEqualTo("alice");
         assertThat(event.get("outcome").asString()).isEqualTo("ok");
         assertThat(event.get("requestId").asString()).isEqualTo(back.headers().firstValue("X-Request-Id").orElseThrow());
     }
@@ -279,7 +280,7 @@ class OAuthConnectTest extends PortalHarness {
         HttpResponse<String> back = browser.get(CALLBACK + "?error=access_denied&state=" + state);
 
         C12.assertResponse("GET", "/api/v1/oauth/callback", back);
-        assertThat(location(back)).isEqualTo("/catalog?connectError=cancelled");
+        assertThat(location(back)).isEqualTo("/catalog?connectError=cancelled&system=gitlab");
         assertThat(ConnectRedirectRules.isValid(location(back))).isTrue();
         assertThat(completions()).hasSize(completed);
     }
@@ -293,7 +294,7 @@ class OAuthConnectTest extends PortalHarness {
 
         HttpResponse<String> back = browser.get(CALLBACK + "?error=server_error&error_description=invalid_client_secret_abc&state=" + state);
 
-        assertThat(location(back)).isEqualTo("/catalog?connectError=provider_error");
+        assertThat(location(back)).isEqualTo("/catalog?connectError=provider_error&system=gitlab");
         assertThat(back.headers().map().toString()).doesNotContain("invalid_client_secret_abc");
     }
 
@@ -308,7 +309,7 @@ class OAuthConnectTest extends PortalHarness {
 
             HttpResponse<String> back = browser.get(CALLBACK + "?code=c1&state=" + state);
 
-            assertThat(location(back)).isEqualTo("/catalog?connectError=" + error);
+            assertThat(location(back)).isEqualTo("/catalog?connectError=" + error + "&system=gitlab");
             assertThat(ConnectRedirectRules.isValid(location(back))).isTrue();
             JsonNode event = lastAuditEvent();
             ContractSchemas.assertValid(AUDIT, event);
@@ -328,7 +329,7 @@ class OAuthConnectTest extends PortalHarness {
 
         HttpResponse<String> back = browser.get(CALLBACK + "?code=c1&state=" + state);
 
-        assertThat(location(back)).isEqualTo("/catalog?connectError=provider_error");
+        assertThat(location(back)).isEqualTo("/catalog?connectError=provider_error&system=gitlab");
     }
 
     @Test
@@ -360,7 +361,7 @@ class OAuthConnectTest extends PortalHarness {
 
             HttpResponse<String> back = browser.get(CALLBACK + "?code=c1&state=" + state);
 
-            assertThat(location(back)).as("status " + status).isEqualTo("/catalog?connectError=provider_error");
+            assertThat(location(back)).as("status " + status).isEqualTo("/catalog?connectError=provider_error&system=gitlab");
             assertThat(back.headers().map().toString()).doesNotContain("exploded");
             assertThat(lastAuditEvent().get("reason").asString()).isEqualTo("upstream_unavailable");
         }

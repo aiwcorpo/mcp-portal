@@ -24,7 +24,7 @@ class StepUpPolicyTest {
 
     private static PortalProperties properties(List<String> acrValues) {
         return new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
-                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues), null, null, null);
+                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues), null, null, null, null);
     }
 
     private static StepUpPolicy policy(List<String> acrValues) {

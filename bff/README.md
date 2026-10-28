@@ -4,11 +4,11 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 2.2.3 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 2.2.5 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
 
 ## Uruchomienie lokalne
 
-Wymagane: JDK 25 i `mcp-contracts` 2.2.3 w `~/.m2`. Dwa tryby.
+Wymagane: JDK 25 i `mcp-contracts` 2.2.5 w `~/.m2`. Dwa tryby.
 
 Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
@@ -91,6 +91,8 @@ Wszystko przez zmienne środowiska (`application.yml`):
 | `PORTAL_IGA_ADAPTER` | adapter C13; brak = błąd startu | `mock` (profil `dev`) |
 | `PORTAL_IGA_MOCK_FILE` | dane adaptera `mock` (poza jarem): zwykła ścieżka w systemie plików, bez `file:` | `dev/iga-mock.yaml` |
 | `PORTAL_IGA_REQUESTER_ID_CLAIM` | claim logowania identyfikujący wnioskodawcę w IGA; brak claimu u użytkownika = błąd adaptera (503) | `preferred_username` |
+| `PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CLIENT_ID` | `--client-id` w komendzie `clientConfigs.claudeCode`; puste = bez flagi (litery, cyfry, `.`, `_`, `-`; inna wartość to błąd startu) | `claude-code` w profilu `dev`, poza nim puste |
+| `PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CALLBACK_PORT` | `--callback-port` w tej komendzie (1024-65535); puste = bez flagi | `33418` w profilu `dev`, poza nim puste |
 | `PORTAL_TRUSTED_PROXIES` | regex adresów proxy, od których przyjmowane są `X-Forwarded-*` | `127[.]0[.]0[.]1\|0:0:0:0:0:0:0:1` |
 | `PORTAL_STEP_UP_MAX_AGE` | wiek ostatniego logowania dla operacji ze step-up | `5m` |
 | `PORTAL_STEP_UP_ACR_VALUES` | wartości `acr` uznawane za MFA; puste = tylko `auth_time`, dozwolone wyłącznie w profilu `dev` | puste (realm nie ma poziomów `acr`) |
@@ -127,6 +129,14 @@ zapisuje w sesji `flowId`, `state` z `authorizeUrl` i `returnPath`; `GET /api/v1
 `state` w sesji bieżącego użytkownika (jednorazowo, 15 min, najwyżej 8 naraz), a kody `connectError` to
 `cancelled`, `provider_error`, `flow_invalid` (`identity_mismatch` jest deprecated od 2.2.3: broker go nie zwraca, a BFF nie przekazuje). Wirtualne serwery: proxy do C5 z kontrolą
 `resourceDefaults` (CC-085) i `clientConfigs` z `PORTAL_PUBLIC_BASE_URL`.
+
+`clientConfigs.claudeCode` to `claude mcp add --transport http [--client-id <id>] [--callback-port <port>] <slug> <url>`.
+Keycloak w mcp-platform-dev nie pozwala na dynamiczną rejestrację klienta, więc bez obu flag Authenticate w Claude Code
+nie działa; profil `dev` ustawia `claude-code` i `33418` (klient `claude-code` w realmie musi mieć redirect URI
+`http://localhost:33418/callback`). Produkcja z Entra ID może potrzebować innego klienta albo żadnego, dlatego domyślnie
+flag nie ma. Copilot i Codex dostają tylko link: nie ma potwierdzonego pola na identyfikator klienta w ich konfiguracji
+(patrz STATUS.md). Przy `409 virtual_server_limit_reached` z C5 BFF odpowiada własnym `409` z tym samym kodem (CC-119),
+a zdarzenie `connection_change` niesie `backendUser` połączonego konta (CC-117; brak, gdy broker go nie zwrócił).
 
 | Test | Co sprawdza |
 | --- | --- |

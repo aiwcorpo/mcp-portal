@@ -86,6 +86,11 @@ portal:
     acr-values: ${PORTAL_STEP_UP_ACR_VALUES:}
   session:
     absolute-timeout: 8h
+  # Extra flags of the Claude Code command in clientConfigs; empty means the flag is left out.
+  client-configs:
+    claude-code:
+      client-id: ${PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CLIENT_ID:}
+      callback-port: ${PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CALLBACK_PORT:}
   iga:
     # No default: a deployment must choose its C13 adapter (mock exists for the dev profile only).
     adapter: ${PORTAL_IGA_ADAPTER:}

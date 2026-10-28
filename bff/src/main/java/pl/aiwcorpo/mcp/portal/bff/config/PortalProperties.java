@@ -20,7 +20,8 @@ public record PortalProperties(
         @DefaultValue StepUp stepUp,
         @DefaultValue Session session,
         @DefaultValue Web web,
-        @DefaultValue Iga iga) {
+        @DefaultValue Iga iga,
+        @DefaultValue ClientConfigs clientConfigs) {
 
     /**
      * @param tlsName name that must appear as DNS SAN in the server certificate, independent of the host in
@@ -96,5 +97,32 @@ public record PortalProperties(
             String adapter,
             String mockFile,
             @DefaultValue("preferred_username") String requesterIdClaim) {
+    }
+
+    /** Extra settings that go into the ready-to-paste client commands (C12 {@code clientConfigs}). */
+    public record ClientConfigs(@DefaultValue ClaudeCode claudeCode) {
+    }
+
+    /**
+     * Claude Code cannot register an OAuth client dynamically against an IdP that forbids it (Keycloak in dev), so
+     * the command then needs {@code --client-id} and {@code --callback-port}. Both optional and independent: with
+     * Entra ID in production a pre-registered client may be different or not needed at all.
+     *
+     * @param clientId     public client registered at the IdP for Claude Code; empty means no {@code --client-id}
+     * @param callbackPort fixed local port of the OAuth redirect (1024-65535); null means no {@code --callback-port}
+     */
+    public record ClaudeCode(String clientId, Integer callbackPort) {
+
+        public ClaudeCode {
+            clientId = clientId == null || clientId.isBlank() ? null : clientId.strip();
+            if (clientId != null && !clientId.matches("[A-Za-z0-9._-]{1,128}")) {
+                throw new IllegalArgumentException(
+                        "portal.client-configs.claude-code.client-id may only contain letters, digits, '.', '_' and '-'");
+            }
+            if (callbackPort != null && (callbackPort < 1024 || callbackPort > 65535)) {
+                throw new IllegalArgumentException(
+                        "portal.client-configs.claude-code.callback-port must be between 1024 and 65535");
+            }
+        }
     }
 }

@@ -280,6 +280,8 @@ class PortalApiTest extends PortalHarness {
         assertThat(event.get("event").asString()).isEqualTo("connection_change");
         assertThat(event.get("sub").asString()).isEqualTo(ALICE.sub());
         assertThat(event.get("server").asString()).isEqualTo("mcp-jira");
+        assertThat(event.get("backendUser").asString())
+                .isEqualTo(JSON.readTree(response.body()).get("backendUser").asString());
         assertThat(event.get("outcome").asString()).isEqualTo("ok");
         assertThat(event.get("requestId").asString())
                 .isEqualTo(response.headers().firstValue("X-Request-Id").orElseThrow())

@@ -33,6 +33,12 @@ public class AuditLog {
 
     /** {@code connection_change} of the current user; {@code system} is null when the request named no valid one. */
     public void connectionChange(String requestId, PortalUser user, String system, Outcome outcome, long latencyMs) {
+        connectionChange(requestId, user, system, null, outcome, latencyMs);
+    }
+
+    /** As above; {@code backendUser} is the account that was linked (CC-117), the only trace of who linked what. */
+    public void connectionChange(String requestId, PortalUser user, String system, String backendUser, Outcome outcome,
+                                 long latencyMs) {
         write(new AuditEvent(
                 clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
                 requestId,
@@ -46,6 +52,7 @@ public class AuditLog {
                 outcome.decision(),
                 outcome.reason(),
                 null,
+                auditableBackendUser(backendUser),
                 outcome.outcome(),
                 outcome.errorCode(),
                 latencyMs));
@@ -66,9 +73,19 @@ public class AuditLog {
                 outcome.decision(),
                 outcome.reason(),
                 null,
+                null,
                 outcome.outcome(),
                 outcome.errorCode(),
                 latencyMs));
+    }
+
+    /** C8 accepts 1..255 characters without control characters; anything else is dropped rather than failing the event. */
+    private static String auditableBackendUser(String backendUser) {
+        if (backendUser == null || backendUser.isEmpty() || backendUser.length() > 255
+                || backendUser.chars().anyMatch(Character::isISOControl)) {
+            return null;
+        }
+        return backendUser;
     }
 
     private void write(AuditEvent event) {

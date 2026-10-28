@@ -60,7 +60,8 @@ class VirtualServersTest extends PortalHarness {
         String url = "https://mcp-gateway.internal/v/team-a-dev/mcp";
         assertThat(link.get("url").asString()).isEqualTo(url);
         JsonNode configs = link.get("clientConfigs");
-        assertThat(configs.get("claudeCode").asString()).isEqualTo("claude mcp add --transport http team-a-dev " + url);
+        assertThat(configs.get("claudeCode").asString()).isEqualTo(
+                "claude mcp add --transport http --client-id claude-code --callback-port 33418 team-a-dev " + url);
         assertThat(configs.get("copilot").asString())
                 .isEqualTo("{\"servers\":{\"team-a-dev\":{\"type\":\"http\",\"url\":\"" + url + "\"}}}");
         assertThat(configs.get("codex").asString()).isEqualTo("[mcp_servers.team-a-dev]\nurl = \"" + url + "\"\n");
@@ -206,6 +207,21 @@ class VirtualServersTest extends PortalHarness {
         JsonNode event = lastAuditEvent();
         ContractSchemas.assertValid(AUDIT, event);
         assertThat(event.get("decision").asString()).isEqualTo("deny");
+    }
+
+    @Test
+    void virtualServerLimitIsPassedAsItsOwnConflict() {
+        TestBrowser browser = session();
+        stubCreate(409, "{\"error\":\"virtual_server_limit_reached\"}");
+
+        HttpResponse<String> limited = browser.post("/api/v1/virtual-servers", VALID, true);
+
+        C12.assertResponse("POST", "/api/v1/virtual-servers", limited);
+        assertThat(limited.statusCode()).isEqualTo(409);
+        assertThat(JSON.readTree(limited.body()).get("error").asString()).isEqualTo("virtual_server_limit_reached");
+        JsonNode event = lastAuditEvent();
+        ContractSchemas.assertValid(AUDIT, event);
+        assertThat(event.get("reason").asString()).isEqualTo("virtual_server_limit_reached");
     }
 
     @Test

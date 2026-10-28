@@ -88,7 +88,8 @@ class ConnectionsController {
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
             BrokerModel.PutSecretResponse stored = broker.putSecret(token, requestId, system, body);
-            audit.connectionChange(requestId, user, system, AuditLog.Outcome.ok(), clock.millis() - started);
+            audit.connectionChange(requestId, user, system, stored == null ? null : stored.backendUser(),
+                    AuditLog.Outcome.ok(), clock.millis() - started);
             return ResponseEntity.ok(stored);
         } catch (UpstreamException e) {
             if (e.status() == 422 && BROKER_SECRET_ERRORS.contains(e.error())) {

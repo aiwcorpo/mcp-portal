@@ -4,3 +4,8 @@ portal:
     adapter: ${PORTAL_IGA_ADAPTER:mock}
     # Plain path relative to the working directory (bff/); PORTAL_IGA_MOCK_FILE overrides it.
     mock-file: dev/iga-mock.yaml
+  client-configs:
+    # Keycloak of mcp-platform-dev forbids dynamic client registration, so Claude Code needs a fixed client and port.
+    claude-code:
+      client-id: ${PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CLIENT_ID:claude-code}
+      callback-port: ${PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CALLBACK_PORT:33418}

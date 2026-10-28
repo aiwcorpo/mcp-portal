@@ -8,11 +8,12 @@ import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 /**
  * What the contract allows in a redirect the BFF sends after OAuth or at the OAuth callback without a session
  * (README "Wektory testowe", test-vectors/connect-redirects): a portal path whose last query parameter is the
- * outcome, from a closed set, and nothing else the provider or the broker said.
+ * outcome, from a closed set optionally followed by the system (CC-111), and nothing else the provider or the broker said.
  */
 public final class ConnectRedirectRules {
 
     private static final Pattern CONNECTED = Pattern.compile("^connected=(jira|confluence|gitlab|servicedesk|opensearch)$");
+    private static final Pattern SYSTEM = Pattern.compile("^system=(jira|confluence|gitlab|servicedesk|opensearch)$");
     private static final List<String> ERRORS = List.of("identity_mismatch", "flow_invalid", "provider_error", "cancelled");
 
     private ConnectRedirectRules() {
@@ -29,6 +30,10 @@ public final class ConnectRedirectRules {
         String path = location.substring(0, query);
         String[] parameters = location.substring(query + 1).split("&");
         String last = parameters[parameters.length - 1];
+        if (parameters.length >= 2 && SYSTEM.matcher(last).matches()) {
+            String error = parameters[parameters.length - 2];
+            return error.startsWith("connectError=") && ERRORS.contains(error.substring("connectError=".length()));
+        }
         if (path.equals("/") && last.equals("loginError=session_expired")) {
             return true;
         }

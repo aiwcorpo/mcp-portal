@@ -133,18 +133,19 @@ class OAuthConnectController {
             String reason = "access_denied".equals(error) ? CANCELLED : PROVIDER_ERROR;
             audit.connectionChange(requestId, user, flow.system(), AuditLog.Outcome.rejected(reason),
                     clock.millis() - started);
-            redirects.redirect(request, response, withParameter(flow.returnPath(), "connectError", reason));
+            redirects.redirect(request, response, withError(flow, reason));
             return;
         }
         if (code == null || code.isEmpty() || code.length() > MAX_CODE) {
             audit.connectionChange(requestId, user, flow.system(), AuditLog.Outcome.rejected(FLOW_INVALID),
                     clock.millis() - started);
-            redirects.redirect(request, response, withParameter(flow.returnPath(), "connectError", FLOW_INVALID));
+            redirects.redirect(request, response, withError(flow, FLOW_INVALID));
             return;
         }
         String failure = complete(flow, code, state, user, authentication, request, response, requestId, started);
-        redirects.redirect(request, response, withParameter(flow.returnPath(),
-                failure == null ? "connected" : "connectError", failure == null ? flow.system() : failure));
+        redirects.redirect(request, response, failure == null
+                ? withParameter(flow.returnPath(), "connected", flow.system())
+                : withError(flow, failure));
     }
 
     /** Returns null on success, otherwise a code of {@code ConnectErrorCode}. */
@@ -153,9 +154,10 @@ class OAuthConnectController {
                             String requestId, long started) {
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
-            broker.completeOAuth(token, requestId, flow.system(),
+            BrokerModel.OAuthCompleteResponse completed = broker.completeOAuth(token, requestId, flow.system(),
                     new BrokerModel.OAuthCompleteRequest(flow.flowId(), code, state));
-            audit.connectionChange(requestId, user, flow.system(), AuditLog.Outcome.ok(), clock.millis() - started);
+            audit.connectionChange(requestId, user, flow.system(), completed == null ? null : completed.backendUser(),
+                    AuditLog.Outcome.ok(), clock.millis() - started);
             return null;
         } catch (UpstreamException e) {
             if (e.status() == 422 && BROKER_COMPLETE_ERRORS.contains(e.error())) {
@@ -176,6 +178,11 @@ class OAuthConnectController {
     /** {@code ?} when the return path has no query yet, {@code &} otherwise (test-vectors/connect-redirects). */
     private static String withParameter(String returnPath, String name, String value) {
         return returnPath + (returnPath.indexOf('?') >= 0 ? "&" : "?") + name + "=" + value;
+    }
+
+    /** The failure code, then the system (CC-111) so that the portal can name it. */
+    private static String withError(OAuthFlows.Flow flow, String code) {
+        return withParameter(withParameter(flow.returnPath(), "connectError", code), "system", flow.system());
     }
 
     private String returnPath(byte[] rawBody) {

@@ -20,6 +20,7 @@ public record AuditEvent(
         String decision,
         String reason,
         String credentialType,
+        String backendUser,
         String outcome,
         String errorCode,
         Long latencyMs) {
