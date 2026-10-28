@@ -23,6 +23,11 @@ public class PublicUrls {
         if (!(https || http) || !bareOrigin) {
             throw new IllegalStateException("portal.public-base-url must be scheme://host[:port] without a path");
         }
+        // The base ends up unquoted in a shell command (clientConfigs); the brackets of an IPv6 literal are glob
+        // characters there.
+        if (publicBaseUrl.getHost().startsWith("[")) {
+            throw new IllegalStateException("portal.public-base-url must use a host name or an IPv4 address, not an IPv6 literal");
+        }
         devMode.require(http, "An http portal.public-base-url");
         String text = publicBaseUrl.toString();
         this.base = text.endsWith("/") ? text.substring(0, text.length() - 1) : text;

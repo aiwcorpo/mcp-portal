@@ -47,6 +47,8 @@ class VirtualServersController {
     static final String RESOURCE_DEFAULTS_UNSUPPORTED = "resource_defaults_unsupported";
     static final String SLUG_TAKEN = "slug_taken";
     static final String VIRTUAL_SERVER_LIMIT_REACHED = "virtual_server_limit_reached";
+    /** C8 vocabulary for {@code admin_change}; the API error code above differs from it. */
+    static final String VIRTUAL_SERVER_LIMIT_AUDIT_REASON = "virtual_server_limit";
 
     private static final Pattern SLUG = Pattern.compile("^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$");
     private static final Pattern TOOL = Pattern
@@ -161,7 +163,7 @@ class VirtualServersController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(SLUG_TAKEN).withRequestId(requestId));
         }
         if (e.status() == 409 && VIRTUAL_SERVER_LIMIT_REACHED.equals(e.error())) {
-            audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.rejected(VIRTUAL_SERVER_LIMIT_REACHED),
+            audit.virtualServerChange(requestId, user, slug, AuditLog.Outcome.rejected(VIRTUAL_SERVER_LIMIT_AUDIT_REASON),
                     latency);
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(ApiError.of(VIRTUAL_SERVER_LIMIT_REACHED).withRequestId(requestId));

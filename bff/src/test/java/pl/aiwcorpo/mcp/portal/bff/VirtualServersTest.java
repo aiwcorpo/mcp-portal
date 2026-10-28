@@ -219,9 +219,16 @@ class VirtualServersTest extends PortalHarness {
         C12.assertResponse("POST", "/api/v1/virtual-servers", limited);
         assertThat(limited.statusCode()).isEqualTo(409);
         assertThat(JSON.readTree(limited.body()).get("error").asString()).isEqualTo("virtual_server_limit_reached");
+        String requestId = limited.headers().firstValue("X-Request-Id").orElseThrow();
+        assertThat(JSON.readTree(limited.body()).get("requestId").asString()).isEqualTo(requestId);
+        LoggedRequest sent = GATEWAY.findAll(postRequestedFor(urlPathEqualTo(COLLECTION))).getLast();
+        assertThat(sent.getHeader("X-Request-Id")).isEqualTo(requestId);
         JsonNode event = lastAuditEvent();
         ContractSchemas.assertValid(AUDIT, event);
-        assertThat(event.get("reason").asString()).isEqualTo("virtual_server_limit_reached");
+        assertThat(event.get("reason").asString()).isEqualTo("virtual_server_limit");
+        assertThat(event.get("decision").asString()).isEqualTo("deny");
+        assertThat(event.get("outcome").asString()).isEqualTo("error");
+        assertThat(event.get("requestId").asString()).isEqualTo(requestId);
     }
 
     @Test

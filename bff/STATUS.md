@@ -58,25 +58,31 @@ Integracja z gateway'em M2 (C5): BFF składa katalog C12 sam: z C5 `GET /admin/v
 był wykonany: wymaga zalogowanej sesji Keycloak i certyfikatu klienta z hasłem ze `.secrets`; do wykonania przez koordynatora
 (`./mvnw test -Pdev-env` z `PORTAL_GATEWAY_ADMIN_URL`).
 
-## Domkniecie M2: contracts 2.2.5 i komenda Claude Code (2026-10-28)
+## Domknięcie M2: contracts 2.2.5 (2026-10-28)
 
-Kontrakty 2.2.5. `./mvnw test`: 153 testy, 0 bledow.
+Kontrakty 2.2.5. `./mvnw test`: 177 testów, 0 błędów.
 
-- CC-119: `409 virtual_server_limit_reached` z C5 -> wlasny `409` z tym samym kodem i `requestId`; audyt `admin_change`
-  z powodem `virtual_server_limit_reached` (test `virtualServerLimitIsPassedAsItsOwnConflict`).
-- CC-117: `connection_change` niesie `backendUser` (z odpowiedzi brokera na `PUT secret` i na `completeOAuth`); pole
-  pomijane, gdy broker go nie zwrocil, ma ponad 255 znakow albo znak sterujacy. Dla `disconnect` brak (broker nie zwraca konta).
-- CC-111 (2.2.4, dotad niezrobione, wektory `valid-*-with-system` padaly po przejsciu na 2.2.5): przekierowanie po bledzie
-  OAuth dokleja `&system=<system>`, gdy przeplyw jest znany; bez przeplywu (`flow_invalid` bez sesji) bez `system`.
+- CC-119: `409 virtual_server_limit_reached` z C5 -> własny `409` z tym samym kodem i `requestId`; audyt `admin_change` z
+  powodem `virtual_server_limit` (słownik C8, kod błędu API jest inny). Test sprawdza `requestId` w ciele, nagłówek do C5,
+  `decision` i `outcome`.
+- CC-117: `connection_change` niesie `backendUser` (odpowiedź brokera na `PUT secret` i `completeOAuth`). Pole przechodzi
+  wzorzec ze schematu C8 (bez C0/C1, DEL, U+2028/2029, bidi U+202A-202E i U+2066-2069, 1..255 code pointów) oraz bez
+  samotnych surogatów; inaczej jest pomijane, a `WARN` (bez wartości, osobny logger od audytu) zostawia ślad. Testy:
+  `BackendUserAuditTest` i ścieżka odrzucenia w `OAuthConnectTest`. Dla `disconnect` brak (broker nie zwraca konta).
+- CC-111 (2.2.4, wcześniej niezrobione): przekierowanie po błędzie OAuth dokleja `&system=<system>`, gdy przepływ jest
+  znany; web nie dokleja już własnego `system` do `returnPath`.
 - Komenda Claude Code: `portal.client-configs.claude-code.client-id` i `.callback-port` (env
-  `PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CLIENT_ID`, `..._CALLBACK_PORT`). Puste = brak flagi, niezaleznie od siebie. Profil
-  `dev`: `claude-code` i `33418`. Walidacja przy starcie (client id `[A-Za-z0-9._-]{1,128}`, port 1024-65535), bo wartosc
-  trafia do komendy wklejanej do powloki. Schemat `ClientConfigs` (C12) to trzy zwykle stringi, wiec zmiana nie wymaga CC.
-- Copilot (JSON `mcp.json`) i Codex (`config.toml`): nie dodalem flag ani pol, bo nie mam potwierdzenia w dokumentacji
-  klientow, ze maja tu pole na identyfikator klienta (VS Code pyta o niego interaktywnie, gdy IdP nie ma DCR; Codex nie
-  sprawdzony). Do sprawdzenia przez czlowieka na zywo; gdy potrzebne, to ten sam mechanizm (nowy klucz w `client-configs`).
-
-Do ws-01: klient `claude-code` (publiczny) w realmie `corp` z redirect URI `http://localhost:33418/callback`.
+  `PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CLIENT_ID`, `..._CALLBACK_PORT`). Puste = brak flagi, niezależnie. Profil `dev`:
+  `claude-code` i `33418`. Walidacja przy starcie (client id `[A-Za-z0-9._-]{1,128}`, port 1024-65535); gotowa komenda
+  jest dodatkowo sprawdzana wzorcem `^[A-Za-z0-9 ._:/=-]+$` (powłoka bez cytowania). `publicBaseUrl` z literałem IPv6
+  jest błędem startu (nawiasy to znaki glob). Schemat `ClientConfigs` (C12) to trzy zwykłe stringi, więc CC nie trzeba.
+  Testy: `ClientConfigsTest` (wartości graniczne całej komendy, metaznaki), `ClientConfigsBindingTest` (binder bez
+  profilu `dev` z shipped `application.yml`: puste = bez flag, zła wartość = kontekst nie wstaje).
+- Copilot (`mcp.json`) i Codex (`config.toml`): bez zmian, brak potwierdzonego pola na identyfikator klienta; do
+  sprawdzenia na żywo.
+- Do sprawdzenia przez ws-01 (klient `claude-code` w realmie `corp`, redirect `http://localhost:33418/callback`) i
+  na żywo `claude mcp add ...` z tej komendy do końca Authenticate; do tego czasu komenda w dev jest sprawdzona tylko
+  co do kształtu.
 
 ## Propozycje CC
 

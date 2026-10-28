@@ -45,4 +45,29 @@ class ClientConfigsTest {
         assertThatThrownBy(() -> new ClaudeCode(null, 80)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new ClaudeCode(null, 70000)).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void theWholeCommandAtTheBoundariesOfEveryPart() {
+        String slug = "a" + "b".repeat(61) + "c";
+        String clientId = "A".repeat(128);
+        String url = "https://mcp.aiwcorpo.pl:65535/v/" + slug + "/mcp";
+        for (int port : new int[] {1024, 65535}) {
+            String command = ClientConfigs.of(slug, url, new ClaudeCode(clientId, port)).claudeCode();
+            assertThat(command).isEqualTo("claude mcp add --transport http --client-id " + clientId
+                    + " --callback-port " + port + " " + slug + " " + url);
+            assertThat(command).matches("^[A-Za-z0-9 ._:/=-]+$");
+        }
+    }
+
+    @Test
+    void anyInputWithShellMetacharactersIsRefusedWhateverItsSource() {
+        ClaudeCode none = new ClaudeCode(null, null);
+        for (String slug : new String[] {"a;b", "a b$(x)", "a`b`", "a|b", "a&b", "a'b", "a\"b", "a*b", "a\nb"}) {
+            assertThatThrownBy(() -> ClientConfigs.of(slug, URL, none)).as(slug).isInstanceOf(IllegalStateException.class);
+        }
+        for (String url : new String[] {"https://[2001:db8::1]/v/x/mcp", "https://h/v/x/mcp;id", "https://h/v/x/mcp?a=b",
+                "https://h/v/x/mcp#f"}) {
+            assertThatThrownBy(() -> ClientConfigs.of("x", url, none)).as(url).isInstanceOf(IllegalStateException.class);
+        }
+    }
 }

@@ -2,6 +2,7 @@ package pl.aiwcorpo.mcp.portal.bff.audit;
 
 import java.time.Clock;
 import java.time.temporal.ChronoUnit;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,8 @@ public class AuditLog {
     public static final String LOGGER = "pl.aiwcorpo.mcp.audit";
 
     private static final Logger log = LoggerFactory.getLogger(LOGGER);
+    // Not the audit logger: that one carries C8 events only.
+    private static final Logger diagnostics = LoggerFactory.getLogger(AuditLog.class);
 
     // C8 requires escaping control characters and U+2028/U+2029; escaping all non-ASCII covers both.
     private final JsonMapper mapper = JsonMapper.builder().enable(JsonWriteFeature.ESCAPE_NON_ASCII).build();
@@ -79,13 +82,35 @@ public class AuditLog {
                 latencyMs));
     }
 
-    /** C8 accepts 1..255 characters without control characters; anything else is dropped rather than failing the event. */
-    private static String auditableBackendUser(String backendUser) {
-        if (backendUser == null || backendUser.isEmpty() || backendUser.length() > 255
-                || backendUser.chars().anyMatch(Character::isISOControl)) {
+    /**
+     * Same pattern as {@code backendUser} in audit-event.schema.json (C0/C1, DEL, U+2028/2029 and the bidi controls are
+     * excluded, 1..255 code points), plus lone surrogates, which a JSON consumer cannot decode. A name that fails is
+     * dropped rather than failing the event, and the loss is logged without the value.
+     */
+    private static final Pattern BACKEND_USER = Pattern
+            .compile("^[^\\u0000-\\u001f\\u007f-\\u009f\\u2028\\u2029\\u202a-\\u202e\\u2066-\\u2069]{1,255}$");
+
+    static String auditableBackendUser(String backendUser) {
+        if (backendUser == null) {
             return null;
         }
-        return backendUser;
+        if (BACKEND_USER.matcher(backendUser).matches() && !hasLoneSurrogate(backendUser)) {
+            return backendUser;
+        }
+        diagnostics.warn("backendUser left out of the audit event: it does not fit the C8 schema");
+        return null;
+    }
+
+    private static boolean hasLoneSurrogate(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (Character.isHighSurrogate(c) && i + 1 < text.length() && Character.isLowSurrogate(text.charAt(i + 1))) {
+                i++;
+            } else if (Character.isSurrogate(c)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void write(AuditEvent event) {

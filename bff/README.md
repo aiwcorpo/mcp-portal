@@ -82,7 +82,7 @@ Wszystko przez zmienne środowiska (`application.yml`):
 | `PORTAL_OIDC_CLIENT_ID`, `PORTAL_OIDC_CLIENT_SECRET` | klient poufny | `mcp-portal-bff`, `KC_CLIENT_MCP_PORTAL_BFF_SECRET` |
 | `PORTAL_BROKER_URL`, `PORTAL_BROKER_TLS_NAME` | C4 i nazwa w certyfikacie brokera | `https://localhost:18443`, `MCP_BROKER_TLS_NAME` |
 | `PORTAL_GATEWAY_ADMIN_URL`, `PORTAL_GATEWAY_ADMIN_TLS_NAME` | C5 i nazwa w certyfikacie | `https://localhost:18444`, `MCP_GATEWAY_INTERNAL_TLS_NAME` |
-| `PORTAL_PUBLIC_BASE_URL` | origin jednej domeny (portal, `/api`, `/s/`, `/v/`): z niego redirect URI OIDC `<url>/api/v1/auth/callback`, linki `copy_link` i `clientConfigs`; nigdy z `Host`; poza `dev` tylko https (dawna nazwa: `PORTAL_GATEWAY_PUBLIC_URL`) | `http://localhost:18720` |
+| `PORTAL_PUBLIC_BASE_URL` | origin jednej domeny (portal, `/api`, `/s/`, `/v/`): z niego redirect URI OIDC `<url>/api/v1/auth/callback`, linki `copy_link` i `clientConfigs`; nigdy z `Host`; poza `dev` tylko https, bez literału IPv6 (dawna nazwa: `PORTAL_GATEWAY_PUBLIC_URL`) | `http://localhost:18720` |
 | `PORTAL_TLS_KEYSTORE`, `PORTAL_TLS_KEYSTORE_PASSWORD` | certyfikat klienta `CN=mcp-portal-bff` (PKCS12) | `certs/mcp-portal-bff/keystore.p12` |
 | `PORTAL_TLS_TRUSTSTORE`, `PORTAL_TLS_TRUSTSTORE_PASSWORD` | CA wewnętrzne | `certs/ca/truststore.p12` |
 | `PORTAL_WEB_DIST` | katalog z `index.html` zbudowanego frontendu | `../web/dist/portal` |
@@ -142,6 +142,8 @@ a zdarzenie `connection_change` niesie `backendUser` połączonego konta (CC-117
 | --- | --- |
 | `OAuthConnectTest`, `ConnectRedirectVectorsTest` | start i callback, wszystkie kody, cudzy link, powtórzenie, brak sesji, wektory `connect-redirects/` |
 | `VirtualServersTest` | lista, utworzenie, usunięcie, 409/403/503, kolejność kontroli `resourceDefaults`, `clientConfigs` |
+| `ClientConfigsTest`, `ClientConfigsBindingTest` | komenda Claude Code (wartości graniczne, metaznaki, brak flag bez profilu `dev`, błąd startu przy złej wartości) |
+| `BackendUserAuditTest` | `backendUser` w audycie zgodny ze wzorcem schematu C8 albo pomijany |
 | `NegativeSecurityTest` | `X-Request-Id` na każdej odpowiedzi i ignorowanie wartości klienta, brak XSRF, cudza sesja i token, sekret i kod OAuth w logach, `returnPath` poza wzorcem |
 | `PublicBaseUrlTest` | redirect URI z konfiguracji mimo `X-Forwarded-Host` |
 | `CatalogAssemblerTest` | wektory `catalog-actions/`, przykłady `mixed` i `states` z C12 |

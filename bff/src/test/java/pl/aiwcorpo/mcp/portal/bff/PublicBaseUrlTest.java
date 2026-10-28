@@ -74,7 +74,7 @@ class PublicBaseUrlTest {
                 .isEqualTo("https://mcp.aiwcorpo.pl/v/team-a/mcp");
         assertThat(new PublicUrls(URI.create("http://localhost:18700"), new DevMode(true)).server("mcp-jira"))
                 .isEqualTo("http://localhost:18700/s/mcp-jira/mcp");
-        for (String bad : new String[] {"", "mcp.aiwcorpo.pl", "https://mcp.aiwcorpo.pl/portal", "https://u:p@mcp.aiwcorpo.pl",
+        for (String bad : new String[] {"https://[2001:db8::1]", "https://[::1]:8443", "", "mcp.aiwcorpo.pl", "https://mcp.aiwcorpo.pl/portal", "https://u:p@mcp.aiwcorpo.pl",
                 "https://mcp.aiwcorpo.pl/?x=1", "ftp://mcp.aiwcorpo.pl"}) {
             assertThatThrownBy(() -> new PublicUrls(URI.create(bad), new DevMode(true))).as(bad)
                     .isInstanceOf(IllegalStateException.class);

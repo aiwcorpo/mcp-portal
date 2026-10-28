@@ -168,6 +168,25 @@ class OAuthConnectTest extends PortalHarness {
     }
 
     @Test
+    void aBackendUserThatBreaksTheAuditSchemaIsLeftOutOfTheEventButTheConnectionStands() {
+        for (String name : List.of("adm\\u202Enimda", "a\\u2028b", "a\\u0085b", "x".repeat(256))) {
+            String state = state();
+            stubStart(authorizeUrl(state), "flow-bu");
+            stubComplete(200, "{\"status\":\"connected\",\"backendUser\":\"" + name + "\"}");
+            TestBrowser browser = login(ALICE, Instant.now());
+            start(browser, "{\"returnPath\":\"/catalog\"}");
+
+            HttpResponse<String> back = browser.get(CALLBACK + "?code=c1&state=" + state);
+
+            assertThat(location(back)).isEqualTo("/catalog?connected=gitlab");
+            JsonNode event = lastAuditEvent();
+            ContractSchemas.assertValid(AUDIT, event);
+            assertThat(event.has("backendUser")).as(name).isFalse();
+            assertThat(event.get("outcome").asString()).isEqualTo("ok");
+        }
+    }
+
+    @Test
     void callbackCompletesTheFlowAndReturnsToThePortalPath() {
         String state = state();
         stubStart(authorizeUrl(state), "flow-77");
