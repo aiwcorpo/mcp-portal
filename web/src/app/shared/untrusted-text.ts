@@ -24,6 +24,8 @@ const HIDDEN_CLASSES = [
   '\\u{E0100}-\\u{E01EF}',
   '\\u034F\\u115F\\u1160\\u3164\\uFFA0\\u2800\\u17B4\\u17B5',
 ].join('');
+// U+034F (combining grapheme joiner) is listed on purpose: it is one of the invisible characters to replace.
+// eslint-disable-next-line no-misleading-character-class
 const NEUTRALISED = new RegExp(`\\[(?=U\\+)|[${HIDDEN_CLASSES}]`, 'gu');
 const PICTOGRAPH = /\p{Extended_Pictographic}$/u;
 const WRITTEN_BY_BFF = /<U\+[0-9A-F]{4,6}>/;
