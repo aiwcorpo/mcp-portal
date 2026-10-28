@@ -27,8 +27,9 @@ public final class GatewayData {
     private static final Pattern RESOURCE_ID = Pattern.compile("^" + NO_CONTROLS + "{1,512}$");
     private static final Pattern RESOURCE_PARENT = Pattern.compile("^[A-Za-z]+::[A-Za-z]+::" + NO_CONTROLS + "+$");
     private static final Pattern RESULT = Pattern.compile("^[a-z][a-z0-9_]{0,63}$");
+    private static final Pattern ARGUMENT_NAME = Pattern.compile("^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$");
+    private static final Pattern CLIENT = Pattern.compile("^[A-Za-z0-9._:-]{1,255}$");
     private static final int MAX_PARENT = 600;
-    private static final int MAX_CLIENT = 255;
     private static final int MAX_TOOL = 80;
 
     private GatewayData() {
@@ -41,12 +42,56 @@ public final class GatewayData {
                 || view.arguments() == null || !(view.resource() == null || validResource(view.resource()))) {
             return null;
         }
+        List<GatewayModel.ConfirmationArgument> arguments = new ArrayList<>();
         for (GatewayModel.ConfirmationArgument argument : view.arguments()) {
-            if (argument == null || argument.name() == null || argument.value() == null || argument.truncated() == null) {
+            if (argument == null || argument.name() == null || !ARGUMENT_NAME.matcher(argument.name()).matches()
+                    || argument.value() == null || argument.truncated() == null) {
                 return null;
             }
+            arguments.add(new GatewayModel.ConfirmationArgument(argument.name(), neutralize(argument.value()),
+                    argument.truncated()));
         }
-        return view;
+        return new GatewayModel.ConfirmationView(view.confirmationId(), view.tool(), view.system(), view.resource(),
+                arguments, view.expiresAt());
+    }
+
+    /**
+     * Argument values come from an untrusted agent and are shown in the trusted preview. Bidi controls, other
+     * C0/C1 controls (newline and tab stay), U+2028/2029 and lone surrogates would let a value pose as something
+     * else, so each becomes its visible code point notation, {@code <U+202E>}. C12 has no flag for this (the
+     * argument schema is closed); the notation itself is what the reader sees.
+     */
+    static String neutralize(String value) {
+        StringBuilder out = null;
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            boolean pair = Character.isHighSurrogate(c) && i + 1 < value.length()
+                    && Character.isLowSurrogate(value.charAt(i + 1));
+            if (pair) {
+                if (out != null) {
+                    out.append(c).append(value.charAt(i + 1));
+                }
+                i++;
+                continue;
+            }
+            if (isHidden(c)) {
+                if (out == null) {
+                    out = new StringBuilder(value.length() + 16).append(value, 0, i);
+                }
+                out.append(String.format("<U+%04X>", (int) c));
+            } else if (out != null) {
+                out.append(c);
+            }
+        }
+        return out == null ? value : out.toString();
+    }
+
+    private static boolean isHidden(char c) {
+        if (c == '\n' || c == '\t') {
+            return false;
+        }
+        return c <= 0x1f || c >= 0x7f && c <= 0x9f || c == 0x2028 || c == 0x2029 || c == 0x200e || c == 0x200f
+                || c == 0x061c || c >= 0x202a && c <= 0x202e || c >= 0x2066 && c <= 0x2069 || Character.isSurrogate(c);
     }
 
     /** Rows that fit {@code ActivityCall}; the others are left out with a warning that carries no value. */
@@ -68,7 +113,7 @@ public final class GatewayData {
                 && ContractValues.isTimestamp(call.ts())
                 && validTool(call.tool())
                 && call.result() != null && RESULT.matcher(call.result()).matches()
-                && (call.client() == null || call.client().length() <= MAX_CLIENT)
+                && (call.client() == null || CLIENT.matcher(call.client()).matches())
                 && (call.virtualServer() == null || ContractValues.VIRTUAL_SERVER_SLUG.matcher(call.virtualServer()).matches())
                 && (call.risk() == null || BrokerData.RISKS.contains(call.risk()))
                 && (call.resource() == null || validResource(call.resource()))

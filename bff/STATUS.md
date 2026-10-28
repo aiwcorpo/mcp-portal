@@ -258,6 +258,15 @@ dwa pliki. Wydanie jest niezmienne, więc do zgłoszenia ws-00 (kolejne wydanie 
 
 Testy: `./mvnw test`: 238 testów, 0 błędów.
 
+Poprawka po przeglądzie bezpieczeństwa (GatewayData): nazwa argumentu podglądu musi pasować do `^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$`
+(inaczej cały podgląd to 503); w `value` znaki bidi (U+202A-202E, U+2066-2069, U+200E/200F, U+061C), sterujące C0/C1 poza
+`\n` i `\t`, U+2028/2029 i samotne surogaty zamieniają się na widoczny zapis `<U+202E>`; `ActivityCall.client` musi pasować do
+`^[A-Za-z0-9._:-]{1,255}$` (inaczej wiersz jest pomijany). Schemat `ConfirmationArgument` jest zamknięty (nie ma pola na
+oznaczenie), więc znacznikiem jest sam widoczny zapis, a `truncated` zostaje tylko dla przycięcia. Kontrakt nie podaje limitu
+długości `value`, więc BFF go nie wymyśla.
+
 ## Propozycje CC
 
-- Brak nowych. Uwaga do C8: powody `upstream_unavailable` dla `virtual_server_change` i `authenticator` (zob. wyżej).
+- C12/C5 `ConfirmationArgument`: opcjonalne pole (np. `neutralized: boolean`), by UI mogło oznaczyć argument, w którym BFF
+  zamienił znaki ukryte na zapis `<U+XXXX>`; oraz limit długości `value` i wzorzec `name` w schemacie.
+- Brak innych. Uwaga do C8: powody `upstream_unavailable` dla `virtual_server_change` i `authenticator` (zob. wyżej).

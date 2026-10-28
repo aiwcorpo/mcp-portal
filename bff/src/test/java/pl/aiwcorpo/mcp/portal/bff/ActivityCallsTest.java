@@ -135,6 +135,8 @@ class ActivityCallsTest extends PortalHarness {
                  {"requestId":"not-a-uuid","ts":"2026-10-26T20:00:00Z","tool":"jira__get_issue","result":"ok"},
                  {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e80","ts":"2026-10-26T20:00:00Z",
                   "tool":"jira__get_issue","result":"ok","wrongCodeCount":9},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e82","ts":"2026-10-26T20:00:00Z",
+                  "client":"claude\u202e-code","tool":"jira__get_issue","result":"ok"},
                  {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e81","ts":"2026-10-26T20:00:00Z",
                   "tool":"jira__delete_issue","risk":"DESTRUCTIVE","result":"cancelled","wrongCodeCount":0,
                   "errorCode":"confirmation_cancelled","resource":{"type":"Jira::Issue","id":"ABC-1"}}]""");

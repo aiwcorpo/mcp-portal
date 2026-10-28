@@ -123,6 +123,30 @@ class ConfirmationsTest extends PortalHarness {
     }
 
     @Test
+    void hiddenCharactersInArgumentValuesBecomeVisibleAndNamesWithThemAreRefused() {
+        TestBrowser browser = session();
+        stub(get(urlPathMatching("/admin/v1/confirmations/.*")), 200, """
+                {"confirmationId":"%s","tool":"jira__delete_issue","system":"jira",
+                 "arguments":[{"name":"comment","value":"\\\"ok\\u202e gnp.exe\\u2028x\\u0007y\\nline\\tt\\u061c\\\"",
+                 "truncated":false}],"expiresAt":"2026-10-26T20:02:00Z"}""".formatted(ID));
+
+        HttpResponse<String> shown = browser.get(PREVIEW);
+
+        C12.assertResponse("GET", "/api/v1/confirmations/{id}", shown);
+        String value = JSON.readTree(shown.body()).get("arguments").get(0).get("value").asString();
+        assertThat(value).isEqualTo("\"ok<U+202E> gnp.exe<U+2028>x<U+0007>y\nline\tt<U+061C>\"");
+        assertThat(shown.body()).doesNotContain("\u202e").doesNotContain("\\u202e");
+
+        for (String name : List.of("a\\u202eb", "a b", "", "x".repeat(129))) {
+            stub(get(urlPathMatching("/admin/v1/confirmations/.*")), 200, """
+                    {"confirmationId":"%s","tool":"jira__delete_issue","system":"jira",
+                     "arguments":[{"name":"%s","value":"1","truncated":false}],"expiresAt":"2026-10-26T20:02:00Z"}"""
+                    .formatted(ID, name));
+            assertThat(browser.get(PREVIEW).statusCode()).as(name).isEqualTo(503);
+        }
+    }
+
+    @Test
     void thereIsNoDecisionEndpoint() {
         TestBrowser browser = session();
         int before = gatewayCalls();
