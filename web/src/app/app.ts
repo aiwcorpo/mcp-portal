@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter, skip } from 'rxjs';
+import { filter } from 'rxjs';
 import { ApiFailure } from './core/api-error';
 import { APP_NAME } from './core/page-title.strategy';
 import { SessionService } from './core/session.service';
@@ -66,8 +66,9 @@ export class App {
       .subscribe((event) => this.path.set(event.urlAfterRedirects.split(/[?#]/)[0]));
     this.router.events
       .pipe(
-        filter((event) => event instanceof NavigationEnd),
-        skip(1),
+        // Navigation 1 is the page load and keeps the browser's focus. Counting "the first NavigationEnd"
+        // instead would swallow the first click when it cancels a slow initial navigation.
+        filter((event) => event instanceof NavigationEnd && event.id !== 1),
         takeUntilDestroyed(),
       )
       .subscribe(() => afterNextRender(() => this.focusMain(), { injector }));

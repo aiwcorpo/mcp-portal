@@ -1,7 +1,9 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  DOCUMENT,
   DestroyRef,
   HostListener,
   OnInit,
@@ -23,6 +25,7 @@ import { BrowserNavigation } from '../../core/browser-navigation';
 import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
+import { Notice } from '../../shared/notice';
 import { QrCode } from './qr-code';
 
 type Step = 'checking' | 'info' | 'starting' | 'scan' | 'code' | 'done' | 'failed' | 'already';
@@ -59,6 +62,7 @@ const MFA_RETURN = 'ok';
     ErrorNotice,
     LoadError,
     Loading,
+    Notice,
     QrCode,
   ],
   templateUrl: './register-page.html',
@@ -70,6 +74,8 @@ export class AuthenticatorRegisterPage implements OnInit {
   private readonly router = inject(Router);
   private readonly navigation = inject(BrowserNavigation);
   private readonly clipboard = inject(Clipboard);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly document = inject(DOCUMENT);
 
   /** Query parameter `mfa` (withComponentInputBinding). */
   readonly mfa = input<string | undefined>();
@@ -83,12 +89,17 @@ export class AuthenticatorRegisterPage implements OnInit {
   protected readonly codeWrong = signal(false);
   protected readonly codeAttempted = signal(false);
   protected readonly busy = signal(false);
+  /** The IdP returned from the fresh MFA; the user continues with one more click. */
+  protected readonly mfaConfirmed = signal(false);
+  /** The key may still be in the clipboard and this page could not clear it. */
+  protected readonly clipboardAdvice = signal(false);
 
   private enrollmentId: string | null = null;
   private readonly expiresAt = signal<number | null>(null);
   private readonly now = signal(Date.now());
   private timer: ReturnType<typeof setInterval> | null = null;
   private returnedFromMfa = false;
+  private keyCopied = false;
 
   protected readonly code = new FormControl('', {
     nonNullable: true,
@@ -117,7 +128,10 @@ export class AuthenticatorRegisterPage implements OnInit {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.discard());
+    inject(DestroyRef).onDestroy(() => {
+      this.wipeClipboard(this.seed()?.secret);
+      this.discard();
+    });
     effect(() => {
       if (this.expiresAt() !== null && this.remaining() === 0) {
         untracked(() => this.expire());
@@ -130,13 +144,30 @@ export class AuthenticatorRegisterPage implements OnInit {
     void this.begin();
   }
 
-  /** The browser may keep the page in the back-forward cache; the key must not come back with it. */
+  /**
+   * The browser may keep the page in the back-forward cache, frozen right after `pagehide`. The DOM is brought
+   * up to date synchronously here, because a scheduled change detection would not run before the freeze, and
+   * again on a restore (`pageshow` with `persisted`).
+   */
   @HostListener('window:pagehide')
   protected onPageHide(): void {
+    this.leave();
+  }
+
+  @HostListener('window:pageshow', ['$event'])
+  protected onPageShow(event: PageTransitionEvent): void {
+    if (event.persisted) {
+      this.leave();
+    }
+  }
+
+  private leave(): void {
+    this.wipeClipboard(this.seed()?.secret);
     this.discard();
     if (this.step() === 'scan' || this.step() === 'code') {
       this.step.set('info');
     }
+    this.changeDetector.detectChanges();
   }
 
   private async begin(): Promise<void> {
@@ -154,10 +185,8 @@ export class AuthenticatorRegisterPage implements OnInit {
       this.loadFailure.set(toApiFailure(error));
       return;
     }
+    this.mfaConfirmed.set(this.returnedFromMfa);
     this.step.set('info');
-    if (this.returnedFromMfa) {
-      await this.start();
-    }
   }
 
   protected retryLoad(): void {
@@ -180,6 +209,7 @@ export class AuthenticatorRegisterPage implements OnInit {
       this.expiresAt.set(Date.parse(started.expiresAt));
       this.now.set(Date.now());
       this.timer ??= setInterval(() => this.now.set(Date.now()), 1000);
+      this.mfaConfirmed.set(false);
       this.step.set('scan');
     } catch (error) {
       this.step.set('info');
@@ -204,9 +234,11 @@ export class AuthenticatorRegisterPage implements OnInit {
       this.failure.set(failure);
     }
     this.returnedFromMfa = false;
+    this.mfaConfirmed.set(false);
   }
 
   protected toCodeStep(): void {
+    this.wipeClipboard(this.seed()?.secret);
     this.seed.set(null);
     this.copyState.set('idle');
     this.codeWrong.set(false);
@@ -217,18 +249,22 @@ export class AuthenticatorRegisterPage implements OnInit {
 
   /** The key is gone after step 2, so going back means a new registration, not a second look at the old key. */
   protected backToInfo(): void {
+    this.wipeClipboard(this.seed()?.secret);
     this.discard();
     this.step.set('info');
   }
 
   protected async cancel(): Promise<void> {
+    this.wipeClipboard(this.seed()?.secret);
     this.discard();
     await this.router.navigateByUrl('/connections');
   }
 
   protected async copyKey(): Promise<void> {
     const secret = this.seed()?.secret;
-    this.copyState.set(secret && this.clipboard.copy(secret) ? 'copied' : 'failed');
+    const copied = Boolean(secret && this.clipboard.copy(secret));
+    this.keyCopied = this.keyCopied || copied;
+    this.copyState.set(copied ? 'copied' : 'failed');
   }
 
   protected async submit(): Promise<void> {
@@ -266,8 +302,31 @@ export class AuthenticatorRegisterPage implements OnInit {
     this.step.set('info');
   }
 
+  /**
+   * The key was copied to the system clipboard, where it would outlive this page. It is overwritten with an
+   * empty text when the clipboard still holds exactly this key; where the browser does not allow reading or
+   * writing it, the page says so and asks the user to clear it.
+   */
+  private wipeClipboard(secret: string | undefined): void {
+    if (!this.keyCopied || !secret) {
+      return;
+    }
+    this.keyCopied = false;
+    const clipboard = this.document.defaultView?.navigator.clipboard;
+    const advise = () => this.clipboardAdvice.set(true);
+    if (!clipboard?.readText || !clipboard.writeText) {
+      advise();
+      return;
+    }
+    void clipboard
+      .readText()
+      .then((current) => (current === secret ? clipboard.writeText('') : undefined))
+      .catch(advise);
+  }
+
   private expire(): void {
     if (this.step() === 'scan' || this.step() === 'code') {
+      this.wipeClipboard(this.seed()?.secret);
       this.discard();
       this.step.set('failed');
     }

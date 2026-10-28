@@ -24,6 +24,12 @@
   @if (failure(); as problem) {
     <app-error-notice [failure]="problem" />
   }
+  @if (clipboardAdvice() && step() !== 'scan') {
+    <app-notice kind="warning" i18n="@@enroll.clipboard">
+      Klucz został skopiowany do schowka. Wyczyść schowek, na przykład kopiując inny tekst: klucz
+      pozwala generować kody.
+    </app-notice>
+  }
 
   @switch (step()) {
     @case ('already') {
@@ -51,6 +57,11 @@
     }
     @case ('info') {
       <h1 i18n="@@enroll.infoTitle">Zarejestruj Authenticator</h1>
+      @if (mfaConfirmed()) {
+        <app-notice kind="info" i18n="@@enroll.mfaDone">
+          Tożsamość potwierdzona. Kontynuuj rejestrację, gdy jesteś gotowy.
+        </app-notice>
+      }
       <div class="text">
         <p class="lead" i18n="@@enroll.infoLead">
           Gdy agent chce wykonać operację nieodwracalną, na przykład usunąć stronę, wpisujesz w
@@ -68,14 +79,12 @@
         <button mat-stroked-button type="button" (click)="cancel()" i18n="@@enroll.cancel">
           Anuluj
         </button>
-        <button
-          mat-flat-button
-          type="button"
-          [disabled]="busy()"
-          (click)="start()"
-          i18n="@@enroll.next"
-        >
-          Dalej
+        <button mat-flat-button type="button" [disabled]="busy()" (click)="start()">
+          @if (mfaConfirmed()) {
+            <ng-container i18n="@@enroll.continue">Kontynuuj rejestrację</ng-container>
+          } @else {
+            <ng-container i18n="@@enroll.next">Dalej</ng-container>
+          }
         </button>
       </div>
     }

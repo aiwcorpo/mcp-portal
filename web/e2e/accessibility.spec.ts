@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { expect, test } from './fixtures';
+import { expect, startEnrollment, test } from './fixtures';
 
 async function expectNoViolations(page: Page): Promise<void> {
   // Material fades messages in; axe would measure contrast mid-transition.
@@ -69,7 +69,7 @@ for (const scheme of ['dark', 'light'] as const) {
   }) => {
     await page.goto('/authenticator/register');
     await useScheme(page, scheme);
-    await page.getByRole('button', { name: 'Dalej' }).click();
+    await startEnrollment(page);
     await expect(page.getByTestId('enrollment-key')).toBeVisible();
     await expectNoViolations(page);
     await page.getByRole('button', { name: 'Dalej' }).click();
@@ -254,6 +254,18 @@ test('320 px: no WCAG 2.1 AA violations and no horizontal scroll', async ({ page
 });
 
 test('focus moves to the main content after an in-app navigation', async ({ page }) => {
+  await page.goto('/catalog');
+  await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+  await page.getByRole('link', { name: 'Połączenia z systemami' }).click();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Połączenia z systemami' }),
+  ).toBeVisible();
+  await expect(page.locator('#main')).toBeFocused();
+});
+
+test('focus moves to the main content even when the click comes before the first page has loaded', async ({
+  page,
+}) => {
   await page.goto('/catalog');
   await page.getByRole('link', { name: 'Połączenia z systemami' }).click();
   await expect(

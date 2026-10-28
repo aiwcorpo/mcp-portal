@@ -247,4 +247,47 @@ describe('LogsPage', () => {
     await openRoute('/logs');
     await until(() => expect(text()).toContain('Jira ABC[U+202E]1'));
   });
+
+  it('starts again from the first page when the cursor has expired (400)', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Pokaż więcej'));
+    const cursors: (string | null)[] = [];
+    server.events.on('request:start', ({ request }) => {
+      const url = new URL(request.url);
+      if (url.pathname === '/api/v1/activity/calls') {
+        cursors.push(url.searchParams.get('cursor'));
+      }
+    });
+    server.use(
+      http.get(
+        '/api/v1/activity/calls',
+        () => HttpResponse.json({ error: 'invalid_request' }, { status: 400 }),
+        { once: true },
+      ),
+    );
+    button('Pokaż więcej').click();
+    await until(() => expect(text()).toContain('Lista jest nieaktualna.'));
+    expect(text()).not.toContain('Niepoprawne dane wejściowe');
+    button('Wczytaj od początku').click();
+    await until(() => expect(text()).not.toContain('Lista jest nieaktualna.'));
+    await until(() => expect(text()).toContain('Pokaż więcej'));
+    expect(cursors).toEqual(['c50', null]);
+  });
+
+  it('shows hidden characters in the tool name and the link as markers', async () => {
+    server.use(
+      http.get('/api/v1/activity/calls', () =>
+        HttpResponse.json([
+          call({
+            tool: `jira__get${String.fromCodePoint(0x202e)}issue`,
+            virtualServer: 'a\u200bb',
+          }),
+        ]),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('jira__get[U+202E]issue'));
+  });
 });

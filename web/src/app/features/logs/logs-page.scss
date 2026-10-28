@@ -197,3 +197,13 @@ thead th {
     gap: 0;
   }
 }
+
+.linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pm-link);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}

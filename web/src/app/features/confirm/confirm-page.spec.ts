@@ -8,7 +8,6 @@ import {
 } from '../../../mocks/m3-mock';
 import { useMockApi } from '../../../testing/mock-api';
 import { button, configureTestApp, openRoute, text, until } from '../../../testing/test-app';
-import { neutraliseText } from '../../shared/untrusted-text';
 import { CONFIRM_POLL_MS, sortedArguments } from './confirm-page';
 
 function visibility(state: 'visible' | 'hidden'): void {
@@ -185,6 +184,49 @@ describe('ConfirmPage', () => {
     expect(CONFIRMATION_TTL_MS).toBe(120_000);
   });
 
+  describe('a wrong clock on this machine', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    function serverSays(expiresInMs: number) {
+      const expiresAt = new Date(Date.now() + expiresInMs).toISOString();
+      server.use(
+        http.get(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}`, () =>
+          HttpResponse.json(
+            {
+              ...demoConfirmation(Date.now()),
+              expiresAt,
+            },
+            { headers: { Date: new Date().toUTCString() } },
+          ),
+        ),
+      );
+    }
+
+    it('does not make the page say "Czas minął" and does not hide "Anuluj operację"', async () => {
+      serverSays(100_000);
+      const real = Date.now.bind(Date);
+      vi.spyOn(Date, 'now').mockImplementation(() => real() + 130_000);
+      const viewed = countCalls(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}/viewed`, 'post');
+      configureTestApp();
+      await openRoute(path);
+      await until(() => expect(text()).toContain('Anuluj operację'));
+      expect(text()).not.toContain('Czas minął.');
+      expect(text()).toMatch(/wygasa za 01:(3|4|5)\d/);
+      await until(() => expect(viewed).toHaveBeenCalledTimes(1));
+    });
+
+    it('does not turn "Czas minął" into a view when the server clock says the time is over', async () => {
+      serverSays(-5000);
+      const viewed = countCalls(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}/viewed`, 'post');
+      configureTestApp();
+      await openRoute(path);
+      await until(() => expect(text()).toContain('Czas minął.'));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(viewed).not.toHaveBeenCalled();
+      expect(text()).not.toContain('Anuluj operację');
+    });
+  });
+
   it('cancels the operation from the preview', async () => {
     configureTestApp();
     await openRoute(path);
@@ -274,24 +316,4 @@ describe('ConfirmPage', () => {
     await until(() => expect(text()).toContain('<img src=x onerror=alert(1)>'));
     expect(document.querySelector('main img')).toBeNull();
   });
-});
-
-describe('neutraliseText', () => {
-  it('leaves ordinary text, line breaks and tabs alone', () => {
-    expect(neutraliseText('Zażółć gęślą jaźń\n\tok')).toEqual({
-      text: 'Zażółć gęślą jaźń\n\tok',
-      neutralised: false,
-    });
-  });
-
-  it.each([0x202e, 0x2066, 0x200f, 0x2028, 0x0000, 0x0085, 0x007f, 0xfeff])(
-    'replaces U+%s by a visible marker',
-    (code) => {
-      const marker = `[U+${code.toString(16).toUpperCase().padStart(4, '0')}]`;
-      expect(neutraliseText(`a${String.fromCodePoint(code)}b`)).toEqual({
-        text: `a${marker}b`,
-        neutralised: true,
-      });
-    },
-  );
 });

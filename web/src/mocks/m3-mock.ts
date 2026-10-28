@@ -492,7 +492,12 @@ export function createM3Handlers(store: MockStore, ctx: MockContext): HttpHandle
         return ctx.failure('not_found_or_denied', 404);
       }
       return HttpResponse.json(demoConfirmation(seenAt, id), {
-        headers: { ...headers, 'Cache-Control': 'no-store', Pragma: 'no-cache' },
+        headers: {
+          ...headers,
+          Date: new Date().toUTCString(),
+          'Cache-Control': 'no-store',
+          Pragma: 'no-cache',
+        },
       });
     }),
     http.post(at('/api/v1/confirmations/:id/viewed'), ({ request, cookies, params }) => {

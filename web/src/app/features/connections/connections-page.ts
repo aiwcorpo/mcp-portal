@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import {
+  ActivityCall,
   ActivityService,
   AuthenticatorService,
   AuthenticatorStatus,
@@ -84,6 +85,21 @@ function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
     date: null,
     tone: 'neutral',
   };
+}
+
+/** How many newest calls are read to find the last one that really used the system. */
+const LAST_CALL_LOOKUP = 20;
+
+/** Results of calls that stopped before the system (policy, scope, missing credential, limits). */
+const NOT_REACHED =
+  /^(denied_|tool_disabled$|credential_required$|rate_limited$|step_up_required$|blocked_by_pending$|superseded$|cancelled$)/;
+
+/**
+ * `q` of the API also matches resource ids, so the tool name is checked here: a GitLab project called
+ * "servicedesk__x" must not count as a use of Service Desk. Calls refused before the system do not count.
+ */
+export function reachedSystem(call: ActivityCall, system: SystemId): boolean {
+  return call.tool.startsWith(`${system}__`) && !NOT_REACHED.test(call.result);
 }
 
 interface ConnectionsData {
@@ -210,15 +226,16 @@ export class ConnectionsPage implements OnInit {
         )
         .map(async (server) => {
           try {
-            const [latest] = await firstValueFrom(
+            const calls = await firstValueFrom(
               this.activityApi.listMyActivityCalls(
-                1,
+                LAST_CALL_LOOKUP,
                 undefined,
                 undefined,
                 undefined,
                 `${server.system}__`,
               ),
             );
+            const latest = calls.find((call) => reachedSystem(call, server.system));
             if (latest) {
               result[server.system] = latest.ts;
             }

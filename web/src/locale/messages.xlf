@@ -666,9 +666,17 @@
         <source>Kroki rejestracji</source>
       </segment>
     </unit>
+    <unit id="enroll.clipboard">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:29,32</note>
+      </notes>
+      <segment>
+        <source> Klucz został skopiowany do schowka. Wyczyść schowek, na przykład kopiując inny tekst: klucz pozwala generować kody. </source>
+      </segment>
+    </unit>
     <unit id="enroll.alreadyTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:30,31</note>
+        <note category="location">src/app/features/authenticator/register-page.html:36,37</note>
       </notes>
       <segment>
         <source>Authenticator jest już zarejestrowany</source>
@@ -676,7 +684,7 @@
     </unit>
     <unit id="enroll.alreadyText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:32,35</note>
+        <note category="location">src/app/features/authenticator/register-page.html:38,41</note>
       </notes>
       <segment>
         <source> Żeby zarejestrować go od nowa, najpierw usuń obecną rejestrację w Połączeniach z systemami. Usunięcie wymaga potwierdzenia tożsamości (MFA). </source>
@@ -684,7 +692,7 @@
     </unit>
     <unit id="enroll.toConnections">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:37,39</note>
+        <note category="location">src/app/features/authenticator/register-page.html:43,45</note>
       </notes>
       <segment>
         <source> Wróć do połączeń </source>
@@ -692,7 +700,7 @@
     </unit>
     <unit id="enroll.failedTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:43,44</note>
+        <note category="location">src/app/features/authenticator/register-page.html:49,50</note>
       </notes>
       <segment>
         <source>Rejestracja wygasła albo wpisano 3 błędne kody.</source>
@@ -700,7 +708,7 @@
     </unit>
     <unit id="enroll.failedText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:45,47</note>
+        <note category="location">src/app/features/authenticator/register-page.html:51,53</note>
       </notes>
       <segment>
         <source> Zacznij od nowa. Usuń w aplikacji konto &quot;MCP Platform&quot; dodane przed chwilą. </source>
@@ -708,7 +716,7 @@
     </unit>
     <unit id="enroll.restart">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:48,50</note>
+        <note category="location">src/app/features/authenticator/register-page.html:54,56</note>
       </notes>
       <segment>
         <source> Zacznij od nowa </source>
@@ -716,15 +724,23 @@
     </unit>
     <unit id="enroll.infoTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:53,55</note>
+        <note category="location">src/app/features/authenticator/register-page.html:59,60</note>
       </notes>
       <segment>
         <source>Zarejestruj Authenticator</source>
       </segment>
     </unit>
+    <unit id="enroll.mfaDone">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:62,63</note>
+      </notes>
+      <segment>
+        <source> Tożsamość potwierdzona. Kontynuuj rejestrację, gdy jesteś gotowy. </source>
+      </segment>
+    </unit>
     <unit id="enroll.infoLead">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:56,58</note>
+        <note category="location">src/app/features/authenticator/register-page.html:67,69</note>
       </notes>
       <segment>
         <source> Gdy agent chce wykonać operację nieodwracalną, na przykład usunąć stronę, wpisujesz w sesji agenta 6-cyfrowy kod z aplikacji. </source>
@@ -732,7 +748,7 @@
     </unit>
     <unit id="enroll.infoApp">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:60,62</note>
+        <note category="location">src/app/features/authenticator/register-page.html:71,73</note>
       </notes>
       <segment>
         <source> Dodasz w Microsoft Authenticator osobne konto &quot;MCP Platform&quot;. Robisz to raz. </source>
@@ -740,7 +756,7 @@
     </unit>
     <unit id="enroll.infoMfa">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:63,65</note>
+        <note category="location">src/app/features/authenticator/register-page.html:74,76</note>
       </notes>
       <segment>
         <source> &quot;Dalej&quot; poprosi o potwierdzenie tożsamości (MFA). Potrzebne tylko przy rejestracji i usunięciu. </source>
@@ -748,23 +764,31 @@
     </unit>
     <unit id="enroll.cancel">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:69,71</note>
+        <note category="location">src/app/features/authenticator/register-page.html:80,82</note>
       </notes>
       <segment>
         <source> Anuluj </source>
       </segment>
     </unit>
-    <unit id="enroll.next">
+    <unit id="enroll.continue">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:78,79</note>
+        <note category="location">src/app/features/authenticator/register-page.html:84,85</note>
       </notes>
       <segment>
-        <source> Dalej </source>
+        <source>Kontynuuj rejestrację</source>
+      </segment>
+    </unit>
+    <unit id="enroll.next">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.html:86,87</note>
+      </notes>
+      <segment>
+        <source>Dalej</source>
       </segment>
     </unit>
     <unit id="enroll.scanTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:87,89</note>
+        <note category="location">src/app/features/authenticator/register-page.html:96,98</note>
       </notes>
       <segment>
         <source>Dodaj konto w aplikacji</source>
@@ -772,7 +796,7 @@
     </unit>
     <unit id="enroll.how1">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:95,96</note>
+        <note category="location">src/app/features/authenticator/register-page.html:104,105</note>
       </notes>
       <segment>
         <source>Otwórz Microsoft Authenticator.</source>
@@ -780,7 +804,7 @@
     </unit>
     <unit id="enroll.how2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:96,97</note>
+        <note category="location">src/app/features/authenticator/register-page.html:105,106</note>
       </notes>
       <segment>
         <source>Dodaj konto, a potem Inne konto.</source>
@@ -788,7 +812,7 @@
     </unit>
     <unit id="enroll.how3">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:97,99</note>
+        <note category="location">src/app/features/authenticator/register-page.html:106,108</note>
       </notes>
       <segment>
         <source>Zeskanuj kod QR.</source>
@@ -796,7 +820,7 @@
     </unit>
     <unit id="enroll.manual">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:99,100</note>
+        <note category="location">src/app/features/authenticator/register-page.html:108,109</note>
       </notes>
       <segment>
         <source>Nie możesz zeskanować? Wpisz klucz ręcznie.</source>
@@ -804,7 +828,7 @@
     </unit>
     <unit id="enroll.copy">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:103,104</note>
+        <note category="location">src/app/features/authenticator/register-page.html:112,113</note>
       </notes>
       <segment>
         <source> Kopiuj </source>
@@ -812,7 +836,7 @@
     </unit>
     <unit id="enroll.copied">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:109,110</note>
+        <note category="location">src/app/features/authenticator/register-page.html:118,119</note>
       </notes>
       <segment>
         <source>Klucz skopiowany do schowka.</source>
@@ -820,7 +844,7 @@
     </unit>
     <unit id="enroll.copyFailed">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:113,114</note>
+        <note category="location">src/app/features/authenticator/register-page.html:122,123</note>
       </notes>
       <segment>
         <source>Nie udało się skopiować. Zaznacz klucz i skopiuj go ręcznie.</source>
@@ -828,7 +852,7 @@
     </unit>
     <unit id="enroll.once">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:119,123</note>
+        <note category="location">src/app/features/authenticator/register-page.html:128,132</note>
       </notes>
       <segment>
         <source> Kod QR i klucz pokazujemy tylko teraz. Rejestracja ważna jeszcze <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;mono timer&quot;&gt;" dispEnd="&lt;/span
@@ -837,7 +861,7 @@
     </unit>
     <unit id="enroll.cancel2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:128,130</note>
+        <note category="location">src/app/features/authenticator/register-page.html:137,139</note>
       </notes>
       <segment>
         <source> Anuluj </source>
@@ -845,7 +869,7 @@
     </unit>
     <unit id="enroll.next2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:131,132</note>
+        <note category="location">src/app/features/authenticator/register-page.html:140,141</note>
       </notes>
       <segment>
         <source> Dalej </source>
@@ -853,7 +877,7 @@
     </unit>
     <unit id="enroll.codeTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:136,137</note>
+        <note category="location">src/app/features/authenticator/register-page.html:145,146</note>
       </notes>
       <segment>
         <source>Wpisz pierwszy kod</source>
@@ -861,7 +885,7 @@
     </unit>
     <unit id="enroll.codeLabel">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:139,141</note>
+        <note category="location">src/app/features/authenticator/register-page.html:148,150</note>
       </notes>
       <segment>
         <source>Kod z aplikacji (6 cyfr)</source>
@@ -869,7 +893,7 @@
     </unit>
     <unit id="enroll.codeWrong">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:154,156</note>
+        <note category="location">src/app/features/authenticator/register-page.html:163,165</note>
       </notes>
       <segment>
         <source> Kod nieprawidłowy. </source>
@@ -877,7 +901,7 @@
     </unit>
     <unit id="enroll.codeFormat">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:158,160</note>
+        <note category="location">src/app/features/authenticator/register-page.html:167,169</note>
       </notes>
       <segment>
         <source> Kod ma 6 cyfr. </source>
@@ -885,7 +909,7 @@
     </unit>
     <unit id="enroll.codeHint">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:162,164</note>
+        <note category="location">src/app/features/authenticator/register-page.html:171,173</note>
       </notes>
       <segment>
         <source> Wpisz kod widoczny w aplikacji przy koncie &quot;MCP Platform&quot;. </source>
@@ -893,7 +917,7 @@
     </unit>
     <unit id="enroll.back2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:167,168</note>
+        <note category="location">src/app/features/authenticator/register-page.html:176,177</note>
       </notes>
       <segment>
         <source> Wstecz </source>
@@ -901,7 +925,7 @@
     </unit>
     <unit id="enroll.check">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:170,171</note>
+        <note category="location">src/app/features/authenticator/register-page.html:179,180</note>
       </notes>
       <segment>
         <source> Sprawdź </source>
@@ -909,7 +933,7 @@
     </unit>
     <unit id="enroll.doneTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:176,178</note>
+        <note category="location">src/app/features/authenticator/register-page.html:185,187</note>
       </notes>
       <segment>
         <source>Authenticator zarejestrowany</source>
@@ -917,7 +941,7 @@
     </unit>
     <unit id="enroll.doneLead">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:179,181</note>
+        <note category="location">src/app/features/authenticator/register-page.html:188,190</note>
       </notes>
       <segment>
         <source> Od teraz operacje nieodwracalne potwierdzasz kodem z aplikacji. </source>
@@ -925,7 +949,7 @@
     </unit>
     <unit id="enroll.doneText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:182,184</note>
+        <note category="location">src/app/features/authenticator/register-page.html:191,193</note>
       </notes>
       <segment>
         <source> Kod wpisujesz w sesji agenta, gdy o niego poprosi. </source>
@@ -933,7 +957,7 @@
     </unit>
     <unit id="enroll.toConnections2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:187,190</note>
+        <note category="location">src/app/features/authenticator/register-page.html:196,199</note>
       </notes>
       <segment>
         <source> Wróć do połączeń </source>
@@ -941,7 +965,7 @@
     </unit>
     <unit id="enroll.stepInfo">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.ts:37</note>
+        <note category="location">src/app/features/authenticator/register-page.ts:40</note>
       </notes>
       <segment>
         <source>Informacja</source>
@@ -949,7 +973,7 @@
     </unit>
     <unit id="enroll.stepScan">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.ts:38</note>
+        <note category="location">src/app/features/authenticator/register-page.ts:41</note>
       </notes>
       <segment>
         <source>Skanowanie</source>
@@ -957,7 +981,7 @@
     </unit>
     <unit id="enroll.stepCode">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.ts:39</note>
+        <note category="location">src/app/features/authenticator/register-page.ts:42</note>
       </notes>
       <segment>
         <source>Pierwszy kod</source>
@@ -965,7 +989,7 @@
     </unit>
     <unit id="enroll.stepDone">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.ts:40</note>
+        <note category="location">src/app/features/authenticator/register-page.ts:43</note>
       </notes>
       <segment>
         <source>Gotowe</source>
@@ -1706,7 +1730,7 @@
     </unit>
     <unit id="conn.reconnectNeeded">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:58</note>
+        <note category="location">src/app/features/connections/connections-page.ts:59</note>
       </notes>
       <segment>
         <source>wymaga ponownego połączenia</source>
@@ -1714,7 +1738,7 @@
     </unit>
     <unit id="conn.pending">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:63</note>
+        <note category="location">src/app/features/connections/connections-page.ts:64</note>
       </notes>
       <segment>
         <source>wniosek oczekuje</source>
@@ -1722,7 +1746,7 @@
     </unit>
     <unit id="conn.noAccess">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:65</note>
+        <note category="location">src/app/features/connections/connections-page.ts:66</note>
       </notes>
       <segment>
         <source>brak uprawnienia</source>
@@ -1730,7 +1754,7 @@
     </unit>
     <unit id="conn.autoRefreshed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:82</note>
+        <note category="location">src/app/features/connections/connections-page.ts:83</note>
       </notes>
       <segment>
         <source>odświeżane automatycznie</source>
@@ -1738,7 +1762,7 @@
     </unit>
     <unit id="conn.noExpiry">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:83</note>
+        <note category="location">src/app/features/connections/connections-page.ts:84</note>
       </notes>
       <segment>
         <source>bez terminu</source>
@@ -1746,7 +1770,7 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:266</note>
+        <note category="location">src/app/features/connections/connections-page.ts:283</note>
       </notes>
       <segment>
         <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
@@ -2673,9 +2697,25 @@
         <source>Wynik</source>
       </segment>
     </unit>
+    <unit id="logs.stale">
+      <notes>
+        <note category="location">src/app/features/logs/logs-page.html:43</note>
+      </notes>
+      <segment>
+        <source>Lista jest nieaktualna.</source>
+      </segment>
+    </unit>
+    <unit id="logs.reload">
+      <notes>
+        <note category="location">src/app/features/logs/logs-page.html:49,51</note>
+      </notes>
+      <segment>
+        <source> Wczytaj od początku </source>
+      </segment>
+    </unit>
     <unit id="logs.caption">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:47,49</note>
+        <note category="location">src/app/features/logs/logs-page.html:58,60</note>
       </notes>
       <segment>
         <source> Moje wywołania narzędzi, od najnowszych </source>
@@ -2683,7 +2723,7 @@
     </unit>
     <unit id="logs.colDetails">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:52,54</note>
+        <note category="location">src/app/features/logs/logs-page.html:63,65</note>
       </notes>
       <segment>
         <source>Szczegóły</source>
@@ -2691,8 +2731,8 @@
     </unit>
     <unit id="logs.colTime">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:54,55</note>
-        <note category="location">src/app/features/logs/logs-page.html:90</note>
+        <note category="location">src/app/features/logs/logs-page.html:65,66</note>
+        <note category="location">src/app/features/logs/logs-page.html:101</note>
       </notes>
       <segment>
         <source>Czas</source>
@@ -2700,8 +2740,8 @@
     </unit>
     <unit id="logs.colClient">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:55,56</note>
-        <note category="location">src/app/features/logs/logs-page.html:94</note>
+        <note category="location">src/app/features/logs/logs-page.html:66,67</note>
+        <note category="location">src/app/features/logs/logs-page.html:105</note>
       </notes>
       <segment>
         <source>Klient</source>
@@ -2709,8 +2749,8 @@
     </unit>
     <unit id="logs.colTool">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:56,57</note>
-        <note category="location">src/app/features/logs/logs-page.html:97</note>
+        <note category="location">src/app/features/logs/logs-page.html:67,68</note>
+        <note category="location">src/app/features/logs/logs-page.html:108</note>
       </notes>
       <segment>
         <source>Narzędzie</source>
@@ -2718,8 +2758,8 @@
     </unit>
     <unit id="logs.colResource">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:57,58</note>
-        <note category="location">src/app/features/logs/logs-page.html:104</note>
+        <note category="location">src/app/features/logs/logs-page.html:68,69</note>
+        <note category="location">src/app/features/logs/logs-page.html:115</note>
       </notes>
       <segment>
         <source>Zasób</source>
@@ -2727,8 +2767,8 @@
     </unit>
     <unit id="logs.colResult">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:58,60</note>
-        <note category="location">src/app/features/logs/logs-page.html:113</note>
+        <note category="location">src/app/features/logs/logs-page.html:69,71</note>
+        <note category="location">src/app/features/logs/logs-page.html:124</note>
       </notes>
       <segment>
         <source>Wynik</source>
@@ -2736,7 +2776,7 @@
     </unit>
     <unit id="logs.wrongCodes">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:128,129</note>
+        <note category="location">src/app/features/logs/logs-page.html:139,140</note>
       </notes>
       <segment>
         <source>Błędne kody</source>
@@ -2744,7 +2784,7 @@
     </unit>
     <unit id="logs.risk">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:133,134</note>
+        <note category="location">src/app/features/logs/logs-page.html:144,145</note>
       </notes>
       <segment>
         <source>Ryzyko</source>
@@ -2752,7 +2792,7 @@
     </unit>
     <unit id="logs.link">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:138,139</note>
+        <note category="location">src/app/features/logs/logs-page.html:149,150</note>
       </notes>
       <segment>
         <source>Link</source>
@@ -2760,7 +2800,7 @@
     </unit>
     <unit id="logs.errorCode">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:144,145</note>
+        <note category="location">src/app/features/logs/logs-page.html:155,156</note>
       </notes>
       <segment>
         <source>Kod błędu</source>
@@ -2768,7 +2808,7 @@
     </unit>
     <unit id="logs.rawResult">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:152,153</note>
+        <note category="location">src/app/features/logs/logs-page.html:163,164</note>
       </notes>
       <segment>
         <source>Wynik (wartość z gatewaya)</source>
@@ -2776,7 +2816,7 @@
     </unit>
     <unit id="logs.requestId">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:159,160</note>
+        <note category="location">src/app/features/logs/logs-page.html:170,171</note>
       </notes>
       <segment>
         <source>Identyfikator żądania</source>
@@ -2784,7 +2824,7 @@
     </unit>
     <unit id="logs.more">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:180,181</note>
+        <note category="location">src/app/features/logs/logs-page.html:191,192</note>
       </notes>
       <segment>
         <source> Pokaż więcej </source>
@@ -2792,7 +2832,7 @@
     </unit>
     <unit id="logs.noMatches">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:187,188</note>
+        <note category="location">src/app/features/logs/logs-page.html:198,199</note>
       </notes>
       <segment>
         <source>Żadne wywołanie nie pasuje do filtrów.</source>
@@ -2800,7 +2840,7 @@
     </unit>
     <unit id="logs.empty">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:189,191</note>
+        <note category="location">src/app/features/logs/logs-page.html:200,202</note>
       </notes>
       <segment>
         <source>Brak wywołań w wybranym okresie.</source>
@@ -2808,7 +2848,7 @@
     </unit>
     <unit id="logs.note">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:194,197</note>
+        <note category="location">src/app/features/logs/logs-page.html:205,208</note>
       </notes>
       <segment>
         <source> Tylko Twoje wywołania. Wartości argumentów nie są tu pokazywane. </source>
@@ -2816,7 +2856,7 @@
     </unit>
     <unit id="logs.showDetails">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.ts:84</note>
+        <note category="location">src/app/features/logs/logs-page.ts:93</note>
       </notes>
       <segment>
         <source>Pokaż szczegóły</source>
@@ -2824,7 +2864,7 @@
     </unit>
     <unit id="logs.hideDetails">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.ts:85</note>
+        <note category="location">src/app/features/logs/logs-page.ts:94</note>
       </notes>
       <segment>
         <source>Ukryj szczegóły</source>

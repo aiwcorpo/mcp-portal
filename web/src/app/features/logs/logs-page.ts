@@ -14,6 +14,7 @@ import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import { riskLabel } from '../../shared/labels';
+import { Notice } from '../../shared/notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { formatResource } from '../../shared/resource';
@@ -39,6 +40,10 @@ interface Row {
   key: string;
   client: string;
   resource: string;
+  tool: string;
+  link: string;
+  errorCode: string;
+  rawResult: string;
   result: ReturnType<typeof resultInfo>;
   unknownResult: boolean;
 }
@@ -55,6 +60,10 @@ function toRow(call: ActivityCall): Row {
     key: call.requestId,
     client: neutraliseText(clientName(call.client)).text,
     resource: neutraliseText(formatResource(call.resource)).text,
+    tool: neutraliseText(call.tool).text,
+    link: neutraliseText(call.virtualServer ?? '').text,
+    errorCode: neutraliseText(call.errorCode ?? '').text,
+    rawResult: neutraliseText(call.result).text,
     result,
     unknownResult: result.label === resultInfo('?').label,
   };
@@ -67,7 +76,7 @@ function toRow(call: ActivityCall): Row {
  */
 @Component({
   selector: 'app-logs-page',
-  imports: [DatePipe, MatButtonModule, ErrorNotice, LoadError, Loading],
+  imports: [DatePipe, MatButtonModule, ErrorNotice, LoadError, Loading, Notice],
   templateUrl: './logs-page.html',
   styleUrl: './logs-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -90,6 +99,8 @@ export class LogsPage {
   protected readonly page = signal<LoadState<Page>>(LOADING);
   protected readonly moreBusy = signal(false);
   protected readonly moreFailure = signal<ApiFailure | null>(null);
+  /** The cursor is only valid for a while (C5); the list then has to start again from its first page. */
+  protected readonly listStale = computed(() => this.moreFailure()?.code === 'invalid_request');
   protected readonly expanded = signal<ReadonlySet<string>>(new Set());
 
   protected readonly rows = computed(() => {

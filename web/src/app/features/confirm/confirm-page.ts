@@ -75,6 +75,8 @@ export class ConfirmPage implements OnInit {
   readonly id = input.required<string>();
 
   protected readonly phase = signal<Phase>({ kind: 'loading' });
+  /** Server time minus client time, from the Date header: a wrong clock on this machine must not decide expiry. */
+  private readonly clockOffset = signal(0);
   protected readonly now = signal(Date.now());
   protected readonly viewedFailed = signal(false);
   protected readonly refreshFailed = signal(false);
@@ -94,6 +96,7 @@ export class ConfirmPage implements OnInit {
     const view = this.view();
     return view ? systemName(view.system) : '';
   });
+  protected readonly toolText = computed(() => neutraliseText(this.view()?.tool ?? ''));
   protected readonly resourceText = computed(() =>
     neutraliseText(formatResource(this.view()?.resource)),
   );
@@ -109,7 +112,10 @@ export class ConfirmPage implements OnInit {
     }),
   );
   protected readonly anyNeutralised = computed(
-    () => this.rows().some((row) => row.neutralised) || this.resourceText().neutralised,
+    () =>
+      this.rows().some((row) => row.neutralised) ||
+      this.resourceText().neutralised ||
+      this.toolText().neutralised,
   );
   protected readonly remaining = computed(() => {
     const view = this.view();
@@ -126,7 +132,7 @@ export class ConfirmPage implements OnInit {
     const destroyRef = inject(DestroyRef);
     destroyRef.onDestroy(() => this.stop());
     effect(() => {
-      if (this.view() !== null && !this.viewedRecorded) {
+      if (this.view() !== null && !this.viewedRecorded && !this.expired()) {
         untracked(() => afterNextRender(() => void this.markViewed(), { injector: this.injector }));
       }
     });
@@ -140,7 +146,7 @@ export class ConfirmPage implements OnInit {
   ngOnInit(): void {
     void this.load();
     this.document.addEventListener('visibilitychange', this.onVisibility);
-    this.clock = setInterval(() => this.now.set(Date.now()), 1000);
+    this.clock = setInterval(() => this.tick(), 1000);
     this.polling = setInterval(() => void this.refresh(), this.pollMs);
   }
 
@@ -150,6 +156,21 @@ export class ConfirmPage implements OnInit {
       void this.markViewed();
     }
   };
+
+  private tick(): void {
+    this.now.set(Date.now() + this.clockOffset());
+  }
+
+  /** The view, with the offset between the server clock and this one taken from the Date header. */
+  private async read(): Promise<ConfirmationView> {
+    const received = Date.now();
+    const response = await firstValueFrom(this.api.getMyConfirmation(this.id(), 'response'));
+    const server = Date.parse(response.headers.get('Date') ?? '');
+    if (Number.isFinite(server)) {
+      this.clockOffset.set(server - received);
+    }
+    return response.body as ConfirmationView;
+  }
 
   private stop(): void {
     this.document.removeEventListener('visibilitychange', this.onVisibility);
@@ -166,8 +187,8 @@ export class ConfirmPage implements OnInit {
   protected async load(): Promise<void> {
     this.phase.set({ kind: 'loading' });
     try {
-      const view = await firstValueFrom(this.api.getMyConfirmation(this.id()));
-      this.now.set(Date.now());
+      const view = await this.read();
+      this.tick();
       this.phase.set({ kind: 'ready', view });
     } catch (error) {
       const failure = toApiFailure(error);
@@ -183,7 +204,7 @@ export class ConfirmPage implements OnInit {
       return;
     }
     try {
-      const view = await firstValueFrom(this.api.getMyConfirmation(this.id()));
+      const view = await this.read();
       this.refreshFailed.set(false);
       if (this.phase().kind === 'ready') {
         this.phase.set({ kind: 'ready', view });
@@ -211,6 +232,7 @@ export class ConfirmPage implements OnInit {
       this.viewedRecorded ||
       this.viewedInFlight ||
       this.phase().kind !== 'ready' ||
+      this.expired() ||
       doc.prerendering ||
       doc.visibilityState !== 'visible'
     ) {

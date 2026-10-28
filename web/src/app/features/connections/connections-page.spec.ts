@@ -155,7 +155,39 @@ describe('ConnectionsPage', () => {
       await until(() => expect(text()).toContain('Service Desk'));
       await until(() => expect(lastUseCell()).toMatch(/\d{2}\.\d{2}\.\d{4}|dziś \d{2}:\d{2}/));
       expect(queries.map((query) => query.get('q'))).toEqual(['servicedesk__']);
-      expect(queries[0].get('limit')).toBe('1');
+      expect(queries[0].get('limit')).toBe('20');
+    });
+
+    it('skips calls of other systems that only match by resource id, and calls refused before the system', async () => {
+      server.use(
+        http.get('/api/v1/activity/calls', () =>
+          HttpResponse.json([
+            {
+              requestId: '0192d1b2-7c3a-7d4e-8f10-000000000001',
+              ts: '2026-10-28T10:00:00.000Z',
+              tool: 'gitlab__get_project',
+              result: 'ok',
+              resource: { type: 'GitLab::Project', id: 'group/servicedesk__tools' },
+            },
+            {
+              requestId: '0192d1b2-7c3a-7d4e-8f10-000000000002',
+              ts: '2026-10-28T09:00:00.000Z',
+              tool: 'servicedesk__get_ticket',
+              result: 'denied_not_granted',
+            },
+            {
+              requestId: '0192d1b2-7c3a-7d4e-8f10-000000000003',
+              ts: '2026-10-20T08:00:00.000Z',
+              tool: 'servicedesk__get_ticket',
+              result: 'ok',
+            },
+          ]),
+        ),
+      );
+      configureTestApp();
+      await openRoute('/connections');
+      await until(() => expect(text()).toContain('Service Desk'));
+      await until(() => expect(lastUseCell()).toBe('20.10.2026'));
     });
 
     it('stays empty, without an error, when the log cannot be read', async () => {

@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import type { Page } from '@playwright/test';
 import { BIDI_CONFIRMATION_ID, DEMO_CONFIRMATION_ID, MOCK_TOTP_SEED } from '../src/mocks/m3-mock';
 import { currentCode } from '../src/mocks/totp';
-import { expect, test } from './fixtures';
+import { expect, startEnrollment, test } from './fixtures';
 
 /**
  * Screenshots of the key screens for comparison with the mockups in mcp-platform-plan/design.
@@ -148,7 +148,7 @@ test.describe('screenshots', () => {
       page.getByRole('heading', { level: 1, name: 'Zarejestruj Authenticator' }),
     ).toBeVisible();
     await shot(page, project, '25-rejestracja-1-informacja');
-    await page.getByRole('button', { name: 'Dalej' }).click();
+    await startEnrollment(page);
     await expect(page.getByTestId('enrollment-key')).toBeVisible();
     await shot(page, project, '26-rejestracja-2-qr-i-klucz');
     const key = (await page.getByTestId('enrollment-key').innerText()).replace(/\s/g, '');
@@ -170,7 +170,7 @@ test.describe('screenshots', () => {
     await shot(page, project, '28-rejestracja-4-gotowe');
 
     await page.goto('/authenticator/register?mockAuthenticator=none');
-    await page.getByRole('button', { name: 'Dalej' }).click();
+    await startEnrollment(page);
     await page.getByRole('button', { name: 'Dalej' }).click();
     for (let attempt = 0; attempt < 3; attempt += 1) {
       await page.getByLabel('Kod z aplikacji (6 cyfr)').fill('000000');

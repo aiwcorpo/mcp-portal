@@ -10,7 +10,8 @@ Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `
 | K1 | Kontrakty 3.0.1, klient i mock (Authenticator, potwierdzenia, logi); Authenticator: status w Połączeniach (brak, aktywny, zablokowany, wyłączony z banerem), kreator rejestracji 4 kroki z QR rysowanym lokalnie, błędy rejestracji, usunięcie, baner w katalogu i kreatorze linków (23-30, m33, m36-m39) | zrobiony |
 | K2 | Podgląd operacji `/confirm/<id>` (14, 15, m35): tylko odczyt, licznik, `viewed`, odpytywanie, "Anuluj operację", stany końcowe, argumenty jako niezaufany tekst | zrobiony |
 | K3 | Zakładka Logi (06): filtry, "Pokaż więcej", etykiety wyników, błędne kody w szczegółach; "Ostatnie użycie" konta serwisowego z logów | zrobiony |
-| K4 | a11y AA, 360 px, e2e na MSW 3.0.1, README i STATUS | zrobiony |
+| K4 | a11y AA, 360 px, e2e na MSW 3.0.2, README i STATUS | zrobiony |
+| K5 | Poprawki po przeglądzie Opus (M-1, L-1..L-9), patrz niżej | zrobiony |
 
 ## M3: stan (2026-10-28)
 
@@ -19,10 +20,10 @@ podgląd potwierdzeń i logi (`src/mocks/m3-mock.ts`, TOTP z ziarna w `src/mocks
 RFC 6238). Usunięte: ekran decyzji i `identity_mismatch`, `confirmation_declined`.
 
 ```
-npm test               Test Files 22 passed, Tests 223 passed
+npm test               Test Files 22 passed, Tests 294 passed
 npm run lint           All files pass linting.
 npm run i18n:check     bez różnic
-npm run e2e            144 passed, 8 skipped (zrzuty: tylko z SHOTS_DIR); desktop 1280 px i mobile-360; axe AA ciemny i jasny
+npm run e2e            146 passed, 8 skipped (zrzuty: tylko z SHOTS_DIR); desktop 1280 px i mobile-360; axe AA ciemny i jasny
 ```
 
 Zrzuty: `<scratchpad>/m3-web-shots/`
@@ -37,7 +38,7 @@ Co działa (zakres web, na mockach):
   po zakończeniu, po wygaśnięciu, przy zniszczeniu komponentu i przy `pagehide`; po odświeżeniu kroku 2 wraca krok 1.
   Klucza nie ma w URL, tytule, powiadomieniu, storage ani `history.state` (testy jednostkowe i e2e). Brak "pokaż
   ponownie". Step-up MFA: `401 step_up_required` -> przekierowanie z `returnPath=/authenticator/register?mfa=ok`,
-  po powrocie rejestracja rusza sama; drugi `step_up_required` zaraz po powrocie to błąd, nie pętla. Usunięcie:
+  po powrocie przycisk "Kontynuuj rejestrację"; drugi `step_up_required` zaraz po powrocie to błąd, nie pętla. Usunięcie:
   ostrzeżenie, MFA, powrót na `/connections?mfa=ok` i ponowne kliknięcie "Usuń" (celowo bez automatycznego
   wykonania destrukcyjnej akcji z parametru adresu). Błędy: wygasła / 3 błędne kody (`enrollment_invalid`),
   `invalid_code`, `already_registered`, 429, 503.
@@ -59,6 +60,21 @@ Co działa (zakres web, na mockach):
   ryzyko, link, kod błędu, identyfikator żądania; odpowiedź na nieaktualny filtr jest ignorowana; błąd całej strony.
   "Ostatnie użycie" konta serwisowego w Połączeniach z najnowszego wywołania w logach (decyzja z 2026-10-28).
 - Katalog i kreator: "Wymaga kodu z Authenticatora", "Wyłączone przez administratora" (ten sam tekst w obu).
+
+## Poprawki po przeglądzie Opus (K5)
+
+| Znalezisko | Poprawka |
+| --- | --- |
+| M-1 wygaśnięcie zegarem przeglądarki, `viewed` na stronie "Czas minął" | czas pozostały liczony względem zegara serwera (różnica z nagłówka `Date` odpowiedzi podglądu, odświeżana przy każdym odczycie); `viewed` nie idzie, gdy `expired()`; testy z przesuniętym zegarem (+130 s: strona nie wygasa i wysyła `viewed`; serwer mówi "po terminie": brak `viewed`) |
+| L-2 `?mfa=ok` startował rejestrację | po powrocie z MFA krok 1 z komunikatem i przyciskiem "Kontynuuj rejestrację"; start tylko z kliknięcia (test: `enrollStarts` zostaje 0 do kliknięcia) |
+| L-1 czyszczenie przy `pagehide` | `detectChanges()` synchronicznie w `pagehide` i `pageshow` z `persisted`; test jednostkowy bez czekania. Ograniczenie: e2e nie obejmuje prawdziwego bfcache, bo Playwright uruchamia Chromium z wyłączonym back-forward cache |
+| L-3 zbiór znaków | `neutraliseText` wg CC-121 jak BFF (Cc, Cf, Zl, Zp, Co, Cn, Cs, selektory wariantów poza U+FE0F po emoji, wypełniacze), wektory `text-hygiene/argument-*` w teście (bez dwóch wektorów z niesparowanym surogatem, których nie da się wczytać jako JSON); też dla nazwy narzędzia, linku, kodu błędu i surowego wyniku w logach oraz nazwy narzędzia w podglądzie |
+| L-4 podrobiony `[U+` | literalne `[U+` zapisywane jako `[U+005B]U+` (jak BFF dla `<U+`); zapis BFF `<U+XXXX>` przechodzi bez zmian i daje ostrzeżenie |
+| L-5 wygasły kursor | 400 przy "Pokaż więcej" daje "Lista jest nieaktualna." z przyciskiem "Wczytaj od początku" (pierwsza strona) |
+| L-6 ostatnie użycie z innego systemu | odczyt 20 najnowszych wywołań, filtr po stronie klienta: nazwa narzędzia z prefiksem systemu i wynik, który dotarł do systemu (bez odmów, limitów, anulowanych, zastąpionych) |
+| L-7 test U+202E | e2e porównuje położenie prostokątów kolejnych znaków (rysowana kolejność), z uwzględnieniem zawinięć |
+| L-8 fokus po nawigacji | przyczyna: `skip(1)` pomijał pierwsze `NavigationEnd`, także gdy pochodziło z kliknięcia przerywającego wolne ładowanie; teraz pomijana jest tylko nawigacja nr 1; dodany test z kliknięciem przed końcem ładowania |
+| L-9 schowek | po opuszczeniu kroku 2 (i przy anulowaniu, wygaśnięciu, zniszczeniu strony) schowek nadpisywany pustym tekstem, jeśli zawiera dokładnie ten klucz; bez uprawnień do odczytu albo zapisu komunikat "Wyczyść schowek" |
 
 ## Różnice względem makiet v3 (M3)
 

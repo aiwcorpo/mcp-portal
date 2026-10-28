@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
 
 /**
  * Every test fails on a CSP violation or an uncaught page error, so the suite also proves that the
@@ -23,5 +23,14 @@ export const test = base.extend<{ pageProblems: string[] }>({
     { auto: true },
   ],
 });
+
+/**
+ * Step 1 of the Authenticator registration: "Dalej" sends the browser through the (mock) IdP for a fresh
+ * MFA and back, where the user continues with one more click.
+ */
+export async function startEnrollment(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await page.getByRole('button', { name: 'Kontynuuj rejestrację' }).click();
+}
 
 export { expect };

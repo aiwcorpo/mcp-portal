@@ -38,7 +38,18 @@
 } @else if (state.status === 'error') {
   <app-load-error [failure]="state.failure" (retry)="load()" />
 } @else {
-  @if (moreFailure(); as failure) {
+  @if (listStale()) {
+    <app-notice kind="warning">
+      <ng-container i18n="@@logs.stale">Lista jest nieaktualna.</ng-container>&ngsp;<button
+        type="button"
+        class="linkish"
+        (click)="load()"
+        i18n="@@logs.reload"
+      >
+        Wczytaj od początku
+      </button>
+    </app-notice>
+  } @else if (moreFailure(); as failure) {
     <app-error-notice [failure]="failure" [retryable]="true" (retry)="more()" />
   }
   @if (rows().length) {
@@ -68,7 +79,7 @@
                 class="toggle"
                 [attr.aria-expanded]="open"
                 [attr.aria-controls]="'details-' + row.key"
-                [attr.aria-label]="(open ? hideLabel : showLabel) + ': ' + row.call.tool"
+                [attr.aria-label]="(open ? hideLabel : showLabel) + ': ' + row.tool"
                 (click)="toggle(row.key)"
               >
                 <svg
@@ -95,7 +106,7 @@
               {{ row.client }}
             </td>
             <td role="cell" data-label="Narzędzie" i18n-data-label="@@logs.colTool">
-              <code class="tool">{{ row.call.tool }}</code>
+              <code class="tool">{{ row.tool }}</code>
             </td>
             <td
               role="cell"
@@ -136,14 +147,14 @@
                   @if (row.call.virtualServer) {
                     <div>
                       <dt i18n="@@logs.link">Link</dt>
-                      <dd>{{ row.call.virtualServer }}</dd>
+                      <dd>{{ row.link }}</dd>
                     </div>
                   }
                   @if (row.call.errorCode) {
                     <div>
                       <dt i18n="@@logs.errorCode">Kod błędu</dt>
                       <dd>
-                        <code>{{ row.call.errorCode }}</code>
+                        <code>{{ row.errorCode }}</code>
                       </dd>
                     </div>
                   }
@@ -151,7 +162,7 @@
                     <div>
                       <dt i18n="@@logs.rawResult">Wynik (wartość z gatewaya)</dt>
                       <dd>
-                        <code>{{ row.call.result }}</code>
+                        <code>{{ row.rawResult }}</code>
                       </dd>
                     </div>
                   }

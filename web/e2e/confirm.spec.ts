@@ -93,8 +93,30 @@ test('a right-to-left override in an argument is shown as a marker and keeps the
   for (const code of [0x202e, 0x2066, 0x07]) {
     expect(characters.text).not.toContain(String.fromCodePoint(code));
   }
-  expect(characters.text.indexOf('cleanup')).toBeLessThan(characters.text.indexOf('gnp.exe'));
+
   expect(characters.direction).toBe('ltr');
+  // Drawn order, not logical order: the left edges of the characters must grow along the string, which an
+  // unneutralised U+202E would break (the text after it would be drawn right to left).
+  const lefts = await value.evaluate((node) => {
+    const text = node.firstChild as Text;
+    const first = (text.data.match(/^[^\n]*/) ?? [''])[0];
+    return Array.from(first).map((_, index) => {
+      const range = document.createRange();
+      range.setStart(text, index);
+      range.setEnd(text, index + 1);
+      const box = range.getBoundingClientRect();
+      return { left: box.left, top: Math.round(box.top) };
+    });
+  });
+  expect(lefts.length).toBeGreaterThan(20);
+  for (let index = 1; index < lefts.length; index += 1) {
+    const previous = lefts[index - 1];
+    const current = lefts[index];
+    // A wrapped line starts lower and further left; on the same line the next character is further right.
+    expect(current.top > previous.top || current.left > previous.left, `character ${index}`).toBe(
+      true,
+    );
+  }
   expect(characters.bidi).toBe('isolate');
   expect(characters.whiteSpace).toBe('pre-wrap');
   await expect(page.getByText('Wartości zawierają znaki sterujące.')).toBeVisible();

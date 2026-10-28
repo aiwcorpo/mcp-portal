@@ -93,10 +93,11 @@ describe('AuthenticatorRegisterPage', () => {
     expectSeedNowhere();
   });
 
-  it('drops the seed when the page is hidden for the back-forward cache', async () => {
+  it('drops the seed from the DOM synchronously when the page is hidden for the back-forward cache', async () => {
     await toScanStep();
     window.dispatchEvent(new Event('pagehide'));
-    await until(() => expect(document.querySelector('app-qr-code')).toBeNull());
+    // No waiting: a frozen page never gets a later change detection.
+    expect(document.querySelector('app-qr-code')).toBeNull();
     expectSeedNowhere();
     expect(text()).toContain('Zarejestruj Authenticator');
   });
@@ -114,17 +115,25 @@ describe('AuthenticatorRegisterPage', () => {
     expect(target.searchParams.get('returnPath')).toBe('/authenticator/register?mfa=ok');
   });
 
-  it('continues by itself after the return from the MFA, and does not loop when the MFA did not count', async () => {
+  it('after the return from the MFA waits for one more click instead of starting by itself', async () => {
     store.update({ mfaFresh: true });
     configureTestApp();
     await openRoute('/authenticator/register?mfa=ok');
-    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+    await until(() => expect(text()).toContain('Tożsamość potwierdzona.'));
     expect(TestBed.inject(Router).url).toBe('/authenticator/register');
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(store.state.enrollStarts).toBe(0);
+    expect(text()).not.toContain('Dodaj konto w aplikacji');
+
+    button('Kontynuuj rejestrację').click();
+    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
   });
 
   it('shows the error instead of another redirect when the start is refused right after the MFA', async () => {
     const navigation = configureTestApp();
     await openRoute('/authenticator/register?mfa=ok');
+    await until(() => expect(text()).toContain('Kontynuuj rejestrację'));
+    button('Kontynuuj rejestrację').click();
     await until(() =>
       expect(text()).toContain('Ta operacja wymaga ponownego uwierzytelnienia (MFA).'),
     );
@@ -242,5 +251,76 @@ describe('AuthenticatorRegisterPage', () => {
     button('Kopiuj').click();
     await until(() => expect(text()).toContain('Klucz skopiowany do schowka.'));
     expect(copy).toHaveBeenCalledWith(MOCK_TOTP_SEED);
+  });
+
+  describe('the clipboard', () => {
+    function clipboardWith(content: string | Error) {
+      const writeText = vi.fn(() => Promise.resolve());
+      const readText = vi.fn(() =>
+        content instanceof Error ? Promise.reject(content) : Promise.resolve(content),
+      );
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { readText, writeText },
+      });
+      return { readText, writeText };
+    }
+
+    async function copyThenContinue() {
+      configureTestApp();
+      TestBed.configureTestingModule({
+        providers: [{ provide: Clipboard, useValue: { copy: () => true } }],
+      });
+      store.update({ mfaFresh: true });
+      await openRoute('/authenticator/register');
+      await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
+      button('Dalej').click();
+      await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+      button('Kopiuj').click();
+      await until(() => expect(text()).toContain('Klucz skopiowany do schowka.'));
+      button('Dalej').click();
+      await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
+    }
+
+    afterEach(() => Reflect.deleteProperty(navigator, 'clipboard'));
+
+    it('is overwritten with an empty text when it still holds the key', async () => {
+      const clipboard = clipboardWith(MOCK_TOTP_SEED);
+      await copyThenContinue();
+      await until(() => expect(clipboard.writeText).toHaveBeenCalledWith(''));
+      expect(text()).not.toContain('Wyczyść schowek');
+    });
+
+    it('is left alone when it holds something else', async () => {
+      const clipboard = clipboardWith('another text');
+      await copyThenContinue();
+      await until(() => expect(clipboard.readText).toHaveBeenCalled());
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(clipboard.writeText).not.toHaveBeenCalled();
+      expect(text()).not.toContain('Wyczyść schowek');
+    });
+
+    it('asks the user to clear it when the browser does not let the page read it', async () => {
+      const clipboard = clipboardWith(new Error('NotAllowedError'));
+      await copyThenContinue();
+      await until(() =>
+        expect(text()).toContain('Klucz został skopiowany do schowka. Wyczyść schowek'),
+      );
+      expect(clipboard.writeText).not.toHaveBeenCalled();
+    });
+
+    it('says nothing when the key was never copied', async () => {
+      const clipboard = clipboardWith(MOCK_TOTP_SEED);
+      configureTestApp();
+      store.update({ mfaFresh: true });
+      await openRoute('/authenticator/register');
+      await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
+      button('Dalej').click();
+      await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+      button('Dalej').click();
+      await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
+      expect(clipboard.readText).not.toHaveBeenCalled();
+      expect(text()).not.toContain('Wyczyść schowek');
+    });
   });
 });

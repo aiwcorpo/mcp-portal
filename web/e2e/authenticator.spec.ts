@@ -1,6 +1,6 @@
 import { MOCK_TOTP_SEED } from '../src/mocks/m3-mock';
 import { currentCode } from '../src/mocks/totp';
-import { expect, test } from './fixtures';
+import { expect, startEnrollment, test } from './fixtures';
 
 async function expectSeedNowhere(page: import('@playwright/test').Page): Promise<void> {
   const everywhere = [
@@ -29,7 +29,7 @@ test('register the Authenticator with a fresh MFA, then remove it with another o
     page.getByRole('heading', { level: 1, name: 'Zarejestruj Authenticator' }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Dalej' }).click();
+  await startEnrollment(page);
   await expect(
     page.getByRole('heading', { level: 1, name: 'Dodaj konto w aplikacji' }),
   ).toBeVisible();
@@ -78,7 +78,7 @@ test('register the Authenticator with a fresh MFA, then remove it with another o
 
 test('a reload during step 2 comes back to step 1 without the key', async ({ page }) => {
   await page.goto('/authenticator/register');
-  await page.getByRole('button', { name: 'Dalej' }).click();
+  await startEnrollment(page);
   await expect(page.getByTestId('enrollment-key')).toBeVisible();
   await page.reload();
   await expect(
@@ -91,7 +91,7 @@ test('a reload during step 2 comes back to step 1 without the key', async ({ pag
 test('going back in history after step 2 does not bring the key back', async ({ page }) => {
   await page.goto('/catalog');
   await page.goto('/authenticator/register');
-  await page.getByRole('button', { name: 'Dalej' }).click();
+  await startEnrollment(page);
   await expect(page.getByTestId('enrollment-key')).toBeVisible();
   await page.goto('/connections');
   await page.goBack();
@@ -101,7 +101,7 @@ test('going back in history after step 2 does not bring the key back', async ({ 
 
 test('three wrong codes end the registration', async ({ page }) => {
   await page.goto('/authenticator/register');
-  await page.getByRole('button', { name: 'Dalej' }).click();
+  await startEnrollment(page);
   await page.getByRole('button', { name: 'Dalej' }).click();
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     await page.getByLabel('Kod z aplikacji (6 cyfr)').fill('000000');
@@ -117,7 +117,7 @@ test('three wrong codes end the registration', async ({ page }) => {
 test('a registration that runs past ten minutes ends by itself', async ({ page }) => {
   await page.clock.install();
   await page.goto('/authenticator/register');
-  await page.getByRole('button', { name: 'Dalej' }).click();
+  await startEnrollment(page);
   await expect(page.getByTestId('enrollment-key')).toBeVisible();
   await page.clock.fastForward('10:05');
   await expect(page.getByText('Rejestracja wygasła albo wpisano 3 błędne kody.')).toBeVisible();
