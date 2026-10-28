@@ -42,4 +42,27 @@ public final class BrokerModel {
     @JsonInclude(JsonInclude.Include.ALWAYS)
     public record PutSecretResponse(String status, String backendUser, String expiresAt) {
     }
+
+    public record OAuthStartRequest(String returnPath) {
+    }
+
+    public record OAuthStartResponse(String authorizeUrl, String flowId) {
+
+        @Override
+        public String toString() {
+            return "OAuthStartResponse[flowId=" + flowId + "]";
+        }
+    }
+
+    /** {@code OAuthCompleteRequest}; {@code code} is a one-time grant and stays out of logs. */
+    public record OAuthCompleteRequest(String flowId, String code, String state) {
+
+        @Override
+        public String toString() {
+            return "OAuthCompleteRequest[flowId=" + flowId + ", code=<redacted>, state=<redacted>]";
+        }
+    }
+
+    public record OAuthCompleteResponse(String status, String backendUser) {
+    }
 }

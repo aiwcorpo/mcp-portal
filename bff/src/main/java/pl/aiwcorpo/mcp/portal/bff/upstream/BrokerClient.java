@@ -39,4 +39,22 @@ public class BrokerClient {
         calls.call(calls.authorize(calls.http().delete().uri("/v1/connections/{system}", system), token, requestId),
                 response -> null);
     }
+
+    public BrokerModel.OAuthStartResponse startOAuth(BearerToken token, String requestId, String system,
+                                                     BrokerModel.OAuthStartRequest body) {
+        return calls.call(calls.authorize(calls.http().post()
+                                .uri("/v1/connections/{system}/oauth/start", system)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(body), token, requestId),
+                response -> calls.read(response, BrokerModel.OAuthStartResponse.class));
+    }
+
+    public BrokerModel.OAuthCompleteResponse completeOAuth(BearerToken token, String requestId, String system,
+                                                           BrokerModel.OAuthCompleteRequest body) {
+        return calls.call(calls.authorize(calls.http().post()
+                                .uri("/v1/connections/{system}/oauth/complete", system)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(body), token, requestId),
+                response -> calls.read(response, BrokerModel.OAuthCompleteResponse.class));
+    }
 }

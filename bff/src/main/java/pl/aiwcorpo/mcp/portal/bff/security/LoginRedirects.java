@@ -6,6 +6,8 @@ import java.net.URI;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpHeaders;
+
 import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 
 /**
@@ -40,9 +42,17 @@ public final class LoginRedirects {
         return uri.toString();
     }
 
-    /** @param path a validated return path or a fixed portal path */
+    /**
+     * 302 with a relative {@code Location} (C12 examples): {@code sendRedirect} would make it absolute from the
+     * request's {@code Host}, and public addresses come from configuration only (CC-089).
+     *
+     * @param path a validated return path or a fixed portal path
+     */
     public void redirect(HttpServletRequest request, HttpServletResponse response, String path) throws IOException {
-        response.sendRedirect((origin != null ? origin : request.getContextPath()) + path);
+        response.setStatus(HttpServletResponse.SC_FOUND);
+        response.setHeader(HttpHeaders.LOCATION, (origin != null ? origin : request.getContextPath()) + path);
+        response.setContentLength(0);
+        response.flushBuffer();
     }
 
     public void redirectToError(HttpServletRequest request, HttpServletResponse response, String code) throws IOException {
