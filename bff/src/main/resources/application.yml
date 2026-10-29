@@ -86,6 +86,14 @@ portal:
     acr-values: ${PORTAL_STEP_UP_ACR_VALUES:}
   session:
     absolute-timeout: 8h
+  # Per session; over a limit the BFF answers 429 with Retry-After (CC-156).
+  limits:
+    secret-write:
+      max: ${PORTAL_LIMIT_SECRET_WRITE_MAX:10}
+      window: ${PORTAL_LIMIT_SECRET_WRITE_WINDOW:1m}
+    authenticator:
+      max: ${PORTAL_LIMIT_AUTHENTICATOR_MAX:10}
+      window: ${PORTAL_LIMIT_AUTHENTICATOR_WINDOW:10m}
   # Extra flags of the Claude Code command in clientConfigs; empty means the flag is left out.
   client-configs:
     claude-code:

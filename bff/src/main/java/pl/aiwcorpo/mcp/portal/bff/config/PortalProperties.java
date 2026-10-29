@@ -24,7 +24,8 @@ public record PortalProperties(
         @DefaultValue Web web,
         @DefaultValue Iga iga,
         @DefaultValue ClientConfigs clientConfigs,
-        @DefaultValue Oidc oidc) {
+        @DefaultValue Oidc oidc,
+        @DefaultValue Limits limits) {
 
     /**
      * @param tlsName name that must appear as DNS SAN in the server certificate, independent of the host in
@@ -98,6 +99,29 @@ public record PortalProperties(
      */
     public record Oidc(String authorizationUri, String tokenUri, String jwkSetUri, String userInfoUri,
                        String endSessionUri) {
+    }
+
+    /**
+     * Limits per session (CC-156); values are configuration, not contract. Counted per kind of operation over a sliding
+     * window; the answer to a request over the limit is {@code 429 rate_limited} with {@code Retry-After}.
+     *
+     * @param secretWrite   {@code PUT /connections/{system}/secret}: each attempt is a validity check of a token at the
+     *                      target system, so it must not be repeatable at will
+     * @param authenticator start and removal of the registration and the confirmation of its first code
+     */
+    public record Limits(
+            @DefaultValue SessionLimit secretWrite,
+            @DefaultValue SessionLimit authenticator) {
+    }
+
+    /** At most {@code max} requests in any {@code window}. */
+    public record SessionLimit(@DefaultValue("10") int max, @DefaultValue("1m") Duration window) {
+
+        public SessionLimit {
+            if (max < 1 || window == null || window.compareTo(Duration.ofSeconds(1)) < 0) {
+                throw new IllegalArgumentException("a session limit needs max >= 1 and a window of at least 1s");
+            }
+        }
     }
 
     /** Idle timeout is server.servlet.session.timeout; this is the hard limit from login. */

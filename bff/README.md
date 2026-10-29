@@ -88,6 +88,8 @@ Wszystko przez zmienne środowiska (`application.yml`):
 | `PORTAL_WEB_DIST` | katalog z `index.html` zbudowanego frontendu | `../web/dist/portal` |
 | `PORTAL_WEB_LOGIN_RETURN_ORIGIN` | tylko dev: origin frontendu z `ng serve`, na który BFF wraca po logowaniu (`scheme://host:port`, z konfiguracji, nigdy z żądania) | puste; z `npm start` w `web/`: `http://localhost:4200` |
 | `SPRING_PROFILES_ACTIVE` | `dev` tylko dla mcp-platform-dev; bez niego BFF nie wstanie z adapterem IGA `mock`, step-up bez `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` ani `portal.tls.insecure-plain-http-for-tests` | `dev` (ustawia `run-dev.sh`) |
+| `PORTAL_LIMIT_SECRET_WRITE_MAX`, `PORTAL_LIMIT_SECRET_WRITE_WINDOW` | zapis tokenu (`PUT .../secret`): najwyżej tyle żądań w oknie na sesję, potem `429` z `Retry-After` (CC-156) | `10`, `1m` |
+| `PORTAL_LIMIT_AUTHENTICATOR_MAX`, `PORTAL_LIMIT_AUTHENTICATOR_WINDOW` | zapisy Authenticatora (start, usunięcie, potwierdzenie) na sesję | `10`, `10m` |
 | `PORTAL_IGA_ADAPTER` | adapter C13: `keycloak-groups` albo `mock` (tylko `dev`); brak = błąd startu | `mock` (profil `dev`) |
 | `PORTAL_IGA_CATALOG_FILE` | katalog uprawnień adaptera `keycloak-groups` (ten sam format YAML co mock: `entitlements`, opcjonalnie `descriptions`); adapter nie ma obiegu wniosków | brak |
 | `PORTAL_IGA_MOCK_FILE` | dane adaptera `mock` (poza jarem): zwykła ścieżka w systemie plików, bez `file:` | `dev/iga-mock.yaml` |
@@ -228,6 +230,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   authenticator/ rejestracja Authenticatora (TOTP)
   activity/    GET /api/v1/activity/calls
   admin/       rejestr: widok, diff definicji, zatwierdzanie (grupa mcp-platform-admin)
+  limits/      limity na sesję (429 z Retry-After)
   iga/         port C13, adaptery mock (dane: dev/iga-mock.yaml, tylko profil dev) i keycloak-groups, wnioski o dostęp
   audit/       zdarzenia C8
   spa/         serwowanie frontendu, fallback tras, CSP

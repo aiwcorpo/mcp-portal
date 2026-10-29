@@ -12,6 +12,7 @@ public record ApiError(String error, String message, String requestId) {
     public static final String CSRF_INVALID = "csrf_invalid";
     public static final String NOT_FOUND_OR_DENIED = "not_found_or_denied";
     public static final String UPSTREAM_UNAVAILABLE = "upstream_unavailable";
+    public static final String RATE_LIMITED = "rate_limited";
     public static final String INTERNAL_ERROR = "internal_error";
 
     public static ApiError of(String error) {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
+import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import tools.jackson.core.json.JsonWriteFeature;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -233,6 +234,22 @@ public class AuditLog {
         /** A link that is missing or not the caller's; the browser cannot tell which. */
         public static Outcome notFoundOrDenied() {
             return new Outcome("deny", "not_found_or_denied", "denied", "not_found_or_denied");
+        }
+
+        /** The portal's own limit per session, or one of the broker or the gateway (CC-156). */
+        public static Outcome rateLimited() {
+            return new Outcome("deny", "rate_limited", "denied", "rate_limited");
+        }
+
+        /** The broker has no configuration for the system (CC-158); the user is not at fault. */
+        public static Outcome systemNotConfigured() {
+            return new Outcome("deny", "system_not_configured", "error", "upstream_unavailable");
+        }
+
+        /** How a failed call to the broker or the gateway ended: a limit of theirs, or no usable answer. */
+        public static Outcome ofFailure(RuntimeException failure) {
+            return failure instanceof UpstreamException upstream && upstream.status() == 429 ? rateLimited()
+                    : upstreamUnavailable();
         }
 
         public static Outcome upstreamUnavailable() {

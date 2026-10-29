@@ -47,6 +47,11 @@ class OAuthConnectTest extends PortalHarness {
                 .withBody("{\"authorizeUrl\":\"" + authorize + "\",\"flowId\":\"" + flowId + "\"}")));
     }
 
+    private static void stubStartFailure(int status, String body) {
+        BROKER.stubFor(post(urlPathEqualTo(START)).atPriority(1).willReturn(aResponse().withStatus(status)
+                .withHeader("Content-Type", "application/json").withBody(body)));
+    }
+
     private static void stubComplete(int status, String body) {
         BROKER.stubFor(post(urlPathEqualTo(COMPLETE)).atPriority(1).willReturn(aResponse().withStatus(status)
                 .withHeader("Content-Type", "application/json").withBody(body)));
@@ -335,6 +340,47 @@ class OAuthConnectTest extends PortalHarness {
             assertThat(event.get("reason").asString()).isEqualTo(error);
             assertThat(event.get("outcome").asString()).isEqualTo("error");
         }
+    }
+
+    @Test
+    void aSystemTheBrokerDoesNotKnowIsAnInstallationFaultNotAUserError() {
+        // CC-158: 422 system_not_configured. C12 has no code for it (ConnectErrorCode is closed), so the start is a 503
+        // and the callback ends in provider_error, with the cause in the audit event.
+        stubStartFailure(422, "{\"error\":\"system_not_configured\"}");
+        TestBrowser browser = login(ALICE, Instant.now());
+        HttpResponse<String> refused = start(browser, "{}");
+        C12.assertResponse("POST", "/api/v1/connections/{system}/oauth", refused);
+        assertThat(refused.statusCode()).isEqualTo(503);
+        assertThat(refused.body()).doesNotContain("system_not_configured");
+
+        String state = state();
+        stubStart(authorizeUrl(state), "flow-snc");
+        stubComplete(422, "{\"error\":\"system_not_configured\"}");
+        start(browser, "{\"returnPath\":\"/catalog\"}");
+
+        HttpResponse<String> back = browser.get(CALLBACK + "?code=c1&state=" + state);
+
+        assertThat(location(back)).isEqualTo("/catalog?connectError=provider_error&system=gitlab");
+        assertThat(ConnectRedirectRules.isValid(location(back))).isTrue();
+        JsonNode event = lastAuditEvent();
+        ContractSchemas.assertValid(AUDIT, event);
+        assertThat(event.get("reason").asString()).isEqualTo("system_not_configured");
+        assertThat(event.get("outcome").asString()).isEqualTo("error");
+    }
+
+    @Test
+    void aLimitOfTheBrokerWhileCompletingTheFlowEndsInProviderError() {
+        String state = state();
+        stubStart(authorizeUrl(state), "flow-rl");
+        stubComplete(429, "{\"error\":\"rate_limited\"}");
+        TestBrowser browser = login(ALICE, Instant.now());
+        start(browser, "{\"returnPath\":\"/catalog\"}");
+
+        HttpResponse<String> back = browser.get(CALLBACK + "?code=c1&state=" + state);
+
+        assertThat(location(back)).isEqualTo("/catalog?connectError=provider_error&system=gitlab");
+        assertThat(lastAuditEvent().get("reason").asString()).isEqualTo("rate_limited");
+        ContractSchemas.assertValid(AUDIT, lastAuditEvent());
     }
 
     @Test

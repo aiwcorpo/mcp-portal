@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
+import pl.aiwcorpo.mcp.portal.bff.limits.SessionRateLimiter;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.security.SessionAttributes;
 import pl.aiwcorpo.mcp.portal.bff.security.StepUpPolicy;
@@ -58,12 +59,14 @@ class AuthenticatorController {
     private final AuditLog audit;
     private final Clock clock;
     private final String returnPath;
+    private final SessionRateLimiter limiter;
     private final ObjectReader confirmReader = StrictJson.builder().build()
             .readerFor(BrokerModel.AuthenticatorEnrollmentConfirm.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     AuthenticatorController(UserTokens tokens, BrokerClient broker, StepUpPolicy stepUp, AuditLog audit, Clock clock,
-                            PortalProperties properties) {
+                            PortalProperties properties, SessionRateLimiter limiter) {
+        this.limiter = limiter;
         this.tokens = tokens;
         this.broker = broker;
         this.stepUp = stepUp;
@@ -87,11 +90,12 @@ class AuthenticatorController {
         String requestId = RequestIds.of(request);
         long started = clock.millis();
         requireFreshMfa(user, requestId, started);
+        limit(request, user, requestId, started);
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
             broker.deleteAuthenticator(token, requestId);
         } catch (RuntimeException e) {
-            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
+            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
             throw e;
         }
         forgetEnrollment(request);
@@ -107,6 +111,7 @@ class AuthenticatorController {
         String requestId = RequestIds.of(request);
         long started = clock.millis();
         requireFreshMfa(user, requestId, started);
+        limit(request, user, requestId, started);
         BrokerModel.AuthenticatorEnrollment enrollment;
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
@@ -123,12 +128,12 @@ class AuthenticatorController {
             if (e.status() == 429 && RATE_LIMITED.equals(e.error())) {
                 audit.authenticatorEvent(requestId, user,
                         AuditLog.Outcome.denied("authenticator_enrollment_failed", RATE_LIMITED), clock.millis() - started);
-                throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, ApiError.of(RATE_LIMITED).withRequestId(requestId));
+                throw ApiException.rateLimited(e.retryAfterSeconds() == null ? null : e.retryAfterSeconds().longValue());
             }
-            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
+            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
             throw e;
         } catch (RuntimeException e) {
-            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
+            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
             throw e;
         }
         request.getSession().setAttribute(SessionAttributes.AUTHENTICATOR_ENROLLMENT_ID, enrollment.enrollmentId());
@@ -159,6 +164,7 @@ class AuthenticatorController {
                     clock.millis() - started);
             throw new ApiException(HttpStatus.NOT_FOUND, ApiError.of(ApiError.NOT_FOUND_OR_DENIED));
         }
+        limit(request, user, requestId, started);
         BrokerModel.AuthenticatorStatus registered;
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
@@ -173,10 +179,10 @@ class AuthenticatorController {
                 // AuthenticatorEnrollmentError is a closed schema: the code alone, the request id is in the header.
                 return ResponseEntity.unprocessableEntity().body(new EnrollmentError(e.error()));
             }
-            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
+            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
             throw e;
         } catch (RuntimeException e) {
-            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
+            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
             throw e;
         }
         forgetEnrollment(request);
@@ -185,6 +191,17 @@ class AuthenticatorController {
     }
 
     record EnrollmentError(String error) {
+    }
+
+    /** The portal's limit per session; a refused request is audited and never reaches the broker. */
+    private void limit(HttpServletRequest request, PortalUser user, String requestId, long started) {
+        try {
+            limiter.acquire(request, SessionRateLimiter.Kind.AUTHENTICATOR);
+        } catch (ApiException e) {
+            audit.authenticatorEvent(requestId, user, AuditLog.Outcome.denied("rate_limited", RATE_LIMITED),
+                    clock.millis() - started);
+            throw e;
+        }
     }
 
     private void requireFreshMfa(PortalUser user, String requestId, long started) {

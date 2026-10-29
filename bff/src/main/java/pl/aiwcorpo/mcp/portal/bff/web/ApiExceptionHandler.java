@@ -1,5 +1,7 @@
 package pl.aiwcorpo.mcp.portal.bff.web;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -26,7 +28,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<Object> api(ApiException e) {
-        return json(e.status(), e.body());
+        return json(e.status(), e.body(), e.headers());
     }
 
     @ExceptionHandler(TokenUnavailableException.class)
@@ -38,6 +40,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler({UpstreamException.class, IgaUnavailableException.class})
     ResponseEntity<Object> upstream(RuntimeException e) {
         log.warn("{}", e.getMessage());
+        // A limit of the broker or the gateway is the user's to wait out, not an outage (CC-156).
+        if (e instanceof UpstreamException upstream && upstream.status() == 429) {
+            Map<String, String> headers = upstream.retryAfterSeconds() == null ? Map.of()
+                    : Map.of("Retry-After", upstream.retryAfterSeconds().toString());
+            return json(HttpStatus.TOO_MANY_REQUESTS, ApiError.of(ApiError.RATE_LIMITED), headers);
+        }
         return json(HttpStatus.SERVICE_UNAVAILABLE, ApiError.of(ApiError.UPSTREAM_UNAVAILABLE));
     }
 
@@ -57,7 +65,13 @@ public class ApiExceptionHandler {
     }
 
     private static ResponseEntity<Object> json(HttpStatus status, Object body) {
+        return json(status, body, Map.of());
+    }
+
+    private static ResponseEntity<Object> json(HttpStatus status, Object body, Map<String, String> headers) {
         Object shown = body instanceof ApiError error ? error.withRequestId(RequestIds.current()) : body;
-        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(shown);
+        ResponseEntity.BodyBuilder answer = ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON);
+        headers.forEach(answer::header);
+        return answer.body(shown);
     }
 }

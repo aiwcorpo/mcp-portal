@@ -55,6 +55,7 @@ class OAuthConnectController {
 
     // identity_mismatch left the contract in 3.0.0 (no identity check, human decision 2026-10-28): a stray one from
     // an older broker ends as provider_error.
+    private static final String SYSTEM_NOT_CONFIGURED = "system_not_configured";
     private static final Set<String> BROKER_COMPLETE_ERRORS = Set.of(FLOW_INVALID);
     private static final Set<String> LOOPBACK_HOSTS = Set.of("localhost", "127.0.0.1", "[::1]");
     private static final int MAX_FLOW_ID = 128;
@@ -166,8 +167,11 @@ class OAuthConnectController {
                         clock.millis() - started);
                 return e.error();
             }
-            audit.connectionChange(requestId, user, flow.system(), AuditLog.Outcome.upstreamUnavailable(),
-                    clock.millis() - started);
+            // A system the broker does not know is a defect of the installation (CC-158), not of the user's flow: the
+            // closed list of ConnectErrorCode has no value for it, so the user sees provider_error and the audit the cause.
+            AuditLog.Outcome outcome = e.status() == 422 && SYSTEM_NOT_CONFIGURED.equals(e.error())
+                    ? AuditLog.Outcome.systemNotConfigured() : AuditLog.Outcome.ofFailure(e);
+            audit.connectionChange(requestId, user, flow.system(), outcome, clock.millis() - started);
             return PROVIDER_ERROR;
         } catch (RuntimeException e) {
             audit.connectionChange(requestId, user, flow.system(), AuditLog.Outcome.upstreamUnavailable(),

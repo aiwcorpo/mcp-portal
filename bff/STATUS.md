@@ -17,7 +17,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M3.4 | kontrakty 3.0.2 (czysty jar), poprawki przeglądu Opus M3 (L-1..L-8) | zrobione |
 | M4.1 | kontrakty 4.0.0; port C13 i adaptery `mock` oraz `keycloak-groups`; `GET/POST /access-requests`, `GET /access-requests/entitlements`, `decidedAt`; tabela akcji katalogu wg CC-113 | zrobione |
 | M4.2 | administracja rejestru: `GET /admin/registry`, `.../pending`, `POST .../approve` (source, `pendingVersion`, `409 hash_mismatch`, `422 ManifestRejected`), audyt `definition_approved` | zrobione |
-| M4.3 | limity `429` z `Retry-After`: zapis tokenu i operacje Authenticatora na sesję, przekazanie `429` z brokera i gateway'a | do zrobienia |
+| M4.3 | limity `429` z `Retry-After`: zapis tokenu i operacje Authenticatora na sesję, przekazanie `429` z brokera i gateway'a, `system_not_configured` w `oauth/*` | zrobione |
 | M4.4 | aktywność wg CC-142 i CC-150, zgodność z resztą 4.0.0 (przykłady C12, `system_not_configured`), README, obraz `m4-<sha>` | do zrobienia |
 
 ## M2: wynik (2026-10-28)
@@ -363,7 +363,34 @@ Do M3 BFF nie miał tras `/api/v1/admin/registry*` (brief ws-07 punkt 8), więc 
 
 Testy: `./mvnw test`: 390 testów, 0 błędów (nowy `RegistryAdminTest`, 11 testów, z przykładem `changed_on_server` z kontraktu).
 
+## M4.3: limity i `429` (2026-10-29)
+
+- Limity własne BFF, na sesję (`SessionRateLimiter`, okno przesuwne trzymane w sesji, więc znika razem z nią): zapis tokenu (`PUT
+  .../secret`) i zapisy Authenticatora (start rejestracji, usunięcie, potwierdzenie pierwszego kodu; jedno wspólne okno). Konfiguracja:
+  `portal.limits.secret-write` (domyślnie 10 na 1 min) i `portal.limits.authenticator` (10 na 10 min), zmienne
+  `PORTAL_LIMIT_SECRET_WRITE_MAX|WINDOW`, `PORTAL_LIMIT_AUTHENTICATOR_MAX|WINDOW`. Wartości są wyborem BFF (kontrakt ich nie podaje):
+  zapis tokenu to sprawdzenie ważności tokenu w systemie docelowym, więc chodzi o to, by nie dało się go powtarzać bez końca.
+- Liczone są tylko żądania, które doszłyby do brokera: błędne ciało, nieznany system, brak świeżego MFA i cudzy `enrollmentId` limitu
+  nie zużywają. Odmowa: `429 {error: rate_limited, requestId}` z `Retry-After` (sekundy, min. 1, do wygaśnięcia najstarszego wpisu), bez
+  żadnego nagłówka `X-RateLimit-*`; odmowa nie jest liczona; żądanie nie dociera do brokera. Audyt: `connection_change` albo
+  `authenticator` z `decision: deny`, `reason: rate_limited`, `errorCode: rate_limited`.
+- Limit na sesję znaczy, że nowe logowanie zaczyna nowe okno; per użytkownik pilnują broker i gateway (start OAuth, rejestracja
+  Authenticatora 10 na godzinę, `tools/call`). To zgodne z CC-156 ("na sesję").
+- `429` z brokera i gateway'a: każde `429` od C4/C5 wraca jako `429 rate_limited`, z `Retry-After` tylko gdy upstream podał liczbę
+  sekund (data HTTP, liczba ujemna lub zbyt duża jest traktowana jak brak, nagłówka nie wymyślam; `0` -> `1`). Dotyczy też start OAuth
+  (`POST .../oauth`), którego C12 nie wylicza z `429` (propozycja CC niżej); callback OAuth dalej kończy się `connectError=provider_error`
+  (CC-107), z powodem `rate_limited` w audycie.
+- `422 system_not_configured` z brokera (CC-158): start OAuth -> `503 upstream_unavailable`; zakończenie przepływu -> `provider_error`
+  (`ConnectErrorCode` jest zamknięte, usterka instalacji to nie błąd użytkownika), audyt `connection_change` z powodem
+  `system_not_configured`, `outcome: error`.
+
+Testy: `./mvnw test`: 398 testów, 0 błędów (nowy `RateLimitsTest` na zmniejszonych limitach przez `@TestPropertySource`, rozszerzony
+`OAuthConnectTest`).
+
 ## Propozycje CC (M4)
+
+3. C12 `startOAuth` (i każda operacja przez C4/C5): dopisać `429 rate_limited` z `Retry-After`; broker zwraca je przy starcie OAuth
+   (CC-156), a BFF przekazuje je dalej zamiast `503`.
 
 2. C12 `approveAdminTool`: dopisać `400 invalid_request` dla ciała spoza schematu (dziś BFF zwraca `400`, którego operacja nie wymienia).
 

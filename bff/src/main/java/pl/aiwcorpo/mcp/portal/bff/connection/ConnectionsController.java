@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
+import pl.aiwcorpo.mcp.portal.bff.limits.SessionRateLimiter;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
@@ -51,15 +52,18 @@ class ConnectionsController {
     private final BrokerClient broker;
     private final AuditLog audit;
     private final Clock clock;
+    private final SessionRateLimiter limiter;
     private final ObjectReader secretReader = StrictJson.builder().build()
             .readerFor(BrokerModel.PutSecretRequest.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
-    ConnectionsController(UserTokens tokens, BrokerClient broker, AuditLog audit, Clock clock) {
+    ConnectionsController(UserTokens tokens, BrokerClient broker, AuditLog audit, Clock clock,
+                          SessionRateLimiter limiter) {
         this.tokens = tokens;
         this.broker = broker;
         this.audit = audit;
         this.clock = clock;
+        this.limiter = limiter;
     }
 
     @GetMapping("/api/v1/connections")
@@ -85,6 +89,13 @@ class ConnectionsController {
                     clock.millis() - started);
             throw ApiException.badRequest();
         }
+        // Each attempt is a check of the token at the target system, so the limit counts attempts that reach the broker.
+        try {
+            limiter.acquire(request, SessionRateLimiter.Kind.SECRET_WRITE);
+        } catch (ApiException e) {
+            audit.connectionChange(requestId, user, system, AuditLog.Outcome.rateLimited(), clock.millis() - started);
+            throw e;
+        }
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
             BrokerModel.PutSecretResponse stored = broker.putSecret(token, requestId, system, body);
@@ -101,7 +112,7 @@ class ConnectionsController {
                         clock.millis() - started);
                 throw ApiException.badRequest();
             }
-            audit.connectionChange(requestId, user, system, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);
+            audit.connectionChange(requestId, user, system, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
             throw e;
         } catch (RuntimeException e) {
             // Token refresh or exchange failed: the change did not happen and that is worth an event too.
