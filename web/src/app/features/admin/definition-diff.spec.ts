@@ -1,4 +1,5 @@
 import { ToolEntry } from '../../api/generated';
+import { parseKeepingNumbers } from './raw-json';
 import { describeEntry, diffDefinitions, riskChange, riskChangeText } from './definition-diff';
 
 function entry(overrides: Partial<ToolEntry> = {}, description = 'Updates a page.'): ToolEntry {
@@ -127,8 +128,8 @@ describe('hostile text', () => {
     expect(lines.filter((line) => line.startsWith('ryzyko:'))).toEqual([
       'ryzyko: Zapis ("UPDATE")',
     ]);
-    expect(lines[1]).toBe(
-      'opis: "ok<U+000A>ryzyko: Odczyt (\\"READ_ONLY\\")<U+000D><U+000A><U+0009>schemat.additionalProperties: false"',
+    expect(lines[3]).toBe(
+      'opis: "ok[U+000A]ryzyko: Odczyt (\\"READ_ONLY\\")[U+000D][U+000A][U+0009]schemat.additionalProperties: false"',
     );
   });
 
@@ -149,9 +150,55 @@ describe('hostile text', () => {
     };
     const lines = describeEntry(hostile).filter((line) => line.startsWith('schemat.'));
     expect(lines).toEqual([
-      'schemat.properties."a<U+000A>schemat.required: x".description: "v<U+000A>w"',
-      'schemat.properties."a<U+000A>schemat.required: x".enum: "1<U+000A>2"',
+      'schemat.properties."a[U+000A]schemat.required: x".description: "v[U+000A]w"',
+      'schemat.properties."a[U+000A]schemat.required: x".enum: "1[U+000A]2"',
     ]);
+  });
+});
+
+describe('what the hash covers', () => {
+  it('shows the name of the definition and of the entry', () => {
+    const renamed = entry();
+    renamed.definition = { ...renamed.definition, name: 'other_name' };
+    const { before, after, changed } = diffDefinitions(entry(), renamed);
+    expect(changed).toBe(true);
+    expect(before.filter((line) => line.mark === 'removed').map((line) => line.text)).toEqual([
+      'nazwa: "update_page"',
+    ]);
+    expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toEqual([
+      'nazwa: "other_name"',
+    ]);
+  });
+
+  it('compares numbers as written, also beyond 2^53', () => {
+    const parse = (limit: string) =>
+      parseKeepingNumbers<ToolEntry>(
+        JSON.stringify(entry()).replace('"maxLength":12', `"maxLength":${limit}`),
+      );
+    const { changed, after } = diffDefinitions(
+      parse('9007199254740992'),
+      parse('9007199254740993'),
+    );
+    expect(changed).toBe(true);
+    expect(after.some((line) => line.text.endsWith('maxLength: 9007199254740993'))).toBe(true);
+  });
+
+  it('reports no change for equal definitions (the caller then knows a hash difference is hidden)', () => {
+    expect(diffDefinitions(entry(), entry()).changed).toBe(false);
+  });
+
+  it('cannot be fooled by the notation of the BFF: a literal marker differs from a real line break', () => {
+    const real = describeEntry(entry({}, 'a\nb'));
+    const typed = describeEntry(entry({}, 'a<U+000A>b'));
+    const bracket = describeEntry(entry({}, 'a[U+000A]b'));
+    expect(real).not.toEqual(typed);
+    expect(real).not.toEqual(bracket);
+  });
+
+  it('limits stacked combining marks and reports hidden characters only when there were some', () => {
+    const stacked = diffDefinitions(null, entry({}, 'x\u0301\u0302\u0303\u0304'));
+    expect(stacked.after.some((line) => line.text.includes('[U+0303][U+0304]'))).toBe(true);
+    expect(diffDefinitions(null, entry({}, 'two\nlines')).neutralised).toBe(false);
   });
 });
 

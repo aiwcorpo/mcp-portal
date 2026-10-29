@@ -9,6 +9,7 @@ import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { neutraliseText } from '../../shared/untrusted-text';
+import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { ToolDiff } from './tool-diff';
 
 interface ToolRow {
@@ -57,7 +58,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
   return {
     tool,
     key: `${server.serverId}/${tool.name}`,
-    name: `${server.system}__${tool.name}`,
+    name: neutraliseText(`${server.system}__${tool.name}`).text,
     title: neutraliseText(tool.definition.title).text,
     pending,
     state,
@@ -71,7 +72,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
  */
 @Component({
   selector: 'app-admin-page',
-  imports: [MatButtonModule, LoadError, Loading, Notice, ToolDiff],
+  imports: [SafeTextPipe, MatButtonModule, LoadError, Loading, Notice, ToolDiff],
   templateUrl: './admin-page.html',
   styleUrl: './admin-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

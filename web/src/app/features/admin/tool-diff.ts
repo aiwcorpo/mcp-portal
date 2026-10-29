@@ -9,10 +9,13 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, PendingTool, ServerId } from '../../api/generated';
+import { parseKeepingNumbers } from './raw-json';
+import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
@@ -29,13 +32,14 @@ import { diffDefinitions, riskChange, riskChangeText } from './definition-diff';
  */
 @Component({
   selector: 'app-tool-diff',
-  imports: [MatButtonModule, ErrorNotice, LoadError, Loading, Notice],
+  imports: [SafeTextPipe, MatButtonModule, ErrorNotice, LoadError, Loading, Notice],
   templateUrl: './tool-diff.html',
   styleUrl: './tool-diff.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToolDiff {
   private readonly adminApi = inject(AdminService);
+  private readonly http = inject(HttpClient);
   private readonly dialog = inject(MatDialog);
 
   readonly serverId = input.required<ServerId>();
@@ -47,6 +51,7 @@ export class ToolDiff {
   /** The definition is no longer pending (approved elsewhere, or gone from the registry). */
   readonly gone = output();
 
+  protected readonly noVersion = $localize`:@@admin.noVersion:brak wersji`;
   protected readonly pending = signal<LoadState<PendingTool>>(LOADING);
   protected readonly approving = signal(false);
   protected readonly failure = signal<ApiFailure | null>(null);
@@ -61,18 +66,31 @@ export class ToolDiff {
     }
     const { approvedEntry, pendingEntry } = state.value;
     const change = riskChange(approvedEntry, pendingEntry);
+    const diff = diffDefinitions(approvedEntry, pendingEntry);
     return {
       value: state.value,
-      diff: diffDefinitions(approvedEntry, pendingEntry),
+      diff,
       riskText: riskChangeText(change, approvedEntry, pendingEntry),
       riskLowered: change === 'lowered',
+      // The hash covers more than the diff shows (the definition name, the server's credential block), so an
+      // approved tool whose hash changed without a visible line is a change the administrator cannot see.
+      hiddenChange:
+        approvedEntry !== null &&
+        approvedEntry.definitionHash !== state.value.pendingHash &&
+        !diff.changed,
+      hashConsistent: state.value.pendingHash === pendingEntry.definitionHash,
       isNew: approvedEntry === null,
       fromServer: state.value.source === 'server',
     };
   });
   protected readonly blocked = computed(() => {
     const state = this.pending();
-    return state.status === 'ready' && state.value.pendingHash === this.refusedHash();
+    const view = this.view();
+    return (
+      state.status === 'ready' &&
+      view !== null &&
+      (state.value.pendingHash === this.refusedHash() || view.riskLowered || !view.hashConsistent)
+    );
   });
 
   constructor() {
@@ -87,10 +105,14 @@ export class ToolDiff {
     this.pending.set(LOADING);
     this.failure.set(null);
     try {
-      const pending = await firstValueFrom(
-        this.adminApi.getAdminPendingTool(this.serverId(), this.tool()),
+      // Read as text: a number beyond 2^53 must reach the diff as written, not rounded by JSON.parse.
+      const body = await firstValueFrom(
+        this.http.get(
+          `/api/v1/admin/registry/servers/${encodeURIComponent(this.serverId())}/tools/${encodeURIComponent(this.tool())}/pending`,
+          { responseType: 'text' },
+        ),
       );
-      this.pending.set({ status: 'ready', value: pending });
+      this.pending.set({ status: 'ready', value: parseKeepingNumbers<PendingTool>(body) });
     } catch (error) {
       const failure = toApiFailure(error);
       this.pending.set({ status: 'error', failure });
@@ -107,6 +129,9 @@ export class ToolDiff {
       return;
     }
     if (view.fromServer && !(await this.confirmServerSource())) {
+      return;
+    }
+    if (view.hiddenChange && !(await this.confirmHiddenChange())) {
       return;
     }
     this.approving.set(true);
@@ -136,6 +161,22 @@ export class ToolDiff {
     } finally {
       this.approving.set(false);
     }
+  }
+
+  private async confirmHiddenChange(): Promise<boolean> {
+    const confirmed = await firstValueFrom(
+      this.dialog
+        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+          data: {
+            title: $localize`:@@admin.hiddenConfirm.title:Zatwierdzić zmianę, której nie widać?`,
+            message: $localize`:@@admin.hiddenConfirm.message:Skrót definicji jest inny, a żadna pokazana linia się nie zmieniła. Zmiana dotyczy elementu spoza widoku, na przykład poświadczenia serwera. Zatwierdź tylko, jeśli znasz jej przyczynę.`,
+            confirmLabel: $localize`:@@admin.hiddenConfirm.confirm:Zatwierdź mimo to`,
+            destructive: true,
+          },
+        })
+        .afterClosed(),
+    );
+    return confirmed === true;
   }
 
   private async confirmServerSource(): Promise<boolean> {

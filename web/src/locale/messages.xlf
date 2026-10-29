@@ -623,7 +623,7 @@
     </unit>
     <unit id="admin.newCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:41</note>
+        <note category="location">src/app/features/admin/admin-page.ts:42</note>
       </notes>
       <segment>
         <source>nowe: <ph id="0" equiv="count" disp="created"/></source>
@@ -631,7 +631,7 @@
     </unit>
     <unit id="admin.changedCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:44</note>
+        <note category="location">src/app/features/admin/admin-page.ts:45</note>
       </notes>
       <segment>
         <source>zmienione: <ph id="0" equiv="count" disp="changed"/></source>
@@ -639,7 +639,7 @@
     </unit>
     <unit id="admin.toolApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:53</note>
+        <note category="location">src/app/features/admin/admin-page.ts:54</note>
       </notes>
       <segment>
         <source>Zatwierdzone · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -647,7 +647,7 @@
     </unit>
     <unit id="admin.toolNew">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:55</note>
+        <note category="location">src/app/features/admin/admin-page.ts:56</note>
       </notes>
       <segment>
         <source>Nowe · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -655,7 +655,7 @@
     </unit>
     <unit id="admin.toolChanged">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:56</note>
+        <note category="location">src/app/features/admin/admin-page.ts:57</note>
       </notes>
       <segment>
         <source>Zmienione · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -663,7 +663,7 @@
     </unit>
     <unit id="admin.showTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:82</note>
+        <note category="location">src/app/features/admin/admin-page.ts:83</note>
       </notes>
       <segment>
         <source>Pokaż narzędzia</source>
@@ -671,7 +671,7 @@
     </unit>
     <unit id="admin.hideTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:83</note>
+        <note category="location">src/app/features/admin/admin-page.ts:84</note>
       </notes>
       <segment>
         <source>Ukryj narzędzia</source>
@@ -679,7 +679,7 @@
     </unit>
     <unit id="admin.serverDisabled">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:106</note>
+        <note category="location">src/app/features/admin/admin-page.ts:107</note>
       </notes>
       <segment>
         <source>Wyłączony</source>
@@ -687,7 +687,7 @@
     </unit>
     <unit id="admin.serverPending">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:108</note>
+        <note category="location">src/app/features/admin/admin-page.ts:109</note>
       </notes>
       <segment>
         <source>Do zatwierdzenia</source>
@@ -695,7 +695,7 @@
     </unit>
     <unit id="admin.serverActive">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:109</note>
+        <note category="location">src/app/features/admin/admin-page.ts:110</note>
       </notes>
       <segment>
         <source>Aktywny</source>
@@ -703,7 +703,7 @@
     </unit>
     <unit id="admin.approved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:163</note>
+        <note category="location">src/app/features/admin/admin-page.ts:164</note>
       </notes>
       <segment>
         <source>Zatwierdzono definicję <ph id="0" equiv="tool" disp="tool.name"/>.</source>
@@ -717,9 +717,25 @@
         <source>Administracja</source>
       </segment>
     </unit>
+    <unit id="admin.diff.entryName">
+      <notes>
+        <note category="location">src/app/features/admin/definition-diff.ts:119</note>
+      </notes>
+      <segment>
+        <source>wpis: <ph id="0" equiv="name" disp="quoted(entry.name)"/></source>
+      </segment>
+    </unit>
+    <unit id="admin.diff.defName">
+      <notes>
+        <note category="location">src/app/features/admin/definition-diff.ts:120</note>
+      </notes>
+      <segment>
+        <source>nazwa: <ph id="0" equiv="name" disp="quoted(entry.definition.name)"/></source>
+      </segment>
+    </unit>
     <unit id="admin.diff.title">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:91</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:121</note>
       </notes>
       <segment>
         <source>tytuł: <ph id="0" equiv="title" disp="quoted(entry.definition.title)"/></source>
@@ -727,7 +743,7 @@
     </unit>
     <unit id="admin.diff.description">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:92</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:122</note>
       </notes>
       <segment>
         <source>opis: <ph id="0" equiv="description" disp="quoted(entry.definition.description)"/></source>
@@ -735,7 +751,7 @@
     </unit>
     <unit id="admin.diff.risk">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:93</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:123</note>
       </notes>
       <segment>
         <source>ryzyko: <ph id="0" equiv="label" disp="riskLabel(entry.risk)"/> (<ph id="1" equiv="risk" disp="quoted(entry.risk)"/>)</source>
@@ -743,7 +759,7 @@
     </unit>
     <unit id="admin.diff.action">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:94</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:124</note>
       </notes>
       <segment>
         <source>akcja: <ph id="0" equiv="action" disp="quoted(entry.action)"/></source>
@@ -751,7 +767,7 @@
     </unit>
     <unit id="admin.diff.resource">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:98</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:128</note>
       </notes>
       <segment>
         <source>zasób: argument <ph id="0" equiv="argument" disp="quoted(ref.argument)"/> (<ph id="1" equiv="type" disp="quoted(ref.type)"/>)</source>
@@ -759,7 +775,7 @@
     </unit>
     <unit id="admin.diff.schema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:103</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:133</note>
       </notes>
       <segment>
         <source>schemat.<ph id="0" equiv="line" disp="line"/></source>
@@ -767,7 +783,7 @@
     </unit>
     <unit id="admin.diff.outputSchema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:108</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:138</note>
       </notes>
       <segment>
         <source>schemat wyniku.<ph id="0" equiv="line" disp="line"/></source>
@@ -775,7 +791,7 @@
     </unit>
     <unit id="admin.diff.annotations">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:115</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:145</note>
       </notes>
       <segment>
         <source>wskazówki.<ph id="0" equiv="line" disp="line"/></source>
@@ -783,7 +799,7 @@
     </unit>
     <unit id="admin.riskRaised">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:185</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:216</note>
       </notes>
       <segment>
         <source>Ryzyko rośnie: <ph id="0" equiv="from" disp="from"/> na <ph id="1" equiv="to" disp="to"/>.</source>
@@ -791,7 +807,7 @@
     </unit>
     <unit id="admin.riskLowered">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:186</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:217</note>
       </notes>
       <segment>
         <source>Ryzyko maleje: <ph id="0" equiv="from" disp="from"/> na <ph id="1" equiv="to" disp="to"/>. Obniżenia ryzyka gateway nie zatwierdza.</source>
@@ -818,28 +834,52 @@
         <note category="location">src/app/features/admin/tool-diff.html:21,24</note>
       </notes>
       <segment>
-        <source> Tę definicję przedstawił działający serwer, a nie potok CI z przeglądanego commitu. Nikt jej nie przeglądał w kodzie, a podana wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion }}"/>) pochodzi od serwera. Przeczytaj opis i schemat uważnie, zanim zatwierdzisz. </source>
+        <source> Tę definicję przedstawił działający serwer, a nie potok CI z przeglądanego commitu. Nikt jej nie przeglądał w kodzie, a podana wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Przeczytaj opis i schemat uważnie, zanim zatwierdzisz. </source>
       </segment>
     </unit>
     <unit id="admin.ciSource">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:29,30</note>
+        <note category="location">src/app/features/admin/tool-diff.html:29,31</note>
       </notes>
       <segment>
-        <source>Źródło: potok CI (przeglądany commit), wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion }}"/>.</source>
+        <source>Źródło: potok CI (przeglądany commit), wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</source>
       </segment>
     </unit>
-    <unit id="admin.neutralised">
+    <unit id="admin.hiddenTitle">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:37,38</note>
+      </notes>
+      <segment>
+        <source>Skrót się zmienił, a pokazane pola nie.</source>
+      </segment>
+    </unit>
+    <unit id="admin.hiddenText">
       <notes>
         <note category="location">src/app/features/admin/tool-diff.html:39,41</note>
       </notes>
       <segment>
-        <source> W definicji były ukryte znaki. Zastąpiono je znacznikami [U+XXXX]. </source>
+        <source> Zmienił się element definicji spoza widoku, na przykład poświadczenie serwera. Zatwierdzenie wymaga jawnego potwierdzenia. </source>
+      </segment>
+    </unit>
+    <unit id="admin.hashInconsistent">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:46,49</note>
+      </notes>
+      <segment>
+        <source> Skrót podany przez serwer nie zgadza się ze skrótem pokazanej definicji. Nie zatwierdzaj; zgłoś to administratorom platformy. </source>
+      </segment>
+    </unit>
+    <unit id="admin.neutralised">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:55,57</note>
+      </notes>
+      <segment>
+        <source> W definicji były ukryte znaki. Zastąpiono je znacznikami w postaci [U+XXXX]. </source>
       </segment>
     </unit>
     <unit id="admin.beforeNew">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:47,48</note>
+        <note category="location">src/app/features/admin/tool-diff.html:63,64</note>
       </notes>
       <segment>
         <source>Przed (brak, nowe narzędzie)</source>
@@ -847,15 +887,15 @@
     </unit>
     <unit id="admin.before">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:50,51</note>
+        <note category="location">src/app/features/admin/tool-diff.html:66,67</note>
       </notes>
       <segment>
-        <source>Przed (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.approvedInVersion ?? &apos;brak wersji&apos; }}"/>)</source>
+        <source>Przed (<ph id="0" equiv="INTERPOLATION" disp="{{ (v.value.approvedInVersion | safeText) || noVersion }}"/>)</source>
       </segment>
     </unit>
     <unit id="admin.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:63,64</note>
+        <note category="location">src/app/features/admin/tool-diff.html:79,80</note>
       </notes>
       <segment>
         <source>Usunięto: </source>
@@ -863,7 +903,7 @@
     </unit>
     <unit id="admin.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:66,67</note>
+        <note category="location">src/app/features/admin/tool-diff.html:82,83</note>
       </notes>
       <segment>
         <source>Brak wcześniejszej definicji.</source>
@@ -871,15 +911,15 @@
     </unit>
     <unit id="admin.after">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:71,72</note>
+        <note category="location">src/app/features/admin/tool-diff.html:88,89</note>
       </notes>
       <segment>
-        <source>Po (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion }}"/>)</source>
+        <source>Po (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
       </segment>
     </unit>
     <unit id="admin.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:82,83</note>
+        <note category="location">src/app/features/admin/tool-diff.html:100,101</note>
       </notes>
       <segment>
         <source>Dodano: </source>
@@ -887,7 +927,7 @@
     </unit>
     <unit id="admin.approve">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:99,100</note>
+        <note category="location">src/app/features/admin/tool-diff.html:117,118</note>
       </notes>
       <segment>
         <source>Zatwierdź definicję</source>
@@ -895,15 +935,47 @@
     </unit>
     <unit id="admin.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:103,106</note>
+        <note category="location">src/app/features/admin/tool-diff.html:121,124</note>
       </notes>
       <segment>
         <source> Brak zatwierdzenia nie niszczy niczego: narzędzie zostaje ukryte przed agentami. </source>
       </segment>
     </unit>
+    <unit id="admin.noVersion">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:54</note>
+      </notes>
+      <segment>
+        <source>brak wersji</source>
+      </segment>
+    </unit>
+    <unit id="admin.hiddenConfirm.title">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:171</note>
+      </notes>
+      <segment>
+        <source>Zatwierdzić zmianę, której nie widać?</source>
+      </segment>
+    </unit>
+    <unit id="admin.hiddenConfirm.message">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:172</note>
+      </notes>
+      <segment>
+        <source>Skrót definicji jest inny, a żadna pokazana linia się nie zmieniła. Zmiana dotyczy elementu spoza widoku, na przykład poświadczenia serwera. Zatwierdź tylko, jeśli znasz jej przyczynę.</source>
+      </segment>
+    </unit>
+    <unit id="admin.hiddenConfirm.confirm">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:173</note>
+      </notes>
+      <segment>
+        <source>Zatwierdź mimo to</source>
+      </segment>
+    </unit>
     <unit id="admin.serverConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:147</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:188</note>
       </notes>
       <segment>
         <source>Zatwierdzić definicję zgłoszoną przez serwer?</source>
@@ -911,7 +983,7 @@
     </unit>
     <unit id="admin.serverConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:148</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:189</note>
       </notes>
       <segment>
         <source>Definicję <ph id="0" equiv="tool" disp="name"/> przedstawił działający serwer, nie potok CI. Nikt nie przeglądał jej w kodzie. Zatwierdź ją tylko, jeśli opis i schemat są zgodne z oczekiwanym.</source>
@@ -919,7 +991,7 @@
     </unit>
     <unit id="admin.serverConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:149</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:190</note>
       </notes>
       <segment>
         <source>Zatwierdź</source>
@@ -1536,7 +1608,7 @@
     </unit>
     <unit id="catalog.linkCopied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:115</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:116</note>
       </notes>
       <segment>
         <source>Skopiowano adres serwera <ph id="0" equiv="system" disp="systemName(server.system)"/>.</source>
@@ -1544,7 +1616,7 @@
     </unit>
     <unit id="catalog.linkCopyFailed">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:116</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:117</note>
       </notes>
       <segment>
         <source>Nie udało się skopiować adresu. Adres: <ph id="0" equiv="url" disp="server.url"/></source>
@@ -1552,10 +1624,10 @@
     </unit>
     <unit id="catalog.requestCreated">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:158</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:159</note>
       </notes>
       <segment>
-        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
+        <source>Wniosek <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
       </segment>
     </unit>
     <unit id="catalog.caption">
@@ -2230,7 +2302,7 @@
     </unit>
     <unit id="conn.reconnectNeeded">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:59</note>
+        <note category="location">src/app/features/connections/connections-page.ts:60</note>
       </notes>
       <segment>
         <source>wymaga ponownego połączenia</source>
@@ -2238,7 +2310,7 @@
     </unit>
     <unit id="conn.pending">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:64</note>
+        <note category="location">src/app/features/connections/connections-page.ts:65</note>
       </notes>
       <segment>
         <source>wniosek oczekuje</source>
@@ -2246,7 +2318,7 @@
     </unit>
     <unit id="conn.noAccess">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:66</note>
+        <note category="location">src/app/features/connections/connections-page.ts:67</note>
       </notes>
       <segment>
         <source>brak uprawnienia</source>
@@ -2254,7 +2326,7 @@
     </unit>
     <unit id="conn.autoRefreshed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:83</note>
+        <note category="location">src/app/features/connections/connections-page.ts:84</note>
       </notes>
       <segment>
         <source>odświeżane automatycznie</source>
@@ -2262,7 +2334,7 @@
     </unit>
     <unit id="conn.noExpiry">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:84</note>
+        <note category="location">src/app/features/connections/connections-page.ts:85</note>
       </notes>
       <segment>
         <source>bez terminu</source>
@@ -2270,10 +2342,10 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:290</note>
+        <note category="location">src/app/features/connections/connections-page.ts:291</note>
       </notes>
       <segment>
-        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
+        <source>Wniosek <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
       </segment>
     </unit>
     <unit id="linkConfig.back">
@@ -2639,7 +2711,7 @@
     </unit>
     <unit id="wizard.step.name">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:112</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:113</note>
       </notes>
       <segment>
         <source>Nazwa</source>
@@ -2647,7 +2719,7 @@
     </unit>
     <unit id="wizard.step.tools">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:113</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:114</note>
       </notes>
       <segment>
         <source>Narzędzia</source>
@@ -2655,7 +2727,7 @@
     </unit>
     <unit id="wizard.step.ready">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:114</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:115</note>
       </notes>
       <segment>
         <source>Gotowe</source>
@@ -2663,7 +2735,7 @@
     </unit>
     <unit id="wizard.slugTaken">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:208</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:209</note>
       </notes>
       <segment>
         <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
@@ -2671,7 +2743,7 @@
     </unit>
     <unit id="wizard.slugTaken2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:211</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:212</note>
       </notes>
       <segment>
         <source>Ten identyfikator jest już zajęty. Wybierz inny.</source>
@@ -2679,7 +2751,7 @@
     </unit>
     <unit id="wizard.slugRequired">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:215</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:216</note>
       </notes>
       <segment>
         <source>Podaj identyfikator.</source>
@@ -2687,7 +2759,7 @@
     </unit>
     <unit id="wizard.slugPattern">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:216</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:217</note>
       </notes>
       <segment>
         <source>Dozwolone są małe litery, cyfry i myślnik; identyfikator nie może zaczynać się ani kończyć myślnikiem (do 63 znaków).</source>
@@ -2695,10 +2767,10 @@
     </unit>
     <unit id="wizard.requestCreated">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:292</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:307</note>
       </notes>
       <segment>
-        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
+        <source>Wniosek <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
       </segment>
     </unit>
     <unit id="links.title">
@@ -3524,7 +3596,7 @@
     </unit>
     <unit id="requests.lead">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:17,18</note>
+        <note category="location">src/app/features/requests/requests-page.html:14,15</note>
       </notes>
       <segment>
         <source>Wnioski o uprawnienia do serwerów MCP.</source>
@@ -3532,7 +3604,7 @@
     </unit>
     <unit id="requests.new">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:19,21</note>
+        <note category="location">src/app/features/requests/requests-page.html:16,18</note>
       </notes>
       <segment>
         <source> Złóż wniosek </source>
@@ -3540,7 +3612,7 @@
     </unit>
     <unit id="requests.caption">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:25,27</note>
+        <note category="location">src/app/features/requests/requests-page.html:22,24</note>
       </notes>
       <segment>
         <source> Moje wnioski o uprawnienia </source>
@@ -3548,8 +3620,8 @@
     </unit>
     <unit id="requests.colEntitlement">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:29,30</note>
-        <note category="location">src/app/features/requests/requests-page.html:44,45</note>
+        <note category="location">src/app/features/requests/requests-page.html:26,27</note>
+        <note category="location">src/app/features/requests/requests-page.html:41,42</note>
       </notes>
       <segment>
         <source>Uprawnienie</source>
@@ -3557,8 +3629,8 @@
     </unit>
     <unit id="requests.colCreated">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:30,31</note>
-        <note category="location">src/app/features/requests/requests-page.html:53</note>
+        <note category="location">src/app/features/requests/requests-page.html:27,28</note>
+        <note category="location">src/app/features/requests/requests-page.html:50</note>
       </notes>
       <segment>
         <source>Złożono</source>
@@ -3566,8 +3638,8 @@
     </unit>
     <unit id="requests.colStatus">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:31,32</note>
-        <note category="location">src/app/features/requests/requests-page.html:60</note>
+        <note category="location">src/app/features/requests/requests-page.html:28,29</note>
+        <note category="location">src/app/features/requests/requests-page.html:57</note>
       </notes>
       <segment>
         <source>Status</source>
@@ -3575,8 +3647,8 @@
     </unit>
     <unit id="requests.colDecided">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:32,33</note>
-        <note category="location">src/app/features/requests/requests-page.html:67,68</note>
+        <note category="location">src/app/features/requests/requests-page.html:29,30</note>
+        <note category="location">src/app/features/requests/requests-page.html:64,65</note>
       </notes>
       <segment>
         <source>Rozpatrzono</source>
@@ -3584,7 +3656,7 @@
     </unit>
     <unit id="requests.colActions">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:34,36</note>
+        <note category="location">src/app/features/requests/requests-page.html:31,33</note>
       </notes>
       <segment>
         <source>Akcje</source>
@@ -3592,7 +3664,7 @@
     </unit>
     <unit id="requests.open">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:79,80</note>
+        <note category="location">src/app/features/requests/requests-page.html:76,77</note>
       </notes>
       <segment>
         <source>Otwórz w systemie uprawnień</source>
@@ -3600,7 +3672,7 @@
     </unit>
     <unit id="requests.newTab">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:81,82</note>
+        <note category="location">src/app/features/requests/requests-page.html:78,79</note>
       </notes>
       <segment>
         <source> (otwiera się w nowej karcie)</source>
@@ -3608,7 +3680,7 @@
     </unit>
     <unit id="requests.emptyTitle">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:92,93</note>
+        <note category="location">src/app/features/requests/requests-page.html:89,90</note>
       </notes>
       <segment>
         <source>Nie masz żadnych wniosków.</source>
@@ -3616,7 +3688,7 @@
     </unit>
     <unit id="requests.emptyText">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:94,96</note>
+        <note category="location">src/app/features/requests/requests-page.html:91,93</note>
       </notes>
       <segment>
         <source> Gdy poprosisz o uprawnienie, wniosek pojawi się tutaj razem ze statusem. </source>
@@ -3624,7 +3696,7 @@
     </unit>
     <unit id="requests.footnote">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:99,102</note>
+        <note category="location">src/app/features/requests/requests-page.html:96,99</note>
       </notes>
       <segment>
         <source> Wnioski akceptuje i anuluje system uprawnień. </source>
@@ -3632,7 +3704,7 @@
     </unit>
     <unit id="request.status.pending">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:18</note>
+        <note category="location">src/app/features/requests/requests-page.ts:19</note>
       </notes>
       <segment>
         <source>Oczekuje</source>
@@ -3640,7 +3712,7 @@
     </unit>
     <unit id="request.status.approved">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:19</note>
+        <note category="location">src/app/features/requests/requests-page.ts:20</note>
       </notes>
       <segment>
         <source>Zaakceptowany</source>
@@ -3648,7 +3720,7 @@
     </unit>
     <unit id="request.status.rejected">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:20</note>
+        <note category="location">src/app/features/requests/requests-page.ts:21</note>
       </notes>
       <segment>
         <source>Odrzucony</source>
@@ -3656,7 +3728,7 @@
     </unit>
     <unit id="request.status.cancelled">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:21</note>
+        <note category="location">src/app/features/requests/requests-page.ts:22</note>
       </notes>
       <segment>
         <source>Anulowany</source>
@@ -3664,10 +3736,10 @@
     </unit>
     <unit id="requests.created">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:90</note>
+        <note category="location">src/app/features/requests/requests-page.ts:89</note>
       </notes>
       <segment>
-        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz tutaj.</source>
+        <source>Wniosek <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> jest w systemie uprawnień. Jego stan sprawdzisz tutaj.</source>
       </segment>
     </unit>
     <unit id="common.cancel">

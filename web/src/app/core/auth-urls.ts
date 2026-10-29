@@ -59,6 +59,9 @@ const LOOPBACK_HOSTS: ReadonlySet<string> = new Set(['localhost', '127.0.0.1', '
 export function isAllowedRedirect(value: string): boolean {
   try {
     const url = new URL(value);
+    if (url.username || url.password || url.hash) {
+      return false;
+    }
     return (
       url.protocol === 'https:' || (url.protocol === 'http:' && LOOPBACK_HOSTS.has(url.hostname))
     );

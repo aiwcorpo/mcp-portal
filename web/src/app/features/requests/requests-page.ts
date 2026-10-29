@@ -3,15 +3,16 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { AccessRequest, AccessRequestStatus, AccessRequestsService } from '../../api/generated';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { isAllowedRedirect } from '../../core/auth-urls';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ErrorNotice } from '../../shared/error-notice';
 import { Tone } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
+import { SafeTextPipe } from '../../shared/safe-text.pipe';
+import { neutraliseText } from '../../shared/untrusted-text';
 import { entitlementTitle } from './entitlement-labels';
 
 const STATUS: Record<AccessRequestStatus, { label: () => string; tone: Tone }> = {
@@ -37,7 +38,7 @@ interface RequestRow {
 /** "Wnioski" (mockup 17): the user's requests from the IGA and the way to file a new one. */
 @Component({
   selector: 'app-requests-page',
-  imports: [DatePipe, MatButtonModule, ErrorNotice, LoadError, Loading, Notice],
+  imports: [SafeTextPipe, DatePipe, MatButtonModule, LoadError, Loading, Notice],
   templateUrl: './requests-page.html',
   styleUrl: './requests-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,7 +49,6 @@ export class RequestsPage {
 
   protected readonly requests = signal<LoadState<AccessRequest[]>>(LOADING);
   protected readonly done = signal<string | null>(null);
-  protected readonly failure = signal<ApiFailure | null>(null);
 
   protected readonly rows = computed<RequestRow[]>(() => {
     const state = this.requests();
@@ -83,11 +83,10 @@ export class RequestsPage {
 
   protected async newRequest(): Promise<void> {
     this.done.set(null);
-    this.failure.set(null);
     const result = await this.actions.requestWithChoice(null);
     if (result?.kind === 'created') {
       this.done.set(
-        $localize`:@@requests.created:Wniosek ${result.requestId}:id: jest w systemie uprawnień. Jego stan sprawdzisz tutaj.`,
+        $localize`:@@requests.created:Wniosek ${neutraliseText(result.requestId).text}:id: jest w systemie uprawnień. Jego stan sprawdzisz tutaj.`,
       );
       await this.load();
     }

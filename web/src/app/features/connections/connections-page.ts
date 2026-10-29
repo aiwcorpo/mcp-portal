@@ -22,6 +22,7 @@ import {
   SystemId,
 } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { neutraliseText } from '../../shared/untrusted-text';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
@@ -287,7 +288,7 @@ export class ConnectionsPage implements OnInit {
           const result = await this.connectionActions.requestWithChoice(server.system);
           if (result?.kind === 'created') {
             this.actionDone.set(
-              $localize`:@@conn.requestCreated:Wniosek ${result.requestId}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
+              $localize`:@@conn.requestCreated:Wniosek ${neutraliseText(result.requestId).text}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
             );
             await this.load();
           }

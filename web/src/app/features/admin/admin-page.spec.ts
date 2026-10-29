@@ -113,29 +113,113 @@ describe('AdminPage', () => {
     expect(store.state.registryApproved).toEqual(['mcp-confluence/update_page']);
   });
 
-  it('shows the 422 risk_lowered text and keeps that definition from being sent again', async () => {
-    const posts: string[] = [];
-    server.events.on('request:start', ({ request }) => {
-      if (request.method === 'POST' && request.url.includes('/approve')) {
-        posts.push(request.url);
-      }
-    });
+  it('switches the button off at once for a lowered risk', async () => {
     await openAdmin();
-    await until(() => expect(text()).toContain('mcp-gitlab'));
     await openDiff('gitlab__delete_branch');
     expect(text()).toContain('Ryzyko maleje: Usuwanie na Zapis.');
+    expect(
+      button('Zatwierdź definicję (gitlab__delete_branch)').getAttribute('aria-disabled'),
+    ).toBe('true');
+  });
 
-    button('Zatwierdź definicję (gitlab__delete_branch)').click();
-
+  it('shows the 422 risk_lowered text and keeps that definition from being sent again', async () => {
+    let posts = 0;
+    server.use(
+      http.post('/api/v1/admin/registry/servers/mcp-confluence/tools/archive_page/approve', () => {
+        posts += 1;
+        return HttpResponse.json(
+          { error: 'manifest_rejected', reason: 'risk_lowered', message: 'lowers risk' },
+          { status: 422 },
+        );
+      }),
+    );
+    await openAdmin();
+    await openDiff('confluence__archive_page');
+    button('Zatwierdź definicję (confluence__archive_page)').click();
     await until(() => expect(text()).toContain('Nowa definicja obniża poziom ryzyka narzędzia'));
-    expect(text()).not.toContain('lowers risk from');
+    expect(text()).not.toContain('lowers risk');
     await until(() =>
       expect(
-        button('Zatwierdź definicję (gitlab__delete_branch)').getAttribute('aria-disabled'),
+        button('Zatwierdź definicję (confluence__archive_page)').getAttribute('aria-disabled'),
       ).toBe('true'),
     );
-    button('Zatwierdź definicję (gitlab__delete_branch)').click();
-    expect(posts).toHaveLength(1);
+    button('Zatwierdź definicję (confluence__archive_page)').click();
+    expect(posts).toBe(1);
+  });
+
+  it('warns about a hash change that no shown line explains and asks before approving', async () => {
+    const approved = {
+      name: 'update_issue',
+      risk: 'UPDATE',
+      action: 'update',
+      resourceRefs: [],
+      definition: {
+        name: 'update_issue',
+        title: 'U',
+        description: 'd',
+        inputSchema: { type: 'object' },
+      },
+      definitionHash: 'sha256:' + 'a'.repeat(64),
+    };
+    server.use(
+      http.get('/api/v1/admin/registry/servers/mcp-jira/tools/update_issue/pending', () =>
+        HttpResponse.json({
+          approvedEntry: approved,
+          pendingEntry: { ...approved, definitionHash: 'sha256:' + 'b'.repeat(64) },
+          pendingHash: 'sha256:' + 'b'.repeat(64),
+          approvedInVersion: '1.3.0',
+          pendingVersion: '1.4.0',
+          source: 'ci',
+        }),
+      ),
+    );
+    await openAdmin();
+    await openDiff('jira__update_issue');
+
+    expect(text()).toContain('Skrót się zmienił, a pokazane pola nie.');
+    button('Zatwierdź definicję (jira__update_issue)').click();
+    await until(() =>
+      expect(document.querySelector('mat-dialog-container')?.textContent).toContain(
+        'Zatwierdzić zmianę, której nie widać?',
+      ),
+    );
+    button('Anuluj', document.querySelector('mat-dialog-container')!).click();
+    await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
+    expect(store.state.registryApproved).toEqual([]);
+  });
+
+  it('blocks approval when the hash does not match the shown definition', async () => {
+    const entry = {
+      name: 'update_issue',
+      risk: 'UPDATE',
+      action: 'update',
+      resourceRefs: [],
+      definition: {
+        name: 'update_issue',
+        title: 'U',
+        description: 'd',
+        inputSchema: { type: 'object' },
+      },
+      definitionHash: 'sha256:' + 'a'.repeat(64),
+    };
+    server.use(
+      http.get('/api/v1/admin/registry/servers/mcp-jira/tools/update_issue/pending', () =>
+        HttpResponse.json({
+          approvedEntry: null,
+          pendingEntry: entry,
+          pendingHash: 'sha256:' + 'c'.repeat(64),
+          approvedInVersion: null,
+          pendingVersion: '1.4.0',
+          source: 'ci',
+        }),
+      ),
+    );
+    await openAdmin();
+    await openDiff('jira__update_issue');
+    expect(text()).toContain('Skrót podany przez serwer nie zgadza się');
+    expect(button('Zatwierdź definicję (jira__update_issue)').getAttribute('aria-disabled')).toBe(
+      'true',
+    );
   });
 
   it('warns that a definition from the running server was not reviewed, shows its text as text and asks again before approving', async () => {

@@ -62,7 +62,7 @@
             </td>
             <th scope="row" role="rowheader" class="c-name">
               {{ row.name }}
-              <code class="server-id muted">{{ row.server.serverId }}</code>
+              <code class="server-id muted">{{ row.server.serverId | safeText }}</code>
             </th>
             <td
               role="cell"
@@ -70,7 +70,7 @@
               data-label="Wersja"
               i18n-data-label="@@admin.colVersion"
             >
-              {{ row.server.version }}
+              {{ row.server.version | safeText }}
             </td>
             <td role="cell" class="muted" data-label="Zmiany" i18n-data-label="@@admin.colChanges">
               @if (row.changes) {

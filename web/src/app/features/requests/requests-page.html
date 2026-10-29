@@ -3,9 +3,6 @@
 @if (done(); as text) {
   <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
 }
-@if (failure(); as f) {
-  <app-error-notice [failure]="f" />
-}
 
 @let state = requests();
 @if (state.status === 'loading') {
@@ -44,11 +41,11 @@
               data-label="Uprawnienie"
               i18n-data-label="@@requests.colEntitlement"
             >
-              <code>{{ row.request.entitlement }}</code>
+              <code>{{ row.request.entitlement | safeText }}</code>
               @if (row.title) {
                 <span class="title muted">{{ row.title }}</span>
               }
-              <span class="id muted">{{ row.request.requestId }}</span>
+              <span class="id muted">{{ row.request.requestId | safeText }}</span>
             </th>
             <td role="cell" data-label="Złożono" i18n-data-label="@@requests.colCreated">
               {{ row.request.createdAt | date: 'dd.MM.yyyy' }}

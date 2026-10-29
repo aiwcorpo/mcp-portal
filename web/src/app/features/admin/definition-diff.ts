@@ -1,6 +1,7 @@
 import { Risk, ToolEntry } from '../../api/generated';
 import { riskLabel } from '../../shared/labels';
 import { neutraliseText } from '../../shared/untrusted-text';
+import { RawNumber } from './raw-json';
 
 export type DiffMark = 'same' | 'removed' | 'added';
 
@@ -14,6 +15,8 @@ export interface DefinitionDiff {
   after: DiffLine[];
   /** True when any shown text carried a hidden character that was replaced by a [U+XXXX] marker. */
   neutralised: boolean;
+  /** False when no shown line differs; for an approved tool whose hash differs that means the change is outside the view. */
+  changed: boolean;
 }
 
 const RISK_ORDER: Record<Risk, number> = { READ_ONLY: 0, UPDATE: 1, DESTRUCTIVE: 2 };
@@ -28,23 +31,42 @@ export function riskChange(approved: ToolEntry | null, pending: ToolEntry): Risk
   return RISK_ORDER[pending.risk] > RISK_ORDER[approved.risk] ? 'raised' : 'lowered';
 }
 
+/**
+ * Own notation for line breaks (square brackets): a literal "[U+" in a value is already written as "[U+005B]U+"
+ * by neutraliseText, so these markers cannot be imitated, unlike the BFF's <U+XXXX>.
+ */
 const LINE_BREAKS: Record<string, string> = {
-  '\n': '<U+000A>',
-  '\r': '<U+000D>',
-  '\t': '<U+0009>',
+  '\n': '[U+000A]',
+  '\r': '[U+000D]',
+  '\t': '[U+0009]',
 };
 
+/** More than two combining marks in a row (stacked marks that overlap other lines) are shown as markers. */
+const MARK_RUN = /(\p{M}{2})(\p{M}+)/gu;
+
+function markers(extra: string): string {
+  return Array.from(
+    extra,
+    (char) => `[U+${char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0')}]`,
+  ).join('');
+}
+
 /**
- * Untrusted text as one quoted token: hidden characters, line breaks, CR and tabs become visible <U+XXXX>
- * markers (the BFF's notation) and the result is JSON-quoted, so a value can neither start a line of its own
+ * Untrusted text as one quoted token: hidden characters, line breaks, CR and tabs become visible [U+XXXX]
+ * markers and the result is JSON-quoted, so a value can neither start a line of its own
  * nor imitate `path: value` of the diff.
  */
 function quoted(value: string): string {
   const { text } = neutraliseText(value);
-  return JSON.stringify(text.replace(/[\n\r\t]/g, (char) => LINE_BREAKS[char]));
+  const limited = text.replace(
+    MARK_RUN,
+    (_all, kept: string, extra: string) => kept + markers(extra),
+  );
+  return JSON.stringify(limited.replace(/[\n\r\t]/g, (char) => LINE_BREAKS[char]));
 }
 
-const MARKER = /\[U\+[0-9A-F]{4,6}\]|<U\+[0-9A-F]{4,6}>/;
+/** A marker for a hidden character; the markers for ordinary line breaks do not count. */
+const MARKER = /\[U\+(?!000A\]|000D\]|0009\])[0-9A-F]{4,6}\]|<U\+[0-9A-F]{4,6}>/;
 
 const PLAIN_KEY = /^[A-Za-z0-9_$-]+$/;
 
@@ -53,6 +75,9 @@ function key(name: string): string {
 }
 
 function scalar(value: unknown): string {
+  if (value instanceof RawNumber) {
+    return value.source;
+  }
   return typeof value === 'string' ? quoted(value) : JSON.stringify(value);
 }
 
@@ -61,16 +86,19 @@ function scalar(value: unknown): string {
  * A schema is the thing an administrator approves, so nothing is summarised: a changed `maxLength`, a new
  * `enum` value or a loosened `additionalProperties` all show up as lines.
  */
+const isLeaf = (value: unknown): boolean =>
+  value === null || typeof value !== 'object' || value instanceof RawNumber;
+
 function flatten(value: unknown, path: string, out: string[]): void {
   if (Array.isArray(value)) {
-    if (value.every((item) => item === null || typeof item !== 'object')) {
+    if (value.every(isLeaf)) {
       out.push(`${path}: ${value.map(scalar).join(', ')}`);
     } else {
       value.forEach((item, index) => flatten(item, `${path}[${index}]`, out));
     }
     return;
   }
-  if (value !== null && typeof value === 'object') {
+  if (!isLeaf(value)) {
     const entries = Object.entries(value as Record<string, unknown>).sort(([first], [second]) =>
       first < second ? -1 : first > second ? 1 : 0,
     );
@@ -88,6 +116,8 @@ function flatten(value: unknown, path: string, out: string[]): void {
 /** The reviewable text of a tool entry, one line per fact (description, risk, resources, schema, hints). */
 export function describeEntry(entry: ToolEntry): string[] {
   const lines = [
+    $localize`:@@admin.diff.entryName:wpis: ${quoted(entry.name)}:name:`,
+    $localize`:@@admin.diff.defName:nazwa: ${quoted(entry.definition.name)}:name:`,
     $localize`:@@admin.diff.title:tytuł: ${quoted(entry.definition.title)}:title:`,
     $localize`:@@admin.diff.description:opis: ${quoted(entry.definition.description)}:description:`,
     $localize`:@@admin.diff.risk:ryzyko: ${riskLabel(entry.risk)}:label: (${quoted(entry.risk)}:risk:)`,
@@ -167,6 +197,7 @@ export function diffDefinitions(approved: ToolEntry | null, pending: ToolEntry):
     })),
     after: after.map((text, index) => ({ text, mark: keptAfter.has(index) ? 'same' : 'added' })),
     neutralised,
+    changed: keptBefore.size !== before.length || keptAfter.size !== after.length,
   };
 }
 

@@ -12,6 +12,7 @@ import {
   VirtualServersService,
 } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { neutraliseText } from '../../shared/untrusted-text';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { canRequestTool } from '../catalog/catalog-actions';
 import { LOADING, LoadState } from '../../core/load-state';
@@ -283,13 +284,27 @@ export class LinkWizardPage {
     }
   }
 
+  private requesting = false;
+
   protected async requestAccess(tool: CatalogTool): Promise<void> {
+    if (this.requesting) {
+      return;
+    }
+    this.requesting = true;
+    try {
+      await this.sendRequest(tool);
+    } finally {
+      this.requesting = false;
+    }
+  }
+
+  private async sendRequest(tool: CatalogTool): Promise<void> {
     this.info.set(null);
     this.failure.set(null);
     const result = await this.connectionActions.requestAccess(tool);
     if (result.kind === 'created') {
       this.info.set(
-        $localize`:@@wizard.requestCreated:Wniosek ${result.requestId}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
+        $localize`:@@wizard.requestCreated:Wniosek ${neutraliseText(result.requestId).text}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
       );
     } else if (result.kind === 'failed') {
       this.failure.set(result.failure);

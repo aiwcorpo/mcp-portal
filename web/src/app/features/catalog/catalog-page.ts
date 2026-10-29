@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { CatalogService, PortalCatalogServer, SystemId } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { AccessRequestResult } from '../../core/access-request-flow';
+import { neutraliseText } from '../../shared/untrusted-text';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
@@ -155,7 +156,7 @@ export class CatalogPage {
       case 'created':
         this.banner.set({
           kind: 'success',
-          text: $localize`:@@catalog.requestCreated:Wniosek ${result.requestId}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
+          text: $localize`:@@catalog.requestCreated:Wniosek ${neutraliseText(result.requestId).text}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
         });
         await this.load();
         return;

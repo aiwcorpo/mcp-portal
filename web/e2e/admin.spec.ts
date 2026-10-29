@@ -60,7 +60,7 @@ test('a definition that changes while it is open is refused (409) and shown agai
   await expect(page.getByText('Zatwierdzono definicję confluence__archive_page.')).toBeVisible();
 });
 
-test('a definition from the running server carries a clear warning and a second confirmation; a lowered risk is refused (422)', async ({
+test('a definition from the running server carries a clear warning and a second confirmation; a lowered risk cannot be approved', async ({
   page,
 }) => {
   await page.goto('/admin?mockAdmin=in');
@@ -79,8 +79,9 @@ test('a definition from the running server carries a clear warning and a second 
 
   await page.getByRole('button', { name: 'Pokaż różnice (gitlab__delete_branch)' }).click();
   await expect(page.getByText('Ryzyko maleje: Usuwanie na Zapis.')).toBeVisible();
-  await page.getByRole('button', { name: 'Zatwierdź definicję (gitlab__delete_branch)' }).click();
-  await expect(page.getByText(/Nowa definicja obniża poziom ryzyka/)).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Zatwierdź definicję (gitlab__delete_branch)' }),
+  ).toHaveAttribute('aria-disabled', 'true');
 });
 
 test('the log says "Zbyt wiele wywołań" for a call refused by a limit', async ({ page }) => {

@@ -15,6 +15,7 @@ import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import { SYSTEM_IDS, isSystemId, systemName } from '../../shared/labels';
+import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { entitlementTitle } from './entitlement-labels';
 
@@ -30,7 +31,7 @@ export interface RequestDialogData {
  */
 @Component({
   selector: 'app-request-dialog',
-  imports: [MatDialogModule, MatButtonModule, ErrorNotice],
+  imports: [SafeTextPipe, MatDialogModule, MatButtonModule, ErrorNotice],
   templateUrl: './request-dialog.html',
   styleUrl: './request-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -16,6 +16,7 @@
 }
 
 .column-title {
+  margin-top: 0;
   margin-bottom: 6px;
   font-size: 13px;
   font-weight: 400;
@@ -42,8 +43,10 @@
 .line {
   display: block;
   padding: 0 10px;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
+  // No wrapping: a wrapped long value would start a visual line that looks like a line of its own.
+  min-width: max-content;
+  overflow-y: clip;
+  white-space: pre;
   unicode-bidi: isolate;
 }
 

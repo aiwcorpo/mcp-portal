@@ -20,6 +20,15 @@ Mock MSW 4.0.0: wnioski ze stanem (`mockIga`), rejestr z oczekującymi definicja
 
 Różnice względem makiet: "Zatwierdź" jest per narzędzie (endpoint jest per narzędzie), nie "Zatwierdź zmiany" per serwer; dialog wniosku zaczyna od wyboru systemu.
 
+## Poprawki po przeglądzie M4 (kontrakty 4.0.1)
+
+Kontrakty 4.0.1, klient po regeneracji bez zmian. M1: diff pokazuje też nazwę wpisu i nazwę z definicji; odpowiedź "pending" czytana jako tekst, a liczby porównywane tak, jak zapisano (`JSON.parse` z `context.source`, bez zaokrągleń powyżej 2^53); gdy skrót zatwierdzonego wpisu jest inny, a żadna linia się nie zmieniła, ekran ostrzega i wymaga jawnego potwierdzenia; niezgodność `pendingHash` z wpisem blokuje przycisk. LOW: linie diffu bez zawijania (przewijanie poziome, brak podrobionych linii), znaczniki łamań linii `[U+000A]` (nie do podrobienia, w przeciwieństwie do `<U+XXXX>` z BFF), serie znaków łączących ograniczone do dwóch, komunikat o ukrytych znakach tylko gdy były, `isAllowedRedirect` odrzuca dane logowania i fragment, blokada podwójnego kliknięcia w kreatorze, `safeText` dla identyfikatorów i wersji, przycisk wyłączony od razu przy obniżeniu ryzyka, h2 zamiast h3, martwy kod usunięty.
+Świadomie nie zrobione: `http://localhost` zostaje dozwolone w buildzie produkcyjnym, bo obraz z buildu produkcyjnego obsługuje stos dev z mockami OAuth na http (ws-01); BFF i tak odrzuca takie adresy poza dev.
+
+## Propozycje CC
+
+- `PendingTool` powinien nosić blok `credential` (i `system`) serwera, które wchodzą do `definitionHash`, żeby diff mógł pokazać każdą zmianę objętą skrótem (przegląd M4, M1). Do czasu zmiany ekran tylko ostrzega o zmianie niewidocznej.
+
 ## Kamienie M3
 
 | Kamień | Zakres | Stan |

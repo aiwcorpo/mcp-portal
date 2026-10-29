@@ -66,4 +66,10 @@ describe('auth URLs', () => {
     expect(isAllowedRedirect('data:text/html,x')).toBe(false);
     expect(isAllowedRedirect('/relative')).toBe(false);
   });
+
+  it('refuses credentials and fragments in the URL', () => {
+    expect(isAllowedRedirect('https://iga.internal@other.host/x')).toBe(false);
+    expect(isAllowedRedirect('https://user:pw@iga.internal/x')).toBe(false);
+    expect(isAllowedRedirect('https://iga.internal/x#frag')).toBe(false);
+  });
 });
