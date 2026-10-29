@@ -105,7 +105,7 @@ describe('diffDefinitions', () => {
   it('makes hidden characters visible and reports it', () => {
     const { after, neutralised } = diffDefinitions(
       null,
-      entry({}, 'Safe‮ text​ and <b>markup</b>'),
+      entry({}, 'Safe\u202E text\u200B and <b>markup</b>'),
     );
     expect(neutralised).toBe(true);
     expect(after.map((line) => line.text)).toContain(
