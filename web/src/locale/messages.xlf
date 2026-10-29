@@ -719,47 +719,47 @@
     </unit>
     <unit id="admin.diff.title">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:67</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:91</note>
       </notes>
       <segment>
-        <source>tytuł: <ph id="0" equiv="title" disp="entry.definition.title"/></source>
+        <source>tytuł: <ph id="0" equiv="title" disp="quoted(entry.definition.title)"/></source>
       </segment>
     </unit>
     <unit id="admin.diff.description">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:68</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:92</note>
       </notes>
       <segment>
-        <source>opis: <ph id="0" equiv="description" disp="entry.definition.description"/></source>
+        <source>opis: <ph id="0" equiv="description" disp="quoted(entry.definition.description)"/></source>
       </segment>
     </unit>
     <unit id="admin.diff.risk">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:69</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:93</note>
       </notes>
       <segment>
-        <source>ryzyko: <ph id="0" equiv="label" disp="riskLabel(entry.risk)"/> (<ph id="1" equiv="risk" disp="entry.risk"/>)</source>
+        <source>ryzyko: <ph id="0" equiv="label" disp="riskLabel(entry.risk)"/> (<ph id="1" equiv="risk" disp="quoted(entry.risk)"/>)</source>
       </segment>
     </unit>
     <unit id="admin.diff.action">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:70</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:94</note>
       </notes>
       <segment>
-        <source>akcja: <ph id="0" equiv="action" disp="entry.action"/></source>
+        <source>akcja: <ph id="0" equiv="action" disp="quoted(entry.action)"/></source>
       </segment>
     </unit>
     <unit id="admin.diff.resource">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:74</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:98</note>
       </notes>
       <segment>
-        <source>zasób: argument <ph id="0" equiv="argument" disp="ref.argument"/> (<ph id="1" equiv="type" disp="ref.type"/>)</source>
+        <source>zasób: argument <ph id="0" equiv="argument" disp="quoted(ref.argument)"/> (<ph id="1" equiv="type" disp="quoted(ref.type)"/>)</source>
       </segment>
     </unit>
     <unit id="admin.diff.schema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:79</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:103</note>
       </notes>
       <segment>
         <source>schemat.<ph id="0" equiv="line" disp="line"/></source>
@@ -767,7 +767,7 @@
     </unit>
     <unit id="admin.diff.outputSchema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:84</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:108</note>
       </notes>
       <segment>
         <source>schemat wyniku.<ph id="0" equiv="line" disp="line"/></source>
@@ -775,7 +775,7 @@
     </unit>
     <unit id="admin.diff.annotations">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:91</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:115</note>
       </notes>
       <segment>
         <source>wskazówki.<ph id="0" equiv="line" disp="line"/></source>
@@ -783,7 +783,7 @@
     </unit>
     <unit id="admin.riskRaised">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:167</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:185</note>
       </notes>
       <segment>
         <source>Ryzyko rośnie: <ph id="0" equiv="from" disp="from"/> na <ph id="1" equiv="to" disp="to"/>.</source>
@@ -791,7 +791,7 @@
     </unit>
     <unit id="admin.riskLowered">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:168</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:186</note>
       </notes>
       <segment>
         <source>Ryzyko maleje: <ph id="0" equiv="from" disp="from"/> na <ph id="1" equiv="to" disp="to"/>. Obniżenia ryzyka gateway nie zatwierdza.</source>
@@ -855,7 +855,7 @@
     </unit>
     <unit id="admin.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:59,60</note>
+        <note category="location">src/app/features/admin/tool-diff.html:63,64</note>
       </notes>
       <segment>
         <source>Usunięto: </source>
@@ -863,7 +863,7 @@
     </unit>
     <unit id="admin.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:62,63</note>
+        <note category="location">src/app/features/admin/tool-diff.html:66,67</note>
       </notes>
       <segment>
         <source>Brak wcześniejszej definicji.</source>
@@ -871,7 +871,7 @@
     </unit>
     <unit id="admin.after">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:67,68</note>
+        <note category="location">src/app/features/admin/tool-diff.html:71,72</note>
       </notes>
       <segment>
         <source>Po (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion }}"/>)</source>
@@ -879,7 +879,7 @@
     </unit>
     <unit id="admin.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:74,75</note>
+        <note category="location">src/app/features/admin/tool-diff.html:82,83</note>
       </notes>
       <segment>
         <source>Dodano: </source>
@@ -887,7 +887,7 @@
     </unit>
     <unit id="admin.approve">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:91,92</note>
+        <note category="location">src/app/features/admin/tool-diff.html:99,100</note>
       </notes>
       <segment>
         <source>Zatwierdź definicję</source>
@@ -895,7 +895,7 @@
     </unit>
     <unit id="admin.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:95,98</note>
+        <note category="location">src/app/features/admin/tool-diff.html:103,106</note>
       </notes>
       <segment>
         <source> Brak zatwierdzenia nie niszczy niczego: narzędzie zostaje ukryte przed agentami. </source>

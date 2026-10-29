@@ -51,7 +51,11 @@
             >
           }
         </h3>
-        <pre class="code" dir="ltr" tabindex="0"><code>@for (line of v.diff.before; track $index) {<span
+        <pre
+          class="code"
+          dir="ltr"
+          tabindex="0"
+        ><code>@for (line of v.diff.before; track $index) {<span
               class="line"
               [class.removed]="line.mark === 'removed'"
               ><span class="sign" aria-hidden="true">{{ line.mark === 'removed' ? '-' : ' ' }}</span
@@ -66,7 +70,11 @@
         <h3 [id]="'after-' + toolName()" class="column-title muted">
           <ng-container i18n="@@admin.after">Po ({{ v.value.pendingVersion }})</ng-container>
         </h3>
-        <pre class="code" dir="ltr" tabindex="0"><code>@for (line of v.diff.after; track $index) {<span
+        <pre
+          class="code"
+          dir="ltr"
+          tabindex="0"
+        ><code>@for (line of v.diff.after; track $index) {<span
               class="line"
               [class.added]="line.mark === 'added'"
               ><span class="sign" aria-hidden="true">{{ line.mark === 'added' ? '+' : ' ' }}</span

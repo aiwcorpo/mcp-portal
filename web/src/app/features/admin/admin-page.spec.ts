@@ -74,11 +74,11 @@ describe('AdminPage', () => {
     expect(text(columns[1])).toContain('Po (1.5.0)');
     const removed = Array.from(columns[0].querySelectorAll('.removed')).map((line) => text(line));
     const added = Array.from(columns[1].querySelectorAll('.added')).map((line) => text(line));
-    expect(removed.join('|')).toContain('opis: Edit the content of a page.');
-    expect(added.join('|')).toContain('opis: Edit the content and the parent of a page.');
-    expect(added.join('|')).toContain('schemat.properties.parentId.type: string');
+    expect(removed.join('|')).toContain('opis: "Edit the content of a page."');
+    expect(added.join('|')).toContain('opis: "Edit the content and the parent of a page."');
+    expect(added.join('|')).toContain('schemat.properties.parentId.type: "string"');
     expect(removed.some((line) => line.includes('Usunięto:'))).toBe(true);
-    expect(text(columns[1])).toContain('ryzyko: Zapis (UPDATE)');
+    expect(text(columns[1])).toContain('ryzyko: Zapis ("UPDATE")');
   });
 
   it('shows a new tool with an empty "before" and approves it', async () => {

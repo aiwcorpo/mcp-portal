@@ -28,8 +28,32 @@ export function riskChange(approved: ToolEntry | null, pending: ToolEntry): Risk
   return RISK_ORDER[pending.risk] > RISK_ORDER[approved.risk] ? 'raised' : 'lowered';
 }
 
+const LINE_BREAKS: Record<string, string> = {
+  '\n': '<U+000A>',
+  '\r': '<U+000D>',
+  '\t': '<U+0009>',
+};
+
+/**
+ * Untrusted text as one quoted token: hidden characters, line breaks, CR and tabs become visible <U+XXXX>
+ * markers (the BFF's notation) and the result is JSON-quoted, so a value can neither start a line of its own
+ * nor imitate `path: value` of the diff.
+ */
+function quoted(value: string): string {
+  const { text } = neutraliseText(value);
+  return JSON.stringify(text.replace(/[\n\r\t]/g, (char) => LINE_BREAKS[char]));
+}
+
+const MARKER = /\[U\+[0-9A-F]{4,6}\]|<U\+[0-9A-F]{4,6}>/;
+
+const PLAIN_KEY = /^[A-Za-z0-9_$-]+$/;
+
+function key(name: string): string {
+  return PLAIN_KEY.test(name) ? name : quoted(name);
+}
+
 function scalar(value: unknown): string {
-  return typeof value === 'string' ? value : JSON.stringify(value);
+  return typeof value === 'string' ? quoted(value) : JSON.stringify(value);
 }
 
 /**
@@ -53,8 +77,8 @@ function flatten(value: unknown, path: string, out: string[]): void {
     if (!entries.length) {
       out.push(`${path}: {}`);
     }
-    for (const [key, child] of entries) {
-      flatten(child, path ? `${path}.${key}` : key, out);
+    for (const [name, child] of entries) {
+      flatten(child, path ? `${path}.${key(name)}` : key(name), out);
     }
     return;
   }
@@ -64,14 +88,14 @@ function flatten(value: unknown, path: string, out: string[]): void {
 /** The reviewable text of a tool entry, one line per fact (description, risk, resources, schema, hints). */
 export function describeEntry(entry: ToolEntry): string[] {
   const lines = [
-    $localize`:@@admin.diff.title:tytuł: ${entry.definition.title}:title:`,
-    $localize`:@@admin.diff.description:opis: ${entry.definition.description}:description:`,
-    $localize`:@@admin.diff.risk:ryzyko: ${riskLabel(entry.risk)}:label: (${entry.risk}:risk:)`,
-    $localize`:@@admin.diff.action:akcja: ${entry.action}:action:`,
+    $localize`:@@admin.diff.title:tytuł: ${quoted(entry.definition.title)}:title:`,
+    $localize`:@@admin.diff.description:opis: ${quoted(entry.definition.description)}:description:`,
+    $localize`:@@admin.diff.risk:ryzyko: ${riskLabel(entry.risk)}:label: (${quoted(entry.risk)}:risk:)`,
+    $localize`:@@admin.diff.action:akcja: ${quoted(entry.action)}:action:`,
   ];
   for (const ref of entry.resourceRefs) {
     lines.push(
-      $localize`:@@admin.diff.resource:zasób: argument ${ref.argument}:argument: (${ref.type}:type:)`,
+      $localize`:@@admin.diff.resource:zasób: argument ${quoted(ref.argument)}:argument: (${quoted(ref.type)}:type:)`,
     );
   }
   const schema: string[] = [];
@@ -126,19 +150,13 @@ function commonLines(before: string[], after: string[]): [number, number][] {
 
 /**
  * Old and new definition side by side (mockup 07): lines present only in the old one are `removed`, lines
- * present only in the new one `added`. A new tool has an empty "before". Text comes from a CI manifest or a
- * running server, so every line is neutralised before it can reach the page.
+ * present only in the new one `added`. A new tool has an empty "before".
  */
 export function diffDefinitions(approved: ToolEntry | null, pending: ToolEntry): DefinitionDiff {
-  let neutralised = false;
-  const clean = (lines: string[]) =>
-    lines.map((line) => {
-      const safe = neutraliseText(line);
-      neutralised ||= safe.neutralised;
-      return safe.text;
-    });
-  const before = clean(approved ? describeEntry(approved) : []);
-  const after = clean(describeEntry(pending));
+  // describeEntry already neutralised every untrusted value; a second pass would rewrite its own markers.
+  const before = approved ? describeEntry(approved) : [];
+  const after = describeEntry(pending);
+  const neutralised = [...before, ...after].some((line) => MARKER.test(line));
   const pairs = commonLines(before, after);
   const keptBefore = new Set(pairs.map(([index]) => index));
   const keptAfter = new Set(pairs.map(([, index]) => index));

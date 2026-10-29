@@ -21,10 +21,10 @@ test('review a changed definition as a diff and approve it', async ({ page }) =>
   await expect(page.getByText('Przed (1.3.0)')).toBeVisible();
   await expect(page.getByText('Po (1.5.0)')).toBeVisible();
   await expect(
-    page.locator('.removed', { hasText: 'opis: Edit the content of a page.' }),
+    page.locator('.removed', { hasText: 'opis: "Edit the content of a page."' }),
   ).toBeVisible();
   await expect(
-    page.locator('.added', { hasText: 'schemat.properties.parentId.type: string' }),
+    page.locator('.added', { hasText: 'schemat.properties.parentId.type: "string"' }),
   ).toBeVisible();
 
   await page.getByRole('button', { name: 'Zatwierdź definicję (confluence__update_page)' }).click();

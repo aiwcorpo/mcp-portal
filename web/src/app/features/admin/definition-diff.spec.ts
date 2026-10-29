@@ -27,12 +27,12 @@ function entry(overrides: Partial<ToolEntry> = {}, description = 'Updates a page
 describe('describeEntry', () => {
   it('lists description, risk, resources, every schema leaf and the hints', () => {
     const lines = describeEntry(entry());
-    expect(lines).toContain('opis: Updates a page.');
-    expect(lines).toContain('ryzyko: Zapis (UPDATE)');
-    expect(lines).toContain('akcja: update');
-    expect(lines).toContain('zasób: argument pageId (Confluence::Page)');
+    expect(lines).toContain('opis: "Updates a page."');
+    expect(lines).toContain('ryzyko: Zapis ("UPDATE")');
+    expect(lines).toContain('akcja: "update"');
+    expect(lines).toContain('zasób: argument "pageId" ("Confluence::Page")');
     expect(lines).toContain('schemat.properties.pageId.maxLength: 12');
-    expect(lines).toContain('schemat.required: pageId, body');
+    expect(lines).toContain('schemat.required: "pageId", "body"');
     expect(lines).toContain('schemat.additionalProperties: false');
     expect(lines).toContain('wskazówki.readOnlyHint: false');
   });
@@ -72,13 +72,13 @@ describe('diffDefinitions', () => {
     const { before, after } = diffDefinitions(entry(), next);
 
     expect(before.filter((line) => line.mark === 'removed').map((line) => line.text)).toEqual([
-      'opis: Updates a page.',
+      'opis: "Updates a page."',
       'schemat.properties.pageId.maxLength: 12',
     ]);
     expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toEqual([
-      'opis: Updates a page and its parent.',
+      'opis: "Updates a page and its parent."',
       'schemat.properties.pageId.maxLength: 64',
-      'schemat.properties.parentId.type: string',
+      'schemat.properties.parentId.type: "string"',
     ]);
   });
 
@@ -92,13 +92,13 @@ describe('diffDefinitions', () => {
     const next = entry({ risk: 'DESTRUCTIVE', action: 'delete', resourceRefs: [] });
     const { before, after } = diffDefinitions(entry(), next);
     expect(before.filter((line) => line.mark === 'removed').map((line) => line.text)).toEqual([
-      'ryzyko: Zapis (UPDATE)',
-      'akcja: update',
-      'zasób: argument pageId (Confluence::Page)',
+      'ryzyko: Zapis ("UPDATE")',
+      'akcja: "update"',
+      'zasób: argument "pageId" ("Confluence::Page")',
     ]);
     expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toEqual([
-      'ryzyko: Usuwanie (DESTRUCTIVE)',
-      'akcja: delete',
+      'ryzyko: Usuwanie ("DESTRUCTIVE")',
+      'akcja: "delete"',
     ]);
   });
 
@@ -109,12 +109,49 @@ describe('diffDefinitions', () => {
     );
     expect(neutralised).toBe(true);
     expect(after.map((line) => line.text)).toContain(
-      'opis: Safe[U+202E] text[U+200B] and <b>markup</b>',
+      'opis: "Safe[U+202E] text[U+200B] and <b>markup</b>"',
     );
   });
 
   it('does not report an ordinary definition', () => {
     expect(diffDefinitions(entry(), entry()).neutralised).toBe(false);
+  });
+});
+
+describe('hostile text', () => {
+  const forged = 'ok\nryzyko: Odczyt ("READ_ONLY")\r\n\tschemat.additionalProperties: false';
+
+  it('keeps line breaks, CR and tabs of a value inside one quoted line', () => {
+    const lines = describeEntry(entry({}, forged));
+    expect(lines.every((line) => !/[\n\r\t]/.test(line))).toBe(true);
+    expect(lines.filter((line) => line.startsWith('ryzyko:'))).toEqual([
+      'ryzyko: Zapis ("UPDATE")',
+    ]);
+    expect(lines[1]).toBe(
+      'opis: "ok<U+000A>ryzyko: Odczyt (\\"READ_ONLY\\")<U+000D><U+000A><U+0009>schemat.additionalProperties: false"',
+    );
+  });
+
+  it('cannot hide a risk change behind a forged line', () => {
+    const { after } = diffDefinitions(entry(), entry({ risk: 'DESTRUCTIVE' }, forged));
+    expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toContain(
+      'ryzyko: Usuwanie ("DESTRUCTIVE")',
+    );
+  });
+
+  it('quotes schema keys and string values that try to forge a path', () => {
+    const hostile = entry();
+    hostile.definition = {
+      ...hostile.definition,
+      inputSchema: {
+        properties: { 'a\nschemat.required: x': { description: 'v\nw', enum: ['1\n2'] } },
+      },
+    };
+    const lines = describeEntry(hostile).filter((line) => line.startsWith('schemat.'));
+    expect(lines).toEqual([
+      'schemat.properties."a<U+000A>schemat.required: x".description: "v<U+000A>w"',
+      'schemat.properties."a<U+000A>schemat.required: x".enum: "1<U+000A>2"',
+    ]);
   });
 });
 
