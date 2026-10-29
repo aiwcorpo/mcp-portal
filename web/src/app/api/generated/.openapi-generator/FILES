@@ -26,6 +26,7 @@ model/accessRequestResultOneOf.ts
 model/accessRequestResultOneOf1.ts
 model/accessRequestStatus.ts
 model/activityCall.ts
+model/approveAdminTool401Response.ts
 model/approveRequest.ts
 model/auditEvent.ts
 model/auditEventErrorCode.ts
@@ -48,7 +49,6 @@ model/connection.ts
 model/connectionStatus.ts
 model/credentialType.ts
 model/errorCode.ts
-model/inlineObject.ts
 model/loginErrorCode.ts
 model/manifestRejected.ts
 model/mcpToolDefinition.ts

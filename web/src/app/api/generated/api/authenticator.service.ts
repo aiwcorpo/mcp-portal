@@ -17,6 +17,8 @@ import { Observable }                                        from 'rxjs';
 import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 
 // @ts-ignore
+import { ApproveAdminTool401Response } from '../model/approveAdminTool401Response';
+// @ts-ignore
 import { AuthenticatorEnrollment } from '../model/authenticatorEnrollment';
 // @ts-ignore
 import { AuthenticatorEnrollmentConfirm } from '../model/authenticatorEnrollmentConfirm';
@@ -24,8 +26,6 @@ import { AuthenticatorEnrollmentConfirm } from '../model/authenticatorEnrollment
 import { AuthenticatorEnrollmentError } from '../model/authenticatorEnrollmentError';
 // @ts-ignore
 import { AuthenticatorStatus } from '../model/authenticatorStatus';
-// @ts-ignore
-import { InlineObject } from '../model/inlineObject';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';

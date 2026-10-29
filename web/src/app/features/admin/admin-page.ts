@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, RegistryServer, RegistryTool } from '../../api/generated';
@@ -52,9 +61,11 @@ function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
   const risk = riskLabel(tool.risk);
   const state = !pending
     ? $localize`:@@admin.toolApproved:Zatwierdzone · ${risk}:risk:`
-    : tool.change === 'new'
-      ? $localize`:@@admin.toolNew:Nowe · ${risk}:risk:`
-      : $localize`:@@admin.toolChanged:Zmienione · ${risk}:risk:`;
+    : tool.riskLowered
+      ? $localize`:@@admin.toolRiskLowered:Obniżenie ryzyka · ${risk}:risk:`
+      : tool.change === 'new'
+        ? $localize`:@@admin.toolNew:Nowe · ${risk}:risk:`
+        : $localize`:@@admin.toolChanged:Zmienione · ${risk}:risk:`;
   return {
     tool,
     key: `${server.serverId}/${tool.name}`,
@@ -62,7 +73,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
     title: neutraliseText(tool.definition.title).text,
     pending,
     state,
-    tone: pending ? 'warn' : 'neutral',
+    tone: tool.riskLowered ? 'error' : pending ? 'warn' : 'neutral',
   };
 }
 
@@ -77,7 +88,12 @@ function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
   styleUrl: './admin-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminPage {
+export class AdminPage implements OnInit {
+  private readonly router = inject(Router);
+  /** `mfa=ok` in the URL after the IdP returned from the fresh MFA that lowering a risk needs. */
+  readonly mfa = input<string | undefined>();
+  protected readonly mfaReturned = signal(false);
+
   private readonly adminApi = inject(AdminService);
 
   protected readonly showLabel = $localize`:@@admin.showTools:Pokaż narzędzia`;
@@ -121,6 +137,13 @@ export class AdminPage {
     void this.load();
   }
 
+  ngOnInit(): void {
+    if (this.mfa() === 'ok') {
+      this.mfaReturned.set(true);
+      void this.router.navigate([], { queryParams: { mfa: null }, replaceUrl: true });
+    }
+  }
+
   protected async load(): Promise<void> {
     this.registry.set(LOADING);
     await this.read();
@@ -161,6 +184,7 @@ export class AdminPage {
 
   protected async onApproved(tool: ToolRow): Promise<void> {
     this.diffOpen.update((set) => removeFrom(set, tool.key));
+    this.mfaReturned.set(false);
     this.done.set($localize`:@@admin.approved:Zatwierdzono definicję ${tool.name}:tool:.`);
     await this.read();
   }

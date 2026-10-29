@@ -17,6 +17,8 @@ import { Observable }                                        from 'rxjs';
 import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 
 // @ts-ignore
+import { ApproveAdminTool401Response } from '../model/approveAdminTool401Response';
+// @ts-ignore
 import { ApproveRequest } from '../model/approveRequest';
 // @ts-ignore
 import { ManifestRejected } from '../model/manifestRejected';
@@ -45,6 +47,7 @@ export class AdminService extends BaseService {
 
     /**
      * Approve a pending tool definition (proxy to C5). The manual way to accept a change made outside a deployment (CC-133).
+     * Plain approve is unchanged. With acceptRiskLowering true (an entry with riskLowered true, CC-167) the BFF requires a fresh MFA of the administrator, the same mechanism and window as the registration of the Authenticator: without it &#x60;401 step_up_required&#x60; with &#x60;stepUpUrl&#x60;. The BFF sends the field only when it is true, so that an older gateway keeps accepting the request. 
      * @endpoint post /api/v1/admin/registry/servers/{serverId}/tools/{tool}/approve
      * @param serverId 
      * @param tool 

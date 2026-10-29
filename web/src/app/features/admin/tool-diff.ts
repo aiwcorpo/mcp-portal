@@ -13,16 +13,20 @@ import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
-import { AdminService, PendingTool, ServerId } from '../../api/generated';
+import { AdminService, PendingTool, Risk, ServerId } from '../../api/generated';
 import { parseKeepingNumbers } from './raw-json';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
+import { stepUpUrlFor } from '../../core/auth-urls';
+import { BrowserNavigation } from '../../core/browser-navigation';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
+import { riskLabel } from '../../shared/labels';
+import { ADMIN_PATH } from './admin-path';
 import { diffDefinitions, riskChange, riskChangeText } from './definition-diff';
 
 /**
@@ -40,6 +44,7 @@ import { diffDefinitions, riskChange, riskChangeText } from './definition-diff';
 export class ToolDiff {
   private readonly adminApi = inject(AdminService);
   private readonly http = inject(HttpClient);
+  private readonly navigation = inject(BrowserNavigation);
   private readonly dialog = inject(MatDialog);
 
   readonly serverId = input.required<ServerId>();
@@ -47,10 +52,13 @@ export class ToolDiff {
   readonly tool = input.required<string>();
   /** Gateway-prefixed name, for texts and labels. */
   readonly toolName = input.required<string>();
+  /** True right after the return from the fresh MFA: a second step_up_required is then an error, not a loop. */
+  readonly mfaReturned = input(false);
   readonly approved = output();
   /** The definition is no longer pending (approved elsewhere, or gone from the registry). */
   readonly gone = output();
 
+  protected readonly riskName = riskLabel;
   protected readonly noVersion = $localize`:@@admin.noVersion:brak wersji`;
   protected readonly pending = signal<LoadState<PendingTool>>(LOADING);
   protected readonly approving = signal(false);
@@ -71,7 +79,10 @@ export class ToolDiff {
       value: state.value,
       diff,
       riskText: riskChangeText(change, approvedEntry, pendingEntry),
-      riskLowered: change === 'lowered',
+      // The gateway's flag (the risk floor, CC-167) is the authority; the local comparison only adds to it.
+      riskLowered: state.value.riskLowered === true || change === 'lowered',
+      riskFrom: approvedEntry?.risk ?? null,
+      riskTo: pendingEntry.risk,
       // The hash covers more than the diff shows (the definition name, the server's credential block), so an
       // approved tool whose hash changed without a visible line is a change the administrator cannot see.
       hiddenChange:
@@ -89,7 +100,7 @@ export class ToolDiff {
     return (
       state.status === 'ready' &&
       view !== null &&
-      (state.value.pendingHash === this.refusedHash() || view.riskLowered || !view.hashConsistent)
+      (state.value.pendingHash === this.refusedHash() || !view.hashConsistent)
     );
   });
 
@@ -134,6 +145,9 @@ export class ToolDiff {
     if (view.hiddenChange && !(await this.confirmHiddenChange())) {
       return;
     }
+    if (view.riskLowered && !(await this.confirmRiskLowering(view.riskFrom, view.riskTo))) {
+      return;
+    }
     this.approving.set(true);
     this.failure.set(null);
     this.changedMeanwhile.set(false);
@@ -142,6 +156,8 @@ export class ToolDiff {
       await firstValueFrom(
         this.adminApi.approveAdminTool(this.serverId(), this.tool(), {
           definitionHash: approvedHash,
+          // Sent only when true: an older gateway rejects the field.
+          ...(view.riskLowered ? { acceptRiskLowering: true } : {}),
         }),
       );
       this.approved.emit();
@@ -150,6 +166,10 @@ export class ToolDiff {
       if (failure.code === 'hash_mismatch') {
         await this.load();
         this.changedMeanwhile.set(true);
+      } else if (failure.code === 'step_up_required' && !this.mfaReturned()) {
+        this.navigation.assign(
+          stepUpUrlFor(failure.stepUpUrl, `${ADMIN_PATH}?mfa=ok`, this.navigation.origin),
+        );
       } else if (failure.code === 'manifest_rejected') {
         this.refusedHash.set(approvedHash);
         this.failure.set(failure);
@@ -161,6 +181,26 @@ export class ToolDiff {
     } finally {
       this.approving.set(false);
     }
+  }
+
+  private async confirmRiskLowering(from: Risk | null, to: Risk): Promise<boolean> {
+    const name = this.toolName();
+    const change = from
+      ? $localize`:@@admin.riskLoweringConfirm.change:z ${riskLabel(from)}:from: na ${riskLabel(to)}:to:`
+      : $localize`:@@admin.riskLoweringConfirm.floor:poniżej najwyższego dotąd zgłoszonego poziomu (teraz ${riskLabel(to)}:to:)`;
+    const confirmed = await firstValueFrom(
+      this.dialog
+        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+          data: {
+            title: $localize`:@@admin.riskLoweringConfirm.title:Zatwierdzić obniżenie ryzyka?`,
+            message: $localize`:@@admin.riskLoweringConfirm.message:Narzędzie ${name}:tool: obniża ryzyko ${change}:change:. Po zatwierdzeniu nowy poziom staje się obowiązujący, a dla narzędzi, które były nieodwracalne, przestaje być wymagany kod z Authenticatora. Zatwierdź tylko, jeśli zmiana jest zamierzona.`,
+            confirmLabel: $localize`:@@admin.riskLoweringConfirm.confirm:Zatwierdź obniżenie ryzyka`,
+            destructive: true,
+          },
+        })
+        .afterClosed(),
+    );
+    return confirmed === true;
   }
 
   private async confirmHiddenChange(): Promise<boolean> {

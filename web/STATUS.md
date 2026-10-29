@@ -20,6 +20,10 @@ Mock MSW 4.0.0: wnioski ze stanem (`mockIga`), rejestr z oczekującymi definicja
 
 Różnice względem makiet: "Zatwierdź" jest per narzędzie (endpoint jest per narzędzie), nie "Zatwierdź zmiany" per serwer; dialog wniosku zaczyna od wyboru systemu.
 
+## Kontrakty 4.1.0
+
+Klient zregenerowany. Obniżenie ryzyka (CC-167): `riskLowered` z `PendingTool` i `RegistryTool` pokazane jako "Obniżenie ryzyka" (stare i nowe ryzyko, ostrzeżenie o znikającym kodzie z Authenticatora, ukryte przed agentami), przycisk "Zatwierdź obniżenie ryzyka" wysyła `acceptRiskLowering: true` tylko po potwierdzeniu w dialogu (zwykłe zatwierdzenie nie wysyła pola); `401 step_up_required` przekierowuje na MFA z powrotem na `/admin?mfa=ok` (drugi raz z rzędu to błąd, nie pętla), po powrocie zatwierdzenie trzeba powtórzyć. Aktywność wg CC-165: brak nowych etykiet, wyniki i grupy jak dotąd (`tool_disabled`, `rate_limited` w "Odmowy"); `request_access` nie jest proponowane na podstawie samego wyniku. Mock 4.1.0: `riskLowered`, 422 bez `acceptRiskLowering`, 401 bez świeżego MFA.
+
 ## Poprawki po przeglądzie M4 (kontrakty 4.0.1)
 
 Kontrakty 4.0.1, klient po regeneracji bez zmian. M1: diff pokazuje też nazwę wpisu i nazwę z definicji; odpowiedź "pending" czytana jako tekst, a liczby porównywane tak, jak zapisano (`JSON.parse` z `context.source`, bez zaokrągleń powyżej 2^53); gdy skrót zatwierdzonego wpisu jest inny, a żadna linia się nie zmieniła, ekran ostrzega i wymaga jawnego potwierdzenia; niezgodność `pendingHash` z wpisem blokuje przycisk. LOW: linie diffu bez zawijania (przewijanie poziome, brak podrobionych linii), znaczniki łamań linii `[U+000A]` (nie do podrobienia, w przeciwieństwie do `<U+XXXX>` z BFF), serie znaków łączących ograniczone do dwóch, komunikat o ukrytych znakach tylko gdy były, `isAllowedRedirect` odrzuca dane logowania i fragment, blokada podwójnego kliknięcia w kreatorze, `safeText` dla identyfikatorów i wersji, przycisk wyłączony od razu przy obniżeniu ryzyka, h2 zamiast h3, martwy kod usunięty.

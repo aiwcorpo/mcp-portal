@@ -40,6 +40,10 @@ export interface RegistryTool {
      */
     source?: RegistryTool.SourceEnum;
     /**
+     * True when the pending entry has a risk below the risk floor (CC-167). The tool is hidden and refused as tool_disabled, and only an administrator can approve it, with acceptRiskLowering true. Absent means false.
+     */
+    riskLowered?: boolean;
+    /**
      * Version of the manifest at which the approved entry was approved; null for a new tool that has no approved entry. Absent only for an approved tool whose version was not recorded before this field existed (CC-097).
      */
     approvedInVersion?: string | null;

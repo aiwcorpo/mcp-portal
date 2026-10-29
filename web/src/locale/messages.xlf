@@ -506,9 +506,17 @@
         <source>Administracja</source>
       </segment>
     </unit>
+    <unit id="admin.mfaDone">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:10,13</note>
+      </notes>
+      <segment>
+        <source>Tożsamość potwierdzona. Otwórz różnice i zatwierdź obniżenie ryzyka jeszcze raz.</source>
+      </segment>
+    </unit>
     <unit id="admin.lead">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:14,17</note>
+        <note category="location">src/app/features/admin/admin-page.html:23,26</note>
       </notes>
       <segment>
         <source> Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI zatwierdza sam tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj. </source>
@@ -516,7 +524,7 @@
     </unit>
     <unit id="admin.pendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:19,22</note>
+        <note category="location">src/app/features/admin/admin-page.html:28,31</note>
       </notes>
       <segment>
         <source> Do zatwierdzenia: <ph id="0" equiv="INTERPOLATION" disp="{{ totalPending() }}"/> </source>
@@ -524,7 +532,7 @@
     </unit>
     <unit id="admin.caption">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:25,27</note>
+        <note category="location">src/app/features/admin/admin-page.html:34,36</note>
       </notes>
       <segment>
         <source> Rejestr serwerów MCP </source>
@@ -532,7 +540,7 @@
     </unit>
     <unit id="admin.colToggle">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:30,32</note>
+        <note category="location">src/app/features/admin/admin-page.html:39,41</note>
       </notes>
       <segment>
         <source>Narzędzia</source>
@@ -540,7 +548,7 @@
     </unit>
     <unit id="admin.colServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:32,33</note>
+        <note category="location">src/app/features/admin/admin-page.html:41,42</note>
       </notes>
       <segment>
         <source>Serwer</source>
@@ -548,8 +556,8 @@
     </unit>
     <unit id="admin.colVersion">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:33,34</note>
-        <note category="location">src/app/features/admin/admin-page.html:71</note>
+        <note category="location">src/app/features/admin/admin-page.html:42,43</note>
+        <note category="location">src/app/features/admin/admin-page.html:80</note>
       </notes>
       <segment>
         <source>Wersja</source>
@@ -557,8 +565,8 @@
     </unit>
     <unit id="admin.colChanges">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:34,35</note>
-        <note category="location">src/app/features/admin/admin-page.html:75</note>
+        <note category="location">src/app/features/admin/admin-page.html:43,44</note>
+        <note category="location">src/app/features/admin/admin-page.html:84</note>
       </notes>
       <segment>
         <source>Zmiany</source>
@@ -566,8 +574,8 @@
     </unit>
     <unit id="admin.colState">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:35,37</note>
-        <note category="location">src/app/features/admin/admin-page.html:86</note>
+        <note category="location">src/app/features/admin/admin-page.html:44,46</note>
+        <note category="location">src/app/features/admin/admin-page.html:95</note>
       </notes>
       <segment>
         <source>Stan</source>
@@ -575,7 +583,7 @@
     </unit>
     <unit id="admin.sourceServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:103,105</note>
+        <note category="location">src/app/features/admin/admin-page.html:112,114</note>
       </notes>
       <segment>
         <source>Źródło: serwer</source>
@@ -583,7 +591,7 @@
     </unit>
     <unit id="admin.sourceCi">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:106,107</note>
+        <note category="location">src/app/features/admin/admin-page.html:115,116</note>
       </notes>
       <segment>
         <source>Źródło: CI</source>
@@ -591,7 +599,7 @@
     </unit>
     <unit id="admin.hideDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:124,125</note>
+        <note category="location">src/app/features/admin/admin-page.html:133,134</note>
       </notes>
       <segment>
         <source>Ukryj różnice</source>
@@ -599,7 +607,7 @@
     </unit>
     <unit id="admin.showDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:126,127</note>
+        <note category="location">src/app/features/admin/admin-page.html:135,136</note>
       </notes>
       <segment>
         <source>Pokaż różnice</source>
@@ -607,7 +615,7 @@
     </unit>
     <unit id="admin.noTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:151,152</note>
+        <note category="location">src/app/features/admin/admin-page.html:161,162</note>
       </notes>
       <segment>
         <source> Serwer nie ma zarejestrowanych narzędzi. </source>
@@ -615,7 +623,7 @@
     </unit>
     <unit id="admin.empty">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:160,163</note>
+        <note category="location">src/app/features/admin/admin-page.html:170,173</note>
       </notes>
       <segment>
         <source>Rejestr nie zawiera żadnego serwera.</source>
@@ -623,7 +631,7 @@
     </unit>
     <unit id="admin.newCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:42</note>
+        <note category="location">src/app/features/admin/admin-page.ts:51</note>
       </notes>
       <segment>
         <source>nowe: <ph id="0" equiv="count" disp="created"/></source>
@@ -631,7 +639,7 @@
     </unit>
     <unit id="admin.changedCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:45</note>
+        <note category="location">src/app/features/admin/admin-page.ts:54</note>
       </notes>
       <segment>
         <source>zmienione: <ph id="0" equiv="count" disp="changed"/></source>
@@ -639,15 +647,23 @@
     </unit>
     <unit id="admin.toolApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:54</note>
+        <note category="location">src/app/features/admin/admin-page.ts:63</note>
       </notes>
       <segment>
         <source>Zatwierdzone · <ph id="0" equiv="risk" disp="risk"/></source>
       </segment>
     </unit>
+    <unit id="admin.toolRiskLowered">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:65</note>
+      </notes>
+      <segment>
+        <source>Obniżenie ryzyka · <ph id="0" equiv="risk" disp="risk"/></source>
+      </segment>
+    </unit>
     <unit id="admin.toolNew">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:56</note>
+        <note category="location">src/app/features/admin/admin-page.ts:67</note>
       </notes>
       <segment>
         <source>Nowe · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -655,7 +671,7 @@
     </unit>
     <unit id="admin.toolChanged">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:57</note>
+        <note category="location">src/app/features/admin/admin-page.ts:68</note>
       </notes>
       <segment>
         <source>Zmienione · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -663,7 +679,7 @@
     </unit>
     <unit id="admin.showTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:83</note>
+        <note category="location">src/app/features/admin/admin-page.ts:99</note>
       </notes>
       <segment>
         <source>Pokaż narzędzia</source>
@@ -671,7 +687,7 @@
     </unit>
     <unit id="admin.hideTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:84</note>
+        <note category="location">src/app/features/admin/admin-page.ts:100</note>
       </notes>
       <segment>
         <source>Ukryj narzędzia</source>
@@ -679,7 +695,7 @@
     </unit>
     <unit id="admin.serverDisabled">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:107</note>
+        <note category="location">src/app/features/admin/admin-page.ts:123</note>
       </notes>
       <segment>
         <source>Wyłączony</source>
@@ -687,7 +703,7 @@
     </unit>
     <unit id="admin.serverPending">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:109</note>
+        <note category="location">src/app/features/admin/admin-page.ts:125</note>
       </notes>
       <segment>
         <source>Do zatwierdzenia</source>
@@ -695,7 +711,7 @@
     </unit>
     <unit id="admin.serverActive">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:110</note>
+        <note category="location">src/app/features/admin/admin-page.ts:126</note>
       </notes>
       <segment>
         <source>Aktywny</source>
@@ -703,7 +719,7 @@
     </unit>
     <unit id="admin.approved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:164</note>
+        <note category="location">src/app/features/admin/admin-page.ts:188</note>
       </notes>
       <segment>
         <source>Zatwierdzono definicję <ph id="0" equiv="tool" disp="tool.name"/>.</source>
@@ -869,9 +885,43 @@
         <source> Skrót podany przez serwer nie zgadza się ze skrótem pokazanej definicji. Nie zatwierdzaj; zgłoś to administratorom platformy. </source>
       </segment>
     </unit>
-    <unit id="admin.neutralised">
+    <unit id="admin.riskLoweredTitle">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:52,53</note>
+      </notes>
+      <segment>
+        <source>Obniżenie ryzyka.</source>
+      </segment>
+    </unit>
+    <unit id="admin.riskLoweredFromTo">
       <notes>
         <note category="location">src/app/features/admin/tool-diff.html:55,57</note>
+      </notes>
+      <segment>
+        <source>Ryzyko narzędzia spada z <ph id="0" equiv="INTERPOLATION" disp="{{ riskName(v.riskFrom) }}"/> na <ph id="1" equiv="INTERPOLATION_1" disp="{{ riskName(v.riskTo) }}"/>.</source>
+      </segment>
+    </unit>
+    <unit id="admin.riskLoweredFloor">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:60,63</note>
+      </notes>
+      <segment>
+        <source>Ryzyko jest niższe niż najwyższe dotąd zgłoszone (<ph id="0" equiv="INTERPOLATION" disp="{{
+              riskName(v.riskTo)
+            }}"/>).</source>
+      </segment>
+    </unit>
+    <unit id="admin.riskLoweredWarning">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:66,69</note>
+      </notes>
+      <segment>
+        <source>Narzędzie jest ukryte przed agentami do Twojej decyzji. Zatwierdzenie obniża obowiązujący poziom, a dla narzędzia, które było nieodwracalne, znika wymóg kodu z Authenticatora. Wymaga świeżego potwierdzenia tożsamości (MFA).</source>
+      </segment>
+    </unit>
+    <unit id="admin.neutralised">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:76,78</note>
       </notes>
       <segment>
         <source> W definicji były ukryte znaki. Zastąpiono je znacznikami w postaci [U+XXXX]. </source>
@@ -879,7 +929,7 @@
     </unit>
     <unit id="admin.beforeNew">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:63,64</note>
+        <note category="location">src/app/features/admin/tool-diff.html:84,85</note>
       </notes>
       <segment>
         <source>Przed (brak, nowe narzędzie)</source>
@@ -887,7 +937,7 @@
     </unit>
     <unit id="admin.before">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:66,67</note>
+        <note category="location">src/app/features/admin/tool-diff.html:87,88</note>
       </notes>
       <segment>
         <source>Przed (<ph id="0" equiv="INTERPOLATION" disp="{{ (v.value.approvedInVersion | safeText) || noVersion }}"/>)</source>
@@ -895,7 +945,7 @@
     </unit>
     <unit id="admin.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:79,80</note>
+        <note category="location">src/app/features/admin/tool-diff.html:100,101</note>
       </notes>
       <segment>
         <source>Usunięto: </source>
@@ -903,7 +953,7 @@
     </unit>
     <unit id="admin.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:82,83</note>
+        <note category="location">src/app/features/admin/tool-diff.html:103,104</note>
       </notes>
       <segment>
         <source>Brak wcześniejszej definicji.</source>
@@ -911,7 +961,7 @@
     </unit>
     <unit id="admin.after">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:88,89</note>
+        <note category="location">src/app/features/admin/tool-diff.html:109,110</note>
       </notes>
       <segment>
         <source>Po (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -919,15 +969,23 @@
     </unit>
     <unit id="admin.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:100,101</note>
+        <note category="location">src/app/features/admin/tool-diff.html:121,122</note>
       </notes>
       <segment>
         <source>Dodano: </source>
       </segment>
     </unit>
+    <unit id="admin.approveLowering">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:139,141</note>
+      </notes>
+      <segment>
+        <source>Zatwierdź obniżenie ryzyka</source>
+      </segment>
+    </unit>
     <unit id="admin.approve">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:117,118</note>
+        <note category="location">src/app/features/admin/tool-diff.html:141,143</note>
       </notes>
       <segment>
         <source>Zatwierdź definicję</source>
@@ -935,7 +993,7 @@
     </unit>
     <unit id="admin.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:121,124</note>
+        <note category="location">src/app/features/admin/tool-diff.html:146,149</note>
       </notes>
       <segment>
         <source> Brak zatwierdzenia nie niszczy niczego: narzędzie zostaje ukryte przed agentami. </source>
@@ -943,15 +1001,55 @@
     </unit>
     <unit id="admin.noVersion">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:54</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:62</note>
       </notes>
       <segment>
         <source>brak wersji</source>
       </segment>
     </unit>
+    <unit id="admin.riskLoweringConfirm.change">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:189</note>
+      </notes>
+      <segment>
+        <source>z <ph id="0" equiv="from" disp="riskLabel(from)"/> na <ph id="1" equiv="to" disp="riskLabel(to)"/></source>
+      </segment>
+    </unit>
+    <unit id="admin.riskLoweringConfirm.floor">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:190</note>
+      </notes>
+      <segment>
+        <source>poniżej najwyższego dotąd zgłoszonego poziomu (teraz <ph id="0" equiv="to" disp="riskLabel(to)"/>)</source>
+      </segment>
+    </unit>
+    <unit id="admin.riskLoweringConfirm.title">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:195</note>
+      </notes>
+      <segment>
+        <source>Zatwierdzić obniżenie ryzyka?</source>
+      </segment>
+    </unit>
+    <unit id="admin.riskLoweringConfirm.message">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:196</note>
+      </notes>
+      <segment>
+        <source>Narzędzie <ph id="0" equiv="tool" disp="name"/> obniża ryzyko <ph id="1" equiv="change" disp="change"/>. Po zatwierdzeniu nowy poziom staje się obowiązujący, a dla narzędzi, które były nieodwracalne, przestaje być wymagany kod z Authenticatora. Zatwierdź tylko, jeśli zmiana jest zamierzona.</source>
+      </segment>
+    </unit>
+    <unit id="admin.riskLoweringConfirm.confirm">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.ts:197</note>
+      </notes>
+      <segment>
+        <source>Zatwierdź obniżenie ryzyka</source>
+      </segment>
+    </unit>
     <unit id="admin.hiddenConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:171</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:211</note>
       </notes>
       <segment>
         <source>Zatwierdzić zmianę, której nie widać?</source>
@@ -959,7 +1057,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:172</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:212</note>
       </notes>
       <segment>
         <source>Skrót definicji jest inny, a żadna pokazana linia się nie zmieniła. Zmiana dotyczy elementu spoza widoku, na przykład poświadczenia serwera. Zatwierdź tylko, jeśli znasz jej przyczynę.</source>
@@ -967,7 +1065,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:173</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:213</note>
       </notes>
       <segment>
         <source>Zatwierdź mimo to</source>
@@ -975,7 +1073,7 @@
     </unit>
     <unit id="admin.serverConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:188</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:228</note>
       </notes>
       <segment>
         <source>Zatwierdzić definicję zgłoszoną przez serwer?</source>
@@ -983,7 +1081,7 @@
     </unit>
     <unit id="admin.serverConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:189</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:229</note>
       </notes>
       <segment>
         <source>Definicję <ph id="0" equiv="tool" disp="name"/> przedstawił działający serwer, nie potok CI. Nikt nie przeglądał jej w kodzie. Zatwierdź ją tylko, jeśli opis i schemat są zgodne z oczekiwanym.</source>
@@ -991,7 +1089,7 @@
     </unit>
     <unit id="admin.serverConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:190</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:230</note>
       </notes>
       <segment>
         <source>Zatwierdź</source>

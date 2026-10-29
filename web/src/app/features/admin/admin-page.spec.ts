@@ -34,10 +34,10 @@ async function openAdmin(): Promise<void> {
   await openRoute('/admin');
 }
 
-async function openDiff(tool: string): Promise<void> {
+async function openDiff(tool: string, approve = 'Zatwierdź definicję'): Promise<void> {
   await until(() => expect(button(`Pokaż różnice (${tool})`)).toBeTruthy());
   button(`Pokaż różnice (${tool})`).click();
-  await until(() => expect(button(`Zatwierdź definicję (${tool})`)).toBeTruthy());
+  await until(() => expect(button(`${approve} (${tool})`)).toBeTruthy());
 }
 
 describe('AdminPage', () => {
@@ -113,13 +113,86 @@ describe('AdminPage', () => {
     expect(store.state.registryApproved).toEqual(['mcp-confluence/update_page']);
   });
 
-  it('switches the button off at once for a lowered risk', async () => {
-    await openAdmin();
-    await openDiff('gitlab__delete_branch');
-    expect(text()).toContain('Ryzyko maleje: Usuwanie na Zapis.');
-    expect(
-      button('Zatwierdź definicję (gitlab__delete_branch)').getAttribute('aria-disabled'),
-    ).toBe('true');
+  describe('a risk lowering (CC-167)', () => {
+    const bodies: Record<string, unknown>[] = [];
+
+    beforeAll(() => {
+      server.events.on('request:start', async ({ request }) => {
+        if (request.method === 'POST' && request.url.includes('/approve')) {
+          bodies.push((await request.clone().json()) as Record<string, unknown>);
+        }
+      });
+    });
+    beforeEach(() => {
+      bodies.length = 0;
+    });
+
+    async function confirmDialog(label: string): Promise<void> {
+      await until(() =>
+        expect(button(label, document.querySelector('mat-dialog-container')!)).toBeTruthy(),
+      );
+      button(label, document.querySelector('mat-dialog-container')!).click();
+    }
+
+    it('names the old and the new risk, warns about the lost code and labels the button', async () => {
+      await openAdmin();
+      await until(() =>
+        expect(text(toolRow('gitlab__delete_branch'))).toContain('Obniżenie ryzyka · Zapis'),
+      );
+      await openDiff('gitlab__delete_branch', 'Zatwierdź obniżenie ryzyka');
+
+      expect(text()).toContain('Obniżenie ryzyka. Ryzyko narzędzia spada z Usuwanie na Zapis.');
+      expect(text()).toContain('znika wymóg kodu z Authenticatora');
+    });
+
+    it('sends nothing when the dialog is cancelled and no acceptRiskLowering without it', async () => {
+      await openAdmin();
+      await openDiff('gitlab__delete_branch', 'Zatwierdź obniżenie ryzyka');
+      button('Zatwierdź obniżenie ryzyka (gitlab__delete_branch)').click();
+      await until(() => expect(document.querySelector('mat-dialog-container')).toBeTruthy());
+      await confirmDialog('Anuluj');
+      await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
+      expect(bodies).toEqual([]);
+    });
+
+    it('goes through the fresh MFA, then approves with acceptRiskLowering true', async () => {
+      const navigation = configureTestApp();
+      await TestBed.inject(SessionService).load();
+      await openRoute('/admin');
+      await openDiff('gitlab__delete_branch', 'Zatwierdź obniżenie ryzyka');
+
+      button('Zatwierdź obniżenie ryzyka (gitlab__delete_branch)').click();
+      await confirmDialog('Zatwierdź obniżenie ryzyka');
+      await until(() =>
+        expect(navigation.assign).toHaveBeenCalledWith(
+          '/api/v1/auth/login?stepUp=true&returnPath=%2Fadmin%3Fmfa%3Dok',
+        ),
+      );
+      await until(() =>
+        expect(bodies).toEqual([
+          { definitionHash: expect.stringMatching(/^sha256:/), acceptRiskLowering: true },
+        ]),
+      );
+      expect(store.state.registryApproved).toEqual([]);
+
+      store.update({ mfaFresh: true });
+      button('Zatwierdź obniżenie ryzyka (gitlab__delete_branch)').click();
+      await confirmDialog('Zatwierdź obniżenie ryzyka');
+      await until(() => expect(text()).toContain('Zatwierdzono definicję gitlab__delete_branch.'));
+      expect(store.state.registryApproved).toEqual(['mcp-gitlab/delete_branch']);
+    });
+
+    it('does not send the field for an ordinary approval', async () => {
+      await openAdmin();
+      await openDiff('confluence__archive_page');
+      button('Zatwierdź definicję (confluence__archive_page)').click();
+      await until(() =>
+        expect(text()).toContain('Zatwierdzono definicję confluence__archive_page.'),
+      );
+      await until(() =>
+        expect(bodies).toEqual([{ definitionHash: expect.stringMatching(/^sha256:/) }]),
+      );
+    });
   });
 
   it('shows the 422 risk_lowered text and keeps that definition from being sent again', async () => {

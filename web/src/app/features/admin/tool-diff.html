@@ -47,8 +47,29 @@
         zgłoś to administratorom platformy.
       </app-notice>
     }
-    @if (v.riskText) {
-      <app-notice [kind]="v.riskLowered ? 'error' : 'warning'">{{ v.riskText }}</app-notice>
+    @if (v.riskLowered) {
+      <app-notice kind="error">
+        <strong i18n="@@admin.riskLoweredTitle">Obniżenie ryzyka.</strong>&ngsp;
+        @if (v.riskFrom) {
+          <ng-container i18n="@@admin.riskLoweredFromTo"
+            >Ryzyko narzędzia spada z {{ riskName(v.riskFrom) }} na
+            {{ riskName(v.riskTo) }}.</ng-container
+          >
+        } @else {
+          <ng-container i18n="@@admin.riskLoweredFloor"
+            >Ryzyko jest niższe niż najwyższe dotąd zgłoszone ({{
+              riskName(v.riskTo)
+            }}).</ng-container
+          >
+        }
+        <ng-container i18n="@@admin.riskLoweredWarning"
+          >Narzędzie jest ukryte przed agentami do Twojej decyzji. Zatwierdzenie obniża obowiązujący
+          poziom, a dla narzędzia, które było nieodwracalne, znika wymóg kodu z Authenticatora.
+          Wymaga świeżego potwierdzenia tożsamości (MFA).</ng-container
+        >
+      </app-notice>
+    } @else if (v.riskText) {
+      <app-notice kind="warning">{{ v.riskText }}</app-notice>
     }
     @if (v.diff.neutralised) {
       <app-notice kind="info" i18n="@@admin.neutralised">
@@ -114,8 +135,12 @@
         [disabled]="approving() || blocked()"
         (click)="approve()"
       >
-        <ng-container i18n="@@admin.approve">Zatwierdź definicję</ng-container
-        ><span class="visually-hidden"> ({{ toolName() }})</span>
+        @if (v.riskLowered) {
+          <ng-container i18n="@@admin.approveLowering">Zatwierdź obniżenie ryzyka</ng-container>
+        } @else {
+          <ng-container i18n="@@admin.approve">Zatwierdź definicję</ng-container>
+        }
+        <span class="visually-hidden"> ({{ toolName() }})</span>
       </button>
       <p class="muted hint" i18n="@@admin.approveHint">
         Brak zatwierdzenia nie niszczy niczego: narzędzie zostaje ukryte przed agentami.

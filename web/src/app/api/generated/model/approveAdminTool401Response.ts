@@ -12,8 +12,8 @@ import { StepUpRequired } from './stepUpRequired';
 
 
 /**
- * @type InlineObject
+ * @type ApproveAdminTool401Response
  * @export
  */
-export type InlineObject = ModelError | StepUpRequired;
+export type ApproveAdminTool401Response = ModelError | StepUpRequired;
 

@@ -14,5 +14,9 @@ export interface ApproveRequest {
      * sha256:<hex> over the RFC 8785 canonical JSON described in C6 (see test-vectors/definition-hash).
      */
     definitionHash: string;
+    /**
+     * Only an administrator (mcp-platform-admin) can set it, and only through this operation; the pipeline (PUT) never lowers a risk, and the portal asks for a fresh MFA first. Sent only when true. On an entry that lowers nothing it is ignored (definition_approved). Without it an entry that lowers the risk floor is 422 risk_lowered; with it the lower risk is approved, the floor becomes that risk and the audit event is admin_change with reason risk_lowered_by_admin (CC-167).
+     */
+    acceptRiskLowering?: boolean;
 }
 

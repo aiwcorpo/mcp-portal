@@ -296,6 +296,13 @@ const SEED: SeedServer[] = [
   },
 ];
 
+const RISK_ORDER: Record<Risk, number> = { READ_ONLY: 0, UPDATE: 1, DESTRUCTIVE: 2 };
+
+/** The risk floor of CC-167, here the risk of the approved entry. */
+function lowersRisk(approved: ToolEntry | null, pending: ToolEntry): boolean {
+  return approved !== null && RISK_ORDER[pending.risk] < RISK_ORDER[approved.risk];
+}
+
 const keyOf = (serverId: string, tool: string) => `${serverId}/${tool}`;
 
 /** The pending entry of a tool after `revision` changes made behind the administrator's back. */
@@ -352,6 +359,7 @@ export function mockRegistry(state: Readonly<AdminState>): RegistryServer[] {
           change: resolved.approved ? 'changed' : 'new',
           source: resolved.pending.source,
           approvedInVersion: resolved.approved ? '1.3.0' : null,
+          ...(lowersRisk(resolved.approved, resolved.pending.entry) ? { riskLowered: true } : {}),
         };
       }
       return { ...resolved.approved!, status: 'approved', approvedInVersion: seed.version };
@@ -387,10 +395,9 @@ export function mockPendingTool(
     approvedInVersion: resolved.approved ? '1.3.0' : null,
     pendingVersion: resolved.pending.version,
     source: resolved.pending.source,
+    ...(lowersRisk(resolved.approved, resolved.pending.entry) ? { riskLowered: true } : {}),
   };
 }
-
-const RISK_ORDER: Record<Risk, number> = { READ_ONLY: 0, UPDATE: 1, DESTRUCTIVE: 2 };
 
 export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHandler[] {
   const { at } = ctx;
@@ -440,23 +447,38 @@ export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHan
         if (!pending) {
           return ctx.failure('not_found_or_denied', 404);
         }
-        const { definitionHash } = (await request.json()) as { definitionHash: string };
+        const { definitionHash, acceptRiskLowering } = (await request.json()) as {
+          definitionHash: string;
+          acceptRiskLowering?: boolean;
+        };
         if (definitionHash !== pending.pendingHash) {
           return ctx.failure('hash_mismatch', 409);
         }
-        if (
-          pending.approvedEntry &&
-          RISK_ORDER[pending.pendingEntry.risk] < RISK_ORDER[pending.approvedEntry.risk]
-        ) {
+        const lowers = lowersRisk(pending.approvedEntry, pending.pendingEntry);
+        if (lowers && acceptRiskLowering !== true) {
           return HttpResponse.json(
             {
               error: 'manifest_rejected',
               reason: 'risk_lowered',
-              message: `${toolName} lowers risk from ${pending.approvedEntry.risk} to ${pending.pendingEntry.risk}`,
+              message: `${toolName} lowers risk`,
               requestId: ctx.requestId,
             },
             { status: 422, headers },
           );
+        }
+        if (lowers && !store.state.mfaFresh) {
+          // The BFF asks for a fresh MFA before it passes acceptRiskLowering on (CC-167).
+          return HttpResponse.json(
+            {
+              error: 'step_up_required',
+              stepUpUrl: '/api/v1/auth/login?stepUp=true&returnPath=/admin',
+              requestId: ctx.requestId,
+            },
+            { status: 401, headers },
+          );
+        }
+        if (lowers) {
+          store.update({ mfaFresh: false });
         }
         store.update({
           registryApproved: [...admin().registryApproved, keyOf(serverId, toolName)],

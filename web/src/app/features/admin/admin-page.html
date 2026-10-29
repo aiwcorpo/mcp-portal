@@ -4,6 +4,15 @@
   <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
 }
 
+@if (mfaReturned()) {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaReturned.set(false)">
+    <ng-container i18n="@@admin.mfaDone"
+      >Tożsamość potwierdzona. Otwórz różnice i zatwierdź obniżenie ryzyka jeszcze
+      raz.</ng-container
+    >
+  </app-notice>
+}
+
 @let state = registry();
 @if (state.status === 'loading') {
   <app-loading />
@@ -137,6 +146,7 @@
                       [serverId]="row.server.serverId"
                       [tool]="item.tool.name"
                       [toolName]="item.name"
+                      [mfaReturned]="mfaReturned()"
                       (approved)="onApproved(item)"
                       (gone)="onGone(item)"
                     />

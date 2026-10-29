@@ -160,6 +160,7 @@ describe('LogsPage', () => {
       expect(text()).toContain('Zbyt wiele wywołań');
     });
     expect(text()).toContain('Odmowa (brak uprawnienia)');
+    expect(text()).toContain('Narzędzie wyłączone');
     expect(text()).not.toContain('Brak połączenia z systemem');
 
     select('logs-group', 'error');

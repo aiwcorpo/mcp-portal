@@ -60,7 +60,7 @@ test('a definition that changes while it is open is refused (409) and shown agai
   await expect(page.getByText('Zatwierdzono definicję confluence__archive_page.')).toBeVisible();
 });
 
-test('a definition from the running server carries a clear warning and a second confirmation; a lowered risk cannot be approved', async ({
+test('a definition from the running server carries a clear warning and a second confirmation; a risk lowering needs a dialog and a fresh MFA', async ({
   page,
 }) => {
   await page.goto('/admin?mockAdmin=in');
@@ -78,10 +78,25 @@ test('a definition from the running server carries a clear warning and a second 
   await expect(page.getByText('Zatwierdzono definicję jira__update_issue.')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Pokaż różnice (gitlab__delete_branch)' }).click();
-  await expect(page.getByText('Ryzyko maleje: Usuwanie na Zapis.')).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Zatwierdź definicję (gitlab__delete_branch)' }),
-  ).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.getByText(/Ryzyko narzędzia spada z Usuwanie na Zapis/)).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka (gitlab__delete_branch)' })
+    .click();
+  const lowering = page.getByRole('dialog', { name: 'Zatwierdzić obniżenie ryzyka?' });
+  await lowering.getByRole('button', { name: 'Zatwierdź obniżenie ryzyka' }).click();
+
+  // The mock IdP gives a fresh MFA and returns to the admin page, where the approval is repeated.
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page.getByText('Tożsamość potwierdzona.')).toBeVisible();
+  await page.getByRole('button', { name: 'Pokaż różnice (gitlab__delete_branch)' }).click();
+  await page
+    .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka (gitlab__delete_branch)' })
+    .click();
+  await page
+    .getByRole('dialog', { name: 'Zatwierdzić obniżenie ryzyka?' })
+    .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka' })
+    .click();
+  await expect(page.getByText('Zatwierdzono definicję gitlab__delete_branch.')).toBeVisible();
 });
 
 test('the log says "Zbyt wiele wywołań" for a call refused by a limit', async ({ page }) => {

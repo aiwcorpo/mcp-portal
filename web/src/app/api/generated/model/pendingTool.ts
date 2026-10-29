@@ -20,6 +20,10 @@ export interface PendingTool {
      */
     pendingVersion: string;
     /**
+     * True when the pending entry has a risk below the risk floor, the highest risk ever reported for the tool (CC-167); approve needs acceptRiskLowering true then. Absent means false.
+     */
+    riskLowered?: boolean;
+    /**
      * Where the pending entry comes from (CC-162). ci is an entry left by a PUT of the pipeline (the reviewed commit); server is a definition that the running server presented. A server entry never replaces a ci entry, see the README, \"Rejestr i przypinanie definicji\".
      */
     source: PendingTool.SourceEnum;
