@@ -83,6 +83,33 @@ public class AuditLog {
     }
 
     /**
+     * {@code admin_change} with reason {@code definition_approved} for an administrator's approval of a pending tool
+     * definition (CC-133). {@code outcome} carries how the attempt ended; the sub is the administrator.
+     */
+    public void definitionApproval(String requestId, PortalUser user, String serverId, String tool, String definitionHash,
+                                   Outcome outcome, long latencyMs) {
+        write(new AuditEvent(
+                clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
+                requestId,
+                "portal",
+                componentId,
+                "admin_change",
+                user.sub(),
+                user.username(),
+                serverId,
+                tool == null || tool.isEmpty() ? null : tool,
+                null,
+                outcome.decision(),
+                "definition_approved",
+                null,
+                null,
+                outcome.outcome(),
+                outcome.errorCode(),
+                latencyMs,
+                definitionHash));
+    }
+
+    /**
      * A write on a confirmation that the portal itself refused (the gateway audits the ones it accepts): a sign of a
      * request that did not come from the preview page of the user.
      */

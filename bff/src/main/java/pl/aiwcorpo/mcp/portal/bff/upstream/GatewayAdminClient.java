@@ -43,6 +43,25 @@ public class GatewayAdminClient {
                 response -> null);
     }
 
+    public List<JsonNode> registry(BearerToken token, String requestId) {
+        return calls.call(calls.authorize(calls.http().get().uri("/admin/v1/registry/servers"), token, requestId),
+                response -> calls.read(response, new TypeReference<List<JsonNode>>() { }));
+    }
+
+    public JsonNode pendingTool(BearerToken token, String requestId, String serverId, String tool) {
+        return calls.call(calls.authorize(calls.http().get()
+                        .uri("/admin/v1/registry/servers/{serverId}/tools/{tool}/pending", serverId, tool), token, requestId),
+                response -> calls.read(response, JsonNode.class));
+    }
+
+    public void approveTool(BearerToken token, String requestId, String serverId, String tool, String definitionHash) {
+        calls.call(calls.authorize(calls.http().post()
+                        .uri("/admin/v1/registry/servers/{serverId}/tools/{tool}/approve", serverId, tool)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(new GatewayModel.ApproveRequest(definitionHash)), token, requestId),
+                response -> null);
+    }
+
     public JsonNode confirmation(BearerToken token, String requestId, String confirmationId) {
         return calls.call(calls.authorize(calls.http().get().uri("/admin/v1/confirmations/{id}", confirmationId),
                         token, requestId),

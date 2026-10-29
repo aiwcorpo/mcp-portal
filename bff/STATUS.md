@@ -16,7 +16,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M3.3 | brak koercji typów w ciałach żądań (`StrictJson`), test na żywo ze stosem po zmianie compose przez ws-01 | zrobione; test na żywo przy integracji |
 | M3.4 | kontrakty 3.0.2 (czysty jar), poprawki przeglądu Opus M3 (L-1..L-8) | zrobione |
 | M4.1 | kontrakty 4.0.0; port C13 i adaptery `mock` oraz `keycloak-groups`; `GET/POST /access-requests`, `GET /access-requests/entitlements`, `decidedAt`; tabela akcji katalogu wg CC-113 | zrobione |
-| M4.2 | administracja rejestru: `GET /admin/registry`, `.../pending`, `POST .../approve` (source, `pendingVersion`, `409 hash_mismatch`, `422 ManifestRejected`), audyt `definition_approved` | w toku |
+| M4.2 | administracja rejestru: `GET /admin/registry`, `.../pending`, `POST .../approve` (source, `pendingVersion`, `409 hash_mismatch`, `422 ManifestRejected`), audyt `definition_approved` | zrobione |
 | M4.3 | limity `429` z `Retry-After`: zapis tokenu i operacje Authenticatora na sesję, przekazanie `429` z brokera i gateway'a | do zrobienia |
 | M4.4 | aktywność wg CC-142 i CC-150, zgodność z resztą 4.0.0 (przykłady C12, `system_not_configured`), README, obraz `m4-<sha>` | do zrobienia |
 
@@ -339,7 +339,33 @@ Zachowanie:
 Testy: `./mvnw test`: 379 testów, 0 błędów (nowe: `AccessRequestsTest`, `AccessRequestsAdapterTest` z adapterem skryptowanym,
 `IgaDataTest`, `KeycloakGroupsAccessGovernanceTest`, rozszerzone `CatalogAssemblerTest`, `IgaConfigTest`).
 
+## M4.2: administracja rejestru (2026-10-29)
+
+Do M3 BFF nie miał tras `/api/v1/admin/registry*` (brief ws-07 punkt 8), więc M4.2 dodaje je w całości.
+
+- `GET /api/v1/admin/registry`, `GET .../servers/{serverId}/tools/{tool}/pending`, `POST .../approve`: proxy do C5 z tokenem
+  `aud=mcp-gateway-admin`. BFF sprawdza grupę `mcp-platform-admin` z logowania przed wywołaniem gateway'a (nie-admin: `403
+  access_denied`, bez żadnego żądania do C5); gateway sprawdza ją jeszcze raz na wymienionym tokenie (jego `403` też daje `403`).
+- Odpowiedzi C5 są sprawdzane względem zamkniętych schematów `RegistryServer` i `PendingTool` (`RegistryData`): pola spoza schematu,
+  `change`/`source` poza `pending_approval`, `pendingHash` różny od `pendingEntry.definitionHash`, zły `serverId` dla `system` itp.
+  to naruszenie kontraktu i cały widok jest odrzucony (`503`), bez widoków częściowych.
+- Definicje narzędzi pochodzą z potoku repozytorium albo (`source: server`) z działającego serwera, więc każdy tekst w odpowiedzi (opisy,
+  `inputSchema`, nazwy pól) przechodzi przez `TextHygiene`: znaki ukryte zapisane jako `<U+XXXX>`; hashe przekazywane bez zmian
+  (należą do oryginalnego tekstu). To jest "diff definicji dla web": `approvedEntry`, `pendingEntry`, `approvedInVersion`,
+  `pendingVersion`, `source`.
+- `approve`: ciało czytane ściśle (`definitionHash` wg wzorca); `409 hash_mismatch` z C5 -> `409`; `422 manifest_rejected` z C5 ->
+  `422` z `ManifestRejected` (`reason` tylko gdy pasuje do wzorca `^[a-z][a-z0-9_]{0,63}$`, `message` max 500 znaków po neutralizacji; to
+  jedyne pola ciała C5 przekazywane dalej); inne statusy C5 -> `503`.
+- Ścieżka z `serverId` spoza pięciu serwerów albo `tool` spoza `ToolName`: `404 not_found_or_denied` (kontrakt nie ma `400` dla tych tras).
+- Audyt: `admin_change` (`component: portal`) z `reason: definition_approved`, `server`, `tool`, `definitionHash` (pola dodane do
+  `AuditEvent`), `sub` administratora; wynik `ok` albo odmowa/błąd z kodem. Gateway zapisuje swoje zdarzenie niezależnie.
+- `UpstreamException` niesie teraz także `reason`, `message` (422) i `Retry-After` (liczba sekund, min. 1), pod M4.3.
+
+Testy: `./mvnw test`: 390 testów, 0 błędów (nowy `RegistryAdminTest`, 11 testów, z przykładem `changed_on_server` z kontraktu).
+
 ## Propozycje CC (M4)
+
+2. C12 `approveAdminTool`: dopisać `400 invalid_request` dla ciała spoza schematu (dziś BFF zwraca `400`, którego operacja nie wymienia).
 
 1. C8: osobne zdarzenie (np. `access_request_change`) albo znana wartość `reason` dla `admin_change` przy złożeniu wniosku o dostęp z
    portalu; dziś portal nie ma jak zapisać tej akcji w audycie.

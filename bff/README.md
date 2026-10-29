@@ -227,6 +227,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   confirmation/ podgląd, viewed, cancel
   authenticator/ rejestracja Authenticatora (TOTP)
   activity/    GET /api/v1/activity/calls
+  admin/       rejestr: widok, diff definicji, zatwierdzanie (grupa mcp-platform-admin)
   iga/         port C13, adaptery mock (dane: dev/iga-mock.yaml, tylko profil dev) i keycloak-groups, wnioski o dostęp
   audit/       zdarzenia C8
   spa/         serwowanie frontendu, fallback tras, CSP

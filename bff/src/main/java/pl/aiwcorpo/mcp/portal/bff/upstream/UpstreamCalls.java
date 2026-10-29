@@ -25,6 +25,7 @@ final class UpstreamCalls {
             .build();
     private static final Pattern ERROR_CODE = Pattern.compile("^[a-z][a-z0-9_]{0,63}$");
     private static final int MAX_ERROR_BODY = 4096;
+    private static final int MAX_MESSAGE = 500;
 
     private final String name;
     private final RestClient http;
@@ -51,7 +52,9 @@ final class UpstreamCalls {
                 if (status >= 200 && status < 300) {
                     return onSuccess.apply(response);
                 }
-                throw new UpstreamException(name, status, errorCode(response));
+                ErrorBody body = errorBody(response);
+                throw new UpstreamException(name, status, body.error(), body.reason(), body.message(),
+                        retryAfter(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)));
             });
         } catch (UpstreamException e) {
             throw e;
@@ -79,17 +82,36 @@ final class UpstreamCalls {
         }
     }
 
-    private static String errorCode(ClientHttpResponse response) {
+    private record ErrorBody(String error, String reason, String message) {
+    }
+
+    private static ErrorBody errorBody(ClientHttpResponse response) {
         try (InputStream body = response.getBody()) {
             byte[] bytes = body.readNBytes(MAX_ERROR_BODY);
             JsonNode node = MAPPER.readTree(bytes);
-            JsonNode error = node == null ? null : node.get("error");
-            if (error != null && error.isString() && ERROR_CODE.matcher(error.asString()).matches()) {
-                return error.asString();
-            }
+            return new ErrorBody(text(node, "error", ERROR_CODE), text(node, "reason", ERROR_CODE), message(node));
         } catch (IOException | RuntimeException ignored) {
             // Body is not the C4/C5 Error JSON; the status alone decides.
+            return new ErrorBody(null, null, null);
         }
-        return null;
+    }
+
+    private static String text(JsonNode node, String field, Pattern pattern) {
+        JsonNode value = node == null ? null : node.get(field);
+        return value != null && value.isString() && pattern.matcher(value.asString()).matches() ? value.asString() : null;
+    }
+
+    private static String message(JsonNode node) {
+        JsonNode value = node == null ? null : node.get("message");
+        return value != null && value.isString() && !value.asString().isEmpty()
+                && value.asString().length() <= MAX_MESSAGE ? value.asString() : null;
+    }
+
+    /** Delta-seconds only (RFC 9110); an HTTP date or anything else is treated as absent. */
+    static Integer retryAfter(String header) {
+        if (header == null || !header.matches("[0-9]{1,9}")) {
+            return null;
+        }
+        return Math.max(1, Integer.parseInt(header));
     }
 }
