@@ -13,6 +13,8 @@ import org.springframework.core.io.ByteArrayResource;
 class MockAccessGovernanceTest {
 
     private static final ByteArrayResource FILE = new ByteArrayResource("""
+            entitlements:
+              jira: [mcp-jira-read, mcp-jira-destructive]
             requests:
               - user: alice
                 requestId: REQ-1
@@ -41,6 +43,12 @@ class MockAccessGovernanceTest {
     void missingClaimIsAnAdapterError() {
         MockAccessGovernance iga = new MockAccessGovernance(FILE, "employee_id", Clock.systemUTC());
         assertThatThrownBy(() -> iga.requestsOf(ALICE)).isInstanceOf(IgaUnavailableException.class);
+    }
+
+    @Test
+    void onlyAnEntitlementOfTheCatalogCanBeRequested() {
+        MockAccessGovernance iga = new MockAccessGovernance(FILE, "preferred_username", Clock.systemUTC());
+        assertThatThrownBy(() -> iga.request(ALICE, "mcp-platform-admin")).isInstanceOf(NotRequestableException.class);
     }
 
     @Test

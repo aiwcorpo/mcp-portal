@@ -88,7 +88,8 @@ Wszystko przez zmienne środowiska (`application.yml`):
 | `PORTAL_WEB_DIST` | katalog z `index.html` zbudowanego frontendu | `../web/dist/portal` |
 | `PORTAL_WEB_LOGIN_RETURN_ORIGIN` | tylko dev: origin frontendu z `ng serve`, na który BFF wraca po logowaniu (`scheme://host:port`, z konfiguracji, nigdy z żądania) | puste; z `npm start` w `web/`: `http://localhost:4200` |
 | `SPRING_PROFILES_ACTIVE` | `dev` tylko dla mcp-platform-dev; bez niego BFF nie wstanie z adapterem IGA `mock`, step-up bez `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` ani `portal.tls.insecure-plain-http-for-tests` | `dev` (ustawia `run-dev.sh`) |
-| `PORTAL_IGA_ADAPTER` | adapter C13; brak = błąd startu | `mock` (profil `dev`) |
+| `PORTAL_IGA_ADAPTER` | adapter C13: `keycloak-groups` albo `mock` (tylko `dev`); brak = błąd startu | `mock` (profil `dev`) |
+| `PORTAL_IGA_CATALOG_FILE` | katalog uprawnień adaptera `keycloak-groups` (ten sam format YAML co mock: `entitlements`, opcjonalnie `descriptions`); adapter nie ma obiegu wniosków | brak |
 | `PORTAL_IGA_MOCK_FILE` | dane adaptera `mock` (poza jarem): zwykła ścieżka w systemie plików, bez `file:` | `dev/iga-mock.yaml` |
 | `PORTAL_IGA_REQUESTER_ID_CLAIM` | claim logowania identyfikujący wnioskodawcę w IGA; brak claimu u użytkownika = błąd adaptera (503) | `preferred_username` |
 | `PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CLIENT_ID` | `--client-id` w komendzie `clientConfigs.claudeCode`; puste = bez flagi (litery, cyfry, `.`, `_`, `-`; inna wartość to błąd startu) | `claude-code` w profilu `dev`, poza nim puste |
@@ -226,7 +227,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   confirmation/ podgląd, viewed, cancel
   authenticator/ rejestracja Authenticatora (TOTP)
   activity/    GET /api/v1/activity/calls
-  iga/         port C13 i adapter mock (dane: dev/iga-mock.yaml, tylko profil dev)
+  iga/         port C13, adaptery mock (dane: dev/iga-mock.yaml, tylko profil dev) i keycloak-groups, wnioski o dostęp
   audit/       zdarzenia C8
   spa/         serwowanie frontendu, fallback tras, CSP
   web/         błędy JSON, returnPath, requestId

@@ -20,19 +20,27 @@ class IgaConfig {
         PortalProperties.Iga iga = properties.iga();
         String adapter = iga.adapter();
         if (adapter == null || adapter.isBlank()) {
-            throw new IllegalStateException("No IGA adapter configured (portal.iga.adapter); available: mock (dev only)");
+            throw new IllegalStateException("No IGA adapter configured (portal.iga.adapter); available: keycloak-groups, mock (dev only)");
+        }
+        if ("keycloak-groups".equals(adapter)) {
+            return new KeycloakGroupsAccessGovernance(new FileSystemResource(existing(iga.catalogFile(), "portal.iga.catalog-file", "IGA catalog file")));
         }
         if ("mock".equals(adapter)) {
             devMode.require(true, "portal.iga.adapter=mock");
-            if (iga.mockFile() == null || iga.mockFile().isBlank()) {
-                throw new IllegalStateException("portal.iga.mock-file is required for the mock adapter");
-            }
-            Path file = Path.of(iga.mockFile()).toAbsolutePath().normalize();
-            if (!Files.isRegularFile(file)) {
-                throw new IllegalStateException("IGA mock file " + file + " does not exist");
-            }
-            return new MockAccessGovernance(new FileSystemResource(file), iga.requesterIdClaim(), clock);
+            return new MockAccessGovernance(new FileSystemResource(existing(iga.mockFile(), "portal.iga.mock-file",
+                    "IGA mock file")), iga.requesterIdClaim(), clock);
         }
-        throw new IllegalStateException("Unknown IGA adapter '" + adapter + "'; available: mock (dev only)");
+        throw new IllegalStateException("Unknown IGA adapter '" + adapter + "'; available: keycloak-groups, mock (dev only)");
+    }
+
+    private static Path existing(String configured, String setting, String what) {
+        if (configured == null || configured.isBlank()) {
+            throw new IllegalStateException(setting + " is required for this adapter");
+        }
+        Path file = Path.of(configured).toAbsolutePath().normalize();
+        if (!Files.isRegularFile(file)) {
+            throw new IllegalStateException(what + " " + file + " does not exist");
+        }
+        return file;
     }
 }

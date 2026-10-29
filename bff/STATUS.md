@@ -15,6 +15,10 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M3.2 | osobne adresy token/JWKS przy `issuer-uri` (bez `idp-relay`), higiena znaków ukrytych (CC-121) w podglądzie | zrobione |
 | M3.3 | brak koercji typów w ciałach żądań (`StrictJson`), test na żywo ze stosem po zmianie compose przez ws-01 | zrobione; test na żywo przy integracji |
 | M3.4 | kontrakty 3.0.2 (czysty jar), poprawki przeglądu Opus M3 (L-1..L-8) | zrobione |
+| M4.1 | kontrakty 4.0.0; port C13 i adaptery `mock` oraz `keycloak-groups`; `GET/POST /access-requests`, `GET /access-requests/entitlements`, `decidedAt`; tabela akcji katalogu wg CC-113 | zrobione |
+| M4.2 | administracja rejestru: `GET /admin/registry`, `.../pending`, `POST .../approve` (source, `pendingVersion`, `409 hash_mismatch`, `422 ManifestRejected`), audyt `definition_approved` | w toku |
+| M4.3 | limity `429` z `Retry-After`: zapis tokenu i operacje Authenticatora na sesję, przekazanie `429` z brokera i gateway'a | do zrobienia |
+| M4.4 | aktywność wg CC-142 i CC-150, zgodność z resztą 4.0.0 (przykłady C12, `system_not_configured`), README, obraz `m4-<sha>` | do zrobienia |
 
 ## M2: wynik (2026-10-28)
 
@@ -302,3 +306,40 @@ obejście stałych plików `valid-identity-mismatch*` w `ConnectRedirectVectorsT
 | L-6 MFA tylko z `acr` | `portal.step-up.amr-values` (`PORTAL_STEP_UP_AMR_VALUES`): `amr` z ID tokenu zawierający wartość liczy się jak poziom `acr`; wystarczy jedno ze źródeł; poza `dev` któraś lista jest obowiązkowa. Nie sprawdzone z żywym Entra |
 | L-7 brak śladu odrzuceń | cudzy `enrollmentId` to zdarzenie `authenticator` (`authenticator_enrollment_failed`, `not_found_or_denied`); `viewed` odrzucone przez `Sec-Fetch-Site` to zdarzenie `confirmation` portalu (`fetch_site_not_same_origin`, deny) |
 | L-8 STATUS | jedna sekcja M3.2, zaktualizowana tabela |
+
+
+## M4.1: kontrakty 4.0.0, IGA, tabela akcji CC-113 (2026-10-29)
+
+Zależność `mcp-contracts` 4.0.0 (testowe wektory i mocki WireMock z jara). Przed zmianami `./mvnw test` na 4.0.0 padał tylko na trzech
+wektorach `catalog-actions/` (CC-113), reszta bez zmian.
+
+Zachowanie:
+- Port C13 zgodny z README kontraktów: `catalog(system)` zwraca `Entitlement(name, description)`, `AccessRequest` ma `decidedAt`.
+  `request` rzuca `NotRequestableException` (adapter bez obiegu wniosków albo nieznane uprawnienie) -> `422 not_requestable`.
+- Adaptery: `mock` (tylko `dev`; dane i opisy w `dev/iga-mock.yaml`; wniosek tylko na uprawnienie z katalogu) i `keycloak-groups`
+  (katalog z pliku `portal.iga.catalog-file` / `PORTAL_IGA_CATALOG_FILE`, brak wniosków, `request` zawsze odmawia). Portal nie ma
+  poświadczenia do listowania grup przez Admin API Keycloaka, więc katalog jest plikiem wdrożenia; lista grup z API to następny
+  krok (potrzebne konto serwisowe od ws-01).
+- `POST /access-requests`: ciało czytane ściśle; wniosek już oczekujący na to uprawnienie = `200` z jego `requestId` (bez drugiego
+  wniosku); uprawnienie spoza katalogu IGA albo już posiadane przez użytkownika (grupy z logowania) = `422 not_requestable`, więc
+  portal nie służy do proszenia o `mcp-platform-admin`. Wynik adaptera musi mieć dokładnie jedno pole (`requestUrl` albo `requestId`).
+- `requestUrl` z IGA to adres spoza platformy, do którego przeglądarka przechodzi albo który pokazuje: tylko `https` (w profilu `dev`
+  także `http`), host, bez danych logowania i fragmentu, drukowalny ASCII, do 2048 znaków. Inaczej wynik jest błędem adaptera (503),
+  a wiersz listy jest pomijany.
+- `GET /access-requests/entitlements?system=`: dokładnie jeden znany system (inaczej 400); wynik bez uprawnień, które użytkownik już
+  ma; `description` z IGA jako tekst nieufny: znaki ukryte zapisane jako `<U+XXXX>` (`TextHygiene`), ucięte do 500 znaków bez
+  rozcinania zapisu; pozycje z nazwą spoza `GroupName` pomijane z ostrzeżeniem bez wartości.
+- Lista wniosków: pozycje spoza kontraktu (status, znaczniki czasu, `requestId` ze znakami ukrytymi) są pomijane; `decidedAt` przy
+  `pending` jest pomijane (kontrakt: nieobecne do rozstrzygnięcia). Katalog używa tej samej walidowanej listy.
+- Katalog (CC-113): `request_access` tylko gdy odmówione narzędzie ma niepuste `requiredEntitlements`; `view_request` także przy
+  `connected`, gdy oczekujący wniosek dotyczy uprawnienia wymaganego przez odmówione narzędzie (zamiast `request_access`); wniosek na
+  uprawnienie narzędzia już dozwolonego się nie liczy. Wszystkie 19 wektorów `catalog-actions/` przechodzi.
+- Audyt wniosków: C8 nie ma `event` dla wniosków o dostęp (zamknięte enum), więc BFF niczego nie zapisuje. Propozycja CC niżej.
+
+Testy: `./mvnw test`: 379 testów, 0 błędów (nowe: `AccessRequestsTest`, `AccessRequestsAdapterTest` z adapterem skryptowanym,
+`IgaDataTest`, `KeycloakGroupsAccessGovernanceTest`, rozszerzone `CatalogAssemblerTest`, `IgaConfigTest`).
+
+## Propozycje CC (M4)
+
+1. C8: osobne zdarzenie (np. `access_request_change`) albo znana wartość `reason` dla `admin_change` przy złożeniu wniosku o dostęp z
+   portalu; dziś portal nie ma jak zapisać tej akcji w audycie.

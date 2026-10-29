@@ -55,7 +55,7 @@ class CatalogAssemblerTest {
     }
 
     private static AccessRequest pending(String entitlement) {
-        return new AccessRequest("REQ-1", entitlement, "pending", "2026-10-25T09:00:00Z", null);
+        return new AccessRequest("REQ-1", entitlement, "pending", "2026-10-25T09:00:00Z", null, null);
     }
 
     private static PortalCatalog.Server only(PortalCatalog catalog) {
@@ -123,7 +123,7 @@ class CatalogAssemblerTest {
     static Stream<Arguments> actionVectors() throws IOException {
         Resource[] files = new PathMatchingResourcePatternResolver()
                 .getResources("classpath*:mcp-contracts/test-vectors/catalog-actions/*.json");
-        assertThat(files).hasSizeGreaterThanOrEqualTo(12);
+        assertThat(files).hasSizeGreaterThanOrEqualTo(19);
         List<Arguments> result = new ArrayList<>();
         for (Resource file : files) {
             try (InputStream in = file.getInputStream()) {
@@ -145,12 +145,20 @@ class CatalogAssemblerTest {
 
         // Tools and requests that lead to the status of the vector.
         boolean noneGranted = status.equals("request_pending") || status.equals("no_access");
+        boolean entitlementsKnown = !in.has("entitlementsKnown") || in.get("entitlementsKnown").asBoolean();
         List<CatalogTool> tools = new ArrayList<>();
-        tools.add(tool("jira__get_issue", noneGranted ? "denied" : "granted", "mcp-jira-read"));
+        tools.add(tool("jira__get_issue", noneGranted ? "denied" : "granted",
+                noneGranted && !entitlementsKnown ? new String[0] : new String[] {"mcp-jira-read"}));
         if (in.get("someToolDenied").asBoolean()) {
-            tools.add(tool("jira__update_issue", "denied", "mcp-jira-write"));
+            tools.add(tool("jira__update_issue", "denied",
+                    entitlementsKnown ? new String[] {"mcp-jira-write"} : new String[0]));
         }
-        List<AccessRequest> requests = status.equals("request_pending") ? List.of(pending("mcp-jira-read")) : List.of();
+        List<AccessRequest> requests = List.of();
+        if (status.equals("request_pending")) {
+            requests = List.of(pending("mcp-jira-read"));
+        } else if (in.has("pendingRequestForDeniedTool") && in.get("pendingRequestForDeniedTool").asBoolean()) {
+            requests = List.of(pending("mcp-jira-write"));
+        }
 
         List<Connection> connections = List.of();
         if (in.get("hasConnection").asBoolean()) {
@@ -228,17 +236,44 @@ class CatalogAssemblerTest {
         assertThat(only(pendingBoth).connection()).isNull();
 
         PortalCatalog rejected = ASSEMBLER.assemble(c5, List.of(), SYSTEMS,
-                List.of(new AccessRequest("REQ-2", "mcp-jira-read", "rejected", "2026-10-25T09:00:00Z", null)));
+                List.of(new AccessRequest("REQ-2", "mcp-jira-read", "rejected", "2026-10-25T09:00:00Z", "2026-10-26T09:00:00Z", null)));
         assertThat(only(rejected).status()).isEqualTo("no_access");
     }
 
     @Test
-    void noAccessOffersTheRequestEvenWithoutNamedEntitlements() {
-        // The table of CC-083 has no condition on requiredEntitlements; the IGA adapter decides what a request means.
+    void noAccessWithoutNamedEntitlementsHasNothingToRequest() {
+        // CC-113: without requiredEntitlements there is nothing to ask for.
         Catalog c5 = new Catalog(List.of(server("jira", tool("jira__get_issue", "denied"))));
         PortalCatalog result = ASSEMBLER.assemble(c5, List.of(), SYSTEMS, List.of());
         assertThat(only(result).status()).isEqualTo("no_access");
-        assertThat(only(result).actions()).containsExactly("request_access");
+        assertThat(only(result).actions()).isEmpty();
+    }
+
+    @Test
+    void oneNamedEntitlementAmongDeniedToolsIsEnoughToOfferTheRequest() {
+        Catalog c5 = new Catalog(List.of(server("jira", tool("jira__get_issue", "denied"),
+                tool("jira__update_issue", "denied", "mcp-jira-write"))));
+        assertThat(only(ASSEMBLER.assemble(c5, List.of(), SYSTEMS, List.of())).actions()).containsExactly("request_access");
+    }
+
+    @Test
+    void aPendingRequestForAGrantedToolOnlyDoesNotReplaceTheRequest() {
+        // The request covers what a denied tool needs; one for an entitlement the user already has does not count.
+        Catalog c5 = new Catalog(List.of(server("jira", tool("jira__get_issue", "granted", "mcp-jira-read"),
+                tool("jira__update_issue", "denied", "mcp-jira-write"))));
+        PortalCatalog result = ASSEMBLER.assemble(c5, List.of(connection("jira", "connected")), SYSTEMS,
+                List.of(pending("mcp-jira-read")));
+        assertThat(only(result).actions()).containsExactly("copy_link", "request_access", "disconnect");
+    }
+
+    @Test
+    void aPendingRequestShowsTheRequestAlsoForAConnectedServer() {
+        Catalog c5 = new Catalog(List.of(server("jira", tool("jira__get_issue", "granted", "mcp-jira-read"),
+                tool("jira__update_issue", "denied", "mcp-jira-write"))));
+        PortalCatalog result = ASSEMBLER.assemble(c5, List.of(connection("jira", "connected")), SYSTEMS,
+                List.of(pending("mcp-jira-write")));
+        assertThat(only(result).status()).isEqualTo("connected");
+        assertThat(only(result).actions()).containsExactly("copy_link", "view_request", "disconnect");
     }
 
     @Test

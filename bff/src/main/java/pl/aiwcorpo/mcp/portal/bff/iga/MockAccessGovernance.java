@@ -1,7 +1,5 @@
 package pl.aiwcorpo.mcp.portal.bff.iga;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.Clock;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -12,40 +10,31 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.core.io.Resource;
 
-import tools.jackson.dataformat.yaml.YAMLMapper;
-
 /**
  * Adapter {@code mock} of C13 for mcp-platform-dev only: entitlements and requests from a YAML file outside the jar,
  * new requests kept in memory until restart. A request belongs to the user whose identity claim
- * {@code requesterIdClaim} equals the entry's {@code user}; a login without that claim is an adapter error.
+ * {@code requesterIdClaim} equals the entry's {@code user}; a login without that claim is an adapter error. Only an
+ * entitlement of the catalog can be requested.
  */
 public class MockAccessGovernance implements AccessGovernance {
 
-    private final Map<String, List<String>> entitlements;
+    private final Map<String, List<Entitlement>> catalog;
     private final List<MockRequest> requests;
     private final String requesterIdClaim;
     private final Clock clock;
     private final AtomicInteger sequence = new AtomicInteger(9000);
 
     public MockAccessGovernance(Resource file, String requesterIdClaim, Clock clock) {
-        MockFile content = load(file);
-        this.entitlements = content.entitlements() == null ? Map.of() : Map.copyOf(content.entitlements());
+        MockFile content = CatalogFile.read(file, MockFile.class);
+        this.catalog = new CatalogFile(content.entitlements(), content.descriptions()).catalog();
         this.requests = new CopyOnWriteArrayList<>(content.requests() == null ? List.of() : content.requests());
         this.requesterIdClaim = requesterIdClaim;
         this.clock = clock;
     }
 
-    private static MockFile load(Resource file) {
-        try (InputStream in = file.getInputStream()) {
-            return new YAMLMapper().readValue(in, MockFile.class);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read IGA mock file " + file.getDescription(), e);
-        }
-    }
-
     @Override
-    public List<String> catalog(String system) {
-        return entitlements.getOrDefault(system, List.of());
+    public List<Entitlement> catalog(String system) {
+        return catalog.getOrDefault(system, List.of());
     }
 
     @Override
@@ -55,7 +44,7 @@ public class MockAccessGovernance implements AccessGovernance {
         for (MockRequest request : requests) {
             if (id.equals(request.user())) {
                 result.add(new AccessRequest(request.requestId(), request.entitlement(), request.status(),
-                        request.createdAt(), request.requestUrl()));
+                        request.createdAt(), request.decidedAt(), request.requestUrl()));
             }
         }
         return result;
@@ -63,10 +52,16 @@ public class MockAccessGovernance implements AccessGovernance {
 
     @Override
     public RequestResult request(Requester requester, String entitlement) {
-        String id = "REQ-MOCK-" + sequence.incrementAndGet();
-        requests.add(new MockRequest(requesterId(requester), id, entitlement, "pending",
-                clock.instant().truncatedTo(ChronoUnit.SECONDS).toString(), null));
-        return new RequestResult(null, id);
+        String id = requesterId(requester);
+        boolean known = catalog.values().stream()
+                .anyMatch(entitlements -> entitlements.stream().anyMatch(e -> e.name().equals(entitlement)));
+        if (!known) {
+            throw new NotRequestableException();
+        }
+        String requestId = "REQ-MOCK-" + sequence.incrementAndGet();
+        requests.add(new MockRequest(id, requestId, entitlement, "pending",
+                clock.instant().truncatedTo(ChronoUnit.SECONDS).toString(), null, null));
+        return new RequestResult(null, requestId);
     }
 
     private String requesterId(Requester requester) {
@@ -77,11 +72,12 @@ public class MockAccessGovernance implements AccessGovernance {
         return id;
     }
 
-    record MockFile(Map<String, List<String>> entitlements, List<MockRequest> requests) {
+    record MockFile(Map<String, List<String>> entitlements, Map<String, String> descriptions,
+                    List<MockRequest> requests) {
     }
 
     /** @param user value of the configured requester claim (preferred_username by default) */
     record MockRequest(String user, String requestId, String entitlement, String status, String createdAt,
-                       String requestUrl) {
+                       String decidedAt, String requestUrl) {
     }
 }

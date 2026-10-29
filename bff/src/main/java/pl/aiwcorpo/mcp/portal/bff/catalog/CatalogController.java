@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.config.PublicUrls;
+import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.iga.AccessGovernance;
+import pl.aiwcorpo.mcp.portal.bff.iga.IgaData;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
@@ -30,9 +32,11 @@ class CatalogController {
     private final BrokerClient broker;
     private final AccessGovernance iga;
     private final CatalogAssembler assembler;
+    private final boolean allowPlainHttp;
 
     CatalogController(UserTokens tokens, GatewayAdminClient gateway, BrokerClient broker, AccessGovernance iga,
-                      PublicUrls publicUrls) {
+                      PublicUrls publicUrls, DevMode devMode) {
+        this.allowPlainHttp = devMode.enabled();
         this.tokens = tokens;
         this.gateway = gateway;
         this.broker = broker;
@@ -51,7 +55,8 @@ class CatalogController {
                 BrokerData.validConnections(broker.listConnections(brokerToken, requestId));
         List<BrokerModel.SystemInfo> systems = BrokerData.validSystems(broker.listSystems(brokerToken, requestId));
         List<AccessGovernance.AccessRequest> requests =
-                iga.requestsOf(new AccessGovernance.Requester(user.sub(), user.username(), user.email(), user.claims()));
+                IgaData.validRequests(iga.requestsOf(
+                        new AccessGovernance.Requester(user.sub(), user.username(), user.email(), user.claims())), allowPlainHttp);
         return assembler.assemble(catalog, connections, systems, requests);
     }
 }

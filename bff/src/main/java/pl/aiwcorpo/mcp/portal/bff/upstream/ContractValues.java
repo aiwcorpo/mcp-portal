@@ -13,6 +13,9 @@ public final class ContractValues {
     public static final Pattern REQUEST_ID = Pattern
             .compile("^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$");
     public static final Pattern VIRTUAL_SERVER_SLUG = Pattern.compile("^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$");
+    /** {@code GroupName} of common.schema.json (C9). */
+    public static final Pattern GROUP_NAME = Pattern.compile("^mcp-[A-Za-z0-9][A-Za-z0-9._-]*$");
+    public static final int GROUP_NAME_MAX = 255;
     public static final Pattern QUALIFIED_TOOL = Pattern
             .compile("^(jira|confluence|gitlab|servicedesk|opensearch)__[a-z][a-z0-9]*(_[a-z0-9]+)*$");
 

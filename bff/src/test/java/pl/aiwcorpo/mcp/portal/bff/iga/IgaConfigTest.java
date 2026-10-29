@@ -15,7 +15,7 @@ class IgaConfigTest {
 
     private static PortalProperties properties(String adapter) {
         return new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null, null, null, null,
-                new PortalProperties.Iga(adapter, "dev/iga-mock.yaml", "preferred_username"), null, null);
+                new PortalProperties.Iga(adapter, "dev/iga-mock.yaml", null, "preferred_username"), null, null);
     }
 
     @Test
@@ -28,10 +28,10 @@ class IgaConfigTest {
     void mockFileIsAPlainPathAndMustExist() {
         PortalProperties absolute = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null, null,
                 null, null, new PortalProperties.Iga("mock", Path.of("dev/iga-mock.yaml").toAbsolutePath().toString(),
-                "preferred_username"), null, null);
+                null, "preferred_username"), null, null);
         assertThat(new IgaConfig().accessGovernance(absolute, new DevMode(true), Clock.systemUTC())).isNotNull();
         PortalProperties missing = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null, null,
-                null, null, new PortalProperties.Iga("mock", "dev/no-such-file.yaml", "preferred_username"), null, null);
+                null, null, new PortalProperties.Iga("mock", "dev/no-such-file.yaml", null, "preferred_username"), null, null);
         assertThatThrownBy(() -> new IgaConfig().accessGovernance(missing, new DevMode(true), Clock.systemUTC()))
                 .hasMessageContaining("does not exist");
     }
@@ -42,5 +42,18 @@ class IgaConfigTest {
                 .hasMessageContaining("profile 'dev'");
         assertThat(new IgaConfig().accessGovernance(properties("mock"), new DevMode(true), Clock.systemUTC()))
                 .isInstanceOf(MockAccessGovernance.class);
+    }
+
+    @Test
+    void keycloakGroupsNeedsItsCatalogFileAndWorksOutsideDev() {
+        PortalProperties missing = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null, null,
+                null, null, new PortalProperties.Iga("keycloak-groups", null, null, "preferred_username"), null, null);
+        assertThatThrownBy(() -> new IgaConfig().accessGovernance(missing, new DevMode(false), Clock.systemUTC()))
+                .hasMessageContaining("portal.iga.catalog-file");
+        PortalProperties present = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null, null,
+                null, null, new PortalProperties.Iga("keycloak-groups", null,
+                Path.of("dev/iga-mock.yaml").toAbsolutePath().toString(), "preferred_username"), null, null);
+        assertThat(new IgaConfig().accessGovernance(present, new DevMode(false), Clock.systemUTC()))
+                .isInstanceOf(KeycloakGroupsAccessGovernance.class);
     }
 }

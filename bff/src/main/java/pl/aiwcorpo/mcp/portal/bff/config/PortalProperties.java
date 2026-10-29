@@ -118,14 +118,16 @@ public record PortalProperties(
     }
 
     /**
-     * @param adapter          C13 adapter; none configured is a start-up error ({@code mock} only in dev)
+     * @param adapter          C13 adapter; none configured is a start-up error ({@code keycloak-groups}, or {@code mock} in dev only)
      * @param mockFile         file system path of the mock data; a plain path, because the environment variable
      *                         PORTAL_IGA_MOCK_FILE binds to this property directly (relaxed binding)
+     * @param catalogFile      file system path of the entitlement catalog of the {@code keycloak-groups} adapter
      * @param requesterIdClaim identity claim the adapter uses to identify the requester
      */
     public record Iga(
             String adapter,
             String mockFile,
+            String catalogFile,
             @DefaultValue("preferred_username") String requesterIdClaim) {
     }
 

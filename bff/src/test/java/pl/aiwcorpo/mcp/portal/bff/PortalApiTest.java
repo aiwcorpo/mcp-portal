@@ -199,15 +199,16 @@ class PortalApiTest extends PortalHarness {
     }
 
     @Test
-    void catalogShowsPendingRequestOnlyWhenNothingIsGranted() {
-        // The C5 stub grants jira__get_issue, so a pending request for another tool does not change the table row.
+    void catalogShowsTheRequestAlsoForAConnectedServerWhenADeniedToolIsPending() {
+        // The C5 stub grants jira__get_issue and denies update_issue, which Bob has a pending request for (CC-113): the
+        // status stays connected and view_request replaces request_access.
         HttpResponse<String> response = login(BOB, Instant.now()).get("/api/v1/catalog");
 
         C12.assertResponse("GET", "/api/v1/catalog", response);
         JsonNode jira = JSON.readTree(response.body()).get("servers").get(0);
         assertThat(jira.get("status").asString()).isEqualTo("connected");
         assertThat(jira.get("actions").valueStream().map(JsonNode::asString))
-                .containsExactly("copy_link", "request_access", "disconnect");
+                .containsExactly("copy_link", "view_request", "disconnect");
 
         HttpResponse<String> mallory = login(MALLORY, Instant.now()).get("/api/v1/catalog");
         C12.assertResponse("GET", "/api/v1/catalog", mallory);

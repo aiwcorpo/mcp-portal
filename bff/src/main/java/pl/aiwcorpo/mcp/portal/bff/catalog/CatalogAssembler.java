@@ -24,7 +24,7 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayModel.CatalogTool;
  * {@code expired}/{@code revoked}/{@code error} (and anything unknown) {@code reconnect_required}; no connection
  * {@code not_connected}.
  *
- * <p>Actions follow the table of {@code getPortalCatalog} (vectors {@code test-vectors/catalog-actions/}). The type
+ * <p>Actions follow the table of {@code getPortalCatalog} (CC-083, CC-113; vectors {@code test-vectors/catalog-actions/}). The type
  * of the existing connection decides for {@code expiring} and {@code reconnect_required}; the credential types the
  * broker supports for {@code not_connected}. Order is stable (enum order of the contract); the contract treats the
  * list as a set.
@@ -77,11 +77,13 @@ public final class CatalogAssembler {
         boolean granted = false;
         boolean pending = false;
         boolean someDenied = false;
+        boolean entitlementsKnown = false;
         List<CatalogTool> tools = server.tools() == null ? List.of() : server.tools();
         for (CatalogTool tool : tools) {
             boolean toolGranted = "granted".equals(tool.access());
             granted |= toolGranted;
             someDenied |= !toolGranted;
+            entitlementsKnown |= !toolGranted && !entitlements(tool).isEmpty();
             // Any one of requiredEntitlements grants the tool, so one pending request covers it.
             pending |= !toolGranted && entitlements(tool).stream().anyMatch(pendingEntitlements::contains);
         }
@@ -110,11 +112,12 @@ public final class CatalogAssembler {
                 actions.add("add_secret");
             }
         }
-        if (NO_ACCESS.equals(status) || (CONNECTED.equals(status) && someDenied)) {
-            actions.add("request_access");
-        }
-        if (REQUEST_PENDING.equals(status)) {
+        // CC-113: nothing to ask for without a named entitlement; a pending request for what a denied tool needs is
+        // shown instead of a new request, also for a connected server.
+        if (REQUEST_PENDING.equals(status) || CONNECTED.equals(status) && someDenied && pending) {
             actions.add("view_request");
+        } else if ((NO_ACCESS.equals(status) || CONNECTED.equals(status) && someDenied) && entitlementsKnown) {
+            actions.add("request_access");
         }
         if (connection != null && (CONNECTED.equals(status) || EXPIRING.equals(status)
                 || RECONNECT_REQUIRED.equals(status))) {

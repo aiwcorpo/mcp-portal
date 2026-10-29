@@ -94,4 +94,5 @@ portal:
   iga:
     # No default: a deployment must choose its C13 adapter (mock exists for the dev profile only).
     adapter: ${PORTAL_IGA_ADAPTER:}
+    catalog-file: ${PORTAL_IGA_CATALOG_FILE:}
     requester-id-claim: ${PORTAL_IGA_REQUESTER_ID_CLAIM:preferred_username}

@@ -6,6 +6,16 @@ entitlements:
   gitlab: [mcp-gitlab-read, mcp-gitlab-write, mcp-gitlab-grp-team-a]
   servicedesk: [mcp-servicedesk-read, mcp-servicedesk-write, mcp-servicedesk-queue-IT]
   opensearch: [mcp-opensearch-read, mcp-opensearch-idx-logs-team-a, mcp-opensearch-idx-logs-team-b]
+descriptions:
+  mcp-jira-read: Read access to Jira issues and projects
+  mcp-jira-write: Create and update Jira issues
+  mcp-jira-destructive: Delete Jira issues
+  mcp-confluence-read: Read access to Confluence spaces
+  mcp-confluence-write: Create and edit Confluence pages
+  mcp-gitlab-read: Read access to GitLab projects
+  mcp-gitlab-write: Push and merge request access to GitLab projects
+  mcp-servicedesk-read: Read access to Service Desk tickets
+  mcp-opensearch-read: Search access to OpenSearch indexes
 requests:
   - user: bob
     requestId: REQ-2026-0042
@@ -22,3 +32,4 @@ requests:
     entitlement: mcp-jira-destructive
     status: rejected
     createdAt: "2026-10-20T08:00:00Z"
+    decidedAt: "2026-10-21T11:30:00Z"
