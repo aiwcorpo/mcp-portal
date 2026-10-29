@@ -80,6 +80,31 @@ class RegistryAdminTest extends PortalHarness {
     }
 
     @Test
+    void theRegistryExamplesOfTheContractPassUnchanged() {
+        TestBrowser browser = admin();
+        for (String name : List.of("jira", "opensearch_disabled")) {
+            JsonNode example = C12.responseExample("GET", REGISTRY, 200, name);
+            assertThat(example.isMissingNode()).as(name).isFalse();
+            stubGet(GATEWAY_REGISTRY, 200, example.toString());
+
+            HttpResponse<String> response = browser.get(REGISTRY);
+
+            C12.assertResponse("GET", REGISTRY, response);
+            assertThat(JSON.readTree(response.body())).as(name).isEqualTo(example);
+        }
+        for (String name : List.of("new_tool", "changed_on_server")) {
+            JsonNode example = C12.responseExample("GET", PENDING_TEMPLATE, 200, name);
+            assertThat(example.isMissingNode()).as(name).isFalse();
+            stubGet(GATEWAY_REGISTRY + "/mcp-jira/tools/update_issue/pending", 200, example.toString());
+
+            HttpResponse<String> response = browser.get(PENDING);
+
+            C12.assertResponse("GET", PENDING_TEMPLATE, response);
+            assertThat(JSON.readTree(response.body())).as(name).isEqualTo(example);
+        }
+    }
+
+    @Test
     void aUserWithoutTheAdminGroupGetsAForbiddenAnswerWithoutAnyCallToTheGateway() {
         TestBrowser alice = login(ALICE, Instant.now());
         alice.get("/api/v1/me");

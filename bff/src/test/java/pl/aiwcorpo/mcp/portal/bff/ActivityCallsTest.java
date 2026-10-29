@@ -180,6 +180,61 @@ class ActivityCallsTest extends PortalHarness {
     }
 
     @Test
+    void rateLimitedAndCredentialRequiredRowsAreShownAndEveryResultGroupIsForwarded() {
+        // CC-142: rate_limited belongs to the group denied, credential_required to error; the gateway groups, the BFF
+        // only checks that the group is one of the four and passes the rows on.
+        TestBrowser browser = session();
+        stub(200, null, """
+                [{"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e11","ts":"2026-10-26T20:00:00.000Z",
+                  "tool":"jira__get_issue","risk":"READ_ONLY","result":"rate_limited","errorCode":"rate_limited"},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e12","ts":"2026-10-26T20:00:01.000Z",
+                  "tool":"gitlab__get_project","result":"credential_required","errorCode":"credential_required"}]""");
+
+        HttpResponse<String> response = browser.get("/api/v1/activity/calls?result=denied");
+
+        C12.assertResponse("GET", "/api/v1/activity/calls", response);
+        JsonNode rows = JSON.readTree(response.body());
+        assertThat(rows).hasSize(2);
+        assertThat(rows.get(0).get("result").asString()).isEqualTo("rate_limited");
+        assertThat(rows.get(1).get("errorCode").asString()).isEqualTo("credential_required");
+        assertThat(gatewayRequests().getLast().queryParameter("result").firstValue()).isEqualTo("denied");
+        for (String group : List.of("ok", "error", "confirmation")) {
+            assertThat(browser.get("/api/v1/activity/calls?result=" + group).statusCode()).as(group).isEqualTo(200);
+            assertThat(gatewayRequests().getLast().queryParameter("result").firstValue()).isEqualTo(group);
+        }
+    }
+
+    @Test
+    void theRowsOfAServiceAccountSystemCarryWhatTheLastUseIsReadFrom() {
+        // CC-150: "last use" of a service account is the newest row with result ok, confirmed or error of the system's
+        // tools; the portal computes it from these rows, there is no field of its own. Denials and expiries stay in
+        // the list but do not count, so the BFF must pass every one of them through unchanged.
+        TestBrowser browser = session();
+        stub(200, null, """
+                [{"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e21","ts":"2026-10-26T20:05:00.000Z",
+                  "tool":"servicedesk__get_ticket","risk":"READ_ONLY","result":"denied_policy","errorCode":"access_denied"},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e22","ts":"2026-10-26T20:04:00.000Z",
+                  "tool":"servicedesk__close_ticket","risk":"DESTRUCTIVE","result":"expired","errorCode":"confirmation_failed",
+                  "wrongCodeCount":1,"resource":{"type":"ServiceDesk::Ticket","id":"IT-42"}},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e23","ts":"2026-10-26T20:03:00.000Z",
+                  "tool":"servicedesk__close_ticket","risk":"DESTRUCTIVE","result":"confirmed","wrongCodeCount":0,
+                  "resource":{"type":"ServiceDesk::Ticket","id":"IT-41"}},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e24","ts":"2026-10-26T20:02:00.000Z",
+                  "tool":"servicedesk__get_ticket","risk":"READ_ONLY","result":"error","errorCode":"upstream_unavailable"},
+                 {"requestId":"0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e25","ts":"2026-10-26T20:01:00.000Z",
+                  "tool":"servicedesk__get_ticket","risk":"READ_ONLY","result":"ok"}]""");
+
+        HttpResponse<String> response = browser.get("/api/v1/activity/calls?q=servicedesk__&limit=50");
+
+        C12.assertResponse("GET", "/api/v1/activity/calls", response);
+        JsonNode rows = JSON.readTree(response.body());
+        assertThat(rows).hasSize(5);
+        assertThat(rows.valueStream().map(row -> row.get("result").asString()))
+                .containsExactly("denied_policy", "expired", "confirmed", "error", "ok");
+        assertThat(gatewayRequests().getLast().queryParameter("q").firstValue()).isEqualTo("servicedesk__");
+    }
+
+    @Test
     void withoutASessionTheAnswerIs401() {
         HttpResponse<String> response = browser().get("/api/v1/activity/calls");
 

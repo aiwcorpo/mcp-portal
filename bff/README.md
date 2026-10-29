@@ -4,11 +4,11 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 3.0.2 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 4.0.0 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
 
 ## Uruchomienie lokalne
 
-Wymagane: JDK 25 i `mcp-contracts` 3.0.2 w `~/.m2`. Dwa tryby.
+Wymagane: JDK 25 i `mcp-contracts` 4.0.0 w `~/.m2`. Dwa tryby.
 
 Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
@@ -214,6 +214,31 @@ działa discovery jak dotąd. Dla mcp-platform-dev (zmiana compose po stronie ws
 i `JAVA_TOOL_OPTIONS` z truststore'em dev public CA w BFF są zbędne. Bez `PORTAL_OIDC_END_SESSION_URI` wylogowanie kończy
 tylko sesję BFF (sesja SSO w IdP zostaje), co BFF zgłasza ostrzeżeniem przy starcie. Pusta wartość `PORTAL_OIDC_TOKEN_URI`
 oznacza discovery.
+
+## M4: wnioski, administracja rejestru, limity
+
+Kontrakty 4.0.0. Szczegóły decyzji w `STATUS.md` (M4.1 ... M4.4).
+
+- Wnioski o dostęp (port C13): `GET/POST /api/v1/access-requests`, `GET /api/v1/access-requests/entitlements?system=`. Adaptery:
+  `keycloak-groups` (katalog z pliku, bez wniosków: `POST` daje `422 not_requestable`) i `mock` (profil `dev`). `POST` na uprawnienie,
+  na które wniosek już czeka, zwraca `200` z jego `requestId`; uprawnienie spoza katalogu albo już posiadane to `422 not_requestable`.
+  Opis uprawnienia z IGA to tekst nieufny (znaki ukryte zapisane jako `<U+XXXX>`, do 500 znaków), `requestUrl` z IGA tylko `https`.
+- Tabela akcji katalogu wg CC-113: `request_access` tylko przy znanym `requiredEntitlements`; `view_request` także przy `connected`.
+- Administracja rejestru (grupa `mcp-platform-admin`, sprawdzana w BFF i w gateway): `GET /api/v1/admin/registry`,
+  `.../servers/{serverId}/tools/{tool}/pending` (diff: `approvedEntry`, `pendingEntry`, wersje, `source`),
+  `POST .../approve` (`409 hash_mismatch`, `422 ManifestRejected` z `reason`). Teksty definicji z hasłami ukrytych znaków zapisanymi
+  jawnie; hashe bez zmian. Zatwierdzenie zostawia zdarzenie `admin_change` / `definition_approved` z `definitionHash`.
+- Limity na sesję: zapis tokenu i zapisy Authenticatora (zmienne `PORTAL_LIMIT_*`), odpowiedź `429 rate_limited` z `Retry-After`; `429` z
+  brokera i gateway'a jest przekazywane dalej.
+- "Ostatnie użycie" konta serwisowego (CC-150) liczy web z wierszy `GET /api/v1/activity/calls` (wyniki `ok`, `confirmed`, `error`);
+  BFF nie ma na to osobnego pola.
+
+| Test | Co sprawdza |
+| --- | --- |
+| `AccessRequestsTest`, `AccessRequestsAdapterTest` | lista, idempotentny `POST`, `422`, `503`, ścisłe ciało, CSRF, przykłady C12, adapter skryptowany (przekierowanie, wynik spoza kontraktu, wiersze spoza kontraktu, tekst z IGA) |
+| `IgaDataTest`, `KeycloakGroupsAccessGovernanceTest`, `IgaConfigTest` | adresy `requestUrl`, wynik adaptera, katalog bez wniosków, wybór adaptera |
+| `RegistryAdminTest` | tylko admin, widoki sprawdzane względem schematu, neutralizacja definicji, przykłady C12, zatwierdzenie z audytem, `409`, `422`, mapowanie statusów |
+| `RateLimitsTest` | limity na sesję (okno, `Retry-After`, liczenie tylko żądań do brokera), `429` z brokera i gateway'a |
 
 ## Struktura
 

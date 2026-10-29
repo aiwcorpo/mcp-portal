@@ -18,7 +18,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M4.1 | kontrakty 4.0.0; port C13 i adaptery `mock` oraz `keycloak-groups`; `GET/POST /access-requests`, `GET /access-requests/entitlements`, `decidedAt`; tabela akcji katalogu wg CC-113 | zrobione |
 | M4.2 | administracja rejestru: `GET /admin/registry`, `.../pending`, `POST .../approve` (source, `pendingVersion`, `409 hash_mismatch`, `422 ManifestRejected`), audyt `definition_approved` | zrobione |
 | M4.3 | limity `429` z `Retry-After`: zapis tokenu i operacje Authenticatora na sesję, przekazanie `429` z brokera i gateway'a, `system_not_configured` w `oauth/*` | zrobione |
-| M4.4 | aktywność wg CC-142 i CC-150, zgodność z resztą 4.0.0 (przykłady C12, `system_not_configured`), README, obraz `m4-<sha>` | do zrobienia |
+| M4.4 | aktywność wg CC-142 i CC-150, zgodność z przykładami C12 4.0.0, README, obraz `m4-<sha>` | zrobione |
 
 ## M2: wynik (2026-10-28)
 
@@ -386,6 +386,25 @@ Testy: `./mvnw test`: 390 testów, 0 błędów (nowy `RegistryAdminTest`, 11 tes
 
 Testy: `./mvnw test`: 398 testów, 0 błędów (nowy `RateLimitsTest` na zmniejszonych limitach przez `@TestPropertySource`, rozszerzony
 `OAuthConnectTest`).
+
+## M4.4: aktywność, zgodność z przykładami 4.0.0 (2026-10-29)
+
+- Aktywność (CC-142): wiersze z wynikiem `rate_limited` (kod `rate_limited`) i `credential_required` przechodzą walidację wierszy bez zmian
+  (oba były już na liście kodów BFF); wszystkie cztery grupy filtra `result` (`ok`, `denied`, `error`, `confirmation`) są przekazywane
+  gateway'owi bez zmian, który je rozwija. BFF niczego nie grupuje.
+- "Ostatnie użycie" konta serwisowego (CC-150): bez nowego pola i bez logiki w BFF; web liczy z wierszy `activity/calls` o wyniku `ok`,
+  `confirmed` i `error`. Test `theRowsOfAServiceAccountSystemCarryWhatTheLastUseIsReadFrom` pilnuje, że wiersze Service Desku (także
+  odmowy i `expired`, które się nie liczą) docierają bez zmian i że filtr `q` jest przekazywany.
+- Przykłady C12: odpowiedzi BFF są równe przykładom kontraktu dla listy wniosków (`pending`, `approved`), uprawnień (`confluence`),
+  rejestru (`jira`, `opensearch_disabled`) i diffu (`new_tool`, `changed_on_server`); kody `429`, `422 not_requestable`, `422` z
+  `ManifestRejected`, `503` przechodzą walidację operacji.
+- Mocki MSW (`mocks/msw`) to dane dla web; po stronie BFF ich odpowiednikiem są przykłady OpenAPI sprawdzone wyżej oraz mapowania WireMock z
+  jara 4.0.0 (`run-mocks.sh` bierze wersję z `pom.xml`). Stuby brokera i gateway'a 4.0.0 zawierają `pendingVersion`, `source` i `Retry-After`
+  w odpowiedziach, więc BFF 4.0.0 przechodzi na nich bez zmian w stubach.
+- `scripts/build-image.sh` taguje `mcp-portal-bff:m4-<sha>` (przedrostek z `IMAGE_TAG_PREFIX`). Obraz zawiera sam jar BFF; zbudowany
+  frontend nie wchodzi do obrazu, tylko jest montowany i wskazywany przez `PORTAL_WEB_DIST` (jak w M3, po stronie compose ws-01).
+
+Testy: `./mvnw test`: 402 testy, 0 błędów, 1 pominięty tylko w profilu `dev-env` (jak w M2/M3).
 
 ## Propozycje CC (M4)
 

@@ -27,11 +27,13 @@ class AccessRequestsAdapterTest extends PortalHarness {
     private static final String ENTITLEMENT = "{\"entitlement\":\"mcp-jira-read\"}";
 
     private static volatile ScriptedIga.Mode mode = ScriptedIga.Mode.UNAVAILABLE;
+    private static volatile List<AccessGovernance.AccessRequest> exampleRequests = List.of();
+    private static volatile List<AccessGovernance.Entitlement> exampleCatalog = List.of();
 
     @TestConfiguration
     static class ScriptedIga {
 
-        enum Mode { UNAVAILABLE, NO_FLOW, REDIRECT, BAD_REDIRECT, BOTH_FIELDS, BAD_ROWS }
+        enum Mode { UNAVAILABLE, NO_FLOW, REDIRECT, BAD_REDIRECT, BOTH_FIELDS, BAD_ROWS, EXAMPLES }
 
         @Bean
         @Primary
@@ -41,6 +43,9 @@ class AccessRequestsAdapterTest extends PortalHarness {
                 public List<Entitlement> catalog(String system) {
                     if (mode == Mode.UNAVAILABLE) {
                         throw new IgaUnavailableException("scripted");
+                    }
+                    if (mode == Mode.EXAMPLES) {
+                        return exampleCatalog;
                     }
                     return List.of(new Entitlement("mcp-jira-read", "line one‮line two <U+0041>"),
                             new Entitlement("not a group", "dropped"), new Entitlement("mcp-jira-write", "x".repeat(600)));
@@ -58,6 +63,7 @@ class AccessRequestsAdapterTest extends PortalHarness {
                                 new AccessRequest("REQ-4", "mcp-jira-read", "approved", "2026-10-25T09:00:00Z", null,
                                         "javascript:alert(1)"),
                                 new AccessRequest("REQ‮5", "mcp-jira-read", "approved", "2026-10-25T09:00:00Z", null, null));
+                        case EXAMPLES -> exampleRequests;
                         default -> List.of();
                     };
                 }
@@ -163,5 +169,30 @@ class AccessRequestsAdapterTest extends PortalHarness {
         assertThat(items).hasSize(2);
         assertThat(items.get(0).get("description").asString()).isEqualTo("line one<U+202E>line two <U+003C>U+0041>");
         assertThat(items.get(1).get("description").asString()).hasSize(500);
+    }
+
+    @Test
+    void theAnswersEqualTheExamplesOfTheContract() {
+        mode = ScriptedIga.Mode.EXAMPLES;
+        TestBrowser browser = session();
+        for (String name : List.of("pending", "approved")) {
+            JsonNode example = C12.responseExample("GET", PATH, 200, name);
+            assertThat(example.isMissingNode()).as(name).isFalse();
+            exampleRequests = List.of(JSON.treeToValue(example, AccessGovernance.AccessRequest[].class));
+
+            HttpResponse<String> response = browser.get(PATH);
+
+            C12.assertResponse("GET", PATH, response);
+            assertThat(JSON.readTree(response.body())).as(name).isEqualTo(example);
+        }
+
+        JsonNode confluence = C12.responseExample("GET", PATH + "/entitlements", 200, "confluence");
+        exampleCatalog = confluence.valueStream().map(node -> new AccessGovernance.Entitlement(
+                node.get("entitlement").asString(), node.has("description") ? node.get("description").asString() : null)).toList();
+        HttpResponse<String> entitlements = browser.get(PATH + "/entitlements?system=confluence");
+        C12.assertResponse("GET", PATH + "/entitlements", entitlements);
+        assertThat(JSON.readTree(entitlements.body())).isEqualTo(confluence);
+
+        assertThat(C12.responseExample("POST", PATH, 200, "created").get("requestId").asString()).startsWith("REQ-");
     }
 }
