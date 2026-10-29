@@ -87,7 +87,7 @@ class RegistryAdminController {
         requireTarget(serverId, tool);
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
-            JsonNode pending = RegistryData.validPending(gateway.pendingTool(token, RequestIds.of(request), serverId, tool));
+            JsonNode pending = RegistryData.validPending(gateway.pendingTool(token, RequestIds.of(request), serverId, tool), tool);
             if (pending == null) {
                 throw new UpstreamException("gateway admin", 502, null);
             }
@@ -107,18 +107,24 @@ class RegistryAdminController {
         long started = clock.millis();
         String target = SERVER_IDS.contains(serverId) ? serverId : null;
         if (!user.isAdmin()) {
-            audit.definitionApproval(requestId, user, target, validTool(tool), null, AuditLog.Outcome.accessDenied(),
+            audit.definitionApprovalFailed(requestId, user, target, validTool(tool), null, AuditLog.Outcome.accessDenied(),
                     clock.millis() - started);
             throw forbidden();
         }
+        // Approval unblocks a changed definition for everyone, so it must come from the portal page itself (as `viewed`).
+        if (!"same-origin".equals(request.getHeader("Sec-Fetch-Site"))) {
+            audit.definitionApprovalFailed(requestId, user, target, validTool(tool), null, AuditLog.Outcome.accessDenied(),
+                    clock.millis() - started);
+            throw new ApiException(HttpStatus.FORBIDDEN, ApiError.of(ApiError.CSRF_INVALID));
+        }
         if (target == null || validTool(tool).isEmpty()) {
-            audit.definitionApproval(requestId, user, target, validTool(tool), null, AuditLog.Outcome.notFoundOrDenied(),
+            audit.definitionApprovalFailed(requestId, user, target, validTool(tool), null, AuditLog.Outcome.notFoundOrDenied(),
                     clock.millis() - started);
             throw notFound();
         }
         String hash = parse(rawBody);
         if (hash == null) {
-            audit.definitionApproval(requestId, user, target, tool, null, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
+            audit.definitionApprovalFailed(requestId, user, target, tool, null, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
                     clock.millis() - started);
             throw ApiException.badRequest();
         }
@@ -128,11 +134,12 @@ class RegistryAdminController {
         } catch (UpstreamException e) {
             return approvalFailure(e, user, requestId, serverId, tool, hash, started);
         } catch (RuntimeException e) {
-            audit.definitionApproval(requestId, user, serverId, tool, hash, AuditLog.Outcome.upstreamUnavailable(),
+            audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.upstreamUnavailable(),
                     clock.millis() - started);
             throw e;
         }
-        audit.definitionApproval(requestId, user, serverId, tool, hash, AuditLog.Outcome.ok(), clock.millis() - started);
+        // The gateway records the approval (admin_change, definition_approved, sub of the administrator); the portal
+        // records only attempts that did not end in one, so a count of approvals is not doubled.
         return ResponseEntity.noContent().build();
     }
 
@@ -141,22 +148,22 @@ class RegistryAdminController {
         long latency = clock.millis() - started;
         switch (e.status()) {
             case 403 -> {
-                audit.definitionApproval(requestId, user, serverId, tool, hash, AuditLog.Outcome.accessDenied(), latency);
+                audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.accessDenied(), latency);
                 throw forbidden();
             }
             case 404 -> {
-                audit.definitionApproval(requestId, user, serverId, tool, hash, AuditLog.Outcome.notFoundOrDenied(), latency);
+                audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.notFoundOrDenied(), latency);
                 throw notFound();
             }
             case 409 -> {
                 if (HASH_MISMATCH.equals(e.error())) {
-                    audit.definitionApproval(requestId, user, serverId, tool, hash, AuditLog.Outcome.rejected(HASH_MISMATCH), latency);
+                    audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.rejected(HASH_MISMATCH), latency);
                     throw new ApiException(HttpStatus.CONFLICT, ApiError.of(HASH_MISMATCH));
                 }
             }
             case 422 -> {
                 if (MANIFEST_REJECTED.equals(e.error())) {
-                    audit.definitionApproval(requestId, user, serverId, tool, hash,
+                    audit.definitionApprovalFailed(requestId, user, serverId, tool, hash,
                             AuditLog.Outcome.rejected(e.reason() == null ? MANIFEST_REJECTED : e.reason()), latency);
                     throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, rejected(e));
                 }
@@ -164,7 +171,7 @@ class RegistryAdminController {
             default -> {
             }
         }
-        audit.definitionApproval(requestId, user, serverId, tool, hash, AuditLog.Outcome.upstreamUnavailable(), latency);
+        audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.upstreamUnavailable(), latency);
         throw e;
     }
 

@@ -409,8 +409,10 @@ ze `.secrets`, nie czytam ich; do wykonania przez koordynatora).
 
 ## Propozycje CC (M4)
 
-3. C12 `startOAuth` (i każda operacja przez C4/C5): dopisać `429 rate_limited` z `Retry-After`; broker zwraca je przy starcie OAuth
-   (CC-156), a BFF przekazuje je dalej zamiast `503`.
+3. C12 `startOAuth`: dopisać `429 rate_limited` z `Retry-After` (broker limituje start OAuth, CC-156). Do czasu zmiany BFF odpowiada tu `503`.
+   Gateway admin API nie ma limitów w C5, więc `429` z C5 też jest `503`.
+4. C8: `reason` dla `admin_change` portalu przy zatwierdzeniu, które nie doszło do skutku (odmowa nie-admina, `hash_mismatch`, `risk_lowered`);
+   dziś słownik zna tylko `definition_approved`, więc takie zdarzenia nie mają `reason`.
 
 2. C12 `approveAdminTool`: dopisać `400 invalid_request` dla ciała spoza schematu (dziś BFF zwraca `400`, którego operacja nie wymienia).
 
@@ -418,3 +420,21 @@ ze `.secrets`, nie czytam ich; do wykonania przez koordynatora).
    portalu; dziś portal nie ma jak zapisać tej akcji w audycie.
 
 Obraz: `mcp-portal-bff:m4-6c73f1b` (z commita M4.4, `scripts/build-image.sh`, bez wdrożenia na stos).
+
+## Runda poprawek po przeglądzie Opus M4 (2026-10-29)
+
+| Znalezisko | Status |
+| --- | --- |
+| M-1 audyt approve | `definition_approved` tylko w zdarzeniu gateway'a (źródło prawdy dla udanego zatwierdzenia, `sub` administratora, `definitionHash`). Portal zapisuje `admin_change` wyłącznie dla prób bez skutku (odmowa, `404`, zły `Sec-Fetch-Site`, `409`, `422`, błąd), bez `reason` (słownik C8 nie ma pasującej wartości, propozycja CC 4), z `outcome`, `errorCode`, `server`, `tool`, `definitionHash`. Udane zatwierdzenie nie ma drugiego zdarzenia portalu, więc liczba zatwierdzeń nie jest podwojona. Opis w README |
+| M-2 entitlements z `keycloak-groups` | port ma `supportsRequests()`; adapter bez obiegu wniosków daje `422 not_requestable` także dla `entitlements` i `POST`; test |
+| L-1 | `approve` wymaga `Sec-Fetch-Site: same-origin` (jak `viewed`), inaczej `403 csrf_invalid` i zdarzenie; świeże MFA nie dodane (kontrakt go nie wymaga; do decyzji koordynatora) |
+| L-2 | `mcp-platform-admin` i uprawnienia spoza `mcp-<system>-` odrzucane twardo (lista i `POST`), niezależnie od katalogu IGA |
+| L-3 | `approvedInVersion: null` przy istniejącym `approvedEntry` nie odrzuca diffu |
+| L-4 | diff odrzucany, gdy `pendingEntry` lub `approvedEntry` dotyczy innego narzędzia niż w ścieżce |
+| L-5 | `429` od C4/C5 przekazywane tylko dla `PUT secret` i operacji Authenticatora (te C12 opisuje); gdzie indziej `503` zgodnie z kontraktem; propozycja CC 3 (konkretnie `startOAuth`) |
+| L-6 | `429` z brokera bez użytecznego `Retry-After` dostaje 60 s (C12 obiecuje nagłówek); wartość z upstreamu bez zmian |
+| L-8 | `system_not_configured` przy `PUT secret` w audycie jako przyczyna; DELETE i `PUT` uwzględniają też `429` |
+| L-11 | plik katalogu IGA: nieznany klucz albo pusty katalog `keycloak-groups` = błąd startu |
+| L-7, L-9, L-10, L-12, L-13 | bez zmian: L-7 to konsekwencja "na sesję" z CC-156 (broker nie ma limitu zapisu tokenu na `sub`, do rozważenia po stronie ws-06); L-9 w propozycji CC 1; L-10 (wyścig dwóch POST) zostaje na adapterze IGA; L-12 (lista hostów IGA) nie dodana; L-13 uwaga do kontraktu |
+
+Testy: `./mvnw test`: 410 testów, 0 błędów.

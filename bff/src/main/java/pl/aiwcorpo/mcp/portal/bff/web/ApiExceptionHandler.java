@@ -40,12 +40,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler({UpstreamException.class, IgaUnavailableException.class})
     ResponseEntity<Object> upstream(RuntimeException e) {
         log.warn("{}", e.getMessage());
-        // A limit of the broker or the gateway is the user's to wait out, not an outage (CC-156).
-        if (e instanceof UpstreamException upstream && upstream.status() == 429) {
-            Map<String, String> headers = upstream.retryAfterSeconds() == null ? Map.of()
-                    : Map.of("Retry-After", upstream.retryAfterSeconds().toString());
-            return json(HttpStatus.TOO_MANY_REQUESTS, ApiError.of(ApiError.RATE_LIMITED), headers);
-        }
+        // C12 lists a 429 only for a token write and the authenticator, which turn it into one themselves.
         return json(HttpStatus.SERVICE_UNAVAILABLE, ApiError.of(ApiError.UPSTREAM_UNAVAILABLE));
     }
 

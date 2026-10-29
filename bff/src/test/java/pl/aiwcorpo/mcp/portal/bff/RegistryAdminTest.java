@@ -49,6 +49,10 @@ class RegistryAdminTest extends PortalHarness {
         return GATEWAY.findAll(anyRequestedFor(urlPathMatching(GATEWAY_REGISTRY + ".*")));
     }
 
+    private static HttpResponse<String> approve(TestBrowser browser, String path, String body, boolean csrf) {
+        return browser.post(path, body, csrf, java.util.Map.of("Sec-Fetch-Site", "same-origin"));
+    }
+
     private static void stubGet(String path, int status, String body) {
         GATEWAY.stubFor(get(urlPathEqualTo(path)).atPriority(1).willReturn(aResponse().withStatus(status)
                 .withHeader("Content-Type", "application/json").withBody(body)));
@@ -110,7 +114,7 @@ class RegistryAdminTest extends PortalHarness {
         alice.get("/api/v1/me");
 
         for (HttpResponse<String> response : List.of(alice.get(REGISTRY), alice.get(PENDING),
-                alice.post(APPROVE, BODY, true))) {
+                approve(alice, APPROVE, BODY, true))) {
             assertThat(response.statusCode()).isEqualTo(403);
             assertThat(JSON.readTree(response.body()).get("error").asString()).isEqualTo("access_denied");
             assertThat(response.headers().firstValue("X-Request-Id")).isPresent();
@@ -188,7 +192,7 @@ class RegistryAdminTest extends PortalHarness {
 
     @Test
     void anApprovalGoesToTheGatewayWithTheHashAndLeavesAnAuditEvent() {
-        HttpResponse<String> response = admin().post(APPROVE, BODY, true);
+        HttpResponse<String> response = approve(admin(), APPROVE, BODY, true);
 
         C12.assertResponse("POST", APPROVE_TEMPLATE, response);
         assertThat(response.statusCode()).isEqualTo(204);
@@ -196,23 +200,60 @@ class RegistryAdminTest extends PortalHarness {
                 .getLast();
         assertThat(sent.getBodyAsString()).isEqualTo(BODY);
         assertThat(sent.getHeader("Authorization")).startsWith("Bearer xt-mcp-gateway-admin-");
+        // The approval is recorded by the gateway (definition_approved); the portal adds no second event for it.
+        assertThat(auditEvents()).noneMatch(event -> "admin_change".equals(event.get("event").asString())
+                && "ok".equals(event.get("outcome").asString()));
+    }
+
+    @Test
+    void anApprovalThatEndedInNothingIsAuditedWithoutTheReasonOfAnApproval() {
+        stubApprove(409, "{\"error\":\"hash_mismatch\"}");
+
+        approve(admin(), APPROVE, BODY, true);
+
         JsonNode event = lastAuditEvent();
         ContractSchemas.assertValid(AUDIT, event);
         assertThat(event.get("event").asString()).isEqualTo("admin_change");
         assertThat(event.get("component").asString()).isEqualTo("portal");
-        assertThat(event.get("reason").asString()).isEqualTo("definition_approved");
+        assertThat(event.has("reason")).isFalse();
+        assertThat(event.get("outcome").asString()).isEqualTo("error");
         assertThat(event.get("definitionHash").asString()).isEqualTo(HASH);
         assertThat(event.get("server").asString()).isEqualTo("mcp-jira");
         assertThat(event.get("tool").asString()).isEqualTo("update_issue");
         assertThat(event.get("username").asString()).isEqualTo("carol");
-        assertThat(event.get("outcome").asString()).isEqualTo("ok");
+    }
+
+    @Test
+    void anApprovalNeedsTheRequestToComeFromThePortalPage() {
+        TestBrowser browser = admin();
+        for (java.util.Map<String, String> headers : List.of(java.util.Map.<String, String>of(),
+                java.util.Map.of("Sec-Fetch-Site", "cross-site"), java.util.Map.of("Sec-Fetch-Site", "same-site"))) {
+            HttpResponse<String> response = browser.post(APPROVE, BODY, true, headers);
+            C12.assertResponse("POST", APPROVE_TEMPLATE, response);
+            assertThat(response.statusCode()).isEqualTo(403);
+        }
+        assertThat(GATEWAY.findAll(anyRequestedFor(urlPathMatching(GATEWAY_REGISTRY + "/.*/approve")))).isEmpty();
+    }
+
+    @Test
+    void aMissingApprovedVersionDoesNotBreakTheDiffAndAnotherToolDoes() {
+        JsonNode example = C12.responseExample("GET", PENDING_TEMPLATE, 200, "changed_on_server");
+        String nullVersion = example.toString().replace("\"approvedInVersion\":\"1.4.0\"", "\"approvedInVersion\":null");
+        assertThat(nullVersion).isNotEqualTo(example.toString());
+        stubGet(GATEWAY_REGISTRY + "/mcp-jira/tools/update_issue/pending", 200, nullVersion);
+        TestBrowser browser = admin();
+        assertThat(browser.get(PENDING).statusCode()).isEqualTo(200);
+
+        stubGet(GATEWAY_REGISTRY + "/mcp-jira/tools/update_issue/pending", 200,
+                example.toString().replace("\"name\":\"update_issue\"", "\"name\":\"delete_issue\""));
+        assertThat(browser.get(PENDING).statusCode()).isEqualTo(503);
     }
 
     @Test
     void aHashThatNoLongerMatchesIsAConflictAndTheRiskLoweredRejectionIsPassedOn() {
         TestBrowser browser = admin();
         stubApprove(409, "{\"error\":\"hash_mismatch\"}");
-        HttpResponse<String> mismatch = browser.post(APPROVE, BODY, true);
+        HttpResponse<String> mismatch = approve(browser, APPROVE, BODY, true);
         C12.assertResponse("POST", APPROVE_TEMPLATE, mismatch);
         assertThat(mismatch.statusCode()).isEqualTo(409);
         assertThat(JSON.readTree(mismatch.body()).get("error").asString()).isEqualTo("hash_mismatch");
@@ -221,7 +262,7 @@ class RegistryAdminTest extends PortalHarness {
 
         stubApprove(422, "{\"error\":\"manifest_rejected\",\"reason\":\"risk_lowered\","
                 + "\"message\":\"update_issue lowers risk from UPDATE to READ_ONLY\"}");
-        HttpResponse<String> lowered = browser.post(APPROVE, BODY, true);
+        HttpResponse<String> lowered = approve(browser, APPROVE, BODY, true);
         C12.assertResponse("POST", APPROVE_TEMPLATE, lowered);
         assertThat(lowered.statusCode()).isEqualTo(422);
         JsonNode rejected = JSON.readTree(lowered.body());
@@ -236,14 +277,14 @@ class RegistryAdminTest extends PortalHarness {
         TestBrowser browser = admin();
         stubApprove(422, "{\"error\":\"manifest_rejected\",\"reason\":\"Risk Lowered!\",\"message\":\"a\\u202Eb\"}");
 
-        HttpResponse<String> response = browser.post(APPROVE, BODY, true);
+        HttpResponse<String> response = approve(browser, APPROVE, BODY, true);
 
         C12.assertResponse("POST", APPROVE_TEMPLATE, response);
         JsonNode rejected = JSON.readTree(response.body());
         assertThat(rejected.has("reason")).isFalse();
         assertThat(rejected.get("message").asString()).isEqualTo("a<U+202E>b");
         stubApprove(422, "{\"error\":\"manifest_rejected\"}");
-        JsonNode bare = JSON.readTree(browser.post(APPROVE, BODY, true).body());
+        JsonNode bare = JSON.readTree(approve(browser, APPROVE, BODY, true).body());
         assertThat(bare.propertyNames()).containsExactly("error");
     }
 
@@ -251,41 +292,41 @@ class RegistryAdminTest extends PortalHarness {
     void gatewayAnswersAreMappedToTheContractStatuses() {
         TestBrowser browser = admin();
         stubApprove(404, "{\"error\":\"not_found_or_denied\"}");
-        HttpResponse<String> missing = browser.post(APPROVE, BODY, true);
+        HttpResponse<String> missing = approve(browser, APPROVE, BODY, true);
         C12.assertResponse("POST", APPROVE_TEMPLATE, missing);
         assertThat(missing.statusCode()).isEqualTo(404);
 
         stubApprove(403, "{\"error\":\"access_denied\"}");
-        HttpResponse<String> denied = browser.post(APPROVE, BODY, true);
+        HttpResponse<String> denied = approve(browser, APPROVE, BODY, true);
         C12.assertResponse("POST", APPROVE_TEMPLATE, denied);
         assertThat(denied.statusCode()).isEqualTo(403);
 
         stubApprove(500, "{\"error\":\"internal_error\",\"message\":\"stack trace here\"}");
-        HttpResponse<String> broken = browser.post(APPROVE, BODY, true);
+        HttpResponse<String> broken = approve(browser, APPROVE, BODY, true);
         C12.assertResponse("POST", APPROVE_TEMPLATE, broken);
         assertThat(broken.statusCode()).isEqualTo(503);
         assertThat(broken.body()).doesNotContain("stack trace");
         assertThat(lastAuditEvent().get("errorCode").asString()).isEqualTo("upstream_unavailable");
 
         stubApprove(409, "{\"error\":\"something_else\"}");
-        assertThat(browser.post(APPROVE, BODY, true).statusCode()).isEqualTo(503);
+        assertThat(approve(browser, APPROVE, BODY, true).statusCode()).isEqualTo(503);
     }
 
     @Test
     void anApprovalNeedsTheCsrfHeaderAndAWellFormedRequest() {
         TestBrowser browser = admin();
-        HttpResponse<String> noCsrf = browser.post(APPROVE, BODY, false);
+        HttpResponse<String> noCsrf = approve(browser, APPROVE, BODY, false);
         assertThat(noCsrf.statusCode()).isEqualTo(403);
 
         for (String body : List.of("", "{}", "{\"definitionHash\":\"sha256:abc\"}", "{\"definitionHash\":5}",
                 "{\"definitionHash\":\"" + HASH + "\",\"extra\":1}", "not json")) {
-            HttpResponse<String> response = browser.post(APPROVE, body, true);
+            HttpResponse<String> response = approve(browser, APPROVE, body, true);
             assertThat(response.statusCode()).as(body).isEqualTo(400);
         }
         for (String path : List.of("/api/v1/admin/registry/servers/mcp-other/tools/update_issue/approve",
                 "/api/v1/admin/registry/servers/mcp-jira/tools/Update-Issue/approve",
                 "/api/v1/admin/registry/servers/mcp-jira/tools/a__b/approve")) {
-            HttpResponse<String> response = browser.post(path, BODY, true);
+            HttpResponse<String> response = approve(browser, path, BODY, true);
             C12.assertResponse("POST", APPROVE_TEMPLATE, response);
             assertThat(response.statusCode()).as(path).isEqualTo(404);
         }

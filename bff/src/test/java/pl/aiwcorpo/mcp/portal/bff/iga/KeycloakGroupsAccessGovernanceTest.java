@@ -34,4 +34,18 @@ class KeycloakGroupsAccessGovernanceTest {
     void aRequestIsNeverPossible() {
         assertThatThrownBy(() -> iga.request(ALICE, "mcp-jira-read")).isInstanceOf(NotRequestableException.class);
     }
+
+    @Test
+    void thisAdapterHasNoRequestFlow() {
+        assertThat(iga.supportsRequests()).isFalse();
+    }
+
+    @Test
+    void aMisspelledKeyOrAnEmptyCatalogStopsTheStart() {
+        assertThatThrownBy(() -> new KeycloakGroupsAccessGovernance(new ByteArrayResource(
+                "entitlement:\n  jira: [mcp-jira-read]\n".getBytes(StandardCharsets.UTF_8))))
+                .isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new KeycloakGroupsAccessGovernance(new ByteArrayResource(
+                "descriptions: {}\n".getBytes(StandardCharsets.UTF_8)))).isInstanceOf(IllegalStateException.class);
+    }
 }

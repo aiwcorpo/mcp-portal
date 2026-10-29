@@ -15,7 +15,16 @@ public class KeycloakGroupsAccessGovernance implements AccessGovernance {
     private final Map<String, List<Entitlement>> catalog;
 
     public KeycloakGroupsAccessGovernance(Resource catalogFile) {
-        this.catalog = CatalogFile.read(catalogFile, CatalogFile.class).catalog();
+        CatalogFile content = CatalogFile.read(catalogFile, CatalogFile.class);
+        if (content.entitlements() == null || content.entitlements().isEmpty()) {
+            throw new IllegalStateException("IGA catalog file " + catalogFile.getDescription() + " lists no entitlements");
+        }
+        this.catalog = content.catalog();
+    }
+
+    @Override
+    public boolean supportsRequests() {
+        return false;
     }
 
     @Override

@@ -112,8 +112,10 @@ class ConnectionsController {
                         clock.millis() - started);
                 throw ApiException.badRequest();
             }
-            audit.connectionChange(requestId, user, system, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
-            throw e;
+            AuditLog.Outcome outcome = e.status() == 422 && "system_not_configured".equals(e.error())
+                    ? AuditLog.Outcome.systemNotConfigured() : AuditLog.Outcome.ofFailure(e);
+            audit.connectionChange(requestId, user, system, outcome, clock.millis() - started);
+            throw ApiException.limitOf(e);
         } catch (RuntimeException e) {
             // Token refresh or exchange failed: the change did not happen and that is worth an event too.
             audit.connectionChange(requestId, user, system, AuditLog.Outcome.upstreamUnavailable(), clock.millis() - started);

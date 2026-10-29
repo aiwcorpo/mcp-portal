@@ -161,20 +161,20 @@ class RateLimitsTest extends PortalHarness {
         assertThat(enrollment.headers().firstValue("Retry-After")).hasValue("600");
 
         stub(post(urlPathEqualTo("/v1/connections/gitlab/oauth/start")), 429, "{\"error\":\"rate_limited\"}", "30");
+        // C12 lists no 429 for the start of an OAuth connection, so it is the 503 of the contract (CC proposal 3).
         HttpResponse<String> oauth = browser.post("/api/v1/connections/gitlab/oauth", "{}", true);
-        assertThat(oauth.statusCode()).isEqualTo(429);
-        assertThat(oauth.headers().firstValue("Retry-After")).hasValue("30");
-        assertThat(JSON.readTree(oauth.body()).get("error").asString()).isEqualTo("rate_limited");
+        C12.assertResponse("POST", "/api/v1/connections/{system}/oauth", oauth);
+        assertThat(oauth.statusCode()).isEqualTo(503);
     }
 
     @Test
-    void aLimitWithoutAUsableRetryAfterLeavesTheHeaderOutAndTheGatewayLimitIsPassedOn() {
+    void aLimitWithoutAUsableRetryAfterGetsTheDefaultAndAGatewayLimitIsAnOrdinaryOutage() {
         // A new session per request: the BFF's own limit of three writes must not answer in place of the broker's.
         for (String header : new String[] {null, "soon", "Wed, 21 Oct 2026 07:28:00 GMT", "-5", "99999999999"}) {
             stub(put(urlPathEqualTo("/v1/connections/jira/secret")), 429, "{\"error\":\"rate_limited\"}", header);
             HttpResponse<String> response = fresh().put(SECRET, SECRET_BODY, true);
             assertThat(response.statusCode()).isEqualTo(429);
-            assertThat(response.headers().firstValue("Retry-After")).as(String.valueOf(header)).isEmpty();
+            assertThat(response.headers().firstValue("Retry-After")).as(String.valueOf(header)).hasValue("60");
         }
         stub(put(urlPathEqualTo("/v1/connections/jira/secret")), 429, "{\"error\":\"rate_limited\"}", "0");
         assertThat(fresh().put(SECRET, SECRET_BODY, true).headers().firstValue("Retry-After")).hasValue("1");
@@ -183,8 +183,8 @@ class RateLimitsTest extends PortalHarness {
                 .withHeader("Retry-After", "12").withHeader("Content-Type", "application/json")
                 .withBody("{\"error\":\"rate_limited\"}")));
         HttpResponse<String> catalog = fresh().get("/api/v1/catalog");
-        assertThat(catalog.statusCode()).isEqualTo(429);
-        assertThat(catalog.headers().firstValue("Retry-After")).hasValue("12");
+        C12.assertResponse("GET", "/api/v1/catalog", catalog);
+        assertThat(catalog.statusCode()).isEqualTo(503);
     }
 
     @Test

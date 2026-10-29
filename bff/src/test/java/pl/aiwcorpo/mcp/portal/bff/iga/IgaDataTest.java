@@ -40,7 +40,7 @@ class IgaDataTest {
 
     @Test
     void requestableLeavesOutHeldEntitlementsAndBadNames() {
-        List<AccessGovernance.Entitlement> result = IgaData.requestable(List.of(
+        List<AccessGovernance.Entitlement> result = IgaData.requestable("jira", List.of(
                 new AccessGovernance.Entitlement("mcp-jira-read", null),
                 new AccessGovernance.Entitlement("mcp-jira-write", "  "),
                 new AccessGovernance.Entitlement("jira-admin", "no prefix"),
@@ -52,9 +52,21 @@ class IgaDataTest {
     }
 
     @Test
+    void theAdminGroupAndEntitlementsOfAnotherSystemAreNeverOffered() {
+        List<AccessGovernance.Entitlement> result = IgaData.requestable("jira", List.of(
+                new AccessGovernance.Entitlement("mcp-platform-admin", null),
+                new AccessGovernance.Entitlement("mcp-confluence-write", null),
+                new AccessGovernance.Entitlement("mcp-jira-write", null)), Set.of());
+
+        assertThat(result).extracting(AccessGovernance.Entitlement::name).containsExactly("mcp-jira-write");
+        assertThat(IgaData.belongsTo("jira", "mcp-platform-admin")).isFalse();
+        assertThat(IgaData.belongsTo("jira", "mcp-jiraX-read")).isFalse();
+    }
+
+    @Test
     void aTextCutAtTheLimitDoesNotSplitTheNotation() {
         String text = "x".repeat(497) + "‮";
-        List<AccessGovernance.Entitlement> result = IgaData.requestable(
+        List<AccessGovernance.Entitlement> result = IgaData.requestable("jira",
                 List.of(new AccessGovernance.Entitlement("mcp-jira-read", text)), Set.of());
         assertThat(result.getFirst().description()).isEqualTo("x".repeat(497));
     }

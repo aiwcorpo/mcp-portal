@@ -60,8 +60,11 @@ class AccessRequestsController {
         if (systems == null || systems.length != 1 || !BrokerData.SYSTEMS.contains(systems[0])) {
             throw ApiException.badRequest();
         }
+        if (!iga.supportsRequests()) {
+            throw notRequestable();
+        }
         try {
-            return IgaData.requestable(iga.catalog(systems[0]), user.groups()).stream()
+            return IgaData.requestable(systems[0], iga.catalog(systems[0]), user.groups()).stream()
                     .map(e -> new RequestableEntitlement(e.name(), e.description())).toList();
         } catch (NotRequestableException e) {
             throw notRequestable();
@@ -95,12 +98,12 @@ class AccessRequestsController {
     }
 
     private boolean listed(String entitlement, Set<String> held) {
-        if (held.contains(entitlement)) {
+        if (held.contains(entitlement) || !iga.supportsRequests()) {
             return false;
         }
         for (String system : BrokerData.SYSTEMS) {
             for (AccessGovernance.Entitlement listed : iga.catalog(system)) {
-                if (listed != null && entitlement.equals(listed.name())) {
+                if (listed != null && IgaData.belongsTo(system, entitlement) && entitlement.equals(listed.name())) {
                     return true;
                 }
             }

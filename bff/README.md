@@ -227,9 +227,10 @@ Kontrakty 4.0.0. Szczegóły decyzji w `STATUS.md` (M4.1 ... M4.4).
 - Administracja rejestru (grupa `mcp-platform-admin`, sprawdzana w BFF i w gateway): `GET /api/v1/admin/registry`,
   `.../servers/{serverId}/tools/{tool}/pending` (diff: `approvedEntry`, `pendingEntry`, wersje, `source`),
   `POST .../approve` (`409 hash_mismatch`, `422 ManifestRejected` z `reason`). Teksty definicji z hasłami ukrytych znaków zapisanymi
-  jawnie; hashe bez zmian. Zatwierdzenie zostawia zdarzenie `admin_change` / `definition_approved` z `definitionHash`.
+  jawnie; hashe bez zmian. Źródłem prawdy dla udanego zatwierdzenia jest zdarzenie gateway'a (`admin_change` / `definition_approved`, `sub` administratora,
+  `definitionHash`); portal zapisuje własne `admin_change` tylko dla prób bez skutku (bez `reason`, z `outcome` i `errorCode`). `approve` wymaga `Sec-Fetch-Site: same-origin`.
 - Limity na sesję: zapis tokenu i zapisy Authenticatora (zmienne `PORTAL_LIMIT_*`), odpowiedź `429 rate_limited` z `Retry-After`; `429` z
-  brokera i gateway'a jest przekazywane dalej.
+  brokera jest przekazywane dalej tylko tam, gdzie C12 opisuje `429` (zapis tokenu, Authenticator; bez `Retry-After` od brokera: 60 s), gdzie indziej to `503`.
 - "Ostatnie użycie" konta serwisowego (CC-150) liczy web z wierszy `GET /api/v1/activity/calls` (wyniki `ok`, `confirmed`, `error`);
   BFF nie ma na to osobnego pola.
 

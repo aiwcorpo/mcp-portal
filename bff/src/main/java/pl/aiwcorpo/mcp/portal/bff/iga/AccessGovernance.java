@@ -12,6 +12,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 public interface AccessGovernance {
 
+    /** False for an adapter without a request flow; C12 then answers 422 not_requestable also for the catalog. */
+    default boolean supportsRequests() {
+        return true;
+    }
+
     /** Entitlements (C9 group names) of a system, as the IGA catalog lists them. */
     List<Entitlement> catalog(String system);
 

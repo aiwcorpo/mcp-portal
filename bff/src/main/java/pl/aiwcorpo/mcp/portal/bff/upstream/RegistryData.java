@@ -54,7 +54,7 @@ public final class RegistryData {
     }
 
     /** One {@code PendingTool} as the browser gets it, or null when it breaks the contract. */
-    public static JsonNode validPending(JsonNode pending) {
+    public static JsonNode validPending(JsonNode pending, String tool) {
         if (pending == null || !pending.isObject() || !onlyFields(pending, PENDING_FIELDS)
                 || !pending.has("approvedEntry") || !pending.has("pendingEntry") || !pending.has("pendingHash")
                 || !pending.has("pendingVersion") || !pending.has("source")) {
@@ -65,11 +65,14 @@ public final class RegistryData {
         JsonNode approvedIn = pending.get("approvedInVersion");
         boolean fits = (approved.isNull() || validTool(approved, TOOL_FIELDS, false))
                 && validTool(entry, TOOL_FIELDS, false)
+                // The administrator approves the tool of the path, so the diff must be about that tool.
+                && tool.equals(entry.get("name").asString())
+                && (approved.isNull() || tool.equals(approved.get("name").asString()))
                 && hash(pending.get("pendingHash"))
                 && entry.get("definitionHash").equals(pending.get("pendingHash"))
                 && semver(pending.get("pendingVersion"))
                 && SOURCES.contains(text(pending.get("source")))
-                && (approvedIn == null || approvedIn.isNull() && approved.isNull() || semver(approvedIn));
+                && (approvedIn == null || approvedIn.isNull() || semver(approvedIn));
         return fits ? neutralized(pending) : null;
     }
 

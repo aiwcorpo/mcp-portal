@@ -45,14 +45,16 @@ class IgaConfigTest {
     }
 
     @Test
-    void keycloakGroupsNeedsItsCatalogFileAndWorksOutsideDev() {
+    void keycloakGroupsNeedsItsCatalogFileAndWorksOutsideDev() throws java.io.IOException {
+        Path catalog = java.nio.file.Files.createTempFile("catalog", ".yaml");
+        java.nio.file.Files.writeString(catalog, "entitlements:\n  jira: [mcp-jira-read]\n");
         PortalProperties missing = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null, null,
                 null, null, new PortalProperties.Iga("keycloak-groups", null, null, "preferred_username"), null, null, null);
         assertThatThrownBy(() -> new IgaConfig().accessGovernance(missing, new DevMode(false), Clock.systemUTC()))
                 .hasMessageContaining("portal.iga.catalog-file");
         PortalProperties present = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null, null,
                 null, null, new PortalProperties.Iga("keycloak-groups", null,
-                Path.of("dev/iga-mock.yaml").toAbsolutePath().toString(), "preferred_username"), null, null, null);
+                catalog.toString(), "preferred_username"), null, null, null);
         assertThat(new IgaConfig().accessGovernance(present, new DevMode(false), Clock.systemUTC()))
                 .isInstanceOf(KeycloakGroupsAccessGovernance.class);
     }

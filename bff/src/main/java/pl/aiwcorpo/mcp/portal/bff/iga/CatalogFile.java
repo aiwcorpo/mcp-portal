@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.core.io.Resource;
 
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
@@ -28,8 +29,9 @@ record CatalogFile(Map<String, List<String>> entitlements, Map<String, String> d
 
     static <T> T read(Resource file, Class<T> type) {
         try (InputStream in = file.getInputStream()) {
-            return new YAMLMapper().readValue(in, type);
-        } catch (IOException e) {
+            // A misspelled key must stop the start, not leave a catalog that is quietly empty.
+            return YAMLMapper.builder().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build().readValue(in, type);
+        } catch (IOException | RuntimeException e) {
             throw new IllegalStateException("Cannot read IGA data file " + file.getDescription(), e);
         }
     }

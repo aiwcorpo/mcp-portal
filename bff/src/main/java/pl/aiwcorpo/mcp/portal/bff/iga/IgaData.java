@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.upstream.ContractValues;
 import pl.aiwcorpo.mcp.portal.bff.upstream.TextHygiene;
 
@@ -62,11 +63,12 @@ public final class IgaData {
     }
 
     /** Entitlements the user can order: valid names only, text neutralized and cut, names the user already holds left out. */
-    public static List<AccessGovernance.Entitlement> requestable(List<AccessGovernance.Entitlement> catalog,
+    public static List<AccessGovernance.Entitlement> requestable(String system,
+                                                                 List<AccessGovernance.Entitlement> catalog,
                                                                  Set<String> held) {
         List<AccessGovernance.Entitlement> result = new ArrayList<>();
         for (AccessGovernance.Entitlement entitlement : catalog == null ? List.<AccessGovernance.Entitlement>of() : catalog) {
-            if (entitlement == null || !validEntitlement(entitlement.name())) {
+            if (entitlement == null || !belongsTo(system, entitlement.name())) {
                 log.warn("Dropping an IGA catalog entry outside the contract");
                 continue;
             }
@@ -94,6 +96,14 @@ public final class IgaData {
         boolean fits = !result.requestId().isEmpty() && result.requestId().length() <= MAX_REQUEST_ID
                 && TextHygiene.isClean(result.requestId(), false);
         return fits ? result : null;
+    }
+
+    /**
+     * An entitlement the portal may offer for a system: a valid group name of that system ({@code mcp-<system>-...}),
+     * never the platform admin group, whatever the IGA catalog says.
+     */
+    public static boolean belongsTo(String system, String name) {
+        return validEntitlement(name) && !PortalUser.ADMIN_GROUP.equals(name) && name.startsWith("mcp-" + system + "-");
     }
 
     public static boolean validEntitlement(String name) {

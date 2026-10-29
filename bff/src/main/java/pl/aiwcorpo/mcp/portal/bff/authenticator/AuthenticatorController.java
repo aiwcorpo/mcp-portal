@@ -96,7 +96,7 @@ class AuthenticatorController {
             broker.deleteAuthenticator(token, requestId);
         } catch (RuntimeException e) {
             audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
-            throw e;
+            throw ApiException.limitOf(e);
         }
         forgetEnrollment(request);
         audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ok("authenticator_removed"), clock.millis() - started);
@@ -128,13 +128,13 @@ class AuthenticatorController {
             if (e.status() == 429 && RATE_LIMITED.equals(e.error())) {
                 audit.authenticatorEvent(requestId, user,
                         AuditLog.Outcome.denied("authenticator_enrollment_failed", RATE_LIMITED), clock.millis() - started);
-                throw ApiException.rateLimited(e.retryAfterSeconds() == null ? null : e.retryAfterSeconds().longValue());
+                throw ApiException.limitOf(e);
             }
             audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
-            throw e;
+            throw ApiException.limitOf(e);
         } catch (RuntimeException e) {
             audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
-            throw e;
+            throw ApiException.limitOf(e);
         }
         request.getSession().setAttribute(SessionAttributes.AUTHENTICATOR_ENROLLMENT_ID, enrollment.enrollmentId());
         audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ok("authenticator_enrollment_started"),
@@ -180,10 +180,10 @@ class AuthenticatorController {
                 return ResponseEntity.unprocessableEntity().body(new EnrollmentError(e.error()));
             }
             audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
-            throw e;
+            throw ApiException.limitOf(e);
         } catch (RuntimeException e) {
             audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ofFailure(e), clock.millis() - started);
-            throw e;
+            throw ApiException.limitOf(e);
         }
         forgetEnrollment(request);
         audit.authenticatorEvent(requestId, user, AuditLog.Outcome.ok("authenticator_registered"), clock.millis() - started);

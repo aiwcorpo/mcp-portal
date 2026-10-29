@@ -84,10 +84,12 @@ public class AuditLog {
     }
 
     /**
-     * {@code admin_change} with reason {@code definition_approved} for an administrator's approval of a pending tool
-     * definition (CC-133). {@code outcome} carries how the attempt ended; the sub is the administrator.
+     * {@code admin_change} for an approval of a pending tool definition that did not end in an approval (refused,
+     * rejected, failed). The reason {@code definition_approved} belongs to the approval itself, which the gateway
+     * records (its event is the source of truth), so it is not used here; C8 has no reason for a refused approval
+     * (CC proposal), so none is given and {@code outcome} and {@code errorCode} say how it ended.
      */
-    public void definitionApproval(String requestId, PortalUser user, String serverId, String tool, String definitionHash,
+    public void definitionApprovalFailed(String requestId, PortalUser user, String serverId, String tool, String definitionHash,
                                    Outcome outcome, long latencyMs) {
         write(new AuditEvent(
                 clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
@@ -101,7 +103,7 @@ public class AuditLog {
                 tool == null || tool.isEmpty() ? null : tool,
                 null,
                 outcome.decision(),
-                "definition_approved",
+                null,
                 null,
                 null,
                 outcome.outcome(),

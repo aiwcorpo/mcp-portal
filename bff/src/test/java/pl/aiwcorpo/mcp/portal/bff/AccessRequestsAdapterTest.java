@@ -40,6 +40,11 @@ class AccessRequestsAdapterTest extends PortalHarness {
         AccessGovernance scriptedIga() {
             return new AccessGovernance() {
                 @Override
+                public boolean supportsRequests() {
+                    return mode != Mode.NO_FLOW;
+                }
+
+                @Override
                 public List<Entitlement> catalog(String system) {
                     if (mode == Mode.UNAVAILABLE) {
                         throw new IgaUnavailableException("scripted");
@@ -48,7 +53,9 @@ class AccessRequestsAdapterTest extends PortalHarness {
                         return exampleCatalog;
                     }
                     return List.of(new Entitlement("mcp-jira-read", "line one‮line two <U+0041>"),
-                            new Entitlement("not a group", "dropped"), new Entitlement("mcp-jira-write", "x".repeat(600)));
+                            new Entitlement("not a group", "dropped"), new Entitlement("mcp-jira-write", "x".repeat(600)),
+                            new Entitlement("mcp-platform-admin", "never offered"),
+                            new Entitlement("mcp-confluence-read", "another system"));
                 }
 
                 @Override
@@ -122,6 +129,28 @@ class AccessRequestsAdapterTest extends PortalHarness {
     }
 
     @Test
+    void theEntitlementsOfAnAdapterWithoutARequestFlowAreNotRequestableEither() {
+        mode = ScriptedIga.Mode.NO_FLOW;
+
+        HttpResponse<String> response = session().get(PATH + "/entitlements?system=jira");
+
+        C12.assertResponse("GET", PATH + "/entitlements", response);
+        assertThat(response.statusCode()).isEqualTo(422);
+        assertThat(JSON.readTree(response.body()).get("error").asString()).isEqualTo("not_requestable");
+    }
+
+    @Test
+    void theAdminGroupCannotBeRequestedWhateverTheCatalogSays() {
+        mode = ScriptedIga.Mode.REDIRECT;
+        TestBrowser browser = session();
+
+        HttpResponse<String> response = browser.post(PATH, "{\"entitlement\":\"mcp-platform-admin\"}", true);
+        C12.assertResponse("POST", PATH, response);
+        assertThat(response.statusCode()).isEqualTo(422);
+        assertThat(browser.post(PATH, "{\"entitlement\":\"mcp-jira-read\"}", true).statusCode()).isEqualTo(200);
+    }
+
+    @Test
     void aRedirectToTheIgaFormIsPassedOn() {
         mode = ScriptedIga.Mode.REDIRECT;
 
@@ -160,7 +189,7 @@ class AccessRequestsAdapterTest extends PortalHarness {
 
     @Test
     void catalogTextFromTheIgaIsNeutralizedCutAndInvalidNamesAreDropped() {
-        mode = ScriptedIga.Mode.NO_FLOW;
+        mode = ScriptedIga.Mode.REDIRECT;
 
         HttpResponse<String> response = login(MALLORY, Instant.now()).get(PATH + "/entitlements?system=jira");
 
