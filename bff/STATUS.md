@@ -399,12 +399,13 @@ Testy: `./mvnw test`: 398 testów, 0 błędów (nowy `RateLimitsTest` na zmniejs
   rejestru (`jira`, `opensearch_disabled`) i diffu (`new_tool`, `changed_on_server`); kody `429`, `422 not_requestable`, `422` z
   `ManifestRejected`, `503` przechodzą walidację operacji.
 - Mocki MSW (`mocks/msw`) to dane dla web; po stronie BFF ich odpowiednikiem są przykłady OpenAPI sprawdzone wyżej oraz mapowania WireMock z
-  jara 4.0.0 (`run-mocks.sh` bierze wersję z `pom.xml`). Stuby brokera i gateway'a 4.0.0 zawierają `pendingVersion`, `source` i `Retry-After`
-  w odpowiedziach, więc BFF 4.0.0 przechodzi na nich bez zmian w stubach.
+  jara 4.0.0 (`run-mocks.sh` bierze wersję z `pom.xml`). Stuby 4.0.0 mają `pendingVersion` i `source` (gateway) oraz `Retry-After` w odpowiedziach `429` brokera
+  (start OAuth, rejestracja Authenticatora), więc BFF 4.0.0 przechodzi na nich bez zmian w stubach.
 - `scripts/build-image.sh` taguje `mcp-portal-bff:m4-<sha>` (przedrostek z `IMAGE_TAG_PREFIX`). Obraz zawiera sam jar BFF; zbudowany
   frontend nie wchodzi do obrazu, tylko jest montowany i wskazywany przez `PORTAL_WEB_DIST` (jak w M3, po stronie compose ws-01).
 
-Testy: `./mvnw test`: 402 testy, 0 błędów, 1 pominięty tylko w profilu `dev-env` (jak w M2/M3).
+Testy: `./mvnw test`: 402 testy, 0 błędów, 0 pominiętych (testy `-Pdev-env` na stosie nie były uruchamiane: wymagają Keycloaka i certyfikatów
+ze `.secrets`, nie czytam ich; do wykonania przez koordynatora).
 
 ## Propozycje CC (M4)
 
@@ -415,3 +416,5 @@ Testy: `./mvnw test`: 402 testy, 0 błędów, 1 pominięty tylko w profilu `dev-
 
 1. C8: osobne zdarzenie (np. `access_request_change`) albo znana wartość `reason` dla `admin_change` przy złożeniu wniosku o dostęp z
    portalu; dziś portal nie ma jak zapisać tej akcji w audycie.
+
+Obraz: `mcp-portal-bff:m4-6c73f1b` (z commita M4.4, `scripts/build-image.sh`, bez wdrożenia na stos).
