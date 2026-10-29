@@ -25,7 +25,7 @@ class StepUpPolicyTest {
 
     private static PortalProperties properties(List<String> acrValues) {
         return new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
-                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues, List.of(), "/authenticator", "/admin/registry"), null, null, null, null, null, null);
+                new PortalProperties.StepUp(Duration.ofMinutes(5), acrValues, List.of(), "/authenticator", "/admin"), null, null, null, null, null, null);
     }
 
     private static StepUpPolicy policy(List<String> acrValues) {
@@ -68,7 +68,7 @@ class StepUpPolicyTest {
     @Test
     void amrFromTheIdTokenCountsAsMfaWhenConfigured() {
         PortalProperties properties = new PortalProperties("keycloak", "mcp-portal-bff", null, null, null, null, null,
-                new PortalProperties.StepUp(Duration.ofMinutes(5), List.of(), List.of("mfa"), "/authenticator", "/admin/registry"),
+                new PortalProperties.StepUp(Duration.ofMinutes(5), List.of(), List.of("mfa"), "/authenticator", "/admin"),
                 null, null, null, null, null, null);
         StepUpPolicy policy = new StepUpPolicy(properties, new DevMode(false), CLOCK);
         assertThat(policy.isFresh(withAmr(List.of("pwd", "mfa")))).isTrue();

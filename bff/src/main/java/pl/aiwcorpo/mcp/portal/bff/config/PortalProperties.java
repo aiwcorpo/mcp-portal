@@ -79,7 +79,7 @@ public record PortalProperties(
             @DefaultValue List<String> acrValues,
             @DefaultValue List<String> amrValues,
             @DefaultValue("/authenticator") String authenticatorReturnPath,
-            @DefaultValue("/admin/registry") String adminReturnPath) {
+            @DefaultValue("/admin") String adminReturnPath) {
 
         public StepUp {
             if (!ReturnPaths.isValid(authenticatorReturnPath)) {

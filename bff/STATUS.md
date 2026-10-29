@@ -444,7 +444,7 @@ Testy: `./mvnw test`: 410 testów, 0 błędów.
 Zależność `mcp-contracts` 4.1.0 (gateway 4.1.0 i BFF 4.1.0 wchodzą razem: schematy `RegistryTool`/`PendingTool` są zamknięte).
 - `approve` przyjmuje `acceptRiskLowering` (ścisły boolean). Przy `true` BFF wymaga świeżego MFA administratora tym samym mechanizmem i
   oknem co rejestracja Authenticatora; bez niego `401 step_up_required` ze `stepUpUrl`, `returnPath` = `portal.step-up.admin-return-path`
-  (`/admin/registry`), zdarzenie `admin_change` z `outcome: denied`, bez wywołania gateway'a. Pole idzie do gateway'a tylko przy `true`
+  (`/admin`; web podmienia go na `/admin?mfa=ok`, co C12 dopuszcza, `ReturnPath` ma query), zdarzenie `admin_change` z `outcome: denied`, bez wywołania gateway'a. Pole idzie do gateway'a tylko przy `true`
   (`false`/brak/`null` = zwykłe zatwierdzenie, bez MFA).
 - `riskLowered` (pending, `RegistryTool`, `PendingTool`) jest przekazywane do web; musi być booleanem, a w zatwierdzonym wpisie nie może być `true`.
 - Aktywność (CC-165): gateway zmienia wynik wierszy (m.in. `rate_limited`, `tool_disabled`, `denied_*` w grupie `denied`); BFF przekazuje

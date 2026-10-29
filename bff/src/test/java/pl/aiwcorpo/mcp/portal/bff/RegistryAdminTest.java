@@ -240,7 +240,7 @@ class RegistryAdminTest extends PortalHarness {
         assertThat(refused.statusCode()).isEqualTo(401);
         JsonNode body = JSON.readTree(refused.body());
         assertThat(body.get("error").asString()).isEqualTo("step_up_required");
-        assertThat(body.get("stepUpUrl").asString()).startsWith("/api/v1/auth/login?stepUp=true").contains("admin");
+        assertThat(body.get("stepUpUrl").asString()).isEqualTo("/api/v1/auth/login?stepUp=true&returnPath=/admin");
         assertThat(approvals()).isEmpty();
         assertThat(lastAuditEvent().get("outcome").asString()).isEqualTo("denied");
         ContractSchemas.assertValid(AUDIT, lastAuditEvent());
