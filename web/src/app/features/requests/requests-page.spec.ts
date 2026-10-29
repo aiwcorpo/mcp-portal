@@ -178,11 +178,18 @@ describe('RequestsPage', () => {
         await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
       }
 
-      const requests = Array.from(document.querySelectorAll('tbody tr')).filter((tr) =>
-        text(tr).includes('mcp-gitlab-read'),
+      await until(() => expect(text()).toContain('mcp-gitlab-read'));
+      await until(() =>
+        expect(
+          Array.from(document.querySelectorAll('tbody tr')).filter((tr) =>
+            text(tr).includes('mcp-gitlab-read'),
+          ),
+        ).toHaveLength(1),
       );
-      expect(requests).toHaveLength(1);
       expect(posted).toHaveLength(2);
+      expect(
+        store.state.requests!.filter((candidate) => candidate.entitlement === 'mcp-gitlab-read'),
+      ).toHaveLength(1);
     });
 
     it('goes to the form of the IGA when the adapter answers with a URL', async () => {
