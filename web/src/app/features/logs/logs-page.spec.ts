@@ -78,6 +78,7 @@ describe('LogsPage', () => {
       'Odmowa (brak uprawnienia)',
       'Odmowa (poza zakresem linku)',
       'Błąd',
+      'Zbyt wiele wywołań',
       'Inny wynik',
     ]) {
       expect(text(), label).toContain(label);
@@ -146,6 +147,22 @@ describe('LogsPage', () => {
     input.dispatchEvent(new Event('input'));
     await until(() => expect(queries.at(-1)?.get('q')).toBe('ABC-1190'));
     expect(queries.at(-1)?.get('cursor')).toBeNull();
+  });
+
+  it('puts limits and step-up refusals in "Odmowy" and missing credentials in "Błędy" (CC-142)', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Zbyt wiele wywołań'));
+
+    select('logs-group', 'denied');
+    await until(() => expect(text()).not.toContain('Wykonano'));
+    expect(text()).toContain('Zbyt wiele wywołań');
+    expect(text()).toContain('Odmowa (brak uprawnienia)');
+    expect(text()).not.toContain('Brak połączenia z systemem');
+
+    select('logs-group', 'error');
+    await until(() => expect(text()).not.toContain('Zbyt wiele wywołań'));
+    expect(text()).toContain('Błąd');
   });
 
   it('says so when no call matches the filters', async () => {

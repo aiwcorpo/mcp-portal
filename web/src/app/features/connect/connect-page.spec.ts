@@ -180,6 +180,27 @@ describe('ConnectPage', () => {
     expect(tokenInput().value).toBe('');
   });
 
+  it('shows the wait from Retry-After on a 429 and keeps the form usable', async () => {
+    server.use(
+      http.put('/api/v1/connections/jira/secret', () =>
+        HttpResponse.json(
+          { error: 'rate_limited' },
+          { status: 429, headers: { 'Retry-After': '30' } },
+        ),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(tokenInput()).toBeTruthy());
+
+    type(tokenInput(), 'some-token');
+    button('Sprawdź i zapisz').click();
+
+    await until(() => expect(text()).toContain('Za dużo żądań. Spróbuj ponownie za 30 s.'));
+    expect(tokenInput().value).toBe('');
+    expect(button('Sprawdź i zapisz').getAttribute('aria-disabled')).not.toBe('true');
+  });
+
   it('requires a token before sending, trims it and rejects whitespace or more than 4096 characters', async () => {
     const bodies: string[] = [];
     server.events.on('request:start', async ({ request }) => {

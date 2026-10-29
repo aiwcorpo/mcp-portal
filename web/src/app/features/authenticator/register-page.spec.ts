@@ -166,14 +166,17 @@ describe('AuthenticatorRegisterPage', () => {
   it('shows 429 and lets the user retry from step 1', async () => {
     server.use(
       http.post('/api/v1/authenticator/enrollment', () =>
-        HttpResponse.json({ error: 'rate_limited' }, { status: 429 }),
+        HttpResponse.json(
+          { error: 'rate_limited' },
+          { status: 429, headers: { 'Retry-After': '120' } },
+        ),
       ),
     );
     configureTestApp();
     await openRoute('/authenticator/register');
     await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
     button('Dalej').click();
-    await until(() => expect(text()).toContain('Za dużo żądań. Spróbuj ponownie za chwilę.'));
+    await until(() => expect(text()).toContain('Za dużo żądań. Spróbuj ponownie za 120 s.'));
     expect(text()).toContain('1. Informacja');
     expect(button('Dalej').disabled).toBe(false);
   });

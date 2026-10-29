@@ -1,0 +1,178 @@
+.lead {
+  margin-bottom: 8px;
+  color: var(--pm-muted);
+  max-width: 720px;
+}
+
+.summary {
+  margin-bottom: 12px;
+  color: var(--pm-warn);
+  font-weight: 500;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px 8px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--pm-border);
+  font-weight: 400;
+}
+
+thead th {
+  padding-block: 10px;
+  color: var(--pm-muted);
+  font-size: 13px;
+}
+
+.c-toggle {
+  width: 32px;
+  padding-inline: 0 4px;
+}
+
+.toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--pm-radius);
+  background: transparent;
+  color: var(--pm-muted);
+  cursor: pointer;
+}
+
+.toggle svg {
+  transition: transform 120ms;
+  transform: rotate(-90deg);
+}
+
+.toggle svg.open {
+  transform: none;
+}
+
+.c-name {
+  font-weight: 600;
+}
+
+.server-id {
+  display: block;
+  font-weight: 400;
+}
+
+.tool td {
+  padding-block: 9px;
+  border-top: 1px solid var(--pm-border);
+  font-size: 13px;
+}
+
+.tool-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.source {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid var(--pm-border-strong);
+  border-radius: var(--pm-radius);
+  white-space: nowrap;
+  color: var(--pm-text);
+}
+
+.source-server {
+  border-color: var(--pm-warn);
+  color: var(--pm-warn);
+  font-weight: 600;
+}
+
+.c-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.quiet {
+  --mat-button-filled-container-color: transparent;
+  --mat-button-filled-label-text-color: var(--pm-text);
+  border: 1px solid var(--pm-border);
+}
+
+.diff-row td {
+  padding: 4px 0 16px;
+}
+
+@media (max-width: 719px) {
+  thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  tr {
+    display: block;
+  }
+
+  .server {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    padding: 10px 0 4px;
+    border-top: 1px solid var(--pm-border);
+  }
+
+  .server th,
+  .server td {
+    padding: 2px 0;
+    border: 0;
+  }
+
+  .server .c-toggle {
+    grid-row: span 4;
+  }
+
+  .server td[data-label]::before {
+    content: attr(data-label);
+    content: attr(data-label) / '';
+    margin-right: 8px;
+    color: var(--pm-muted);
+  }
+
+  .tool {
+    padding: 8px 0 8px 32px;
+    border-top: 1px solid var(--pm-border);
+  }
+
+  .tool td {
+    display: block;
+    padding: 1px 0;
+    border: 0;
+  }
+
+  .tool .c-toggle {
+    display: none;
+  }
+
+  .c-actions {
+    padding-top: 4px;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .diff-row,
+  .diff-row td {
+    display: block;
+    padding: 0;
+  }
+}

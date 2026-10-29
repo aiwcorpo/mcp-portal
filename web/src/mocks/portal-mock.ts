@@ -1,9 +1,12 @@
 import {
+  MOCK_XSRF_TOKEN,
+  XSRF_COOKIE,
   createPortalBffHandlers,
   portalBffExample,
   portalBffExamples,
 } from '@aiwcorpo/mcp-contracts/msw';
 import { http, HttpResponse, type HttpHandler } from 'msw';
+import { AdminState, createAdminHandlers, initialAdminState } from './admin-mock';
 import { M3State, createM3Handlers, initialM3State } from './m3-mock';
 import type {
   AccessRequest,
@@ -60,7 +63,7 @@ export interface MockRequest {
   decidedAt?: string;
 }
 
-export interface MockState extends M3State {
+export interface MockState extends M3State, AdminState {
   session: boolean;
   scenario: MockScenario;
   oauthOutcome: MockOAuthOutcome;
@@ -106,6 +109,7 @@ export function initialMockState(): MockState {
     links: null,
     pendingOAuth: null,
     ...initialM3State(),
+    ...initialAdminState(),
   };
 }
 
@@ -459,9 +463,22 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
     store.state.session ? handler() : portalBffExample('getMe', 'unauthenticated');
 
   const stateful: HttpHandler[] = [
-    http.get(at('/api/v1/me'), () =>
-      store.state.session ? undefined : portalBffExample('getMe', 'unauthenticated'),
-    ),
+    http.get(at('/api/v1/me'), async () => {
+      if (!store.state.session) {
+        return portalBffExample('getMe', 'unauthenticated');
+      }
+      if (!store.state.admin) {
+        return undefined;
+      }
+      // The contract handler sets the CSRF cookie on GET /me; answering instead of it must do the same.
+      const me = portalBffExample('getMe', 'admin');
+      return HttpResponse.json(await me.json(), {
+        headers: {
+          'Set-Cookie': `${XSRF_COOKIE}=${MOCK_XSRF_TOKEN}; Path=/; Secure; SameSite=Strict`,
+          'X-Request-Id': MOCK_REQUEST_ID,
+        },
+      });
+    }),
     http.post(at('/api/v1/auth/logout'), ({ request, cookies }) => {
       if (!csrfValid(request, cookies)) {
         return undefined;
@@ -667,7 +684,15 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       store.state.session ? undefined : portalBffExample('getMe', 'unauthenticated'),
     requestId: MOCK_REQUEST_ID,
   });
-  return [...stateful, ...m3, ...createPortalBffHandlers({ baseUrl })];
+  const adminHandlers = createAdminHandlers(store, {
+    at,
+    csrfValid,
+    failure,
+    unauthenticated: () =>
+      store.state.session ? undefined : portalBffExample('getMe', 'unauthenticated'),
+    requestId: MOCK_REQUEST_ID,
+  });
+  return [...stateful, ...m3, ...adminHandlers, ...createPortalBffHandlers({ baseUrl })];
 }
 
 /** What the BFF and the IdP would do after a successful login. */

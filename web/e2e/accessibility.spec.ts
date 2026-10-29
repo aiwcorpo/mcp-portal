@@ -45,6 +45,7 @@ const PAGES = [
   { path: '/authenticator/register', ready: 'Zarejestruj Authenticator' },
   { path: '/logs', ready: 'Logi audytowe' },
   { path: '/requests', ready: 'Wnioski' },
+  { path: '/admin?mockAdmin=in', ready: 'Administracja' },
   { path: '/links', ready: 'Moje linki' },
   { path: '/links/new', ready: 'Nowy link' },
   { path: '/links/przeglad-zgloszen', ready: 'Konfiguracja linku "Przegląd zgłoszeń"' },
@@ -85,6 +86,26 @@ for (const scheme of ['dark', 'light'] as const) {
     }
     await page.goto('/catalog?mockAuthenticator=none');
     await expect(page.getByText('Narzędzia "Usuwanie" wymagają kodu')).toBeVisible();
+    await expectNoViolations(page);
+  });
+
+  test(`the request dialog and the definition diff have no violations (${scheme})`, async ({
+    page,
+  }) => {
+    await page.goto('/requests');
+    await useScheme(page, scheme);
+    await page.getByRole('button', { name: 'Złóż wniosek' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Złóż wniosek' });
+    await dialog.getByLabel('System').selectOption('jira');
+    await dialog.getByLabel('Uprawnienie').selectOption('mcp-jira-destructive');
+    await expect(dialog.getByText('Opis z systemu uprawnień')).toBeVisible();
+    await expectNoViolations(page);
+    await dialog.getByRole('button', { name: 'Anuluj' }).click();
+
+    await page.goto('/admin?mockAdmin=in');
+    await page.getByRole('button', { name: 'Pokaż różnice (jira__update_issue)' }).click();
+    await page.getByRole('button', { name: 'Pokaż różnice (confluence__update_page)' }).click();
+    await expect(page.getByText('Źródło: serwer.')).toBeVisible();
     await expectNoViolations(page);
   });
 

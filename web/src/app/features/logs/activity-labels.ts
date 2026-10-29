@@ -32,8 +32,9 @@ const RESULTS: Record<string, () => ResultInfo> = {
     tone: 'danger',
   }),
   rate_limited: () => ({
-    label: $localize`:@@logs.result.rate_limited:Przekroczony limit`,
+    label: $localize`:@@logs.result.rate_limited:Zbyt wiele wywołań`,
     tone: 'danger',
+    explanation: $localize`:@@logs.explain.rate_limited:Wywołanie odrzucone przez limit. Odczekaj chwilę i powtórz.`,
   }),
   step_up_required: () => ({
     label: $localize`:@@logs.result.step_up_required:Wymaga potwierdzenia tożsamości`,

@@ -14,6 +14,7 @@ import {
   createMockHandlers,
   initialMockState,
 } from './portal-mock';
+import { changePendingDefinition } from './admin-mock';
 import { DEMO_CONFIRMATION_ID } from './m3-mock';
 
 /**
@@ -87,6 +88,7 @@ const store = new MockStore(readState(), writeState);
 /**
  * ?mockScenario=default|mixed|empty|nolinks|errors switches the data set, ?mockOAuth=<outcome> the result
  * of the next OAuth provider round trip, ?mockSession=in|out starts with or without a session and
+ * ?mockAdmin=in signs in as an administrator (the Administracja tab) and
  * ?mockAuthenticator=none|active|locked|disabled sets the Authenticator registration and
  * ?mockIga=direct|redirect|groups|down the behaviour of the IGA adapter, all for the rest of the browser session. The preview of the pending operation is /confirm/cnf_4k9Qe2LxW7tB3mZp.
  */
@@ -110,6 +112,9 @@ function applyScenarioFromUrl(): void {
       authenticator: authenticatorFor(authenticator as AuthenticatorScenario),
       enrollment: null,
     });
+  }
+  if (params.get('mockAdmin') === 'in') {
+    store.update({ admin: true });
   }
   const iga = params.get('mockIga');
   if (iga && (IGA_MODES as readonly string[]).includes(iga)) {
@@ -153,6 +158,8 @@ class MockBrowserNavigation extends BrowserNavigation {
 function exposeTestHooks(): void {
   Object.assign(window, {
     __portalMock: {
+      changePendingDefinition: (serverId: string, tool: string) =>
+        changePendingDefinition(store, serverId, tool),
       supersedeConfirmation: (id: string = DEMO_CONFIRMATION_ID) =>
         store.update({
           confirmations: {

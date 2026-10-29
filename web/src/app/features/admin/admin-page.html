@@ -1,0 +1,162 @@
+<h1 class="visually-hidden" i18n="@@admin.title">Administracja</h1>
+
+@if (done(); as text) {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
+}
+
+@let state = registry();
+@if (state.status === 'loading') {
+  <app-loading />
+} @else if (state.status === 'error') {
+  <app-load-error [failure]="state.failure" (retry)="load()" />
+} @else {
+  <p class="lead" i18n="@@admin.lead">
+    Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI
+    zatwierdza sam tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj.
+  </p>
+  @if (totalPending() > 0) {
+    <p class="summary" role="status" i18n="@@admin.pendingTotal">
+      Do zatwierdzenia: {{ totalPending() }}
+    </p>
+  }
+  @if (rows().length) {
+    <table class="table" role="table">
+      <caption class="visually-hidden" i18n="@@admin.caption">
+        Rejestr serwerów MCP
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader" class="c-toggle">
+            <span class="visually-hidden" i18n="@@admin.colToggle">Narzędzia</span>
+          </th>
+          <th scope="col" role="columnheader" i18n="@@admin.colServer">Serwer</th>
+          <th scope="col" role="columnheader" i18n="@@admin.colVersion">Wersja</th>
+          <th scope="col" role="columnheader" i18n="@@admin.colChanges">Zmiany</th>
+          <th scope="col" role="columnheader" i18n="@@admin.colState">Stan</th>
+        </tr>
+      </thead>
+      @for (row of rows(); track row.server.serverId) {
+        @let open = isOpen(row);
+        <tbody role="rowgroup">
+          <tr role="row" class="server">
+            <td role="cell" class="c-toggle">
+              <button
+                type="button"
+                class="toggle"
+                [attr.aria-expanded]="open"
+                [attr.aria-controls]="'tools-' + row.server.serverId"
+                [attr.aria-label]="(open ? hideLabel : showLabel) + ' (' + row.name + ')'"
+                (click)="toggleServer(row)"
+              >
+                <svg
+                  viewBox="0 0 12 12"
+                  width="12"
+                  height="12"
+                  aria-hidden="true"
+                  focusable="false"
+                  [class.open]="open"
+                >
+                  <path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </button>
+            </td>
+            <th scope="row" role="rowheader" class="c-name">
+              {{ row.name }}
+              <code class="server-id muted">{{ row.server.serverId }}</code>
+            </th>
+            <td
+              role="cell"
+              class="mono muted"
+              data-label="Wersja"
+              i18n-data-label="@@admin.colVersion"
+            >
+              {{ row.server.version }}
+            </td>
+            <td role="cell" class="muted" data-label="Zmiany" i18n-data-label="@@admin.colChanges">
+              @if (row.changes) {
+                {{ row.changes }}
+              } @else {
+                &mdash;
+              }
+            </td>
+            <td
+              role="cell"
+              [class]="'state-' + row.tone"
+              data-label="Stan"
+              i18n-data-label="@@admin.colState"
+            >
+              {{ row.state }}
+            </td>
+          </tr>
+          @if (open) {
+            @for (item of row.tools; track item.key; let first = $first) {
+              <tr role="row" class="tool" [id]="first ? 'tools-' + row.server.serverId : null">
+                <td role="cell" class="c-toggle"></td>
+                <td role="cell" class="c-tool">
+                  <code class="tool-name">{{ item.name }}</code>
+                  <span class="note muted">{{ item.title }}</span>
+                </td>
+                <td role="cell" class="muted c-source">
+                  @if (item.pending) {
+                    @if (item.tool.source === 'server') {
+                      <span class="source source-server" i18n="@@admin.sourceServer"
+                        >Źródło: serwer</span
+                      >
+                    } @else {
+                      <span class="source" i18n="@@admin.sourceCi">Źródło: CI</span>
+                    }
+                  }
+                </td>
+                <td role="cell" [class]="'state-' + item.tone" class="c-tool-state">
+                  {{ item.state }}
+                </td>
+                <td role="cell" class="c-actions">
+                  @if (item.pending) {
+                    <button
+                      mat-flat-button
+                      type="button"
+                      class="quiet"
+                      [attr.aria-expanded]="diffOpen().has(item.key)"
+                      [attr.aria-controls]="'diff-' + item.key.replace('/', '-')"
+                      (click)="toggleDiff(item.key)"
+                    >
+                      @if (diffOpen().has(item.key)) {
+                        <ng-container i18n="@@admin.hideDiff">Ukryj różnice</ng-container>
+                      } @else {
+                        <ng-container i18n="@@admin.showDiff">Pokaż różnice</ng-container>
+                      }
+                      <span class="visually-hidden"> ({{ item.name }})</span>
+                    </button>
+                  }
+                </td>
+              </tr>
+              @if (item.pending && diffOpen().has(item.key)) {
+                <tr role="row" class="diff-row">
+                  <td role="cell" colspan="5" [id]="'diff-' + item.key.replace('/', '-')">
+                    <app-tool-diff
+                      [serverId]="row.server.serverId"
+                      [tool]="item.tool.name"
+                      [toolName]="item.name"
+                      (approved)="onApproved(item)"
+                      (gone)="onGone(item)"
+                    />
+                  </td>
+                </tr>
+              }
+            }
+            @if (!row.tools.length) {
+              <tr role="row" class="tool">
+                <td role="cell" class="c-toggle"></td>
+                <td role="cell" colspan="4" class="muted" i18n="@@admin.noTools">
+                  Serwer nie ma zarejestrowanych narzędzi.
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      }
+    </table>
+  } @else {
+    <p class="muted" role="status" i18n="@@admin.empty">Rejestr nie zawiera żadnego serwera.</p>
+  }
+}

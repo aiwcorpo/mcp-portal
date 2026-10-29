@@ -291,6 +291,25 @@ describe('CatalogPage', () => {
     expect(text()).toContain('Żaden serwer ani narzędzie nie pasuje do wyszukiwania.');
   });
 
+  it('shows the wait from Retry-After when starting OAuth hits a limit (429)', async () => {
+    server.use(
+      http.post('/api/v1/connections/gitlab/oauth', () =>
+        HttpResponse.json(
+          { error: 'rate_limited' },
+          { status: 429, headers: { 'Retry-After': '45' } },
+        ),
+      ),
+    );
+    const navigation = configureTestApp();
+    await openRoute('/catalog');
+    await until(() => expect(text()).toContain('GitLab'));
+
+    button('Połącz (GitLab)').click();
+
+    await until(() => expect(text()).toContain('Za dużo żądań. Spróbuj ponownie za 45 s.'));
+    expect(navigation.assign).not.toHaveBeenCalled();
+  });
+
   it('copies the server URL from the catalog', async () => {
     configureTestApp();
     await openRoute('/catalog');

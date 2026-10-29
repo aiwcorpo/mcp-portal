@@ -38,6 +38,8 @@ Parametry adresu, ważne do końca sesji przeglądarki (stan w ciasteczku `mcp-p
 | --- | --- |
 | `mockScenario` | `default` (przykład `states`: wygasający token, wymagane ponowne połączenie, brak uprawnień, konto serwisowe, wymiana tokenu), `mixed` (przykład `mixed`: połączone i niepołączone), `empty` (brak serwerów i linków), `nolinks` (puste Moje linki), `errors` (`503 upstream_unavailable` z `requestId`); zmiana scenariusza zeruje zmiany |
 | `mockAuthenticator` | `none`, `active`, `locked`, `disabled`: rejestracja Authenticatora (domyślnie `none`; start rejestracji i usunięcie wymagają świeżego MFA, które mock "robi" przy przekierowaniu step-up) |
+| `mockIga` | zachowanie adaptera IGA: `direct` (wniosek tworzony od razu, domyślnie), `redirect` (odpowiedź z adresem formularza IGA), `groups` (adapter Keycloak bez wniosków: `422 not_requestable`), `down` (`503`) |
+| `mockAdmin` | `in`: sesja administratora (zakładka Administracja, rejestr z oczekującymi definicjami; hak `window.__portalMock.changePendingDefinition(serverId, tool)` zmienia definicję po otwarciu różnic, żeby wywołać `409`) |
 | `mockOAuth` | wynik następnego powrotu od dostawcy: `ok`, `cancelled`, `flow_invalid`, `provider_error` |
 | `mockSession` | `in` albo `out`: start z sesją albo bez niej (z `?loginError=<kod>` pokazuje błędy logowania) |
 
@@ -168,7 +170,8 @@ src/app/
   features/connect/     Połącz konto (OAuth, token PAT)
   features/connections/ Połączenia z systemami
   features/links/       Moje linki: lista, kreator Nazwa -> Narzędzia -> Gotowe, konfiguracja klienta
-  features/admin/       trasy admina (lazy, na razie puste)
+  features/requests/    Wnioski: lista, dialog "Złóż wniosek" z uprawnieniami z IGA
+  features/admin/       Administracja (lazy, tylko isAdmin): rejestr, różnice definicji, zatwierdzanie
 src/mocks/              warstwa stanowa nad handlerami MSW z kontraktów; start MSW w przeglądarce
 src/testing/            pomocnicze dla testów jednostkowych (MSW w Node, TestBed)
 e2e/                    Playwright
