@@ -31,8 +31,30 @@ export interface RegistryTool {
      */
     definitionHash: string;
     status: RegistryToolStatus;
+    /**
+     * Present exactly when status is pending_approval. new means no approved entry exists, changed means an approved entry exists and differs (CC-097).
+     */
+    change?: RegistryTool.ChangeEnum;
+    /**
+     * Present exactly when status is pending_approval (CC-162); same meaning as PendingTool.source.
+     */
+    source?: RegistryTool.SourceEnum;
+    /**
+     * Version of the manifest at which the approved entry was approved; null for a new tool that has no approved entry. Absent only for an approved tool whose version was not recorded before this field existed (CC-097).
+     */
+    approvedInVersion?: string | null;
 }
 export namespace RegistryTool {
+    export const ChangeEnum = {
+        New: 'new',
+        Changed: 'changed',
+    } as const;
+    export type ChangeEnum = typeof ChangeEnum[keyof typeof ChangeEnum];
+    export const SourceEnum = {
+        Ci: 'ci',
+        Server: 'server',
+    } as const;
+    export type SourceEnum = typeof SourceEnum[keyof typeof SourceEnum];
 }
 
 

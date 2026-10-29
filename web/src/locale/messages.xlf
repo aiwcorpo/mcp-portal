@@ -66,12 +66,28 @@
         <source>Moje linki</source>
       </segment>
     </unit>
+    <unit id="nav.requests">
+      <notes>
+        <note category="location">src/app/app.html:63,66</note>
+      </notes>
+      <segment>
+        <source>Wnioski</source>
+      </segment>
+    </unit>
     <unit id="nav.logs">
       <notes>
-        <note category="location">src/app/app.html:63,65</note>
+        <note category="location">src/app/app.html:70,72</note>
       </notes>
       <segment>
         <source>Logi audytowe</source>
+      </segment>
+    </unit>
+    <unit id="nav.admin">
+      <notes>
+        <note category="location">src/app/app.html:78,80</note>
+      </notes>
+      <segment>
+        <source>Administracja</source>
       </segment>
     </unit>
     <unit id="route.catalog">
@@ -122,9 +138,17 @@
         <source>Konfiguracja linku</source>
       </segment>
     </unit>
-    <unit id="route.logs">
+    <unit id="route.requests">
       <notes>
         <note category="location">src/app/app.routes.ts:43</note>
+      </notes>
+      <segment>
+        <source>Wnioski</source>
+      </segment>
+    </unit>
+    <unit id="route.logs">
+      <notes>
+        <note category="location">src/app/app.routes.ts:48</note>
       </notes>
       <segment>
         <source>Logi audytowe</source>
@@ -132,7 +156,7 @@
     </unit>
     <unit id="route.authenticatorMfa">
       <notes>
-        <note category="location">src/app/app.routes.ts:49</note>
+        <note category="location">src/app/app.routes.ts:54</note>
       </notes>
       <segment>
         <source>Rejestracja Authenticatora</source>
@@ -140,7 +164,7 @@
     </unit>
     <unit id="route.authenticatorRegister">
       <notes>
-        <note category="location">src/app/app.routes.ts:55</note>
+        <note category="location">src/app/app.routes.ts:60</note>
       </notes>
       <segment>
         <source>Rejestracja Authenticatora</source>
@@ -148,7 +172,7 @@
     </unit>
     <unit id="route.confirm">
       <notes>
-        <note category="location">src/app/app.routes.ts:61</note>
+        <note category="location">src/app/app.routes.ts:66</note>
       </notes>
       <segment>
         <source>Operacja czeka na kod</source>
@@ -156,7 +180,7 @@
     </unit>
     <unit id="route.notFound">
       <notes>
-        <note category="location">src/app/app.routes.ts:71</note>
+        <note category="location">src/app/app.routes.ts:76</note>
       </notes>
       <segment>
         <source>Nie znaleziono</source>
@@ -164,7 +188,7 @@
     </unit>
     <unit id="disconnect.title">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:127</note>
+        <note category="location">src/app/core/connection-actions.service.ts:101</note>
       </notes>
       <segment>
         <source>Rozłączyć konto <ph id="0" equiv="system" disp="name"/>?</source>
@@ -172,7 +196,7 @@
     </unit>
     <unit id="disconnect.message">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:128</note>
+        <note category="location">src/app/core/connection-actions.service.ts:102</note>
       </notes>
       <segment>
         <source>Portal usunie zapisane poświadczenie. Narzędzia tego systemu przestaną działać, dopóki nie połączysz konta ponownie.</source>
@@ -180,7 +204,7 @@
     </unit>
     <unit id="disconnect.confirm">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:129</note>
+        <note category="location">src/app/core/connection-actions.service.ts:103</note>
       </notes>
       <segment>
         <source>Rozłącz</source>
@@ -188,7 +212,7 @@
     </unit>
     <unit id="disconnect.done">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:148</note>
+        <note category="location">src/app/core/connection-actions.service.ts:122</note>
       </notes>
       <segment>
         <source>Rozłączono konto <ph id="0" equiv="system" disp="systemName(system)"/>.</source>
@@ -394,9 +418,25 @@
         <source>Definicja zmieniła się w międzyczasie. Odśwież widok.</source>
       </segment>
     </unit>
-    <unit id="error.flow_invalid">
+    <unit id="error.not_requestable">
       <notes>
         <note category="location">src/app/core/error-messages.ts:48</note>
+      </notes>
+      <segment>
+        <source>System uprawnień nie przyjmuje wniosków z portalu. Złóż wniosek bezpośrednio w systemie uprawnień.</source>
+      </segment>
+    </unit>
+    <unit id="error.manifest_rejected">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:50</note>
+      </notes>
+      <segment>
+        <source>Definicja została odrzucona i nie może być zatwierdzona.</source>
+      </segment>
+    </unit>
+    <unit id="error.flow_invalid">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:52</note>
       </notes>
       <segment>
         <source>Link połączenia wygasł albo był już użyty. Zacznij od nowa.</source>
@@ -404,7 +444,7 @@
     </unit>
     <unit id="error.provider_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:50</note>
+        <note category="location">src/app/core/error-messages.ts:54</note>
       </notes>
       <segment>
         <source>System nie odpowiedział poprawnie. Spróbuj za chwilę.</source>
@@ -412,15 +452,39 @@
     </unit>
     <unit id="error.cancelled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:51</note>
+        <note category="location">src/app/core/error-messages.ts:55</note>
       </notes>
       <segment>
         <source>Łączenie anulowane.</source>
       </segment>
     </unit>
+    <unit id="error.risk_lowered">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:65</note>
+      </notes>
+      <segment>
+        <source>Nowa definicja obniża poziom ryzyka narzędzia, więc nie zostanie zatwierdzona. Popraw ryzyko w manifeście i wdróż serwer ponownie.</source>
+      </segment>
+    </unit>
+    <unit id="error.environment_mismatch">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:67</note>
+      </notes>
+      <segment>
+        <source>Manifest jest przeznaczony dla innego środowiska i został odrzucony.</source>
+      </segment>
+    </unit>
+    <unit id="error.credential_type_mismatch">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:69</note>
+      </notes>
+      <segment>
+        <source>Manifest nie zgadza się z typem poświadczenia skonfigurowanym dla systemu i został odrzucony.</source>
+      </segment>
+    </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:60</note>
+        <note category="location">src/app/core/error-messages.ts:80</note>
       </notes>
       <segment>
         <source>Za dużo żądań. Spróbuj ponownie za <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -1021,7 +1085,7 @@
     </unit>
     <unit id="catalog.noMatches">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:41,45</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:43,47</note>
       </notes>
       <segment>
         <source> Żaden serwer ani narzędzie nie pasuje do wyszukiwania. </source>
@@ -1029,7 +1093,7 @@
     </unit>
     <unit id="catalog.emptyTitle">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:46,47</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:48,49</note>
       </notes>
       <segment>
         <source>Nie masz jeszcze dostępu do żadnego serwera MCP</source>
@@ -1037,7 +1101,7 @@
     </unit>
     <unit id="catalog.emptyText">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:48,52</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:50,54</note>
       </notes>
       <segment>
         <source> Dostęp nadaje system uprawnień. Po akceptacji wniosku serwery pojawią się tutaj. </source>
@@ -1045,7 +1109,7 @@
     </unit>
     <unit id="catalog.linkCopied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:108</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:115</note>
       </notes>
       <segment>
         <source>Skopiowano adres serwera <ph id="0" equiv="system" disp="systemName(server.system)"/>.</source>
@@ -1053,7 +1117,7 @@
     </unit>
     <unit id="catalog.linkCopyFailed">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:109</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:116</note>
       </notes>
       <segment>
         <source>Nie udało się skopiować adresu. Adres: <ph id="0" equiv="url" disp="server.url"/></source>
@@ -1061,10 +1125,10 @@
     </unit>
     <unit id="catalog.requestCreated">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:135</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:158</note>
       </notes>
       <segment>
-        <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
+        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
       </segment>
     </unit>
     <unit id="catalog.caption">
@@ -1155,9 +1219,17 @@
         <source>Wymaga kodu z Authenticatora.</source>
       </segment>
     </unit>
+    <unit id="catalog.requestTool">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:117,118</note>
+      </notes>
+      <segment>
+        <source>Złóż wniosek</source>
+      </segment>
+    </unit>
     <unit id="catalog.noTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:115,116</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:128,129</note>
       </notes>
       <segment>
         <source> Serwer nie udostępnia narzędzi. </source>
@@ -1165,7 +1237,7 @@
     </unit>
     <unit id="catalog.showTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.ts:68</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:75</note>
       </notes>
       <segment>
         <source>Pokaż narzędzia</source>
@@ -1173,7 +1245,7 @@
     </unit>
     <unit id="catalog.hideTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.ts:69</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:76</note>
       </notes>
       <segment>
         <source>Ukryj narzędzia</source>
@@ -1518,6 +1590,7 @@
     <unit id="common.cancel2">
       <notes>
         <note category="location">src/app/features/connect/secret-form.html:87,88</note>
+        <note category="location">src/app/features/requests/request-dialog.html:77,79</note>
       </notes>
       <segment>
         <source>Anuluj</source>
@@ -1770,10 +1843,10 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:283</note>
+        <note category="location">src/app/features/connections/connections-page.ts:290</note>
       </notes>
       <segment>
-        <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
+        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
       </segment>
     </unit>
     <unit id="linkConfig.back">
@@ -2043,7 +2116,7 @@
     </unit>
     <unit id="wizard.request">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:130,131</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:126,127</note>
       </notes>
       <segment>
         <source>Złóż wniosek</source>
@@ -2051,7 +2124,7 @@
     </unit>
     <unit id="wizard.notConnected">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:139,140</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:135,136</note>
       </notes>
       <segment>
         <source>Konto niepołączone</source>
@@ -2059,7 +2132,7 @@
     </unit>
     <unit id="wizard.connect">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:143,144</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:139,140</note>
       </notes>
       <segment>
         <source>Połącz</source>
@@ -2067,7 +2140,7 @@
     </unit>
     <unit id="wizard.reconnect">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:151,152</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:147,148</note>
       </notes>
       <segment>
         <source>Wymaga ponownego połączenia</source>
@@ -2075,7 +2148,7 @@
     </unit>
     <unit id="wizard.connect2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:155,156</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:151,152</note>
       </notes>
       <segment>
         <source>Połącz</source>
@@ -2083,7 +2156,7 @@
     </unit>
     <unit id="wizard.confirmNote">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:163,165</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:159,161</note>
       </notes>
       <segment>
         <source>Wymaga kodu z Authenticatora.</source>
@@ -2091,7 +2164,7 @@
     </unit>
     <unit id="wizard.noTools">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:181,184</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:177,180</note>
       </notes>
       <segment>
         <source>Żadne narzędzie nie pasuje do wyszukiwania.</source>
@@ -2099,7 +2172,7 @@
     </unit>
     <unit id="wizard.needOne">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:186,188</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:182,184</note>
       </notes>
       <segment>
         <source> Wybierz co najmniej jedno narzędzie. </source>
@@ -2107,7 +2180,7 @@
     </unit>
     <unit id="wizard.back2">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:191,192</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:187,188</note>
       </notes>
       <segment>
         <source> Wstecz </source>
@@ -2115,7 +2188,7 @@
     </unit>
     <unit id="wizard.create">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:200,202</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:196,198</note>
       </notes>
       <segment>
         <source> Utwórz link </source>
@@ -2123,7 +2196,7 @@
     </unit>
     <unit id="wizard.readyTitle">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:207,208</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:203,204</note>
       </notes>
       <segment>
         <source>Link &quot;<ph id="0" equiv="INTERPOLATION" disp="{{ form.controls.name.value.trim() }}"/>&quot; jest gotowy</source>
@@ -2131,7 +2204,7 @@
     </unit>
     <unit id="wizard.toList">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.html:215,216</note>
+        <note category="location">src/app/features/links/link-wizard-page.html:211,212</note>
       </notes>
       <segment>
         <source> Wróć do listy </source>
@@ -2195,10 +2268,10 @@
     </unit>
     <unit id="wizard.requestCreated">
       <notes>
-        <note category="location">src/app/features/links/link-wizard-page.ts:291</note>
+        <note category="location">src/app/features/links/link-wizard-page.ts:292</note>
       </notes>
       <segment>
-        <source>Wniosek złożony (<ph id="0" equiv="id" disp="result.requestId"/>).</source>
+        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
       </segment>
     </unit>
     <unit id="links.title">
@@ -2884,6 +2957,282 @@
       </notes>
       <segment>
         <source>Wróć do serwerów</source>
+      </segment>
+    </unit>
+    <unit id="entitlement.read">
+      <notes>
+        <note category="location">src/app/features/requests/entitlement-labels.ts:5</note>
+      </notes>
+      <segment>
+        <source>odczyt</source>
+      </segment>
+    </unit>
+    <unit id="entitlement.write">
+      <notes>
+        <note category="location">src/app/features/requests/entitlement-labels.ts:6</note>
+      </notes>
+      <segment>
+        <source>zapis</source>
+      </segment>
+    </unit>
+    <unit id="entitlement.destructive">
+      <notes>
+        <note category="location">src/app/features/requests/entitlement-labels.ts:7</note>
+      </notes>
+      <segment>
+        <source>operacje nieodwracalne</source>
+      </segment>
+    </unit>
+    <unit id="request.title">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:1,3</note>
+      </notes>
+      <segment>
+        <source>Złóż wniosek</source>
+      </segment>
+    </unit>
+    <unit id="request.system">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:5,6</note>
+      </notes>
+      <segment>
+        <source>System</source>
+      </segment>
+    </unit>
+    <unit id="request.systemPlaceholder">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:8,10</note>
+      </notes>
+      <segment>
+        <source> Wybierz system </source>
+      </segment>
+    </unit>
+    <unit id="request.forSystem">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:17,18</note>
+      </notes>
+      <segment>
+        <source>System:</source>
+      </segment>
+    </unit>
+    <unit id="request.loading">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:25,27</note>
+      </notes>
+      <segment>
+        <source> Pobieram uprawnienia z systemu uprawnień... </source>
+      </segment>
+    </unit>
+    <unit id="request.entitlement">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:36,37</note>
+      </notes>
+      <segment>
+        <source>Uprawnienie</source>
+      </segment>
+    </unit>
+    <unit id="request.entitlementPlaceholder">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:39,41</note>
+      </notes>
+      <segment>
+        <source> Wybierz uprawnienie </source>
+      </segment>
+    </unit>
+    <unit id="request.descriptionSource">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:53,54</note>
+      </notes>
+      <segment>
+        <source>Opis z systemu uprawnień:</source>
+      </segment>
+    </unit>
+    <unit id="request.neutralised">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:57,59</note>
+      </notes>
+      <segment>
+        <source> Ukryte znaki w opisie zastąpiono znacznikami [U+XXXX]. </source>
+      </segment>
+    </unit>
+    <unit id="request.none">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:64,67</note>
+      </notes>
+      <segment>
+        <source> Dla tego systemu nie ma uprawnień, o które możesz poprosić z portalu. </source>
+      </segment>
+    </unit>
+    <unit id="request.note">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:73,75</note>
+      </notes>
+      <segment>
+        <source> Jeśli system uprawnień poprosi o uzasadnienie, podasz je po przekierowaniu. </source>
+      </segment>
+    </unit>
+    <unit id="request.submit">
+      <notes>
+        <note category="location">src/app/features/requests/request-dialog.html:85,87</note>
+      </notes>
+      <segment>
+        <source> Złóż wniosek </source>
+      </segment>
+    </unit>
+    <unit id="requests.title">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:1,3</note>
+      </notes>
+      <segment>
+        <source>Wnioski</source>
+      </segment>
+    </unit>
+    <unit id="requests.lead">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:17,18</note>
+      </notes>
+      <segment>
+        <source>Wnioski o uprawnienia do serwerów MCP.</source>
+      </segment>
+    </unit>
+    <unit id="requests.new">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:19,21</note>
+      </notes>
+      <segment>
+        <source> Złóż wniosek </source>
+      </segment>
+    </unit>
+    <unit id="requests.caption">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:25,27</note>
+      </notes>
+      <segment>
+        <source> Moje wnioski o uprawnienia </source>
+      </segment>
+    </unit>
+    <unit id="requests.colEntitlement">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:29,30</note>
+        <note category="location">src/app/features/requests/requests-page.html:44,45</note>
+      </notes>
+      <segment>
+        <source>Uprawnienie</source>
+      </segment>
+    </unit>
+    <unit id="requests.colCreated">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:30,31</note>
+        <note category="location">src/app/features/requests/requests-page.html:53</note>
+      </notes>
+      <segment>
+        <source>Złożono</source>
+      </segment>
+    </unit>
+    <unit id="requests.colStatus">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:31,32</note>
+        <note category="location">src/app/features/requests/requests-page.html:60</note>
+      </notes>
+      <segment>
+        <source>Status</source>
+      </segment>
+    </unit>
+    <unit id="requests.colDecided">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:32,33</note>
+        <note category="location">src/app/features/requests/requests-page.html:67,68</note>
+      </notes>
+      <segment>
+        <source>Rozpatrzono</source>
+      </segment>
+    </unit>
+    <unit id="requests.colActions">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:34,36</note>
+      </notes>
+      <segment>
+        <source>Akcje</source>
+      </segment>
+    </unit>
+    <unit id="requests.open">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:79,80</note>
+      </notes>
+      <segment>
+        <source>Otwórz w systemie uprawnień</source>
+      </segment>
+    </unit>
+    <unit id="requests.newTab">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:81,82</note>
+      </notes>
+      <segment>
+        <source> (otwiera się w nowej karcie)</source>
+      </segment>
+    </unit>
+    <unit id="requests.emptyTitle">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:92,93</note>
+      </notes>
+      <segment>
+        <source>Nie masz żadnych wniosków.</source>
+      </segment>
+    </unit>
+    <unit id="requests.emptyText">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:94,96</note>
+      </notes>
+      <segment>
+        <source> Gdy poprosisz o uprawnienie, wniosek pojawi się tutaj razem ze statusem. </source>
+      </segment>
+    </unit>
+    <unit id="requests.footnote">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.html:99,102</note>
+      </notes>
+      <segment>
+        <source> Wnioski akceptuje i anuluje system uprawnień. </source>
+      </segment>
+    </unit>
+    <unit id="request.status.pending">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.ts:18</note>
+      </notes>
+      <segment>
+        <source>Oczekuje</source>
+      </segment>
+    </unit>
+    <unit id="request.status.approved">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.ts:19</note>
+      </notes>
+      <segment>
+        <source>Zaakceptowany</source>
+      </segment>
+    </unit>
+    <unit id="request.status.rejected">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.ts:20</note>
+      </notes>
+      <segment>
+        <source>Odrzucony</source>
+      </segment>
+    </unit>
+    <unit id="request.status.cancelled">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.ts:21</note>
+      </notes>
+      <segment>
+        <source>Anulowany</source>
+      </segment>
+    </unit>
+    <unit id="requests.created">
+      <notes>
+        <note category="location">src/app/features/requests/requests-page.ts:90</note>
+      </notes>
+      <segment>
+        <source>Wniosek <ph id="0" equiv="id" disp="result.requestId"/> jest w systemie uprawnień. Jego stan sprawdzisz tutaj.</source>
       </segment>
     </unit>
     <unit id="common.cancel">

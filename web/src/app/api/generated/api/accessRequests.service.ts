@@ -22,6 +22,10 @@ import { AccessRequest } from '../model/accessRequest';
 import { AccessRequestCreate } from '../model/accessRequestCreate';
 // @ts-ignore
 import { AccessRequestResult } from '../model/accessRequestResult';
+// @ts-ignore
+import { RequestableEntitlement } from '../model/requestableEntitlement';
+// @ts-ignore
+import { SystemId } from '../model/systemId';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -41,6 +45,7 @@ export class AccessRequestsService extends BaseService {
 
     /**
      * Request an entitlement (C13 request); result depends on the IGA adapter.
+     * When a request for the entitlement is already pending, the BFF answers 200 with the requestId of that request (CC-096): the user wants to reach the request, not to read an error. An adapter without a request flow (&#x60;keycloak-groups&#x60;: a catalog without requests) or an unknown entitlement is &#x60;422 not_requestable&#x60;. 
      * @endpoint post /api/v1/access-requests
      * @param accessRequestCreate 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -154,6 +159,77 @@ export class AccessRequestsService extends BaseService {
         return this.httpClient.request<Array<AccessRequest>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Entitlements of a system that the user can request (C13 catalog, CC-154).
+     * For a request made from a server row, where no single entitlement is obvious: the BFF returns what &#x60;catalog(system)&#x60; of the IGA port gives, limited to entitlements the user can order, and the UI lets the user choose before sending. &#x60;description&#x60; comes from the IGA and is untrusted text (shown as text, never as markup). An adapter without a request flow answers &#x60;422 not_requestable&#x60;. 
+     * @endpoint get /api/v1/access-requests/entitlements
+     * @param system 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public listRequestableEntitlements(system: SystemId, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<RequestableEntitlement>>;
+    public listRequestableEntitlements(system: SystemId, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<RequestableEntitlement>>>;
+    public listRequestableEntitlements(system: SystemId, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<RequestableEntitlement>>>;
+    public listRequestableEntitlements(system: SystemId, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (system === null || system === undefined) {
+            throw new Error('Required parameter system was null or undefined when calling listRequestableEntitlements.');
+        }
+
+        let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'system',
+            <any>system,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/access-requests/entitlements`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Array<RequestableEntitlement>>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                params: localVarQueryParameters.toHttpParams(),
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

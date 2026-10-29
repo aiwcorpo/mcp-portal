@@ -20,6 +20,8 @@ const C12_ERROR_CODES = [
   'hash_mismatch',
   'resource_defaults_unsupported',
   'already_registered',
+  'not_requestable',
+  'manifest_rejected',
 ] as const;
 
 const DECLARED_ERROR_CODES = [
@@ -49,6 +51,8 @@ export interface ApiFailure {
   retryAfterSeconds?: number;
   /** X-Request-Id of the failed response (CC-087), shown shortened next to the error. */
   requestId?: string;
+  /** Closed-form `reason` of a manifest_rejected answer (CC-133); the UI maps it to its own text. */
+  reason?: string;
 }
 
 const KNOWN_CODES: ReadonlySet<string> = new Set(PORTAL_ERROR_CODES);
@@ -104,6 +108,11 @@ export function toApiFailure(error: unknown): ApiFailure {
   }
   if (code === 'step_up_required' && typeof body['stepUpUrl'] === 'string') {
     failure.stepUpUrl = body['stepUpUrl'];
+  }
+  if (code === 'manifest_rejected' && typeof body['reason'] === 'string') {
+    if (/^[a-z][a-z0-9_]*$/.test(body['reason'])) {
+      failure.reason = body['reason'];
+    }
   }
   if (code === 'rate_limited') {
     const retryAfter = Number(body['retryAfterSeconds'] ?? error.headers.get('Retry-After'));

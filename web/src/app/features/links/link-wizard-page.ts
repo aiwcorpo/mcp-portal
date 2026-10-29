@@ -13,7 +13,7 @@ import {
 } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { ConnectionActions } from '../../core/connection-actions.service';
-import { ACCESS_REQUESTS_AVAILABLE } from '../catalog/catalog-actions';
+import { canRequestTool } from '../catalog/catalog-actions';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import { riskLabel, systemName } from '../../shared/labels';
@@ -162,7 +162,7 @@ export class LinkWizardPage {
   });
 
   protected readonly riskLabel = riskLabel;
-  protected readonly accessRequests = ACCESS_REQUESTS_AVAILABLE;
+  protected readonly canRequest = canRequestTool;
 
   constructor() {
     void this.load();
@@ -283,12 +283,14 @@ export class LinkWizardPage {
     }
   }
 
-  protected async requestAccess(server: PortalCatalogServer, tool: CatalogTool): Promise<void> {
+  protected async requestAccess(tool: CatalogTool): Promise<void> {
     this.info.set(null);
     this.failure.set(null);
-    const result = await this.connectionActions.requestAccess(server, tool);
+    const result = await this.connectionActions.requestAccess(tool);
     if (result.kind === 'created') {
-      this.info.set($localize`:@@wizard.requestCreated:Wniosek złożony (${result.requestId}:id:).`);
+      this.info.set(
+        $localize`:@@wizard.requestCreated:Wniosek ${result.requestId}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
+      );
     } else if (result.kind === 'failed') {
       this.failure.set(result.failure);
     } else if (result.kind === 'unavailable') {

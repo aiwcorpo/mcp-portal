@@ -19,6 +19,7 @@ import { isSystemId, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
+import { hasUserCredential } from '../catalog/catalog-actions';
 import { SecretForm } from './secret-form';
 import { tokenInstructions } from './token-instructions';
 
@@ -35,6 +36,9 @@ export function connectOptions(
   server: PortalCatalogServer,
   connection: Connection | null | undefined,
 ): ConnectOptions {
+  if (!hasUserCredential(server)) {
+    return { oauth: false, token: false };
+  }
   const reconnect = server.actions.includes('reconnect');
   const viaOAuth = connection?.type === 'user-oauth';
   return {

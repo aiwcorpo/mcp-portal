@@ -1,0 +1,104 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 14px 8px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--pm-border);
+  font-weight: 400;
+}
+
+thead th {
+  padding-block: 10px;
+  color: var(--pm-muted);
+  font-size: 13px;
+}
+
+tbody th {
+  font-weight: 500;
+}
+
+tbody th code {
+  display: block;
+}
+
+.title,
+.id {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.id {
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  text-align: right;
+}
+
+.empty {
+  display: grid;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.empty h2 {
+  font-size: 18px;
+}
+
+.footnote {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+@media (max-width: 719px) {
+  thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  tr {
+    display: block;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pm-border);
+  }
+
+  th,
+  td {
+    display: grid;
+    grid-template-columns: minmax(110px, 40%) 1fr;
+    gap: 8px;
+    padding: 3px 0;
+    border: 0;
+  }
+
+  th[data-label]::before,
+  td[data-label]::before {
+    content: attr(data-label);
+    content: attr(data-label) / '';
+    font-weight: 400;
+    color: var(--pm-muted);
+  }
+
+  tbody th code,
+  tbody th .title,
+  tbody th .id {
+    grid-column: 2;
+  }
+
+  .actions {
+    display: block;
+    padding-top: 8px;
+    text-align: left;
+  }
+}

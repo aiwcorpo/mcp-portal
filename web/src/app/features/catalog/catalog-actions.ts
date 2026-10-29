@@ -1,20 +1,15 @@
-import { CatalogAction, PortalCatalogServer } from '../../api/generated';
+import { CatalogAction, CatalogTool, PortalCatalogServer } from '../../api/generated';
 
-/**
- * Actions this release can carry out. Access requests are an M4 topic: the BFF of M2 has no
- * `POST /access-requests` and view_request needs the requests screen, so neither is offered even when
- * the BFF lists them; the pending status is still shown as text. Add 'request_access' here when the BFF
- * implements the operation (the flow in ConnectionActions is ready).
- */
+/** Every action of C12 is handled; "Rozłącz" is only offered on the connections page. */
 export const SUPPORTED_ACTIONS: readonly CatalogAction[] = [
   'copy_link',
   'connect_oauth',
   'add_secret',
   'reconnect',
+  'request_access',
+  'view_request',
   'disconnect',
 ];
-
-export const ACCESS_REQUESTS_AVAILABLE = SUPPORTED_ACTIONS.includes('request_access');
 
 const CATALOG_ORDER: readonly CatalogAction[] = [
   'reconnect',
@@ -22,6 +17,7 @@ const CATALOG_ORDER: readonly CatalogAction[] = [
   'add_secret',
   'copy_link',
   'request_access',
+  'view_request',
 ];
 
 const CONNECTIONS_ORDER: readonly CatalogAction[] = [
@@ -29,12 +25,43 @@ const CONNECTIONS_ORDER: readonly CatalogAction[] = [
   'connect_oauth',
   'add_secret',
   'request_access',
+  'view_request',
   'disconnect',
 ];
 
+const CONNECT_ACTIONS: readonly CatalogAction[] = ['connect_oauth', 'add_secret', 'reconnect'];
+
+/**
+ * A system whose credential is a service account or a token exchange has nothing for the user to connect
+ * (Service Desk, OpenSearch). The BFF does not offer connect actions there; a stray one is dropped so that
+ * no button asks for a token the system would never use.
+ */
+export function hasUserCredential(server: PortalCatalogServer): boolean {
+  const types = server.credential?.supportedTypes;
+  return !types || types.some((type) => type === 'user-oauth' || type === 'user-secret');
+}
+
 function pick(server: PortalCatalogServer, order: readonly CatalogAction[]): CatalogAction[] {
+  const connectable = hasUserCredential(server);
   return order.filter(
-    (action) => server.actions.includes(action) && SUPPORTED_ACTIONS.includes(action),
+    (action) =>
+      server.actions.includes(action) &&
+      SUPPORTED_ACTIONS.includes(action) &&
+      (connectable || !CONNECT_ACTIONS.includes(action)),
+  );
+}
+
+/**
+ * "Złóż wniosek" next to a denied tool (CC-113): the server must offer `request_access` (it does so only when
+ * a denied tool names entitlements and no request for them is pending) and the tool itself names an
+ * entitlement to ask for.
+ */
+export function canRequestTool(server: PortalCatalogServer, tool: CatalogTool): boolean {
+  return (
+    server.actions.includes('request_access') &&
+    tool.access === 'denied' &&
+    !tool.disabled &&
+    tool.requiredEntitlements.length > 0
   );
 }
 

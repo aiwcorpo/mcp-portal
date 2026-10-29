@@ -45,7 +45,7 @@ describe('CatalogPage', () => {
     expect(text(row('GitLab'))).toContain('Wymaga ponownego połączenia');
     expect(button('Połącz (GitLab)', row('GitLab'))).toBeTruthy();
     expect(text(row('Confluence'))).toContain('Brak uprawnienia');
-    expect(text(row('Confluence'))).not.toContain('Złóż wniosek');
+    expect(button('Złóż wniosek (Confluence)', row('Confluence'))).toBeTruthy();
     expect(text(row('Service Desk'))).toContain('Konto serwisowe');
     expect(text(row('Service Desk'))).toContain('Połączone');
     expect(document.body.textContent).not.toContain('Rozłącz');
@@ -196,7 +196,7 @@ describe('CatalogPage', () => {
           tools: [toolFixture('jira__get', { access: 'denied' })],
         }),
         'Wniosek oczekuje',
-        [],
+        ['Zobacz wniosek (Jira)'],
       ],
       [
         'no_access',
@@ -206,7 +206,7 @@ describe('CatalogPage', () => {
           tools: [toolFixture('jira__get', { access: 'denied' })],
         }),
         'Brak uprawnienia',
-        [],
+        ['Złóż wniosek (Jira)'],
       ],
     ];
 
@@ -331,14 +331,6 @@ describe('CatalogPage', () => {
     button('Odnów (Jira)').click();
 
     await until(() => expect(TestBed.inject(Router).url).toBe('/connect/jira'));
-  });
-
-  it('does not offer access requests while the BFF has none (M4), even when it lists them', async () => {
-    configureTestApp();
-    await openRoute('/catalog');
-    await until(() => expect(text()).toContain('Confluence'));
-
-    expect(text()).not.toContain('Złóż wniosek');
   });
 
   describe('return from the OAuth provider', () => {

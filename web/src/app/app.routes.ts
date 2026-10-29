@@ -3,7 +3,7 @@ import { adminGuard } from './core/admin.guard';
 
 /**
  * No route starts with /api, /s/, /v/ or /.well-known/: the reverse proxy sends those to the BFF and the
- * gateway (CC-089). Later milestones add requests and admin children.
+ * gateway (CC-089).
  */
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'catalog' },
@@ -37,6 +37,11 @@ export const routes: Routes = [
     path: 'links/:slug',
     title: $localize`:@@route.linkConfig:Konfiguracja linku`,
     loadComponent: () => import('./features/links/link-config-page').then((m) => m.LinkConfigPage),
+  },
+  {
+    path: 'requests',
+    title: $localize`:@@route.requests:Wnioski`,
+    loadComponent: () => import('./features/requests/requests-page').then((m) => m.RequestsPage),
   },
   {
     path: 'logs',

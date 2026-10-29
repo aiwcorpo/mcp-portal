@@ -25,6 +25,10 @@ export interface AccessRequest {
      */
     createdAt: string;
     /**
+     * When the IGA decided the request (approved or rejected). Absent while the request is pending (CC-154).
+     */
+    decidedAt?: string;
+    /**
      * Page of the request in the IGA, when the adapter has one.
      */
     requestUrl?: string;

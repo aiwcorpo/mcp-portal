@@ -90,16 +90,23 @@ function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
 /** How many newest calls are read to find the last one that really used the system. */
 const LAST_CALL_LOOKUP = 20;
 
-/** Results of calls that stopped before the system (policy, scope, missing credential, limits). */
-const NOT_REACHED =
-  /^(denied_|tool_disabled$|credential_required$|rate_limited$|step_up_required$|blocked_by_pending$|superseded$|cancelled$)/;
+/**
+ * Results that mean the call reached the system (CC-150): executed, confirmed with a code, or failed in
+ * the system itself. Refusals, limits, expired or unconfirmed operations and everything else do not count;
+ * an error that says the system could not be reached (`upstream_unavailable`) is not a use either.
+ */
+const REACHED_SYSTEM: ReadonlySet<string> = new Set(['ok', 'confirmed', 'error']);
 
 /**
  * `q` of the API also matches resource ids, so the tool name is checked here: a GitLab project called
- * "servicedesk__x" must not count as a use of Service Desk. Calls refused before the system do not count.
+ * "servicedesk__x" must not count as a use of Service Desk.
  */
 export function reachedSystem(call: ActivityCall, system: SystemId): boolean {
-  return call.tool.startsWith(`${system}__`) && !NOT_REACHED.test(call.result);
+  return (
+    call.tool.startsWith(`${system}__`) &&
+    REACHED_SYSTEM.has(call.result) &&
+    call.errorCode !== 'upstream_unavailable'
+  );
 }
 
 interface ConnectionsData {
@@ -277,19 +284,18 @@ export class ConnectionsPage implements OnInit {
           );
           return;
         case 'request_access': {
-          const result = await this.connectionActions.requestAccess(server);
-          if (result.kind === 'created') {
+          const result = await this.connectionActions.requestWithChoice(server.system);
+          if (result?.kind === 'created') {
             this.actionDone.set(
-              $localize`:@@conn.requestCreated:Wniosek złożony (${result.requestId}:id:).`,
+              $localize`:@@conn.requestCreated:Wniosek ${result.requestId}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
             );
             await this.load();
-          } else if (result.kind === 'failed') {
-            this.actionFailure.set(result.failure);
-          } else if (result.kind === 'unavailable') {
-            this.actionFailure.set({ code: 'internal_error', status: 0 });
           }
           return;
         }
+        case 'view_request':
+          await this.router.navigate(['/requests']);
+          return;
         case 'disconnect': {
           const result = await this.connectionActions.confirmAndDisconnect(server.system);
           if (result.kind === 'done') {

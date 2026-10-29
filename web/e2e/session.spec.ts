@@ -103,12 +103,6 @@ test('dialog and snack bar work under the CSP: copy link and disconnect', async 
   await expect(page.getByRole('row', { name: /Jira/ })).toContainText('Dodaj token');
 });
 
-test('the catalog offers no access request while the BFF has none', async ({ page }) => {
-  await page.goto('/catalog');
-  await expect(page.getByRole('rowheader', { name: 'Confluence' })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Złóż wniosek/ })).toHaveCount(0);
-});
-
 test('the catalog filter finds a tool and opens its server', async ({ page }) => {
   await page.goto('/catalog');
   await page.getByRole('searchbox', { name: 'Szukaj serwera lub narzędzia' }).fill('delete_issue');

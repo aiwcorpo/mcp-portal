@@ -6,6 +6,8 @@ import {
 import { http, HttpResponse, type HttpHandler } from 'msw';
 import { M3State, createM3Handlers, initialM3State } from './m3-mock';
 import type {
+  AccessRequest,
+  AccessRequestStatus,
   CatalogAction,
   CatalogCredential,
   CatalogStatus,
@@ -16,6 +18,7 @@ import type {
   PortalCatalogServer,
   PortalVirtualServer,
   PutSecretRequest,
+  RequestableEntitlement,
   SystemId,
   VirtualServerCreate,
 } from '../app/api/generated';
@@ -28,6 +31,12 @@ import type {
  */
 
 export type MockScenario = 'default' | 'mixed' | 'empty' | 'nolinks' | 'errors';
+/**
+ * What the IGA adapter does with a request (C13): `direct` creates it and answers with the id, `redirect`
+ * answers with the URL of its own form, `groups` is the Keycloak adapter without a request flow (422) and
+ * `down` is an IGA that does not answer (503).
+ */
+export type MockIga = 'direct' | 'redirect' | 'groups' | 'down';
 export type MockOAuthOutcome = 'ok' | 'cancelled' | 'flow_invalid' | 'provider_error';
 
 /** A connection the user changed in the mock; `null` stands for "disconnected". */
@@ -43,13 +52,23 @@ export interface MockLink {
   tools: string[];
 }
 
+export interface MockRequest {
+  requestId: string;
+  entitlement: string;
+  status: AccessRequestStatus;
+  createdAt: string;
+  decidedAt?: string;
+}
+
 export interface MockState extends M3State {
   session: boolean;
   scenario: MockScenario;
   oauthOutcome: MockOAuthOutcome;
   /** Per system; absent means "as in the scenario's example". */
   connections: Partial<Record<SystemId, MockConnection | null>>;
-  requested: SystemId[];
+  /** Requests of the user; null means the scenario's seed. */
+  requests: MockRequest[] | null;
+  iga: MockIga;
   /** Links created or deleted in the mock; absent means the scenario's seed. */
   links: MockLink[] | null;
   pendingOAuth: { system: SystemId; returnPath: string } | null;
@@ -82,7 +101,8 @@ export function initialMockState(): MockState {
     scenario: 'default',
     oauthOutcome: 'ok',
     connections: {},
-    requested: [],
+    requests: null,
+    iga: 'direct',
     links: null,
     pendingOAuth: null,
     ...initialM3State(),
@@ -191,9 +211,13 @@ function baseCatalog(scenario: MockScenario, now: number): PortalCatalogServer[]
 }
 
 function defaultCredential(system: SystemId): CatalogCredential {
-  return system === 'servicedesk'
-    ? { supportedTypes: ['service-account'], defaultType: 'service-account' }
-    : { supportedTypes: ['user-oauth', 'user-secret'], defaultType: 'user-oauth' };
+  if (system === 'servicedesk') {
+    return { supportedTypes: ['service-account'], defaultType: 'service-account' };
+  }
+  if (system === 'opensearch') {
+    return { supportedTypes: ['token-exchange'], defaultType: 'token-exchange' };
+  }
+  return { supportedTypes: ['user-oauth', 'user-secret'], defaultType: 'user-oauth' };
 }
 
 function connectionOf(
@@ -213,23 +237,33 @@ function connectionOf(
   };
 }
 
-/** The status and action table of C12 `getPortalCatalog` (CC-021, CC-083). */
+/** The status and action table of C12 `getPortalCatalog` (CC-021, CC-083, CC-113). */
 export function deriveRow(
   server: PortalCatalogServer,
   connection: Connection | null,
-  requestPending: boolean,
+  pendingEntitlements: ReadonlySet<string>,
 ): { status: CatalogStatus; actions: CatalogAction[] } {
   const granted = server.tools.some((candidate) => candidate.access === 'granted');
   const someDenied = server.tools.some((candidate) => candidate.access === 'denied');
+  // request_access needs entitlements to ask for; a pending request for one of them turns it into view_request.
+  const askable = server.tools.filter(
+    (candidate) => candidate.access === 'denied' && candidate.requiredEntitlements.length > 0,
+  );
+  const requestPending = askable.some((candidate) =>
+    candidate.requiredEntitlements.some((entitlement) => pendingEntitlements.has(entitlement)),
+  );
+  const requestAction: CatalogAction[] = askable.length
+    ? [requestPending ? 'view_request' : 'request_access']
+    : [];
   if (!granted) {
     return requestPending
       ? { status: 'request_pending', actions: ['view_request'] }
-      : { status: 'no_access', actions: ['request_access'] };
+      : { status: 'no_access', actions: requestAction };
   }
   const credential = server.credential;
   const nothingToConnect =
     credential?.defaultType === 'service-account' || credential?.defaultType === 'token-exchange';
-  const extra: CatalogAction[] = someDenied ? ['request_access'] : [];
+  const extra: CatalogAction[] = someDenied ? requestAction : [];
   if (nothingToConnect) {
     return { status: 'connected', actions: ['copy_link', ...extra] };
   }
@@ -259,17 +293,110 @@ export function mockCatalog(state: MockState, now: number = Date.now()): PortalC
   if (state.scenario === 'empty') {
     return { servers: [] };
   }
+  const pending = new Set(
+    mockRequests(state, now)
+      .filter((request) => request.status === 'pending')
+      .map((request) => request.entitlement),
+  );
   const servers = baseCatalog(state.scenario, now).map((server): PortalCatalogServer => {
     const override = state.connections[server.system];
     const connection =
       override === undefined
         ? (server.connection ?? null)
         : override && connectionOf(server.system, override, server.connection, now);
-    const row = deriveRow(server, connection, state.requested.includes(server.system));
+    const row = deriveRow(server, connection, pending);
     return { ...server, connection, ...row };
   });
   return { servers };
 }
+
+const IGA_BASE = 'https://iga.internal';
+
+/** Requests the user has in the IGA: a seed per scenario, then what the mock creates. */
+export function mockRequests(state: Readonly<MockState>, now: number = Date.now()): MockRequest[] {
+  if (state.requests) {
+    return state.requests;
+  }
+  if (state.scenario === 'empty') {
+    return [];
+  }
+  const days = (count: number) => iso(now - count * DAY_MS);
+  const seed: MockRequest[] = [
+    {
+      requestId: 'REQ-2026-0040',
+      entitlement: 'mcp-jira-write',
+      status: 'approved',
+      createdAt: days(9),
+      decidedAt: days(8),
+    },
+    {
+      requestId: 'REQ-2026-0038',
+      entitlement: 'mcp-gitlab-write',
+      status: 'rejected',
+      createdAt: days(17),
+      decidedAt: days(16),
+    },
+    {
+      requestId: 'REQ-2026-0031',
+      entitlement: 'mcp-jira-write',
+      status: 'cancelled',
+      createdAt: days(27),
+      decidedAt: days(27),
+    },
+  ];
+  return state.scenario === 'mixed'
+    ? [
+        {
+          requestId: 'REQ-2026-0042',
+          entitlement: 'mcp-confluence-read',
+          status: 'pending',
+          createdAt: days(4),
+        },
+        ...seed,
+      ]
+    : seed;
+}
+
+function isSystem(value: string | null): value is SystemId {
+  return value !== null && Object.hasOwn(IGA_CATALOG, value);
+}
+
+function toAccessRequest(request: MockRequest): AccessRequest {
+  return {
+    ...request,
+    ...(request.status === 'pending'
+      ? { requestUrl: `${IGA_BASE}/requests/${request.requestId}` }
+      : {}),
+  };
+}
+
+/** What the IGA offers per system (C13 `catalog`); descriptions are the IGA's own text. */
+const IGA_CATALOG: Partial<Record<SystemId, RequestableEntitlement[]>> = {
+  jira: [
+    { entitlement: 'mcp-jira-read', description: 'Odczyt zgłoszeń w Jirze.' },
+    {
+      entitlement: 'mcp-jira-write',
+      description: 'Tworzenie i zmiana zgłoszeń oraz komentarze w Jirze.',
+    },
+    {
+      entitlement: 'mcp-jira-destructive',
+      description:
+        'Daje dostęp do narzędzi nieodwracalnych w Jirze, np. jira__delete_issue. Każde użycie wymaga kodu z Authenticatora.',
+    },
+  ],
+  confluence: [
+    { entitlement: 'mcp-confluence-read', description: 'Odczyt stron Confluence.' },
+    { entitlement: 'mcp-confluence-write' },
+  ],
+  gitlab: [
+    { entitlement: 'mcp-gitlab-read', description: 'Odczyt projektów i merge requestów.' },
+    { entitlement: 'mcp-gitlab-write', description: 'Komentarze i zmiany w merge requestach.' },
+  ],
+  servicedesk: [
+    { entitlement: 'mcp-servicedesk-read', description: 'Odczyt zgłoszeń serwisowych.' },
+  ],
+  opensearch: [{ entitlement: 'mcp-opensearch-read', description: 'Odczyt logów w OpenSearch.' }],
+};
 
 export function mockLinks(state: MockState): MockLink[] {
   if (state.links) {
@@ -401,18 +528,74 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
         { headers: { 'X-Request-Id': MOCK_REQUEST_ID } },
       );
     }),
+    http.get(
+      at('/api/v1/access-requests'),
+      guarded(() =>
+        store.state.iga === 'down' || store.state.scenario === 'errors'
+          ? unavailable()
+          : HttpResponse.json(mockRequests(store.state).map(toAccessRequest), {
+              headers: { 'X-Request-Id': MOCK_REQUEST_ID },
+            }),
+      ),
+    ),
+    http.get(at('/api/v1/access-requests/entitlements'), ({ request }) => {
+      if (!store.state.session) {
+        return portalBffExample('getMe', 'unauthenticated');
+      }
+      const system = new URL(request.url).searchParams.get('system');
+      if (!isSystem(system)) {
+        return failure('invalid_request', 400);
+      }
+      if (store.state.iga === 'down') {
+        return unavailable();
+      }
+      if (store.state.iga === 'groups') {
+        return failure('not_requestable', 422);
+      }
+      const offered = IGA_CATALOG[system] ?? [];
+      return HttpResponse.json(offered, { headers: { 'X-Request-Id': MOCK_REQUEST_ID } });
+    }),
     http.post(at('/api/v1/access-requests'), async ({ request, cookies }) => {
       if (!csrfValid(request, cookies)) {
         return undefined;
       }
-      const { entitlement } = (await request.json()) as { entitlement: string };
-      const owner = mockCatalog(store.state).servers.find((server) =>
-        server.tools.some((candidate) => candidate.requiredEntitlements.includes(entitlement)),
-      );
-      if (owner && !store.state.requested.includes(owner.system)) {
-        store.update({ requested: [...store.state.requested, owner.system] });
+      if (!store.state.session) {
+        return portalBffExample('createAccessRequest', 'unauthenticated');
       }
-      return portalBffExample('createAccessRequest', 'created');
+      const { entitlement } = (await request.json()) as { entitlement: string };
+      const iga = store.state.iga;
+      if (iga === 'down') {
+        return unavailable();
+      }
+      const known = Object.values(IGA_CATALOG).some((list) =>
+        list?.some((item) => item.entitlement === entitlement),
+      );
+      if (iga === 'groups' || !known) {
+        return failure('not_requestable', 422);
+      }
+      const requests = mockRequests(store.state);
+      const existing = requests.find(
+        (candidate) => candidate.entitlement === entitlement && candidate.status === 'pending',
+      );
+      if (existing) {
+        return HttpResponse.json(
+          { requestId: existing.requestId },
+          { headers: { 'X-Request-Id': MOCK_REQUEST_ID } },
+        );
+      }
+      const created: MockRequest = {
+        requestId: `REQ-2026-${String(43 + requests.length).padStart(4, '0')}`,
+        entitlement,
+        status: 'pending',
+        createdAt: iso(Date.now()),
+      };
+      store.update({ requests: [created, ...requests] });
+      return HttpResponse.json(
+        iga === 'redirect'
+          ? { requestUrl: `${IGA_BASE}/catalog/request?entitlement=${entitlement}` }
+          : { requestId: created.requestId },
+        { headers: { 'X-Request-Id': MOCK_REQUEST_ID } },
+      );
     }),
     http.get(
       at('/api/v1/virtual-servers'),

@@ -44,6 +44,7 @@ const PAGES = [
   { path: '/connections', ready: 'Połączenia z systemami' },
   { path: '/authenticator/register', ready: 'Zarejestruj Authenticator' },
   { path: '/logs', ready: 'Logi audytowe' },
+  { path: '/requests', ready: 'Wnioski' },
   { path: '/links', ready: 'Moje linki' },
   { path: '/links/new', ready: 'Nowy link' },
   { path: '/links/przeglad-zgloszen', ready: 'Konfiguracja linku "Przegląd zgłoszeń"' },

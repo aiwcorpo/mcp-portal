@@ -120,13 +120,9 @@
                     @case ('denied') {
                       <span class="note muted"
                         ><ng-container i18n="@@wizard.denied">Brak uprawnienia</ng-container>
-                        @if (accessRequests) {
+                        @if (canRequest(group.server, row.tool)) {
                           &middot;
-                          <button
-                            type="button"
-                            class="linkish"
-                            (click)="requestAccess(group.server, row.tool)"
-                          >
+                          <button type="button" class="linkish" (click)="requestAccess(row.tool)">
                             <ng-container i18n="@@wizard.request">Złóż wniosek</ng-container
                             ><span class="visually-hidden"> ({{ row.tool.name }})</span>
                           </button>

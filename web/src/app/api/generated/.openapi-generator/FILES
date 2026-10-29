@@ -50,6 +50,7 @@ model/credentialType.ts
 model/errorCode.ts
 model/inlineObject.ts
 model/loginErrorCode.ts
+model/manifestRejected.ts
 model/mcpToolDefinition.ts
 model/me.ts
 model/modelError.ts
@@ -65,6 +66,7 @@ model/putSecretResponse.ts
 model/registryServer.ts
 model/registryTool.ts
 model/registryToolStatus.ts
+model/requestableEntitlement.ts
 model/resource.ts
 model/resourceDefaults.ts
 model/resourceRef.ts

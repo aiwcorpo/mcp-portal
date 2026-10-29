@@ -155,7 +155,7 @@ describe('LinkWizardPage', () => {
       expect(text()).not.toContain('jira__get_issue');
     });
 
-    it('leads to the connect page from a not-connected row and offers no access request in M2', async () => {
+    it('leads to the connect page from a not-connected row and asks for access to a denied tool', async () => {
       configureTestApp();
       await openRoute('/links/new');
       await toToolsStep('Zestaw');
@@ -166,7 +166,7 @@ describe('LinkWizardPage', () => {
       expect(connect).toBeTruthy();
 
       expect(text()).toContain('Brak uprawnienia');
-      expect(text()).not.toContain('Złóż wniosek');
+      expect(text()).toContain('Złóż wniosek (confluence__get_page)');
     });
   });
 

@@ -77,7 +77,8 @@ describe('ConnectionsPage', () => {
     expect(text(row('Service Desk'))).toContain('Konto serwisowe');
     expect(row('Service Desk').querySelector('button')).toBeNull();
     expect(text(row('OpenSearch'))).toContain('brak uprawnienia');
-    expect(row('OpenSearch').querySelector('button')).toBeNull();
+    expect(button('Złóż wniosek (OpenSearch)', row('OpenSearch'))).toBeTruthy();
+    expect(text(row('OpenSearch'))).not.toContain('Dodaj token');
     expect(text()).toContain('Ostatnie użycie');
   });
 

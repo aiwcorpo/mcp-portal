@@ -56,12 +56,28 @@
           >Moje linki</a
         >
         <a
+          routerLink="/requests"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          i18n="@@nav.requests"
+          >Wnioski</a
+        >
+        <a
           routerLink="/logs"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
           i18n="@@nav.logs"
           >Logi audytowe</a
         >
+        @if (session.isAdmin()) {
+          <a
+            routerLink="/admin"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            i18n="@@nav.admin"
+            >Administracja</a
+          >
+        }
       </nav>
     }
   </header>

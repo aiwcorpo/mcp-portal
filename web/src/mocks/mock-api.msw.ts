@@ -4,6 +4,7 @@ import type { AuthenticatorStatus } from '../app/api/generated';
 import { LOGIN_PATH, safeReturnPath } from '../app/core/auth-urls';
 import { BrowserNavigation } from '../app/core/browser-navigation';
 import {
+  MockIga,
   MockOAuthOutcome,
   MockScenario,
   MockState,
@@ -27,6 +28,8 @@ const OAUTH_OUTCOMES: readonly MockOAuthOutcome[] = [
   'flow_invalid',
   'provider_error',
 ];
+
+const IGA_MODES: readonly MockIga[] = ['direct', 'redirect', 'groups', 'down'];
 
 const AUTHENTICATOR_STATES = ['none', 'active', 'locked', 'disabled'] as const;
 type AuthenticatorScenario = (typeof AUTHENTICATOR_STATES)[number];
@@ -84,8 +87,8 @@ const store = new MockStore(readState(), writeState);
 /**
  * ?mockScenario=default|mixed|empty|nolinks|errors switches the data set, ?mockOAuth=<outcome> the result
  * of the next OAuth provider round trip, ?mockSession=in|out starts with or without a session and
- * ?mockAuthenticator=none|active|locked|disabled sets the Authenticator registration, all for the rest
- * of the browser session. The preview of the pending operation is /confirm/cnf_4k9Qe2LxW7tB3mZp.
+ * ?mockAuthenticator=none|active|locked|disabled sets the Authenticator registration and
+ * ?mockIga=direct|redirect|groups|down the behaviour of the IGA adapter, all for the rest of the browser session. The preview of the pending operation is /confirm/cnf_4k9Qe2LxW7tB3mZp.
  */
 function applyScenarioFromUrl(): void {
   const params = new URLSearchParams(location.search);
@@ -108,6 +111,10 @@ function applyScenarioFromUrl(): void {
       enrollment: null,
     });
   }
+  const iga = params.get('mockIga');
+  if (iga && (IGA_MODES as readonly string[]).includes(iga)) {
+    store.update({ iga: iga as MockIga });
+  }
   const outcome = params.get('mockOAuth');
   if (outcome && (OAUTH_OUTCOMES as readonly string[]).includes(outcome)) {
     store.update({ oauthOutcome: outcome as MockOAuthOutcome });
@@ -125,6 +132,10 @@ class MockBrowserNavigation extends BrowserNavigation {
         store.update({ mfaFresh: true });
       }
       super.assign(safeReturnPath(target.searchParams.get('returnPath')));
+      return;
+    }
+    if (target.hostname === 'iga.internal') {
+      super.assign('/requests');
       return;
     }
     if (/^[a-z]+\.internal$/.test(target.hostname) && target.pathname === '/oauth/authorize') {

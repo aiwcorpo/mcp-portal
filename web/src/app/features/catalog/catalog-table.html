@@ -105,7 +105,20 @@
                 riskLabel(tool.risk)
               }}</span>
             </td>
-            <td role="cell" class="c-actions"></td>
+            <td role="cell" class="c-actions">
+              @if (canRequest(srv, tool)) {
+                <button
+                  mat-flat-button
+                  type="button"
+                  class="quiet"
+                  [disabled]="busyTool() === tool.name || busy() === srv.serverId"
+                  (click)="requestTool(srv, tool)"
+                >
+                  <ng-container i18n="@@catalog.requestTool">Złóż wniosek</ng-container
+                  ><span class="visually-hidden"> ({{ tool.name }})</span>
+                </button>
+              }
+            </td>
           </tr>
         }
         @if (!row.tools.length) {

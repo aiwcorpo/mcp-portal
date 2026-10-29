@@ -266,6 +266,14 @@ const CALL_SEEDS: CallSeed[] = [
     resource: { type: 'Jira::Issue', id: 'PAY-10' },
     result: 'result_from_a_newer_gateway',
   },
+  {
+    minutesAgo: 1000,
+    client: 'codex',
+    tool: 'servicedesk__get_ticket',
+    risk: 'READ_ONLY',
+    resource: { type: 'ServiceDesk::Ticket', id: 'SD-70' },
+    result: 'ok',
+  },
 ];
 
 /** 16 hand-written rows and then a steady stream of reads, so that "Pokaż więcej" has pages to show. */
@@ -325,10 +333,10 @@ const RESULT_GROUPS: Record<string, readonly string[]> = {
     'denied_link_scope',
     'denied_policy',
     'tool_disabled',
-    'credential_required',
+    'step_up_required',
     'rate_limited',
   ],
-  error: ['error', 'step_up_required'],
+  error: ['error', 'credential_required'],
   confirmation: [
     'confirmation_pending',
     'confirmed',

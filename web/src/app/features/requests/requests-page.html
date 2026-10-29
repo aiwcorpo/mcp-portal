@@ -1,0 +1,101 @@
+<h1 class="visually-hidden" i18n="@@requests.title">Wnioski</h1>
+
+@if (done(); as text) {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
+}
+@if (failure(); as f) {
+  <app-error-notice [failure]="f" />
+}
+
+@let state = requests();
+@if (state.status === 'loading') {
+  <app-loading />
+} @else if (state.status === 'error') {
+  <app-load-error [failure]="state.failure" (retry)="load()" />
+} @else {
+  <div class="page-head">
+    <p class="muted" i18n="@@requests.lead">Wnioski o uprawnienia do serwerów MCP.</p>
+    <button mat-flat-button type="button" (click)="newRequest()" i18n="@@requests.new">
+      Złóż wniosek
+    </button>
+  </div>
+  @if (rows().length) {
+    <table class="table" role="table">
+      <caption class="visually-hidden" i18n="@@requests.caption">
+        Moje wnioski o uprawnienia
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader" i18n="@@requests.colEntitlement">Uprawnienie</th>
+          <th scope="col" role="columnheader" i18n="@@requests.colCreated">Złożono</th>
+          <th scope="col" role="columnheader" i18n="@@requests.colStatus">Status</th>
+          <th scope="col" role="columnheader" i18n="@@requests.colDecided">Rozpatrzono</th>
+          <th scope="col" role="columnheader">
+            <span class="visually-hidden" i18n="@@requests.colActions">Akcje</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        @for (row of rows(); track row.request.requestId) {
+          <tr role="row">
+            <th
+              scope="row"
+              role="rowheader"
+              data-label="Uprawnienie"
+              i18n-data-label="@@requests.colEntitlement"
+            >
+              <code>{{ row.request.entitlement }}</code>
+              @if (row.title) {
+                <span class="title muted">{{ row.title }}</span>
+              }
+              <span class="id muted">{{ row.request.requestId }}</span>
+            </th>
+            <td role="cell" data-label="Złożono" i18n-data-label="@@requests.colCreated">
+              {{ row.request.createdAt | date: 'dd.MM.yyyy' }}
+            </td>
+            <td
+              role="cell"
+              [class]="'state-' + row.tone"
+              data-label="Status"
+              i18n-data-label="@@requests.colStatus"
+            >
+              {{ row.status }}
+            </td>
+            <td
+              role="cell"
+              class="muted"
+              data-label="Rozpatrzono"
+              i18n-data-label="@@requests.colDecided"
+            >
+              @if (row.request.decidedAt) {
+                {{ row.request.decidedAt | date: 'dd.MM.yyyy' }}
+              } @else {
+                &mdash;
+              }
+            </td>
+            <td role="cell" class="actions">
+              @if (row.openUrl) {
+                <a [href]="row.openUrl" target="_blank" rel="noopener noreferrer"
+                  ><ng-container i18n="@@requests.open">Otwórz w systemie uprawnień</ng-container
+                  ><span class="visually-hidden" i18n="@@requests.newTab">
+                    (otwiera się w nowej karcie)</span
+                  ></a
+                >
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <section class="empty">
+      <h2 i18n="@@requests.emptyTitle">Nie masz żadnych wniosków.</h2>
+      <p class="muted" i18n="@@requests.emptyText">
+        Gdy poprosisz o uprawnienie, wniosek pojawi się tutaj razem ze statusem.
+      </p>
+    </section>
+  }
+  <p class="muted footnote" i18n="@@requests.footnote">
+    Wnioski akceptuje i anuluje system uprawnień.
+  </p>
+}

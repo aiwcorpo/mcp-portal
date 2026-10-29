@@ -1,4 +1,11 @@
 import connectedAllGranted from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/connected-all-granted.json';
+import connectedDeniedToolRequestPending from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/connected-denied-tool-request-pending.json';
+import connectedDeniedToolUnknownEntitlements from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/connected-denied-tool-unknown-entitlements.json';
+import connectedServiceAccountDeniedTool from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/connected-service-account-denied-tool.json';
+import expiringSecretDeniedTool from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/expiring-secret-denied-tool.json';
+import noAccessUnknownEntitlements from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/no-access-unknown-entitlements.json';
+import notConnectedDeniedTool from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/not-connected-denied-tool.json';
+import reconnectRequiredOauthDeniedTool from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/reconnect-required-oauth-denied-tool.json';
 import connectedMixedTypesSecretConnection from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/connected-mixed-types-secret-connection.json';
 import connectedOauthDeniedTool from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/connected-oauth-denied-tool.json';
 import connectedServiceAccount from '@aiwcorpo/mcp-contracts/test-vectors/catalog-actions/connected-service-account.json';
@@ -22,12 +29,23 @@ interface Vector {
     connectionType: CredentialType | null;
     someToolDenied: boolean;
     hasConnection: boolean;
+    /** CC-113: false when the catalog names no requiredEntitlements. */
+    entitlementsKnown?: boolean;
+    pendingRequestForDeniedTool?: boolean;
   };
   expected: { actions: CatalogAction[] };
 }
 
 const VECTORS: Record<string, Vector> = {
   'connected-all-granted.json': connectedAllGranted as Vector,
+  'connected-denied-tool-request-pending.json': connectedDeniedToolRequestPending as Vector,
+  'connected-denied-tool-unknown-entitlements.json':
+    connectedDeniedToolUnknownEntitlements as Vector,
+  'connected-service-account-denied-tool.json': connectedServiceAccountDeniedTool as Vector,
+  'expiring-secret-denied-tool.json': expiringSecretDeniedTool as Vector,
+  'no-access-unknown-entitlements.json': noAccessUnknownEntitlements as Vector,
+  'not-connected-denied-tool.json': notConnectedDeniedTool as Vector,
+  'reconnect-required-oauth-denied-tool.json': reconnectRequiredOauthDeniedTool as Vector,
   'connected-mixed-types-secret-connection.json': connectedMixedTypesSecretConnection as Vector,
   'connected-oauth-denied-tool.json': connectedOauthDeniedTool as Vector,
   'connected-service-account.json': connectedServiceAccount as Vector,
@@ -49,9 +67,12 @@ describe('mock catalog rows follow the contract vectors', () => {
   it.each(Object.keys(VECTORS))('%s', (file) => {
     const { input, expected } = VECTORS[file];
     const granted = input.status !== 'no_access' && input.status !== 'request_pending';
+    const requiredEntitlements = input.entitlementsKnown === false ? [] : ['mcp-test-read'];
     const tools = [
-      toolFixture('x__granted', { access: granted ? 'granted' : 'denied' }),
-      ...(input.someToolDenied && granted ? [toolFixture('x__denied', { access: 'denied' })] : []),
+      toolFixture('x__granted', { access: granted ? 'granted' : 'denied', requiredEntitlements }),
+      ...(input.someToolDenied && granted
+        ? [toolFixture('x__denied', { access: 'denied', requiredEntitlements })]
+        : []),
     ];
     const credentialStatus =
       input.status === 'expiring'
@@ -71,7 +92,12 @@ describe('mock catalog rows follow the contract vectors', () => {
       tools,
     });
 
-    const row = deriveRow(server, connection, input.status === 'request_pending');
+    const pending = new Set(
+      input.status === 'request_pending' || input.pendingRequestForDeniedTool
+        ? requiredEntitlements
+        : [],
+    );
+    const row = deriveRow(server, connection, pending);
 
     expect(row.status).toBe(input.status);
     expect([...row.actions].sort()).toEqual([...expected.actions].sort());

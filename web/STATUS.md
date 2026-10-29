@@ -1,7 +1,15 @@
 # STATUS: mcp-portal/web (ws-08)
 
-Stan na 2026-10-28. Kontrakty: `mcp-contracts` 3.0.2 (paczka `release/aiwcorpo-mcp-contracts-3.0.2.tgz`; z 3.0.1 bez zmian w kodzie: zaostrzone wzorce `resource.id`/`parent`, 503 w `viewed` obsługiwane jak każdy błąd `viewed`). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
+Stan na 2026-10-29 (M4 w toku). Kontrakty: `mcp-contracts` 4.0.0 (paczka `release/aiwcorpo-mcp-contracts-4.0.0.tgz`, klient wygenerowany ponownie z `portal-bff.v1.bundled.yaml` 4.0.0, zero ręcznych typów API). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
 Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
+
+## Kamienie M4
+
+| Kamień | Zakres | Stan |
+| --- | --- | --- |
+| K2 | Kontrakty 4.0.0 i regeneracja klienta; wnioski IGA: zakładka "Wnioski" (lista ze statusem i `decidedAt`), "Złóż wniosek" przy narzędziu i przy wierszu serwera (wybór uprawnienia z `GET /access-requests/entitlements`, opis z IGA jako niezaufany tekst), "Zobacz wniosek" także przy `connected`, tabela akcji CC-113, 503/422 `not_requestable`/idempotencja; Service Desk i OpenSearch bez przycisków podpinania; "ostatnie użycie" konta serwisowego wg B13; mock MSW 4.0.0 (wnioski, tryby IGA) | w toku |
+| K3 | Administracja rejestru (lazy route, `isAdmin`): narzędzia `pending_approval`, diff definicji (opis, schemat, ryzyko), źródło CI/serwer z ostrzeżeniem, "Zatwierdź" z 409 i 422 `risk_lowered` | do zrobienia |
+| K4 | Limity: "Zbyt wiele wywołań" w aktywności, grupy filtra `result` wg B4, 429 z `Retry-After` w formularzach (token, Authenticator); a11y, e2e, README, obraz | do zrobienia |
 
 ## Kamienie M3
 

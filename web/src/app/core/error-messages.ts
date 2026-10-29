@@ -44,6 +44,10 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
     $localize`:@@error.resource_defaults_unsupported:Zawężanie zasobów nie jest jeszcze dostępne.`,
   hash_mismatch: () =>
     $localize`:@@error.hash_mismatch:Definicja zmieniła się w międzyczasie. Odśwież widok.`,
+  not_requestable: () =>
+    $localize`:@@error.not_requestable:System uprawnień nie przyjmuje wniosków z portalu. Złóż wniosek bezpośrednio w systemie uprawnień.`,
+  manifest_rejected: () =>
+    $localize`:@@error.manifest_rejected:Definicja została odrzucona i nie może być zatwierdzona.`,
   flow_invalid: () =>
     $localize`:@@error.flow_invalid:Link połączenia wygasł albo był już użyty. Zacznij od nowa.`,
   provider_error: () =>
@@ -55,7 +59,23 @@ export function errorMessage(code: PortalErrorCode): string {
   return MESSAGES[code]();
 }
 
+function manifestRejectedMessage(reason: string | undefined): string {
+  switch (reason) {
+    case 'risk_lowered':
+      return $localize`:@@error.risk_lowered:Nowa definicja obniża poziom ryzyka narzędzia, więc nie zostanie zatwierdzona. Popraw ryzyko w manifeście i wdróż serwer ponownie.`;
+    case 'environment_mismatch':
+      return $localize`:@@error.environment_mismatch:Manifest jest przeznaczony dla innego środowiska i został odrzucony.`;
+    case 'credential_type_mismatch':
+      return $localize`:@@error.credential_type_mismatch:Manifest nie zgadza się z typem poświadczenia skonfigurowanym dla systemu i został odrzucony.`;
+    default:
+      return errorMessage('manifest_rejected');
+  }
+}
+
 export function failureMessage(failure: ApiFailure): string {
+  if (failure.code === 'manifest_rejected') {
+    return manifestRejectedMessage(failure.reason);
+  }
   if (failure.code === 'rate_limited' && failure.retryAfterSeconds) {
     return $localize`:@@error.rate_limited_retry:Za dużo żądań. Spróbuj ponownie za ${failure.retryAfterSeconds}:seconds: s.`;
   }

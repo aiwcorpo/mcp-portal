@@ -2,8 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom } from 'rxjs';
+import { Router } from '@angular/router';
 import { CatalogService, PortalCatalogServer, SystemId } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { AccessRequestResult } from '../../core/access-request-flow';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
@@ -13,7 +15,7 @@ import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { OAuthReturnBanner } from '../../shared/oauth-return';
 import { AuthenticatorBanner } from '../authenticator/authenticator-banner';
-import { CatalogActionEvent, CatalogTable, matchesServer } from './catalog-table';
+import { CatalogActionEvent, CatalogTable, ToolRequestEvent, matchesServer } from './catalog-table';
 
 type Banner = { kind: 'success'; text: string } | { kind: 'error'; failure: ApiFailure };
 
@@ -37,10 +39,12 @@ export class CatalogPage {
   private readonly connectionActions = inject(ConnectionActions);
   private readonly clipboard = inject(Clipboard);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   protected readonly catalog = signal<LoadState<PortalCatalogServer[]>>(LOADING);
   protected readonly banner = signal<Banner | null>(null);
   protected readonly busyServer = signal<string | null>(null);
+  protected readonly busyTool = signal<string | null>(null);
   protected readonly query = signal('');
 
   protected readonly loadedServers = computed(() => {
@@ -93,6 +97,9 @@ export class CatalogPage {
       case 'request_access':
         await this.requestAccess(server);
         return;
+      case 'view_request':
+        await this.router.navigate(['/requests']);
+        return;
       case 'disconnect':
         await this.disconnect(server);
         return;
@@ -124,15 +131,31 @@ export class CatalogPage {
     }
   }
 
+  protected async onToolRequest({ tool }: ToolRequestEvent): Promise<void> {
+    if (this.busyTool() !== null) {
+      return;
+    }
+    this.busyTool.set(tool.name);
+    const result = await this.connectionActions.requestAccess(tool);
+    this.busyTool.set(null);
+    await this.showRequestResult(result);
+  }
+
   private async requestAccess(server: PortalCatalogServer): Promise<void> {
     this.busyServer.set(server.serverId);
-    const result = await this.connectionActions.requestAccess(server);
+    const result = await this.connectionActions.requestWithChoice(server.system);
     this.busyServer.set(null);
+    if (result) {
+      await this.showRequestResult(result);
+    }
+  }
+
+  private async showRequestResult(result: AccessRequestResult): Promise<void> {
     switch (result.kind) {
       case 'created':
         this.banner.set({
           kind: 'success',
-          text: $localize`:@@catalog.requestCreated:Wniosek złożony (${result.requestId}:id:).`,
+          text: $localize`:@@catalog.requestCreated:Wniosek ${result.requestId}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
         });
         await this.load();
         return;

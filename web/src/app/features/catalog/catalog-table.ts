@@ -9,11 +9,16 @@ import {
   riskLabel,
   systemName,
 } from '../../shared/labels';
-import { catalogRowActions, isEmphasised } from './catalog-actions';
+import { canRequestTool, catalogRowActions, isEmphasised } from './catalog-actions';
 
 export interface CatalogActionEvent {
   server: PortalCatalogServer;
   action: CatalogAction;
+}
+
+export interface ToolRequestEvent {
+  server: PortalCatalogServer;
+  tool: CatalogTool;
 }
 
 /** True when the query matches the server name, its id or one of its tools (name, title). */
@@ -49,7 +54,9 @@ export class CatalogTable {
   readonly servers = input.required<readonly PortalCatalogServer[]>();
   readonly query = input('');
   readonly busy = input<string | null>(null);
+  readonly busyTool = input<string | null>(null);
   readonly action = output<CatalogActionEvent>();
+  readonly toolRequest = output<ToolRequestEvent>();
 
   private readonly opened = signal<ReadonlySet<string>>(new Set());
 
@@ -70,6 +77,7 @@ export class CatalogTable {
   protected readonly actionLabel = actionLabel;
   protected readonly riskLabel = riskLabel;
   protected readonly isEmphasised = isEmphasised;
+  protected readonly canRequest = canRequestTool;
 
   protected isOpen(server: PortalCatalogServer): boolean {
     const query = this.query().trim().toLowerCase();
@@ -92,6 +100,10 @@ export class CatalogTable {
 
   protected run(server: PortalCatalogServer, action: CatalogAction): void {
     this.action.emit({ server, action });
+  }
+
+  protected requestTool(server: PortalCatalogServer, tool: CatalogTool): void {
+    this.toolRequest.emit({ server, tool });
   }
 
   private loginLabel(server: PortalCatalogServer): string {

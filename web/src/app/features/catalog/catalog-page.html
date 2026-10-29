@@ -34,7 +34,9 @@
       [servers]="visibleServers()"
       [query]="query()"
       [busy]="busyServer()"
+      [busyTool]="busyTool()"
       (action)="onAction($event)"
+      (toolRequest)="onToolRequest($event)"
     />
   } @else {
     <p class="muted none" role="status" i18n="@@catalog.noMatches">

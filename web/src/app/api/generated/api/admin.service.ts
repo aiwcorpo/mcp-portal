@@ -19,6 +19,8 @@ import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 // @ts-ignore
 import { ApproveRequest } from '../model/approveRequest';
 // @ts-ignore
+import { ManifestRejected } from '../model/manifestRejected';
+// @ts-ignore
 import { PendingTool } from '../model/pendingTool';
 // @ts-ignore
 import { RegistryServer } from '../model/registryServer';
@@ -42,7 +44,7 @@ export class AdminService extends BaseService {
     }
 
     /**
-     * Approve a pending tool definition (proxy to C5).
+     * Approve a pending tool definition (proxy to C5). The manual way to accept a change made outside a deployment (CC-133).
      * @endpoint post /api/v1/admin/registry/servers/{serverId}/tools/{tool}/approve
      * @param serverId 
      * @param tool 

@@ -2,42 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import {
-  AccessRequestsService,
-  CatalogTool,
-  ConnectionsService,
-  PortalCatalogServer,
-  SystemId,
-} from '../api/generated';
+import { CatalogTool, ConnectionsService, PortalCatalogServer, SystemId } from '../api/generated';
 import { ConfirmDialog, ConfirmDialogData } from '../shared/confirm-dialog';
 import { systemName } from '../shared/labels';
 import { ApiFailure, toApiFailure } from './api-error';
 import { isAllowedRedirect } from './auth-urls';
 import { BrowserNavigation } from './browser-navigation';
+import { AccessRequestFlow, AccessRequestResult } from './access-request-flow';
+import { RequestDialog, RequestDialogData } from '../features/requests/request-dialog';
 
-export type AccessRequestResult =
-  | { kind: 'redirected' }
-  | { kind: 'created'; requestId: string }
-  | { kind: 'unavailable' }
-  | { kind: 'failed'; failure: ApiFailure };
-
-/**
- * The entitlement to ask for. With a tool (the wizard: the one that was clicked) it is that tool's;
- * without one (a whole server row) the first denied tool's. Any one of a tool's entitlements grants it.
- */
-export function entitlementToRequest(
-  server: PortalCatalogServer,
-  tool?: CatalogTool,
-): string | null {
-  if (tool) {
-    return tool.requiredEntitlements[0] ?? null;
-  }
-  for (const candidate of server.tools) {
-    if (candidate.access === 'denied' && candidate.requiredEntitlements.length) {
-      return candidate.requiredEntitlements[0];
-    }
-  }
-  return null;
+/** Any one of the entitlements a tool names grants it, so the first is asked for. */
+export function entitlementToRequest(tool: CatalogTool): string | null {
+  return tool.requiredEntitlements[0] ?? null;
 }
 
 export type DisconnectResult =
@@ -47,7 +23,7 @@ export type DisconnectResult =
 @Injectable({ providedIn: 'root' })
 export class ConnectionActions {
   private readonly connectionsApi = inject(ConnectionsService);
-  private readonly accessRequestsApi = inject(AccessRequestsService);
+  private readonly requests = inject(AccessRequestFlow);
   private readonly dialog = inject(MatDialog);
   private readonly navigation = inject(BrowserNavigation);
   private readonly router = inject(Router);
@@ -92,30 +68,28 @@ export class ConnectionActions {
     return null;
   }
 
-  /** The IGA either hands back a form to open (https only) or creates the request itself (C13). */
-  async requestAccess(
-    server: PortalCatalogServer,
-    tool?: CatalogTool,
-  ): Promise<AccessRequestResult> {
-    const entitlement = entitlementToRequest(server, tool);
-    if (!entitlement) {
-      return { kind: 'unavailable' };
-    }
-    try {
-      const result = await firstValueFrom(
-        this.accessRequestsApi.createAccessRequest({ entitlement }),
-      );
-      if ('requestUrl' in result) {
-        if (!isAllowedRedirect(result.requestUrl)) {
-          return { kind: 'failed', failure: { code: 'internal_error', status: 200 } };
-        }
-        this.navigation.assign(result.requestUrl);
-        return { kind: 'redirected' };
-      }
-      return { kind: 'created', requestId: result.requestId };
-    } catch (error) {
-      return { kind: 'failed', failure: toApiFailure(error) };
-    }
+  /** Request from a tool row: the entitlement of the tool that was clicked, no choice to make. */
+  async requestAccess(tool: CatalogTool): Promise<AccessRequestResult> {
+    const entitlement = entitlementToRequest(tool);
+    return entitlement ? this.requests.createRequest(entitlement) : { kind: 'unavailable' };
+  }
+
+  /**
+   * Request from a server row (or from the requests page, `system` null): there is no single obvious
+   * entitlement, so the dialog lets the user pick one of those the IGA offers (CC-154). Null when the
+   * dialog was dismissed.
+   */
+  async requestWithChoice(system: SystemId | null): Promise<AccessRequestResult | null> {
+    const result = await firstValueFrom(
+      this.dialog
+        .open<RequestDialog, RequestDialogData, AccessRequestResult>(RequestDialog, {
+          data: { system },
+          width: '480px',
+          maxWidth: '95vw',
+        })
+        .afterClosed(),
+    );
+    return result ?? null;
   }
 
   async confirmAndDisconnect(system: SystemId): Promise<DisconnectResult> {

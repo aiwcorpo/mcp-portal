@@ -186,8 +186,16 @@ tbody {
     border: 0;
   }
 
-  .tool .c-toggle,
-  .tool .c-actions {
+  .tool .c-toggle {
     display: none;
+  }
+
+  .tool .c-actions:empty {
+    display: none;
+  }
+
+  .tool .c-actions {
+    padding-top: 4px;
+    text-align: left;
   }
 }

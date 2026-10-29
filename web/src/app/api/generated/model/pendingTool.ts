@@ -12,6 +12,18 @@ import { ToolEntry } from './toolEntry';
 
 export interface PendingTool { 
     /**
+     * Version of the manifest at which approvedEntry was approved; null when approvedEntry is null (CC-097).
+     */
+    approvedInVersion?: string | null;
+    /**
+     * Version of the manifest in which the pending entry appeared (CC-097). For source server it is the version the server reported in initialize, a value the server controls, so the administrator sees it together with source.
+     */
+    pendingVersion: string;
+    /**
+     * Where the pending entry comes from (CC-162). ci is an entry left by a PUT of the pipeline (the reviewed commit); server is a definition that the running server presented. A server entry never replaces a ci entry, see the README, \"Rejestr i przypinanie definicji\".
+     */
+    source: PendingTool.SourceEnum;
+    /**
      * Currently approved entry; null for a new tool.
      */
     approvedEntry: ToolEntry | null;
@@ -21,4 +33,12 @@ export interface PendingTool {
      */
     pendingHash: string;
 }
+export namespace PendingTool {
+    export const SourceEnum = {
+        Ci: 'ci',
+        Server: 'server',
+    } as const;
+    export type SourceEnum = typeof SourceEnum[keyof typeof SourceEnum];
+}
+
 
