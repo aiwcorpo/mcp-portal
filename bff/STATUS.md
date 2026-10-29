@@ -419,7 +419,7 @@ ze `.secrets`, nie czytam ich; do wykonania przez koordynatora).
 1. C8: osobne zdarzenie (np. `access_request_change`) albo znana wartość `reason` dla `admin_change` przy złożeniu wniosku o dostęp z
    portalu; dziś portal nie ma jak zapisać tej akcji w audycie.
 
-Obraz: `mcp-portal-bff:m4-6c73f1b` (z commita M4.4, `scripts/build-image.sh`, bez wdrożenia na stos).
+Obraz: `mcp-portal-bff:m4-66121db` (po poprawkach z przeglądu, bez wdrożenia na stos; wcześniejszy `m4-6c73f1b` zastąpiony).
 
 ## Runda poprawek po przeglądzie Opus M4 (2026-10-29)
 
