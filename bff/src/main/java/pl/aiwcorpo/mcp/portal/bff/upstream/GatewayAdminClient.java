@@ -54,11 +54,12 @@ public class GatewayAdminClient {
                 response -> calls.read(response, JsonNode.class));
     }
 
-    public void approveTool(BearerToken token, String requestId, String serverId, String tool, String definitionHash) {
+    public void approveTool(BearerToken token, String requestId, String serverId, String tool, String definitionHash,
+                            boolean acceptRiskLowering) {
         calls.call(calls.authorize(calls.http().post()
                         .uri("/admin/v1/registry/servers/{serverId}/tools/{tool}/approve", serverId, tool)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(new GatewayModel.ApproveRequest(definitionHash)), token, requestId),
+                        .body(new GatewayModel.ApproveRequest(definitionHash, acceptRiskLowering ? Boolean.TRUE : null)), token, requestId),
                 response -> null);
     }
 

@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
+import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
+import pl.aiwcorpo.mcp.portal.bff.security.StepUpPolicy;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
 import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayAdminClient;
@@ -54,11 +56,16 @@ class RegistryAdminController {
     private final GatewayAdminClient gateway;
     private final AuditLog audit;
     private final Clock clock;
+    private final StepUpPolicy stepUp;
+    private final String returnPath;
     private final ObjectReader approveReader = StrictJson.builder().build()
             .readerFor(ApproveBody.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
-    RegistryAdminController(UserTokens tokens, GatewayAdminClient gateway, AuditLog audit, Clock clock) {
+    RegistryAdminController(UserTokens tokens, GatewayAdminClient gateway, AuditLog audit, Clock clock,
+                            StepUpPolicy stepUp, PortalProperties properties) {
+        this.stepUp = stepUp;
+        this.returnPath = properties.stepUp().adminReturnPath();
         this.tokens = tokens;
         this.gateway = gateway;
         this.audit = audit;
@@ -122,15 +129,27 @@ class RegistryAdminController {
                     clock.millis() - started);
             throw notFound();
         }
-        String hash = parse(rawBody);
-        if (hash == null) {
+        ApproveBody body = parse(rawBody);
+        if (body == null) {
             audit.definitionApprovalFailed(requestId, user, target, tool, null, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
                     clock.millis() - started);
             throw ApiException.badRequest();
         }
+        String hash = body.definitionHash();
+        boolean lowering = Boolean.TRUE.equals(body.acceptRiskLowering());
+        if (lowering) {
+            // The only way to lower a risk (CC-167): the administrator has to prove a fresh second factor first.
+            try {
+                stepUp.requireFresh(user, returnPath);
+            } catch (ApiException e) {
+                audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.stepUpRequired(),
+                        clock.millis() - started);
+                throw e;
+            }
+        }
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
-            gateway.approveTool(token, requestId, serverId, tool, hash);
+            gateway.approveTool(token, requestId, serverId, tool, hash, lowering);
         } catch (UpstreamException e) {
             return approvalFailure(e, user, requestId, serverId, tool, hash, started);
         } catch (RuntimeException e) {
@@ -217,20 +236,21 @@ class RegistryAdminController {
         return new ApiException(HttpStatus.FORBIDDEN, ApiError.of(ApiError.ACCESS_DENIED));
     }
 
-    private String parse(byte[] rawBody) {
+    private ApproveBody parse(byte[] rawBody) {
         if (rawBody == null || rawBody.length == 0) {
             return null;
         }
         try {
             ApproveBody body = approveReader.readValue(rawBody);
             return body != null && body.definitionHash() != null
-                    && RegistryData.DEFINITION_HASH.matcher(body.definitionHash()).matches() ? body.definitionHash() : null;
+                    && RegistryData.DEFINITION_HASH.matcher(body.definitionHash()).matches() ? body : null;
         } catch (JacksonException e) {
             return null;
         }
     }
 
-    record ApproveBody(String definitionHash) {
+    /** {@code acceptRiskLowering} false, null or absent is a plain approval. */
+    record ApproveBody(String definitionHash, Boolean acceptRiskLowering) {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

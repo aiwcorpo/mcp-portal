@@ -33,8 +33,10 @@ public final class GatewayModel {
             Boolean requiresConfirmation) {
     }
 
-    /** {@code ApproveRequest}: the hash the administrator saw, which the gateway compares with the current pending one. */
-    public record ApproveRequest(String definitionHash) {
+    /** {@code ApproveRequest}: the hash the administrator saw, which the gateway compares with the current pending one;
+     * {@code acceptRiskLowering} is set only when true (an older gateway rejects the unknown field, CC-167). */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record ApproveRequest(String definitionHash, Boolean acceptRiskLowering) {
     }
 
     /** {@code VirtualServer} from C5; {@code url} is ignored, the BFF builds links from its own public base URL. */

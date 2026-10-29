@@ -438,3 +438,15 @@ Obraz: `mcp-portal-bff:m4-66121db` (po poprawkach z przeglądu, bez wdrożenia n
 | L-7, L-9, L-10, L-12, L-13 | bez zmian: L-7 to konsekwencja "na sesję" z CC-156 (broker nie ma limitu zapisu tokenu na `sub`, do rozważenia po stronie ws-06); L-9 w propozycji CC 1; L-10 (wyścig dwóch POST) zostaje na adapterze IGA; L-12 (lista hostów IGA) nie dodana; L-13 uwaga do kontraktu |
 
 Testy: `./mvnw test`: 410 testów, 0 błędów.
+
+## Kontrakty 4.1.0 (2026-10-29)
+
+Zależność `mcp-contracts` 4.1.0 (gateway 4.1.0 i BFF 4.1.0 wchodzą razem: schematy `RegistryTool`/`PendingTool` są zamknięte).
+- `approve` przyjmuje `acceptRiskLowering` (ścisły boolean). Przy `true` BFF wymaga świeżego MFA administratora tym samym mechanizmem i
+  oknem co rejestracja Authenticatora; bez niego `401 step_up_required` ze `stepUpUrl`, `returnPath` = `portal.step-up.admin-return-path`
+  (`/admin/registry`), zdarzenie `admin_change` z `outcome: denied`, bez wywołania gateway'a. Pole idzie do gateway'a tylko przy `true`
+  (`false`/brak/`null` = zwykłe zatwierdzenie, bez MFA).
+- `riskLowered` (pending, `RegistryTool`, `PendingTool`) jest przekazywane do web; musi być booleanem, a w zatwierdzonym wpisie nie może być `true`.
+- Aktywność (CC-165): gateway zmienia wynik wierszy (m.in. `rate_limited`, `tool_disabled`, `denied_*` w grupie `denied`); BFF przekazuje
+  wiersze i grupy filtra bez zmian, więc nic do zmiany. Web nie proponuje `request_access` na podstawie samego `result`.
+- Testy: 412, 0 błędów (nowe: MFA przy obniżaniu ryzyka, pole tylko przy `true`, `riskLowered`).

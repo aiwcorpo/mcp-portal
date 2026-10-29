@@ -72,16 +72,21 @@ public record PortalProperties(
      *                  one of them is fresh MFA evidence on its own. Both lists empty: only {@code auth_time} is
      *                  checked, dev profile only
      * @param authenticatorReturnPath portal page of the registration, where a step-up for it comes back to
+     * @param adminReturnPath         portal page of the registry administration, where a step-up for lowering a risk comes back to
      */
     public record StepUp(
             @DefaultValue("5m") Duration maxAge,
             @DefaultValue List<String> acrValues,
             @DefaultValue List<String> amrValues,
-            @DefaultValue("/authenticator") String authenticatorReturnPath) {
+            @DefaultValue("/authenticator") String authenticatorReturnPath,
+            @DefaultValue("/admin/registry") String adminReturnPath) {
 
         public StepUp {
             if (!ReturnPaths.isValid(authenticatorReturnPath)) {
                 throw new IllegalArgumentException("portal.step-up.authenticator-return-path is not a valid ReturnPath");
+            }
+            if (!ReturnPaths.isValid(adminReturnPath)) {
+                throw new IllegalArgumentException("portal.step-up.admin-return-path is not a valid ReturnPath");
             }
         }
     }

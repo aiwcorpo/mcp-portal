@@ -223,6 +223,76 @@ class RegistryAdminTest extends PortalHarness {
         assertThat(event.get("username").asString()).isEqualTo("carol");
     }
 
+    private static final String LOWERING_BODY = "{\"definitionHash\":\"" + HASH + "\",\"acceptRiskLowering\":true}";
+
+    private static List<LoggedRequest> approvals() {
+        return GATEWAY.findAll(anyRequestedFor(urlPathMatching(GATEWAY_REGISTRY + "/.*/approve")));
+    }
+
+    @Test
+    void loweringARiskNeedsAFreshMfaAndTheFieldGoesToTheGatewayOnlyWhenTrue() {
+        TestBrowser stale = login(CAROL, Instant.now().minus(java.time.Duration.ofHours(2)));
+        stale.get("/api/v1/me");
+
+        HttpResponse<String> refused = approve(stale, APPROVE, LOWERING_BODY, true);
+
+        C12.assertResponse("POST", APPROVE_TEMPLATE, refused);
+        assertThat(refused.statusCode()).isEqualTo(401);
+        JsonNode body = JSON.readTree(refused.body());
+        assertThat(body.get("error").asString()).isEqualTo("step_up_required");
+        assertThat(body.get("stepUpUrl").asString()).startsWith("/api/v1/auth/login?stepUp=true").contains("admin");
+        assertThat(approvals()).isEmpty();
+        assertThat(lastAuditEvent().get("outcome").asString()).isEqualTo("denied");
+        ContractSchemas.assertValid(AUDIT, lastAuditEvent());
+
+        // A plain approval, also one that says false, needs no fresh MFA and does not carry the field.
+        HttpResponse<String> plain = approve(stale, APPROVE, "{\"definitionHash\":\"" + HASH + "\",\"acceptRiskLowering\":false}", true);
+        assertThat(plain.statusCode()).isEqualTo(204);
+        assertThat(approvals().getLast().getBodyAsString()).isEqualTo(BODY);
+
+        HttpResponse<String> lowered = approve(admin(), APPROVE, LOWERING_BODY, true);
+        C12.assertResponse("POST", APPROVE_TEMPLATE, lowered);
+        assertThat(lowered.statusCode()).isEqualTo(204);
+        assertThat(approvals().getLast().getBodyAsString()).isEqualTo(LOWERING_BODY);
+        assertThat(approve(admin(), APPROVE, "{\"definitionHash\":\"" + HASH + "\",\"acceptRiskLowering\":\"true\"}", true)
+                .statusCode()).isEqualTo(400);
+    }
+
+    @Test
+    void riskLoweredIsPassedToTheBrowserAndOnlyForAPendingEntry() {
+        tools.jackson.databind.node.ArrayNode registry = (tools.jackson.databind.node.ArrayNode)
+                C12.responseExample("GET", REGISTRY, 200, "jira").deepCopy();
+        for (JsonNode tool : registry.get(0).get("tools")) {
+            if ("pending_approval".equals(tool.get("status").asString())) {
+                ((tools.jackson.databind.node.ObjectNode) tool).put("riskLowered", true);
+            }
+        }
+        String lowered = registry.toString();
+        stubGet(GATEWAY_REGISTRY, 200, lowered);
+        TestBrowser browser = admin();
+
+        HttpResponse<String> response = browser.get(REGISTRY);
+
+        C12.assertResponse("GET", REGISTRY, response);
+        assertThat(response.body()).contains("\"riskLowered\":true");
+
+        tools.jackson.databind.node.ArrayNode approved = (tools.jackson.databind.node.ArrayNode)
+                C12.responseExample("GET", REGISTRY, 200, "jira").deepCopy();
+        tools.jackson.databind.node.ObjectNode entry = (tools.jackson.databind.node.ObjectNode) approved.get(0).get("tools").get(0);
+        entry.put("status", "approved").put("riskLowered", true).remove(List.of("change", "source"));
+        stubGet(GATEWAY_REGISTRY, 200, approved.toString());
+        assertThat(browser.get(REGISTRY).statusCode()).isEqualTo(503);
+        stubGet(GATEWAY_REGISTRY, 200, lowered.replace("\"riskLowered\":true", "\"riskLowered\":\"yes\""));
+        assertThat(browser.get(REGISTRY).statusCode()).isEqualTo(503);
+
+        JsonNode diff = C12.responseExample("GET", PENDING_TEMPLATE, 200, "changed_on_server");
+        stubGet(GATEWAY_REGISTRY + "/mcp-jira/tools/update_issue/pending", 200,
+                diff.toString().substring(0, diff.toString().length() - 1) + ",\"riskLowered\":true}");
+        HttpResponse<String> pending = browser.get(PENDING);
+        C12.assertResponse("GET", PENDING_TEMPLATE, pending);
+        assertThat(JSON.readTree(pending.body()).get("riskLowered").asBoolean()).isTrue();
+    }
+
     @Test
     void anApprovalNeedsTheRequestToComeFromThePortalPage() {
         TestBrowser browser = admin();

@@ -29,9 +29,9 @@ public final class RegistryData {
     private static final Set<String> TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
             "definitionHash");
     private static final Set<String> REGISTRY_TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
-            "definitionHash", "status", "change", "source", "approvedInVersion");
+            "definitionHash", "status", "change", "source", "approvedInVersion", "riskLowered");
     private static final Set<String> PENDING_FIELDS = Set.of("approvedEntry", "pendingEntry", "pendingHash",
-            "pendingVersion", "source", "approvedInVersion");
+            "pendingVersion", "source", "approvedInVersion", "riskLowered");
     private static final Set<String> ACTIONS = Set.of("read", "update", "delete", "admin");
     private static final Set<String> SOURCES = Set.of("ci", "server");
 
@@ -72,7 +72,8 @@ public final class RegistryData {
                 && entry.get("definitionHash").equals(pending.get("pendingHash"))
                 && semver(pending.get("pendingVersion"))
                 && SOURCES.contains(text(pending.get("source")))
-                && (approvedIn == null || approvedIn.isNull() || semver(approvedIn));
+                && (approvedIn == null || approvedIn.isNull() || semver(approvedIn))
+                && (!pending.has("riskLowered") || pending.get("riskLowered").isBoolean());
         return fits ? neutralized(pending) : null;
     }
 
@@ -120,7 +121,10 @@ public final class RegistryData {
             return false;
         }
         JsonNode approvedIn = tool.get("approvedInVersion");
-        return approvedIn == null || approvedIn.isNull() || semver(approvedIn);
+        // riskLowered (CC-167) can only be true for an entry that waits for a decision.
+        JsonNode lowered = tool.get("riskLowered");
+        return (approvedIn == null || approvedIn.isNull() || semver(approvedIn))
+                && (lowered == null || lowered.isBoolean() && (pending || !lowered.asBoolean()));
     }
 
     private static boolean onlyFields(JsonNode node, Set<String> allowed) {
