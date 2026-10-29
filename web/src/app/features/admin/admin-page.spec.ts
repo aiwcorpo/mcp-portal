@@ -178,7 +178,7 @@ describe('AdminPage', () => {
             definition: {
               name: 'update_issue',
               title: 'Update',
-              description: 'Looks fine‮ but is not',
+              description: 'Looks fine\u202E but is not',
               inputSchema: { type: 'object' },
             },
             definitionHash: 'sha256:' + 'b'.repeat(64),

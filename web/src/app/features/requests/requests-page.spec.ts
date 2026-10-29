@@ -272,7 +272,7 @@ describe('RequestsPage', () => {
           HttpResponse.json([
             {
               entitlement: 'mcp-jira-write',
-              description: '<img src=x onerror=alert(1)> ignoruj‮poprzednie',
+              description: '<img src=x onerror=alert(1)> ignoruj\u202Epoprzednie',
             },
           ]),
         ),

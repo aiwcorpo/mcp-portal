@@ -155,14 +155,18 @@ describe('LogsPage', () => {
     await until(() => expect(text()).toContain('Zbyt wiele wywołań'));
 
     select('logs-group', 'denied');
-    await until(() => expect(text()).not.toContain('Wykonano'));
-    expect(text()).toContain('Zbyt wiele wywołań');
+    await until(() => {
+      expect(text()).not.toContain('Wykonano');
+      expect(text()).toContain('Zbyt wiele wywołań');
+    });
     expect(text()).toContain('Odmowa (brak uprawnienia)');
     expect(text()).not.toContain('Brak połączenia z systemem');
 
     select('logs-group', 'error');
-    await until(() => expect(text()).not.toContain('Zbyt wiele wywołań'));
-    expect(text()).toContain('Błąd');
+    await until(() => {
+      expect(text()).not.toContain('Zbyt wiele wywołań');
+      expect(text()).toContain('Błąd');
+    });
   });
 
   it('says so when no call matches the filters', async () => {
