@@ -82,7 +82,7 @@ public final class BrokerData {
     private static List<GatewayModel.CatalogTool> validTools(List<GatewayModel.CatalogTool> tools) {
         List<GatewayModel.CatalogTool> result = new ArrayList<>();
         for (GatewayModel.CatalogTool tool : tools == null ? List.<GatewayModel.CatalogTool>of() : tools) {
-            if (tool == null || tool.name() == null || !RISKS.contains(tool.risk()) || !TOOL_ACTIONS.contains(tool.action())) {
+            if (tool == null || tool.name() == null || !ContractValues.QUALIFIED_TOOL.matcher(tool.name()).matches() || !RISKS.contains(tool.risk()) || !TOOL_ACTIONS.contains(tool.action())) {
                 log.warn("Dropping a C5 catalog tool outside the contract");
                 continue;
             }

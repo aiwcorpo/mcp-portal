@@ -1,0 +1,38 @@
+# Thin wrapper: all logic is in bff/ci/run.sh and web/ci/run.sh.
+# Secrets MCP_MAVEN_REPOSITORY_URL, _USER and _PASSWORD (a read-only token) are passed only on push to main, never to pull
+# request jobs, so code from a pull request cannot read them. Pull requests get the style checks.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  bff-style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bff/ci/run.sh
+        env:
+          CI_STEPS: style
+  bff-build:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: bff/ci/run.sh
+        env:
+          MCP_MAVEN_REPOSITORY_URL: ${{ secrets.MCP_MAVEN_REPOSITORY_URL }}
+          MCP_MAVEN_REPOSITORY_USER: ${{ secrets.MCP_MAVEN_REPOSITORY_USER }}
+          MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.MCP_MAVEN_REPOSITORY_PASSWORD }}
+  web:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: web/ci/run.sh --container

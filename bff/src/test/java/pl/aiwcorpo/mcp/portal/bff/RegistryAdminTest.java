@@ -230,6 +230,20 @@ class RegistryAdminTest extends PortalHarness {
     }
 
     @Test
+    void theStepUpOfALoweringComesBackToTheAdminPageThatSentIt() {
+        TestBrowser stale = login(CAROL, Instant.now().minus(java.time.Duration.ofHours(2)));
+        stale.get("/api/v1/me");
+
+        HttpResponse<String> refused = stale.post(APPROVE, LOWERING_BODY, true, java.util.Map.of("Sec-Fetch-Site", "same-origin",
+                "Referer", "https://mcp-gateway.internal/admin/registry?tool=jira__get_issue"));
+
+        assertThat(refused.statusCode()).isEqualTo(401);
+        assertThat(JSON.readTree(refused.body()).get("stepUpUrl").asString())
+                .isEqualTo("/api/v1/auth/login?stepUp=true&returnPath=/admin/registry?tool%3Djira__get_issue");
+        assertThat(approvals()).isEmpty();
+    }
+
+    @Test
     void loweringARiskNeedsAFreshMfaAndTheFieldGoesToTheGatewayOnlyWhenTrue() {
         TestBrowser stale = login(CAROL, Instant.now().minus(java.time.Duration.ofHours(2)));
         stale.get("/api/v1/me");

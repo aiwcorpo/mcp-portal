@@ -84,7 +84,7 @@ class McpEndpointTest extends PortalHarness {
             if (tool.get("disabled").asBoolean()) {
                 entry.put("disabled", true);
             }
-            bySystem.computeIfAbsent(name.substring(0, name.indexOf("__")), system -> JSON.createArrayNode()).add(entry);
+            bySystem.computeIfAbsent(name.contains("__") ? name.substring(0, name.indexOf("__")) : "jira", system -> JSON.createArrayNode()).add(entry);
         }
         ArrayNode servers = JSON.createArrayNode();
         bySystem.forEach((system, list) -> {
@@ -178,6 +178,33 @@ class McpEndpointTest extends PortalHarness {
             assertThat(JSON.readTree(response.body()).get("reason").asString()).as(query).isEqualTo("invalid_filter");
         }
         assertThat(catalogRequests()).isZero();
+    }
+
+    @Test
+    void whatTheContainerRefusesToParseIsAnInvalidFilterNotAServerError() {
+        TestBrowser browser = session();
+        GATEWAY.resetRequests();
+
+        for (String query : List.of("=jira", "systems=%ff", "%ff=1", "%00=1", "systems%3Djira%26access=read", "&systems=jira",
+                "systems=jira&", "systems=jira&&access=read", "%53ystems=jira%26x", "x%3D1=2")) {
+            HttpResponse<String> response = browser.get(PATH + "?" + query);
+            C12.assertResponse("GET", PATH, response);
+            assertThat(response.statusCode()).as(query).isEqualTo(400);
+            assertThat(JSON.readTree(response.body()).get("reason").asString()).as(query).isEqualTo("invalid_filter");
+        }
+        assertThat(catalogRequests()).isZero();
+        assertThat(browser.get(PATH + "?SYSTEMS=jira").statusCode()).as("names are case-insensitive like on the gateway").isEqualTo(200);
+    }
+
+    @Test
+    void aCatalogToolWithoutTheSystemPrefixDoesNotBreakTheAnswer() {
+        stubCatalog(JSON.readTree("[{\"name\":\"jira__get_issue\",\"risk\":\"READ_ONLY\",\"access\":\"granted\",\"disabled\":false},"
+                + "{\"name\":\"nosystemprefix\",\"risk\":\"READ_ONLY\",\"access\":\"granted\",\"disabled\":false}]"));
+
+        HttpResponse<String> response = session().get(PATH);
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(JSON.readTree(response.body()).get("toolCount").asInt()).isEqualTo(1);
     }
 
     @Test

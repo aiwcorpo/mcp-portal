@@ -75,6 +75,12 @@ public final class TestBrowser {
         return send(builder, headers);
     }
 
+    public HttpResponse<String> delete(String path, boolean withCsrf, Map<String, String> extraHeaders) {
+        Map<String, String> headers = new LinkedHashMap<>(csrf(withCsrf));
+        headers.putAll(extraHeaders);
+        return send(request(path).DELETE(), headers);
+    }
+
     public HttpResponse<String> delete(String path, boolean withCsrf) {
         return send(request(path).DELETE(), csrf(withCsrf));
     }

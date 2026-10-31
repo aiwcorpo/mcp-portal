@@ -271,8 +271,9 @@ nie trafia do audytu. Szczegóły:
 - Cztery parametry przychodzą już zdekodowane przez warstwę HTTP (`jira%2Cgitlab` to `jira,gitlab`). BFF składa z nich
   query sam (`nazwa=wartość` łączone `&`, `&` i `=` w wartości zapisane jako `%26` i `%3D`, bez ponownego kodowania)
   i parsuje je klasą `EndpointFilter` z `mcp-manifest` 5.1.0, czyli tymi samymi regułami co gateway. Parametr spoza czterech,
-  powtórzony, wartość z `%` po dekodowaniu, `+` (spacja), pusta wartość i niepoprawny escape (`%zz`, który kontener po cichu
-  odrzuciłby, zamieniając zły filtr w brak filtra) to `400 invalid_request`, `reason: invalid_filter`; odmowa następuje przed
+  powtórzony, wartość z `%` po dekodowaniu, `+` (spacja), pusta wartość i niepoprawny escape (`%zz`), bajty spoza UTF-8, parametr bez nazwy
+  (`?=jira`), nazwa spoza czterech po dekodowaniu (`?systems%3Djira%26access=read`) i puste segmenty (`&&`, początkowe lub końcowe `&`;
+  kontener pomijałby je po cichu, a gateway je odrzuca) to `400 invalid_request`, `reason: invalid_filter`; odmowa następuje przed
   wywołaniem gateway'a i nic nie mówi o narzędziach użytkownika.
 - `toolCount`: płaska lista z `servers[].tools[]` odpowiedzi `GET /admin/v1/catalog` (C5, token wymieniony na
   `mcp-gateway-admin`), tylko `granted` i nie `disabled`, po filtrze (`EndpointFilter.allows`). To szacunek, wiążące jest
@@ -295,7 +296,10 @@ nie trafia do audytu. Szczegóły:
 `make ci` (czyli `ci/run.sh`) to jedyny punkt wejścia: sprawdza JDK 25, style (znaki, frazy), `./mvnw verify` i wypisuje
 liczbę testów. Działa lokalnie bez żadnego systemu CI. W kontenerze: `ci/run.sh --container` buduje obraz z `ci/Dockerfile` i
 uruchamia w nim ten sam skrypt (repozytorium i `~/.m2` jako wolumeny). Pliki `.gitlab-ci.yml`, `Jenkinsfile`
-i `.github/workflows/` mają być cienkimi nakładkami wołającymi `ci/run.sh`; w tym repo ich nie ma, dopóki system CI nie
-jest wybrany.
+i `.github/workflows/ci.yml` w korzeniu `mcp-portal` to cienkie nakładki wołające `bff/ci/run.sh` i `web/ci/run.sh`.
+Sekrety rejestru artefaktów (`MCP_MAVEN_REPOSITORY_URL`, `_USER`, `_PASSWORD`, token tylko do odczytu; ustawienia w `.ci/settings.xml`)
+trafiają wyłącznie do zadań na gałęzi głównej, nigdy do pipeline'ów merge requestów i pull requestów, które dostają krok `style`.
+Socket Dockera (zadanie `web`) tylko na gałęzi głównej i dedykowanym agencie. `ci/run.sh` kończy się błędem przy nieznanym albo
+pustym `CI_STEPS`, przy padniętym `mvnw` i przy zerze testów.
 
 Stan prac i podział na kamienie: [STATUS.md](STATUS.md).

@@ -140,6 +140,16 @@ class AuthenticatorTest extends PortalHarness {
     }
 
     @Test
+    void removingARegistrationAlsoReturnsToThePageThatSentTheRequest() {
+        HttpResponse<String> response = stale().delete("/api/v1/authenticator", true,
+                Map.of("Referer", "https://mcp-gateway.internal/authenticator?tab=remove"));
+
+        assertThat(response.statusCode()).isEqualTo(401);
+        assertThat(JSON.readTree(response.body()).get("stepUpUrl").asString())
+                .isEqualTo("/api/v1/auth/login?stepUp=true&returnPath=/authenticator?tab%3Dremove");
+    }
+
+    @Test
     void aRefererFromAnotherOriginOrOutsideThePortalPagesIsNotAReturnTarget() {
         TestBrowser browser = stale();
 

@@ -2,6 +2,7 @@ package pl.aiwcorpo.mcp.portal.bff.mcpendpoint;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,7 @@ import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
 @RestController
 class McpEndpointController {
 
-    // A '%' that does not start an escape: the container drops such a parameter, which would turn a broken filter into none.
+    // A '%' that does not start an escape: the container refuses it, and a refusal must answer invalid_filter like any other bad filter.
     private static final Pattern BROKEN_ESCAPE = Pattern.compile("%(?![0-9A-Fa-f]{2})");
 
     private final UserTokens tokens;
@@ -73,12 +74,21 @@ class McpEndpointController {
     /** The query composed from the decoded parameters; null when the request itself is not a valid filter. */
     static String composedQuery(HttpServletRequest request) {
         String raw = request.getQueryString();
-        if (raw != null && BROKEN_ESCAPE.matcher(raw).find()) {
+        // The gateway refuses empty parameters ("&&", a leading or trailing "&"); the container would skip them silently.
+        if (raw != null && (BROKEN_ESCAPE.matcher(raw).find() || raw.startsWith("&") || raw.endsWith("&") || raw.contains("&&"))) {
+            return null;
+        }
+        Map<String, String[]> parameters;
+        try {
+            // Tomcat throws on a nameless parameter, bytes that are no UTF-8 and control characters in a name.
+            parameters = request.getParameterMap();
+        } catch (RuntimeException e) {
             return null;
         }
         List<Map.Entry<String, String>> pairs = new ArrayList<>();
-        for (Map.Entry<String, String[]> parameter : request.getParameterMap().entrySet()) {
-            if (parameter.getValue().length != 1) {
+        for (Map.Entry<String, String[]> parameter : parameters.entrySet()) {
+            // After decoding: "systems%3Djira%26access" is a name with '=' and '&' in it, not the parameter "systems".
+            if (parameter.getValue().length != 1 || !McpEndpoint.PARAMETERS.contains(parameter.getKey().toLowerCase(Locale.ROOT))) {
                 return null;
             }
             pairs.add(Map.entry(parameter.getKey(), parameter.getValue()[0]));

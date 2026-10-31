@@ -457,7 +457,7 @@ Zależność `mcp-contracts` 4.1.0 (gateway 4.1.0 i BFF 4.1.0 wchodzą razem: sc
 ## M5: jeden adres `/mcp`, CI (2026-10-31)
 
 Kontrakty 5.1.0 (`mcp-contracts` i nowa zależność `mcp-manifest` dla `EndpointFilter`, tej samej klasy co w gateway'u).
-`./mvnw verify`: 482 testy, 0 błędów (13 testów `VirtualServersTest` usunięto razem z linkami).
+`clean verify`: 467 testów, 0 błędów (13 testów `VirtualServersTest` usunięto razem z linkami).
 
 - Usunięte: `GET|POST|DELETE /api/v1/virtual-servers*`, proxy `/admin/v1/virtual-servers`, `ClientConfigs` per link, audyt
   `virtual_server_change`, pole `virtualServer` zdarzenia C8, `PublicUrls.virtualServer`. `/v/` nie ma w BFF.
@@ -466,7 +466,7 @@ Kontrakty 5.1.0 (`mcp-contracts` i nowa zależność `mcp-manifest` dla `Endpoin
   `servers[].tools[]` katalogu C5 (`granted` i nie `disabled`, po filtrze), `clientConfigs` z `publicBaseUrl` w cudzysłowie.
   Wszystkie 15 wektorów `mcp-endpoint/` przechodzi dwa razy: na czystej klasie i przez HTTP (z zapytaniem tak, jak wysyła klient:
   `%2C`, `%252C`, `%26`, `+`). Decyzja własna: niepoprawny escape (`%zz`) jest `invalid_filter`, bo kontener (Tomcat) odrzuca taki
-  parametr po cichu i zły filtr stawałby się brakiem filtra; kontrakt tego przypadku nie wylicza.
+  kontener rzuca wyjątek przy takim parametrze (nie gubi go), więc złapany wyjątek też daje `invalid_filter`, a nie 500; kontrakt tego przypadku nie wylicza. Odrzucane są też: parametr bez nazwy, nazwa spoza czterech po dekodowaniu, puste segmenty (`&&`).
 - Aktywność: `ActivityCall.filter` tylko w postaci kanonicznej (inaczej wiersz odrzucony), `denied_link_scope` czytane jako
   `denied_filter_scope`, `virtualServer` ze starego gateway'a ignorowane bez gubienia wiersza (CC-188; właściwe mapowanie jest po
   stronie gateway'a, tu tylko zabezpieczenie na czas aktualizacji).
@@ -480,8 +480,8 @@ Kontrakty 5.1.0 (`mcp-contracts` i nowa zależność `mcp-manifest` dla `Endpoin
 - CI: `ci/run.sh` (style: znaki ukryte i frazy; `./mvnw verify`; liczba testów), `make ci`, `ci/run.sh --container` z
   `ci/Dockerfile`. Sprawdzone: lokalnie pełny przebieg; w kontenerze krok `style` na lokalnym obrazie `eclipse-temurin:25-jre`
   (`CI_BASE_IMAGE`). Krok `build` w kontenerze niesprawdzony: wymaga obrazu `eclipse-temurin:25-jdk`, którego nie ma lokalnie, a
-  pobranie obcego obrazu wymaga zgody człowieka. Nakładek na system CI (GitLab, Jenkins, GitHub Actions) nie ma, bo system nie jest
-  wybrany; mają tylko wołać `ci/run.sh`.
+  pobranie obcego obrazu wymaga zgody człowieka. Nakładki `.gitlab-ci.yml`, `Jenkinsfile`, `.github/workflows/ci.yml` w korzeniu mcp-portal wołają `bff/ci/run.sh` i `web/ci/run.sh`
+  (składnia nieuruchamiana na żadnym runnerze); registry artefaktów przez `MCP_MAVEN_REPOSITORY_*` i `.ci/settings.xml`, sekrety tylko na gałęzi głównej.
 
 ### Propozycje CC
 
@@ -490,4 +490,4 @@ Kontrakty 5.1.0 (`mcp-contracts` i nowa zależność `mcp-manifest` dla `Endpoin
 - Uwaga do C12 (`stepUpUrl`): opis mówi, że frontend może podmienić `returnPath`; BFF dodatkowo ustawia go na stronę wysyłającą
   żądanie. Jeśli ws-08 woli stały adres, wystarczy go podmienić; nic nie zależy od wartości domyślnej.
 
-M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, `GET /api/v1/me/mcp-endpoint`, linki usunięte, aktywność z `filter`, wznowienie po step-up (powrót na stronę akcji), `ci/run.sh`, obraz `m5-94118ff`; 482 testy.
+M5: w toku. Linia `M5: osiągnięty` wróci po przebiegu na prawdziwym runnerze (przegląd Opus: H1-H2, M1-M4 poprawione 2026-10-31).

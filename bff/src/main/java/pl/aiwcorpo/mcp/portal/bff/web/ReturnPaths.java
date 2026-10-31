@@ -2,6 +2,7 @@ package pl.aiwcorpo.mcp.portal.bff.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -41,7 +42,7 @@ public final class ReturnPaths {
         try {
             URI page = new URI(referer);
             if (page.getRawFragment() != null || page.getRawUserInfo() != null || page.getRawPath() == null
-                    || page.getScheme() == null || !originOf(page).equalsIgnoreCase(publicUrls.base())) {
+                    || page.getScheme() == null || !originOf(page).toLowerCase(Locale.ROOT).equals(publicUrls.base().toLowerCase(Locale.ROOT))) {
                 return fallback;
             }
             String candidate = page.getRawPath() + (page.getRawQuery() == null ? "" : "?" + page.getRawQuery());

@@ -17,6 +17,9 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayModel;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 record McpEndpoint(String url, String filter, int toolCount, ClientConfigs clientConfigs) {
 
+    /** The four names of the query (CC-170); the gateway refuses any other. */
+    static final List<String> PARAMETERS = List.of("systems", "tools", "access", "exclude");
+
     /**
      * CC-182: {@code name=value} joined with {@code &}, nothing encoded again. The values are already decoded by the HTTP layer;
      * a value that holds {@code &} or {@code =} would change the structure of the query, so it is written as {@code %26} or
@@ -47,6 +50,7 @@ record McpEndpoint(String url, String filter, int toolCount, ClientConfigs clien
         String url = canonical.isEmpty() ? baseMcpUrl : baseMcpUrl + "?" + canonical;
         int count = (int) tools.stream()
                 .filter(tool -> "granted".equals(tool.access()) && !Boolean.TRUE.equals(tool.disabled()))
+                .filter(tool -> tool.name() != null && tool.name().contains("__"))
                 .filter(tool -> parsed.allows(tool.name(), tool.risk()))
                 .count();
         return new McpEndpoint(url, canonical.isEmpty() ? null : canonical, count, ClientConfigs.of(url, claudeCode));
