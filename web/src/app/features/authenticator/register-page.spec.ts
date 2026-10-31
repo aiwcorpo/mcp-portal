@@ -2,6 +2,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { HttpResponse, http } from 'msw';
+import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { MOCK_TOTP_SEED } from '../../../mocks/m3-mock';
 import { currentCode } from '../../../mocks/totp';
@@ -105,6 +106,7 @@ describe('AuthenticatorRegisterPage', () => {
 
   it('sends the user to the IdP for a fresh MFA and comes back to the same page', async () => {
     const navigation = configureTestApp();
+    await TestBed.inject(SessionService).load();
     await openRoute('/authenticator/register');
     await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
     button('Dalej').click();
@@ -122,7 +124,11 @@ describe('AuthenticatorRegisterPage', () => {
   it('after the return from the MFA that the click asked for, starts the registration without a second click (U12)', async () => {
     store.update({ mfaFresh: true });
     configureTestApp();
-    TestBed.inject(ResumeIntentStore).save({ kind: 'enroll-authenticator' });
+    await TestBed.inject(SessionService).load();
+    TestBed.inject(ResumeIntentStore).save(
+      { kind: 'enroll-authenticator' },
+      TestBed.inject(SessionService).username(),
+    );
     await openRoute('/authenticator/register?mfa=ok');
 
     await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
@@ -133,7 +139,11 @@ describe('AuthenticatorRegisterPage', () => {
   it('starts only once: a reload of the page after the resumed start waits for a click again', async () => {
     store.update({ mfaFresh: true });
     configureTestApp();
-    TestBed.inject(ResumeIntentStore).save({ kind: 'enroll-authenticator' });
+    await TestBed.inject(SessionService).load();
+    TestBed.inject(ResumeIntentStore).save(
+      { kind: 'enroll-authenticator' },
+      TestBed.inject(SessionService).username(),
+    );
     const harness = await openRoute('/authenticator/register?mfa=ok');
     await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
 

@@ -5,6 +5,7 @@ import { AuthService, LoginErrorCode, Me, MeService } from '../api/generated';
 import { ApiFailure, toApiFailure } from './api-error';
 import { loginUrl } from './auth-urls';
 import { BrowserNavigation } from './browser-navigation';
+import { ResumeIntentStore } from './resume-intent';
 
 export type SessionState =
   | { status: 'loading' }
@@ -19,6 +20,7 @@ export class SessionService {
   private readonly navigation = inject(BrowserNavigation);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
+  private readonly resume = inject(ResumeIntentStore);
 
   /**
    * `/?loginError=<code>` after a failed login (CC-051). Read once at start, before the router
@@ -27,6 +29,15 @@ export class SessionService {
   readonly loginError = signal<LoginErrorCode | null>(
     readLoginError(this.document.location?.search ?? ''),
   );
+
+  /** `username` of the signed-in user, '' without a session; what a resumed action is bound to. */
+  readonly username = computed(() => this.me()?.username ?? '');
+
+  constructor() {
+    if (this.loginError()) {
+      this.resume.clear();
+    }
+  }
 
   private readonly stateSignal = signal<SessionState>({ status: 'loading' });
   readonly state = this.stateSignal.asReadonly();
@@ -54,6 +65,7 @@ export class SessionService {
   /** Called by the HTTP interceptor when any API call reports that the session is gone. */
   markExpired(): void {
     if (this.stateSignal().status === 'authenticated') {
+      this.resume.clear();
       this.stateSignal.set({ status: 'anonymous', reason: 'expired' });
     }
   }
@@ -78,6 +90,7 @@ export class SessionService {
         return failure;
       }
     }
+    this.resume.clear();
     this.stateSignal.set({ status: 'anonymous', reason: 'logged_out' });
     await this.router.navigateByUrl('/');
     return null;

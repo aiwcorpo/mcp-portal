@@ -9,6 +9,8 @@ import { MockStore, createMockHandlers } from '../mocks/portal-mock';
  * the interceptor accepts the older name.
  */
 export function useMockApi() {
+  // The first test of a file starts the app cold; in a container on a busy host that exceeds the 5 s default.
+  vi.setConfig({ testTimeout: 20_000 });
   const store = new MockStore();
   const server = setupServer(...createMockHandlers(store));
 

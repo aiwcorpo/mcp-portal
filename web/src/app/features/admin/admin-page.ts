@@ -13,6 +13,7 @@ import { firstValueFrom } from 'rxjs';
 import { AdminService, RegistryServer, RegistryTool } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
+import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
 import { Tone, riskLabel, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
@@ -98,6 +99,7 @@ export class AdminPage implements OnInit {
   protected readonly resumeApproval = signal<ResumeOf<'approve-tool'> | null>(null);
   protected readonly resumedFromMfa = signal(false);
   private readonly resumeStore = inject(ResumeIntentStore);
+  private readonly session = inject(SessionService);
 
   private readonly adminApi = inject(AdminService);
 
@@ -145,7 +147,7 @@ export class AdminPage implements OnInit {
   ngOnInit(): void {
     if (this.mfa() === 'ok') {
       this.mfaReturned.set(true);
-      const intent = this.resumeStore.take('approve-tool');
+      const intent = this.resumeStore.take('approve-tool', this.session.username());
       if (intent) {
         this.resumeApproval.set(intent);
         this.resumedFromMfa.set(true);
@@ -192,6 +194,11 @@ export class AdminPage implements OnInit {
 
   protected toggleDiff(key: string): void {
     this.diffOpen.update((set) => (set.has(key) ? removeFrom(set, key) : addTo(set, key)));
+  }
+
+  protected onResumeHandled(): void {
+    this.resumeApproval.set(null);
+    this.resumedFromMfa.set(false);
   }
 
   protected async onApproved(tool: ToolRow): Promise<void> {

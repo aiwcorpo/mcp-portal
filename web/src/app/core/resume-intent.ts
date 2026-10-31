@@ -15,7 +15,7 @@ export type ResumeIntent =
       acceptRiskLowering: boolean;
     }
   | { kind: 'enroll-authenticator' }
-  | { kind: 'remove-authenticator' };
+  | { kind: 'remove-authenticator'; registeredAt: string };
 
 export type ResumeKind = ResumeIntent['kind'];
 export type ResumeOf<K extends ResumeKind> = Extract<ResumeIntent, { kind: K }>;
@@ -25,9 +25,12 @@ const STORAGE_KEY = 'mcp-portal-resume';
 export const RESUME_TTL_MS = 5 * 60_000;
 
 const IDENTIFIER = /^[A-Za-z0-9._:-]{1,128}$/;
+const TIMESTAMP = /^[0-9TZ:.+-]{1,40}$/;
 const HASH = /^[A-Za-z0-9+/=_:-]{1,200}$/;
 
 interface Stored {
+  /** `username` of the session that clicked; another user in the same tab gets nothing. */
+  user: string;
   intent: ResumeIntent;
   expiresAt: number;
 }
@@ -39,8 +42,11 @@ function valid(intent: unknown): intent is ResumeIntent {
   const candidate = intent as Record<string, unknown>;
   switch (candidate['kind']) {
     case 'enroll-authenticator':
-    case 'remove-authenticator':
       return true;
+    case 'remove-authenticator':
+      return (
+        typeof candidate['registeredAt'] === 'string' && TIMESTAMP.test(candidate['registeredAt'])
+      );
     case 'approve-tool':
       return (
         typeof candidate['serverId'] === 'string' &&
@@ -65,19 +71,25 @@ function valid(intent: unknown): intent is ResumeIntent {
 export class ResumeIntentStore {
   private readonly storage = this.resolveStorage();
 
-  save(intent: ResumeIntent, now: number = Date.now()): void {
+  save(intent: ResumeIntent, user: string, now: number = Date.now()): void {
+    if (!user) {
+      return;
+    }
     try {
       this.storage?.setItem(
         STORAGE_KEY,
-        JSON.stringify({ intent, expiresAt: now + RESUME_TTL_MS } satisfies Stored),
+        JSON.stringify({ user, intent, expiresAt: now + RESUME_TTL_MS } satisfies Stored),
       );
     } catch {
       // Storage full or blocked: the user clicks again after the return.
     }
   }
 
-  /** Reads and removes the slot; an intent of another kind, an expired or a damaged one is dropped. */
-  take<K extends ResumeKind>(kind: K, now: number = Date.now()): ResumeOf<K> | null {
+  /**
+   * Reads and removes the slot; an intent of another kind or of another user, an expired or a damaged one is
+   * dropped. The slot is also cleared on logout, on a login error and when the session expires.
+   */
+  take<K extends ResumeKind>(kind: K, user: string, now: number = Date.now()): ResumeOf<K> | null {
     let raw: string | null;
     try {
       raw = this.storage?.getItem(STORAGE_KEY) ?? null;
@@ -92,6 +104,8 @@ export class ResumeIntentStore {
       const stored = JSON.parse(raw) as Partial<Stored>;
       if (
         typeof stored.expiresAt === 'number' &&
+        user !== '' &&
+        stored.user === user &&
         stored.expiresAt >= now &&
         valid(stored.intent) &&
         stored.intent.kind === kind

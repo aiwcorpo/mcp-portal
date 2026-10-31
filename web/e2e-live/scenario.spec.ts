@@ -2,8 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 const SHOTS = process.env['LIVE_SHOTS_DIR'];
 const PASSWORD = process.env['LIVE_ALICE_PASSWORD'];
-const LINK_NAME = 'Live e2e';
-const LINK_SLUG = 'live-e2e';
+const BASE = process.env['LIVE_BASE_URL'] ?? 'http://localhost:18740';
 
 test.skip(!PASSWORD, 'set LIVE_ALICE_PASSWORD (make users in mcp-platform-dev)');
 
@@ -18,7 +17,7 @@ async function shot(page: Page, name: string): Promise<void> {
   if (original) await page.setViewportSize(original);
 }
 
-test('alice: login, catalog, PAT, OAuth, link wizard, cleanup, logout', async ({
+test('alice: login, catalog, PAT, OAuth, address page with a filter, cleanup, logout', async ({
   page,
   context,
 }) => {
@@ -58,14 +57,6 @@ test('alice: login, catalog, PAT, OAuth, link wizard, cleanup, logout', async ({
   });
 
   await test.step('remove leftovers of an interrupted run', async () => {
-    await page.goto('/links');
-    await expect(page.getByRole('heading', { level: 1, name: 'Moje linki' })).toBeVisible();
-    const leftover = page.getByRole('button', { name: `Usuń (${LINK_NAME})` });
-    if (await leftover.isVisible()) {
-      await leftover.click();
-      await page.getByRole('dialog').getByRole('button', { name: 'Usuń link' }).click();
-      await expect(page.getByText(`Usunięto link "${LINK_NAME}".`)).toBeVisible();
-    }
     await page.goto('/connections');
     await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
     const gitlab = page.getByRole('button', { name: 'Rozłącz (GitLab)' });
@@ -126,32 +117,27 @@ test('alice: login, catalog, PAT, OAuth, link wizard, cleanup, logout', async ({
     await shot(page, '06-oauth-connected');
   });
 
-  await test.step('link wizard: name -> tools -> ready', async () => {
-    await page.goto('/links');
-    await page.getByRole('link', { name: 'Nowy link' }).click();
-    await page.getByLabel('Nazwa').fill(LINK_NAME);
-    await expect(page.getByLabel('Identyfikator')).toHaveValue(LINK_SLUG);
-    await shot(page, '07-wizard-name');
-    await page.getByRole('button', { name: 'Dalej' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Wybierz narzędzia' })).toBeVisible();
-    await page
-      .getByRole('checkbox', { name: /jira__/ })
-      .first()
-      .check();
-    await shot(page, '08-wizard-tools');
-    await page.getByRole('button', { name: 'Utwórz link' }).click();
-    await expect(
-      page.getByRole('heading', { level: 1, name: `Link "${LINK_NAME}" jest gotowy` }),
-    ).toBeVisible();
-    await expect(page.getByLabel('Adres linku')).toHaveValue(
-      `http://localhost:18740/v/${LINK_SLUG}/mcp`,
-    );
+  await test.step('address page: the whole platform, then a filter', async () => {
+    await page.goto('/endpoint');
+    await expect(page.getByRole('heading', { level: 1, name: 'Adres MCP' })).toBeVisible();
+    const address = page.getByLabel('Adres MCP', { exact: true });
+    await expect(address).toHaveValue(`${BASE}/mcp`);
+    await shot(page, '07-endpoint-whole-platform');
+
+    await page.getByRole('checkbox', { name: /^Jira/ }).check();
+    await page.getByLabel('Tylko odczyt').check();
+    await expect(address).toHaveValue(`${BASE}/mcp?systems=jira&access=read`);
+    await shot(page, '08-endpoint-filter');
+
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await page.getByRole('button', { name: 'Kopiuj (Claude Code)' }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-      `claude mcp add --transport http ${LINK_SLUG} http://localhost:18740/v/${LINK_SLUG}/mcp`,
+      `claude mcp add --transport http aiwcorpo-mcp "${BASE}/mcp?systems=jira&access=read"`,
     );
-    await shot(page, '09-wizard-ready');
+    await shot(page, '09-endpoint-copied');
+
+    await page.goto('/links');
+    await expect(page).toHaveURL(/\/endpoint$/);
   });
 
   await test.step('browser hygiene: cookies and storage', async () => {
@@ -170,13 +156,7 @@ test('alice: login, catalog, PAT, OAuth, link wizard, cleanup, logout', async ({
     expect(stored.all).not.toMatch(/access_token|refresh_token|id_token/i);
   });
 
-  await test.step('cleanup: delete the link and disconnect GitLab', async () => {
-    await page.goto('/links');
-    await page.getByRole('button', { name: `Usuń (${LINK_NAME})` }).click();
-    await shot(page, '10-link-delete-dialog');
-    await page.getByRole('dialog').getByRole('button', { name: 'Usuń link' }).click();
-    await expect(page.getByText(`Usunięto link "${LINK_NAME}".`)).toBeVisible();
-
+  await test.step('cleanup: disconnect GitLab', async () => {
     await page.goto('/connections');
     await page.getByRole('button', { name: 'Rozłącz (GitLab)' }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Rozłącz' }).click();

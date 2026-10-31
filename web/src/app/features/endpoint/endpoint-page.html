@@ -13,6 +13,14 @@
       [clientConfigs]="result.clientConfigs"
       [toolCount]="result.toolCount"
     />
+    @if (result.toolCount === 0 && result.filter) {
+      <app-notice kind="warning">
+        <span data-testid="empty-filter" i18n="@@endpoint.emptyFilter"
+          >Ten filtr nie zostawia żadnego narzędzia, które możesz wywołać. Klient zobaczy pustą
+          listę. Zmień wybór albo wróć do adresu bez filtra.</span
+        >
+      </app-notice>
+    }
     @if (result.toolCount >= warningThreshold) {
       <app-notice kind="warning">
         <span data-testid="size-warning" i18n="@@endpoint.sizeWarning"
@@ -34,10 +42,10 @@
     </p>
   } @else {
     @let state = endpoint();
-    @if (state.status === 'loading') {
-      <app-loading />
-    } @else if (state.status === 'error') {
+    @if (state.status === 'error') {
       <app-error-notice [failure]="state.failure" [retryable]="true" (retry)="retryEndpoint()" />
+    } @else {
+      <app-loading />
     }
   }
   <app-notice kind="warning">
@@ -199,28 +207,6 @@
                         >Brak uprawnienia, nie pojawi się na liście.</span
                       >
                     }
-                    @case ('not_connected') {
-                      <span class="note muted"
-                        ><ng-container i18n="@@endpoint.notConnected"
-                          >Konto niepołączone, wywołanie poprosi o połączenie.</ng-container
-                        >
-                        <a [routerLink]="['/connect', group.server.system]"
-                          ><ng-container i18n="@@endpoint.connect">Połącz</ng-container
-                          ><span class="visually-hidden"> ({{ group.name }})</span></a
-                        ></span
-                      >
-                    }
-                    @case ('reconnect_required') {
-                      <span class="note muted"
-                        ><ng-container i18n="@@endpoint.reconnect"
-                          >Wymaga ponownego połączenia.</ng-container
-                        >
-                        <a [routerLink]="['/connect', group.server.system]"
-                          ><ng-container i18n="@@endpoint.connect2">Połącz</ng-container
-                          ><span class="visually-hidden"> ({{ group.name }})</span></a
-                        ></span
-                      >
-                    }
                     @default {
                       @if (row.tool.requiresConfirmation) {
                         <span class="note muted" i18n="@@endpoint.confirmNote"
@@ -228,6 +214,23 @@
                         >
                       }
                     }
+                  }
+                  @if (row.connection; as connection) {
+                    <span class="note muted">
+                      @if (connection === 'not_connected') {
+                        <ng-container i18n="@@endpoint.notConnected"
+                          >Konto niepołączone, wywołanie poprosi o połączenie.</ng-container
+                        >
+                      } @else {
+                        <ng-container i18n="@@endpoint.reconnect"
+                          >Wymaga ponownego połączenia.</ng-container
+                        >
+                      }
+                      <a [routerLink]="['/connect', group.server.system]"
+                        ><ng-container i18n="@@endpoint.connect">Połącz</ng-container
+                        ><span class="visually-hidden"> ({{ group.name }})</span></a
+                      >
+                    </span>
                   }
                 </div>
                 <div

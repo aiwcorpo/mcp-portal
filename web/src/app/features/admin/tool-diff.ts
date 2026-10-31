@@ -20,6 +20,7 @@ import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
+import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
@@ -48,6 +49,7 @@ export class ToolDiff {
   private readonly navigation = inject(BrowserNavigation);
   private readonly dialog = inject(MatDialog);
   private readonly resumeStore = inject(ResumeIntentStore);
+  private readonly session = inject(SessionService);
 
   readonly serverId = input.required<ServerId>();
   /** Tool name in the registry (without the gateway prefix). */
@@ -184,12 +186,12 @@ export class ToolDiff {
       state.value.pendingHash === intent.hash &&
       // A lowering that was confirmed stays confirmed only if the definition still lowers the risk.
       view.riskLowered === intent.acceptRiskLowering;
-    this.resumeHandled.emit();
-    if (!same) {
+    if (same) {
+      await this.send();
+    } else {
       this.resumeRefused.set(true);
-      return;
     }
-    await this.send();
+    this.resumeHandled.emit();
   }
 
   /** The request itself, after every dialog was answered (now or before the MFA). */
@@ -218,13 +220,16 @@ export class ToolDiff {
         await this.load();
         this.changedMeanwhile.set(true);
       } else if (failure.code === 'step_up_required' && !this.mfaReturned()) {
-        this.resumeStore.save({
-          kind: 'approve-tool',
-          serverId: this.serverId(),
-          tool: this.tool(),
-          hash: approvedHash,
-          acceptRiskLowering: view.riskLowered,
-        });
+        this.resumeStore.save(
+          {
+            kind: 'approve-tool',
+            serverId: this.serverId(),
+            tool: this.tool(),
+            hash: approvedHash,
+            acceptRiskLowering: view.riskLowered,
+          },
+          this.session.username(),
+        );
         this.navigation.assign(
           stepUpUrlFor(failure.stepUpUrl, `${ADMIN_PATH}?mfa=ok`, this.navigation.origin),
         );

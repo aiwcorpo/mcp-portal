@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { HttpResponse, http } from 'msw';
 import { AuthenticatorStatus } from '../../api/generated';
@@ -211,6 +212,7 @@ describe('ConnectionsPage', () => {
     async function open(status: AuthenticatorStatus) {
       store.update({ authenticator: status });
       const navigation = configureTestApp();
+      await TestBed.inject(SessionService).load();
       const harness = await openRoute('/connections');
       await until(() => expect(text()).toContain('MCP Platform'));
       return { navigation, harness };
@@ -319,13 +321,61 @@ describe('ConnectionsPage', () => {
         authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' },
       });
       configureTestApp();
-      TestBed.inject(ResumeIntentStore).save({ kind: 'remove-authenticator' });
+      await TestBed.inject(SessionService).load();
+      TestBed.inject(ResumeIntentStore).save(
+        { kind: 'remove-authenticator', registeredAt: '2026-10-27T09:00:00Z' },
+        TestBed.inject(SessionService).username(),
+      );
       await openRoute('/connections?mfa=ok');
 
       await until(() => expect(text()).toContain('Authenticator usunięty.'));
       expect(store.state.authenticator.state).toBe('none');
       expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
       expect(document.querySelector('mat-dialog-container')).toBeNull();
+    });
+
+    it('does not remove the registration for another user of the same tab (the intent is bound to the user)', async () => {
+      store.update({
+        mfaFresh: true,
+        authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' },
+      });
+      configureTestApp();
+      await TestBed.inject(SessionService).load();
+      TestBed.inject(ResumeIntentStore).save(
+        { kind: 'remove-authenticator', registeredAt: '2026-10-27T09:00:00Z' },
+        'somebody-else',
+      );
+      await openRoute('/connections?mfa=ok');
+      await until(() => expect(text()).toContain('Możesz teraz usunąć Authenticator.'));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(store.state.authenticator.state).toBe('active');
+    });
+
+    it('does not remove a registration other than the one that was shown in the dialog', async () => {
+      store.update({
+        mfaFresh: true,
+        authenticator: { state: 'active', registeredAt: '2026-10-29T09:00:00Z' },
+      });
+      configureTestApp();
+      await TestBed.inject(SessionService).load();
+      TestBed.inject(ResumeIntentStore).save(
+        { kind: 'remove-authenticator', registeredAt: '2026-10-27T09:00:00Z' },
+        TestBed.inject(SessionService).username(),
+      );
+      await openRoute('/connections?mfa=ok');
+      await until(() => expect(text()).toContain('Możesz teraz usunąć Authenticator.'));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(store.state.authenticator.state).toBe('active');
+    });
+
+    it('drops the intent on logout, so the next user of the tab inherits nothing', async () => {
+      configureTestApp();
+      const session = TestBed.inject(SessionService);
+      await session.load();
+      const store = TestBed.inject(ResumeIntentStore);
+      store.save({ kind: 'enroll-authenticator' }, session.username());
+      await session.logout();
+      expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
     });
 
     it('keeps the intent of the removal in this tab until the page is back', async () => {
@@ -339,6 +389,7 @@ describe('ConnectionsPage', () => {
       await until(() => expect(navigation.assign).toHaveBeenCalled());
       expect(JSON.parse(sessionStorage.getItem('mcp-portal-resume') ?? '{}').intent).toEqual({
         kind: 'remove-authenticator',
+        registeredAt: '2026-10-27T09:00:00Z',
       });
     });
 

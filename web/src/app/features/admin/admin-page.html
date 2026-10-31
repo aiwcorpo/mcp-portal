@@ -154,7 +154,7 @@
                       [toolName]="item.name"
                       [mfaReturned]="mfaReturned()"
                       [resume]="resumeApproval()"
-                      (resumeHandled)="resumeApproval.set(null)"
+                      (resumeHandled)="onResumeHandled()"
                       (approved)="onApproved(item)"
                       (gone)="onGone(item)"
                     />

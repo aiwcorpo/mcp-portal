@@ -5,6 +5,8 @@ const PORT = 18731;
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // A container with few cores times out axe and the first paint when every core runs a browser (ci/run.sh --container).
+  workers: process.env['PW_WORKERS'] ? Number(process.env['PW_WORKERS']) : undefined,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 1 : 0,
   reporter: process.env['CI'] ? 'line' : 'list',

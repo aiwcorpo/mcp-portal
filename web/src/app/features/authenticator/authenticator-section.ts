@@ -16,6 +16,7 @@ import { AuthenticatorService, AuthenticatorStatus } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
+import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
@@ -42,6 +43,7 @@ export class AuthenticatorSection implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly navigation = inject(BrowserNavigation);
   private readonly resume = inject(ResumeIntentStore);
+  private readonly session = inject(SessionService);
 
   readonly status = input.required<AuthenticatorStatus>();
   /** True right after the return from the IdP that the removal asked for. */
@@ -61,7 +63,12 @@ export class AuthenticatorSection implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.mfaConfirmed() && this.resume.take('remove-authenticator')) {
+    const intent = this.mfaConfirmed()
+      ? this.resume.take('remove-authenticator', this.session.username())
+      : null;
+    const current = this.status();
+    // Only the registration that was shown in the dialog is removed: a new one made meanwhile is not.
+    if (intent && current.state === 'active' && current.registeredAt === intent.registeredAt) {
       this.resumed.set(true);
       void this.performRemoval();
     }
@@ -103,7 +110,10 @@ export class AuthenticatorSection implements OnInit {
     } catch (error) {
       const failure = toApiFailure(error);
       if (failure.code === 'step_up_required' && !this.mfaConfirmed()) {
-        this.resume.save({ kind: 'remove-authenticator' });
+        this.resume.save(
+          { kind: 'remove-authenticator', registeredAt: this.status().registeredAt ?? '' },
+          this.session.username(),
+        );
         this.navigation.assign(
           stepUpUrlFor(
             failure.stepUpUrl,
@@ -115,6 +125,7 @@ export class AuthenticatorSection implements OnInit {
       }
       this.failure.set(failure);
     } finally {
+      this.resumed.set(false);
       this.busy.set(false);
     }
   }

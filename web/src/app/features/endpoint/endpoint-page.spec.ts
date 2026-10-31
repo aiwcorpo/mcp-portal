@@ -7,7 +7,7 @@ import { useMockApi } from '../../../testing/mock-api';
 import { button, configureTestApp, openRoute, text, until } from '../../../testing/test-app';
 import { serverFixture, toolFixture } from '../../../testing/fixtures';
 import { TOOL_LIST_WARNING_THRESHOLD } from '../../core/tool-list-warning';
-import { toolBlock } from './endpoint-page';
+import { connectionNote, toolBlock } from './endpoint-page';
 
 function addressField(): HTMLInputElement {
   return document.getElementById('endpoint-url') as HTMLInputElement;
@@ -34,6 +34,8 @@ function radio(name: string, value: string): HTMLInputElement {
 async function whenAddress(url: string): Promise<void> {
   await until(() => expect(addressField()?.value).toBe(url));
 }
+
+const BASE = 'https://mcp.aiwcorpo.pl/mcp';
 
 describe('EndpointPage', () => {
   const { server, store } = useMockApi();
@@ -193,7 +195,7 @@ describe('EndpointPage', () => {
       expect(text()).toContain('Konto niepołączone, wywołanie poprosi o połączenie.'),
     );
     expect(document.querySelector('a[href="/connect/jira"]')).toBeTruthy();
-    expect(checkbox('jira__get').disabled).toBe(true);
+    expect(checkbox('jira__get').disabled).toBe(false);
   });
 
   it('filters the tool list by name or title', async () => {
@@ -402,11 +404,104 @@ describe('toolBlock', () => {
     expect(toolBlock(connected, { ...tool, disabled: true, access: 'denied' })).toBe('disabled');
     expect(toolBlock(connected, { ...tool, access: 'denied' })).toBe('denied');
     expect(toolBlock(serverFixture('jira', { status: 'expiring' }), tool)).toBeNull();
-    expect(toolBlock(serverFixture('jira', { status: 'not_connected' }), tool)).toBe(
+    expect(toolBlock(serverFixture('jira', { status: 'not_connected' }), tool)).toBeNull();
+    expect(toolBlock(serverFixture('jira', { status: 'reconnect_required' }), tool)).toBeNull();
+    expect(connectionNote(serverFixture('jira', { status: 'not_connected' }))).toBe(
       'not_connected',
     );
-    expect(toolBlock(serverFixture('jira', { status: 'reconnect_required' }), tool)).toBe(
-      'reconnect_required',
+    expect(connectionNote(connected)).toBeNull();
+  });
+});
+
+describe('EndpointPage, stale address and empty result', () => {
+  const { server } = useMockApi();
+
+  it('hides the address and the copy buttons while the address of the new choice is read', async () => {
+    const gate: { release: (() => void) | null } = { release: null };
+    server.use(
+      http.get('/api/v1/me/mcp-endpoint', async ({ request }) => {
+        const filtered = new URL(request.url).searchParams.has('systems');
+        if (filtered) {
+          await new Promise<void>((resolve) => (gate.release = resolve));
+        }
+        const url = filtered ? `${BASE}?systems=jira` : BASE;
+        return HttpResponse.json({
+          url,
+          ...(filtered ? { filter: 'systems=jira' } : {}),
+          toolCount: 3,
+          clientConfigs: { claudeCode: url, copilot: url, codex: url },
+        });
+      }),
     );
+    configureTestApp();
+    await openRoute('/endpoint');
+    await whenAddress(BASE);
+
+    checkbox('Jira').click();
+    await until(() => expect(addressField()).toBeNull());
+    expect(document.body.textContent).not.toContain('Kopiuj adres MCP');
+
+    await until(() => expect(gate.release).not.toBeNull());
+    gate.release!();
+    await whenAddress(`${BASE}?systems=jira`);
+  });
+
+  it('reads the address once when the catalog arrives after it', async () => {
+    const queries: string[] = [];
+    server.events.on('request:start', ({ request }) => {
+      if (new URL(request.url).pathname === '/api/v1/me/mcp-endpoint') {
+        queries.push(request.url);
+      }
+    });
+    server.use(
+      http.get('/api/v1/catalog', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        return HttpResponse.json({ servers: [serverFixture('jira')] });
+      }),
+    );
+    configureTestApp();
+    await openRoute('/endpoint');
+    await whenAddress(BASE);
+    await until(() => expect(checkbox('jira__get')).toBeTruthy());
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(queries.length).toBe(1);
+    expect(addressField()).toBeTruthy();
+  });
+
+  it('says so when the filter leaves no tool', async () => {
+    server.use(
+      http.get('/api/v1/me/mcp-endpoint', ({ request }) => {
+        const filtered = new URL(request.url).searchParams.has('systems');
+        const url = filtered ? `${BASE}?systems=jira` : BASE;
+        return HttpResponse.json({
+          url,
+          ...(filtered ? { filter: 'systems=jira' } : {}),
+          toolCount: 0,
+          clientConfigs: { claudeCode: url, copilot: url, codex: url },
+        });
+      }),
+    );
+    configureTestApp();
+    await openRoute('/endpoint');
+    await whenAddress(BASE);
+    expect(document.querySelector('[data-testid="empty-filter"]')).toBeNull();
+
+    checkbox('Jira').click();
+    await until(() => expect(document.querySelector('[data-testid="empty-filter"]')).toBeTruthy());
+  });
+
+  it('lets the user pick and exclude tools of a system without a connection', async () => {
+    server.use(
+      http.get('/api/v1/catalog', () =>
+        HttpResponse.json({ servers: [serverFixture('jira', { status: 'not_connected' })] }),
+      ),
+    );
+    configureTestApp();
+    await openRoute('/endpoint');
+    await whenAddress(BASE);
+    await until(() => expect(checkbox('jira__get')).toBeTruthy());
+    expect(checkbox('jira__get').disabled).toBe(false);
+    checkbox('jira__get').click();
+    await whenAddress(`${BASE}?tools=jira__get`);
   });
 });

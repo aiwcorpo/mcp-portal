@@ -135,9 +135,8 @@ Nazwy plików zaczynają się od numeru makiety, np. `01-serwery-mcp-rozwiniete-
 Jeden punkt wejścia: `ci/run.sh` (wołany przez `make ci`). Kroki: `style` (znaki ukryte i typograficzne, frazy
 zakazane), `lint`, `i18n`, `unit`, `build`, `e2e`; podzbiór przez `CI_STEPS=style,unit ci/run.sh`.
 `ci/run.sh --container` robi to samo w obrazie z `ci/Dockerfile` (Node 24 i Chromium z obrazu Playwright
-1.64.1; źródła montowane tylko do odczytu i kopiowane bez `node_modules`). Pliki `.gitlab-ci.yml`, `Jenkinsfile`
-i workflow GitHub Actions mogą tylko wołać ten skrypt. Do `npm ci` potrzebne jest repozytorium `mcp-contracts`
-obok `mcp-portal` (paczka `release/` jest zależnością deweloperską).
+1.64.1). Montuje tylko `web/` i paczkę kontraktów, obie tylko do odczytu, i kopiuje źródła bez `node_modules`. Paczka kontraktów: z checkoutu obok (domyślnie), z pliku `CONTRACTS_TARBALL` albo z serwera paczek `CONTRACTS_TARBALL_URL` (z `CONTRACTS_TARBALL_SHA256`). Na pull requestach wystarczy `CI_STEPS=style` (bez npm i paczki), pełny przebieg na głównej gałęzi. `PW_WORKERS` (domyślnie 4 w kontenerze) ogranicza liczbę przeglądarek. Pliki `.gitlab-ci.yml`, `Jenkinsfile`
+i workflow GitHub Actions mogą tylko wołać ten skrypt. 
 
 ## Adres MCP i ostrzeżenie o rozmiarze listy
 

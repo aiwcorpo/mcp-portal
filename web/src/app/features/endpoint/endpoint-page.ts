@@ -35,20 +35,26 @@ import { Notice } from '../../shared/notice';
 import { AuthenticatorBanner } from '../authenticator/authenticator-banner';
 import { EndpointReady } from './endpoint-ready';
 
-/** Why a tool does not count towards the address; null when it does. */
-export type ToolBlock = 'disabled' | 'denied' | 'not_connected' | 'reconnect_required' | null;
+/** Why a tool cannot count towards the address; null when it can. */
+export type ToolBlock = 'disabled' | 'denied' | null;
 
-export function toolBlock(server: PortalCatalogServer, tool: CatalogTool): ToolBlock {
+export function toolBlock(_server: PortalCatalogServer, tool: CatalogTool): ToolBlock {
   if (tool.disabled) {
     return 'disabled';
   }
-  if (tool.access === 'denied') {
-    return 'denied';
-  }
-  if (server.status === 'not_connected' || server.status === 'reconnect_required') {
-    return server.status;
-  }
-  return null;
+  return tool.access === 'denied' ? 'denied' : null;
+}
+
+/**
+ * A system without a working connection keeps its tools on the list (a call asks for the connection, CC-169), so
+ * its tools can be picked or excluded; the page only says that the connection is missing.
+ */
+export function connectionNote(
+  server: PortalCatalogServer,
+): 'not_connected' | 'reconnect_required' | null {
+  return server.status === 'not_connected' || server.status === 'reconnect_required'
+    ? server.status
+    : null;
 }
 
 type AccessChoice = 'all' | FilterAccess;
@@ -60,6 +66,7 @@ export const ENDPOINT_DEBOUNCE_MS = 250;
 interface ToolRow {
   tool: CatalogTool;
   block: ToolBlock;
+  connection: 'not_connected' | 'reconnect_required' | null;
 }
 
 interface ToolGroup {
@@ -150,7 +157,11 @@ export class EndpointPage {
               (tool.title ?? '').toLowerCase().includes(needle) ||
               tool.description.toLowerCase().includes(needle),
           )
-          .map((tool) => ({ tool, block: toolBlock(server, tool) })),
+          .map((tool) => ({
+            tool,
+            block: toolBlock(server, tool),
+            connection: connectionNote(server),
+          })),
       }))
       .filter((group) => group.rows.length);
   });
@@ -165,16 +176,22 @@ export class EndpointPage {
       .filter((name) => picked.has(name));
   });
 
-  protected readonly composed = computed(() => {
-    const picked = this.effectivePicked();
-    const access = this.access();
-    return composeFilter({
-      systems: [...this.systems()],
-      tools: this.toolMode() === 'only' ? picked : [],
-      access: access === 'all' ? null : access,
-      exclude: this.toolMode() === 'except' ? picked : [],
-    });
-  });
+  protected readonly composed = computed(
+    () => {
+      const picked = this.effectivePicked();
+      const access = this.access();
+      return composeFilter({
+        systems: [...this.systems()],
+        tools: this.toolMode() === 'only' ? picked : [],
+        access: access === 'all' ? null : access,
+        exclude: this.toolMode() === 'except' ? picked : [],
+      });
+    },
+    {
+      // The catalog arriving later recomputes this with the same text; that must not read the address again.
+      equal: (a, b) => a.query === b.query && a.bytes === b.bytes && a.problem === b.problem,
+    },
+  );
 
   protected readonly problemText = computed(() => problemMessage(this.composed().problem));
 
@@ -222,6 +239,8 @@ export class EndpointPage {
 
   private async fetchEndpoint(filter: string): Promise<void> {
     const generation = ++this.generation;
+    // The address of an older choice must not stay on screen (and in the clipboard buttons) while the next is read.
+    this.endpoint.set(LOADING);
     this.refreshing.set(true);
     const { systems, tools, access, exclude } = endpointParameters(filter);
     try {
@@ -244,7 +263,11 @@ export class EndpointPage {
 
   protected readonly shown = computed(() => {
     const state = this.endpoint();
-    return this.composed().problem === null && state.status === 'ready' ? state.value : null;
+    return this.composed().problem === null &&
+      state.status === 'ready' &&
+      (state.value.filter ?? '') === this.composed().query
+      ? state.value
+      : null;
   });
 
   protected isSystemChosen(system: string): boolean {

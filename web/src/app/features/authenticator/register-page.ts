@@ -22,6 +22,7 @@ import { AuthenticatorService } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
+import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
@@ -75,6 +76,7 @@ export class AuthenticatorRegisterPage implements OnInit {
   private readonly router = inject(Router);
   private readonly navigation = inject(BrowserNavigation);
   private readonly resume = inject(ResumeIntentStore);
+  private readonly session = inject(SessionService);
   private readonly clipboard = inject(Clipboard);
   private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly document = inject(DOCUMENT);
@@ -190,7 +192,7 @@ export class AuthenticatorRegisterPage implements OnInit {
     this.mfaConfirmed.set(this.returnedFromMfa);
     this.step.set('info');
     // "Dalej" was clicked before the MFA: the registration starts now, without a second click.
-    if (this.returnedFromMfa && this.resume.take('enroll-authenticator')) {
+    if (this.returnedFromMfa && this.resume.take('enroll-authenticator', this.session.username())) {
       void this.start();
     }
   }
@@ -229,7 +231,7 @@ export class AuthenticatorRegisterPage implements OnInit {
     if (failure.code === 'already_registered') {
       this.step.set('already');
     } else if (failure.code === 'step_up_required' && !this.returnedFromMfa) {
-      this.resume.save({ kind: 'enroll-authenticator' });
+      this.resume.save({ kind: 'enroll-authenticator' }, this.session.username());
       this.navigation.assign(
         stepUpUrlFor(
           failure.stepUpUrl,
