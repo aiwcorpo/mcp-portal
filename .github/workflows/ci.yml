@@ -1,6 +1,7 @@
 # Thin wrapper: all logic is in bff/ci/run.sh and web/ci/run.sh.
-# Secrets MCP_MAVEN_REPOSITORY_URL, _USER and _PASSWORD (a read-only token) are passed only on push to main, never to pull
-# request jobs, so code from a pull request cannot read them. Pull requests get the style checks.
+# The registry secrets MCP_MAVEN_REPOSITORY_URL, _USER and _PASSWORD (a read-only token) are secrets of the GitHub Environment
+# `ci-main`, whose deployment branches are restricted to main in the repository settings. An `if` in this file does not protect
+# them (a branch can edit it); the Environment rule does. Pull requests get only the style job, with no secrets.
 name: ci
 on:
   push:
@@ -18,6 +19,7 @@ jobs:
           CI_STEPS: style
   bff-build:
     if: github.event_name == 'push'
+    environment: ci-main
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

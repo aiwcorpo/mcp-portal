@@ -1,12 +1,12 @@
 // Thin wrapper: all logic is in bff/ci/run.sh and web/ci/run.sh.
-// Pull requests and other branches get only the style checks and no credentials. The build runs on main with the registry
-// credentials (read-only token, Jenkins credentials id mcp-maven-registry) and the web job on an agent labelled "docker"
-// that is dedicated to main (the Docker socket is root-equivalent, so no untrusted branch may run there).
+// This file only names the stages; isolation is configured in Jenkins and described in bff/README.md ("CI"): the style stage
+// runs on the pool labelled ci-style (no Docker socket), the credentials mcp-maven-registry* are scoped to the main branch
+// folder, the "docker" node accepts jobs of main only, and pull requests take the Jenkinsfile from the trusted branch.
 pipeline {
     agent none
     stages {
         stage('style') {
-            agent { docker { image 'maven:3.9.12-eclipse-temurin-25' } }
+            agent { label 'ci-style' }
             environment { CI_STEPS = 'style' }
             steps { sh 'bff/ci/run.sh' }
         }

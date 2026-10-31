@@ -299,7 +299,12 @@ uruchamia w nim ten sam skrypt (repozytorium i `~/.m2` jako wolumeny). Pliki `.g
 i `.github/workflows/ci.yml` w korzeniu `mcp-portal` to cienkie nakładki wołające `bff/ci/run.sh` i `web/ci/run.sh`.
 Sekrety rejestru artefaktów (`MCP_MAVEN_REPOSITORY_URL`, `_USER`, `_PASSWORD`, token tylko do odczytu; ustawienia w `.ci/settings.xml`)
 trafiają wyłącznie do zadań na gałęzi głównej, nigdy do pipeline'ów merge requestów i pull requestów, które dostają krok `style`.
-Socket Dockera (zadanie `web`) tylko na gałęzi głównej i dedykowanym agencie. `ci/run.sh` kończy się błędem przy nieznanym albo
+Socket Dockera (zadanie `web`) tylko na gałęzi głównej i dedykowanym agencie.
+Izolacja nie wynika z samych plików nakładek (gałąź może je zmienić), tylko z ustawień systemu CI: GitHub: sekrety w Environment
+`ci-main` z gałęziami wdrożeń ograniczonymi do `main`. GitLab: zmienne masked, protected, tylko do odczytu. Jenkins: etykieta
+`ci-style` to pula bez gniazda Dockera dla kroku `style`; poświadczenia `mcp-maven-registry` i `mcp-maven-registry-url` dostępne tylko dla
+zadań gałęzi `main`; węzeł `docker` przyjmuje wyłącznie zadania `main`; dla pull requestów Jenkinsfile pochodzi z zaufanej gałęzi
+(wtyczka z zaufanym źródłem Jenkinsfile), nie z gałęzi PR. `ci/run.sh` kończy się błędem przy nieznanym albo
 pustym `CI_STEPS`, przy padniętym `mvnw` i przy zerze testów.
 
 Stan prac i podział na kamienie: [STATUS.md](STATUS.md).
