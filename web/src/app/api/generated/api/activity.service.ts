@@ -110,7 +110,7 @@ export class ActivityService extends BaseService {
      * @param limit 
      * @param from 
      * @param to 
-     * @param result Result group (CC-142). The result of a row comes from the reason of the last event of the call (mapping in CC-165, scripts/lib/activity-calls.mjs). A UI must not offer request_access on the result alone, because the C10 error access_denied carries no requiredEntitlements. ok is result ok. denied covers denied_not_granted, denied_link_scope, denied_policy, tool_disabled, step_up_required and rate_limited. error covers error and credential_required. confirmation covers every other result, that is pending, confirmed, expired, failed, superseded, blocked-by-pending and cancelled confirmations.
+     * @param result Result group (CC-142). The result of a row comes from the reason of the last event of the call (mapping in CC-165, scripts/lib/activity-calls.mjs). A UI must not offer request_access on the result alone, because the C10 error access_denied carries no requiredEntitlements. ok is result ok. denied covers denied_not_granted, denied_filter_scope, denied_policy, tool_disabled, step_up_required and rate_limited. error covers error and credential_required. confirmation covers every other result, that is pending, confirmed, expired, failed, superseded, blocked-by-pending and cancelled confirmations.
      * @param q Case-insensitive substring of the qualified tool name or of resource.id. Never matches argument values (they are not stored).
      * @param cursor Opaque value of the X-Next-Cursor header of the previous page.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

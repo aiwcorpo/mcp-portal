@@ -1,3 +1,5 @@
+import { TestBed } from '@angular/core/testing';
+import { ResumeIntentStore } from '../../core/resume-intent';
 import { HttpResponse, http } from 'msw';
 import { AuthenticatorStatus } from '../../api/generated';
 import { connectionFixture, serverFixture, toolFixture } from '../../../testing/fixtures';
@@ -308,6 +310,47 @@ describe('ConnectionsPage', () => {
       const target = new URL(navigation.assign.mock.calls[0][0], location.origin);
       expect(target.searchParams.get('stepUp')).toBe('true');
       expect(target.searchParams.get('returnPath')).toBe('/connections?mfa=ok');
+      expect(store.state.authenticator.state).toBe('active');
+    });
+
+    it('removes the registration after the return from the MFA without a second click, once (U12)', async () => {
+      store.update({
+        mfaFresh: true,
+        authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' },
+      });
+      configureTestApp();
+      TestBed.inject(ResumeIntentStore).save({ kind: 'remove-authenticator' });
+      await openRoute('/connections?mfa=ok');
+
+      await until(() => expect(text()).toContain('Authenticator usunięty.'));
+      expect(store.state.authenticator.state).toBe('none');
+      expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
+      expect(document.querySelector('mat-dialog-container')).toBeNull();
+    });
+
+    it('keeps the intent of the removal in this tab until the page is back', async () => {
+      const { navigation, harness } = await open({
+        state: 'active',
+        registeredAt: '2026-10-27T09:00:00Z',
+      });
+      button('Usuń').click();
+      await harness.fixture.whenStable();
+      button('Usuń', document.querySelector('mat-dialog-container')!).click();
+      await until(() => expect(navigation.assign).toHaveBeenCalled());
+      expect(JSON.parse(sessionStorage.getItem('mcp-portal-resume') ?? '{}').intent).toEqual({
+        kind: 'remove-authenticator',
+      });
+    });
+
+    it('does not remove anything for a bare ?mfa=ok link without the intent of this tab', async () => {
+      store.update({
+        mfaFresh: true,
+        authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' },
+      });
+      configureTestApp();
+      await openRoute('/connections?mfa=ok');
+      await until(() => expect(text()).toContain('Możesz teraz usunąć Authenticator.'));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       expect(store.state.authenticator.state).toBe('active');
     });
 

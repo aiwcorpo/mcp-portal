@@ -117,7 +117,7 @@ interface CallSeed {
   result: string;
   wrongCodeCount?: number;
   errorCode?: ActivityCall['errorCode'];
-  virtualServer?: string;
+  filter?: string;
 }
 
 const CALL_SEEDS: CallSeed[] = [
@@ -129,7 +129,7 @@ const CALL_SEEDS: CallSeed[] = [
     resource: { type: 'Confluence::Page', id: '48213', parent: 'Confluence::Space::DEV' },
     result: 'confirmation_pending',
     wrongCodeCount: 0,
-    virtualServer: 'przeglad-zgloszen',
+    filter: 'systems=confluence,jira',
   },
   {
     minutesAgo: 4,
@@ -162,9 +162,9 @@ const CALL_SEEDS: CallSeed[] = [
     tool: 'opensearch__search',
     risk: 'READ_ONLY',
     resource: { type: 'OpenSearch::Index', id: 'logs-app' },
-    result: 'denied_link_scope',
+    result: 'denied_filter_scope',
     errorCode: 'access_denied',
-    virtualServer: 'przeglad-zgloszen',
+    filter: 'systems=opensearch&access=write',
   },
   {
     minutesAgo: 240,
@@ -314,8 +314,8 @@ function toCall(seed: CallSeed, time: number, index: number): ActivityCall {
   if (seed.client) {
     call.client = seed.client;
   }
-  if (seed.virtualServer) {
-    call.virtualServer = seed.virtualServer;
+  if (seed.filter) {
+    call.filter = seed.filter;
   }
   if (seed.resource) {
     call.resource = seed.resource;
@@ -330,7 +330,7 @@ const RESULT_GROUPS: Record<string, readonly string[]> = {
   ok: ['ok'],
   denied: [
     'denied_not_granted',
-    'denied_link_scope',
+    'denied_filter_scope',
     'denied_policy',
     'tool_disabled',
     'step_up_required',

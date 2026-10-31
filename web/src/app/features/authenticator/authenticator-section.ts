@@ -1,5 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
@@ -8,6 +16,7 @@ import { AuthenticatorService, AuthenticatorStatus } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
+import { ResumeIntentStore } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
 import { Notice } from '../../shared/notice';
@@ -28,10 +37,11 @@ export const MFA_RETURN_QUERY = 'mfa';
   styleUrl: './authenticator-section.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AuthenticatorSection {
+export class AuthenticatorSection implements OnInit {
   private readonly api = inject(AuthenticatorService);
   private readonly dialog = inject(MatDialog);
   private readonly navigation = inject(BrowserNavigation);
+  private readonly resume = inject(ResumeIntentStore);
 
   readonly status = input.required<AuthenticatorStatus>();
   /** True right after the return from the IdP that the removal asked for. */
@@ -42,10 +52,19 @@ export class AuthenticatorSection {
   protected readonly busy = signal(false);
   protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly removed = signal(false);
+  /** The removal was confirmed before the MFA and is carried out after the return without a second click. */
+  protected readonly resumed = signal(false);
   protected readonly today = new Date().toDateString();
 
   protected isToday(iso: string): boolean {
     return new Date(iso).toDateString() === this.today;
+  }
+
+  ngOnInit(): void {
+    if (this.mfaConfirmed() && this.resume.take('remove-authenticator')) {
+      this.resumed.set(true);
+      void this.performRemoval();
+    }
   }
 
   protected async remove(): Promise<void> {
@@ -67,6 +86,13 @@ export class AuthenticatorSection {
     if (!confirmed) {
       return;
     }
+    await this.performRemoval();
+  }
+
+  private async performRemoval(): Promise<void> {
+    if (this.busy()) {
+      return;
+    }
     this.busy.set(true);
     this.failure.set(null);
     this.removed.set(false);
@@ -77,6 +103,7 @@ export class AuthenticatorSection {
     } catch (error) {
       const failure = toApiFailure(error);
       if (failure.code === 'step_up_required' && !this.mfaConfirmed()) {
+        this.resume.save({ kind: 'remove-authenticator' });
         this.navigation.assign(
           stepUpUrlFor(
             failure.stepUpUrl,

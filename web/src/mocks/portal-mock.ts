@@ -7,6 +7,7 @@ import {
 } from '@aiwcorpo/mcp-contracts/msw';
 import { http, HttpResponse, type HttpHandler } from 'msw';
 import { AdminState, createAdminHandlers, initialAdminState } from './admin-mock';
+import { mcpEndpointAnswer } from './endpoint-mock';
 import { M3State, createM3Handlers, initialM3State } from './m3-mock';
 import type {
   AccessRequest,
@@ -15,25 +16,22 @@ import type {
   CatalogCredential,
   CatalogStatus,
   CatalogTool,
-  ClientConfigs,
   Connection,
   PortalCatalog,
   PortalCatalogServer,
-  PortalVirtualServer,
   PutSecretRequest,
   RequestableEntitlement,
   SystemId,
-  VirtualServerCreate,
 } from '../app/api/generated';
 
 /**
  * Stateful layer over the contract MSW handlers (@aiwcorpo/mcp-contracts 3.0.1). Response bodies come
  * from the C12 examples (catalog `states` or `mixed`); the layer tracks what the contract mock cannot:
- * the session, the connections the user adds or removes, access requests and virtual servers. Requests
+ * the session, the connections the user adds or removes, access requests. Requests
  * it does not handle fall through to the contract handlers, which also enforce the CSRF rule.
  */
 
-export type MockScenario = 'default' | 'mixed' | 'empty' | 'nolinks' | 'errors';
+export type MockScenario = 'default' | 'mixed' | 'empty' | 'errors' | 'wide';
 /**
  * What the IGA adapter does with a request (C13): `direct` creates it and answers with the id, `redirect`
  * answers with the URL of its own form, `groups` is the Keycloak adapter without a request flow (422) and
@@ -47,12 +45,6 @@ export interface MockConnection {
   type: Connection['type'];
   status: Connection['status'];
   expiresAt: string | null;
-}
-
-export interface MockLink {
-  slug: string;
-  displayName: string;
-  tools: string[];
 }
 
 export interface MockRequest {
@@ -72,20 +64,12 @@ export interface MockState extends M3State, AdminState {
   /** Requests of the user; null means the scenario's seed. */
   requests: MockRequest[] | null;
   iga: MockIga;
-  /** Links created or deleted in the mock; absent means the scenario's seed. */
-  links: MockLink[] | null;
   pendingOAuth: { system: SystemId; returnPath: string } | null;
 }
 
 /** Mock identity in the target systems, the same user as the C12 `me` example. */
 const MOCK_BACKEND_USER = 'jkowalski';
 const MOCK_REQUEST_ID = '0192d1b2-7c3a-7d4e-8f10-2a3b4c5d6e7f';
-const PUBLIC_BASE = 'https://mcp.aiwcorpo.pl';
-/** A slug owned by somebody else (the C12 example), so that a 409 can be shown. */
-export const FOREIGN_SLUG = 'team-a-dev';
-
-/** Default per-user limit of the gateway (CC-119); the real one is gateway configuration. */
-export const LINK_LIMIT = 50;
 const DAY_MS = 86_400_000;
 const EXPIRING_WITHIN_DAYS = 7;
 
@@ -106,7 +90,6 @@ export function initialMockState(): MockState {
     connections: {},
     requests: null,
     iga: 'direct',
-    links: null,
     pendingOAuth: null,
     ...initialM3State(),
     ...initialAdminState(),
@@ -201,6 +184,21 @@ function baseCatalog(scenario: MockScenario, now: number): PortalCatalogServer[]
         requiresConfirmation: true,
       }),
     ];
+  }
+  if (scenario === 'wide' && jira) {
+    // Enough long names to pass the default size warning and to reach 512 bytes with sixteen of them.
+    jira.tools.push(
+      ...Array.from({ length: 45 }, (_, index) =>
+        tool(
+          'jira',
+          `report_number_${String(index).padStart(2, '0')}_for_quarter`,
+          `Raport ${index + 1}`,
+          {
+            entitlement: 'mcp-jira-read',
+          },
+        ),
+      ),
+    );
   }
   const gitlab = servers.find((server) => server.system === 'gitlab');
   if (gitlab) {
@@ -402,47 +400,6 @@ const IGA_CATALOG: Partial<Record<SystemId, RequestableEntitlement[]>> = {
   opensearch: [{ entitlement: 'mcp-opensearch-read', description: 'Odczyt logów w OpenSearch.' }],
 };
 
-export function mockLinks(state: MockState): MockLink[] {
-  if (state.links) {
-    return state.links;
-  }
-  if (state.scenario === 'empty' || state.scenario === 'nolinks') {
-    return [];
-  }
-  return [
-    {
-      slug: 'przeglad-zgloszen',
-      displayName: 'Przegląd zgłoszeń',
-      tools: ['jira__search_issues', 'jira__get_issue', 'jira__add_comment', 'jira__delete_issue'],
-    },
-    {
-      slug: 'podglad-serwisowy',
-      displayName: 'Podgląd zgłoszeń serwisowych',
-      tools: ['servicedesk__get_ticket'],
-    },
-  ];
-}
-
-export function clientConfigsFor(slug: string): ClientConfigs {
-  const url = `${PUBLIC_BASE}/v/${slug}/mcp`;
-  return {
-    // Same shape as the dev BFF (client id and port of the dev Keycloak); the UI shows it as received.
-    claudeCode: `claude mcp add --transport http --client-id claude-code --callback-port 33418 ${slug} ${url}`,
-    copilot: JSON.stringify({ servers: { [slug]: { type: 'http', url } } }),
-    codex: `[mcp_servers.${slug}]\nurl = "${url}"\n`,
-  };
-}
-
-function toPortalLink(link: MockLink): PortalVirtualServer {
-  return {
-    slug: link.slug,
-    displayName: link.displayName,
-    tools: link.tools,
-    url: `${PUBLIC_BASE}/v/${link.slug}/mcp`,
-    clientConfigs: clientConfigsFor(link.slug),
-  };
-}
-
 function csrfValid(request: Request, cookies: Record<string, string>): boolean {
   const header = request.headers.get('X-XSRF-TOKEN');
   return Boolean(header) && header === cookies['__Host-XSRF-TOKEN'];
@@ -614,66 +571,21 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
         { headers: { 'X-Request-Id': MOCK_REQUEST_ID } },
       );
     }),
-    http.get(
-      at('/api/v1/virtual-servers'),
-      guarded(() =>
-        store.state.scenario === 'errors'
-          ? unavailable()
-          : HttpResponse.json(mockLinks(store.state).map(toPortalLink), {
-              headers: { 'X-Request-Id': MOCK_REQUEST_ID },
-            }),
-      ),
-    ),
-    http.post(at('/api/v1/virtual-servers'), async ({ request, cookies }) => {
-      if (!csrfValid(request, cookies)) {
-        return undefined;
-      }
+    http.get(at('/api/v1/me/mcp-endpoint'), ({ request }) => {
       if (!store.state.session) {
-        return portalBffExample('createMyVirtualServer', 'unauthenticated');
+        return portalBffExample('getMcpEndpoint', 'unauthenticated');
       }
-      const body = (await request.json()) as VirtualServerCreate;
-      const defaults = body.resourceDefaults;
-      if (defaults !== undefined && defaults !== null && Object.keys(defaults).length > 0) {
-        return failure('resource_defaults_unsupported', 400);
+      if (store.state.scenario === 'errors') {
+        return unavailable();
       }
-      const links = mockLinks(store.state);
-      if (body.slug === FOREIGN_SLUG || links.some((link) => link.slug === body.slug)) {
-        return failure('slug_taken', 409);
-      }
-      if (links.length >= LINK_LIMIT) {
-        return failure('virtual_server_limit_reached', 409);
-      }
-      const usable = new Set(
-        mockCatalog(store.state)
-          .servers.flatMap((server) => server.tools)
-          .filter((candidate) => candidate.access === 'granted' && !candidate.disabled)
-          .map((candidate) => candidate.name),
+      const answer = mcpEndpointAnswer(
+        new URL(request.url).searchParams,
+        mockCatalog(store.state).servers.flatMap((server) => server.tools),
       );
-      if (!body.tools.length || body.tools.some((name) => !usable.has(name))) {
-        return failure('access_denied', 403);
-      }
-      store.update({
-        links: [...links, { slug: body.slug, displayName: body.displayName, tools: body.tools }],
+      return HttpResponse.json(answer.body, {
+        status: answer.status,
+        headers: { 'X-Request-Id': MOCK_REQUEST_ID },
       });
-      return HttpResponse.json(
-        {
-          slug: body.slug,
-          url: `${PUBLIC_BASE}/v/${body.slug}/mcp`,
-          clientConfigs: clientConfigsFor(body.slug),
-        },
-        { status: 201, headers: { 'X-Request-Id': MOCK_REQUEST_ID } },
-      );
-    }),
-    http.delete(at('/api/v1/virtual-servers/:slug'), ({ request, cookies, params }) => {
-      if (!csrfValid(request, cookies)) {
-        return undefined;
-      }
-      const links = mockLinks(store.state);
-      if (!links.some((link) => link.slug === params['slug'])) {
-        return failure('not_found_or_denied', 404);
-      }
-      store.update({ links: links.filter((link) => link.slug !== params['slug']) });
-      return new HttpResponse(null, { status: 204 });
     }),
   ];
   const m3 = createM3Handlers(store, {

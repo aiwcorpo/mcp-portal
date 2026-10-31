@@ -5,9 +5,17 @@
     nieodwracalne agentów.
   </p>
 
-  @if (mfaConfirmed()) {
-    <app-notice kind="info" i18n="@@auth.mfaDone">
-      Tożsamość potwierdzona. Możesz teraz usunąć Authenticator.
+  @if (mfaConfirmed() && !removed()) {
+    <app-notice kind="info">
+      @if (resumed()) {
+        <ng-container i18n="@@auth.mfaResumed"
+          >Tożsamość potwierdzona. Usuwam Authenticator.</ng-container
+        >
+      } @else {
+        <ng-container i18n="@@auth.mfaDone"
+          >Tożsamość potwierdzona. Możesz teraz usunąć Authenticator.</ng-container
+        >
+      }
     </app-notice>
   }
   @if (removed()) {

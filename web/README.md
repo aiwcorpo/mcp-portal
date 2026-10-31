@@ -2,7 +2,7 @@
 
 Frontend portalu platformy MCP (strumień ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, teksty po polsku przez `$localize`. Rozmawia wyłącznie z BFF przez API C12
-(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 3.0.2). BFF (`../bff`, ws-07) serwuje zbudowane
+(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 5.1.0). BFF (`../bff`, ws-07) serwuje zbudowane
 pliki z tego samego originu.
 
 Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
@@ -11,7 +11,7 @@ Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
 
 - Node 24, npm 11.
 - Repozytorium `mcp-contracts` obok `mcp-portal` (`../../mcp-contracts` względem `web/`): paczka
-  `release/aiwcorpo-mcp-contracts-3.0.2.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
+  `release/aiwcorpo-mcp-contracts-5.1.0.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
 - Java 25 tylko do ponownego wygenerowania klienta API (`npm run generate:api`).
 - Chromium dla Playwright: `npx playwright install chromium` (raz).
 
@@ -28,7 +28,7 @@ npm run start:mocks          # http://localhost:18730
 ```
 
 Mock jest stanowy: logowanie i wylogowanie, zapis (bez MFA) i usunięcie połączenia, powrót z OAuth, wniosek o
-dostęp, tworzenie i usuwanie linków. Odpowiedzi pochodzą z przykładów C12 (`@aiwcorpo/mcp-contracts/msw`; katalog
+dostęp, adres MCP z filtrem (`GET /me/mcp-endpoint`, liczony wg reguł gatewaya). Odpowiedzi pochodzą z przykładów C12 (`@aiwcorpo/mcp-contracts/msw`; katalog
 z przykładu `states`, rozszerzony o kilka narzędzi), ich handlery pilnują też CSRF. Statusy wierszy i akcje
 liczy `deriveRow` według tabeli z kontraktu (test na wektorach `catalog-actions/`).
 
@@ -36,7 +36,7 @@ Parametry adresu, ważne do końca sesji przeglądarki (stan w ciasteczku `mcp-p
 
 | Parametr | Wartości |
 | --- | --- |
-| `mockScenario` | `default` (przykład `states`: wygasający token, wymagane ponowne połączenie, brak uprawnień, konto serwisowe, wymiana tokenu), `mixed` (przykład `mixed`: połączone i niepołączone), `empty` (brak serwerów i linków), `nolinks` (puste Moje linki), `errors` (`503 upstream_unavailable` z `requestId`); zmiana scenariusza zeruje zmiany |
+| `mockScenario` | `default` (przykład `states`: wygasający token, wymagane ponowne połączenie, brak uprawnień, konto serwisowe, wymiana tokenu), `mixed` (przykład `mixed`: połączone i niepołączone), `empty` (brak serwerów), `wide` (53 narzędzia: przekracza domyślny próg ostrzeżenia i limit 512 bajtów przy 16 długich nazwach), `errors` (`503 upstream_unavailable` z `requestId`); zmiana scenariusza zeruje zmiany |
 | `mockAuthenticator` | `none`, `active`, `locked`, `disabled`: rejestracja Authenticatora (domyślnie `none`; start rejestracji i usunięcie wymagają świeżego MFA, które mock "robi" przy przekierowaniu step-up) |
 | `mockIga` | zachowanie adaptera IGA: `direct` (wniosek tworzony od razu, domyślnie), `redirect` (odpowiedź z adresem formularza IGA), `groups` (adapter Keycloak bez wniosków: `422 not_requestable`), `down` (`503`) |
 | `mockAdmin` | `in`: sesja administratora (zakładka Administracja, rejestr z oczekującymi definicjami; hak `window.__portalMock.changePendingDefinition(serverId, tool)` zmienia definicję po otwarciu różnic, żeby wywołać `409`) |
@@ -45,8 +45,9 @@ Parametry adresu, ważne do końca sesji przeglądarki (stan w ciasteczku `mcp-p
 
 Podgląd operacji: `/confirm/cnf_4k9Qe2LxW7tB3mZp` (wygasa 120 s po pierwszym otwarciu), `/confirm/cnf_Zb3Qm8TnR5vKd2Wy` (argument ze znakami sterującymi), każdy inny identyfikator to 404. Kod rejestracji Authenticatora to RFC 6238 z ziarna `GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ` (`src/mocks/totp.ts`).
 
-Token zaczynający się od `invalid` daje `422 secret_invalid`. Identyfikator
-linku `team-a-dev` jest "cudzy": POST odpowiada `409 slug_taken`.
+Token zaczynający się od `invalid` daje `422 secret_invalid`. Mock `getMcpEndpoint` stosuje parser filtra z
+kontraktu (`src/app/core/mcp-filter.ts`, przypięty wektorami `endpoint-filter/` i `mcp-endpoint/`), więc zły
+filtr daje `400 invalid_filter`.
 
 Z prawdziwym BFF (ws-01, port 18090):
 
@@ -111,6 +112,7 @@ ogólny komunikat.
 ```bash
 npm test                     # Vitest + jsdom, MSW (msw/node) z tymi samymi handlerami co tryb mocków
 npm run lint                 # angular-eslint, w tym reguły dostępności szablonów
+npm run i18n:check           # teksty w kodzie zgodne z src/locale/messages.xlf
 npm run e2e                  # build konfiguracji e2e + Playwright (Chromium, 1280 px i 360 px)
 ```
 
@@ -126,7 +128,37 @@ SHOTS_DIR=/ścieżka/do/katalogu npx playwright test e2e/screenshots.spec.ts   #
 ```
 
 Nazwy plików zaczynają się od numeru makiety, np. `01-serwery-mcp-rozwiniete-desktop.png` albo
-`08-moje-linki-lista-mobile-360.png`.
+`08-adres-mcp-mobile-360.png`.
+
+## CI
+
+Jeden punkt wejścia: `ci/run.sh` (wołany przez `make ci`). Kroki: `style` (znaki ukryte i typograficzne, frazy
+zakazane), `lint`, `i18n`, `unit`, `build`, `e2e`; podzbiór przez `CI_STEPS=style,unit ci/run.sh`.
+`ci/run.sh --container` robi to samo w obrazie z `ci/Dockerfile` (Node 24 i Chromium z obrazu Playwright
+1.64.1; źródła montowane tylko do odczytu i kopiowane bez `node_modules`). Pliki `.gitlab-ci.yml`, `Jenkinsfile`
+i workflow GitHub Actions mogą tylko wołać ten skrypt. Do `npm ci` potrzebne jest repozytorium `mcp-contracts`
+obok `mcp-portal` (paczka `release/` jest zależnością deweloperską).
+
+## Adres MCP i ostrzeżenie o rozmiarze listy
+
+Strona `/endpoint` pokazuje adres całej platformy (`<publicBaseUrl>/mcp`) i pozwala zawęzić go filtrem
+(`systems`, `tools`, `access`, `exclude`). Nic się nie zapisuje; adres i konfiguracje klientów zwraca BFF.
+Kreator składa query sam i liczy bajty: limit to 512 bajtów, nie 100 narzędzi (CC-185). Gdy wybór się nie mieści,
+nie wysyła zapytania i podpowiada systemy i wykluczenia.
+
+Ostrzeżenie o rozmiarze listy pojawia się od `toolCount >= 50`. Próg nie jest ustalony (czeka na pomiar kosztu
+listy w tokenach w teście obciążeniowym M5), dlatego jest konfiguracją: `<meta name="mcp-tool-list-warning"
+content="N">` w `index.html` (dodatnia liczba całkowita, inaczej obowiązuje 50). Powyżej 100 narzędzi strona
+przypomina, że klient musi iść za `nextCursor` (CC-181).
+
+## Wznawianie akcji po MFA
+
+Gdy akcja kończy się `step_up_required`, portal zapisuje w `sessionStorage` karty jeden wpis: rodzaj akcji i
+identyfikatory (serwer i narzędzie, skrót zatwierdzanej definicji), ważny 5 minut, nigdy tokeny, klucze ani
+hasła. Po powrocie z `?mfa=ok` akcja wykonuje się raz, bez drugiego kliknięcia: zatwierdzenie definicji (tylko gdy
+skrót jest ten sam, który administrator widział), start rejestracji Authenticatora, usunięcie Authenticatora
+(po ostrzeżeniu zatwierdzonym przed MFA). Samo `?mfa=ok` w adresie nic nie uruchamia. Formularz z tokenem nie
+jest wznawiany: sekretu nie wolno zapisać, więc użytkownik wpisuje go ponownie.
 
 ## Klient API
 
@@ -169,7 +201,7 @@ src/app/
   features/catalog/     Serwery MCP (tabela z rozwijanymi wierszami)
   features/connect/     Połącz konto (OAuth, token PAT)
   features/connections/ Połączenia z systemami
-  features/links/       Moje linki: lista, kreator Nazwa -> Narzędzia -> Gotowe, konfiguracja klienta
+  features/endpoint/    Adres MCP: jeden adres platformy, kreator filtra bez zapisu, konfiguracja klienta
   features/requests/    Wnioski: lista, dialog "Złóż wniosek" z uprawnieniami z IGA
   features/admin/       Administracja (lazy, tylko isAdmin): rejestr, różnice definicji, zatwierdzanie
 src/mocks/              warstwa stanowa nad handlerami MSW z kontraktów; start MSW w przeglądarce

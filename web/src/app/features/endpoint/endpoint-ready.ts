@@ -11,21 +11,22 @@ interface ConfigTab {
   hint: string;
 }
 
-/** URL, client configuration snippets and a summary of a virtual server (mockup 14). */
+/** Address of the aggregate endpoint with the client configuration snippets (mockup 14, without the saved link). */
 @Component({
-  selector: 'app-link-ready',
+  selector: 'app-endpoint-ready',
   imports: [MatButtonModule, MatTabsModule],
-  templateUrl: './link-ready.html',
-  styleUrl: './link-ready.scss',
+  templateUrl: './endpoint-ready.html',
+  styleUrl: './endpoint-ready.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LinkReady {
+export class EndpointReady {
   private readonly clipboard = inject(Clipboard);
   private readonly snackBar = inject(MatSnackBar);
 
   readonly url = input.required<string>();
   readonly clientConfigs = input.required<ClientConfigs>();
-  readonly tools = input.required<readonly string[]>();
+  /** Tools that the address leaves visible, as the BFF counted them; an estimate. */
+  readonly toolCount = input.required<number>();
 
   protected readonly tabs: readonly ConfigTab[] = [
     {
@@ -60,6 +61,6 @@ export class LinkReady {
     );
   }
 
-  protected readonly urlLabel = $localize`:@@ready.urlCopied:adres linku`;
+  protected readonly urlLabel = $localize`:@@ready.urlCopied:adres MCP`;
   protected readonly configLabel = $localize`:@@ready.configCopied:konfiguracja`;
 }

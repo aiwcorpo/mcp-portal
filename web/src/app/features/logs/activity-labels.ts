@@ -15,9 +15,10 @@ const RESULTS: Record<string, () => ResultInfo> = {
     label: $localize`:@@logs.result.denied_not_granted:Odmowa (brak uprawnienia)`,
     tone: 'danger',
   }),
-  denied_link_scope: () => ({
-    label: $localize`:@@logs.result.denied_link_scope:Odmowa (poza zakresem linku)`,
+  denied_filter_scope: () => ({
+    label: $localize`:@@logs.result.denied_filter_scope:Odmowa (poza filtrem adresu)`,
     tone: 'danger',
+    explanation: $localize`:@@logs.explain.denied_filter_scope:Masz uprawnienie do tego narzędzia, ale adres, którego użył klient, je wyklucza. Filtr w adresie tylko zawęża listę.`,
   }),
   denied_policy: () => ({
     label: $localize`:@@logs.result.denied_policy:Odmowa (polityka)`,

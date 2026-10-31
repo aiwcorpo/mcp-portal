@@ -12,8 +12,8 @@ api/authenticator.service.ts
 api/catalog.service.ts
 api/confirmations.service.ts
 api/connections.service.ts
+api/mcpEndpoint.service.ts
 api/me.service.ts
-api/virtualServers.service.ts
 configuration.ts
 encoder.ts
 git_push.sh
@@ -49,8 +49,10 @@ model/connection.ts
 model/connectionStatus.ts
 model/credentialType.ts
 model/errorCode.ts
+model/invalidFilter.ts
 model/loginErrorCode.ts
 model/manifestRejected.ts
+model/mcpEndpoint.ts
 model/mcpToolDefinition.ts
 model/me.ts
 model/modelError.ts
@@ -58,8 +60,6 @@ model/models.ts
 model/pendingTool.ts
 model/portalCatalog.ts
 model/portalCatalogServer.ts
-model/portalVirtualServer.ts
-model/portalVirtualServerCreated.ts
 model/putSecretError.ts
 model/putSecretRequest.ts
 model/putSecretResponse.ts
@@ -68,7 +68,6 @@ model/registryTool.ts
 model/registryToolStatus.ts
 model/requestableEntitlement.ts
 model/resource.ts
-model/resourceDefaults.ts
 model/resourceRef.ts
 model/resourceType.ts
 model/risk.ts
@@ -78,8 +77,6 @@ model/systemId.ts
 model/toolAction.ts
 model/toolEntry.ts
 model/toolEntryFields.ts
-model/virtualServerCreate.ts
-model/virtualServerFields.ts
 param.ts
 provide-api.ts
 query.params.ts

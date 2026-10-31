@@ -63,3 +63,19 @@ test('Service Desk shows the time of its last call from the log', async ({ page 
   const row = page.getByRole('row', { name: /Service Desk/ });
   await expect(row).toContainText(/\d{2}\.\d{2}\.\d{4}|dziś \d{2}:\d{2}/);
 });
+
+test('the filter column shows the address filter and the call cut by it', async ({ page }) => {
+  await page.goto('/logs');
+  await expect(page.getByRole('columnheader', { name: 'Filtr' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'systems=confluence,jira' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'systems=opensearch&access=write' })).toBeVisible();
+  await expect(
+    page.getByRole('cell', { name: 'Odmowa (poza filtrem adresu)' }).first(),
+  ).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'bez filtra' }).first()).toBeVisible();
+
+  await page.getByLabel('Wynik').selectOption({ label: 'Odmowy' });
+  await expect(
+    page.getByRole('cell', { name: 'Odmowa (poza filtrem adresu)' }).first(),
+  ).toBeVisible();
+});

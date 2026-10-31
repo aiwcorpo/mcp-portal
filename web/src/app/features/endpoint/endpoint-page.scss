@@ -1,0 +1,153 @@
+:host {
+  display: block;
+  max-width: 860px;
+}
+
+h1 {
+  margin-bottom: 8px;
+}
+
+h2 {
+  margin-bottom: 12px;
+}
+
+.lead {
+  margin-bottom: 24px;
+}
+
+.result,
+.narrow-down {
+  margin-bottom: 32px;
+}
+
+.result app-notice {
+  display: block;
+  margin-top: 16px;
+}
+
+.result app-notice span + span {
+  margin-left: 0.4em;
+}
+
+.choice {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+}
+
+.choice legend {
+  padding: 0 0 6px;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0 0 8px;
+  color: var(--pm-muted);
+  font-size: 13px;
+}
+
+.systems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.count {
+  font-size: 13px;
+}
+
+.radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin-bottom: 8px;
+}
+
+.radios label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.group {
+  margin-bottom: 20px;
+}
+
+.group h3 {
+  padding-block: 8px;
+  font-size: 14px;
+}
+
+.tool-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--pm-border);
+}
+
+.tool-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 5fr) 5fr minmax(70px, 1fr);
+  gap: 8px 16px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--pm-border);
+}
+
+.tool-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.blocked .tool-name {
+  color: var(--pm-muted);
+  font-weight: 400;
+}
+
+.what,
+.risk {
+  padding-top: 9px;
+}
+
+.note {
+  display: block;
+  font-size: 13px;
+}
+
+.counter p {
+  margin: 0 0 6px;
+}
+
+.counter.over p:first-child {
+  color: var(--pm-danger);
+}
+
+.actions {
+  padding-top: 16px;
+  border-top: 1px solid var(--pm-border);
+}
+
+@media (max-width: 719px) {
+  .tool-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .what,
+  .risk {
+    padding: 0 0 0 40px;
+  }
+}

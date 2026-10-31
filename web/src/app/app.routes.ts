@@ -2,8 +2,8 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './core/admin.guard';
 
 /**
- * No route starts with /api, /s/, /v/ or /.well-known/: the reverse proxy sends those to the BFF and the
- * gateway (CC-089).
+ * No route starts with /api, /mcp, /s/, /v/ or /.well-known/: the reverse proxy sends those to the BFF and the
+ * gateway (CC-089, CC-169).
  */
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'catalog' },
@@ -24,20 +24,13 @@ export const routes: Routes = [
       import('./features/connections/connections-page').then((m) => m.ConnectionsPage),
   },
   {
-    path: 'links',
-    title: $localize`:@@route.links:Moje linki`,
-    loadComponent: () => import('./features/links/links-page').then((m) => m.LinksPage),
+    path: 'endpoint',
+    title: $localize`:@@route.endpoint:Adres MCP`,
+    loadComponent: () => import('./features/endpoint/endpoint-page').then((m) => m.EndpointPage),
   },
-  {
-    path: 'links/new',
-    title: $localize`:@@route.linksNew:Nowy link`,
-    loadComponent: () => import('./features/links/link-wizard-page').then((m) => m.LinkWizardPage),
-  },
-  {
-    path: 'links/:slug',
-    title: $localize`:@@route.linkConfig:Konfiguracja linku`,
-    loadComponent: () => import('./features/links/link-config-page').then((m) => m.LinkConfigPage),
-  },
+  // The saved links of 4.x are gone (CC-175); bookmarks land on the single address page.
+  { path: 'links', pathMatch: 'full', redirectTo: 'endpoint' },
+  { path: 'links/:slug', redirectTo: 'endpoint' },
   {
     path: 'requests',
     title: $localize`:@@route.requests:Wnioski`,

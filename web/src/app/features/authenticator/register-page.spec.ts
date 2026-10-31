@@ -2,6 +2,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { HttpResponse, http } from 'msw';
+import { ResumeIntentStore } from '../../core/resume-intent';
 import { MOCK_TOTP_SEED } from '../../../mocks/m3-mock';
 import { currentCode } from '../../../mocks/totp';
 import { useMockApi } from '../../../testing/mock-api';
@@ -113,9 +114,36 @@ describe('AuthenticatorRegisterPage', () => {
     expect(target.pathname).toBe('/api/v1/auth/login');
     expect(target.searchParams.get('stepUp')).toBe('true');
     expect(target.searchParams.get('returnPath')).toBe('/authenticator/register?mfa=ok');
+    expect(JSON.parse(sessionStorage.getItem('mcp-portal-resume') ?? '{}').intent).toEqual({
+      kind: 'enroll-authenticator',
+    });
   });
 
-  it('after the return from the MFA waits for one more click instead of starting by itself', async () => {
+  it('after the return from the MFA that the click asked for, starts the registration without a second click (U12)', async () => {
+    store.update({ mfaFresh: true });
+    configureTestApp();
+    TestBed.inject(ResumeIntentStore).save({ kind: 'enroll-authenticator' });
+    await openRoute('/authenticator/register?mfa=ok');
+
+    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+    expect(store.state.enrollStarts).toBe(1);
+    expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
+  });
+
+  it('starts only once: a reload of the page after the resumed start waits for a click again', async () => {
+    store.update({ mfaFresh: true });
+    configureTestApp();
+    TestBed.inject(ResumeIntentStore).save({ kind: 'enroll-authenticator' });
+    const harness = await openRoute('/authenticator/register?mfa=ok');
+    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+
+    await harness.navigateByUrl('/catalog');
+    await harness.navigateByUrl('/authenticator/register?mfa=ok');
+    await until(() => expect(text()).toContain('Kontynuuj rejestrację'));
+    expect(store.state.enrollStarts).toBe(1);
+  });
+
+  it('after the return from the MFA without the intent of this tab (a link with ?mfa=ok) waits for a click', async () => {
     store.update({ mfaFresh: true });
     configureTestApp();
     await openRoute('/authenticator/register?mfa=ok');

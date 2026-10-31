@@ -26,9 +26,9 @@ export interface ActivityCall {
      */
     client?: string;
     /**
-     * Virtual server slug; used in the URL path /v/<slug>/mcp (C5).
+     * Normalized filter of the address the call was made on (CC-174); absent when the address had no filter. Its entries have the syntax of system ids and tool names but are chosen by the client and not checked against the platform\'s systems and tools (CC-186).
      */
-    virtualServer?: string;
+    filter?: string;
     /**
      * Tool name as seen by MCP clients, in C5 and C12: <system>__<tool>.
      */
@@ -39,7 +39,7 @@ export interface ActivityCall {
      */
     resource?: Resource;
     /**
-     * Final state of the call. Known values: ok, error, denied_not_granted, denied_link_scope, denied_policy, tool_disabled, credential_required, rate_limited, step_up_required, confirmation_pending, confirmed, expired, confirmation_failed, superseded, blocked_by_pending, cancelled. A client must show an unknown value as a generic label. 
+     * Final state of the call. Known values: ok, error, denied_not_granted, denied_filter_scope, denied_policy, tool_disabled, credential_required, rate_limited, step_up_required, confirmation_pending, confirmed, expired, confirmation_failed, superseded, blocked_by_pending, cancelled. A client must show an unknown value as a generic label. 
      */
     result: string;
     /**

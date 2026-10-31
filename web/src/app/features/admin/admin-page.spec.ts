@@ -182,6 +182,86 @@ describe('AdminPage', () => {
       expect(store.state.registryApproved).toEqual(['mcp-gitlab/delete_branch']);
     });
 
+    async function sendToTheMfa() {
+      const navigation = configureTestApp();
+      await TestBed.inject(SessionService).load();
+      const harness = await openRoute('/admin');
+      await openDiff('gitlab__delete_branch', 'Zatwierdź obniżenie ryzyka');
+      button('Zatwierdź obniżenie ryzyka (gitlab__delete_branch)').click();
+      await confirmDialog('Zatwierdź obniżenie ryzyka');
+      await until(() => expect(navigation.assign).toHaveBeenCalled());
+      await until(() => expect(bodies.length).toBe(1));
+      return harness;
+    }
+
+    it('carries out the approval confirmed before the MFA once the page is back, without a second click (U12)', async () => {
+      const harness = await sendToTheMfa();
+      expect(store.state.registryApproved).toEqual([]);
+
+      store.update({ mfaFresh: true });
+      await harness.navigateByUrl('/catalog');
+      await harness.navigateByUrl('/admin?mfa=ok');
+
+      await until(() => expect(text()).toContain('Zatwierdzono definicję gitlab__delete_branch.'));
+      expect(store.state.registryApproved).toEqual(['mcp-gitlab/delete_branch']);
+      expect(bodies.at(-1)).toEqual({
+        definitionHash: expect.stringMatching(/^sha256:/),
+        acceptRiskLowering: true,
+      });
+      expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
+      expect(document.querySelector('mat-dialog-container')).toBeNull();
+    });
+
+    it('approves nothing when the definition changed while the administrator was at the IdP', async () => {
+      const harness = await sendToTheMfa();
+
+      changePendingDefinition(store, 'mcp-gitlab', 'delete_branch');
+      store.update({ mfaFresh: true });
+      await harness.navigateByUrl('/catalog');
+      await harness.navigateByUrl('/admin?mfa=ok');
+
+      await until(() =>
+        expect(text()).toContain('Definicja zmieniła się, zanim potwierdziłeś tożsamość'),
+      );
+      expect(store.state.registryApproved).toEqual([]);
+      expect(bodies.length).toBe(1);
+    });
+
+    it('does not approve anything for a bare ?mfa=ok link without the intent of this tab', async () => {
+      store.update({ mfaFresh: true });
+      configureTestApp();
+      await TestBed.inject(SessionService).load();
+      await openRoute('/admin?mfa=ok');
+
+      await until(() => expect(text()).toContain('Otwórz różnice i zatwierdź jeszcze raz.'));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(bodies).toEqual([]);
+      expect(store.state.registryApproved).toEqual([]);
+    });
+
+    it('ignores an intent that expired or belongs to another action', async () => {
+      sessionStorage.setItem(
+        'mcp-portal-resume',
+        JSON.stringify({
+          intent: {
+            kind: 'approve-tool',
+            serverId: 'mcp-gitlab',
+            tool: 'delete_branch',
+            hash: 'sha256:' + 'a'.repeat(64),
+            acceptRiskLowering: true,
+          },
+          expiresAt: Date.now() - 1,
+        }),
+      );
+      store.update({ mfaFresh: true });
+      configureTestApp();
+      await TestBed.inject(SessionService).load();
+      await openRoute('/admin?mfa=ok');
+      await until(() => expect(text()).toContain('Otwórz różnice i zatwierdź jeszcze raz.'));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(bodies).toEqual([]);
+    });
+
     it('does not send the field for an ordinary approval', async () => {
       await openAdmin();
       await openDiff('confluence__archive_page');

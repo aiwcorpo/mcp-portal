@@ -22,7 +22,7 @@ import { DEMO_CONFIRMATION_ID } from './m3-mock';
  * because login and OAuth are full page loads, as with the real BFF; it never holds a secret.
  */
 const STATE_COOKIE = 'mcp-portal-mock';
-const SCENARIOS: readonly MockScenario[] = ['default', 'mixed', 'empty', 'nolinks', 'errors'];
+const SCENARIOS: readonly MockScenario[] = ['default', 'mixed', 'empty', 'errors', 'wide'];
 const OAUTH_OUTCOMES: readonly MockOAuthOutcome[] = [
   'ok',
   'cancelled',
@@ -86,7 +86,7 @@ function writeState(state: MockState): void {
 const store = new MockStore(readState(), writeState);
 
 /**
- * ?mockScenario=default|mixed|empty|nolinks|errors switches the data set, ?mockOAuth=<outcome> the result
+ * ?mockScenario=default|mixed|empty|errors|wide switches the data set, ?mockOAuth=<outcome> the result
  * of the next OAuth provider round trip, ?mockSession=in|out starts with or without a session and
  * ?mockAdmin=in signs in as an administrator (the Administracja tab) and
  * ?mockAuthenticator=none|active|locked|disabled sets the Authenticator registration and

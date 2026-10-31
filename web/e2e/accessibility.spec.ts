@@ -46,9 +46,7 @@ const PAGES = [
   { path: '/logs', ready: 'Logi audytowe' },
   { path: '/requests', ready: 'Wnioski' },
   { path: '/admin?mockAdmin=in', ready: 'Administracja' },
-  { path: '/links', ready: 'Moje linki' },
-  { path: '/links/new', ready: 'Nowy link' },
-  { path: '/links/przeglad-zgloszen', ready: 'Konfiguracja linku "Przegląd zgłoszeń"' },
+  { path: '/endpoint', ready: 'Adres MCP' },
 ];
 
 for (const scheme of ['dark', 'light'] as const) {
@@ -139,19 +137,18 @@ for (const scheme of ['dark', 'light'] as const) {
     await expectNoViolations(page);
   });
 
-  test(`the tool step of the wizard and the ready step have no violations (${scheme})`, async ({
+  test(`the address page with a filter and the size warning have no violations (${scheme})`, async ({
     page,
   }) => {
-    await page.goto('/links/new');
+    await page.goto('/endpoint');
     await useScheme(page, scheme);
-    await page.getByLabel('Nazwa').fill('Zestaw a11y');
-    await page.getByRole('button', { name: 'Dalej' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Wybierz narzędzia' })).toBeVisible();
-    await page.getByRole('checkbox', { name: /jira__get_issue/ }).check();
+    await expect(page.getByLabel('Adres MCP', { exact: true })).toBeVisible();
     await expectNoViolations(page);
 
-    await page.getByRole('button', { name: 'Utwórz link' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: /jest gotowy/ })).toBeVisible();
+    await page.getByRole('checkbox', { name: /^Jira/ }).check();
+    await page.getByLabel('Tylko odczyt').check();
+    await page.getByRole('checkbox', { name: /jira__get_issue/ }).check();
+    await expect(page.getByLabel('Adres MCP', { exact: true })).toHaveValue(/systems=jira/);
     await expectNoViolations(page);
   });
 
@@ -163,10 +160,6 @@ for (const scheme of ['dark', 'light'] as const) {
 
     await page.goto('/catalog?mockScenario=empty');
     await expect(page.getByText('Nie masz jeszcze dostępu do żadnego serwera MCP')).toBeVisible();
-    await expectNoViolations(page);
-
-    await page.goto('/links?mockScenario=nolinks');
-    await expect(page.getByText('Nie masz jeszcze żadnych linków')).toBeVisible();
     await expectNoViolations(page);
 
     await page.goto('/nie-ma-takiej-strony');
@@ -227,18 +220,22 @@ test('keyboard only: skip link, tabs, row toggle and an action', async ({ page }
   await expect(page).toHaveURL(/\/connect\/jira$/);
 });
 
-test('keyboard only: the wizard can be completed', async ({ page }) => {
-  await page.goto('/links/new');
-  await page.getByLabel('Nazwa').focus();
-  await page.keyboard.type('Z klawiatury');
-  await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { level: 1, name: 'Wybierz narzędzia' })).toBeVisible();
-  await page.getByRole('checkbox', { name: /jira__get_issue/ }).focus();
+test('keyboard only: the filter can be chosen and the address copied', async ({ page }) => {
+  await page.goto('/endpoint');
+  await expect(page.getByLabel('Adres MCP', { exact: true })).toHaveValue(
+    'https://mcp.aiwcorpo.pl/mcp',
+  );
+  await page.getByRole('checkbox', { name: /^Jira/ }).focus();
   await page.keyboard.press('Space');
-  await expect(page.getByText('Wybrano: 1')).toBeVisible();
-  await page.getByRole('button', { name: 'Utwórz link' }).focus();
+  await expect(page.getByLabel('Adres MCP', { exact: true })).toHaveValue(
+    'https://mcp.aiwcorpo.pl/mcp?systems=jira',
+  );
+  await page.getByLabel('Tylko odczyt').focus();
+  await page.keyboard.press('Space');
+  await expect(page.getByText('Filtr w adresie: 24 z 512 bajtów')).toBeVisible();
+  await page.getByRole('button', { name: 'Kopiuj adres MCP' }).focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { level: 1, name: /jest gotowy/ })).toBeVisible();
+  await expect(page.getByText('Skopiowano: adres MCP.')).toBeVisible();
 });
 
 test('no horizontal scroll at 360 px and no cut-off tab names', async ({ page }) => {

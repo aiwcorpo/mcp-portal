@@ -60,7 +60,7 @@ test('a definition that changes while it is open is refused (409) and shown agai
   await expect(page.getByText('Zatwierdzono definicję confluence__archive_page.')).toBeVisible();
 });
 
-test('a definition from the running server carries a clear warning and a second confirmation; a risk lowering needs a dialog and a fresh MFA', async ({
+test('a definition from the running server carries a clear warning and a second confirmation; a risk lowering needs a dialog and a fresh MFA, then resumes without a second click', async ({
   page,
 }) => {
   await page.goto('/admin?mockAdmin=in');
@@ -85,17 +85,7 @@ test('a definition from the running server carries a clear warning and a second 
   const lowering = page.getByRole('dialog', { name: 'Zatwierdzić obniżenie ryzyka?' });
   await lowering.getByRole('button', { name: 'Zatwierdź obniżenie ryzyka' }).click();
 
-  // The mock IdP gives a fresh MFA and returns to the admin page, where the approval is repeated.
-  await expect(page).toHaveURL(/\/admin$/);
-  await expect(page.getByText('Tożsamość potwierdzona.')).toBeVisible();
-  await page.getByRole('button', { name: 'Pokaż różnice (gitlab__delete_branch)' }).click();
-  await page
-    .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka (gitlab__delete_branch)' })
-    .click();
-  await page
-    .getByRole('dialog', { name: 'Zatwierdzić obniżenie ryzyka?' })
-    .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka' })
-    .click();
+  // The mock IdP gives a fresh MFA and returns to the admin page, where the approval is carried out by itself (U12).
   await expect(page.getByText('Zatwierdzono definicję gitlab__delete_branch.')).toBeVisible();
 });
 

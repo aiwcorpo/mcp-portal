@@ -6,10 +6,16 @@
 
 @if (mfaReturned()) {
   <app-notice kind="success" [dismissible]="true" (dismiss)="mfaReturned.set(false)">
-    <ng-container i18n="@@admin.mfaDone"
-      >Tożsamość potwierdzona. Otwórz różnice i zatwierdź obniżenie ryzyka jeszcze
-      raz.</ng-container
-    >
+    @if (resumedFromMfa()) {
+      <ng-container i18n="@@admin.mfaResumed"
+        >Tożsamość potwierdzona. Zatwierdzam definicję, którą wybrano przed
+        potwierdzeniem.</ng-container
+      >
+    } @else {
+      <ng-container i18n="@@admin.mfaDone"
+        >Tożsamość potwierdzona. Otwórz różnice i zatwierdź jeszcze raz.</ng-container
+      >
+    }
   </app-notice>
 }
 
@@ -147,6 +153,8 @@
                       [tool]="item.tool.name"
                       [toolName]="item.name"
                       [mfaReturned]="mfaReturned()"
+                      [resume]="resumeApproval()"
+                      (resumeHandled)="resumeApproval.set(null)"
                       (approved)="onApproved(item)"
                       (gone)="onGone(item)"
                     />

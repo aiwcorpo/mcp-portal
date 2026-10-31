@@ -22,7 +22,7 @@ describe('App shell', () => {
     const nav = fixture.nativeElement.querySelector('nav');
     expect(text(nav)).toContain('Serwery MCP');
     expect(text(nav)).toContain('Połączenia z systemami');
-    expect(text(nav)).toContain('Moje linki');
+    expect(text(nav)).toContain('Adres MCP');
     expect(text(nav)).toContain('Wnioski');
     expect(text(nav)).not.toContain('Administracja');
     expect(button('Wyloguj', fixture.nativeElement)).toBeTruthy();

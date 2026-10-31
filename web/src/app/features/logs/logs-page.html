@@ -66,6 +66,7 @@
           <th scope="col" role="columnheader" i18n="@@logs.colClient">Klient</th>
           <th scope="col" role="columnheader" i18n="@@logs.colTool">Narzędzie</th>
           <th scope="col" role="columnheader" i18n="@@logs.colResource">Zasób</th>
+          <th scope="col" role="columnheader" i18n="@@logs.colFilter">Filtr</th>
           <th scope="col" role="columnheader" i18n="@@logs.colResult">Wynik</th>
         </tr>
       </thead>
@@ -119,6 +120,19 @@
             </td>
             <td
               role="cell"
+              class="filter"
+              data-label="Filtr"
+              i18n-data-label="@@logs.colFilter"
+              dir="ltr"
+            >
+              @if (row.filter) {
+                <code>{{ row.filter }}</code>
+              } @else {
+                <span class="muted" i18n="@@logs.noFilter">bez filtra</span>
+              }
+            </td>
+            <td
+              role="cell"
               [class]="'tone-' + row.result.tone"
               data-label="Wynik"
               i18n-data-label="@@logs.colResult"
@@ -129,7 +143,7 @@
           @if (open) {
             <tr role="row" class="details" [id]="'details-' + row.key">
               <td role="cell" class="c-toggle"></td>
-              <td role="cell" colspan="5">
+              <td role="cell" colspan="6">
                 <dl class="facts">
                   @if (row.result.explanation) {
                     <p class="explain">{{ row.result.explanation }}</p>
@@ -144,12 +158,6 @@
                     <dt i18n="@@logs.risk">Ryzyko</dt>
                     <dd>{{ row.call.risk ? riskLabel(row.call.risk) : '' }}</dd>
                   </div>
-                  @if (row.call.virtualServer) {
-                    <div>
-                      <dt i18n="@@logs.link">Link</dt>
-                      <dd>{{ row.link }}</dd>
-                    </div>
-                  }
                   @if (row.call.errorCode) {
                     <div>
                       <dt i18n="@@logs.errorCode">Kod błędu</dt>

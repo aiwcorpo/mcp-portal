@@ -33,7 +33,7 @@ export interface CatalogTool {
      */
     title?: string;
     /**
-     * True when an administrator disabled the tool or its server (C10 tool_disabled; a hash pending approval counts) (CC-081). A disabled tool cannot be added to a virtual server (POST /virtual-servers answers 403 access_denied).
+     * True when an administrator disabled the tool or its server (C10 tool_disabled; a hash pending approval counts) (CC-081).
      */
     disabled?: boolean;
     /**

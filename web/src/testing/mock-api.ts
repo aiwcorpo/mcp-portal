@@ -24,6 +24,7 @@ export function useMockApi() {
   beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
   beforeEach(() => {
     store.reset();
+    sessionStorage.clear();
     document.cookie = `XSRF-TOKEN=${MOCK_XSRF_TOKEN}; path=/`;
   });
   afterEach(() => server.resetHandlers());

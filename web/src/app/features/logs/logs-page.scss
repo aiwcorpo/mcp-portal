@@ -86,6 +86,11 @@ thead th {
   white-space: nowrap;
 }
 
+.filter code {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
 .tone-warn {
   color: var(--pm-warn);
 }

@@ -5,6 +5,14 @@
   <app-load-error [failure]="state.failure" (retry)="load()" />
 } @else if (view(); as v) {
   <section class="panel" [attr.aria-label]="toolName()">
+    @if (resumeRefused()) {
+      <app-notice kind="warning">
+        <ng-container i18n="@@admin.resumeRefused"
+          >Definicja zmieniła się, zanim potwierdziłeś tożsamość, więc niczego nie zatwierdzono.
+          Sprawdź różnice i zatwierdź ponownie.</ng-container
+        >
+      </app-notice>
+    }
     @if (changedMeanwhile()) {
       <app-notice kind="warning">
         <ng-container i18n="@@admin.changedMeanwhile"

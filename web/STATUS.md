@@ -1,5 +1,34 @@
 # STATUS: mcp-portal/web (ws-08)
 
+M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`.
+
+## Kamienie M5
+
+| Kamień | Zakres | Stan |
+| --- | --- | --- |
+| K1 | Kontrakty 5.1.0 (paczka `release/aiwcorpo-mcp-contracts-5.1.0.tgz`), klient wygenerowany ponownie; mock stanowy `getMcpEndpoint` z parserem filtra z kontraktu; lista "Moje linki", API linków, `slug`, scenariusz `nolinks` usunięte | zrobiony |
+| K2 | Strona `/endpoint` ("Adres MCP"): adres `<publicBaseUrl>/mcp` domyślnie, filtr (systemy, rodzaj narzędzi, narzędzia "tylko zaznaczone" albo "wszystkie oprócz"), licznik bajtów query, ostrzeżenie o rozmiarze listy, krótkie ostrzeżenie o prompt injection; aktywność: kolumna "Filtr", etykieta `denied_filter_scope`; `/mcp` zarezerwowane w `ReturnPath` | zrobiony |
+| K3 | U12: po step-up MFA akcja wznawia się bez drugiego kliknięcia; `ci/run.sh`, `make ci`, `ci/Dockerfile` | zrobiony |
+
+## M5: stan
+
+Liczby: `npm test` 27 plików, 490 testów (m.in. wektory `endpoint-filter/`, `mcp-endpoint/` i `return-paths/` z kontraktów); `npm run e2e` 174 przeszły, 8 pominiętych (zrzuty, tylko z `SHOTS_DIR`), desktop 1280 px i mobile-360, axe AA ciemny i jasny; `npm run lint`, `npm run i18n:check` czyste. `ci/run.sh` (style, lint, i18n, unit, build, e2e) lokalnie: `ci: OK`. Trybu `--container` nie uruchamiałem (obraz Playwright 1.64.1 nie był pobrany; pobieranie obcego obrazu wymaga zgody).
+
+- Kreator (CC-175, CC-182, CC-185): jedna strona, nic nie jest zapisywane. Filtr składa `composeFilter` (port `scripts/lib/endpoint-filter.mjs`, test na wszystkich wektorach `parse-*` i `apply-*`). Licznik "Filtr w adresie: N z 512 bajtów"; gdy wybór nie mieści się (512 B, 5 systemów, 100 wpisów), zapytanie do BFF nie jest wysyłane, widać powód i podpowiedź (systemy i wykluczenia). Parametry idą jako typowane wartości `getMcpEndpoint`; odpowiedź `400 invalid_filter` ma własny komunikat (bez tekstu z BFF). Wykluczenie całego systemu wyraża się wyborem `systems` (osobnego wykluczania systemu w UI nie ma).
+- Próg ostrzeżenia o rozmiarze listy: nieustalony (czeka na pomiar kosztu tokenów w teście obciążeniowym), więc konfigurowalny: `<meta name="mcp-tool-list-warning" content="N">` w `index.html`, domyślnie 50 (`core/tool-list-warning.ts`). Powyżej 100 narzędzi dodatkowa uwaga o `nextCursor` (CC-181).
+- Stare zakładki `/links`, `/links/new`, `/links/<slug>` przekierowują na `/endpoint`.
+- Aktywność: kolumna "Filtr" (znormalizowany filtr adresu albo "bez filtra"), `denied_filter_scope` = "Odmowa (poza filtrem adresu)" w grupie "Odmowy" z wyjaśnieniem; stary `denied_link_scope` byłby "Inny wynik" (mapowanie przy odczycie robi gateway/BFF).
+- U12: `ResumeIntentStore` (sessionStorage karty, jeden wpis, 5 minut, tylko identyfikatory). Zatwierdzenie definicji wznawia się tylko, gdy skrót po powrocie jest ten sam, który administrator widział (inaczej komunikat i nic nie zatwierdzone); start rejestracji Authenticatora i usunięcie Authenticatora (po ostrzeżeniu zatwierdzonym przed MFA) wykonują się same. Samo `?mfa=ok` bez wpisu nic nie uruchamia, drugi `step_up_required` po powrocie to błąd, nie pętla. Formularza z tokenem nie wznawiam: sekretu nie wolno zapisać. Zmiana względem M3: usunięcie Authenticatora nie wymaga już ponownego kliknięcia, a wpis pochodzi z kliknięcia użytkownika, nie z adresu.
+- `stepUpUrlFor` nadal podmienia `returnPath` (portal dodaje `?mfa=ok`), komentarz poprawiony zgodnie z BFF (Referer).
+
+Obraz: `mcp-portal-web:m5-<sha>` (budowa jak w M3/M4, bez wdrażania; stos dev zostaje na M4).
+
+## Propozycje CC
+
+- Bez nowych względem M4 (blok `credential` w `PendingTool` nadal otwarty, patrz niżej).
+
+## Stan z M4
+
 Stan na 2026-10-29 (M4 zrobiony). Kontrakty: `mcp-contracts` 4.0.0 (paczka `release/aiwcorpo-mcp-contracts-4.0.0.tgz`, klient wygenerowany ponownie z `portal-bff.v1.bundled.yaml` 4.0.0, zero ręcznych typów API). Angular 22.2.3 / CLI 22.2.4, Angular Material 22.2.4 (wersje z `package.json`).
 Wzorzec wyglądu: makiety człowieka w `mcp-platform-plan/design/` (README.md, `ekrany-authenticator-i-poprawki.txt`).
 

@@ -1,9 +1,9 @@
 <div class="form-field url-field">
-  <label for="link-url" i18n="@@ready.url">Adres linku</label>
+  <label for="endpoint-url" i18n="@@ready.url">Adres MCP</label>
   <div class="url-row">
-    <input id="link-url" type="text" class="mono" readonly [value]="url()" />
+    <input id="endpoint-url" type="text" class="mono" readonly [value]="url()" />
     <button mat-stroked-button type="button" (click)="copy(url(), urlLabel)" i18n="@@ready.copyUrl">
-      Kopiuj<span class="visually-hidden"> adres linku</span>
+      Kopiuj<span class="visually-hidden"> adres MCP</span>
     </button>
   </div>
 </div>
@@ -37,8 +37,7 @@
   kontem firmowym.
 </p>
 
-<h2 class="summary-title" i18n="@@ready.summary">Podsumowanie</h2>
-<dl class="summary">
-  <dt class="muted" i18n="@@ready.tools">Narzędzia</dt>
-  <dd class="mono">{{ tools().join(', ') }}</dd>
-</dl>
+<p class="count" data-testid="tool-count" i18n="@@ready.count">
+  Na liście będzie około <strong>{{ toolCount() }}</strong> narzędzi. To szacunek z katalogu,
+  dokładną listę zwraca gateway.
+</p>

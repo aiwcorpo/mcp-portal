@@ -41,7 +41,7 @@ interface Row {
   client: string;
   resource: string;
   tool: string;
-  link: string;
+  filter: string;
   errorCode: string;
   rawResult: string;
   result: ReturnType<typeof resultInfo>;
@@ -61,7 +61,7 @@ function toRow(call: ActivityCall): Row {
     client: neutraliseText(clientName(call.client)).text,
     resource: neutraliseText(formatResource(call.resource)).text,
     tool: neutraliseText(call.tool).text,
-    link: neutraliseText(call.virtualServer ?? '').text,
+    filter: neutraliseText(call.filter ?? '').text,
     errorCode: neutraliseText(call.errorCode ?? '').text,
     rawResult: neutraliseText(call.result).text,
     result,

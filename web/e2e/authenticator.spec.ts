@@ -67,11 +67,8 @@ test('register the Authenticator with a fresh MFA, then remove it with another o
   await page.getByRole('button', { name: 'Usuń', exact: true }).click();
   await expect(page.getByRole('dialog')).toContainText('Usunąć Authenticator?');
   await page.getByRole('dialog').getByRole('button', { name: 'Usuń' }).click();
+  // After the MFA the removal is carried out by itself (U12), with no second click.
   await expect(page).toHaveURL(/\/connections$/);
-  await expect(page.getByText('Tożsamość potwierdzona.')).toBeVisible();
-
-  await page.getByRole('button', { name: 'Usuń', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Usuń' }).click();
   await expect(page.getByText('Authenticator usunięty.')).toBeVisible();
   await expect(page.getByText('Nie zarejestrowano')).toBeVisible();
 });
@@ -142,10 +139,8 @@ test('active, locked and switched-off states in My connections', async ({ page }
   await expect(page.getByText('Authenticator jest wyłączony po 20 błędnych kodach')).toBeVisible();
 });
 
-test('the link wizard warns about tools that need a code', async ({ page }) => {
-  await page.goto('/links/new');
-  await page.getByLabel('Nazwa').fill('Zestaw');
-  await page.getByRole('button', { name: 'Dalej' }).click();
+test('the address page warns about tools that need a code', async ({ page }) => {
+  await page.goto('/endpoint');
   await expect(page.getByText('Narzędzia "Usuwanie" wymagają kodu z Authenticatora')).toBeVisible();
   await expect(page.getByText('Wymaga kodu z Authenticatora.').first()).toBeVisible();
 });

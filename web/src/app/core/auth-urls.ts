@@ -1,10 +1,10 @@
 /**
  * ReturnPath from the C4/C12 contract (CC-032, CC-099): portal-relative, no percent-encoding, no backslash,
  * no semicolon, no dot segment, and none of the prefixes the reverse proxy sends to the BFF or the gateway
- * (/api, /s, /v, /.well-known as whole segments).
+ * (/api, /mcp, /s, /v, /.well-known as whole segments).
  */
 const RETURN_PATH =
-  /^(?![^?]*\/\.\.?(?:[/?]|$))(?!\/(?:api|s|v|\.well-known)(?:[/?]|$))\/(?!\/)[A-Za-z0-9._~!$&'()*+,=:@/?-]*$/;
+  /^(?![^?]*\/\.\.?(?:[/?]|$))(?!\/(?:api|mcp|s|v|\.well-known)(?:[/?]|$))\/(?!\/)[A-Za-z0-9._~!$&'()*+,=:@/?-]*$/;
 const RETURN_PATH_MAX = 512;
 
 export const LOGIN_PATH = '/api/v1/auth/login';
@@ -26,9 +26,11 @@ export function loginUrl(returnPath: string, stepUp = false): string {
 }
 
 /**
- * The BFF builds stepUpUrl without knowing which screen sent the request, so the portal points its
- * returnPath back at the form. Only the BFF login endpoint on this origin is followed; anything else
- * falls back to a login URL built here, so a tampered response cannot redirect the browser elsewhere.
+ * The BFF sets the returnPath of stepUpUrl from the Referer of the request, which is the page that sent it. The
+ * portal replaces it anyway, because it knows better where to land: the page with `?mfa=ok`, from which it resumes
+ * the action (ResumeIntentStore). `returnPath` is encoded by URLSearchParams. Only the BFF login endpoint on this
+ * origin is followed; anything else falls back to a login URL built here, so a tampered response cannot redirect the
+ * browser elsewhere.
  */
 export function stepUpUrlFor(
   stepUpUrl: string | undefined,

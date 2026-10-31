@@ -20,6 +20,7 @@ import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
+import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
@@ -46,6 +47,7 @@ export class ToolDiff {
   private readonly http = inject(HttpClient);
   private readonly navigation = inject(BrowserNavigation);
   private readonly dialog = inject(MatDialog);
+  private readonly resumeStore = inject(ResumeIntentStore);
 
   readonly serverId = input.required<ServerId>();
   /** Tool name in the registry (without the gateway prefix). */
@@ -54,6 +56,13 @@ export class ToolDiff {
   readonly toolName = input.required<string>();
   /** True right after the return from the fresh MFA: a second step_up_required is then an error, not a loop. */
   readonly mfaReturned = input(false);
+  /**
+   * The approval that was confirmed in the dialogs before the MFA. It is carried out once, right after the
+   * definition is read again, and only when the hash is the one the administrator looked at.
+   */
+  readonly resume = input<ResumeOf<'approve-tool'> | null>(null);
+  /** The resumed approval was handled (carried out or refused), so the page can forget it. */
+  readonly resumeHandled = output();
   readonly approved = output();
   /** The definition is no longer pending (approved elsewhere, or gone from the registry). */
   readonly gone = output();
@@ -64,6 +73,9 @@ export class ToolDiff {
   protected readonly approving = signal(false);
   protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly changedMeanwhile = signal(false);
+  /** The definition changed while the administrator was at the IdP; nothing was approved. */
+  protected readonly resumeRefused = signal(false);
+  private resumeDone = false;
   /** Hash that the gateway refused with 422: it is never approved, so the button stays off for it. */
   private readonly refusedHash = signal<string | null>(null);
 
@@ -124,6 +136,7 @@ export class ToolDiff {
         ),
       );
       this.pending.set({ status: 'ready', value: parseKeepingNumbers<PendingTool>(body) });
+      await this.resumeApproval();
     } catch (error) {
       const failure = toApiFailure(error);
       this.pending.set({ status: 'error', failure });
@@ -148,6 +161,44 @@ export class ToolDiff {
     if (view.riskLowered && !(await this.confirmRiskLowering(view.riskFrom, view.riskTo))) {
       return;
     }
+    await this.send();
+  }
+
+  private async resumeApproval(): Promise<void> {
+    const intent = this.resume();
+    if (
+      !intent ||
+      this.resumeDone ||
+      intent.serverId !== this.serverId() ||
+      intent.tool !== this.tool()
+    ) {
+      return;
+    }
+    this.resumeDone = true;
+    const state = this.pending();
+    const view = this.view();
+    const same =
+      state.status === 'ready' &&
+      view !== null &&
+      !this.blocked() &&
+      state.value.pendingHash === intent.hash &&
+      // A lowering that was confirmed stays confirmed only if the definition still lowers the risk.
+      view.riskLowered === intent.acceptRiskLowering;
+    this.resumeHandled.emit();
+    if (!same) {
+      this.resumeRefused.set(true);
+      return;
+    }
+    await this.send();
+  }
+
+  /** The request itself, after every dialog was answered (now or before the MFA). */
+  private async send(): Promise<void> {
+    const state = this.pending();
+    const view = this.view();
+    if (state.status !== 'ready' || !view || this.approving()) {
+      return;
+    }
     this.approving.set(true);
     this.failure.set(null);
     this.changedMeanwhile.set(false);
@@ -167,6 +218,13 @@ export class ToolDiff {
         await this.load();
         this.changedMeanwhile.set(true);
       } else if (failure.code === 'step_up_required' && !this.mfaReturned()) {
+        this.resumeStore.save({
+          kind: 'approve-tool',
+          serverId: this.serverId(),
+          tool: this.tool(),
+          hash: approvedHash,
+          acceptRiskLowering: view.riskLowered,
+        });
         this.navigation.assign(
           stepUpUrlFor(failure.stepUpUrl, `${ADMIN_PATH}?mfa=ok`, this.navigation.origin),
         );

@@ -76,7 +76,7 @@ describe('LogsPage', () => {
       'Anulowane',
       'Zablokowane przez oczekującą',
       'Odmowa (brak uprawnienia)',
-      'Odmowa (poza zakresem linku)',
+      'Odmowa (poza filtrem adresu)',
       'Błąd',
       'Zbyt wiele wywołań',
       'Inny wynik',
@@ -96,7 +96,7 @@ describe('LogsPage', () => {
             risk: 'DESTRUCTIVE',
             result: 'confirmed',
             wrongCodeCount: 2,
-            virtualServer: 'przeglad-zgloszen',
+            filter: 'systems=jira&access=write',
           }),
           call({
             requestId: '0192d1b2-7c3a-7d4e-8f10-000000000002',
@@ -115,7 +115,6 @@ describe('LogsPage', () => {
     await until(() =>
       expect(document.querySelector('[data-testid="wrong-code-count"]')?.textContent).toBe('2'),
     );
-    expect(text()).toContain('przeglad-zgloszen');
     expect(text()).toContain('Usuwanie');
     expect(labelled('Ukryj szczegóły: jira__delete_issue').getAttribute('aria-expanded')).toBe(
       'true',
@@ -297,13 +296,13 @@ describe('LogsPage', () => {
     expect(cursors).toEqual(['c50', null]);
   });
 
-  it('shows hidden characters in the tool name and the link as markers', async () => {
+  it('shows hidden characters in the tool name and the filter as markers', async () => {
     server.use(
       http.get('/api/v1/activity/calls', () =>
         HttpResponse.json([
           call({
             tool: `jira__get${String.fromCodePoint(0x202e)}issue`,
-            virtualServer: 'a\u200bb',
+            filter: 'systems=a\u200bb',
           }),
         ]),
       ),
@@ -311,5 +310,31 @@ describe('LogsPage', () => {
     configureTestApp();
     await openRoute('/logs');
     await until(() => expect(text()).toContain('jira__get[U+202E]issue'));
+    expect(text()).toContain('systems=a[U+200B]b');
+  });
+
+  it('has a filter column: the normalized filter of the address, or "bez filtra"', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Czeka na potwierdzenie'));
+
+    const header = Array.from(document.querySelectorAll('thead th')).map((cell) =>
+      cell.textContent?.trim(),
+    );
+    expect(header).toContain('Filtr');
+    const cells = Array.from(document.querySelectorAll('td.filter')).map((cell) =>
+      text(cell).trim(),
+    );
+    expect(cells).toContain('systems=confluence,jira');
+    expect(cells).toContain('systems=opensearch&access=write');
+    expect(cells).toContain('bez filtra');
+  });
+
+  it('explains a call cut by the filter of the address and treats the old value as unknown', async () => {
+    configureTestApp();
+    await openRoute('/logs');
+    await until(() => expect(text()).toContain('Odmowa (poza filtrem adresu)'));
+    expect(resultInfo('denied_filter_scope').explanation).toContain('Filtr w adresie tylko zawęża');
+    expect(resultInfo('denied_link_scope').label).toBe('Inny wynik');
   });
 });

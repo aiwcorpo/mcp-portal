@@ -37,11 +37,6 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
   csrf_invalid: () =>
     $localize`:@@error.csrf_invalid:Formularz stracił ważność. Odśwież stronę i spróbuj ponownie.`,
   secret_invalid: () => $localize`:@@error.secret_invalid:Token nieprawidłowy albo wygasł.`,
-  slug_taken: () => $localize`:@@error.slug_taken:Ten identyfikator jest już zajęty. Wybierz inny.`,
-  virtual_server_limit_reached: () =>
-    $localize`:@@error.virtual_server_limit_reached:Osiągnięto limit linków. Usuń nieużywany link.`,
-  resource_defaults_unsupported: () =>
-    $localize`:@@error.resource_defaults_unsupported:Zawężanie zasobów nie jest jeszcze dostępne.`,
   hash_mismatch: () =>
     $localize`:@@error.hash_mismatch:Definicja zmieniła się w międzyczasie. Odśwież widok.`,
   not_requestable: () =>
@@ -75,6 +70,9 @@ function manifestRejectedMessage(reason: string | undefined): string {
 export function failureMessage(failure: ApiFailure): string {
   if (failure.code === 'manifest_rejected') {
     return manifestRejectedMessage(failure.reason);
+  }
+  if (failure.code === 'invalid_request' && failure.reason === 'invalid_filter') {
+    return $localize`:@@error.invalid_filter:Takiego filtru nie da się zapisać w adresie. Zmień wybór.`;
   }
   if (failure.code === 'rate_limited' && failure.retryAfterSeconds) {
     return $localize`:@@error.rate_limited_retry:Za dużo żądań. Spróbuj ponownie za ${failure.retryAfterSeconds}:seconds: s.`;

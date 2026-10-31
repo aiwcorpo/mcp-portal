@@ -59,21 +59,6 @@
   margin-top: 12px;
 }
 
-.summary-title {
-  margin-top: 24px;
-}
-
-.summary {
-  display: grid;
-  grid-template-columns: minmax(90px, 160px) 1fr;
-  gap: 10px 16px;
-  margin: 10px 0 0;
-}
-
-.summary dt,
-.summary dd {
-  margin: 0;
-  padding-block: 8px;
-  border-bottom: 1px solid var(--pm-border);
-  overflow-wrap: anywhere;
+.count {
+  margin-top: 16px;
 }

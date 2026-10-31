@@ -13,6 +13,7 @@ import { firstValueFrom } from 'rxjs';
 import { AdminService, RegistryServer, RegistryTool } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
+import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
 import { Tone, riskLabel, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
@@ -93,6 +94,10 @@ export class AdminPage implements OnInit {
   /** `mfa=ok` in the URL after the IdP returned from the fresh MFA that lowering a risk needs. */
   readonly mfa = input<string | undefined>();
   protected readonly mfaReturned = signal(false);
+  /** The approval confirmed before the MFA; its diff opens by itself and the approval is carried out there. */
+  protected readonly resumeApproval = signal<ResumeOf<'approve-tool'> | null>(null);
+  protected readonly resumedFromMfa = signal(false);
+  private readonly resumeStore = inject(ResumeIntentStore);
 
   private readonly adminApi = inject(AdminService);
 
@@ -140,6 +145,13 @@ export class AdminPage implements OnInit {
   ngOnInit(): void {
     if (this.mfa() === 'ok') {
       this.mfaReturned.set(true);
+      const intent = this.resumeStore.take('approve-tool');
+      if (intent) {
+        this.resumeApproval.set(intent);
+        this.resumedFromMfa.set(true);
+        this.diffOpen.update((set) => addTo(set, `${intent.serverId}/${intent.tool}`));
+        this.opened.update((set) => addTo(set, intent.serverId));
+      }
       void this.router.navigate([], { queryParams: { mfa: null }, replaceUrl: true });
     }
   }
@@ -185,6 +197,7 @@ export class AdminPage implements OnInit {
   protected async onApproved(tool: ToolRow): Promise<void> {
     this.diffOpen.update((set) => removeFrom(set, tool.key));
     this.mfaReturned.set(false);
+    this.resumedFromMfa.set(false);
     this.done.set($localize`:@@admin.approved:Zatwierdzono definicję ${tool.name}:tool:.`);
     await this.read();
   }

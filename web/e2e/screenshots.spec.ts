@@ -76,36 +76,15 @@ test.describe('screenshots', () => {
       await shot(page, project, `22-powrot-z-oauth-${outcome}`);
     }
 
-    await page.goto('/links?mockScenario=default');
-    await expect(page.getByRole('rowheader', { name: 'Przegląd zgłoszeń' })).toBeVisible();
-    await shot(page, project, '08-moje-linki-lista');
+    await page.goto('/endpoint?mockScenario=default');
+    await expect(page.getByLabel('Adres MCP', { exact: true })).toBeVisible();
+    await shot(page, project, '08-adres-mcp');
 
-    await page.getByRole('button', { name: 'Usuń (Przegląd zgłoszeń)' }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-    await shot(page, project, '10-moje-linki-usuwanie');
-    await page.getByRole('button', { name: 'Anuluj' }).click();
-
-    await page.goto('/links?mockScenario=nolinks');
-    await expect(page.getByText('Nie masz jeszcze żadnych linków')).toBeVisible();
-    await shot(page, project, '09-moje-linki-pusta-lista');
-
-    await page.goto('/links/new?mockScenario=default');
-    await page.getByLabel('Nazwa').fill('Przegląd zgłoszeń');
-    await page.getByRole('button', { name: 'Dalej' }).click();
-    await expect(page.getByText('Ten identyfikator jest już zajęty. Wybierz inny.')).toBeVisible();
-    await shot(page, project, '11-kreator-nazwa-slug-zajety');
-
-    await page.getByLabel('Identyfikator').fill('moj-zestaw');
-    await page.getByRole('button', { name: 'Dalej' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Wybierz narzędzia' })).toBeVisible();
-    await page.getByRole('checkbox', { name: /jira__search_issues/ }).check();
+    await page.getByRole('checkbox', { name: /^Jira/ }).check();
+    await page.getByLabel('Tylko odczyt').check();
     await page.getByRole('checkbox', { name: /jira__get_issue/ }).check();
-    await page.getByRole('checkbox', { name: /jira__add_comment/ }).check();
-    await shot(page, project, '12-kreator-narzedzia');
-
-    await page.getByRole('button', { name: 'Utwórz link' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: /jest gotowy/ })).toBeVisible();
-    await shot(page, project, '14-kreator-gotowe');
+    await expect(page.getByLabel('Adres MCP', { exact: true })).toHaveValue(/systems=jira/);
+    await shot(page, project, '12-adres-mcp-filtr');
 
     await page.goto('/catalog?mockScenario=errors');
     await expect(page.getByText('Nie udało się pobrać danych.')).toBeVisible();
@@ -192,11 +171,9 @@ test.describe('screenshots', () => {
     await shot(page, project, '30-usuniecie-authenticatora');
     await page.getByRole('button', { name: 'Anuluj' }).click();
 
-    await page.goto('/links/new?mockScenario=default&mockAuthenticator=none');
-    await page.getByLabel('Nazwa').fill('Zestaw');
-    await page.getByRole('button', { name: 'Dalej' }).click();
+    await page.goto('/endpoint?mockScenario=default&mockAuthenticator=none');
     await expect(page.getByText('Narzędzia "Usuwanie" wymagają kodu')).toBeVisible();
-    await shot(page, project, '12-kreator-narzedzia-baner');
+    await shot(page, project, '12-adres-mcp-baner');
   });
 
   test('preview (M3)', async ({ page }, info) => {

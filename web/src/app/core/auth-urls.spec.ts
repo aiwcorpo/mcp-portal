@@ -1,3 +1,5 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   isAllowedRedirect,
   isValidReturnPath,
@@ -20,13 +22,28 @@ describe('auth URLs', () => {
   });
 
   it('refuses the prefixes of the proxy, dot segments and semicolons (CC-099)', () => {
-    for (const path of ['/api', '/api/v1/me', '/s/mcp-jira/mcp', '/v/x/mcp', '/.well-known/x']) {
+    for (const path of [
+      '/api',
+      '/api/v1/me',
+      '/mcp',
+      '/mcp?systems=jira',
+      '/s/mcp-jira/mcp',
+      '/v/x/mcp',
+      '/.well-known/x',
+    ]) {
       expect(isValidReturnPath(path)).toBe(false);
     }
     for (const path of ['/./catalog', '/a/../api', '/a/..', '/api;x', '/catalog;x=1']) {
       expect(isValidReturnPath(path)).toBe(false);
     }
-    for (const path of ['/apiary', '/vault', '/catalog?x=/api', '/authenticator/register?mfa=ok']) {
+    for (const path of [
+      '/apiary',
+      '/vault',
+      '/mcp-docs',
+      '/f/x',
+      '/catalog?x=/api',
+      '/authenticator/register?mfa=ok',
+    ]) {
       expect(isValidReturnPath(path)).toBe(true);
     }
   });
@@ -71,5 +88,22 @@ describe('auth URLs', () => {
     expect(isAllowedRedirect('https://iga.internal@other.host/x')).toBe(false);
     expect(isAllowedRedirect('https://user:pw@iga.internal/x')).toBe(false);
     expect(isAllowedRedirect('https://iga.internal/x#frag')).toBe(false);
+  });
+});
+
+describe('return paths against the contract vectors (5.1.0)', () => {
+  const directory = join(
+    process.cwd(),
+    'node_modules/@aiwcorpo/mcp-contracts/test-vectors/return-paths',
+  );
+  const vectors = readdirSync(directory).map(
+    (file): [string, { value: string; expected: { valid: boolean } }] => [
+      file,
+      JSON.parse(readFileSync(join(directory, file), 'utf8')),
+    ],
+  );
+
+  it.each(vectors)('%s', (_file, vector) => {
+    expect(isValidReturnPath(vector.value)).toBe(vector.expected.valid);
   });
 });
