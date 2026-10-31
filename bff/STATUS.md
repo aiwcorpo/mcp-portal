@@ -476,6 +476,7 @@ Kontrakty 5.1.0 (`mcp-contracts` i nowa zależność `mcp-manifest` dla `Endpoin
   query, tylko gdy spełnia `ReturnPath`; inaczej `/authenticator` albo `/admin`). Dotyczy rejestracji, usunięcia i potwierdzenia
   Authenticatora oraz zatwierdzenia z `acceptRiskLowering`. Kontrakt bez zmian (`returnPath` w `stepUpUrl` jest domyślny).
   Sama akcja wznawia się w web po powrocie (BFF nie trzyma ciała żądania).
+- Obraz: `mcp-portal-bff:m5-94118ff` (`scripts/build-image.sh`, bez wdrażania; stos dev zostaje na M4).
 - CI: `ci/run.sh` (style: znaki ukryte i frazy; `./mvnw verify`; liczba testów), `make ci`, `ci/run.sh --container` z
   `ci/Dockerfile`. Sprawdzone: lokalnie pełny przebieg; w kontenerze krok `style` na lokalnym obrazie `eclipse-temurin:25-jre`
   (`CI_BASE_IMAGE`). Krok `build` w kontenerze niesprawdzony: wymaga obrazu `eclipse-temurin:25-jdk`, którego nie ma lokalnie, a
@@ -489,3 +490,4 @@ Kontrakty 5.1.0 (`mcp-contracts` i nowa zależność `mcp-manifest` dla `Endpoin
 - Uwaga do C12 (`stepUpUrl`): opis mówi, że frontend może podmienić `returnPath`; BFF dodatkowo ustawia go na stronę wysyłającą
   żądanie. Jeśli ws-08 woli stały adres, wystarczy go podmienić; nic nie zależy od wartości domyślnej.
 
+M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, `GET /api/v1/me/mcp-endpoint`, linki usunięte, aktywność z `filter`, wznowienie po step-up (powrót na stronę akcji), `ci/run.sh`, obraz `m5-94118ff`; 482 testy.
