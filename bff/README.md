@@ -4,11 +4,11 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 4.0.0 (jar w `~/.m2`, z repozytorium `mcp-contracts`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 5.1.0 (jary `mcp-contracts` i `mcp-manifest` w `~/.m2`, z repozytorium `mcp-contracts`).
 
 ## Uruchomienie lokalne
 
-Wymagane: JDK 25 i `mcp-contracts` 4.0.0 w `~/.m2`. Dwa tryby.
+Wymagane: JDK 25 i `mcp-contracts` 5.1.0 w `~/.m2`. Dwa tryby.
 
 Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
@@ -82,7 +82,7 @@ Wszystko przez zmienne środowiska (`application.yml`):
 | `PORTAL_OIDC_CLIENT_ID`, `PORTAL_OIDC_CLIENT_SECRET` | klient poufny | `mcp-portal-bff`, `KC_CLIENT_MCP_PORTAL_BFF_SECRET` |
 | `PORTAL_BROKER_URL`, `PORTAL_BROKER_TLS_NAME` | C4 i nazwa w certyfikacie brokera | `https://localhost:18443`, `MCP_BROKER_TLS_NAME` |
 | `PORTAL_GATEWAY_ADMIN_URL`, `PORTAL_GATEWAY_ADMIN_TLS_NAME` | C5 i nazwa w certyfikacie | `https://localhost:18444`, `MCP_GATEWAY_INTERNAL_TLS_NAME` |
-| `PORTAL_PUBLIC_BASE_URL` | origin jednej domeny (portal, `/api`, `/s/`, `/v/`): z niego redirect URI OIDC `<url>/api/v1/auth/callback`, linki `copy_link` i `clientConfigs`; nigdy z `Host`; poza `dev` tylko https, bez literału IPv6 (dawna nazwa: `PORTAL_GATEWAY_PUBLIC_URL`) | `http://localhost:18720` |
+| `PORTAL_PUBLIC_BASE_URL` | origin jednej domeny (portal, `/api`, `/mcp`, `/s/`): z niego redirect URI OIDC `<url>/api/v1/auth/callback`, linki `copy_link` i `clientConfigs`; nigdy z `Host`; poza `dev` tylko https, bez literału IPv6 (dawna nazwa: `PORTAL_GATEWAY_PUBLIC_URL`) | `http://localhost:18720` |
 | `PORTAL_TLS_KEYSTORE`, `PORTAL_TLS_KEYSTORE_PASSWORD` | certyfikat klienta `CN=mcp-portal-bff` (PKCS12) | `certs/mcp-portal-bff/keystore.p12` |
 | `PORTAL_TLS_TRUSTSTORE`, `PORTAL_TLS_TRUSTSTORE_PASSWORD` | CA wewnętrzne | `certs/ca/truststore.p12` |
 | `PORTAL_WEB_DIST` | katalog z `index.html` zbudowanego frontendu | `../web/dist/portal` |
@@ -130,21 +130,21 @@ step-up i odrzucenia przez broker).
 Callback OIDC to `/api/v1/auth/callback` (jedna domena, CC-089). Połączenie OAuth: `POST /connections/{system}/oauth`
 zapisuje w sesji `flowId`, `state` z `authorizeUrl` i `returnPath`; `GET /api/v1/oauth/callback` szuka przepływu po
 `state` w sesji bieżącego użytkownika (jednorazowo, 15 min, najwyżej 8 naraz), a kody `connectError` to
-`cancelled`, `provider_error`, `flow_invalid` (`identity_mismatch` usunięte w kontraktach 3.0.0). Wirtualne serwery: proxy do C5 z kontrolą
-`resourceDefaults` (CC-085) i `clientConfigs` z `PORTAL_PUBLIC_BASE_URL`.
+`cancelled`, `provider_error`, `flow_invalid` (`identity_mismatch` usunięte w kontraktach 3.0.0). Zapisane linki
+(`/api/v1/virtual-servers`, `/v/<slug>/mcp`) zniknęły w kontraktach 5.0.0 (CC-175, CC-177): zamiast nich jest
+`GET /api/v1/me/mcp-endpoint` (niżej).
 
-`clientConfigs.claudeCode` to `claude mcp add --transport http [--client-id <id>] [--callback-port <port>] <slug> <url>`.
+`clientConfigs.claudeCode` to `claude mcp add --transport http [--client-id <id>] [--callback-port <port>] aiwcorpo-mcp "<adres>"`.
 Keycloak w mcp-platform-dev nie pozwala na dynamiczną rejestrację klienta, więc bez obu flag Authenticate w Claude Code
 nie działa; profil `dev` ustawia `claude-code` i `33418` (klient `claude-code` w realmie musi mieć redirect URI
 `http://localhost:33418/callback`). Produkcja z Entra ID może potrzebować innego klienta albo żadnego, dlatego domyślnie
-flag nie ma. Copilot i Codex dostają tylko link: nie ma potwierdzonego pola na identyfikator klienta w ich konfiguracji
-(patrz STATUS.md). Przy `409 virtual_server_limit_reached` z C5 BFF odpowiada własnym `409` z tym samym kodem (CC-119),
-a zdarzenie `connection_change` niesie `backendUser` połączonego konta (CC-117; brak, gdy broker go nie zwrócił).
+flag nie ma. Copilot i Codex dostają tylko adres: nie ma potwierdzonego pola na identyfikator klienta w ich konfiguracji
+(patrz STATUS.md). Zdarzenie `connection_change` niesie `backendUser` połączonego konta (CC-117; brak, gdy broker go nie zwrócił).
 
 | Test | Co sprawdza |
 | --- | --- |
 | `OAuthConnectTest`, `ConnectRedirectVectorsTest` | start i callback, wszystkie kody, cudzy link, powtórzenie, brak sesji, wektory `connect-redirects/` |
-| `VirtualServersTest` | lista, utworzenie, usunięcie, 409/403/503, kolejność kontroli `resourceDefaults`, `clientConfigs` |
+| `McpEndpointTest`, `McpEndpointVectorsTest`, `ComposedQueryTest` | `GET /api/v1/me/mcp-endpoint`: wektory `mcp-endpoint/` także z zapytaniem tak, jak je wysyła klient, licznik z katalogu C5, odmowy bez wywołania gateway'a, brak audytu |
 | `ClientConfigsTest`, `ClientConfigsBindingTest` | komenda Claude Code (wartości graniczne, metaznaki, brak flag bez profilu `dev`, błąd startu przy złej wartości) |
 | `BackendUserAuditTest` | `backendUser` w audycie zgodny ze wzorcem schematu C8 albo pomijany |
 | `NegativeSecurityTest` | `X-Request-Id` na każdej odpowiedzi i ignorowanie wartości klienta, brak XSRF, cudza sesja i token, sekret i kod OAuth w logach, `returnPath` poza wzorcem |
@@ -178,15 +178,14 @@ BFF nie ma endpointu decyzji (`POST /api/v1/confirmations/{id}` to 405).
   `dev`, inaczej błąd startu.
 - Audyt: `authenticator` (`authenticator_enrollment_started`, `authenticator_registered`,
   `authenticator_enrollment_failed`, `authenticator_removed`, `step_up_required`, `upstream_unavailable`) i
-  `virtual_server_change` zamiast `admin_change` (`vs_created`, `vs_deleted`, `slug_taken`, `not_granted`, `invalid_request`,
-  `virtual_server_limit`, `not_found_or_denied`). Zdarzenia `confirmation` (w tym `cancelled_by_owner`) pisze gateway.
+  `admin_change` dla odmówionych zatwierdzeń definicji. Zdarzenia `virtual_server_change` zniknęły ze schematu (CC-174). Zdarzenia `confirmation` (w tym `cancelled_by_owner`) pisze gateway.
 - Podgląd: odpowiedź gateway'a jest czytana jako obiekt zamknięty (pole spoza schematu: 503), najwyżej 64 argumenty, wartość po
   neutralizacji najwyżej 8192 znaki (dłuższa cięta, `truncated: true`).
 - Tekst w podglądzie: wartości argumentów ze znakami ukrytymi (`TextHygiene`: bidi, zero-width, tag, wypełniacze, sterujące poza
   `\n` i `\t`, separatory, samotne surogaty, prywatne i nieprzypisane) trafiają do przeglądarki jako `<U+202E>` (literalne `<U+` w wartości dostaje `<U+003C>`, więc zapis zawsze znaczy znak, który tam był); nazwa
   argumentu, `resource.id`, `resource.parent` i `client` z takimi znakami powodują odrzucenie (podglądu albo wiersza). Definicja
   wg CC-121, ostrzejsza o U+200C..U+200F i CR.
-- `ReturnPath` (CC-099): bez średnika; pierwszy segment nie jest `api`, `s`, `v` ani `.well-known`; żaden segment ścieżki
+- `ReturnPath` (CC-099): bez średnika; pierwszy segment nie jest `api`, `mcp`, `s`, `v` ani `.well-known` (`/mcp-docs` jest dozwolone); żaden segment ścieżki
   nie jest `.` ani `..`.
 
 | Test | Co sprawdza |
@@ -217,7 +216,7 @@ oznacza discovery.
 
 ## M4: wnioski, administracja rejestru, limity
 
-Kontrakty 4.0.0. Szczegóły decyzji w `STATUS.md` (M4.1 ... M4.4).
+Kontrakty 4.0.0 (stan M4; M5 opisuje sekcja niżej). Szczegóły decyzji w `STATUS.md` (M4.1 ... M4.4).
 
 - Wnioski o dostęp (port C13): `GET/POST /api/v1/access-requests`, `GET /api/v1/access-requests/entitlements?system=`. Adaptery:
   `keycloak-groups` (katalog z pliku, bez wniosków: `POST` daje `422 not_requestable`) i `mock` (profil `dev`). `POST` na uprawnienie,
@@ -250,7 +249,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   upstream/    klienci C4/C5 (mTLS, przypięta nazwa TLS)
   catalog/     GET /api/v1/catalog (reguły CC-021)
   connection/  GET/PUT/DELETE połączeń
-  virtualserver/ wirtualne serwery i clientConfigs
+  mcpendpoint/ GET /api/v1/me/mcp-endpoint: adres /mcp z filtrem, clientConfigs, licznik narzędzi
   me/          GET /api/v1/me
   confirmation/ podgląd, viewed, cancel
   authenticator/ rejestracja Authenticatora (TOTP)
@@ -262,5 +261,41 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   spa/         serwowanie frontendu, fallback tras, CSP
   web/         błędy JSON, returnPath, requestId
 ```
+
+## M5: jeden adres `/mcp` (kontrakty 5.1.0)
+
+`GET /api/v1/me/mcp-endpoint?systems=&tools=&access=&exclude=` (CC-175, CC-182) zwraca znormalizowany adres
+`<PORTAL_PUBLIC_BASE_URL>/mcp[?filtr]`, `filter` (gdy jest), `toolCount` i `clientConfigs`. Nic się nie zapisuje i nic
+nie trafia do audytu. Szczegóły:
+
+- Cztery parametry przychodzą już zdekodowane przez warstwę HTTP (`jira%2Cgitlab` to `jira,gitlab`). BFF składa z nich
+  query sam (`nazwa=wartość` łączone `&`, `&` i `=` w wartości zapisane jako `%26` i `%3D`, bez ponownego kodowania)
+  i parsuje je klasą `EndpointFilter` z `mcp-manifest` 5.1.0, czyli tymi samymi regułami co gateway. Parametr spoza czterech,
+  powtórzony, wartość z `%` po dekodowaniu, `+` (spacja), pusta wartość i niepoprawny escape (`%zz`, który kontener po cichu
+  odrzuciłby, zamieniając zły filtr w brak filtra) to `400 invalid_request`, `reason: invalid_filter`; odmowa następuje przed
+  wywołaniem gateway'a i nic nie mówi o narzędziach użytkownika.
+- `toolCount`: płaska lista z `servers[].tools[]` odpowiedzi `GET /admin/v1/catalog` (C5, token wymieniony na
+  `mcp-gateway-admin`), tylko `granted` i nie `disabled`, po filtrze (`EndpointFilter.allows`). To szacunek, wiążące jest
+  `tools/list` gateway'a.
+- `clientConfigs` z `PORTAL_PUBLIC_BASE_URL` (nigdy z żądania); adres jest w cudzysłowie, bo ma `&`; nazwa serwera w klientach to
+  `aiwcorpo-mcp`. Flagi `--client-id` i `--callback-port` Claude Code jak dotąd z konfiguracji.
+- Aktywność: wiersze mają `filter` zamiast `virtualServer` (CC-174); `filter` jest pokazywany tylko w postaci kanonicznej. Stary
+  wynik `denied_link_scope` jest czytany jako `denied_filter_scope` (CC-188; gateway mapuje przy odczycie, BFF powtarza to dla
+  starszego gateway'a), a pole `virtualServer` ze starego gateway'a jest odrzucane bez gubienia wiersza.
+- `ReturnPath` nie dopuszcza `/mcp` ani `/mcp?...` (CC-169); `/mcp-docs` i `/f/...` są dozwolone. Fallback SPA nie odpowiada na `/mcp`.
+- U12 (wznowienie po step-up bez drugiego kliknięcia): `401 step_up_required` niesie `stepUpUrl` z `returnPath` równym stronie, z której
+  poszło żądanie (nagłówek `Referer` tego samego originu co `PORTAL_PUBLIC_BASE_URL`, ścieżka i query bez fragmentu, tylko
+  gdy spełnia `ReturnPath`; inaczej stały `/authenticator` albo `/admin`). Kontrakt się nie zmienia (`stepUpUrl.returnPath` jest
+  domyślny, frontend może go podmienić). Wznowienie samej akcji po powrocie jest po stronie web: strona rozpoznaje powrót
+  (`Me.mfaFreshUntil`, query w `returnPath`) i wysyła zapisane żądanie jeszcze raz. BFF niczego nie odtwarza sam, bo nie wolno mu
+  trzymać ciała żądania (sekret, kod TOTP).
+
+## CI
+
+`make ci` (czyli `ci/run.sh`) to jedyny punkt wejścia: sprawdza JDK 25, style (znaki, frazy), `./mvnw verify` i wypisuje
+liczbę testów. Działa lokalnie bez żadnego systemu CI. W kontenerze: `ci/run.sh --container` buduje obraz z `ci/Dockerfile` i
+uruchamia w nim ten sam skrypt (repozytorium i `~/.m2` jako wolumeny). Pliki `.gitlab-ci.yml`, `Jenkinsfile`
+i `.github/workflows/` mają być cienkimi nakładkami wołającymi `ci/run.sh`; w tym repo ich nie ma, dopóki system CI nie
+jest wybrany.
 
 Stan prac i podział na kamienie: [STATUS.md](STATUS.md).

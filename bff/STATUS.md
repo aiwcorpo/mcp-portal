@@ -19,6 +19,9 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M4.2 | administracja rejestru: `GET /admin/registry`, `.../pending`, `POST .../approve` (source, `pendingVersion`, `409 hash_mismatch`, `422 ManifestRejected`), audyt `definition_approved` | zrobione |
 | M4.3 | limity `429` z `Retry-After`: zapis tokenu i operacje Authenticatora na sesję, przekazanie `429` z brokera i gateway'a, `system_not_configured` w `oauth/*` | zrobione |
 | M4.4 | aktywność wg CC-142 i CC-150, zgodność z przykładami C12 4.0.0, README, obraz `m4-<sha>` | zrobione |
+| M5.1 | kontrakty 5.1.0; usunięcie proxy linków; `GET /api/v1/me/mcp-endpoint` (CC-175, CC-182); aktywność z `filter` i `denied_filter_scope` (CC-174, CC-188); `/mcp` zarezerwowane w `ReturnPath` | zrobione |
+| M5.2 | wznowienie po step-up (U12): powrót na stronę, z której poszło żądanie | zrobione |
+| M5.3 | `ci/run.sh` + `make ci`, obraz `m5-<sha>` bez wdrażania | zrobione |
 
 ## M2: wynik (2026-10-28)
 
@@ -450,3 +453,39 @@ Zależność `mcp-contracts` 4.1.0 (gateway 4.1.0 i BFF 4.1.0 wchodzą razem: sc
 - Aktywność (CC-165): gateway zmienia wynik wierszy (m.in. `rate_limited`, `tool_disabled`, `denied_*` w grupie `denied`); BFF przekazuje
   wiersze i grupy filtra bez zmian, więc nic do zmiany. Web nie proponuje `request_access` na podstawie samego `result`.
 - Testy: 412, 0 błędów (nowe: MFA przy obniżaniu ryzyka, pole tylko przy `true`, `riskLowered`).
+
+## M5: jeden adres `/mcp`, CI (2026-10-31)
+
+Kontrakty 5.1.0 (`mcp-contracts` i nowa zależność `mcp-manifest` dla `EndpointFilter`, tej samej klasy co w gateway'u).
+`./mvnw verify`: 482 testy, 0 błędów (13 testów `VirtualServersTest` usunięto razem z linkami).
+
+- Usunięte: `GET|POST|DELETE /api/v1/virtual-servers*`, proxy `/admin/v1/virtual-servers`, `ClientConfigs` per link, audyt
+  `virtual_server_change`, pole `virtualServer` zdarzenia C8, `PublicUrls.virtualServer`. `/v/` nie ma w BFF.
+- `GET /api/v1/me/mcp-endpoint` (CC-175, CC-182): parametry jako wartości zdekodowane, `composeQuery` bez ponownego kodowania
+  (`&`, `=` w wartości -> `%26`, `%3D`, parser je odrzuca), parsowanie `EndpointFilter.parse`, `toolCount` z płaskiej listy
+  `servers[].tools[]` katalogu C5 (`granted` i nie `disabled`, po filtrze), `clientConfigs` z `publicBaseUrl` w cudzysłowie.
+  Wszystkie 15 wektorów `mcp-endpoint/` przechodzi dwa razy: na czystej klasie i przez HTTP (z zapytaniem tak, jak wysyła klient:
+  `%2C`, `%252C`, `%26`, `+`). Decyzja własna: niepoprawny escape (`%zz`) jest `invalid_filter`, bo kontener (Tomcat) odrzuca taki
+  parametr po cichu i zły filtr stawałby się brakiem filtra; kontrakt tego przypadku nie wylicza.
+- Aktywność: `ActivityCall.filter` tylko w postaci kanonicznej (inaczej wiersz odrzucony), `denied_link_scope` czytane jako
+  `denied_filter_scope`, `virtualServer` ze starego gateway'a ignorowane bez gubienia wiersza (CC-188; właściwe mapowanie jest po
+  stronie gateway'a, tu tylko zabezpieczenie na czas aktualizacji).
+- `ReturnPath`: `mcp` dochodzi do zarezerwowanych pierwszych segmentów (wektory `invalid-gateway-mcp*`, `valid-mcp-docs`,
+  `valid-f-prefix`); `SpaFallbackFilter` nie oddaje `index.html` pod `/mcp`.
+- U12: `stepUpUrl` z `returnPath` = strona, z której poszło żądanie (`Referer` tego samego originu co `publicBaseUrl`, ścieżka i
+  query, tylko gdy spełnia `ReturnPath`; inaczej `/authenticator` albo `/admin`). Dotyczy rejestracji, usunięcia i potwierdzenia
+  Authenticatora oraz zatwierdzenia z `acceptRiskLowering`. Kontrakt bez zmian (`returnPath` w `stepUpUrl` jest domyślny).
+  Sama akcja wznawia się w web po powrocie (BFF nie trzyma ciała żądania).
+- CI: `ci/run.sh` (style: znaki ukryte i frazy; `./mvnw verify`; liczba testów), `make ci`, `ci/run.sh --container` z
+  `ci/Dockerfile`. Sprawdzone: lokalnie pełny przebieg; w kontenerze krok `style` na lokalnym obrazie `eclipse-temurin:25-jre`
+  (`CI_BASE_IMAGE`). Krok `build` w kontenerze niesprawdzony: wymaga obrazu `eclipse-temurin:25-jdk`, którego nie ma lokalnie, a
+  pobranie obcego obrazu wymaga zgody człowieka. Nakładek na system CI (GitLab, Jenkins, GitHub Actions) nie ma, bo system nie jest
+  wybrany; mają tylko wołać `ci/run.sh`.
+
+### Propozycje CC
+
+- Brak nowych. Uwaga do CC-182: kontrakt nie mówi, co z niepoprawnym escape'em w query (`%zz`); BFF traktuje go jako
+  `invalid_filter`. Warto dopisać wektor `http-broken-escape`.
+- Uwaga do C12 (`stepUpUrl`): opis mówi, że frontend może podmienić `returnPath`; BFF dodatkowo ustawia go na stronę wysyłającą
+  żądanie. Jeśli ws-08 woli stały adres, wystarczy go podmienić; nic nie zależy od wartości domyślnej.
+
