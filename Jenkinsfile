@@ -8,7 +8,7 @@ pipeline {
         stage('style') {
             agent { label 'ci-style' }
             environment { CI_STEPS = 'style' }
-            steps { sh 'bff/ci/run.sh' }
+            steps { sh 'bff/ci/run.sh && web/ci/run.sh' }
         }
         stage('bff') {
             when { branch 'main' }

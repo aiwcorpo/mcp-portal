@@ -17,6 +17,13 @@ jobs:
       - run: bff/ci/run.sh
         env:
           CI_STEPS: style
+  web-style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: web/ci/run.sh
+        env:
+          CI_STEPS: style
   bff-build:
     if: github.event_name == 'push'
     environment: ci-main

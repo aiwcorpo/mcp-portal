@@ -32,6 +32,15 @@ bff-build:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
+web-style:
+  stage: verify
+  image: maven:3.9.12-eclipse-temurin-25
+  variables:
+    CI_STEPS: style
+  script:
+    - web/ci/run.sh
+
+# The runner sets CONTRACTS_TARBALL_URL and CONTRACTS_TARBALL_SHA256 and provides the playwright v1.64.1-noble image (CI_BASE_IMAGE).
 web:
   stage: verify
   tags: [docker]
