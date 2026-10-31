@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
+import pl.aiwcorpo.mcp.portal.bff.config.PublicUrls;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.security.StepUpPolicy;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
@@ -31,6 +32,7 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
+import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
@@ -58,13 +60,15 @@ class RegistryAdminController {
     private final Clock clock;
     private final StepUpPolicy stepUp;
     private final String returnPath;
+    private final PublicUrls publicUrls;
     private final ObjectReader approveReader = StrictJson.builder().build()
             .readerFor(ApproveBody.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     RegistryAdminController(UserTokens tokens, GatewayAdminClient gateway, AuditLog audit, Clock clock,
-                            StepUpPolicy stepUp, PortalProperties properties) {
+                            StepUpPolicy stepUp, PortalProperties properties, PublicUrls publicUrls) {
         this.stepUp = stepUp;
+        this.publicUrls = publicUrls;
         this.returnPath = properties.stepUp().adminReturnPath();
         this.tokens = tokens;
         this.gateway = gateway;
@@ -140,7 +144,7 @@ class RegistryAdminController {
         if (lowering) {
             // The only way to lower a risk (CC-167): the administrator has to prove a fresh second factor first.
             try {
-                stepUp.requireFresh(user, returnPath);
+                stepUp.requireFresh(user, ReturnPaths.pageOf(request, publicUrls, returnPath));
             } catch (ApiException e) {
                 audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.stepUpRequired(),
                         clock.millis() - started);

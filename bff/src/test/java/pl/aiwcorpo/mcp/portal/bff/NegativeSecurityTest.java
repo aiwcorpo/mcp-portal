@@ -70,7 +70,7 @@ class NegativeSecurityTest extends PortalHarness {
         responses.add(browser.get("/api/v1/me"));
         responses.add(browser.get("/api/v1/catalog"));
         responses.add(browser.get("/api/v1/connections"));
-        responses.add(browser.get("/api/v1/virtual-servers"));
+        responses.add(browser.get("/api/v1/me/mcp-endpoint?systems=jira"));
         responses.add(browser.get("/api/v1/does-not-exist"));
         responses.add(browser.post("/api/v1/me", null, true));
         responses.add(browser.put("/api/v1/connections/jira/secret", "garbage", true));
@@ -127,13 +127,10 @@ class NegativeSecurityTest extends PortalHarness {
     void everyModifyingOperationNeedsTheCsrfHeader() {
         TestBrowser browser = alice();
         int before = BROKER.findAll(anyRequestedFor(anyUrl())).size() + GATEWAY.findAll(anyRequestedFor(anyUrl())).size();
-        String vs = "{\"slug\":\"x1\",\"displayName\":\"X\",\"tools\":[\"jira__get_issue\"]}";
         List<HttpResponse<String>> responses = List.of(
                 browser.put("/api/v1/connections/jira/secret", "{\"secret\":\"x\"}", false),
                 browser.delete("/api/v1/connections/jira", false),
                 browser.post("/api/v1/connections/gitlab/oauth", "{}", false),
-                browser.post("/api/v1/virtual-servers", vs, false),
-                browser.delete("/api/v1/virtual-servers/x1", false),
                 browser.post("/api/v1/auth/logout", null, false));
         for (HttpResponse<String> response : responses) {
             assertThat(response.statusCode()).as(response.request().method() + " " + response.uri().getPath()).isEqualTo(403);

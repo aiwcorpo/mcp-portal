@@ -15,6 +15,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
@@ -118,6 +119,37 @@ class AuthenticatorTest extends PortalHarness {
         assertThat(event.get("event").asString()).isEqualTo("authenticator");
         assertThat(event.get("reason").asString()).isEqualTo("step_up_required");
         assertThat(event.get("outcome").asString()).isEqualTo("denied");
+    }
+
+    @Test
+    void theStepUpComesBackToThePageThatStartedItSoTheActionCanResume() {
+        TestBrowser browser = stale();
+        String page = "https://mcp-gateway.internal/authenticator?resume=enrollment";
+
+        HttpResponse<String> response = browser.post(START, null, true, Map.of("Referer", page));
+
+        assertThat(response.statusCode()).isEqualTo(401);
+        assertThat(JSON.readTree(response.body()).get("stepUpUrl").asString())
+                .isEqualTo("/api/v1/auth/login?stepUp=true&returnPath=/authenticator?resume%3Denrollment");
+        HttpResponse<String> stepUp = browser.get(JSON.readTree(response.body()).get("stepUpUrl").asString());
+        var callback = IDP.approve(java.net.URI.create(stepUp.headers().firstValue("Location").orElseThrow()), ALICE,
+                Instant.now(), "1");
+        HttpResponse<String> back = browser.get(callback.toString());
+        assertThat(back.headers().firstValue("Location").orElseThrow()).endsWith("/authenticator?resume=enrollment");
+        assertThat(browser.post(START, null, true).statusCode()).isEqualTo(201);
+    }
+
+    @Test
+    void aRefererFromAnotherOriginOrOutsideThePortalPagesIsNotAReturnTarget() {
+        TestBrowser browser = stale();
+
+        for (String referer : new String[] {"https://evil.test/authenticator", "https://mcp-gateway.internal/api/v1/me",
+                "https://mcp-gateway.internal/mcp?systems=jira", "https://mcp-gateway.internal@evil.test/x",
+                "https://mcp-gateway.internal/a%2Fb", "//evil.test/x", "not a url"}) {
+            HttpResponse<String> response = browser.post(START, null, true, Map.of("Referer", referer));
+            assertThat(JSON.readTree(response.body()).get("stepUpUrl").asString()).as(referer)
+                    .isEqualTo("/api/v1/auth/login?stepUp=true&returnPath=/authenticator");
+        }
     }
 
     @Test

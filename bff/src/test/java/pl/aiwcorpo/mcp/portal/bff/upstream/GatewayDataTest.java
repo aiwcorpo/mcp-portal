@@ -122,4 +122,37 @@ class GatewayDataTest {
     void activityRowsFollowTheContractVectors(String name, JsonNode row, boolean valid) {
         assertThat(GatewayData.validActivityCalls(List.of(row))).as(name).hasSize(valid ? 1 : 0);
     }
+
+    private static JsonNode row(String extraFields, String result) {
+        return JsonMapper.builder().build().readTree("{\"requestId\":\"0197c3a2-5b7e-7c3a-9d1e-2f4a6b8c0d1e\","
+                + "\"ts\":\"2026-10-31T09:00:00Z\",\"tool\":\"jira__get_issue\",\"result\":\"" + result + "\"" + extraFields + "}");
+    }
+
+    @Test
+    void aRowWrittenBeforeTheUpdateKeepsItsMeaningUnderTheCurrentResultName() {
+        var rows = GatewayData.validActivityCalls(List.of(row("", "denied_link_scope"), row("", "denied_filter_scope"),
+                row("", "denied_not_granted")));
+
+        assertThat(rows).extracting(GatewayModel.ActivityCall::result)
+                .containsExactly("denied_filter_scope", "denied_filter_scope", "denied_not_granted");
+    }
+
+    @Test
+    void theNameOfASavedLinkFromAnOldGatewayIsDroppedAndTheRowStays() {
+        var rows = GatewayData.validActivityCalls(List.of(row(",\"virtualServer\":\"team-a-dev\"", "denied_link_scope")));
+
+        assertThat(rows).hasSize(1);
+        assertThat(rows.getFirst().filter()).isNull();
+        assertThat(rows.getFirst().result()).isEqualTo("denied_filter_scope");
+    }
+
+    @Test
+    void theFilterOfARowIsShownOnlyInItsCanonicalForm() {
+        assertThat(GatewayData.validActivityCalls(List.of(row(",\"filter\":\"systems=jira&access=read\"", "ok"))))
+                .hasSize(1);
+        for (String filter : new String[] {"access=read&systems=jira", "systems=Jira", "systems=jira&systems=gitlab", "",
+                "token=abc", "systems=jira%2Cgitlab", "x".repeat(513)}) {
+            assertThat(GatewayData.validActivityCalls(List.of(row(",\"filter\":\"" + filter + "\"", "ok")))).as(filter).isEmpty();
+        }
+    }
 }

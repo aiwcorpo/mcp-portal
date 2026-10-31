@@ -17,7 +17,6 @@ public record AuditEvent(
         String username,
         String server,
         String tool,
-        String virtualServer,
         String decision,
         String reason,
         String credentialType,
@@ -29,9 +28,9 @@ public record AuditEvent(
 
     /** Events that carry neither a tool nor a definition hash (everything but registry approvals). */
     public AuditEvent(String ts, String requestId, String component, String componentId, String event, String sub,
-                      String username, String server, String virtualServer, String decision, String reason,
+                      String username, String server, String decision, String reason,
                       String credentialType, String backendUser, String outcome, String errorCode, Long latencyMs) {
-        this(ts, requestId, component, componentId, event, sub, username, server, null, virtualServer, decision, reason,
+        this(ts, requestId, component, componentId, event, sub, username, server, null, decision, reason,
                 credentialType, backendUser, outcome, errorCode, latencyMs, null);
     }
 }

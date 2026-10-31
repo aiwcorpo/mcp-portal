@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pl.aiwcorpo.mcp.manifest.EndpointFilter;
 import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
@@ -34,6 +35,8 @@ public final class GatewayData {
     private static final Pattern RESULT = Pattern.compile("^[a-z][a-z0-9_]{0,63}$");
     private static final Pattern ARGUMENT_NAME = Pattern.compile("^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$");
     private static final Pattern CLIENT = Pattern.compile("^[A-Za-z0-9._:-]{1,255}$");
+    private static final String LEGACY_FILTER_RESULT = "denied_link_scope";
+    private static final String CURRENT_FILTER_RESULT = "denied_filter_scope";
     private static final int MAX_PARENT = 600;
     private static final int MAX_ARGUMENTS = 64;
     // Characters shown per argument value after hidden ones were written out; longer values are cut and marked.
@@ -98,7 +101,7 @@ public final class GatewayData {
         for (JsonNode row : rows == null ? List.<JsonNode>of() : rows) {
             GatewayModel.ActivityCall call = closed(row, GatewayModel.ActivityCall.class);
             if (validActivityCall(call)) {
-                result.add(call);
+                result.add(withCurrentResultName(call));
             } else {
                 log.warn("Dropping a C5 activity row outside the contract");
             }
@@ -113,11 +116,29 @@ public final class GatewayData {
                 && validTool(call.tool())
                 && call.result() != null && RESULT.matcher(call.result()).matches()
                 && (call.client() == null || CLIENT.matcher(call.client()).matches())
-                && (call.virtualServer() == null || ContractValues.VIRTUAL_SERVER_SLUG.matcher(call.virtualServer()).matches())
+                && (call.filter() == null || canonicalFilter(call.filter()))
                 && (call.risk() == null || BrokerData.RISKS.contains(call.risk()))
                 && (call.resource() == null || validResource(call.resource()))
                 && (call.wrongCodeCount() == null || call.wrongCodeCount() >= 0 && call.wrongCodeCount() <= 3)
                 && (call.errorCode() == null || ERROR_CODES.contains(call.errorCode()));
+    }
+
+    /** CC-188: the 4.x result name of a call outside the filter, which a gateway may still send for old events. */
+    private static GatewayModel.ActivityCall withCurrentResultName(GatewayModel.ActivityCall call) {
+        if (!LEGACY_FILTER_RESULT.equals(call.result())) {
+            return call;
+        }
+        return new GatewayModel.ActivityCall(call.requestId(), call.ts(), call.client(), call.filter(), call.tool(),
+                call.risk(), call.resource(), CURRENT_FILTER_RESULT, call.wrongCodeCount(), call.errorCode());
+    }
+
+    private static boolean canonicalFilter(String filter) {
+        try {
+            EndpointFilter parsed = EndpointFilter.parse(filter);
+            return !parsed.isEmpty() && parsed.canonical().equals(filter);
+        } catch (EndpointFilter.Invalid e) {
+            return false;
+        }
     }
 
     private static boolean validTool(String tool) {

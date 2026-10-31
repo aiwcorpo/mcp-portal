@@ -24,25 +24,6 @@ public class GatewayAdminClient {
                 response -> calls.read(response, GatewayModel.Catalog.class));
     }
 
-    public List<GatewayModel.VirtualServer> virtualServers(BearerToken token, String requestId) {
-        return calls.call(calls.authorize(calls.http().get().uri("/admin/v1/virtual-servers"), token, requestId),
-                response -> calls.read(response, new TypeReference<List<GatewayModel.VirtualServer>>() { }));
-    }
-
-    public GatewayModel.VirtualServerCreated createVirtualServer(BearerToken token, String requestId,
-                                                                 GatewayModel.VirtualServerCreate body) {
-        return calls.call(calls.authorize(calls.http().post()
-                                .uri("/admin/v1/virtual-servers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(body), token, requestId),
-                response -> calls.read(response, GatewayModel.VirtualServerCreated.class));
-    }
-
-    public void deleteVirtualServer(BearerToken token, String requestId, String slug) {
-        calls.call(calls.authorize(calls.http().delete().uri("/admin/v1/virtual-servers/{slug}", slug), token, requestId),
-                response -> null);
-    }
-
     public List<JsonNode> registry(BearerToken token, String requestId) {
         return calls.call(calls.authorize(calls.http().get().uri("/admin/v1/registry/servers"), token, requestId),
                 response -> calls.read(response, new TypeReference<List<JsonNode>>() { }));

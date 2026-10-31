@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
+import pl.aiwcorpo.mcp.portal.bff.config.PublicUrls;
 import pl.aiwcorpo.mcp.portal.bff.limits.SessionRateLimiter;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.security.SessionAttributes;
@@ -33,6 +34,7 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
+import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
 import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
@@ -59,13 +61,15 @@ class AuthenticatorController {
     private final AuditLog audit;
     private final Clock clock;
     private final String returnPath;
+    private final PublicUrls publicUrls;
     private final SessionRateLimiter limiter;
     private final ObjectReader confirmReader = StrictJson.builder().build()
             .readerFor(BrokerModel.AuthenticatorEnrollmentConfirm.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     AuthenticatorController(UserTokens tokens, BrokerClient broker, StepUpPolicy stepUp, AuditLog audit, Clock clock,
-                            PortalProperties properties, SessionRateLimiter limiter) {
+                            PortalProperties properties, SessionRateLimiter limiter, PublicUrls publicUrls) {
+        this.publicUrls = publicUrls;
         this.limiter = limiter;
         this.tokens = tokens;
         this.broker = broker;
@@ -89,7 +93,7 @@ class AuthenticatorController {
         PortalUser user = PortalUser.from(authentication);
         String requestId = RequestIds.of(request);
         long started = clock.millis();
-        requireFreshMfa(user, requestId, started);
+        requireFreshMfa(user, request, requestId, started);
         limit(request, user, requestId, started);
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
@@ -110,7 +114,7 @@ class AuthenticatorController {
         PortalUser user = PortalUser.from(authentication);
         String requestId = RequestIds.of(request);
         long started = clock.millis();
-        requireFreshMfa(user, requestId, started);
+        requireFreshMfa(user, request, requestId, started);
         limit(request, user, requestId, started);
         BrokerModel.AuthenticatorEnrollment enrollment;
         try {
@@ -204,9 +208,9 @@ class AuthenticatorController {
         }
     }
 
-    private void requireFreshMfa(PortalUser user, String requestId, long started) {
+    private void requireFreshMfa(PortalUser user, HttpServletRequest request, String requestId, long started) {
         try {
-            stepUp.requireFresh(user, returnPath);
+            stepUp.requireFresh(user, ReturnPaths.pageOf(request, publicUrls, returnPath));
         } catch (ApiException e) {
             audit.authenticatorEvent(requestId, user, AuditLog.Outcome.stepUpRequired(), clock.millis() - started);
             throw e;

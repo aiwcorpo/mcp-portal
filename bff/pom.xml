@@ -21,7 +21,7 @@
         <java.version>25</java.version>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mcp-contracts.version>4.1.0</mcp-contracts.version>
+        <mcp-contracts.version>5.1.0</mcp-contracts.version>
         <wiremock.version>3.13.2</wiremock.version>
         <json-schema-validator.version>3.0.4</json-schema-validator.version>
     </properties>
@@ -42,6 +42,18 @@
         <dependency>
             <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <!-- EndpointFilter: the filter rules of the gateway (CC-170), so the portal has one source of the canonical address. -->
+        <dependency>
+            <groupId>pl.aiwcorpo.mcp</groupId>
+            <artifactId>mcp-manifest</artifactId>
+            <version>${mcp-contracts.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

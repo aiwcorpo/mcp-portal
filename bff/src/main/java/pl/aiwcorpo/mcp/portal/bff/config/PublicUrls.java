@@ -42,8 +42,8 @@ public class PublicUrls {
         return base + "/s/" + serverId + "/mcp";
     }
 
-    /** MCP endpoint of a virtual server. */
-    public String virtualServer(String slug) {
-        return base + "/v/" + slug + "/mcp";
+    /** The one MCP endpoint of the platform (CC-169); a filter is appended by the caller as a query. */
+    public String mcp() {
+        return base + "/mcp";
     }
 }

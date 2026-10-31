@@ -52,32 +52,10 @@ public class AuditLog {
                 user.sub(),
                 user.username(),
                 system == null ? null : "mcp-" + system,
-                null,
                 outcome.decision(),
                 outcome.reason(),
                 null,
                 auditableBackendUser(backendUser),
-                outcome.outcome(),
-                outcome.errorCode(),
-                latencyMs));
-    }
-
-    /** {@code virtual_server_change} (CC-116) for creating or deleting a link; {@code slug} is null when none was valid. */
-    public void virtualServerChange(String requestId, PortalUser user, String slug, Outcome outcome, long latencyMs) {
-        write(new AuditEvent(
-                clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
-                requestId,
-                "portal",
-                componentId,
-                "virtual_server_change",
-                user.sub(),
-                user.username(),
-                null,
-                slug,
-                outcome.decision(),
-                outcome.reason(),
-                null,
-                null,
                 outcome.outcome(),
                 outcome.errorCode(),
                 latencyMs));
@@ -101,7 +79,6 @@ public class AuditLog {
                 user.username(),
                 serverId,
                 tool == null || tool.isEmpty() ? null : tool,
-                null,
                 outcome.decision(),
                 null,
                 null,
@@ -126,7 +103,6 @@ public class AuditLog {
                 user.sub(),
                 user.username(),
                 null,
-                null,
                 "deny",
                 reason,
                 null,
@@ -149,7 +125,6 @@ public class AuditLog {
                 "authenticator",
                 user.sub(),
                 user.username(),
-                null,
                 null,
                 outcome.decision(),
                 outcome.reason(),

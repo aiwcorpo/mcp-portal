@@ -2,6 +2,7 @@ package pl.aiwcorpo.mcp.portal.bff.upstream;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /** C5 shapes used by the BFF ({@code gateway-admin.v1.yaml}). */
@@ -39,17 +40,6 @@ public final class GatewayModel {
     public record ApproveRequest(String definitionHash, Boolean acceptRiskLowering) {
     }
 
-    /** {@code VirtualServer} from C5; {@code url} is ignored, the BFF builds links from its own public base URL. */
-    public record VirtualServer(String slug, String displayName, List<String> tools) {
-    }
-
-    /** {@code VirtualServerCreate}; {@code resourceDefaults} is dormant (CC-085) and never sent. */
-    public record VirtualServerCreate(String slug, String displayName, List<String> tools) {
-    }
-
-    public record VirtualServerCreated(String slug, String url) {
-    }
-
     /** {@code ConfirmationView}: what the pending call really is, as the gateway recorded it. */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record ConfirmationView(
@@ -69,13 +59,18 @@ public final class GatewayModel {
     public record ConfirmationArgument(String name, String value, Boolean truncated) {
     }
 
-    /** {@code ActivityCall}: one row per tool call; a {@code null errorCode} is the same as an absent one. */
+    /**
+     * {@code ActivityCall}: one row per tool call; a {@code null errorCode} is the same as an absent one. {@code filter}
+     * is the normalized query of the call (CC-174). A gateway that still sends the 4.x {@code virtualServer} (the name
+     * of a saved link) is read without it: the link is gone and the row stays (CC-188).
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties("virtualServer")
     public record ActivityCall(
             String requestId,
             String ts,
             String client,
-            String virtualServer,
+            String filter,
             String tool,
             String risk,
             Resource resource,
