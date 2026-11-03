@@ -326,8 +326,9 @@ i `.github/workflows/ci.yml` w korzeniu `mcp-portal` to cienkie nakładki wołaj
 Sekrety rejestru artefaktów (`MCP_MAVEN_REPOSITORY_URL`, `_USER`, `_PASSWORD`, token tylko do odczytu; ustawienia w `.ci/settings.xml`)
 trafiają wyłącznie do zadań na gałęzi głównej, nigdy do pipeline'ów merge requestów i pull requestów, które dostają krok `style`.
 Socket Dockera (zadanie `web`) tylko na gałęzi głównej i dedykowanym agencie.
-Izolacja nie wynika z samych plików nakładek (gałąź może je zmienić), tylko z ustawień systemu CI: GitHub: sekrety w Environment
-`ci-main` z gałęziami wdrożeń ograniczonymi do `main`. GitLab: zmienne masked, protected, tylko do odczytu. Jenkins: etykieta
+Izolacja nie wynika z samych plików nakładek (gałąź może je zmienić), tylko z ustawień systemu CI: GitHub: bez sekretów rejestru; zadania na `main` czytają pakiety
+`mcp-contracts` tokenem `GITHUB_TOKEN` z `permissions: packages: read`, a każdy pakiet musi dać temu repozytorium dostęp do odczytu
+(ustawienia pakietu, "Manage Actions access"); pull requesty dostają tylko `style`. GitLab: zmienne masked, protected, tylko do odczytu. Jenkins: etykieta
 `ci-style` to pula bez gniazda Dockera dla kroku `style`; poświadczenia `mcp-maven-registry` i `mcp-maven-registry-url` dostępne tylko dla
 zadań gałęzi `main`; węzeł `docker` przyjmuje wyłącznie zadania `main`; dla pull requestów Jenkinsfile pochodzi z zaufanej gałęzi
 (wtyczka z zaufanym źródłem Jenkinsfile), nie z gałęzi PR. `ci/run.sh` kończy się błędem przy nieznanym albo

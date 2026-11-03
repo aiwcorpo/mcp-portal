@@ -1,7 +1,8 @@
 # Thin wrapper: all logic is in bff/ci/run.sh and web/ci/run.sh.
-# The registry secrets MCP_MAVEN_REPOSITORY_URL, _USER and _PASSWORD (a read-only token) are secrets of the GitHub Environment
-# `ci-main`, whose deployment branches are restricted to main in the repository settings. An `if` in this file does not protect
-# them (a branch can edit it); the Environment rule does. Pull requests get only the style job, with no secrets.
+# The mcp-contracts packages are read with the GITHUB_TOKEN of the run and permissions: packages: read; there is no stored
+# registry secret. That needs each package (Maven mcp-contracts and mcp-manifest, npm @aiwcorpo/mcp-contracts) to grant this
+# repository read access (package settings, "Manage Actions access"). Only the jobs on a push to main read packages; pull
+# requests get the style jobs, which need neither packages nor a token.
 name: ci
 on:
   push:
@@ -26,8 +27,10 @@ jobs:
           CI_STEPS: style
   bff-build:
     if: github.event_name == 'push'
-    environment: ci-main
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -36,12 +39,17 @@ jobs:
           java-version: '25'
       - run: bff/ci/run.sh
         env:
-          MCP_MAVEN_REPOSITORY_URL: ${{ secrets.MCP_MAVEN_REPOSITORY_URL }}
-          MCP_MAVEN_REPOSITORY_USER: ${{ secrets.MCP_MAVEN_REPOSITORY_USER }}
-          MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.MCP_MAVEN_REPOSITORY_PASSWORD }}
+          MCP_MAVEN_REPOSITORY_URL: https://maven.pkg.github.com/aiwcorpo/mcp-contracts
+          MCP_MAVEN_REPOSITORY_USER: ${{ github.actor }}
+          MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
   web:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - run: web/ci/run.sh --container
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
