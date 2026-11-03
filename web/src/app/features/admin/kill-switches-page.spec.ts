@@ -217,6 +217,7 @@ describe('KillSwitchesPage', () => {
         kind: 'lift-kill-switch',
         serverId: 'mcp-jira',
         tool: 'update_issue',
+        setAt: '2026-11-03T09:12:44Z',
       });
 
       store.update({ mfaFresh: true });
@@ -261,6 +262,32 @@ describe('KillSwitchesPage', () => {
 
       await until(() => expect(text()).toContain('Żaden wyłącznik nie jest włączony.'));
       expect(requests.length).toBe(before);
+    });
+
+    it('does not lift a switch that was lifted and put on again meanwhile, and says so', async () => {
+      const { harness } = await startLift();
+      await until(() => expect(sessionStorage.getItem('mcp-portal-resume')).not.toBeNull());
+
+      store.update({
+        mfaFresh: true,
+        killSwitches: [
+          {
+            scope: 'tool',
+            serverId: 'mcp-jira',
+            tool: 'update_issue',
+            setBy: 'admin-2',
+            setAt: '2026-11-03T12:00:00Z',
+            reason: 'Nowy incydent',
+          },
+        ],
+      });
+      await harness.navigateByUrl('/catalog');
+      const before = requests.length;
+      await harness.navigateByUrl('/admin/kill-switches?mfa=ok');
+
+      await until(() => expect(text()).toContain('Wyłącznik zmienił się, zanim potwierdziłeś'));
+      expect(requests.length).toBe(before);
+      expect(store.state.killSwitches.length).toBe(1);
     });
 
     it('shows a second step_up_required as an error instead of looping', async () => {

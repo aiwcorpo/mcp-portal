@@ -7,6 +7,14 @@
 @if (done(); as text) {
   <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
 }
+@if (resumeRefused()) {
+  <app-notice kind="warning" [dismissible]="true" (dismiss)="resumeRefused.set(false)">
+    <ng-container i18n="@@killSwitches.resumeRefused"
+      >Wyłącznik zmienił się, zanim potwierdziłeś tożsamość (ktoś go zdjął i włączył od nowa), więc
+      niczego nie zdjęto. Sprawdź nowy powód i zdejmij go ponownie.</ng-container
+    >
+  </app-notice>
+}
 @if (resumed() && !failure()) {
   <app-notice kind="success" [dismissible]="true" (dismiss)="resumed.set(false)">
     <ng-container i18n="@@killSwitches.mfaResumed"
@@ -73,7 +81,7 @@
               >
                 {{ row.entry.setAt | date: 'dd.MM.yyyy HH:mm' }}
                 <span class="by"
-                  ><ng-container i18n="@@killSwitches.by">włączył</ng-container>
+                  ><ng-container i18n="@@killSwitches.by">włączył</ng-container>&ngsp;
                   <code>{{ row.entry.setBy | safeText }}</code></span
                 >
               </td>

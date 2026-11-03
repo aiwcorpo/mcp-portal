@@ -89,6 +89,10 @@ export class KillSwitchesPage implements OnInit {
   protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly done = signal<string | null>(null);
   protected readonly resumed = signal(false);
+  /** True only while the resumed lift runs: a second step_up_required then is an error, not a loop (U12). */
+  private resuming = false;
+  /** The switch changed while the administrator was at the IdP; nothing was lifted. */
+  protected readonly resumeRefused = signal(false);
 
   protected readonly serverId = signal<ServerId | ''>('');
   protected readonly tool = signal('');
@@ -215,7 +219,7 @@ export class KillSwitchesPage implements OnInit {
       confirmLabel: $localize`:@@killSwitches.liftConfirm:Zdejmij wyłącznik`,
     });
     if (confirmed) {
-      await this.performLift(row.entry.serverId, row.toolName, target);
+      await this.performLift(row.entry.serverId, row.toolName, target, row.entry.setAt);
     }
   }
 
@@ -223,6 +227,7 @@ export class KillSwitchesPage implements OnInit {
     serverId: ServerId,
     tool: string | null,
     target: string,
+    setAt: string,
   ): Promise<void> {
     this.busy.set(true);
     this.failure.set(null);
@@ -237,9 +242,9 @@ export class KillSwitchesPage implements OnInit {
       await this.read();
     } catch (error) {
       const failure = toApiFailure(error);
-      if (failure.code === 'step_up_required' && !this.resumed()) {
+      if (failure.code === 'step_up_required' && !this.resuming) {
         this.resumeStore.save(
-          { kind: 'lift-kill-switch', serverId, tool },
+          { kind: 'lift-kill-switch', serverId, tool, setAt },
           this.session.username(),
         );
         this.navigation.assign(
@@ -273,8 +278,18 @@ export class KillSwitchesPage implements OnInit {
     if (!row) {
       return;
     }
+    // Only the switch the administrator saw: one lifted and put on again meanwhile is a new incident with its own reason.
+    if (row.entry.setAt !== intent.setAt) {
+      this.resumeRefused.set(true);
+      return;
+    }
     this.resumed.set(true);
-    await this.performLift(row.entry.serverId, row.toolName, row.target);
+    this.resuming = true;
+    try {
+      await this.performLift(row.entry.serverId, row.toolName, row.target, row.entry.setAt);
+    } finally {
+      this.resuming = false;
+    }
   }
 
   private serverName(id: string): string {

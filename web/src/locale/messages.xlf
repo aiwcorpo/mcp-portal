@@ -1013,9 +1013,17 @@
         <source>Rejestr serwerów</source>
       </segment>
     </unit>
-    <unit id="killSwitches.mfaResumed">
+    <unit id="killSwitches.resumeRefused">
       <notes>
         <note category="location">src/app/features/admin/kill-switches-page.html:13,16</note>
+      </notes>
+      <segment>
+        <source>Wyłącznik zmienił się, zanim potwierdziłeś tożsamość (ktoś go zdjął i włączył od nowa), więc niczego nie zdjęto. Sprawdź nowy powód i zdejmij go ponownie.</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:21,24</note>
       </notes>
       <segment>
         <source>Tożsamość potwierdzona. Zdejmuję wyłącznik, który wybrano przed potwierdzeniem.</source>
@@ -1023,7 +1031,7 @@
     </unit>
     <unit id="killSwitches.lead">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:28,33</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:36,41</note>
       </notes>
       <segment>
         <source> Wyłącznik odcina serwer albo jedno narzędzie dla wszystkich: najpóźniej po 5 sekundach na każdej instancji gatewaya. Zatwierdzenie definicji go nie zdejmuje, restart też nie. Włączenie nie wymaga potwierdzenia tożsamości, zdjęcie wymaga. </source>
@@ -1031,7 +1039,7 @@
     </unit>
     <unit id="killSwitches.active">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:34,36</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:42,44</note>
       </notes>
       <segment>
         <source>Włączone wyłączniki</source>
@@ -1039,7 +1047,7 @@
     </unit>
     <unit id="killSwitches.caption">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:38,40</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:46,48</note>
       </notes>
       <segment>
         <source> Wyłączniki awaryjne, które są włączone </source>
@@ -1047,8 +1055,8 @@
     </unit>
     <unit id="killSwitches.colScope">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:42,43</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:56</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:50,51</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:64</note>
       </notes>
       <segment>
         <source>Zakres</source>
@@ -1056,7 +1064,7 @@
     </unit>
     <unit id="killSwitches.colTarget">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:44,46</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:52,54</note>
       </notes>
       <segment>
         <source> Co jest wyłączone </source>
@@ -1064,8 +1072,8 @@
     </unit>
     <unit id="killSwitches.colSince">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:47</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:72</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:55</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:80</note>
       </notes>
       <segment>
         <source>Od</source>
@@ -1073,8 +1081,8 @@
     </unit>
     <unit id="killSwitches.colReason">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:47,48</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:84</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:55,56</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:92</note>
       </notes>
       <segment>
         <source>Powód</source>
@@ -1082,7 +1090,7 @@
     </unit>
     <unit id="killSwitches.colActions">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:49,51</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:57,59</note>
       </notes>
       <segment>
         <source>Akcje</source>
@@ -1090,7 +1098,7 @@
     </unit>
     <unit id="killSwitches.colTargetLabel">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:63,64</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:71,72</note>
       </notes>
       <segment>
         <source>Co jest wyłączone</source>
@@ -1098,7 +1106,7 @@
     </unit>
     <unit id="killSwitches.by">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:76,77</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:84,85</note>
       </notes>
       <segment>
         <source>włączył</source>
@@ -1106,7 +1114,7 @@
     </unit>
     <unit id="killSwitches.lift">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:96,97</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:104,105</note>
       </notes>
       <segment>
         <source>Zdejmij</source>
@@ -1114,7 +1122,7 @@
     </unit>
     <unit id="killSwitches.none">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:106,109</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:114,117</note>
       </notes>
       <segment>
         <source> Żaden wyłącznik nie jest włączony. </source>
@@ -1122,7 +1130,7 @@
     </unit>
     <unit id="killSwitches.offHeading">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:113,115</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:121,123</note>
       </notes>
       <segment>
         <source> Wyłącz serwer lub narzędzie </source>
@@ -1130,7 +1138,7 @@
     </unit>
     <unit id="killSwitches.server">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:117,119</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:125,127</note>
       </notes>
       <segment>
         <source>Serwer</source>
@@ -1138,7 +1146,7 @@
     </unit>
     <unit id="killSwitches.serverPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:124,125</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:132,133</note>
       </notes>
       <segment>
         <source>Wybierz serwer</source>
@@ -1146,7 +1154,7 @@
     </unit>
     <unit id="killSwitches.tool">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:131,133</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:139,141</note>
       </notes>
       <segment>
         <source>Narzędzie</source>
@@ -1154,7 +1162,7 @@
     </unit>
     <unit id="killSwitches.wholeServer">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:139,140</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:147,148</note>
       </notes>
       <segment>
         <source>Cały serwer</source>
@@ -1162,7 +1170,7 @@
     </unit>
     <unit id="killSwitches.reason">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:146,148</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:154,156</note>
       </notes>
       <segment>
         <source>Powód</source>
@@ -1170,7 +1178,7 @@
     </unit>
     <unit id="killSwitches.reasonHint">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:159,161</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:167,169</note>
       </notes>
       <segment>
         <source>Widzą go administratorzy na tej liście; nie trafia do logów audytu. Zostało znaków:</source>
@@ -1178,7 +1186,7 @@
     </unit>
     <unit id="killSwitches.submit">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:173,175</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:181,183</note>
       </notes>
       <segment>
         <source> Wyłącz </source>
@@ -1186,7 +1194,7 @@
     </unit>
     <unit id="killSwitches.scopeServer">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:111</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:115</note>
       </notes>
       <segment>
         <source>Serwer</source>
@@ -1194,7 +1202,7 @@
     </unit>
     <unit id="killSwitches.scopeTool">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:112</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:116</note>
       </notes>
       <segment>
         <source>Narzędzie</source>
@@ -1202,7 +1210,7 @@
     </unit>
     <unit id="killSwitches.offTitle">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:178</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:182</note>
       </notes>
       <segment>
         <source>Wyłączyć awaryjnie?</source>
@@ -1210,7 +1218,7 @@
     </unit>
     <unit id="killSwitches.offMessage">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:179</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:183</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="target" disp="target"/> przestanie być dostępne dla wszystkich użytkowników i agentów, na każdej instancji gatewaya najpóźniej po 5 sekundach. Wywołania, które już ruszyły, nie są przerywane. Włączenie nie wymaga potwierdzenia tożsamości, zdjęcie wymaga.</source>
@@ -1218,7 +1226,7 @@
     </unit>
     <unit id="killSwitches.offConfirm">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:180</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:184</note>
       </notes>
       <segment>
         <source>Wyłącz</source>
@@ -1226,7 +1234,7 @@
     </unit>
     <unit id="killSwitches.offDone">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:196</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:200</note>
       </notes>
       <segment>
         <source>Wyłączono: <ph id="0" equiv="target" disp="target"/>.</source>
@@ -1234,7 +1242,7 @@
     </unit>
     <unit id="killSwitches.liftTitle">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:213</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:217</note>
       </notes>
       <segment>
         <source>Zdjąć wyłącznik?</source>
@@ -1242,7 +1250,7 @@
     </unit>
     <unit id="killSwitches.liftMessage">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:214</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:218</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="target" disp="target"/> znów będzie dostępne dla użytkowników, którzy mają do niego uprawnienia. Zdjęcie wymaga świeżego potwierdzenia tożsamości (MFA).</source>
@@ -1250,7 +1258,7 @@
     </unit>
     <unit id="killSwitches.liftConfirm">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:215</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:219</note>
       </notes>
       <segment>
         <source>Zdejmij wyłącznik</source>
@@ -1258,7 +1266,7 @@
     </unit>
     <unit id="killSwitches.liftDone">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:236</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:241</note>
       </notes>
       <segment>
         <source>Zdjęto wyłącznik: <ph id="0" equiv="target" disp="target"/>.</source>

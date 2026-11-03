@@ -38,6 +38,7 @@ class KillSwitchTest extends PortalHarness {
     private static final String GATEWAY_LIST = "/admin/v1/kill-switches";
     private static final String GATEWAY_SERVER = "/admin/v1/registry/servers/mcp-jira/kill-switch";
     private static final String GATEWAY_TOOL = "/admin/v1/registry/servers/mcp-jira/tools/update_issue/kill-switch";
+    private static final Map<String, String> SAME_ORIGIN = Map.of("Sec-Fetch-Site", "same-origin");
     private static final String REASON = "{\"reason\":\"Issue updates corrupt the workflow\"}";
 
     @AfterEach
@@ -123,7 +124,7 @@ class KillSwitchTest extends PortalHarness {
     void aUserWithoutTheAdminGroupGetsForbiddenAnswersWithoutAnyCallToTheGateway() {
         TestBrowser alice = login(ALICE, Instant.now());
         alice.get("/api/v1/me");
-        Map<String, String> headers = Map.of();
+        Map<String, String> headers = SAME_ORIGIN;
 
         List<HttpResponse<String>> responses = List.of(alice.get(LIST), alice.put(SERVER, REASON, true),
                 alice.delete(SERVER, true, headers), alice.put(TOOL, REASON, true), alice.delete(TOOL, true, headers));
@@ -188,8 +189,8 @@ class KillSwitchTest extends PortalHarness {
     void liftingNeedsAFreshMfaAndTheStepUpComesBackToThePageThatSentIt() {
         TestBrowser stale = adminWithStaleLogin();
 
-        HttpResponse<String> refused = stale.delete(SERVER, true, Map.of("Referer", "https://mcp-gateway.internal/admin/kill-switches"));
-        HttpResponse<String> refusedTool = stale.delete(TOOL, true, Map.of());
+        HttpResponse<String> refused = stale.delete(SERVER, true, Map.of("Sec-Fetch-Site", "same-origin", "Referer", "https://mcp-gateway.internal/admin/kill-switches"));
+        HttpResponse<String> refusedTool = stale.delete(TOOL, true, SAME_ORIGIN);
 
         C12.assertResponse("DELETE", SERVER_TEMPLATE, refused);
         C12.assertResponse("DELETE", TOOL_TEMPLATE, refusedTool);
@@ -211,8 +212,8 @@ class KillSwitchTest extends PortalHarness {
     void aFreshMfaLiftsTheSwitchOfAServerAndOfATool() {
         TestBrowser browser = admin();
 
-        HttpResponse<String> server = browser.delete(SERVER, true);
-        HttpResponse<String> tool = browser.delete(TOOL, true);
+        HttpResponse<String> server = browser.delete(SERVER, true, SAME_ORIGIN);
+        HttpResponse<String> tool = browser.delete(TOOL, true, SAME_ORIGIN);
 
         C12.assertResponse("DELETE", SERVER_TEMPLATE, server);
         C12.assertResponse("DELETE", TOOL_TEMPLATE, tool);
@@ -230,7 +231,7 @@ class KillSwitchTest extends PortalHarness {
                 "/api/v1/admin/registry/servers/mcp-jira/tools/Update-Issue/kill-switch",
                 "/api/v1/admin/registry/servers/mcp-jira/tools/a__b/kill-switch")) {
             HttpResponse<String> put = browser.put(path, REASON, true);
-            HttpResponse<String> delete = browser.delete(path, true);
+            HttpResponse<String> delete = browser.delete(path, true, SAME_ORIGIN);
             assertThat(put.statusCode()).as(path).isEqualTo(404);
             assertThat(delete.statusCode()).as(path).isEqualTo(404);
             assertThat(JSON.readTree(put.body()).get("error").asString()).isEqualTo("not_found_or_denied");
@@ -239,11 +240,24 @@ class KillSwitchTest extends PortalHarness {
     }
 
     @Test
+    void liftingNeedsTheRequestToComeFromThePortalPage() {
+        TestBrowser browser = admin();
+        for (Map<String, String> headers : List.of(Map.<String, String>of(), Map.of("Sec-Fetch-Site", "cross-site"),
+                Map.of("Sec-Fetch-Site", "same-site"))) {
+            HttpResponse<String> response = browser.delete(SERVER, true, headers);
+            C12.assertResponse("DELETE", SERVER_TEMPLATE, response);
+            assertThat(response.statusCode()).isEqualTo(403);
+        }
+        assertThat(switchRequests()).isEmpty();
+        assertThat(browser.put(SERVER, REASON, true).statusCode()).as("switching off is not restricted").isEqualTo(204);
+    }
+
+    @Test
     void theCsrfHeaderIsRequired() {
         TestBrowser browser = admin();
 
         assertThat(browser.put(SERVER, REASON, false).statusCode()).isEqualTo(403);
-        assertThat(browser.delete(TOOL, false).statusCode()).isEqualTo(403);
+        assertThat(browser.delete(TOOL, false, SAME_ORIGIN).statusCode()).isEqualTo(403);
         assertThat(switchRequests()).isEmpty();
     }
 
@@ -276,7 +290,7 @@ class KillSwitchTest extends PortalHarness {
         assertThat(event.get("errorCode").asString()).isEqualTo("upstream_unavailable");
 
         stubSwitch("DELETE", GATEWAY_SERVER, 503, "{\"error\":\"upstream_unavailable\"}");
-        HttpResponse<String> notLifted = browser.delete(SERVER, true);
+        HttpResponse<String> notLifted = browser.delete(SERVER, true, SAME_ORIGIN);
         C12.assertResponse("DELETE", SERVER_TEMPLATE, notLifted);
         assertThat(notLifted.statusCode()).isEqualTo(503);
     }

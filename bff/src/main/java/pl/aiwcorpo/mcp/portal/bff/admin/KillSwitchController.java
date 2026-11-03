@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +27,7 @@ import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayAdminClient;
 import pl.aiwcorpo.mcp.portal.bff.upstream.RegistryData;
 import pl.aiwcorpo.mcp.portal.bff.upstream.TextHygiene;
 import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
+import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
 import pl.aiwcorpo.mcp.portal.bff.web.ReturnPaths;
@@ -120,6 +122,11 @@ class KillSwitchController {
         if (!user.isAdmin()) {
             refused.accept(AuditLog.Outcome.accessDenied());
             throw AdminTargets.forbidden();
+        }
+        // Lifting a switch gives the tool back to everyone, so it must come from the portal page itself, like an approval.
+        if (lift && !"same-origin".equals(request.getHeader("Sec-Fetch-Site"))) {
+            refused.accept(AuditLog.Outcome.accessDenied());
+            throw new ApiException(HttpStatus.FORBIDDEN, ApiError.of(ApiError.CSRF_INVALID));
         }
         if (target == null || tool != null && toolName.isEmpty()) {
             refused.accept(AuditLog.Outcome.notFoundOrDenied());

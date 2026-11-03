@@ -6,9 +6,12 @@
 #   web     nginx with the built single-page application (port 8080, no state), for that reverse proxy
 #   portal  the BFF with the application inside: one container, one origin (PORTAL_WEB_DIST=/app/web)
 #
-# The base images are pinned by digest; a digest is bumped on purpose, with a rebuild and the tests of the portal.
+# The JRE image is pinned by digest; a digest is bumped on purpose, with a rebuild and the tests of the portal. nginx follows the
+# stable branch (security fixes land there, not on the mainline 1.27 branch); its digest is added at the first build with a
+# network (docker buildx imagetools inspect nginx:stable-alpine). Until then a build that must be offline overrides it
+# with --build-arg NGINX_IMAGE=<image already present> (scripts/build-images.sh passes NGINX_IMAGE through).
 ARG JRE_IMAGE=eclipse-temurin:25-jre-alpine@sha256:b7528962e65d43064d8a8b67ba175367896bc948363ea2d3fcd7f10d34e1f048
-ARG NGINX_IMAGE=nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+ARG NGINX_IMAGE=nginx:stable-alpine
 
 FROM ${JRE_IMAGE} AS bff
 RUN addgroup -S portal && adduser -S -G portal -H -h /app portal

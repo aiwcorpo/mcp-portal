@@ -3,7 +3,9 @@
 # exist at the time of writing, so the workflow is checked by reading, not by a run.
 #
 # Two jobs, so that code under test never sees a write token: verify runs the tests with contents: read and read-only
-# credentials; publish has packages: write and the write token only in the environment of the push step.
+# credentials; publish has packages: write for the whole job, so everything it runs before the push is kept small: the
+# build is the same script as locally, dependencies install with --ignore-scripts, and GITHUB_TOKEN is read only by the
+# login step (through env, not through the text of the script).
 # The mcp-contracts artifacts are read from the packages of aiwcorpo/mcp-contracts with the secret MCP_CONTRACTS_READ_TOKEN
 # (a token with read:packages only, in the environment "release").
 name: release
@@ -69,6 +71,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
+      # actions/setup-node v4.4.0 (SHA to be confirmed at the first run): the web build needs Node 24, which the runner image
+      # does not guarantee; scripts/build-images.sh also refuses an older one.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
       - name: Images (bff, web, portal) from the tagged commit
         run: IMAGE_TAG="${GITHUB_REF_NAME}" IMAGE_REGISTRY=ghcr.io/aiwcorpo scripts/build-images.sh "${GITHUB_SHA}"
       - name: SBOM of the BFF and of the web part (CycloneDX)
@@ -76,10 +83,13 @@ jobs:
           mkdir -p sbom
           (cd bff && ./mvnw -B -ntp -s .ci/settings.xml org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeBom -DoutputFormat=json -DoutputName=bom)
           cp bff/target/bom.json sbom/mcp-portal-bff.cdx.json
-          (cd web && scripts/contracts.sh && npm ci --no-audit --no-fund && npm sbom --sbom-format cyclonedx > ../sbom/mcp-portal-web.cdx.json)
+          (cd web && scripts/contracts.sh && npm ci --ignore-scripts --no-audit --no-fund && npm sbom --sbom-format cyclonedx > ../sbom/mcp-portal-web.cdx.json)
       - name: Push to ghcr.io
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_ACTOR: ${{ github.actor }}
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
           for name in mcp-portal-bff mcp-portal-web mcp-portal; do
             docker push "ghcr.io/aiwcorpo/${name}:${GITHUB_REF_NAME}"
           done

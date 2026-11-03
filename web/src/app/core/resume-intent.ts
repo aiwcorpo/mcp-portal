@@ -17,7 +17,7 @@ export type ResumeIntent =
       /** The classification the administrator chose for a tool of an adapter; both or neither. */
       classification?: { risk: Risk; action: ToolAction };
     }
-  | { kind: 'lift-kill-switch'; serverId: string; tool: string | null }
+  | { kind: 'lift-kill-switch'; serverId: string; tool: string | null; setAt: string }
   | { kind: 'enroll-authenticator' }
   | { kind: 'remove-authenticator'; registeredAt: string };
 
@@ -82,7 +82,9 @@ function valid(intent: unknown): intent is ResumeIntent {
         typeof candidate['serverId'] === 'string' &&
         IDENTIFIER.test(candidate['serverId']) &&
         (candidate['tool'] === null ||
-          (typeof candidate['tool'] === 'string' && IDENTIFIER.test(candidate['tool'])))
+          (typeof candidate['tool'] === 'string' && IDENTIFIER.test(candidate['tool']))) &&
+        typeof candidate['setAt'] === 'string' &&
+        TIMESTAMP.test(candidate['setAt'])
       );
     default:
       return false;

@@ -8,6 +8,8 @@
 # portal of the Dockerfile), prefix m6 unless IMAGE_TAG_PREFIX says otherwise; IMAGE_TAG replaces the whole tag (a release). Nothing is pushed: IMAGE_REGISTRY, when set
 # (for example ghcr.io/aiwcorpo), only changes the names, and pushing is a separate, deliberate step.
 #
+# NGINX_IMAGE overrides the nginx base image of the web target.
+#
 # Needs git, docker, JDK 25 (bff/scripts/select-jdk.sh finds it), Node 24 and the mcp-contracts artifacts: Maven jars in
 # ~/.m2 or in the registry of MCP_MAVEN_REPOSITORY_URL (+ _USER, _PASSWORD), the npm tarball through web/scripts/contracts.sh
 # (CONTRACTS_TARBALL, CONTRACTS_TARBALL_URL, CONTRACTS_SOURCE_DIR or NODE_AUTH_TOKEN; a tarball already in
@@ -41,12 +43,15 @@ contracts_name="$(grep -o 'aiwcorpo-mcp-contracts-[0-9][0-9.]*\.tgz' "$work/web/
 if [[ -n "$contracts_name" && -f "$repo_root/web/.contracts/$contracts_name" && -z "${CONTRACTS_TARBALL:-}" ]]; then
   export CONTRACTS_TARBALL="$repo_root/web/.contracts/$contracts_name"
 fi
-(cd "$work/web" && scripts/contracts.sh && npm ci --prefer-offline --no-audit --no-fund && npm run build)
+node_major="$(node -p 'process.versions.node.split(".")[0]')"
+[[ "$node_major" -ge 24 ]] || { echo "Node 24 or newer is required (found $node_major)" >&2; exit 1; }
+# --ignore-scripts: no install script of a dependency runs next to the credentials of a release job.
+(cd "$work/web" && scripts/contracts.sh && npm ci --ignore-scripts --prefer-offline --no-audit --no-fund && npm run build)
 
 echo "== images"
 for target in bff web portal; do
   name="mcp-portal-$target"
   [[ "$target" == "portal" ]] && name="mcp-portal"
-  docker build -q --target "$target" -t "${registry}${name}:${tag}" "$work" >/dev/null
+  docker build -q ${NGINX_IMAGE:+--build-arg "NGINX_IMAGE=$NGINX_IMAGE"} --target "$target" -t "${registry}${name}:${tag}" "$work" >/dev/null
   echo "${registry}${name}:${tag}"
 done
