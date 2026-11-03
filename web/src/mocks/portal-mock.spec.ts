@@ -109,3 +109,21 @@ describe('completeMockOAuth', () => {
     expect(completeMockOAuth(new MockStore())).toBe('/?connectError=flow_invalid');
   });
 });
+
+describe('a connection in the error state (secret_missing, CC-205)', () => {
+  it.each([
+    ['user-secret', 'add_secret'],
+    ['user-oauth', 'reconnect'],
+  ] as const)(
+    'is reconnect_required with the renewing action of a %s connection',
+    (type, renew) => {
+      const server = serverFixture('jira', { tools: [toolFixture('jira__get')] });
+      const connection = connectionFixture('jira', { type, status: 'error' });
+
+      const row = deriveRow(server, connection, new Set());
+
+      expect(row.status).toBe('reconnect_required');
+      expect([...row.actions].sort()).toEqual([renew, 'disconnect'].sort());
+    },
+  );
+});

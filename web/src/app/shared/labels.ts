@@ -71,6 +71,11 @@ export function catalogStatusText(
         : $localize`:@@catalogStatus.connectionExpiresIn:Połączenie wygasa ${when}:when:`;
     }
   }
+  // error: the secret of the connection is gone from the store or a rotated token was lost (CC-205, CC-196). It
+  // does not heal itself, so the row says what to do, not only that something is wrong.
+  if (status === 'reconnect_required' && connection?.status === 'error') {
+    return $localize`:@@catalogStatus.connectionBroken:Połączenie przestało działać, połącz konto ponownie`;
+  }
   return STATUS_LABELS[status];
 }
 
@@ -105,6 +110,11 @@ export function riskLabel(risk: Risk): string {
   return RISK_LABELS[risk];
 }
 
+/** An entry of an adapter has no risk until an administrator classifies it (CC-193). */
+export function riskOrUnclassified(risk: Risk | undefined): string {
+  return risk ? RISK_LABELS[risk] : $localize`:@@risk.unclassified:Do klasyfikacji`;
+}
+
 const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
   'user-oauth': 'OAuth',
   'user-secret': $localize`:@@credentialType.user-secret:Token PAT`,
@@ -121,7 +131,7 @@ const CONNECTION_STATUS_LABELS: Record<ConnectionStatus, string> = {
   expiring: $localize`:@@connectionStatus.expiring:Wkrótce wygasa`,
   expired: $localize`:@@connectionStatus.expired:Wygasło`,
   revoked: $localize`:@@connectionStatus.revoked:Unieważnione`,
-  error: $localize`:@@connectionStatus.error:Błąd`,
+  error: $localize`:@@connectionStatus.error:Przestało działać`,
 };
 
 export function connectionStatusLabel(status: ConnectionStatus): string {

@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { PendingToolPendingEntry } from './pendingToolPendingEntry';
 import { ToolEntry } from './toolEntry';
 
 
@@ -24,14 +25,14 @@ export interface PendingTool {
      */
     riskLowered?: boolean;
     /**
-     * Where the pending entry comes from (CC-162). ci is an entry left by a PUT of the pipeline (the reviewed commit); server is a definition that the running server presented. A server entry never replaces a ci entry, see the README, \"Rejestr i przypinanie definicji\".
+     * Where the pending entry comes from (CC-162, CC-193). ci is an entry left by a PUT of the pipeline (the reviewed commit); server is a definition that the running server presented; adapter is an entry that an adapter (the sidecar of a foreign MCP server) presented at startup, never approved automatically and without risk and action until an administrator classifies it. A server entry never replaces a ci entry, see the README, \"Rejestr i przypinanie definicji\".
      */
     source: PendingTool.SourceEnum;
     /**
-     * Currently approved entry; null for a new tool.
+     * Currently approved entry; null for a new tool. For an adapter tool it carries the classification of the administrator.
      */
     approvedEntry: ToolEntry | null;
-    pendingEntry: ToolEntry;
+    pendingEntry: PendingToolPendingEntry;
     /**
      * sha256:<hex> over the RFC 8785 canonical JSON described in C6 (see test-vectors/definition-hash).
      */
@@ -41,6 +42,7 @@ export namespace PendingTool {
     export const SourceEnum = {
         Ci: 'ci',
         Server: 'server',
+        Adapter: 'adapter',
     } as const;
     export type SourceEnum = typeof SourceEnum[keyof typeof SourceEnum];
 }

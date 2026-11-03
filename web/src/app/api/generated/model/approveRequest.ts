@@ -7,6 +7,8 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ToolAction } from './toolAction';
+import { Risk } from './risk';
 
 
 export interface ApproveRequest { 
@@ -18,5 +20,16 @@ export interface ApproveRequest {
      * Only an administrator (mcp-platform-admin) can set it, and only through this operation; the pipeline (PUT) never lowers a risk, and the portal asks for a fresh MFA first. Sent only when true. On an entry that lowers nothing it is ignored (definition_approved). Without it an entry that lowers the risk floor is 422 risk_lowered; with it the lower risk is approved, the floor becomes that risk and the audit event is admin_change with reason risk_lowered_by_admin (CC-167).
      */
     acceptRiskLowering?: boolean;
+    /**
+     * Classification by the administrator (CC-193). Required for an entry with source adapter, which has no risk; forbidden for any other entry (422 manifest_rejected, reason classification_not_allowed). The classification is data of the registry, outside definitionHash; lowering a classification given earlier needs acceptRiskLowering like any lowering (CC-167).
+     */
+    risk?: Risk;
+    /**
+     * Cedar action given by the administrator together with risk (CC-193); required and forbidden under the same conditions as risk.
+     */
+    action?: ToolAction;
 }
+export namespace ApproveRequest {
+}
+
 

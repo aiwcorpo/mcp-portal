@@ -85,6 +85,37 @@ describe('ConnectionsPage', () => {
     expect(text()).toContain('Ostatnie użycie');
   });
 
+  it('says the connection stopped working and asks to connect again when the secret is gone (error)', async () => {
+    server.use(
+      serve([
+        serverFixture('jira', {
+          status: 'reconnect_required',
+          actions: ['add_secret', 'disconnect'],
+          connection: connectionFixture('jira', { type: 'user-secret', status: 'error' }),
+        }),
+        serverFixture('confluence', {
+          status: 'reconnect_required',
+          actions: ['reconnect', 'disconnect'],
+          connection: connectionFixture('confluence', { status: 'revoked' }),
+        }),
+      ]),
+    );
+    configureTestApp();
+    await openRoute('/connections');
+
+    await until(() => expect(text()).toContain('Confluence'));
+    const jira = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
+      text(tr).includes('Jira'),
+    )!;
+    const confluence = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
+      text(tr).includes('Confluence'),
+    )!;
+    expect(text(jira)).toContain('przestało działać, połącz konto ponownie');
+    expect(button('Odnów (Jira)', jira)).toBeTruthy();
+    // A revoked connection keeps the older wording: it does not say the secret is gone.
+    expect(text(confluence)).toContain('wymaga ponownego połączenia');
+  });
+
   it('disconnects after confirmation and reloads', async () => {
     configureTestApp();
     const harness = await openRoute('/connections');

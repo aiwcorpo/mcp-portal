@@ -1,4 +1,4 @@
-import { Risk, ToolEntry } from '../../api/generated';
+import { AdapterToolEntry, Risk, ToolEntry } from '../../api/generated';
 import { riskLabel } from '../../shared/labels';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { RawNumber } from './raw-json';
@@ -19,13 +19,19 @@ export interface DefinitionDiff {
   changed: boolean;
 }
 
-const RISK_ORDER: Record<Risk, number> = { READ_ONLY: 0, UPDATE: 1, DESTRUCTIVE: 2 };
+/** The pending entry of an adapter tool has no risk and action until an administrator classifies it (CC-193). */
+export type EntryLike = ToolEntry | AdapterToolEntry;
+
+export const RISK_ORDER: Record<Risk, number> = { READ_ONLY: 0, UPDATE: 1, DESTRUCTIVE: 2 };
 
 export type RiskChange = 'raised' | 'lowered' | 'same';
 
-/** How the risk moves from the approved entry to the pending one; a new tool has nothing to compare with. */
-export function riskChange(approved: ToolEntry | null, pending: ToolEntry): RiskChange {
-  if (!approved || approved.risk === pending.risk) {
+/**
+ * How the risk moves from the approved entry to the pending one; a new tool has nothing to compare with, and neither
+ * has an adapter entry that is not classified yet (its classification is chosen in the dialog, not read from the entry).
+ */
+export function riskChange(approved: ToolEntry | null, pending: EntryLike): RiskChange {
+  if (!approved?.risk || !pending.risk || approved.risk === pending.risk) {
     return 'same';
   }
   return RISK_ORDER[pending.risk] > RISK_ORDER[approved.risk] ? 'raised' : 'lowered';
@@ -114,14 +120,18 @@ function flatten(value: unknown, path: string, out: string[]): void {
 }
 
 /** The reviewable text of a tool entry, one line per fact (description, risk, resources, schema, hints). */
-export function describeEntry(entry: ToolEntry): string[] {
+export function describeEntry(entry: EntryLike): string[] {
   const lines = [
     $localize`:@@admin.diff.entryName:wpis: ${quoted(entry.name)}:name:`,
     $localize`:@@admin.diff.defName:nazwa: ${quoted(entry.definition.name)}:name:`,
     $localize`:@@admin.diff.title:tytuł: ${quoted(entry.definition.title)}:title:`,
     $localize`:@@admin.diff.description:opis: ${quoted(entry.definition.description)}:description:`,
-    $localize`:@@admin.diff.risk:ryzyko: ${riskLabel(entry.risk)}:label: (${quoted(entry.risk)}:risk:)`,
-    $localize`:@@admin.diff.action:akcja: ${quoted(entry.action)}:action:`,
+    ...(entry.risk && entry.action
+      ? [
+          $localize`:@@admin.diff.risk:ryzyko: ${riskLabel(entry.risk)}:label: (${quoted(entry.risk)}:risk:)`,
+          $localize`:@@admin.diff.action:akcja: ${quoted(entry.action)}:action:`,
+        ]
+      : [$localize`:@@admin.diff.unclassified:ryzyko i akcja: do nadania przez administratora`]),
   ];
   for (const ref of entry.resourceRefs) {
     lines.push(
@@ -146,6 +156,19 @@ export function describeEntry(entry: ToolEntry): string[] {
     );
   }
   return lines;
+}
+
+/**
+ * What a foreign server says about a tool in `annotations` (readOnlyHint, destructiveHint, ...), one `name: value`
+ * line each, with hidden characters written out. Offered to the administrator as text to read when classifying;
+ * the portal never turns a hint into a risk (CC-193).
+ */
+export function annotationHints(entry: EntryLike): string[] {
+  const hints: string[] = [];
+  if (entry.definition.annotations) {
+    flatten(entry.definition.annotations, '', hints);
+  }
+  return hints;
 }
 
 /** Longest common subsequence of two line lists, as the matching index pairs. */
@@ -182,7 +205,7 @@ function commonLines(before: string[], after: string[]): [number, number][] {
  * Old and new definition side by side (mockup 07): lines present only in the old one are `removed`, lines
  * present only in the new one `added`. A new tool has an empty "before".
  */
-export function diffDefinitions(approved: ToolEntry | null, pending: ToolEntry): DefinitionDiff {
+export function diffDefinitions(approved: ToolEntry | null, pending: EntryLike): DefinitionDiff {
   // describeEntry already neutralised every untrusted value; a second pass would rewrite its own markers.
   const before = approved ? describeEntry(approved) : [];
   const after = describeEntry(pending);
@@ -205,9 +228,9 @@ export function diffDefinitions(approved: ToolEntry | null, pending: ToolEntry):
 export function riskChangeText(
   change: RiskChange,
   approved: ToolEntry | null,
-  pending: ToolEntry,
+  pending: EntryLike,
 ): string | null {
-  if (!approved || change === 'same') {
+  if (!approved?.risk || !pending.risk || change === 'same') {
     return null;
   }
   const from = riskLabel(approved.risk);

@@ -3,7 +3,14 @@ import { HttpResponse, http } from 'msw';
 import { SessionService } from '../../core/session.service';
 import { changePendingDefinition } from '../../../mocks/admin-mock';
 import { useMockApi } from '../../../testing/mock-api';
-import { button, configureTestApp, openRoute, text, until } from '../../../testing/test-app';
+import {
+  button,
+  configureTestApp,
+  labelled,
+  openRoute,
+  text,
+  until,
+} from '../../../testing/test-app';
 
 function serverRow(name: string): HTMLElement {
   const header = Array.from(document.querySelectorAll('tbody th')).find((th) =>
@@ -63,6 +70,58 @@ describe('AdminPage', () => {
     expect(text(toolRow('confluence__get_page'))).toContain('Zatwierdzone · Odczyt');
     expect(text(toolRow('jira__update_issue'))).toContain('Źródło: serwer');
     expect(document.body.textContent).not.toContain('Odrzuć');
+  });
+
+  it('links to the emergency switches and marks the servers and tools that are switched off', async () => {
+    store.update({
+      killSwitches: [
+        {
+          scope: 'server',
+          serverId: 'mcp-servicedesk',
+          setBy: 'admin-1',
+          setAt: '2026-11-03T09:15:02Z',
+          reason: 'Awaria dostawcy',
+        },
+        {
+          scope: 'tool',
+          serverId: 'mcp-jira',
+          tool: 'get_issue',
+          setBy: 'admin-1',
+          setAt: '2026-11-03T09:12:44Z',
+          reason: 'Błędne dane',
+        },
+      ],
+    });
+    await openAdmin();
+    await until(() => expect(text()).toContain('włączone: 2'));
+
+    expect(text()).toContain('Wyłączniki awaryjne');
+    expect(
+      document.querySelector<HTMLAnchorElement>('a[href="/admin/kill-switches"]'),
+    ).toBeTruthy();
+    expect(text(serverRow('Service Desk'))).toContain('Wyłączony awaryjnie');
+    expect(text(serverRow('Jira'))).not.toContain('Wyłączony awaryjnie');
+    labelled('Pokaż narzędzia (Service Desk)').click();
+    await until(() =>
+      expect(text(toolRow('servicedesk__get_ticket'))).toContain('Wyłączone awaryjnie · Odczyt'),
+    );
+    // Jira has a waiting definition, so it is open from the start.
+    await until(() =>
+      expect(text(toolRow('jira__get_issue'))).toContain('Wyłączone awaryjnie · Odczyt'),
+    );
+    expect(text(toolRow('jira__update_issue'))).not.toContain('Wyłączone awaryjnie');
+  });
+
+  it('shows the registry when the list of switches cannot be read', async () => {
+    server.use(
+      http.get('/api/v1/admin/kill-switches', () =>
+        HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
+      ),
+    );
+    await openAdmin();
+
+    await until(() => expect(text()).toContain('mcp-confluence'));
+    expect(text()).not.toContain('włączone:');
   });
 
   it('shows old and new definition side by side with the lines that differ', async () => {

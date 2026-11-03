@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { DisabledBy } from './disabledBy';
 import { ToolAction } from './toolAction';
 import { Access } from './access';
 import { Risk } from './risk';
@@ -36,6 +37,7 @@ export interface CatalogTool {
      * True when an administrator disabled the tool or its server (C10 tool_disabled; a hash pending approval counts) (CC-081).
      */
     disabled?: boolean;
+    disabledBy?: DisabledBy;
     /**
      * True when every call needs a confirmation (C11), risk DESTRUCTIVE or a policy requires it. Computed by the gateway (CC-081).
      */

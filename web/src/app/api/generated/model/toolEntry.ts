@@ -21,8 +21,8 @@ export interface ToolEntry {
      * Server-side tool name (without the gateway prefix). Snake case; a double underscore is forbidden because the gateway uses it as the <system>__<tool> separator (C5).
      */
     name: string;
-    risk: Risk;
-    action: ToolAction;
+    risk?: Risk;
+    action?: ToolAction;
     /**
      * Always present; an empty array when the tool takes no resource identifier (one canonical form for definitionHash).
      */

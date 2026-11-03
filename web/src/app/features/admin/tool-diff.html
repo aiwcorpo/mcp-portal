@@ -22,7 +22,17 @@
       </app-notice>
     }
 
-    @if (v.fromServer) {
+    @if (v.fromAdapter) {
+      <app-notice kind="warning">
+        <strong i18n="@@admin.adapterWarningTitle">Źródło: adapter obcego serwera.</strong>
+        <ng-container i18n="@@admin.adapterWarning">
+          Tę definicję przedstawił adapter, a nie potok CI. Nikt jej nie przeglądał w kodzie, a
+          wersja ({{ v.value.pendingVersion | safeText }}) pochodzi od serwera. Narzędzie nie ma
+          ryzyka ani akcji: nadasz je przy zatwierdzaniu, a dopóki tego nie zrobisz, agenci go nie
+          widzą.
+        </ng-container>
+      </app-notice>
+    } @else if (v.fromServer) {
       <app-notice kind="warning">
         <strong i18n="@@admin.serverWarningTitle">Źródło: serwer.</strong>
         <ng-container i18n="@@admin.serverWarning">
@@ -58,16 +68,20 @@
     @if (v.riskLowered) {
       <app-notice kind="error">
         <strong i18n="@@admin.riskLoweredTitle">Obniżenie ryzyka.</strong>&ngsp;
-        @if (v.riskFrom) {
+        @if (v.riskFrom && v.riskTo) {
           <ng-container i18n="@@admin.riskLoweredFromTo"
             >Ryzyko narzędzia spada z {{ riskName(v.riskFrom) }} na
             {{ riskName(v.riskTo) }}.</ng-container
           >
-        } @else {
+        } @else if (v.riskTo) {
           <ng-container i18n="@@admin.riskLoweredFloor"
             >Ryzyko jest niższe niż najwyższe dotąd zgłoszone ({{
               riskName(v.riskTo)
             }}).</ng-container
+          >
+        } @else {
+          <ng-container i18n="@@admin.riskLoweredUnclassified"
+            >Ryzyko jest niższe niż najwyższe dotąd zgłoszone.</ng-container
           >
         }
         <ng-container i18n="@@admin.riskLoweredWarning"
@@ -143,7 +157,9 @@
         [disabled]="approving() || blocked()"
         (click)="approve()"
       >
-        @if (v.riskLowered) {
+        @if (v.fromAdapter) {
+          <ng-container i18n="@@admin.approveClassify">Sklasyfikuj i zatwierdź</ng-container>
+        } @else if (v.riskLowered) {
           <ng-container i18n="@@admin.approveLowering">Zatwierdź obniżenie ryzyka</ng-container>
         } @else {
           <ng-container i18n="@@admin.approve">Zatwierdź definicję</ng-container>

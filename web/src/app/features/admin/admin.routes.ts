@@ -10,4 +10,9 @@ export const ADMIN_ROUTES: Routes = [
     title: $localize`:@@route.admin:Administracja`,
     loadComponent: () => import('./admin-page').then((m) => m.AdminPage),
   },
+  {
+    path: 'kill-switches',
+    title: $localize`:@@route.killSwitches:Wyłączniki awaryjne`,
+    loadComponent: () => import('./kill-switches-page').then((m) => m.KillSwitchesPage),
+  },
 ];

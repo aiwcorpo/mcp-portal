@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, PendingTool, Risk, ServerId } from '../../api/generated';
+import { failureMessage } from '../../core/error-messages';
 import { parseKeepingNumbers } from './raw-json';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
@@ -27,9 +28,27 @@ import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
-import { riskLabel } from '../../shared/labels';
+import { riskLabel, riskOrUnclassified } from '../../shared/labels';
 import { ADMIN_PATH } from './admin-path';
-import { diffDefinitions, riskChange, riskChangeText } from './definition-diff';
+import { Classification } from './classification';
+import { ClassifyDialog, ClassifyDialogData } from './classify-dialog';
+import {
+  RISK_ORDER,
+  annotationHints,
+  diffDefinitions,
+  riskChange,
+  riskChangeText,
+} from './definition-diff';
+
+/** What the gateway says when it refuses the classification itself; the dialog opens again with the reason. */
+const CLASSIFICATION_REASONS: ReadonlySet<string> = new Set([
+  'classification_inconsistent',
+  'classification_required',
+  'classification_not_allowed',
+]);
+
+type Outcome =
+  { kind: 'done' } | { kind: 'classification-refused'; message: string } | { kind: 'stopped' };
 
 /**
  * The approved and the pending definition of one tool, side by side, and the approval of the pending one.
@@ -96,7 +115,14 @@ export class ToolDiff {
       // The gateway's flag (the risk floor, CC-167) is the authority; the local comparison only adds to it.
       riskLowered: state.value.riskLowered === true || change === 'lowered',
       riskFrom: approvedEntry?.risk ?? null,
-      riskTo: pendingEntry.risk,
+      riskTo: pendingEntry.risk ?? null,
+      // An adapter entry has no risk of its own: the administrator gives it in the dialog, before the approval.
+      fromAdapter: state.value.source === 'adapter',
+      previous:
+        approvedEntry?.risk && approvedEntry.action
+          ? { risk: approvedEntry.risk, action: approvedEntry.action }
+          : null,
+      hints: annotationHints(pendingEntry),
       // The hash covers more than the diff shows (the definition name, the server's credential block), so an
       // approved tool whose hash changed without a visible line is a change the administrator cannot see.
       hiddenChange:
@@ -160,10 +186,54 @@ export class ToolDiff {
     if (view.hiddenChange && !(await this.confirmHiddenChange())) {
       return;
     }
-    if (view.riskLowered && !(await this.confirmRiskLowering(view.riskFrom, view.riskTo))) {
+    if (!view.fromAdapter) {
+      if (view.riskLowered && !(await this.confirmRiskLowering(view.riskFrom, view.riskTo))) {
+        return;
+      }
+      await this.send(null, view.riskLowered);
       return;
     }
-    await this.send();
+    await this.approveClassified(view);
+  }
+
+  /**
+   * A tool of an adapter is approved together with the classification the administrator gives it. The gateway may still
+   * refuse the pair (422), and the dialog then opens again with the choice and the reason, so nothing has to be retyped.
+   */
+  private async approveClassified(view: NonNullable<ReturnType<typeof this.view>>): Promise<void> {
+    let retry: ClassifyDialogData['retry'] = null;
+    for (;;) {
+      const choice = await this.askClassification(view, retry);
+      if (!choice) {
+        return;
+      }
+      // A lower classification than the one given earlier is a lowering like any other (CC-167): the fresh MFA comes first.
+      const lowering =
+        view.riskLowered ||
+        (view.riskFrom !== null && RISK_ORDER[choice.risk] < RISK_ORDER[view.riskFrom]);
+      if (lowering && !(await this.confirmRiskLowering(view.riskFrom, choice.risk))) {
+        return;
+      }
+      const outcome = await this.send(choice, lowering);
+      if (outcome.kind !== 'classification-refused') {
+        return;
+      }
+      retry = { choice, message: outcome.message };
+    }
+  }
+
+  private async askClassification(
+    view: NonNullable<ReturnType<typeof this.view>>,
+    retry: ClassifyDialogData['retry'],
+  ): Promise<Classification | null> {
+    const chosen = await firstValueFrom(
+      this.dialog
+        .open<ClassifyDialog, ClassifyDialogData, Classification>(ClassifyDialog, {
+          data: { toolName: this.toolName(), hints: view.hints, previous: view.previous, retry },
+        })
+        .afterClosed(),
+    );
+    return chosen ?? null;
   }
 
   private async resumeApproval(): Promise<void> {
@@ -185,9 +255,11 @@ export class ToolDiff {
       !this.blocked() &&
       state.value.pendingHash === intent.hash &&
       // A lowering that was confirmed stays confirmed only if the definition still lowers the risk.
-      view.riskLowered === intent.acceptRiskLowering;
+      (view.fromAdapter
+        ? intent.classification !== undefined
+        : intent.classification === undefined && view.riskLowered === intent.acceptRiskLowering);
     if (same) {
-      await this.send();
+      await this.send(intent.classification ?? null, intent.acceptRiskLowering);
     } else {
       this.resumeRefused.set(true);
     }
@@ -195,11 +267,11 @@ export class ToolDiff {
   }
 
   /** The request itself, after every dialog was answered (now or before the MFA). */
-  private async send(): Promise<void> {
+  private async send(classification: Classification | null, lowering: boolean): Promise<Outcome> {
     const state = this.pending();
     const view = this.view();
     if (state.status !== 'ready' || !view || this.approving()) {
-      return;
+      return { kind: 'stopped' };
     }
     this.approving.set(true);
     this.failure.set(null);
@@ -210,10 +282,12 @@ export class ToolDiff {
         this.adminApi.approveAdminTool(this.serverId(), this.tool(), {
           definitionHash: approvedHash,
           // Sent only when true: an older gateway rejects the field.
-          ...(view.riskLowered ? { acceptRiskLowering: true } : {}),
+          ...(lowering ? { acceptRiskLowering: true } : {}),
+          ...(classification ?? {}),
         }),
       );
       this.approved.emit();
+      return { kind: 'done' };
     } catch (error) {
       const failure = toApiFailure(error);
       if (failure.code === 'hash_mismatch') {
@@ -226,13 +300,21 @@ export class ToolDiff {
             serverId: this.serverId(),
             tool: this.tool(),
             hash: approvedHash,
-            acceptRiskLowering: view.riskLowered,
+            acceptRiskLowering: lowering,
+            ...(classification ? { classification } : {}),
           },
           this.session.username(),
         );
         this.navigation.assign(
           stepUpUrlFor(failure.stepUpUrl, `${ADMIN_PATH}?mfa=ok`, this.navigation.origin),
         );
+      } else if (
+        failure.code === 'manifest_rejected' &&
+        classification &&
+        failure.reason &&
+        CLASSIFICATION_REASONS.has(failure.reason)
+      ) {
+        return { kind: 'classification-refused', message: failureMessage(failure) };
       } else if (failure.code === 'manifest_rejected') {
         this.refusedHash.set(approvedHash);
         this.failure.set(failure);
@@ -241,16 +323,18 @@ export class ToolDiff {
       } else {
         this.failure.set(failure);
       }
+      return { kind: 'stopped' };
     } finally {
       this.approving.set(false);
     }
   }
 
-  private async confirmRiskLowering(from: Risk | null, to: Risk): Promise<boolean> {
+  private async confirmRiskLowering(from: Risk | null, to: Risk | null): Promise<boolean> {
     const name = this.toolName();
+    const target = to ? riskLabel(to) : riskOrUnclassified(undefined);
     const change = from
-      ? $localize`:@@admin.riskLoweringConfirm.change:z ${riskLabel(from)}:from: na ${riskLabel(to)}:to:`
-      : $localize`:@@admin.riskLoweringConfirm.floor:poniżej najwyższego dotąd zgłoszonego poziomu (teraz ${riskLabel(to)}:to:)`;
+      ? $localize`:@@admin.riskLoweringConfirm.change:z ${riskLabel(from)}:from: na ${target}:to:`
+      : $localize`:@@admin.riskLoweringConfirm.floor:poniżej najwyższego dotąd zgłoszonego poziomu (teraz ${target}:to:)`;
     const confirmed = await firstValueFrom(
       this.dialog
         .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {

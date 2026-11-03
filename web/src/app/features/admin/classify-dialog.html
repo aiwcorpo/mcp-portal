@@ -1,0 +1,80 @@
+<h2 mat-dialog-title i18n="@@classify.title">Klasyfikacja narzędzia</h2>
+<mat-dialog-content>
+  <p class="tool">
+    <code>{{ data.toolName }}</code>
+  </p>
+  <p i18n="@@classify.lead">
+    To narzędzie pochodzi z obcego serwera, który nie określa, jak groźna jest operacja. Ustal to
+    sam: od poziomu ryzyka zależy, czy wywołanie wymaga kodu z Authenticatora, i jakie reguły je
+    obejmują.
+  </p>
+
+  @if (data.retry; as retry) {
+    <app-notice kind="error">{{ retry.message }}</app-notice>
+  }
+
+  @if (data.hints.length) {
+    <section class="hints" aria-labelledby="classify-hints">
+      <h3 id="classify-hints" class="hint-title" i18n="@@classify.hints">
+        Podpowiedzi serwera (niezaufane, bez wpływu na wybór)
+      </h3>
+      <ul dir="ltr">
+        @for (hint of data.hints; track $index) {
+          <li>{{ hint }}</li>
+        }
+      </ul>
+    </section>
+  }
+  @if (previousText; as previous) {
+    <p class="muted" i18n="@@classify.previous">Poprzednia klasyfikacja: {{ previous }}.</p>
+  }
+
+  <fieldset>
+    <legend i18n="@@classify.risk">Ryzyko</legend>
+    @for (option of risks; track option) {
+      <label class="choice">
+        <input
+          type="radio"
+          name="classify-risk"
+          [value]="option"
+          [checked]="risk() === option"
+          (change)="chooseRisk(option)"
+        />
+        <span
+          >{{ riskLabel(option) }} <code class="muted">{{ option }}</code></span
+        >
+      </label>
+    }
+  </fieldset>
+
+  <fieldset [disabled]="!risk()">
+    <legend i18n="@@classify.action">Akcja</legend>
+    @if (!risk()) {
+      <p class="muted" i18n="@@classify.pickRiskFirst">Najpierw wybierz ryzyko.</p>
+    }
+    @for (option of actions(); track option) {
+      <label class="choice">
+        <input
+          type="radio"
+          name="classify-action"
+          [value]="option"
+          [checked]="action() === option"
+          (change)="chooseAction(option)"
+        />
+        <span>{{ actionLabel(option) }}</span>
+      </label>
+    }
+  </fieldset>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" mat-dialog-close i18n="@@classify.cancel">Anuluj</button>
+  <button
+    mat-flat-button
+    type="button"
+    [disabled]="!ready()"
+    (click)="confirm()"
+    i18n="@@classify.confirm"
+  >
+    Zatwierdź z tą klasyfikacją
+  </button>
+</mat-dialog-actions>

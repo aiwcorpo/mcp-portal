@@ -223,6 +223,51 @@ describe('CatalogPage', () => {
     });
   });
 
+  it('says why a tool is off: an emergency switch, a definition waiting for approval, or plain disabled', async () => {
+    server.use(
+      serve([
+        serverFixture('jira', {
+          tools: [
+            toolFixture('jira__a', { disabled: true, disabledBy: 'kill_switch' }),
+            toolFixture('jira__b', { disabled: true, disabledBy: 'approval' }),
+            toolFixture('jira__c', { disabled: true, disabledBy: 'configuration' }),
+            toolFixture('jira__d', { disabled: true }),
+          ],
+        }),
+      ]),
+    );
+    configureTestApp();
+    const harness = await openRoute('/catalog');
+    await until(() => expect(text()).toContain('Jira'));
+    labelled('Pokaż narzędzia (Jira)', row('Jira')).click();
+    await harness.fixture.whenStable();
+
+    const rows = Array.from(row('Jira').querySelectorAll('tr.tool')).map((tr) => text(tr));
+    expect(rows[0]).toContain('Wyłączone awaryjnie przez administratora.');
+    expect(rows[1]).toContain('Czeka na zatwierdzenie przez administratora.');
+    expect(rows[2]).toContain('Wyłączone przez administratora.');
+    expect(rows[3]).toContain('Wyłączone przez administratora.');
+  });
+
+  it('calls for connecting again when the connection is in the error state (the secret is gone)', async () => {
+    server.use(
+      serve([
+        serverFixture('jira', {
+          status: 'reconnect_required',
+          actions: ['add_secret', 'disconnect'],
+          connection: connectionFixture('jira', { type: 'user-secret', status: 'error' }),
+        }),
+      ]),
+    );
+    configureTestApp();
+    await openRoute('/catalog');
+
+    await until(() =>
+      expect(text(row('Jira'))).toContain('Połączenie przestało działać, połącz konto ponownie'),
+    );
+    expect(button('Odnów (Jira)', row('Jira'))).toBeTruthy();
+  });
+
   it('expands the tools of a server: id, title, entitlement, risk and notes', async () => {
     server.use(
       serve([

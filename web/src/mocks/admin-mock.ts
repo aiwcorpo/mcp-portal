@@ -1,5 +1,7 @@
 import { http, HttpResponse, type HttpHandler } from 'msw';
 import type {
+  AdapterToolEntry,
+  KillSwitch,
   McpToolDefinition,
   PendingTool,
   RegistryServer,
@@ -19,20 +21,33 @@ export interface AdminState {
   registryApproved: string[];
   /** Times the pending definition of `<serverId>/<tool>` changed after it was first shown (the 409 case). */
   registryRevisions: Record<string, number>;
+  /** The Jira server runs behind an adapter: two of its tools wait for a classification (CC-193). */
+  adapter: boolean;
+  /** Classification an administrator gave a tool of the adapter, by `<serverId>/<tool>`. */
+  classified: Record<string, { risk: Risk; action: ToolAction; at: string }>;
+  /** Emergency switches that are on (CC-194). */
+  killSwitches: KillSwitch[];
 }
 
 export function initialAdminState(): AdminState {
-  return { admin: false, registryApproved: [], registryRevisions: {} };
+  return {
+    admin: false,
+    registryApproved: [],
+    registryRevisions: {},
+    adapter: false,
+    classified: {},
+    killSwitches: [],
+  };
 }
 
-type Source = 'ci' | 'server';
+type Source = 'ci' | 'server' | 'adapter';
 
 interface SeedTool {
   name: string;
   /** Present when the tool has an approved entry. */
   approved?: ToolEntry;
   /** Present while a definition waits for approval. */
-  pending?: { entry: ToolEntry; source: Source; version: string };
+  pending?: { entry: ToolEntry | AdapterToolEntry; source: Source; version: string };
 }
 
 interface SeedServer {
@@ -296,17 +311,127 @@ const SEED: SeedServer[] = [
   },
 ];
 
+/**
+ * Tools of a foreign server behind an adapter (mcp-atlassian on Jira): no risk and no action, resourceRefs empty. The
+ * annotations are what the server claims; the second one claims READ_ONLY for a tool that deletes.
+ */
+function adapterEntry(
+  name: string,
+  title: string,
+  description: string,
+  annotations: Record<string, boolean>,
+  properties: Record<string, object>,
+  required: string[],
+): AdapterToolEntry {
+  const definition: McpToolDefinition = {
+    name,
+    title,
+    description,
+    inputSchema: { type: 'object', properties, required, additionalProperties: false },
+    annotations,
+  };
+  return {
+    name,
+    resourceRefs: [],
+    definition,
+    definitionHash: fakeHash({ definition, resourceRefs: [] }),
+  };
+}
+
+const ISSUE_KEY = { type: 'string', pattern: '^[A-Z][A-Z0-9]+-[0-9]+$', maxLength: 32 };
+
+const ADAPTER_TOOLS: SeedTool[] = [
+  {
+    // Classified earlier as UPDATE; the server changed the definition, so it waits again (a lower class needs the MFA).
+    name: 'transition_issue',
+    approved: entry(
+      'transition_issue',
+      'Zmiana statusu zgłoszenia',
+      'Moves an issue to another status.',
+      'UPDATE',
+      'update',
+      { issueKey: ISSUE_KEY, status: { type: 'string', maxLength: 64 } },
+      ['issueKey', 'status'],
+    ),
+    pending: {
+      source: 'adapter',
+      version: '0.23.1',
+      entry: adapterEntry(
+        'transition_issue',
+        'Zmiana statusu zgłoszenia',
+        'Moves an issue to another status and notifies the watchers.',
+        { readOnlyHint: false },
+        { issueKey: ISSUE_KEY, status: { type: 'string', maxLength: 64 } },
+        ['issueKey', 'status'],
+      ),
+    },
+  },
+  {
+    name: 'add_worklog',
+    pending: {
+      source: 'adapter',
+      version: '0.23.1',
+      entry: adapterEntry(
+        'add_worklog',
+        'Dodanie wpisu czasu pracy',
+        'Logs time spent on an issue.',
+        { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+        { issueKey: ISSUE_KEY, timeSpent: { type: 'string', maxLength: 16 } },
+        ['issueKey', 'timeSpent'],
+      ),
+    },
+  },
+  {
+    name: 'delete_comment',
+    pending: {
+      source: 'adapter',
+      version: '0.23.1',
+      entry: adapterEntry(
+        'delete_comment',
+        'Usunięcie komentarza',
+        'Removes a comment from an issue.',
+        { readOnlyHint: true, destructiveHint: false },
+        { issueKey: ISSUE_KEY, commentId: { type: 'string', maxLength: 16 } },
+        ['issueKey', 'commentId'],
+      ),
+    },
+  },
+];
+
+/** Allowed pairs of CC-207, the same table as the portal's classification dialog. */
+const ALLOWED: Record<Risk, readonly ToolAction[]> = {
+  READ_ONLY: ['read'],
+  UPDATE: ['update', 'admin'],
+  DESTRUCTIVE: ['delete', 'admin'],
+};
+
+function seedOf(state: Readonly<AdminState>): SeedServer[] {
+  if (!state.adapter) {
+    return SEED;
+  }
+  return SEED.map((seed) =>
+    seed.serverId === 'mcp-jira' ? { ...seed, tools: [...seed.tools, ...ADAPTER_TOOLS] } : seed,
+  );
+}
+
 const RISK_ORDER: Record<Risk, number> = { READ_ONLY: 0, UPDATE: 1, DESTRUCTIVE: 2 };
 
 /** The risk floor of CC-167, here the risk of the approved entry. */
-function lowersRisk(approved: ToolEntry | null, pending: ToolEntry): boolean {
-  return approved !== null && RISK_ORDER[pending.risk] < RISK_ORDER[approved.risk];
+function lowersRisk(approved: ToolEntry | null, pending: AnyEntry): boolean {
+  return (
+    approved?.risk !== undefined &&
+    pending.risk !== undefined &&
+    RISK_ORDER[pending.risk] < RISK_ORDER[approved.risk]
+  );
 }
 
 const keyOf = (serverId: string, tool: string) => `${serverId}/${tool}`;
 
+/** `sub` of the administrator the mock plays, as the gateway records it in `setBy` and `classifiedBy`. */
+const MOCK_ADMIN_SUB = '3c1d6b7e-5a43-4f49-9d4f-0a7b1a1f2c11';
+
 /** The pending entry of a tool after `revision` changes made behind the administrator's back. */
-function revised(pending: ToolEntry, revision: number): ToolEntry {
+function revised<E extends AnyEntry>(pending: E, revision: number): E {
   if (revision === 0) {
     return pending;
   }
@@ -319,25 +444,32 @@ function revised(pending: ToolEntry, revision: number): ToolEntry {
     definition,
     definitionHash: fakeHash({
       definition,
-      risk: pending.risk,
-      action: pending.action,
+      ...(pending.risk ? { risk: pending.risk, action: pending.action } : {}),
       resourceRefs: pending.resourceRefs,
     }),
   };
 }
 
+type AnyEntry = ToolEntry | AdapterToolEntry;
+
 interface Resolved {
   seed: SeedServer;
   tool: SeedTool;
   approved: ToolEntry | null;
-  pending: { entry: ToolEntry; source: Source; version: string } | null;
+  pending: { entry: AnyEntry; source: Source; version: string } | null;
 }
 
 function resolveTool(state: Readonly<AdminState>, seed: SeedServer, tool: SeedTool): Resolved {
   const key = keyOf(seed.serverId, tool.name);
   if (state.registryApproved.includes(key) && tool.pending) {
     const entryNow = revised(tool.pending.entry, state.registryRevisions[key] ?? 0);
-    return { seed, tool, approved: entryNow, pending: null };
+    const given = state.classified[key];
+    return {
+      seed,
+      tool,
+      approved: given ? { ...entryNow, risk: given.risk, action: given.action } : entryNow,
+      pending: null,
+    };
   }
   const pending = tool.pending
     ? {
@@ -349,7 +481,7 @@ function resolveTool(state: Readonly<AdminState>, seed: SeedServer, tool: SeedTo
 }
 
 export function mockRegistry(state: Readonly<AdminState>): RegistryServer[] {
-  return SEED.map((seed) => {
+  return seedOf(state).map((seed) => {
     const tools = seed.tools.map((tool): RegistryTool => {
       const resolved = resolveTool(state, seed, tool);
       if (resolved.pending) {
@@ -362,7 +494,14 @@ export function mockRegistry(state: Readonly<AdminState>): RegistryServer[] {
           ...(lowersRisk(resolved.approved, resolved.pending.entry) ? { riskLowered: true } : {}),
         };
       }
-      return { ...resolved.approved!, status: 'approved', approvedInVersion: seed.version };
+      const key = keyOf(seed.serverId, tool.name);
+      const given = state.classified[key];
+      return {
+        ...resolved.approved!,
+        status: 'approved',
+        approvedInVersion: seed.version,
+        ...(given ? { classifiedBy: MOCK_ADMIN_SUB, classifiedAt: given.at } : {}),
+      };
     });
     return {
       serverId: seed.serverId,
@@ -379,7 +518,7 @@ export function mockPendingTool(
   serverId: string,
   toolName: string,
 ): PendingTool | null {
-  const seed = SEED.find((candidate) => candidate.serverId === serverId);
+  const seed = seedOf(state).find((candidate) => candidate.serverId === serverId);
   const tool = seed?.tools.find((candidate) => candidate.name === toolName);
   if (!seed || !tool) {
     return null;
@@ -447,24 +586,38 @@ export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHan
         if (!pending) {
           return ctx.failure('not_found_or_denied', 404);
         }
-        const { definitionHash, acceptRiskLowering } = (await request.json()) as {
+        const { definitionHash, acceptRiskLowering, risk, action } = (await request.json()) as {
           definitionHash: string;
           acceptRiskLowering?: boolean;
+          risk?: Risk;
+          action?: ToolAction;
         };
         if (definitionHash !== pending.pendingHash) {
           return ctx.failure('hash_mismatch', 409);
         }
-        const lowers = lowersRisk(pending.approvedEntry, pending.pendingEntry);
-        if (lowers && acceptRiskLowering !== true) {
-          return HttpResponse.json(
-            {
-              error: 'manifest_rejected',
-              reason: 'risk_lowered',
-              message: `${toolName} lowers risk`,
-              requestId: ctx.requestId,
-            },
+        const rejected = (reason: string, message: string): Response =>
+          HttpResponse.json(
+            { error: 'manifest_rejected', reason, message, requestId: ctx.requestId },
             { status: 422, headers },
           );
+        const fromAdapter = pending.source === 'adapter';
+        if (fromAdapter && (risk === undefined || action === undefined)) {
+          return rejected('classification_required', `${toolName} needs risk and action`);
+        }
+        if (!fromAdapter && (risk !== undefined || action !== undefined)) {
+          return rejected('classification_not_allowed', `${toolName} is not from an adapter`);
+        }
+        if (risk !== undefined && action !== undefined && !ALLOWED[risk].includes(action)) {
+          return rejected('classification_inconsistent', `${risk} does not fit ${action}`);
+        }
+        const key = keyOf(serverId, toolName);
+        // An adapter entry is compared with the classification given earlier; any other with the approved entry.
+        const earlier = admin().classified[key]?.risk ?? pending.approvedEntry?.risk;
+        const lowers = fromAdapter
+          ? earlier !== undefined && risk !== undefined && RISK_ORDER[risk] < RISK_ORDER[earlier]
+          : lowersRisk(pending.approvedEntry, pending.pendingEntry);
+        if (lowers && acceptRiskLowering !== true) {
+          return rejected('risk_lowered', `${toolName} lowers risk`);
         }
         if (lowers && !store.state.mfaFresh) {
           // The BFF asks for a fresh MFA before it passes acceptRiskLowering on (CC-167).
@@ -480,11 +633,147 @@ export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHan
         if (lowers) {
           store.update({ mfaFresh: false });
         }
+        if (fromAdapter && risk !== undefined && action !== undefined) {
+          store.update({
+            classified: {
+              ...admin().classified,
+              [key]: { risk, action, at: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z') },
+            },
+          });
+        }
         store.update({
           registryApproved: [...admin().registryApproved, keyOf(serverId, toolName)],
         });
         return new HttpResponse(null, { status: 204, headers });
       },
+    ),
+    ...killSwitchHandlers(store, ctx, refused),
+  ];
+}
+
+const SERVER_IDS: readonly string[] = [
+  'mcp-confluence',
+  'mcp-jira',
+  'mcp-gitlab',
+  'mcp-servicedesk',
+  'mcp-opensearch',
+];
+
+/**
+ * Emergency switch (CC-194): switching off needs no fresh MFA, lifting does, like the gateway's own rule behind the BFF.
+ * A server or tool the registry does not know is 404; lifting a switch that is not on is a 204.
+ */
+function killSwitchHandlers(
+  store: MockStore,
+  ctx: MockContext,
+  refused: () => Response | undefined,
+): HttpHandler[] {
+  const { at } = ctx;
+  const headers = { 'X-Request-Id': ctx.requestId };
+  const active = (): KillSwitch[] => store.state.killSwitches;
+  const knownTool = (serverId: string, tool: string): boolean =>
+    seedOf(store.state)
+      .find((seed) => seed.serverId === serverId)
+      ?.tools.some((candidate) => candidate.name === tool) === true;
+  const stepUp = (): Response =>
+    HttpResponse.json(
+      {
+        error: 'step_up_required',
+        stepUpUrl: '/api/v1/auth/login?stepUp=true&returnPath=/admin/kill-switches',
+        requestId: ctx.requestId,
+      },
+      { status: 401, headers },
+    );
+  const matches = (entry: KillSwitch, serverId: string, tool: string | null): boolean =>
+    entry.serverId === serverId && (entry.tool ?? null) === tool;
+
+  const put = async (
+    request: Request,
+    cookies: Record<string, string>,
+    serverId: string,
+    tool: string | null,
+  ): Promise<Response | undefined> => {
+    if (!ctx.csrfValid(request, cookies)) {
+      return undefined;
+    }
+    const denied = refused();
+    if (denied) {
+      return denied;
+    }
+    if (!SERVER_IDS.includes(serverId) || (tool !== null && !knownTool(serverId, tool))) {
+      return ctx.failure('not_found_or_denied', 404);
+    }
+    const body = (await request.json().catch(() => null)) as { reason?: unknown } | null;
+    if (typeof body?.reason !== 'string' || body.reason.length < 1 || body.reason.length > 200) {
+      return ctx.failure('invalid_request', 400);
+    }
+    const entry: KillSwitch = {
+      scope: tool === null ? 'server' : 'tool',
+      serverId: serverId as KillSwitch['serverId'],
+      ...(tool === null ? {} : { tool }),
+      setBy: MOCK_ADMIN_SUB,
+      setAt: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      reason: body.reason,
+    };
+    store.update({
+      killSwitches: [...active().filter((existing) => !matches(existing, serverId, tool)), entry],
+    });
+    return new HttpResponse(null, { status: 204, headers });
+  };
+
+  const lift = (
+    request: Request,
+    cookies: Record<string, string>,
+    serverId: string,
+    tool: string | null,
+  ): Response | undefined => {
+    if (!ctx.csrfValid(request, cookies)) {
+      return undefined;
+    }
+    const denied = refused();
+    if (denied) {
+      return denied;
+    }
+    if (!SERVER_IDS.includes(serverId)) {
+      return ctx.failure('not_found_or_denied', 404);
+    }
+    if (!store.state.mfaFresh) {
+      return stepUp();
+    }
+    store.update({
+      mfaFresh: false,
+      killSwitches: active().filter((existing) => !matches(existing, serverId, tool)),
+    });
+    return new HttpResponse(null, { status: 204, headers });
+  };
+
+  return [
+    http.get(at('/api/v1/admin/kill-switches'), () => {
+      const denied = refused();
+      if (denied) {
+        return denied;
+      }
+      return store.state.scenario === 'errors'
+        ? ctx.failure('upstream_unavailable', 503)
+        : HttpResponse.json({ switches: active() }, { headers });
+    }),
+    http.put(
+      at('/api/v1/admin/registry/servers/:serverId/kill-switch'),
+      ({ request, cookies, params }) => put(request, cookies, String(params['serverId']), null),
+    ),
+    http.delete(
+      at('/api/v1/admin/registry/servers/:serverId/kill-switch'),
+      ({ request, cookies, params }) => lift(request, cookies, String(params['serverId']), null),
+    ),
+    http.put(
+      at('/api/v1/admin/registry/servers/:serverId/tools/:tool/kill-switch'),
+      ({ request, cookies, params }) =>
+        put(request, cookies, String(params['serverId']), String(params['tool'])),
+    ),
+    http.delete(
+      at('/api/v1/admin/registry/servers/:serverId/tools/:tool/kill-switch'),
+      ({ request, cookies, params }) =>
+        lift(request, cookies, String(params['serverId']), String(params['tool'])),
     ),
   ];
 }

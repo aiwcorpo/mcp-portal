@@ -57,7 +57,10 @@ function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
   switch (server.status) {
     case 'reconnect_required':
       return {
-        text: $localize`:@@conn.reconnectNeeded:wymaga ponownego połączenia`,
+        text:
+          connection?.status === 'error'
+            ? $localize`:@@conn.brokenReconnect:przestało działać, połącz konto ponownie`
+            : $localize`:@@conn.reconnectNeeded:wymaga ponownego połączenia`,
         date: null,
         tone: 'warn',
       };

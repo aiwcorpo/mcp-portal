@@ -29,6 +29,17 @@
     Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI
     zatwierdza sam tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj.
   </p>
+  <p class="switches">
+    <a routerLink="/admin/kill-switches" i18n="@@admin.killSwitchesLink">Wyłączniki awaryjne</a>
+    @if (switches().length) {
+      <span class="state-error"
+        >&middot;
+        <ng-container i18n="@@admin.killSwitchesOn"
+          >włączone: {{ switches().length }}</ng-container
+        ></span
+      >
+    }
+  </p>
   @if (totalPending() > 0) {
     <p class="summary" role="status" i18n="@@admin.pendingTotal">
       Do zatwierdzenia: {{ totalPending() }}
@@ -116,6 +127,10 @@
                     @if (item.tool.source === 'server') {
                       <span class="source source-server" i18n="@@admin.sourceServer"
                         >Źródło: serwer</span
+                      >
+                    } @else if (item.tool.source === 'adapter') {
+                      <span class="source source-server" i18n="@@admin.sourceAdapter"
+                        >Źródło: adapter</span
                       >
                     } @else {
                       <span class="source" i18n="@@admin.sourceCi">Źródło: CI</span>

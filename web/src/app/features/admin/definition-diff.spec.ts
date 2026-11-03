@@ -1,6 +1,12 @@
-import { ToolEntry } from '../../api/generated';
+import { AdapterToolEntry, ToolEntry } from '../../api/generated';
 import { parseKeepingNumbers } from './raw-json';
-import { describeEntry, diffDefinitions, riskChange, riskChangeText } from './definition-diff';
+import {
+  annotationHints,
+  describeEntry,
+  diffDefinitions,
+  riskChange,
+  riskChangeText,
+} from './definition-diff';
 
 function entry(overrides: Partial<ToolEntry> = {}, description = 'Updates a page.'): ToolEntry {
   return {
@@ -216,5 +222,41 @@ describe('riskChange', () => {
     expect(riskChangeText('raised', approved, raised)).toBe('Ryzyko rośnie: Zapis na Usuwanie.');
     expect(riskChangeText('lowered', raised, approved)).toContain('Ryzyko maleje');
     expect(riskChangeText('same', approved, approved)).toBeNull();
+  });
+});
+
+describe('an entry of an adapter', () => {
+  function adapterEntry(): AdapterToolEntry {
+    const classified = entry({}, 'Removes a comment.');
+    return {
+      name: classified.name,
+      resourceRefs: [],
+      definition: { ...classified.definition, annotations: { readOnlyHint: true } },
+      definitionHash: classified.definitionHash,
+    };
+  }
+
+  it('is described without a risk and says the administrator gives it', () => {
+    const lines = describeEntry(adapterEntry());
+    expect(lines).toContain('ryzyko i akcja: do nadania przez administratora');
+    expect(lines.some((line) => line.startsWith('ryzyko:'))).toBe(false);
+  });
+
+  it('has no risk change to compare, so nothing is read as a lowering', () => {
+    expect(riskChange(entry(), adapterEntry())).toBe('same');
+    expect(riskChangeText('same', entry(), adapterEntry())).toBeNull();
+  });
+
+  it('gives the hints of the server as text lines, hidden characters written out', () => {
+    const hinted = adapterEntry();
+    hinted.definition = {
+      ...hinted.definition,
+      annotations: { readOnlyHint: true, title: 'a\u202Eb' },
+    };
+
+    expect(annotationHints(hinted)).toEqual(['readOnlyHint: true', 'title: "a[U+202E]b"']);
+    expect(
+      annotationHints(entry({ definition: { ...entry().definition, annotations: undefined } })),
+    ).toEqual([]);
   });
 });

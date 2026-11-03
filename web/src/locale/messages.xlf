@@ -442,9 +442,41 @@
         <source>Manifest nie zgadza się z typem poświadczenia skonfigurowanym dla systemu i został odrzucony.</source>
       </segment>
     </unit>
+    <unit id="error.classification_inconsistent">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:66</note>
+      </notes>
+      <segment>
+        <source>Ryzyko i akcja nie pasują do siebie. Odczyt łączy się z akcją read, zapis z update lub admin, usuwanie z delete lub admin.</source>
+      </segment>
+    </unit>
+    <unit id="error.classification_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:68</note>
+      </notes>
+      <segment>
+        <source>To narzędzie pochodzi z adaptera i wymaga klasyfikacji: wybierz ryzyko i akcję.</source>
+      </segment>
+    </unit>
+    <unit id="error.classification_not_allowed">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:70</note>
+      </notes>
+      <segment>
+        <source>Klasyfikować można tylko narzędzia z adaptera. Ta definicja pochodzi z innego źródła.</source>
+      </segment>
+    </unit>
+    <unit id="error.adapter_mode_mismatch">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:72</note>
+      </notes>
+      <segment>
+        <source>Tryb serwera w gatewayu nie zgadza się ze źródłem manifestu. Sprawdź konfigurację adaptera.</source>
+      </segment>
+    </unit>
     <unit id="error.invalid_filter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:75</note>
+        <note category="location">src/app/core/error-messages.ts:83</note>
       </notes>
       <segment>
         <source>Takiego filtru nie da się zapisać w adresie. Zmień wybór.</source>
@@ -452,7 +484,7 @@
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:78</note>
+        <note category="location">src/app/core/error-messages.ts:86</note>
       </notes>
       <segment>
         <source>Za dużo żądań. Spróbuj ponownie za <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -498,9 +530,25 @@
         <source> Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI zatwierdza sam tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj. </source>
       </segment>
     </unit>
+    <unit id="admin.killSwitchesLink">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:33,35</note>
+      </notes>
+      <segment>
+        <source>Wyłączniki awaryjne</source>
+      </segment>
+    </unit>
+    <unit id="admin.killSwitchesOn">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:38,39</note>
+      </notes>
+      <segment>
+        <source>włączone: <ph id="0" equiv="INTERPOLATION" disp="{{ switches().length }}"/></source>
+      </segment>
+    </unit>
     <unit id="admin.pendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:34,37</note>
+        <note category="location">src/app/features/admin/admin-page.html:45,48</note>
       </notes>
       <segment>
         <source> Do zatwierdzenia: <ph id="0" equiv="INTERPOLATION" disp="{{ totalPending() }}"/> </source>
@@ -508,7 +556,7 @@
     </unit>
     <unit id="admin.caption">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:40,42</note>
+        <note category="location">src/app/features/admin/admin-page.html:51,53</note>
       </notes>
       <segment>
         <source> Rejestr serwerów MCP </source>
@@ -516,7 +564,7 @@
     </unit>
     <unit id="admin.colToggle">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:45,47</note>
+        <note category="location">src/app/features/admin/admin-page.html:56,58</note>
       </notes>
       <segment>
         <source>Narzędzia</source>
@@ -524,7 +572,7 @@
     </unit>
     <unit id="admin.colServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:47,48</note>
+        <note category="location">src/app/features/admin/admin-page.html:58,59</note>
       </notes>
       <segment>
         <source>Serwer</source>
@@ -532,8 +580,8 @@
     </unit>
     <unit id="admin.colVersion">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:48,49</note>
-        <note category="location">src/app/features/admin/admin-page.html:86</note>
+        <note category="location">src/app/features/admin/admin-page.html:59,60</note>
+        <note category="location">src/app/features/admin/admin-page.html:97</note>
       </notes>
       <segment>
         <source>Wersja</source>
@@ -541,8 +589,8 @@
     </unit>
     <unit id="admin.colChanges">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:49,50</note>
-        <note category="location">src/app/features/admin/admin-page.html:90</note>
+        <note category="location">src/app/features/admin/admin-page.html:60,61</note>
+        <note category="location">src/app/features/admin/admin-page.html:101</note>
       </notes>
       <segment>
         <source>Zmiany</source>
@@ -550,8 +598,8 @@
     </unit>
     <unit id="admin.colState">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:50,52</note>
-        <note category="location">src/app/features/admin/admin-page.html:101</note>
+        <note category="location">src/app/features/admin/admin-page.html:61,63</note>
+        <note category="location">src/app/features/admin/admin-page.html:112</note>
       </notes>
       <segment>
         <source>Stan</source>
@@ -559,15 +607,23 @@
     </unit>
     <unit id="admin.sourceServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:118,120</note>
+        <note category="location">src/app/features/admin/admin-page.html:129,131</note>
       </notes>
       <segment>
         <source>Źródło: serwer</source>
       </segment>
     </unit>
+    <unit id="admin.sourceAdapter">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:133,135</note>
+      </notes>
+      <segment>
+        <source>Źródło: adapter</source>
+      </segment>
+    </unit>
     <unit id="admin.sourceCi">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:121,122</note>
+        <note category="location">src/app/features/admin/admin-page.html:136,137</note>
       </notes>
       <segment>
         <source>Źródło: CI</source>
@@ -575,7 +631,7 @@
     </unit>
     <unit id="admin.hideDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:139,140</note>
+        <note category="location">src/app/features/admin/admin-page.html:154,155</note>
       </notes>
       <segment>
         <source>Ukryj różnice</source>
@@ -583,7 +639,7 @@
     </unit>
     <unit id="admin.showDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:141,142</note>
+        <note category="location">src/app/features/admin/admin-page.html:156,157</note>
       </notes>
       <segment>
         <source>Pokaż różnice</source>
@@ -591,7 +647,7 @@
     </unit>
     <unit id="admin.noTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:169,170</note>
+        <note category="location">src/app/features/admin/admin-page.html:184,185</note>
       </notes>
       <segment>
         <source> Serwer nie ma zarejestrowanych narzędzi. </source>
@@ -599,7 +655,7 @@
     </unit>
     <unit id="admin.empty">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:178,181</note>
+        <note category="location">src/app/features/admin/admin-page.html:193,196</note>
       </notes>
       <segment>
         <source>Rejestr nie zawiera żadnego serwera.</source>
@@ -653,9 +709,17 @@
         <source>Zmienione · <ph id="0" equiv="risk" disp="risk"/></source>
       </segment>
     </unit>
+    <unit id="admin.toolSwitchedOff">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:73</note>
+      </notes>
+      <segment>
+        <source>Wyłączone awaryjnie · <ph id="0" equiv="risk" disp="risk"/></source>
+      </segment>
+    </unit>
     <unit id="admin.showTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:106</note>
+        <note category="location">src/app/features/admin/admin-page.ts:110</note>
       </notes>
       <segment>
         <source>Pokaż narzędzia</source>
@@ -663,15 +727,23 @@
     </unit>
     <unit id="admin.hideTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:107</note>
+        <note category="location">src/app/features/admin/admin-page.ts:111</note>
       </notes>
       <segment>
         <source>Ukryj narzędzia</source>
       </segment>
     </unit>
+    <unit id="admin.serverSwitchedOff">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:152</note>
+      </notes>
+      <segment>
+        <source>Wyłączony awaryjnie</source>
+      </segment>
+    </unit>
     <unit id="admin.serverDisabled">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:130</note>
+        <note category="location">src/app/features/admin/admin-page.ts:154</note>
       </notes>
       <segment>
         <source>Wyłączony</source>
@@ -679,7 +751,7 @@
     </unit>
     <unit id="admin.serverPending">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:132</note>
+        <note category="location">src/app/features/admin/admin-page.ts:156</note>
       </notes>
       <segment>
         <source>Do zatwierdzenia</source>
@@ -687,7 +759,7 @@
     </unit>
     <unit id="admin.serverActive">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:133</note>
+        <note category="location">src/app/features/admin/admin-page.ts:157</note>
       </notes>
       <segment>
         <source>Aktywny</source>
@@ -695,7 +767,7 @@
     </unit>
     <unit id="admin.approved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:208</note>
+        <note category="location">src/app/features/admin/admin-page.ts:238</note>
       </notes>
       <segment>
         <source>Zatwierdzono definicję <ph id="0" equiv="tool" disp="tool.name"/>.</source>
@@ -709,9 +781,121 @@
         <source>Administracja</source>
       </segment>
     </unit>
+    <unit id="route.killSwitches">
+      <notes>
+        <note category="location">src/app/features/admin/admin.routes.ts:15</note>
+      </notes>
+      <segment>
+        <source>Wyłączniki awaryjne</source>
+      </segment>
+    </unit>
+    <unit id="classify.title">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:1,3</note>
+      </notes>
+      <segment>
+        <source>Klasyfikacja narzędzia</source>
+      </segment>
+    </unit>
+    <unit id="classify.lead">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:7,12</note>
+      </notes>
+      <segment>
+        <source> To narzędzie pochodzi z obcego serwera, który nie określa, jak groźna jest operacja. Ustal to sam: od poziomu ryzyka zależy, czy wywołanie wymaga kodu z Authenticatora, i jakie reguły je obejmują. </source>
+      </segment>
+    </unit>
+    <unit id="classify.hints">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:19,21</note>
+      </notes>
+      <segment>
+        <source> Podpowiedzi serwera (niezaufane, bez wpływu na wybór) </source>
+      </segment>
+    </unit>
+    <unit id="classify.previous">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:29,32</note>
+      </notes>
+      <segment>
+        <source>Poprzednia klasyfikacja: <ph id="0" equiv="INTERPOLATION" disp="{{ previous }}"/>.</source>
+      </segment>
+    </unit>
+    <unit id="classify.risk">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:33,34</note>
+      </notes>
+      <segment>
+        <source>Ryzyko</source>
+      </segment>
+    </unit>
+    <unit id="classify.action">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:51,53</note>
+      </notes>
+      <segment>
+        <source>Akcja</source>
+      </segment>
+    </unit>
+    <unit id="classify.pickRiskFirst">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:53,55</note>
+      </notes>
+      <segment>
+        <source>Najpierw wybierz ryzyko.</source>
+      </segment>
+    </unit>
+    <unit id="classify.cancel">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:70,72</note>
+      </notes>
+      <segment>
+        <source>Anuluj</source>
+      </segment>
+    </unit>
+    <unit id="classify.confirm">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.html:78,80</note>
+      </notes>
+      <segment>
+        <source> Zatwierdź z tą klasyfikacją </source>
+      </segment>
+    </unit>
+    <unit id="classify.action.read">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.ts:21</note>
+      </notes>
+      <segment>
+        <source>read: odczyt danych</source>
+      </segment>
+    </unit>
+    <unit id="classify.action.update">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.ts:22</note>
+      </notes>
+      <segment>
+        <source>update: zmiana danych</source>
+      </segment>
+    </unit>
+    <unit id="classify.action.delete">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.ts:23</note>
+      </notes>
+      <segment>
+        <source>delete: usunięcie danych</source>
+      </segment>
+    </unit>
+    <unit id="classify.action.admin">
+      <notes>
+        <note category="location">src/app/features/admin/classify-dialog.ts:24</note>
+      </notes>
+      <segment>
+        <source>admin: operacja administracyjna</source>
+      </segment>
+    </unit>
     <unit id="admin.diff.entryName">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:119</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:125</note>
       </notes>
       <segment>
         <source>wpis: <ph id="0" equiv="name" disp="quoted(entry.name)"/></source>
@@ -719,7 +903,7 @@
     </unit>
     <unit id="admin.diff.defName">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:120</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:126</note>
       </notes>
       <segment>
         <source>nazwa: <ph id="0" equiv="name" disp="quoted(entry.definition.name)"/></source>
@@ -727,7 +911,7 @@
     </unit>
     <unit id="admin.diff.title">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:121</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:127</note>
       </notes>
       <segment>
         <source>tytuł: <ph id="0" equiv="title" disp="quoted(entry.definition.title)"/></source>
@@ -735,7 +919,7 @@
     </unit>
     <unit id="admin.diff.description">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:122</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:128</note>
       </notes>
       <segment>
         <source>opis: <ph id="0" equiv="description" disp="quoted(entry.definition.description)"/></source>
@@ -743,7 +927,7 @@
     </unit>
     <unit id="admin.diff.risk">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:123</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:131</note>
       </notes>
       <segment>
         <source>ryzyko: <ph id="0" equiv="label" disp="riskLabel(entry.risk)"/> (<ph id="1" equiv="risk" disp="quoted(entry.risk)"/>)</source>
@@ -751,15 +935,23 @@
     </unit>
     <unit id="admin.diff.action">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:124</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:132</note>
       </notes>
       <segment>
         <source>akcja: <ph id="0" equiv="action" disp="quoted(entry.action)"/></source>
       </segment>
     </unit>
+    <unit id="admin.diff.unclassified">
+      <notes>
+        <note category="location">src/app/features/admin/definition-diff.ts:134</note>
+      </notes>
+      <segment>
+        <source>ryzyko i akcja: do nadania przez administratora</source>
+      </segment>
+    </unit>
     <unit id="admin.diff.resource">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:128</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:138</note>
       </notes>
       <segment>
         <source>zasób: argument <ph id="0" equiv="argument" disp="quoted(ref.argument)"/> (<ph id="1" equiv="type" disp="quoted(ref.type)"/>)</source>
@@ -767,7 +959,7 @@
     </unit>
     <unit id="admin.diff.schema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:133</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:143</note>
       </notes>
       <segment>
         <source>schemat.<ph id="0" equiv="line" disp="line"/></source>
@@ -775,7 +967,7 @@
     </unit>
     <unit id="admin.diff.outputSchema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:138</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:148</note>
       </notes>
       <segment>
         <source>schemat wyniku.<ph id="0" equiv="line" disp="line"/></source>
@@ -783,7 +975,7 @@
     </unit>
     <unit id="admin.diff.annotations">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:145</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:155</note>
       </notes>
       <segment>
         <source>wskazówki.<ph id="0" equiv="line" disp="line"/></source>
@@ -791,7 +983,7 @@
     </unit>
     <unit id="admin.riskRaised">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:216</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:239</note>
       </notes>
       <segment>
         <source>Ryzyko rośnie: <ph id="0" equiv="from" disp="from"/> na <ph id="1" equiv="to" disp="to"/>.</source>
@@ -799,10 +991,277 @@
     </unit>
     <unit id="admin.riskLowered">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:217</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:240</note>
       </notes>
       <segment>
         <source>Ryzyko maleje: <ph id="0" equiv="from" disp="from"/> na <ph id="1" equiv="to" disp="to"/>. Obniżenia ryzyka gateway nie zatwierdza.</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.title">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:1,4</note>
+      </notes>
+      <segment>
+        <source>Wyłączniki awaryjne</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.back">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:4,7</note>
+      </notes>
+      <segment>
+        <source>Rejestr serwerów</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:13,16</note>
+      </notes>
+      <segment>
+        <source>Tożsamość potwierdzona. Zdejmuję wyłącznik, który wybrano przed potwierdzeniem.</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.lead">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:28,33</note>
+      </notes>
+      <segment>
+        <source> Wyłącznik odcina serwer albo jedno narzędzie dla wszystkich: najpóźniej po 5 sekundach na każdej instancji gatewaya. Zatwierdzenie definicji go nie zdejmuje, restart też nie. Włączenie nie wymaga potwierdzenia tożsamości, zdjęcie wymaga. </source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.active">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:34,36</note>
+      </notes>
+      <segment>
+        <source>Włączone wyłączniki</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.caption">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:38,40</note>
+      </notes>
+      <segment>
+        <source> Wyłączniki awaryjne, które są włączone </source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.colScope">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:42,43</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:56</note>
+      </notes>
+      <segment>
+        <source>Zakres</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.colTarget">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:44,46</note>
+      </notes>
+      <segment>
+        <source> Co jest wyłączone </source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.colSince">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:47</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:72</note>
+      </notes>
+      <segment>
+        <source>Od</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.colReason">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:47,48</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:84</note>
+      </notes>
+      <segment>
+        <source>Powód</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.colActions">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:49,51</note>
+      </notes>
+      <segment>
+        <source>Akcje</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.colTargetLabel">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:63,64</note>
+      </notes>
+      <segment>
+        <source>Co jest wyłączone</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.by">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:76,77</note>
+      </notes>
+      <segment>
+        <source>włączył</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.lift">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:96,97</note>
+      </notes>
+      <segment>
+        <source>Zdejmij</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.none">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:106,109</note>
+      </notes>
+      <segment>
+        <source> Żaden wyłącznik nie jest włączony. </source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.offHeading">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:113,115</note>
+      </notes>
+      <segment>
+        <source> Wyłącz serwer lub narzędzie </source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.server">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:117,119</note>
+      </notes>
+      <segment>
+        <source>Serwer</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.serverPlaceholder">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:124,125</note>
+      </notes>
+      <segment>
+        <source>Wybierz serwer</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.tool">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:131,133</note>
+      </notes>
+      <segment>
+        <source>Narzędzie</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.wholeServer">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:139,140</note>
+      </notes>
+      <segment>
+        <source>Cały serwer</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.reason">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:146,148</note>
+      </notes>
+      <segment>
+        <source>Powód</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.reasonHint">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:159,161</note>
+      </notes>
+      <segment>
+        <source>Widzą go administratorzy na tej liście; nie trafia do logów audytu. Zostało znaków:</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.submit">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.html:173,175</note>
+      </notes>
+      <segment>
+        <source> Wyłącz </source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.scopeServer">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:111</note>
+      </notes>
+      <segment>
+        <source>Serwer</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.scopeTool">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:112</note>
+      </notes>
+      <segment>
+        <source>Narzędzie</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.offTitle">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:178</note>
+      </notes>
+      <segment>
+        <source>Wyłączyć awaryjnie?</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.offMessage">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:179</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="target" disp="target"/> przestanie być dostępne dla wszystkich użytkowników i agentów, na każdej instancji gatewaya najpóźniej po 5 sekundach. Wywołania, które już ruszyły, nie są przerywane. Włączenie nie wymaga potwierdzenia tożsamości, zdjęcie wymaga.</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.offConfirm">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:180</note>
+      </notes>
+      <segment>
+        <source>Wyłącz</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.offDone">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:196</note>
+      </notes>
+      <segment>
+        <source>Wyłączono: <ph id="0" equiv="target" disp="target"/>.</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.liftTitle">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:213</note>
+      </notes>
+      <segment>
+        <source>Zdjąć wyłącznik?</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.liftMessage">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:214</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="target" disp="target"/> znów będzie dostępne dla użytkowników, którzy mają do niego uprawnienia. Zdjęcie wymaga świeżego potwierdzenia tożsamości (MFA).</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.liftConfirm">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:215</note>
+      </notes>
+      <segment>
+        <source>Zdejmij wyłącznik</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.liftDone">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:236</note>
+      </notes>
+      <segment>
+        <source>Zdjęto wyłącznik: <ph id="0" equiv="target" disp="target"/>.</source>
       </segment>
     </unit>
     <unit id="admin.resumeRefused">
@@ -821,9 +1280,25 @@
         <source>Definicja zmieniła się od czasu, gdy ją otwarto. Pokazuję aktualne różnice; sprawdź je i zatwierdź ponownie.</source>
       </segment>
     </unit>
-    <unit id="admin.serverWarningTitle">
+    <unit id="admin.adapterWarningTitle">
       <notes>
         <note category="location">src/app/features/admin/tool-diff.html:27,28</note>
+      </notes>
+      <segment>
+        <source>Źródło: adapter obcego serwera.</source>
+      </segment>
+    </unit>
+    <unit id="admin.adapterWarning">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:29,32</note>
+      </notes>
+      <segment>
+        <source> Tę definicję przedstawił adapter, a nie potok CI. Nikt jej nie przeglądał w kodzie, a wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Narzędzie nie ma ryzyka ani akcji: nadasz je przy zatwierdzaniu, a dopóki tego nie zrobisz, agenci go nie widzą. </source>
+      </segment>
+    </unit>
+    <unit id="admin.serverWarningTitle">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:37,38</note>
       </notes>
       <segment>
         <source>Źródło: serwer.</source>
@@ -831,7 +1306,7 @@
     </unit>
     <unit id="admin.serverWarning">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:29,32</note>
+        <note category="location">src/app/features/admin/tool-diff.html:39,42</note>
       </notes>
       <segment>
         <source> Tę definicję przedstawił działający serwer, a nie potok CI z przeglądanego commitu. Nikt jej nie przeglądał w kodzie, a podana wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Przeczytaj opis i schemat uważnie, zanim zatwierdzisz. </source>
@@ -839,7 +1314,7 @@
     </unit>
     <unit id="admin.ciSource">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:37,39</note>
+        <note category="location">src/app/features/admin/tool-diff.html:47,49</note>
       </notes>
       <segment>
         <source>Źródło: potok CI (przeglądany commit), wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</source>
@@ -847,7 +1322,7 @@
     </unit>
     <unit id="admin.hiddenTitle">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:45,46</note>
+        <note category="location">src/app/features/admin/tool-diff.html:55,56</note>
       </notes>
       <segment>
         <source>Skrót się zmienił, a pokazane pola nie.</source>
@@ -855,7 +1330,7 @@
     </unit>
     <unit id="admin.hiddenText">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:47,49</note>
+        <note category="location">src/app/features/admin/tool-diff.html:57,59</note>
       </notes>
       <segment>
         <source> Zmienił się element definicji spoza widoku, na przykład poświadczenie serwera. Zatwierdzenie wymaga jawnego potwierdzenia. </source>
@@ -863,7 +1338,7 @@
     </unit>
     <unit id="admin.hashInconsistent">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:54,57</note>
+        <note category="location">src/app/features/admin/tool-diff.html:64,67</note>
       </notes>
       <segment>
         <source> Skrót podany przez serwer nie zgadza się ze skrótem pokazanej definicji. Nie zatwierdzaj; zgłoś to administratorom platformy. </source>
@@ -871,7 +1346,7 @@
     </unit>
     <unit id="admin.riskLoweredTitle">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:60,61</note>
+        <note category="location">src/app/features/admin/tool-diff.html:70,71</note>
       </notes>
       <segment>
         <source>Obniżenie ryzyka.</source>
@@ -879,7 +1354,7 @@
     </unit>
     <unit id="admin.riskLoweredFromTo">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:63,65</note>
+        <note category="location">src/app/features/admin/tool-diff.html:73,75</note>
       </notes>
       <segment>
         <source>Ryzyko narzędzia spada z <ph id="0" equiv="INTERPOLATION" disp="{{ riskName(v.riskFrom) }}"/> na <ph id="1" equiv="INTERPOLATION_1" disp="{{ riskName(v.riskTo) }}"/>.</source>
@@ -887,7 +1362,7 @@
     </unit>
     <unit id="admin.riskLoweredFloor">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:68,71</note>
+        <note category="location">src/app/features/admin/tool-diff.html:78,81</note>
       </notes>
       <segment>
         <source>Ryzyko jest niższe niż najwyższe dotąd zgłoszone (<ph id="0" equiv="INTERPOLATION" disp="{{
@@ -895,9 +1370,17 @@
             }}"/>).</source>
       </segment>
     </unit>
+    <unit id="admin.riskLoweredUnclassified">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:84,87</note>
+      </notes>
+      <segment>
+        <source>Ryzyko jest niższe niż najwyższe dotąd zgłoszone.</source>
+      </segment>
+    </unit>
     <unit id="admin.riskLoweredWarning">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:74,77</note>
+        <note category="location">src/app/features/admin/tool-diff.html:88,91</note>
       </notes>
       <segment>
         <source>Narzędzie jest ukryte przed agentami do Twojej decyzji. Zatwierdzenie obniża obowiązujący poziom, a dla narzędzia, które było nieodwracalne, znika wymóg kodu z Authenticatora. Wymaga świeżego potwierdzenia tożsamości (MFA).</source>
@@ -905,7 +1388,7 @@
     </unit>
     <unit id="admin.neutralised">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:84,86</note>
+        <note category="location">src/app/features/admin/tool-diff.html:98,100</note>
       </notes>
       <segment>
         <source> W definicji były ukryte znaki. Zastąpiono je znacznikami w postaci [U+XXXX]. </source>
@@ -913,7 +1396,7 @@
     </unit>
     <unit id="admin.beforeNew">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:92,93</note>
+        <note category="location">src/app/features/admin/tool-diff.html:106,107</note>
       </notes>
       <segment>
         <source>Przed (brak, nowe narzędzie)</source>
@@ -921,7 +1404,7 @@
     </unit>
     <unit id="admin.before">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:95,96</note>
+        <note category="location">src/app/features/admin/tool-diff.html:109,110</note>
       </notes>
       <segment>
         <source>Przed (<ph id="0" equiv="INTERPOLATION" disp="{{ (v.value.approvedInVersion | safeText) || noVersion }}"/>)</source>
@@ -929,7 +1412,7 @@
     </unit>
     <unit id="admin.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:108,109</note>
+        <note category="location">src/app/features/admin/tool-diff.html:122,123</note>
       </notes>
       <segment>
         <source>Usunięto: </source>
@@ -937,7 +1420,7 @@
     </unit>
     <unit id="admin.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:111,112</note>
+        <note category="location">src/app/features/admin/tool-diff.html:125,126</note>
       </notes>
       <segment>
         <source>Brak wcześniejszej definicji.</source>
@@ -945,7 +1428,7 @@
     </unit>
     <unit id="admin.after">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:117,118</note>
+        <note category="location">src/app/features/admin/tool-diff.html:131,132</note>
       </notes>
       <segment>
         <source>Po (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -953,15 +1436,23 @@
     </unit>
     <unit id="admin.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:129,130</note>
+        <note category="location">src/app/features/admin/tool-diff.html:143,144</note>
       </notes>
       <segment>
         <source>Dodano: </source>
       </segment>
     </unit>
+    <unit id="admin.approveClassify">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:161,162</note>
+      </notes>
+      <segment>
+        <source>Sklasyfikuj i zatwierdź</source>
+      </segment>
+    </unit>
     <unit id="admin.approveLowering">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:147,149</note>
+        <note category="location">src/app/features/admin/tool-diff.html:163,165</note>
       </notes>
       <segment>
         <source>Zatwierdź obniżenie ryzyka</source>
@@ -969,7 +1460,7 @@
     </unit>
     <unit id="admin.approve">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:149,151</note>
+        <note category="location">src/app/features/admin/tool-diff.html:165,167</note>
       </notes>
       <segment>
         <source>Zatwierdź definicję</source>
@@ -977,7 +1468,7 @@
     </unit>
     <unit id="admin.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:154,157</note>
+        <note category="location">src/app/features/admin/tool-diff.html:170,173</note>
       </notes>
       <segment>
         <source> Brak zatwierdzenia nie niszczy niczego: narzędzie zostaje ukryte przed agentami. </source>
@@ -985,7 +1476,7 @@
     </unit>
     <unit id="admin.noVersion">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:73</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:92</note>
       </notes>
       <segment>
         <source>brak wersji</source>
@@ -993,23 +1484,23 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.change">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:252</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:336</note>
       </notes>
       <segment>
-        <source>z <ph id="0" equiv="from" disp="riskLabel(from)"/> na <ph id="1" equiv="to" disp="riskLabel(to)"/></source>
+        <source>z <ph id="0" equiv="from" disp="riskLabel(from)"/> na <ph id="1" equiv="to" disp="target"/></source>
       </segment>
     </unit>
     <unit id="admin.riskLoweringConfirm.floor">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:253</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:337</note>
       </notes>
       <segment>
-        <source>poniżej najwyższego dotąd zgłoszonego poziomu (teraz <ph id="0" equiv="to" disp="riskLabel(to)"/>)</source>
+        <source>poniżej najwyższego dotąd zgłoszonego poziomu (teraz <ph id="0" equiv="to" disp="target"/>)</source>
       </segment>
     </unit>
     <unit id="admin.riskLoweringConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:258</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:342</note>
       </notes>
       <segment>
         <source>Zatwierdzić obniżenie ryzyka?</source>
@@ -1017,7 +1508,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:259</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:343</note>
       </notes>
       <segment>
         <source>Narzędzie <ph id="0" equiv="tool" disp="name"/> obniża ryzyko <ph id="1" equiv="change" disp="change"/>. Po zatwierdzeniu nowy poziom staje się obowiązujący, a dla narzędzi, które były nieodwracalne, przestaje być wymagany kod z Authenticatora. Zatwierdź tylko, jeśli zmiana jest zamierzona.</source>
@@ -1025,7 +1516,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:260</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:344</note>
       </notes>
       <segment>
         <source>Zatwierdź obniżenie ryzyka</source>
@@ -1033,7 +1524,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:274</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:358</note>
       </notes>
       <segment>
         <source>Zatwierdzić zmianę, której nie widać?</source>
@@ -1041,7 +1532,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:275</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:359</note>
       </notes>
       <segment>
         <source>Skrót definicji jest inny, a żadna pokazana linia się nie zmieniła. Zmiana dotyczy elementu spoza widoku, na przykład poświadczenia serwera. Zatwierdź tylko, jeśli znasz jej przyczynę.</source>
@@ -1049,7 +1540,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:276</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:360</note>
       </notes>
       <segment>
         <source>Zatwierdź mimo to</source>
@@ -1057,7 +1548,7 @@
     </unit>
     <unit id="admin.serverConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:291</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:375</note>
       </notes>
       <segment>
         <source>Zatwierdzić definicję zgłoszoną przez serwer?</source>
@@ -1065,7 +1556,7 @@
     </unit>
     <unit id="admin.serverConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:292</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:376</note>
       </notes>
       <segment>
         <source>Definicję <ph id="0" equiv="tool" disp="name"/> przedstawił działający serwer, nie potok CI. Nikt nie przeglądał jej w kodzie. Zatwierdź ją tylko, jeśli opis i schemat są zgodne z oczekiwanym.</source>
@@ -1073,7 +1564,7 @@
     </unit>
     <unit id="admin.serverConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:293</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:377</note>
       </notes>
       <segment>
         <source>Zatwierdź</source>
@@ -1784,9 +2275,25 @@
         <source><ph id="0" equiv="INTERPOLATION" disp="{{ srv.tools.length }}"/> narz.</source>
       </segment>
     </unit>
-    <unit id="catalog.toolDisabled">
+    <unit id="catalog.toolKillSwitch">
       <notes>
         <note category="location">src/app/features/catalog/catalog-table.html:84,86</note>
+      </notes>
+      <segment>
+        <source>Wyłączone awaryjnie przez administratora.</source>
+      </segment>
+    </unit>
+    <unit id="catalog.toolApproval">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:88,90</note>
+      </notes>
+      <segment>
+        <source>Czeka na zatwierdzenie przez administratora.</source>
+      </segment>
+    </unit>
+    <unit id="catalog.toolDisabled">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:92,94</note>
       </notes>
       <segment>
         <source>Wyłączone przez administratora.</source>
@@ -1794,7 +2301,7 @@
     </unit>
     <unit id="catalog.toolDenied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:88,90</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:96,98</note>
       </notes>
       <segment>
         <source>Brak uprawnienia do tego narzędzia.</source>
@@ -1802,7 +2309,7 @@
     </unit>
     <unit id="catalog.toolConfirm">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:92,94</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:100,102</note>
       </notes>
       <segment>
         <source>Wymaga kodu z Authenticatora.</source>
@@ -1810,7 +2317,7 @@
     </unit>
     <unit id="catalog.requestTool">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:117,118</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:125,126</note>
       </notes>
       <segment>
         <source>Złóż wniosek</source>
@@ -1818,7 +2325,7 @@
     </unit>
     <unit id="catalog.noTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:128,129</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:136,137</note>
       </notes>
       <segment>
         <source> Serwer nie udostępnia narzędzi. </source>
@@ -2390,9 +2897,17 @@
         <source> Systemy pojawią się tutaj, gdy dostaniesz dostęp do serwera MCP. </source>
       </segment>
     </unit>
+    <unit id="conn.brokenReconnect">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.ts:62</note>
+      </notes>
+      <segment>
+        <source>przestało działać, połącz konto ponownie</source>
+      </segment>
+    </unit>
     <unit id="conn.reconnectNeeded">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:60</note>
+        <note category="location">src/app/features/connections/connections-page.ts:63</note>
       </notes>
       <segment>
         <source>wymaga ponownego połączenia</source>
@@ -2400,7 +2915,7 @@
     </unit>
     <unit id="conn.pending">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:65</note>
+        <note category="location">src/app/features/connections/connections-page.ts:68</note>
       </notes>
       <segment>
         <source>wniosek oczekuje</source>
@@ -2408,7 +2923,7 @@
     </unit>
     <unit id="conn.noAccess">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:67</note>
+        <note category="location">src/app/features/connections/connections-page.ts:70</note>
       </notes>
       <segment>
         <source>brak uprawnienia</source>
@@ -2416,7 +2931,7 @@
     </unit>
     <unit id="conn.autoRefreshed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:84</note>
+        <note category="location">src/app/features/connections/connections-page.ts:87</note>
       </notes>
       <segment>
         <source>odświeżane automatycznie</source>
@@ -2424,7 +2939,7 @@
     </unit>
     <unit id="conn.noExpiry">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:85</note>
+        <note category="location">src/app/features/connections/connections-page.ts:88</note>
       </notes>
       <segment>
         <source>bez terminu</source>
@@ -2432,7 +2947,7 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:291</note>
+        <note category="location">src/app/features/connections/connections-page.ts:294</note>
       </notes>
       <segment>
         <source>Wniosek <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.</source>
@@ -3803,9 +4318,17 @@
         <source>Połączenie wygasa <ph id="0" equiv="when" disp="when"/></source>
       </segment>
     </unit>
+    <unit id="catalogStatus.connectionBroken">
+      <notes>
+        <note category="location">src/app/shared/labels.ts:77</note>
+      </notes>
+      <segment>
+        <source>Połączenie przestało działać, połącz konto ponownie</source>
+      </segment>
+    </unit>
     <unit id="action.copy_link">
       <notes>
-        <note category="location">src/app/shared/labels.ts:78</note>
+        <note category="location">src/app/shared/labels.ts:83</note>
       </notes>
       <segment>
         <source>Kopiuj link</source>
@@ -3813,7 +4336,7 @@
     </unit>
     <unit id="action.connect_oauth">
       <notes>
-        <note category="location">src/app/shared/labels.ts:79</note>
+        <note category="location">src/app/shared/labels.ts:84</note>
       </notes>
       <segment>
         <source>Połącz przez OAuth</source>
@@ -3821,7 +4344,7 @@
     </unit>
     <unit id="action.add_secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:80</note>
+        <note category="location">src/app/shared/labels.ts:85</note>
       </notes>
       <segment>
         <source>Dodaj token</source>
@@ -3829,7 +4352,7 @@
     </unit>
     <unit id="action.reconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:81</note>
+        <note category="location">src/app/shared/labels.ts:86</note>
       </notes>
       <segment>
         <source>Odnów</source>
@@ -3837,7 +4360,7 @@
     </unit>
     <unit id="action.request_access">
       <notes>
-        <note category="location">src/app/shared/labels.ts:82</note>
+        <note category="location">src/app/shared/labels.ts:87</note>
       </notes>
       <segment>
         <source>Złóż wniosek</source>
@@ -3845,7 +4368,7 @@
     </unit>
     <unit id="action.view_request">
       <notes>
-        <note category="location">src/app/shared/labels.ts:83</note>
+        <note category="location">src/app/shared/labels.ts:88</note>
       </notes>
       <segment>
         <source>Zobacz wniosek</source>
@@ -3853,7 +4376,7 @@
     </unit>
     <unit id="action.disconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:84</note>
+        <note category="location">src/app/shared/labels.ts:89</note>
       </notes>
       <segment>
         <source>Rozłącz</source>
@@ -3861,7 +4384,7 @@
     </unit>
     <unit id="action.reconnectOAuth">
       <notes>
-        <note category="location">src/app/shared/labels.ts:89</note>
+        <note category="location">src/app/shared/labels.ts:94</note>
       </notes>
       <segment>
         <source>Połącz</source>
@@ -3869,7 +4392,7 @@
     </unit>
     <unit id="action.renewSecret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:93</note>
+        <note category="location">src/app/shared/labels.ts:98</note>
       </notes>
       <segment>
         <source>Odnów</source>
@@ -3877,7 +4400,7 @@
     </unit>
     <unit id="risk.READ_ONLY">
       <notes>
-        <note category="location">src/app/shared/labels.ts:99</note>
+        <note category="location">src/app/shared/labels.ts:104</note>
       </notes>
       <segment>
         <source>Odczyt</source>
@@ -3885,7 +4408,7 @@
     </unit>
     <unit id="risk.UPDATE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:100</note>
+        <note category="location">src/app/shared/labels.ts:105</note>
       </notes>
       <segment>
         <source>Zapis</source>
@@ -3893,15 +4416,23 @@
     </unit>
     <unit id="risk.DESTRUCTIVE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:101</note>
+        <note category="location">src/app/shared/labels.ts:106</note>
       </notes>
       <segment>
         <source>Usuwanie</source>
       </segment>
     </unit>
+    <unit id="risk.unclassified">
+      <notes>
+        <note category="location">src/app/shared/labels.ts:115</note>
+      </notes>
+      <segment>
+        <source>Do klasyfikacji</source>
+      </segment>
+    </unit>
     <unit id="credentialType.user-secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:110</note>
+        <note category="location">src/app/shared/labels.ts:120</note>
       </notes>
       <segment>
         <source>Token PAT</source>
@@ -3909,7 +4440,7 @@
     </unit>
     <unit id="credentialType.token-exchange">
       <notes>
-        <note category="location">src/app/shared/labels.ts:111</note>
+        <note category="location">src/app/shared/labels.ts:121</note>
       </notes>
       <segment>
         <source>Wymiana tokenu</source>
@@ -3917,7 +4448,7 @@
     </unit>
     <unit id="credentialType.service-account">
       <notes>
-        <note category="location">src/app/shared/labels.ts:112</note>
+        <note category="location">src/app/shared/labels.ts:122</note>
       </notes>
       <segment>
         <source>Konto serwisowe</source>
@@ -3925,7 +4456,7 @@
     </unit>
     <unit id="connectionStatus.connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:120</note>
+        <note category="location">src/app/shared/labels.ts:130</note>
       </notes>
       <segment>
         <source>Aktywne</source>
@@ -3933,7 +4464,7 @@
     </unit>
     <unit id="connectionStatus.expiring">
       <notes>
-        <note category="location">src/app/shared/labels.ts:121</note>
+        <note category="location">src/app/shared/labels.ts:131</note>
       </notes>
       <segment>
         <source>Wkrótce wygasa</source>
@@ -3941,7 +4472,7 @@
     </unit>
     <unit id="connectionStatus.expired">
       <notes>
-        <note category="location">src/app/shared/labels.ts:122</note>
+        <note category="location">src/app/shared/labels.ts:132</note>
       </notes>
       <segment>
         <source>Wygasło</source>
@@ -3949,7 +4480,7 @@
     </unit>
     <unit id="connectionStatus.revoked">
       <notes>
-        <note category="location">src/app/shared/labels.ts:123</note>
+        <note category="location">src/app/shared/labels.ts:133</note>
       </notes>
       <segment>
         <source>Unieważnione</source>
@@ -3957,10 +4488,10 @@
     </unit>
     <unit id="connectionStatus.error">
       <notes>
-        <note category="location">src/app/shared/labels.ts:124</note>
+        <note category="location">src/app/shared/labels.ts:134</note>
       </notes>
       <segment>
-        <source>Błąd</source>
+        <source>Przestało działać</source>
       </segment>
     </unit>
     <unit id="loadError.forbidden">

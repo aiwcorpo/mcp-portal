@@ -26,6 +26,8 @@ model/accessRequestResultOneOf.ts
 model/accessRequestResultOneOf1.ts
 model/accessRequestStatus.ts
 model/activityCall.ts
+model/adapterToolEntry.ts
+model/adapterToolEntryAllOfNot.ts
 model/approveAdminTool401Response.ts
 model/approveRequest.ts
 model/auditEvent.ts
@@ -48,8 +50,12 @@ model/connectOAuthResponse.ts
 model/connection.ts
 model/connectionStatus.ts
 model/credentialType.ts
+model/disabledBy.ts
 model/errorCode.ts
 model/invalidFilter.ts
+model/killSwitch.ts
+model/killSwitchList.ts
+model/killSwitchRequest.ts
 model/loginErrorCode.ts
 model/manifestRejected.ts
 model/mcpEndpoint.ts
@@ -58,6 +64,7 @@ model/me.ts
 model/modelError.ts
 model/models.ts
 model/pendingTool.ts
+model/pendingToolPendingEntry.ts
 model/portalCatalog.ts
 model/portalCatalogServer.ts
 model/putSecretError.ts

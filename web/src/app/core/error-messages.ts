@@ -62,6 +62,14 @@ function manifestRejectedMessage(reason: string | undefined): string {
       return $localize`:@@error.environment_mismatch:Manifest jest przeznaczony dla innego środowiska i został odrzucony.`;
     case 'credential_type_mismatch':
       return $localize`:@@error.credential_type_mismatch:Manifest nie zgadza się z typem poświadczenia skonfigurowanym dla systemu i został odrzucony.`;
+    case 'classification_inconsistent':
+      return $localize`:@@error.classification_inconsistent:Ryzyko i akcja nie pasują do siebie. Odczyt łączy się z akcją read, zapis z update lub admin, usuwanie z delete lub admin.`;
+    case 'classification_required':
+      return $localize`:@@error.classification_required:To narzędzie pochodzi z adaptera i wymaga klasyfikacji: wybierz ryzyko i akcję.`;
+    case 'classification_not_allowed':
+      return $localize`:@@error.classification_not_allowed:Klasyfikować można tylko narzędzia z adaptera. Ta definicja pochodzi z innego źródła.`;
+    case 'adapter_mode_mismatch':
+      return $localize`:@@error.adapter_mode_mismatch:Tryb serwera w gatewayu nie zgadza się ze źródłem manifestu. Sprawdź konfigurację adaptera.`;
     default:
       return errorMessage('manifest_rejected');
   }

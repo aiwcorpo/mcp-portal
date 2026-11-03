@@ -17,7 +17,7 @@ export interface RegistryServer {
     system: SystemId;
     version: string;
     /**
-     * False when the server is disabled in gateway configuration or by an overrides policy, or when its held manifest fails the checks at start (CC-159). All tools of a disabled server report disabled=true in the catalog (CC-081, CC-088). Read only; the portal has no switch.
+     * False when the server is disabled in gateway configuration or by an overrides policy, or when its held manifest fails the checks at start (CC-159). All tools of a disabled server report disabled=true in the catalog (CC-081, CC-088). Read only here; the emergency switch of a server is a separate resource (CC-194).
      */
     enabled?: boolean;
     tools: Array<RegistryTool>;

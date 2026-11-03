@@ -21,6 +21,10 @@ import { ApproveAdminTool401Response } from '../model/approveAdminTool401Respons
 // @ts-ignore
 import { ApproveRequest } from '../model/approveRequest';
 // @ts-ignore
+import { KillSwitchList } from '../model/killSwitchList';
+// @ts-ignore
+import { KillSwitchRequest } from '../model/killSwitchRequest';
+// @ts-ignore
 import { ManifestRejected } from '../model/manifestRejected';
 // @ts-ignore
 import { PendingTool } from '../model/pendingTool';
@@ -47,7 +51,7 @@ export class AdminService extends BaseService {
 
     /**
      * Approve a pending tool definition (proxy to C5). The manual way to accept a change made outside a deployment (CC-133).
-     * Plain approve is unchanged. With acceptRiskLowering true (an entry with riskLowered true, CC-167) the BFF requires a fresh MFA of the administrator, the same mechanism and window as the registration of the Authenticator: without it &#x60;401 step_up_required&#x60; with &#x60;stepUpUrl&#x60;. The BFF sends the field only when it is true, so that an older gateway keeps accepting the request. 
+     * Plain approve is unchanged. An entry of an adapter (source adapter, CC-193) is approved together with its classification: the body then carries &#x60;risk&#x60; and &#x60;action&#x60; (required for such an entry, forbidden for any other: 422 &#x60;classification_required&#x60; or &#x60;classification_not_allowed&#x60;), and the same fresh MFA is required when the classification lowers one given earlier. With acceptRiskLowering true (an entry with riskLowered true, CC-167) the BFF requires a fresh MFA of the administrator, the same mechanism and window as the registration of the Authenticator: without it &#x60;401 step_up_required&#x60; with &#x60;stepUpUrl&#x60;. The BFF sends the field only when it is true, so that an older gateway keeps accepting the request. 
      * @endpoint post /api/v1/admin/registry/servers/{serverId}/tools/{tool}/approve
      * @param serverId 
      * @param tool 
@@ -115,6 +119,134 @@ export class AdminService extends BaseService {
             {
                 context: localVarHttpContext,
                 body: approveRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Lift the switch of a server (proxy to C5, CC-194).
+     * Needs a fresh MFA of the administrator (the mechanism and window of the registration of the Authenticator): without it &#x60;401 step_up_required&#x60; with &#x60;stepUpUrl&#x60;, the return path is the admin page. Idempotent. 
+     * @endpoint delete /api/v1/admin/registry/servers/{serverId}/kill-switch
+     * @param serverId 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public deleteAdminServerKillSwitch(serverId: ServerId, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminServerKillSwitch(serverId: ServerId, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminServerKillSwitch(serverId: ServerId, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminServerKillSwitch(serverId: ServerId, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling deleteAdminServerKillSwitch.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/kill-switch`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Lift the switch of a tool (proxy to C5, CC-194).
+     * Needs a fresh MFA of the administrator like the lift of a server switch. Idempotent. A switch of the whole server stays on.
+     * @endpoint delete /api/v1/admin/registry/servers/{serverId}/tools/{tool}/kill-switch
+     * @param serverId 
+     * @param tool 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling deleteAdminToolKillSwitch.');
+        }
+        if (tool === null || tool === undefined) {
+            throw new Error('Required parameter tool was null or undefined when calling deleteAdminToolKillSwitch.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -231,6 +363,216 @@ export class AdminService extends BaseService {
         return this.httpClient.request<Array<RegistryServer>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Active emergency switches of servers and tools (proxy to C5, group mcp-platform-admin, CC-194).
+     * @endpoint get /api/v1/admin/kill-switches
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public listAdminKillSwitches(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<KillSwitchList>;
+    public listAdminKillSwitches(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<KillSwitchList>>;
+    public listAdminKillSwitches(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<KillSwitchList>>;
+    public listAdminKillSwitches(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/kill-switches`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<KillSwitchList>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Switch off every tool of a server (proxy to C5, CC-194).
+     * Emergency switch (A9): no fresh MFA is required, an incident must not wait for a second factor. Takes effect on every gateway instance within 5 seconds of the &#x60;204&#x60;. Lifted only by the &#x60;DELETE&#x60; below. 
+     * @endpoint put /api/v1/admin/registry/servers/{serverId}/kill-switch
+     * @param serverId 
+     * @param killSwitchRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling putAdminServerKillSwitch.');
+        }
+        if (killSwitchRequest === null || killSwitchRequest === undefined) {
+            throw new Error('Required parameter killSwitchRequest was null or undefined when calling putAdminServerKillSwitch.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/kill-switch`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: killSwitchRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Switch off one tool (proxy to C5, CC-194).
+     * Same rules as for a server, no fresh MFA, effective within 5 seconds, lifted only by the DELETE.
+     * @endpoint put /api/v1/admin/registry/servers/{serverId}/tools/{tool}/kill-switch
+     * @param serverId 
+     * @param tool 
+     * @param killSwitchRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling putAdminToolKillSwitch.');
+        }
+        if (tool === null || tool === undefined) {
+            throw new Error('Required parameter tool was null or undefined when calling putAdminToolKillSwitch.');
+        }
+        if (killSwitchRequest === null || killSwitchRequest === undefined) {
+            throw new Error('Required parameter killSwitchRequest was null or undefined when calling putAdminToolKillSwitch.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: killSwitchRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

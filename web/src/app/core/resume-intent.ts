@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
+import { Risk, ToolAction } from '../api/generated';
 
 /**
  * What the user asked for just before the browser left for the fresh MFA (step_up_required). After the return the
@@ -13,7 +14,10 @@ export type ResumeIntent =
       tool: string;
       hash: string;
       acceptRiskLowering: boolean;
+      /** The classification the administrator chose for a tool of an adapter; both or neither. */
+      classification?: { risk: Risk; action: ToolAction };
     }
+  | { kind: 'lift-kill-switch'; serverId: string; tool: string | null }
   | { kind: 'enroll-authenticator' }
   | { kind: 'remove-authenticator'; registeredAt: string };
 
@@ -27,6 +31,21 @@ export const RESUME_TTL_MS = 5 * 60_000;
 const IDENTIFIER = /^[A-Za-z0-9._:-]{1,128}$/;
 const TIMESTAMP = /^[0-9TZ:.+-]{1,40}$/;
 const HASH = /^[A-Za-z0-9+/=_:-]{1,200}$/;
+const RISKS: readonly unknown[] = ['READ_ONLY', 'UPDATE', 'DESTRUCTIVE'];
+const ACTIONS: readonly unknown[] = ['read', 'update', 'delete', 'admin'];
+
+function validClassification(value: unknown): boolean {
+  if (value === undefined) {
+    return true;
+  }
+  const candidate = value as Record<string, unknown> | null;
+  return (
+    candidate !== null &&
+    typeof candidate === 'object' &&
+    RISKS.includes(candidate['risk']) &&
+    ACTIONS.includes(candidate['action'])
+  );
+}
 
 interface Stored {
   /** `username` of the session that clicked; another user in the same tab gets nothing. */
@@ -55,7 +74,15 @@ function valid(intent: unknown): intent is ResumeIntent {
         IDENTIFIER.test(candidate['tool']) &&
         typeof candidate['hash'] === 'string' &&
         HASH.test(candidate['hash']) &&
-        typeof candidate['acceptRiskLowering'] === 'boolean'
+        typeof candidate['acceptRiskLowering'] === 'boolean' &&
+        validClassification(candidate['classification'])
+      );
+    case 'lift-kill-switch':
+      return (
+        typeof candidate['serverId'] === 'string' &&
+        IDENTIFIER.test(candidate['serverId']) &&
+        (candidate['tool'] === null ||
+          (typeof candidate['tool'] === 'string' && IDENTIFIER.test(candidate['tool'])))
       );
     default:
       return false;

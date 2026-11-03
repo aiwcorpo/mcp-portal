@@ -17,6 +17,7 @@ import type {
   CatalogStatus,
   CatalogTool,
   Connection,
+  KillSwitch,
   PortalCatalog,
   PortalCatalogServer,
   PutSecretRequest,
@@ -239,6 +240,21 @@ function connectionOf(
   };
 }
 
+/** A tool or server that an emergency switch turned off is `disabled` with `disabledBy: kill_switch` (CC-194). */
+function withKillSwitches(
+  server: PortalCatalogServer,
+  switches: readonly KillSwitch[],
+): CatalogTool[] {
+  return server.tools.map((candidate) => {
+    const off = switches.some(
+      (entry) =>
+        entry.serverId === server.serverId &&
+        (entry.scope === 'server' || `${server.system}__${entry.tool}` === candidate.name),
+    );
+    return off ? { ...candidate, disabled: true, disabledBy: 'kill_switch' } : candidate;
+  });
+}
+
 /** The status and action table of C12 `getPortalCatalog` (CC-021, CC-083, CC-113). */
 export function deriveRow(
   server: PortalCatalogServer,
@@ -307,7 +323,7 @@ export function mockCatalog(state: MockState, now: number = Date.now()): PortalC
         ? (server.connection ?? null)
         : override && connectionOf(server.system, override, server.connection, now);
     const row = deriveRow(server, connection, pending);
-    return { ...server, connection, ...row };
+    return { ...server, connection, ...row, tools: withKillSwitches(server, state.killSwitches) };
   });
   return { servers };
 }

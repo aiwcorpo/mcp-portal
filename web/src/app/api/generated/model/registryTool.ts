@@ -19,8 +19,8 @@ export interface RegistryTool {
      * Server-side tool name (without the gateway prefix). Snake case; a double underscore is forbidden because the gateway uses it as the <system>__<tool> separator (C5).
      */
     name: string;
-    risk: Risk;
-    action: ToolAction;
+    risk?: Risk;
+    action?: ToolAction;
     /**
      * Always present; an empty array when the tool takes no resource identifier (one canonical form for definitionHash).
      */
@@ -30,13 +30,21 @@ export interface RegistryTool {
      * sha256 over the canonical JSON of definition + risk, action, resourceRefs + system, credential (CC-004, CC-005). Receivers recompute it.
      */
     definitionHash: string;
+    /**
+     * sub of the administrator who classified the tool; present only for a tool of an adapter that was classified (CC-193).
+     */
+    classifiedBy?: string;
+    /**
+     * When the tool was classified (CC-193).
+     */
+    classifiedAt?: string;
     status: RegistryToolStatus;
     /**
      * Present exactly when status is pending_approval. new means no approved entry exists, changed means an approved entry exists and differs (CC-097).
      */
     change?: RegistryTool.ChangeEnum;
     /**
-     * Present exactly when status is pending_approval (CC-162); same meaning as PendingTool.source.
+     * Present exactly when status is pending_approval (CC-162, CC-193); same meaning as PendingTool.source.
      */
     source?: RegistryTool.SourceEnum;
     /**
@@ -57,6 +65,7 @@ export namespace RegistryTool {
     export const SourceEnum = {
         Ci: 'ci',
         Server: 'server',
+        Adapter: 'adapter',
     } as const;
     export type SourceEnum = typeof SourceEnum[keyof typeof SourceEnum];
 }

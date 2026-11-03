@@ -7,15 +7,15 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
-import { AdminService, RegistryServer, RegistryTool } from '../../api/generated';
+import { AdminService, KillSwitch, RegistryServer, RegistryTool } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
-import { Tone, riskLabel, systemName } from '../../shared/labels';
+import { Tone, riskOrUnclassified, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -58,16 +58,20 @@ function changesText(created: number, changed: number): string {
   return parts.join(', ');
 }
 
-function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
+function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolean): ToolRow {
   const pending = tool.status === 'pending_approval';
-  const risk = riskLabel(tool.risk);
-  const state = !pending
+  const risk = riskOrUnclassified(tool.risk);
+  const waiting = !pending
     ? $localize`:@@admin.toolApproved:Zatwierdzone · ${risk}:risk:`
     : tool.riskLowered
       ? $localize`:@@admin.toolRiskLowered:Obniżenie ryzyka · ${risk}:risk:`
       : tool.change === 'new'
         ? $localize`:@@admin.toolNew:Nowe · ${risk}:risk:`
         : $localize`:@@admin.toolChanged:Zmienione · ${risk}:risk:`;
+  // An emergency switch (CC-194) is the stronger fact: nothing else matters while the tool is off.
+  const state = switchedOff
+    ? $localize`:@@admin.toolSwitchedOff:Wyłączone awaryjnie · ${risk}:risk:`
+    : waiting;
   return {
     tool,
     key: `${server.serverId}/${tool.name}`,
@@ -75,7 +79,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
     title: neutraliseText(tool.definition.title).text,
     pending,
     state,
-    tone: tool.riskLowered ? 'error' : pending ? 'warn' : 'neutral',
+    tone: switchedOff || tool.riskLowered ? 'error' : pending ? 'warn' : 'neutral',
   };
 }
 
@@ -85,7 +89,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool): ToolRow {
  */
 @Component({
   selector: 'app-admin-page',
-  imports: [SafeTextPipe, MatButtonModule, LoadError, Loading, Notice, ToolDiff],
+  imports: [SafeTextPipe, MatButtonModule, RouterLink, LoadError, Loading, Notice, ToolDiff],
   templateUrl: './admin-page.html',
   styleUrl: './admin-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -107,6 +111,8 @@ export class AdminPage implements OnInit {
   protected readonly hideLabel = $localize`:@@admin.hideTools:Ukryj narzędzia`;
   protected readonly registry = signal<LoadState<RegistryServer[]>>(LOADING);
   protected readonly done = signal<string | null>(null);
+  /** The emergency switches that are on; a failed read leaves the list empty, the registry is shown anyway. */
+  protected readonly switches = signal<readonly KillSwitch[]>([]);
   protected readonly opened = signal<ReadonlySet<string>>(new Set());
   protected readonly closedByUser = signal<ReadonlySet<string>>(new Set());
   protected readonly diffOpen = signal<ReadonlySet<string>>(new Set());
@@ -116,8 +122,24 @@ export class AdminPage implements OnInit {
     if (state.status !== 'ready') {
       return [];
     }
+    const switches = this.switches();
     return state.value.map((server) => {
-      const tools = server.tools.map((tool) => toolRow(server, tool));
+      const serverOff = switches.some(
+        (entry) => entry.serverId === server.serverId && entry.scope === 'server',
+      );
+      const tools = server.tools.map((tool) =>
+        toolRow(
+          server,
+          tool,
+          serverOff ||
+            switches.some(
+              (entry) =>
+                entry.serverId === server.serverId &&
+                entry.scope === 'tool' &&
+                entry.tool === tool.name,
+            ),
+        ),
+      );
       const pendingTools = server.tools.filter((tool) => tool.status === 'pending_approval');
       const created = pendingTools.filter((tool) => tool.change === 'new').length;
       const enabled = server.enabled !== false;
@@ -126,12 +148,14 @@ export class AdminPage implements OnInit {
         name: systemName(server.system),
         pendingCount: pendingTools.length,
         changes: changesText(created, pendingTools.length - created),
-        state: !enabled
-          ? $localize`:@@admin.serverDisabled:Wyłączony`
-          : pendingTools.length
-            ? $localize`:@@admin.serverPending:Do zatwierdzenia`
-            : $localize`:@@admin.serverActive:Aktywny`,
-        tone: !enabled ? 'error' : pendingTools.length ? 'warn' : 'ok',
+        state: serverOff
+          ? $localize`:@@admin.serverSwitchedOff:Wyłączony awaryjnie`
+          : !enabled
+            ? $localize`:@@admin.serverDisabled:Wyłączony`
+            : pendingTools.length
+              ? $localize`:@@admin.serverPending:Do zatwierdzenia`
+              : $localize`:@@admin.serverActive:Aktywny`,
+        tone: serverOff || !enabled ? 'error' : pendingTools.length ? 'warn' : 'ok',
         tools,
       };
     });
@@ -172,6 +196,12 @@ export class AdminPage implements OnInit {
       });
     } catch (error) {
       this.registry.set({ status: 'error', failure: toApiFailure(error) });
+    }
+    try {
+      this.switches.set((await firstValueFrom(this.adminApi.listAdminKillSwitches())).switches);
+    } catch {
+      // The switches are an addition to this view; their own page reports a failed read.
+      this.switches.set([]);
     }
   }
 

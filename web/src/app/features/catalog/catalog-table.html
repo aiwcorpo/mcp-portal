@@ -79,7 +79,15 @@
               <span [class.muted]="tool.disabled || tool.access === 'denied'">{{
                 tool.title || tool.description
               }}</span>
-              @if (tool.disabled) {
+              @if (tool.disabled && tool.disabledBy === 'kill_switch') {
+                <span class="note muted" i18n="@@catalog.toolKillSwitch"
+                  >Wyłączone awaryjnie przez administratora.</span
+                >
+              } @else if (tool.disabled && tool.disabledBy === 'approval') {
+                <span class="note muted" i18n="@@catalog.toolApproval"
+                  >Czeka na zatwierdzenie przez administratora.</span
+                >
+              } @else if (tool.disabled) {
                 <span class="note muted" i18n="@@catalog.toolDisabled"
                   >Wyłączone przez administratora.</span
                 >

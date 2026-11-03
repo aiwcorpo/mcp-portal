@@ -1,0 +1,295 @@
+import { DatePipe } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { AdminService, KillSwitch, RegistryServer, ServerId } from '../../api/generated';
+import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { stepUpUrlFor } from '../../core/auth-urls';
+import { BrowserNavigation } from '../../core/browser-navigation';
+import { LOADING, LoadState } from '../../core/load-state';
+import { ResumeIntentStore } from '../../core/resume-intent';
+import { SessionService } from '../../core/session.service';
+import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
+import { ErrorNotice } from '../../shared/error-notice';
+import { systemName } from '../../shared/labels';
+import { LoadError } from '../../shared/load-error';
+import { Loading } from '../../shared/loading';
+import { Notice } from '../../shared/notice';
+import { SafeTextPipe } from '../../shared/safe-text.pipe';
+import { neutraliseText } from '../../shared/untrusted-text';
+import { KILL_SWITCHES_PATH } from './admin-path';
+
+/** The longest reason the contract takes (KillSwitchRequest.reason). */
+export const REASON_MAX = 200;
+
+interface Data {
+  switches: KillSwitch[];
+  servers: RegistryServer[];
+}
+
+interface Row {
+  entry: KillSwitch;
+  key: string;
+  scope: string;
+  target: string;
+  toolName: string | null;
+  serverName: string;
+}
+
+const keyOf = (serverId: string, tool: string | null | undefined): string =>
+  `${serverId}/${tool ?? ''}`;
+
+/**
+ * "Wyłączniki awaryjne" (A9, CC-194): what an administrator has switched off, with switching off a server or one tool
+ * and lifting a switch. Switching off needs no second factor because an incident must not wait for one; lifting needs a
+ * fresh MFA, and the lift is carried out by itself after the return from the IdP (U12).
+ */
+@Component({
+  selector: 'app-kill-switches-page',
+  imports: [
+    DatePipe,
+    FormsModule,
+    MatButtonModule,
+    RouterLink,
+    ErrorNotice,
+    LoadError,
+    Loading,
+    Notice,
+    SafeTextPipe,
+  ],
+  templateUrl: './kill-switches-page.html',
+  styleUrl: './kill-switches-page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class KillSwitchesPage implements OnInit {
+  private readonly adminApi = inject(AdminService);
+  private readonly dialog = inject(MatDialog);
+  private readonly navigation = inject(BrowserNavigation);
+  private readonly resumeStore = inject(ResumeIntentStore);
+  private readonly session = inject(SessionService);
+  private readonly router = inject(Router);
+
+  /** `mfa=ok` in the URL after the IdP returned from the fresh MFA that lifting a switch needs. */
+  readonly mfa = input<string | undefined>();
+
+  protected readonly reasonMax = REASON_MAX;
+  protected readonly state = signal<LoadState<Data>>(LOADING);
+  protected readonly busy = signal(false);
+  protected readonly failure = signal<ApiFailure | null>(null);
+  protected readonly done = signal<string | null>(null);
+  protected readonly resumed = signal(false);
+
+  protected readonly serverId = signal<ServerId | ''>('');
+  protected readonly tool = signal('');
+  protected readonly reason = signal('');
+
+  protected readonly rows = computed<Row[]>(() => {
+    const state = this.state();
+    return state.status !== 'ready'
+      ? []
+      : state.value.switches.map((entry) => {
+          const server = state.value.servers.find(
+            (candidate) => candidate.serverId === entry.serverId,
+          );
+          const serverName = server ? systemName(server.system) : entry.serverId;
+          return {
+            entry,
+            key: keyOf(entry.serverId, entry.tool),
+            scope:
+              entry.scope === 'server'
+                ? $localize`:@@killSwitches.scopeServer:Serwer`
+                : $localize`:@@killSwitches.scopeTool:Narzędzie`,
+            target: neutraliseText(
+              entry.scope === 'server'
+                ? serverName
+                : `${server?.system ?? entry.serverId}__${entry.tool ?? ''}`,
+            ).text,
+            toolName: entry.tool ?? null,
+            serverName,
+          };
+        });
+  });
+  protected readonly servers = computed(() => {
+    const state = this.state();
+    return state.status === 'ready'
+      ? state.value.servers.map((server) => ({
+          id: server.serverId,
+          name: systemName(server.system),
+        }))
+      : [];
+  });
+  protected readonly tools = computed(() => {
+    const state = this.state();
+    const id = this.serverId();
+    const server =
+      state.status === 'ready' ? state.value.servers.find((s) => s.serverId === id) : null;
+    return server ? server.tools.map((tool) => tool.name) : [];
+  });
+  protected readonly reasonLeft = computed(() => REASON_MAX - this.reason().length);
+  protected readonly canSwitchOff = computed(
+    () => this.serverId() !== '' && this.reason().trim().length > 0 && this.reasonLeft() >= 0,
+  );
+
+  ngOnInit(): void {
+    void this.load().then(() => this.resumeLift());
+  }
+
+  protected async load(): Promise<void> {
+    this.state.set(LOADING);
+    await this.read();
+  }
+
+  private async read(): Promise<void> {
+    try {
+      const [list, servers] = await Promise.all([
+        firstValueFrom(this.adminApi.listAdminKillSwitches()),
+        firstValueFrom(this.adminApi.getAdminRegistry()),
+      ]);
+      this.state.set({ status: 'ready', value: { switches: list.switches, servers } });
+    } catch (error) {
+      this.state.set({ status: 'error', failure: toApiFailure(error) });
+    }
+  }
+
+  protected onServer(value: string): void {
+    this.serverId.set(value as ServerId | '');
+    this.tool.set('');
+  }
+
+  protected async switchOff(): Promise<void> {
+    const id = this.serverId();
+    if (id === '' || !this.canSwitchOff() || this.busy()) {
+      return;
+    }
+    const tool = this.tool() || null;
+    const target = tool ? `${this.serverName(id)}: ${tool}` : this.serverName(id);
+    const confirmed = await this.confirm({
+      title: $localize`:@@killSwitches.offTitle:Wyłączyć awaryjnie?`,
+      message: $localize`:@@killSwitches.offMessage:${target}:target: przestanie być dostępne dla wszystkich użytkowników i agentów, na każdej instancji gatewaya najpóźniej po 5 sekundach. Wywołania, które już ruszyły, nie są przerywane. Włączenie nie wymaga potwierdzenia tożsamości, zdjęcie wymaga.`,
+      confirmLabel: $localize`:@@killSwitches.offConfirm:Wyłącz`,
+      destructive: true,
+    });
+    if (!confirmed) {
+      return;
+    }
+    this.busy.set(true);
+    this.failure.set(null);
+    this.done.set(null);
+    try {
+      const body = { reason: this.reason().trim() };
+      await firstValueFrom(
+        tool
+          ? this.adminApi.putAdminToolKillSwitch(id, tool, body)
+          : this.adminApi.putAdminServerKillSwitch(id, body),
+      );
+      this.done.set($localize`:@@killSwitches.offDone:Wyłączono: ${target}:target:.`);
+      this.reason.set('');
+      this.tool.set('');
+      await this.read();
+    } catch (error) {
+      this.failure.set(toApiFailure(error));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected async lift(row: Row): Promise<void> {
+    if (this.busy()) {
+      return;
+    }
+    const target = row.target;
+    const confirmed = await this.confirm({
+      title: $localize`:@@killSwitches.liftTitle:Zdjąć wyłącznik?`,
+      message: $localize`:@@killSwitches.liftMessage:${target}:target: znów będzie dostępne dla użytkowników, którzy mają do niego uprawnienia. Zdjęcie wymaga świeżego potwierdzenia tożsamości (MFA).`,
+      confirmLabel: $localize`:@@killSwitches.liftConfirm:Zdejmij wyłącznik`,
+    });
+    if (confirmed) {
+      await this.performLift(row.entry.serverId, row.toolName, target);
+    }
+  }
+
+  private async performLift(
+    serverId: ServerId,
+    tool: string | null,
+    target: string,
+  ): Promise<void> {
+    this.busy.set(true);
+    this.failure.set(null);
+    this.done.set(null);
+    try {
+      await firstValueFrom(
+        tool
+          ? this.adminApi.deleteAdminToolKillSwitch(serverId, tool)
+          : this.adminApi.deleteAdminServerKillSwitch(serverId),
+      );
+      this.done.set($localize`:@@killSwitches.liftDone:Zdjęto wyłącznik: ${target}:target:.`);
+      await this.read();
+    } catch (error) {
+      const failure = toApiFailure(error);
+      if (failure.code === 'step_up_required' && !this.resumed()) {
+        this.resumeStore.save(
+          { kind: 'lift-kill-switch', serverId, tool },
+          this.session.username(),
+        );
+        this.navigation.assign(
+          stepUpUrlFor(failure.stepUpUrl, `${KILL_SWITCHES_PATH}?mfa=ok`, this.navigation.origin),
+        );
+        return;
+      }
+      this.failure.set(failure);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  /**
+   * After the return from the IdP the lift that was confirmed before it is carried out once, without a second click. It
+   * is carried out only for a switch that is still on; if somebody lifted it meanwhile nothing is sent.
+   */
+  private async resumeLift(): Promise<void> {
+    if (this.mfa() !== 'ok') {
+      return;
+    }
+    void this.router.navigate([], { queryParams: { mfa: null }, replaceUrl: true });
+    const intent = this.resumeStore.take('lift-kill-switch', this.session.username());
+    const state = this.state();
+    if (!intent || state.status !== 'ready') {
+      return;
+    }
+    const row = this.rows().find(
+      (candidate) => candidate.key === keyOf(intent.serverId, intent.tool),
+    );
+    if (!row) {
+      return;
+    }
+    this.resumed.set(true);
+    await this.performLift(row.entry.serverId, row.toolName, row.target);
+  }
+
+  private serverName(id: string): string {
+    const state = this.state();
+    const server =
+      state.status === 'ready' ? state.value.servers.find((s) => s.serverId === id) : null;
+    return server ? systemName(server.system) : id;
+  }
+
+  private async confirm(data: ConfirmDialogData): Promise<boolean> {
+    const result = await firstValueFrom(
+      this.dialog
+        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, { data })
+        .afterClosed(),
+    );
+    return result === true;
+  }
+}

@@ -14,15 +14,15 @@ import { ResourceRef } from './resourceRef';
 
 
 /**
- * Fields of a manifest tool entry, open for composition (used by the gateway registry API).
+ * Fields of a manifest tool entry, open for composition (used by the gateway registry API). risk and action are required by ToolEntry and forbidden by AdapterToolEntry.
  */
 export interface ToolEntryFields { 
     /**
      * Server-side tool name (without the gateway prefix). Snake case; a double underscore is forbidden because the gateway uses it as the <system>__<tool> separator (C5).
      */
     name: string;
-    risk: Risk;
-    action: ToolAction;
+    risk?: Risk;
+    action?: ToolAction;
     /**
      * Always present; an empty array when the tool takes no resource identifier (one canonical form for definitionHash).
      */
