@@ -47,6 +47,13 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 - Nie sprawdzone: workflow `.github/workflows/release.yml` (nie ma repozytorium ani paczek), `ci/run.sh --container` w całości (krok
   `npm ci` w kontenerze potrzebuje sieci, a ta maszyna jej nie ma), pobranie jarów z GitHub Packages.
 
+## M6: kontrakty 6.3.2 (2026-11-03)
+
+`clean verify`: 502 testy. Jary 6.3.2 z `~/.m2`. `PUT .../secret` przyjmuje `username` (sito znaków jak `backendUser`, bez `:`; null to 400;
+nie jest logowany, audytowany ani zwracany); katalog niesie `userSecretScheme` i `deployment` (wartości spoza enum pomijane). `400` w
+`approve` (CC-210) i `503` katalogu przy nieczytelnych wyłącznikach są sprawdzane względem C12. Obrazy: `mcp-portal-bff:m6-9a9a80d`,
+`mcp-portal:m6-9a9a80d`, `mcp-portal-web:m6-9a9a80d` (bez wdrażania, nginx stable z digestem z rejestru).
+
 ## M2: wynik (2026-10-28)
 
 `./mvnw test`: 131 testów, 0 błędów. `-Pdev-env`: `DevEnvironmentFlowTest` pomija się (realm `corp` nie ma redirect URI

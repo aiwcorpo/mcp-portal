@@ -4,6 +4,18 @@ M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, 
 
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.
 
+## M6: kontrakty 6.3.2 (2026-11-03)
+
+Paczka `aiwcorpo-mcp-contracts-6.3.2.tgz` zrobiona `npm pack` z checkoutu `mcp-contracts` na `v6.3.2` do `web/.contracts/` (sha256 1811f148..., identyczny z plikiem
+wydania), klient i mocki z niej. `npm test`: 539 testów; `npm run e2e`: 198 przeszło, 12 pominiętych. Zmiany:
+- Formularz tokenu: pole loginu przy `CatalogCredential.userSecretScheme === 'Basic'` (tekst, bez `:` i znaków ukrytych, do 255 znaków, obcinany); login
+  wychodzi w `PUT .../secret`, nigdy nie jest wyświetlany po odpowiedzi. Mock: `?mockBasic=in` (Jira), 400 gdy login nie pasuje do schematu.
+- Dialog klasyfikacji: tylko Odczyt i `read` (adapter jest tylko do odczytu, CC-227); mock odpowiada `422 classification_not_allowed` na inne.
+- Wpis adaptera z unieważnioną klasyfikacją (`riskLowered` bez `approvedEntry`): ponowna klasyfikacja to obniżenie, `acceptRiskLowering`, dialog, świeże MFA,
+  wznowienie po powrocie (mock: narzędzie `link_issues`).
+- 503 katalogu: ogólny komunikat z ponowieniem (istniejący).
+- Obraz `mcp-portal-web:m6-9a9a80d`. Zrzut 09 w README (formularz z loginem).
+
 ## M6: stan
 
 Liczby: `npm test` 29 plików, 535 testów; `npm run e2e` 194 przeszły, 12 pominiętych (zrzuty, tylko z `SHOTS_DIR` albo `README_SHOTS_DIR`); `ci/run.sh` bez kroku kontenerowego: OK.
