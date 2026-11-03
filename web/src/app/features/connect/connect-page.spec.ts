@@ -315,7 +315,7 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
     bodies.length = 0;
   });
 
-  /** Jira Cloud with a token only for the user, in the Basic scheme (login plus password or API token). */
+  /** Jira Data Center with a token only for the user, in the Basic scheme (login plus password or API token). */
   function serveJiraBasic(): void {
     store.update({ basicLogin: true });
     server.use(
@@ -329,7 +329,7 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
                 supportedTypes: ['user-secret'],
                 defaultType: 'user-secret',
                 userSecretScheme: 'Basic',
-                deployment: 'cloud',
+                deployment: 'dc',
               },
             }),
           ],
@@ -342,7 +342,7 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
     return document.querySelector<HTMLInputElement>('input[formcontrolname="username"]');
   }
 
-  it('asks for the login next to the password or API token, for Jira Cloud', async () => {
+  it('asks for the login next to the password or API token, for Jira Data Center', async () => {
     serveJiraBasic();
     configureTestApp();
     await openRoute('/connect/jira');

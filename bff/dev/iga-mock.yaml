@@ -5,7 +5,7 @@ entitlements:
   confluence: [mcp-confluence-read, mcp-confluence-write, mcp-confluence-space-ENG]
   gitlab: [mcp-gitlab-read, mcp-gitlab-write, mcp-gitlab-grp-team-a]
   servicedesk: [mcp-servicedesk-read, mcp-servicedesk-write, mcp-servicedesk-queue-IT]
-  opensearch: [mcp-opensearch-read, mcp-opensearch-idx-logs-team-a, mcp-opensearch-idx-logs-team-b]
+  opensearch: [mcp-opensearch-read, mcp-opensearch-ops, mcp-opensearch-idx-logs-team-a, mcp-opensearch-idx-logs-team-b]
 descriptions:
   mcp-jira-read: Read access to Jira issues and projects
   mcp-jira-write: Create and update Jira issues
@@ -16,6 +16,7 @@ descriptions:
   mcp-gitlab-write: Push and merge request access to GitLab projects
   mcp-servicedesk-read: Read access to Service Desk tickets
   mcp-opensearch-read: Search access to OpenSearch indexes
+  mcp-opensearch-ops: Cluster health and backend version (get_cluster_health, get_backend_info) in OpenSearch
 requests:
   - user: bob
     requestId: REQ-2026-0042

@@ -28,8 +28,9 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 ## M6: stan (2026-11-03)
 
-`clean verify`: 497 testów, 0 błędów (`bff/ci/run.sh`). Opis: sekcja "M6" w README.
+`clean verify`: 503 testy, 0 błędów (`bff/ci/run.sh`). Opis: sekcja "M6" w README.
 
+- Katalog mocka IGA (`dev/iga-mock.yaml`) zna grupę `mcp-opensearch-ops` (cluster health i wersja backendu; test na prawdziwym pliku). README i teksty UI nie obiecują Jira Cloud (serwer: tylko Data Center, Cloud później); obrazy bez zmian (plik dev i teksty nie wchodzą do obrazu).
 - Kontrakty 6.2.0: jary `mcp-contracts`, `mcp-manifest` i `test-vectors` z `~/.m2`; z rejestru, gdy ustawione `MCP_MAVEN_REPOSITORY_URL`
   (GitHub Packages: `https://maven.pkg.github.com/aiwcorpo/mcp-contracts`, ustawienia w `.ci/settings.xml`, ten sam mechanizm co dotąd).
   Nie ma w gicie żadnego pliku z kontraktami.

@@ -170,12 +170,12 @@ function baseCatalog(
   }
   const jira = servers.find((server) => server.system === 'jira');
   if (jira && basicLogin) {
-    // Jira Cloud: the e-mail of the account and an API token (CC-222).
+    // Jira Data Center: the login of the account and a password or token (CC-222).
     jira.credential = {
       supportedTypes: ['user-secret'],
       defaultType: 'user-secret',
       userSecretScheme: 'Basic',
-      deployment: 'cloud',
+      deployment: 'dc',
     };
   }
   if (jira) {

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 
 class MockAccessGovernanceTest {
 
@@ -30,6 +31,15 @@ class MockAccessGovernanceTest {
 
     private static final AccessGovernance.Requester ALICE = new AccessGovernance.Requester("sub-a", "alice",
             "alice@corp.test", Map.of("sub", "sub-a", "preferred_username", "alice", "email", "alice@corp.test"));
+
+    @Test
+    void devCatalogOffersTheOpensearchOpsGroupWithADescription() {
+        MockAccessGovernance iga = new MockAccessGovernance(new FileSystemResource("dev/iga-mock.yaml"),
+                "preferred_username", Clock.systemUTC());
+        assertThat(iga.catalog("opensearch")).filteredOn(entitlement -> entitlement.name().equals("mcp-opensearch-ops"))
+                .singleElement().satisfies(entitlement -> assertThat(entitlement.description())
+                        .contains("get_cluster_health", "get_backend_info"));
+    }
 
     @Test
     void identifiesTheRequesterByTheConfiguredClaim() {

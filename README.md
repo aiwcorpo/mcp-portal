@@ -27,7 +27,7 @@ odtwarzanie: `cd web && npm run screenshots`.
 | ![Połączenia z systemami](docs/screenshots/03-polaczenia-z-systemami.png) Połączenia z systemami i Authenticator. | ![Połączenie w błędzie](docs/screenshots/04-polaczenie-w-bledzie.png) Połączenie, któremu zniknął sekret: wiersz prosi o ponowne połączenie. |
 | ![Adres MCP](docs/screenshots/05-adres-mcp.png) Adres `/mcp` z filtrem i gotowe polecenia dla klientów. | ![Różnice definicji](docs/screenshots/06-administracja-roznice.png) Administracja: różnice między zatwierdzoną a oczekującą definicją. |
 | ![Klasyfikacja](docs/screenshots/07-klasyfikacja-narzedzia.png) Klasyfikacja narzędzia obcego serwera: adapter jest tylko do odczytu, więc dialog oferuje wyłącznie Odczyt i `read`. | ![Wyłącznik awaryjny](docs/screenshots/08-wylacznik-awaryjny.png) Wyłącznik awaryjny: lista włączonych, włączenie bez MFA, zdjęcie po świeżym MFA. |
-| ![Formularz z loginem](docs/screenshots/09-formularz-z-loginem.png) Token w schemacie Basic (np. Jira Cloud): pole loginu obok hasła albo tokenu API; login nie wraca z serwera i nie trafia do logów. | |
+| ![Formularz z loginem](docs/screenshots/09-formularz-z-loginem.png) Token w schemacie Basic (login i hasło albo token): pole loginu obok hasła albo tokenu API; login nie wraca z serwera i nie trafia do logów. | |
 
 ## Instalacja
 
@@ -114,7 +114,7 @@ commicie, a nie to, co leży w katalogu roboczym. Niczego nie wysyła do rejestr
   albo usuwa dane, nie przejdzie przez adapter. Podpowiedzi serwera są tylko tekstem do przeczytania. Zmiana definicji cofa
   narzędzie do oczekujących. Klasyfikacja zapisu (`UPDATE`, `DESTRUCTIVE`) zapisana przed gatewayem 6.3.x jest nieważna: wpis wraca
   do oczekujących, a ponowne zatwierdzenie jako Odczyt to obniżenie, które wymaga świeżego MFA (po powrocie z IdP wykonuje się samo).
-- **Token z loginem.** System w schemacie `Basic` (`userSecretScheme` w katalogu, np. Jira Cloud z adresem e-mail) pokazuje w
+- **Token z loginem.** System w schemacie `Basic` (`userSecretScheme` w katalogu, np. Jira Data Center z loginem i hasłem) pokazuje w
   formularzu pole loginu obok hasła albo tokenu API. Login idzie do brokera razem z sekretem; BFF go nie loguje, nie zapisuje w
   audycie i nie zwraca. Brak loginu przy `Basic` albo login przy `Bearer` to 400 z brokera.
 - **Katalog niedostępny (503).** Gdy gateway nie może odczytać stanu wyłączników, katalog odpowiada 503 i portal pokazuje

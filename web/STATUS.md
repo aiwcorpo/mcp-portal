@@ -22,6 +22,7 @@ wydania), klient i mocki z niej. `npm test`: 539 testów; `npm run e2e`: 198 prz
 
 Liczby: `npm test` 29 plików, 535 testów; `npm run e2e` 194 przeszły, 12 pominiętych (zrzuty, tylko z `SHOTS_DIR` albo `README_SHOTS_DIR`); `ci/run.sh` bez kroku kontenerowego: OK.
 
+- Dane mocka i testy formularza z loginem (`Basic`) mówią o Jira Data Center (`deployment: dc`), nie o Cloud; logika bez zmian. Obraz bez zmian.
 - Kontrakty 6.2.0: paczka npm w `web/.contracts/` (poza gitem), `scripts/contracts.sh` (plik, adres z sumą, checkout na tagu z `npm pack`, GitHub Packages
   przez `NODE_AUTH_TOKEN`). `npm pack` z rozpakowanej paczki daje identyczne bajty (sha256 `3e244f22...`), więc checkout na tagu `v6.2.0` odtwarza tę samą paczkę.
   Przejście na rejestr: wpis `"6.2.0"` w `package.json` i `~/.npmrc` z tokenem (README, "Paczka kontraktów"). Klient API wygenerowany ponownie.
