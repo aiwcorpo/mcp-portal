@@ -1,6 +1,31 @@
 # STATUS: mcp-portal/web (ws-08)
 
+M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, dialog klasyfikacji narzędzi adaptera, stan `error` połączenia, wznawianie po MFA dla wyłącznika i klasyfikacji. Obraz `mcp-portal-web:m6-ea6d179` (bez wdrażania). Szczegóły w sekcji "M6: stan".
+
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.
+
+## M6: stan
+
+Liczby: `npm test` 29 plików, 534 testy; `npm run e2e` 194 przeszły, 12 pominiętych (zrzuty, tylko z `SHOTS_DIR` albo `README_SHOTS_DIR`); `ci/run.sh` bez kroku kontenerowego: OK.
+
+- Kontrakty 6.2.0: paczka npm w `web/.contracts/` (poza gitem), `scripts/contracts.sh` (plik, adres z sumą, checkout na tagu z `npm pack`, GitHub Packages
+  przez `NODE_AUTH_TOKEN`). `npm pack` z rozpakowanej paczki daje identyczne bajty (sha256 `3e244f22...`), więc checkout na tagu `v6.2.0` odtwarza tę samą paczkę.
+  Przejście na rejestr: wpis `"6.2.0"` w `package.json` i `~/.npmrc` z tokenem (README, "Paczka kontraktów"). Klient API wygenerowany ponownie.
+- Wyłącznik awaryjny: `/admin/kill-switches` (lista włączonych, włączenie serwera lub narzędzia z powodem do 200 znaków i potwierdzeniem, zdjęcie z
+  potwierdzeniem i świeżym MFA); rejestr pokazuje "Wyłączony awaryjnie" i link do ekranu; katalog mówi "Wyłączone awaryjnie przez administratora" dla `disabledBy: kill_switch`.
+  Nie ma makiety tego ekranu (makiety w `design/` go nie mają); układ jest wzorowany na "Administracji" (makieta 07).
+- Klasyfikacja (CC-193, CC-207): dialog z ryzykiem (Odczyt, Zapis, Usuwanie) i akcją ograniczoną do par, które przyjmuje gateway; nic nie jest
+  zaznaczone z góry, podpowiedzi z `annotations` i poprzednia klasyfikacja są tylko tekstem (`neutraliseText`); `422 classification_*` otwiera
+  dialog ponownie z wyborem i komunikatem. Klasyfikacja niższa niż dotychczasowa to obniżenie (dialog, MFA, `acceptRiskLowering`).
+- `RegistryTool.risk` i `.action` opcjonalne (także `ToolEntry` w wygenerowanych typach: generator gubi `required` z `allOf`, patrz CC-210).
+- Stan `error` połączenia: wiersz katalogu "Połączenie przestało działać, połącz konto ponownie", wiersz połączeń "przestało działać, połącz konto ponownie",
+  przycisk jak dla `reconnect_required` (OAuth: "Połącz", token: "Odnów").
+- U12: `ResumeIntentStore` zna `lift-kill-switch` i `approve-tool` z klasyfikacją; po `?mfa=ok` wyłącznik jest zdejmowany tylko wtedy, gdy nadal działa, a
+  zatwierdzenie z klasyfikacją tylko dla tego samego skrótu. Test: drugi `step_up_required` po powrocie to błąd, nie pętla.
+- Mock: `?mockAdapter=in` (trzy narzędzia adaptera: nowe, nowe z mylącą adnotacją `readOnlyHint: true`, sklasyfikowane i zmienione), `?mockSecretMissing=in`,
+  stanowe wyłączniki.
+- Teksty: `src/locale/messages.xlf` wyekstrahowany.
+- Zrzuty do README: `npm run screenshots` (`e2e/readme-shots.spec.ts`, 8 zrzutów 1280 px w `../docs/screenshots`, dane z mocków).
 
 ## Kamienie M5
 

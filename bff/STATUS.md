@@ -22,6 +22,28 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M5.1 | kontrakty 5.1.0; usunięcie proxy linków; `GET /api/v1/me/mcp-endpoint` (CC-175, CC-182); aktywność z `filter` i `denied_filter_scope` (CC-174, CC-188); `/mcp` zarezerwowane w `ReturnPath` | zrobione |
 | M5.2 | wznowienie po step-up (U12): powrót na stronę, z której poszło żądanie | zrobione |
 | M5.3 | `ci/run.sh` + `make ci`, obraz `m5-<sha>` bez wdrażania | zrobione |
+| M6.1 | kontrakty 6.2.0 (jary), wektory `http-broken-escape` i pokrewne przez surowe żądanie | zrobione |
+| M6.2 | wyłącznik awaryjny (A9): `GET /admin/kill-switches`, `PUT` i `DELETE` serwera i narzędzia, zdjęcie ze step-up; `approve` z `risk` i `action`, widoki rejestru dla wpisu adaptera, `disabledBy` w katalogu | zrobione |
+| M6.3 | porządki do wydania: wyszukiwanie JDK 25, LICENSE, NOTICE, SECURITY, CONTRIBUTING, CHANGELOG, `Dockerfile` w korzeniu repozytorium, `scripts/build-images.sh`, workflow wydania (nie uruchomiony), README ze zrzutami; obraz `m6-ea6d179` bez wdrażania | zrobione |
+
+## M6: stan (2026-11-03)
+
+`clean verify`: 496 testów, 0 błędów (`bff/ci/run.sh`). Opis: sekcja "M6" w README.
+
+- Kontrakty 6.2.0: jary `mcp-contracts`, `mcp-manifest` i `test-vectors` z `~/.m2`; z rejestru, gdy ustawione `MCP_MAVEN_REPOSITORY_URL`
+  (GitHub Packages: `https://maven.pkg.github.com/aiwcorpo/mcp-contracts`, ustawienia w `.ci/settings.xml`, ten sam mechanizm co dotąd).
+  Nie ma w gicie żadnego pliku z kontraktami.
+- Wyłącznik: włączenie bez MFA, zdjęcie ze świeżym MFA (`StepUpPolicy.requireFresh`, `returnPath` ze strony, z której poszło żądanie: U12
+  po stronie BFF bez zmian, wznowienie robi web). Decyzja własna: powód z ukrytymi znakami albo dłuższy niż 200 znaków to `400`; kontrakt
+  nazywa go tekstem nieufnym i nie mówi, czy BFF ma go odrzucić (propozycja CC-210 w `mcp-contracts`).
+- `approve`: BFF sprawdza tylko wartości `risk` i `action` (`400` dla nieznanej wartości albo połowy pary); zgodność pary i to, że
+  wpis jest z adaptera, rozstrzyga gateway (`422` z `reason`). `400` nie występuje w kontrakcie `approveAdminTool` (CC-210).
+- `adapter_mode_mismatch` i pozostałe powody `ManifestRejected` przechodzą bez zmian (wzorzec `^[a-z][a-z0-9_]*$`).
+- Obraz: `mcp-portal-bff:m6-ea6d179`, `mcp-portal:m6-ea6d179` (BFF z aplikacją) i `mcp-portal-web:m6-ea6d179`, z `scripts/build-images.sh` i `Dockerfile`
+  tego repozytorium (nie z `mcp-platform-dev`). Sprawdzone uruchomieniem: `portal` startuje w profilu `dev`, `/actuator/health` UP,
+  `/api/v1/me` 401, trasa SPA 200 z CSP i nonce; `web` odpowiada na `/__web/health` i serwuje `index.html` z CSP. Nie wdrożone na stos.
+- Nie sprawdzone: workflow `.github/workflows/release.yml` (nie ma repozytorium ani paczek), `ci/run.sh --container` w całości (krok
+  `npm ci` w kontenerze potrzebuje sieci, a ta maszyna jej nie ma), pobranie jarów z GitHub Packages.
 
 ## M2: wynik (2026-10-28)
 
