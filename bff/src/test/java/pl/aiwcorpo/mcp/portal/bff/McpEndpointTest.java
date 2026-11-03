@@ -100,6 +100,10 @@ class McpEndpointTest extends PortalHarness {
                 .withHeader("Content-Type", "application/json").withBody(catalog.toString())));
     }
 
+    private static boolean brokenEscape(String query) {
+        return query.matches(".*%(?![0-9A-Fa-f]{2}).*");
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("vectors")
     void everyVectorOverHttpAsTheClientSendsTheQuery(String name, JsonNode vector) {
@@ -110,7 +114,10 @@ class McpEndpointTest extends PortalHarness {
         String httpQuery = input.has("httpQuery") ? input.get("httpQuery").asString()
                 : input.get("rawQuery").asString().replace("%", "%25");
 
-        HttpResponse<String> response = session().get(PATH + (httpQuery.isEmpty() ? "" : "?" + httpQuery));
+        String target = PATH + (httpQuery.isEmpty() ? "" : "?" + httpQuery);
+        TestBrowser browser = session();
+        // %zz and a lone percent sign cannot be written as a java.net.URI, but a browser sends them as typed (CC-202).
+        HttpResponse<String> response = brokenEscape(httpQuery) ? browser.getRawTarget(target) : browser.get(target);
 
         C12.assertResponse("GET", PATH, response);
         assertThat(response.statusCode()).isEqualTo(expected.get("status").asInt());

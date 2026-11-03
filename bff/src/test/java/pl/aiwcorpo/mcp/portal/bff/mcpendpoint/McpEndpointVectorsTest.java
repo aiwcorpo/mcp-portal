@@ -70,7 +70,7 @@ class McpEndpointVectorsTest {
     @MethodSource("vectors")
     void theQueryAsTheClientSentItComposesTheRawQuery(String name, JsonNode vector) {
         JsonNode input = vector.get("input");
-        if (!input.has("httpQuery")) {
+        if (!input.has("httpQuery") || vector.get("expected").get("status").asInt() == 400) {
             return;
         }
         List<Map.Entry<String, String>> pairs = new ArrayList<>();

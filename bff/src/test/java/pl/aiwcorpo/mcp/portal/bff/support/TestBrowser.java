@@ -1,11 +1,15 @@
 package pl.aiwcorpo.mcp.portal.bff.support;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,6 +56,90 @@ public final class TestBrowser {
 
     public HttpResponse<String> get(String pathOrUrl, Map<String, String> headers) {
         return send(request(pathOrUrl).GET(), headers);
+    }
+
+    /**
+     * GET with the request target written byte for byte, for queries that {@link java.net.URI} refuses to build (a lone
+     * percent sign, {@code %zz}); a browser sends such a target as typed. Cookies and Referer are those of the session.
+     */
+    public HttpResponse<String> getRawTarget(String rawTarget) {
+        StringBuilder head = new StringBuilder("GET ").append(rawTarget).append(" HTTP/1.1\r\nHost: ")
+                .append(origin.getHost()).append(':').append(origin.getPort()).append("\r\nConnection: close\r\n");
+        if (!cookies.isEmpty()) {
+            head.append("Cookie: ").append(String.join("; ", cookies.entrySet().stream()
+                    .map(e -> e.getKey() + "=" + e.getValue()).toList())).append("\r\n");
+        }
+        if (referer != null) {
+            head.append("Referer: ").append(referer).append("\r\n");
+        }
+        head.append("\r\n");
+        try (Socket socket = new Socket(origin.getHost(), origin.getPort())) {
+            socket.getOutputStream().write(head.toString().getBytes(StandardCharsets.US_ASCII));
+            socket.getOutputStream().flush();
+            ByteArrayOutputStream raw = new ByteArrayOutputStream();
+            socket.getInputStream().transferTo(raw);
+            HttpResponse<String> response = parseRaw(raw.toString(StandardCharsets.UTF_8), origin.resolve("/"));
+            history.add(response);
+            storeCookies(response);
+            return response;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /** Status line, headers and the body, decoded when chunked. */
+    private static HttpResponse<String> parseRaw(String text, URI uri) {
+        int split = text.indexOf("\r\n\r\n");
+        String[] lines = text.substring(0, split).split("\r\n");
+        int status = Integer.parseInt(lines[0].split(" ")[1]);
+        Map<String, List<String>> map = new LinkedHashMap<>();
+        for (int i = 1; i < lines.length; i++) {
+            int colon = lines[i].indexOf(':');
+            map.computeIfAbsent(lines[i].substring(0, colon).trim(), k -> new ArrayList<>()).add(lines[i].substring(colon + 1).trim());
+        }
+        String body = text.substring(split + 4);
+        if (map.entrySet().stream().anyMatch(e -> e.getKey().equalsIgnoreCase("Transfer-Encoding")
+                && e.getValue().stream().anyMatch(v -> v.equalsIgnoreCase("chunked")))) {
+            body = dechunk(body);
+        }
+        HttpHeaders headers = HttpHeaders.of(map, (k, v) -> true);
+        return new RawResponse(status, headers, body, uri);
+    }
+
+    private static String dechunk(String chunked) {
+        StringBuilder out = new StringBuilder();
+        int at = 0;
+        while (true) {
+            int eol = chunked.indexOf("\r\n", at);
+            int size = Integer.parseInt(chunked.substring(at, eol).split(";")[0].trim(), 16);
+            if (size == 0) {
+                return out.toString();
+            }
+            out.append(chunked, eol + 2, eol + 2 + size);
+            at = eol + 2 + size + 2;
+        }
+    }
+
+    private record RawResponse(int statusCode, HttpHeaders headers, String body, URI uri) implements HttpResponse<String> {
+        @Override
+        public HttpRequest request() {
+            return HttpRequest.newBuilder(uri).build();
+        }
+
+        @Override
+        public Optional<HttpResponse<String>> previousResponse() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<javax.net.ssl.SSLSession> sslSession() {
+            return Optional.empty();
+        }
+
+        @Override
+        public HttpClient.Version version() {
+            return HttpClient.Version.HTTP_1_1;
+        }
     }
 
     public HttpResponse<String> put(String path, String json, boolean withCsrf) {
