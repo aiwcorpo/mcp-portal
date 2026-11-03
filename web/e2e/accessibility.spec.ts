@@ -46,6 +46,7 @@ const PAGES = [
   { path: '/logs', ready: 'Logi audytowe' },
   { path: '/requests', ready: 'Wnioski' },
   { path: '/admin?mockAdmin=in', ready: 'Administracja' },
+  { path: '/admin/kill-switches?mockAdmin=in', ready: 'Wyłączniki awaryjne' },
   { path: '/endpoint', ready: 'Adres MCP' },
 ];
 
@@ -63,6 +64,40 @@ for (const scheme of ['dark', 'light'] as const) {
       await expectNoViolations(page);
     });
   }
+
+  test(`the classification dialog, the kill switch with entries and the error state have no violations (${scheme})`, async ({
+    page,
+  }) => {
+    await page.goto('/admin?mockAdmin=in&mockAdapter=in');
+    await useScheme(page, scheme);
+    await page.getByRole('button', { name: 'Pokaż różnice (jira__delete_comment)' }).click();
+    await expect(page.getByText('Źródło: adapter obcego serwera.')).toBeVisible();
+    await expectNoViolations(page);
+    await page
+      .getByRole('button', { name: 'Sklasyfikuj i zatwierdź (jira__delete_comment)' })
+      .click();
+    const dialog = page.getByRole('dialog', { name: 'Klasyfikacja narzędzia' });
+    await dialog.getByLabel('Zapis UPDATE').check();
+    await expect(dialog.getByLabel('update: zmiana danych')).toBeVisible();
+    await expectNoViolations(page);
+    await dialog.getByRole('button', { name: 'Anuluj' }).click();
+
+    await page.goto('/admin/kill-switches');
+    await page.getByLabel('Serwer', { exact: true }).selectOption('mcp-jira');
+    await page.getByLabel('Narzędzie', { exact: true }).selectOption('update_issue');
+    await page.getByLabel('Powód', { exact: true }).fill('Zapisy psują workflow');
+    await page.getByRole('button', { name: 'Wyłącz', exact: true }).click();
+    await page
+      .getByRole('dialog', { name: 'Wyłączyć awaryjnie?' })
+      .getByRole('button', { name: 'Wyłącz' })
+      .click();
+    await expect(page.getByText('Wyłączono: Jira: update_issue.')).toBeVisible();
+    await expectNoViolations(page);
+
+    await page.goto('/connections?mockSecretMissing=in');
+    await expect(page.getByText('przestało działać, połącz konto ponownie')).toBeVisible();
+    await expectNoViolations(page);
+  });
 
   test(`the registration steps and every Authenticator state have no violations (${scheme})`, async ({
     page,
