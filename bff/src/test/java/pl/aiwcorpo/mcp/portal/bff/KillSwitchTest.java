@@ -253,6 +253,20 @@ class KillSwitchTest extends PortalHarness {
     }
 
     @Test
+    void anUnreadableSwitchStoreMakesTheCatalog503WithoutAnyDetail() {
+        GATEWAY.stubFor(get(urlPathEqualTo("/admin/v1/catalog")).atPriority(1).willReturn(aResponse().withStatus(503)
+                .withHeader("Retry-After", "10").withHeader("Content-Type", "application/json")
+                .withBody("{\"error\":\"upstream_unavailable\",\"message\":\"switch table kill_switches unreadable\"}")));
+
+        HttpResponse<String> response = admin().get("/api/v1/catalog");
+
+        C12.assertResponse("GET", "/api/v1/catalog", response);
+        assertThat(response.statusCode()).isEqualTo(503);
+        assertThat(JSON.readTree(response.body()).get("error").asString()).isEqualTo("upstream_unavailable");
+        assertThat(response.body()).doesNotContain("kill_switches");
+    }
+
+    @Test
     void theCsrfHeaderIsRequired() {
         TestBrowser browser = admin();
 

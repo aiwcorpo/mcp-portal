@@ -6,16 +6,17 @@ export interface Classification {
   action: ToolAction;
 }
 
-export const RISKS: readonly Risk[] = ['READ_ONLY', 'UPDATE', 'DESTRUCTIVE'];
-
 /**
- * The pairs the gateway accepts (CC-207): read only for READ_ONLY, update for UPDATE, delete for DESTRUCTIVE, and admin
- * for UPDATE or DESTRUCTIVE. Anything else is 422 classification_inconsistent, so the dialog offers no other pair.
+ * An adapter is read only (CC-227): the gateway refuses any other classification of an adapter tool with
+ * 422 classification_not_allowed, so the dialog offers READ_ONLY and read and nothing else. A tool that writes or deletes
+ * is not run through an adapter until a later contract version says otherwise.
  */
+export const RISKS: readonly Risk[] = ['READ_ONLY'];
+
 export const ALLOWED_ACTIONS: Record<Risk, readonly ToolAction[]> = {
   READ_ONLY: ['read'],
-  UPDATE: ['update', 'admin'],
-  DESTRUCTIVE: ['delete', 'admin'],
+  UPDATE: [],
+  DESTRUCTIVE: [],
 };
 
 export function allowedPair(risk: Risk | null, action: ToolAction | null): boolean {

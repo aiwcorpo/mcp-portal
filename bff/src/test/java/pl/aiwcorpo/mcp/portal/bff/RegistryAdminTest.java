@@ -443,7 +443,10 @@ class RegistryAdminTest extends PortalHarness {
                 "{\"definitionHash\":\"" + HASH + "\",\"risk\":\"UPDATE\"}",
                 "{\"definitionHash\":\"" + HASH + "\",\"action\":\"update\"}",
                 "{\"definitionHash\":\"" + HASH + "\",\"risk\":5,\"action\":\"update\"}")) {
-            assertThat(approve(browser, APPROVE, body, true).statusCode()).as(body).isEqualTo(400);
+            HttpResponse<String> response = approve(browser, APPROVE, body, true);
+            // CC-210: 400 is in the contract of approveAdminTool.
+            C12.assertResponse("POST", APPROVE_TEMPLATE, response);
+            assertThat(response.statusCode()).as(body).isEqualTo(400);
         }
         assertThat(approvals()).isEmpty();
         assertThat(lastAuditEvent().get("outcome").asString()).isEqualTo("error");

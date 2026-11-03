@@ -11,7 +11,7 @@
 
 export interface KillSwitchRequest { 
     /**
-     * Why the switch is on, free text of the administrator. Kept in the registry and shown in the portal; never part of an audit event and untrusted text for the UI like every administrator text (CC-094 rules).
+     * Why the switch is on, free text of the administrator. Kept in the registry and shown in the portal; never part of an audit event and untrusted text for the UI like every administrator text (CC-094 rules). The portal BFF rejects a reason that contains hidden or control characters (text hygiene rules) with `400 invalid_request`, because the administrator types it and such a character is almost certainly a mistake; the gateway keeps its own range check (CC-210).
      */
     reason: string;
 }

@@ -64,3 +64,15 @@ test('the token is optional-dated and required', async ({ page }) => {
   await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
   await expect(page.getByText('Połączono z Jira jako jkowalski.')).toBeVisible();
 });
+
+test('a system with a login: the form asks for the login next to the password or API token', async ({
+  page,
+}) => {
+  await page.goto('/connect/jira?mockBasic=in');
+  await page.getByLabel('Login w systemie (np. adres e-mail konta)').fill('anna.nowak@firma.pl');
+  await page.getByLabel('Hasło albo token API').fill('test-only-api-token');
+  await page.getByRole('button', { name: 'Sprawdź i zapisz' }).click();
+  await expect(page.getByText(/Połączono z Jira jako/)).toBeVisible();
+  await expect(page.getByText('anna.nowak@firma.pl')).toHaveCount(0);
+  await expect(page.getByText('test-only-api-token')).toHaveCount(0);
+});

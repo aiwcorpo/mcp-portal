@@ -35,8 +35,8 @@ class CatalogAssemblerTest {
             new PublicUrls(java.net.URI.create("https://mcp.aiwcorpo.pl/"), new DevMode(false)));
 
     private static final List<SystemInfo> SYSTEMS = List.of(
-            new SystemInfo("jira", List.of("user-secret", "user-oauth"), "user-secret", List.of()),
-            new SystemInfo("confluence", List.of("user-oauth", "user-secret"), "user-secret", List.of()),
+            new SystemInfo("jira", List.of("user-secret", "user-oauth"), "user-secret", List.of(), "Bearer", "dc"),
+            new SystemInfo("confluence", List.of("user-oauth", "user-secret"), "user-secret", List.of(), "Basic", "cloud"),
             new SystemInfo("gitlab", List.of("user-oauth", "user-secret"), "user-oauth", List.of("read_api", "api")),
             new SystemInfo("servicedesk", List.of("service-account"), "service-account", List.of()),
             new SystemInfo("opensearch", List.of("token-exchange"), "token-exchange", List.of()));
@@ -111,7 +111,9 @@ class CatalogAssemblerTest {
             JsonNode credential = server.get("credential");
             systems.add(new SystemInfo(server.get("system").asString(),
                     List.of(JSON.treeToValue(credential.get("supportedTypes"), String[].class)),
-                    credential.get("defaultType").asString(), List.of()));
+                    credential.get("defaultType").asString(), List.of(),
+                    credential.has("userSecretScheme") ? credential.get("userSecretScheme").asString() : null,
+                    credential.has("deployment") ? credential.get("deployment").asString() : null));
         }
 
         PortalCatalog result = ASSEMBLER.assemble(new Catalog(servers), connections, systems, requests);

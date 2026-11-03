@@ -4,9 +4,9 @@
     <code>{{ data.toolName }}</code>
   </p>
   <p i18n="@@classify.lead">
-    To narzędzie pochodzi z obcego serwera, który nie określa, jak groźna jest operacja. Ustal to
-    sam: od poziomu ryzyka zależy, czy wywołanie wymaga kodu z Authenticatora, i jakie reguły je
-    obejmują.
+    To narzędzie pochodzi z obcego serwera, który nie określa, jak groźna jest operacja. Adapter
+    jest tylko do odczytu: możesz je zatwierdzić wyłącznie jako Odczyt (read). Narzędzie, które
+    zapisuje albo usuwa dane, nie przejdzie przez adapter, więc go nie zatwierdzaj.
   </p>
 
   @if (data.retry; as retry) {

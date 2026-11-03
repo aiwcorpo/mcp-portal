@@ -93,39 +93,17 @@ describe('AdminPage: tools of an adapter', () => {
     expect(bodies).toEqual([]);
   });
 
-  it('offers only the actions that fit the risk and approves with the chosen pair', async () => {
+  it('offers only Odczyt and read (an adapter is read only) and approves with them', async () => {
     await startClassification('jira__add_worklog');
 
-    choose('classify-risk', 'UPDATE');
-    await until(() =>
-      expect(
-        Array.from(
-          dialog().querySelectorAll<HTMLInputElement>('input[name="classify-action"]'),
-        ).map((input) => input.value),
-      ).toEqual(['update', 'admin']),
-    );
-    expect(confirmClassification().getAttribute('aria-disabled')).toBe('true');
-    choose('classify-action', 'update');
-    await until(() =>
-      expect(confirmClassification().getAttribute('aria-disabled')).not.toBe('true'),
-    );
-    confirmClassification().click();
-
-    await until(() => expect(text()).toContain('Zatwierdzono definicję jira__add_worklog.'));
-    expect(bodies).toEqual([
-      { definitionHash: expect.stringMatching(/^sha256:/), risk: 'UPDATE', action: 'update' },
-    ]);
-    await until(() => expect(text()).toContain('Zatwierdzone · Zapis'));
-    expect(store.state.classified['mcp-jira/add_worklog']).toMatchObject({
-      risk: 'UPDATE',
-      action: 'update',
-    });
-  });
-
-  it('takes the only action of READ_ONLY by itself and restricts DESTRUCTIVE to delete and admin', async () => {
-    await startClassification('jira__add_worklog');
-
+    expect(
+      Array.from(dialog().querySelectorAll<HTMLInputElement>('input[name="classify-risk"]')).map(
+        (input) => input.value,
+      ),
+    ).toEqual(['READ_ONLY']);
+    expect(text(dialog())).toContain('tylko do odczytu');
     choose('classify-risk', 'READ_ONLY');
+    // The only possible action is taken by itself.
     await until(() =>
       expect(
         Array.from(
@@ -133,14 +111,17 @@ describe('AdminPage: tools of an adapter', () => {
         ).map((input) => `${input.value}:${input.checked}`),
       ).toEqual(['read:true']),
     );
-    choose('classify-risk', 'DESTRUCTIVE');
-    await until(() =>
-      expect(
-        Array.from(
-          dialog().querySelectorAll<HTMLInputElement>('input[name="classify-action"]'),
-        ).map((input) => `${input.value}:${input.checked}`),
-      ).toEqual(['delete:false', 'admin:false']),
-    );
+    confirmClassification().click();
+
+    await until(() => expect(text()).toContain('Zatwierdzono definicję jira__add_worklog.'));
+    expect(bodies).toEqual([
+      { definitionHash: expect.stringMatching(/^sha256:/), risk: 'READ_ONLY', action: 'read' },
+    ]);
+    await until(() => expect(text()).toContain('Zatwierdzone · Odczyt'));
+    expect(store.state.classified['mcp-jira/add_worklog']).toMatchObject({
+      risk: 'READ_ONLY',
+      action: 'read',
+    });
   });
 
   it('sends nothing when the dialog is cancelled', async () => {
@@ -153,39 +134,32 @@ describe('AdminPage: tools of an adapter', () => {
     expect(text()).not.toContain('Zatwierdzono definicję');
   });
 
-  it('shows the 422 classification_inconsistent in the dialog and keeps the choice', async () => {
+  it.each([
+    ['classification_inconsistent', 'Ryzyko i akcja nie pasują do siebie.'],
+    ['classification_not_allowed', 'Klasyfikować można tylko narzędzia z adaptera.'],
+  ])('shows the 422 %s in the dialog and keeps the choice', async (reason, message) => {
     server.use(
       http.post(
         '/api/v1/admin/registry/servers/mcp-jira/tools/add_worklog/approve',
         () =>
           HttpResponse.json(
-            {
-              error: 'manifest_rejected',
-              reason: 'classification_inconsistent',
-              message: 'server text that must not be shown',
-            },
+            { error: 'manifest_rejected', reason, message: 'server text that must not be shown' },
             { status: 422 },
           ),
         { once: true },
       ),
     );
     await startClassification('jira__add_worklog');
-    choose('classify-risk', 'UPDATE');
-    await until(() => expect(dialog().querySelector('input[name="classify-action"]')).toBeTruthy());
-    choose('classify-action', 'admin');
+    choose('classify-risk', 'READ_ONLY');
     await until(() =>
       expect(confirmClassification().getAttribute('aria-disabled')).not.toBe('true'),
     );
     confirmClassification().click();
 
-    await until(() => expect(text(dialog())).toContain('Ryzyko i akcja nie pasują do siebie.'));
+    await until(() => expect(text(dialog())).toContain(message));
     expect(text(dialog())).not.toContain('server text');
     expect(
-      dialog().querySelector<HTMLInputElement>('input[name="classify-risk"][value="UPDATE"]')
-        ?.checked,
-    ).toBe(true);
-    expect(
-      dialog().querySelector<HTMLInputElement>('input[name="classify-action"][value="admin"]')
+      dialog().querySelector<HTMLInputElement>('input[name="classify-risk"][value="READ_ONLY"]')
         ?.checked,
     ).toBe(true);
 
@@ -277,20 +251,32 @@ describe('AdminPage: tools of an adapter', () => {
       expect(store.state.registryApproved).toEqual([]);
       expect(bodies.length).toBe(1);
     });
+  });
 
-    it('does not ask for the MFA when the new classification is the same or higher', async () => {
-      await startClassification('jira__transition_issue');
-
-      await chooseAndConfirm('DESTRUCTIVE', 'delete');
-
-      await until(() => expect(text()).toContain('Zatwierdzono definicję jira__transition_issue.'));
+  describe('an entry whose stored classification the gateway voided (CC-227)', () => {
+    it('is a lowering from the floor: dialogs, a fresh MFA, acceptRiskLowering, then it resumes by itself (U12)', async () => {
+      const { navigation, harness } = await startClassification('jira__link_issues');
+      expect(text()).toContain('Obniżenie ryzyka.');
+      await chooseAndConfirm('READ_ONLY');
+      await until(() => expect(text(dialog())).toContain('Zatwierdzić obniżenie ryzyka?'));
+      button('Zatwierdź obniżenie ryzyka', dialog()).click();
+      await until(() => expect(navigation.assign).toHaveBeenCalled());
       expect(bodies).toEqual([
         {
           definitionHash: expect.stringMatching(/^sha256:/),
-          risk: 'DESTRUCTIVE',
-          action: 'delete',
+          acceptRiskLowering: true,
+          risk: 'READ_ONLY',
+          action: 'read',
         },
       ]);
+      expect(store.state.registryApproved).toEqual([]);
+
+      store.update({ mfaFresh: true });
+      await harness.navigateByUrl('/catalog');
+      await harness.navigateByUrl('/admin?mfa=ok');
+
+      await until(() => expect(text()).toContain('Zatwierdzono definicję jira__link_issues.'));
+      expect(store.state.classified['mcp-jira/link_issues']).toMatchObject({ risk: 'READ_ONLY' });
     });
   });
 });

@@ -26,6 +26,9 @@ public record PortalCatalog(List<Server> servers) {
             List<GatewayModel.CatalogTool> tools) {
     }
 
-    public record Credential(List<String> supportedTypes, String defaultType) {
+    /** {@code CatalogCredential}; {@code userSecretScheme} decides about the login field of the token form (CC-222). */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record Credential(List<String> supportedTypes, String defaultType, String userSecretScheme,
+                             String deployment) {
     }
 }

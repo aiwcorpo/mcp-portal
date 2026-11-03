@@ -2,7 +2,7 @@
 
 Frontend portalu platformy MCP (strumień ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, teksty po polsku przez `$localize`. Rozmawia wyłącznie z BFF przez API C12
-(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 6.2.0). BFF (`../bff`, ws-07) serwuje zbudowane
+(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 6.3.2). BFF (`../bff`, ws-07) serwuje zbudowane
 pliki z tego samego originu.
 
 Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
@@ -10,7 +10,7 @@ Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
 ## Wymagania
 
 - Node 24, npm 11.
-- Paczka `@aiwcorpo/mcp-contracts` 6.2.0 (OpenAPI, handlery MSW, wektory) jako zależność deweloperska; leży w `web/.contracts/`
+- Paczka `@aiwcorpo/mcp-contracts` 6.3.2 (OpenAPI, handlery MSW, wektory) jako zależność deweloperska; leży w `web/.contracts/`
   (katalog poza gitem), skąd czyta ją npm. Wypełnia go `scripts/contracts.sh`, patrz "Paczka kontraktów" niżej.
 - Java 25 tylko do ponownego wygenerowania klienta API (`npm run generate:api`).
 - Chromium dla Playwright: `npx playwright install chromium` (raz).
@@ -21,14 +21,14 @@ scripts/contracts.sh && npm ci
 
 ### Paczka kontraktów
 
-`package.json` wskazuje plik: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-6.2.0.tgz"`. Katalog
+`package.json` wskazuje plik: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-6.3.2.tgz"`. Katalog
 `.contracts/` jest w `.gitignore`, więc repozytorium nie trzyma żadnego tarballa. `scripts/contracts.sh` kładzie tam paczkę
 z pierwszego dostępnego źródła: plik już leży (sprawdza `CONTRACTS_TARBALL_SHA256`, gdy ustawiona), `CONTRACTS_TARBALL=<plik>`,
-`CONTRACTS_TARBALL_URL=<adres>`, `CONTRACTS_SOURCE_DIR=<checkout mcp-contracts na tagu v6.2.0>` (robi tam `npm pack`; paczka z tego
+`CONTRACTS_TARBALL_URL=<adres>`, `CONTRACTS_SOURCE_DIR=<checkout mcp-contracts na tagu v6.3.2>` (robi tam `npm pack`; paczka z tego
 samego tagu ma te same bajty) albo, przy ustawionym `NODE_AUTH_TOKEN` (token z `read:packages`), `npm pack` z GitHub Packages.
 `ci/run.sh` woła go sam przed `npm ci`.
 
-Przejście na GitHub Packages bez pliku pośredniego: w `package.json` zmienić wpis na `"@aiwcorpo/mcp-contracts": "6.2.0"`,
+Przejście na GitHub Packages bez pliku pośredniego: w `package.json` zmienić wpis na `"@aiwcorpo/mcp-contracts": "6.3.2"`,
 dodać do swojego `~/.npmrc` (token nie trafia do pliku w repozytorium; `web/.npmrc` ma już adres rejestru dla zakresu `@aiwcorpo`):
 
 ```
@@ -70,7 +70,7 @@ filtr daje `400 invalid_filter`.
 
 Dodatkowe parametry adresu (też do końca sesji przeglądarki): `mockAdapter=in` (dwa narzędzia adaptera czekają w rejestrze Jiry
 na klasyfikację, jedno było sklasyfikowane i zmieniło się: obniżenie wymaga MFA), `mockSecretMissing=in` (połączenie Jiry w stanie
-`error`). Wyłączniki awaryjne mock trzyma w stanie (`/admin/kill-switches`), zdjęcie wymaga "świeżego MFA" tak jak zatwierdzenie
+`error`), `mockBasic=in` (formularz tokenu Jiry z polem loginu, `userSecretScheme: Basic`). Wyłączniki awaryjne mock trzyma w stanie (`/admin/kill-switches`), zdjęcie wymaga "świeżego MFA" tak jak zatwierdzenie
 z obniżeniem ryzyka.
 
 Z prawdziwym BFF (ws-01, port 18090):

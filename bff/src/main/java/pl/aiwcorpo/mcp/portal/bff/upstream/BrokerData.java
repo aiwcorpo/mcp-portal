@@ -18,6 +18,8 @@ public final class BrokerData {
 
     static final Set<String> CREDENTIAL_TYPES = Set.of("user-oauth", "user-secret", "token-exchange", "service-account");
     static final Set<String> CONNECTION_STATUSES = Set.of("connected", "expiring", "expired", "revoked", "error");
+    static final Set<String> SCHEMES = Set.of("Bearer", "Basic");
+    static final Set<String> DEPLOYMENTS = Set.of("dc", "cloud");
     static final Set<String> RISKS = Set.of("READ_ONLY", "UPDATE", "DESTRUCTIVE");
     static final Set<String> DISABLED_BY = Set.of("kill_switch", "approval", "configuration");
     static final Set<String> TOOL_ACTIONS = Set.of("read", "update", "delete", "admin");
@@ -58,7 +60,9 @@ public final class BrokerData {
                 continue;
             }
             result.add(new BrokerModel.SystemInfo(s.system(), supported, s.defaultType(),
-                    s.oauthScopes() == null ? List.of() : s.oauthScopes()));
+                    s.oauthScopes() == null ? List.of() : s.oauthScopes(),
+                    s.userSecretScheme() != null && SCHEMES.contains(s.userSecretScheme()) ? s.userSecretScheme() : null,
+                    s.deployment() != null && DEPLOYMENTS.contains(s.deployment()) ? s.deployment() : null));
         }
         return result;
     }

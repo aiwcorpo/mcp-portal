@@ -26,16 +26,23 @@ public final class BrokerModel {
             String system,
             List<String> supportedTypes,
             String defaultType,
-            List<String> oauthScopes) {
+            List<String> oauthScopes,
+            String userSecretScheme,
+            String deployment) {
+
+        public SystemInfo(String system, List<String> supportedTypes, String defaultType, List<String> oauthScopes) {
+            this(system, supportedTypes, defaultType, oauthScopes, null, null);
+        }
     }
 
     /** {@code PutSecretRequest}. The secret is only ever passed through; it is not logged or printed. */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record PutSecretRequest(String secret, String expiresAt) {
+    public record PutSecretRequest(String secret, String username, String expiresAt) {
 
+        /** Neither the secret nor the login is ever printed (CC-222). */
         @Override
         public String toString() {
-            return "PutSecretRequest[secret=<redacted>, expiresAt=" + expiresAt + "]";
+            return "PutSecretRequest[secret=<redacted>, username=<redacted>, expiresAt=" + expiresAt + "]";
         }
     }
 

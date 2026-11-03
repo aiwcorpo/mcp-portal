@@ -8,7 +8,7 @@
 #   4. CONTRACTS_SOURCE_DIR=<checkout>      `npm pack` in a checkout of mcp-contracts at the release tag (dist/ built there)
 #   5. NODE_AUTH_TOKEN set                  `npm pack` from the registry of the @aiwcorpo scope in .npmrc (GitHub Packages)
 #
-# When the dependency in package.json is a registry version ("6.2.0" instead of a file: path) there is nothing to prepare.
+# When the dependency in package.json is a registry version ("6.3.2" instead of a file: path) there is nothing to prepare.
 set -euo pipefail
 
 web_dir="$(cd "$(dirname "$0")/.." && pwd)"

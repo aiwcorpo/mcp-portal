@@ -21,11 +21,11 @@ export interface ApproveRequest {
      */
     acceptRiskLowering?: boolean;
     /**
-     * Classification by the administrator (CC-193). Required for an entry with source adapter, which has no risk; forbidden for any other entry (422 manifest_rejected, reason classification_not_allowed). The classification is data of the registry, outside definitionHash; lowering a classification given earlier needs acceptRiskLowering like any lowering (CC-167).
+     * Classification by the administrator (CC-193). Required for an entry with source adapter, which has no risk, and for such an entry only READ_ONLY is accepted (an adapter is read only, CC-227, any other value is 422 manifest_rejected, reason classification_not_allowed); forbidden for any other entry (the same 422). The classification is data of the registry, outside definitionHash; lowering a classification given earlier needs acceptRiskLowering like any lowering (CC-167).
      */
     risk?: Risk;
     /**
-     * Cedar action given by the administrator together with risk (CC-193); required and forbidden under the same conditions as risk.
+     * Cedar action given by the administrator together with risk (CC-193); required and forbidden under the same conditions as risk; for an adapter it fits READ_ONLY, so it is read.
      */
     action?: ToolAction;
 }

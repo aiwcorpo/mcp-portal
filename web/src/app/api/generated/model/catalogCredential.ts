@@ -16,8 +16,26 @@ import { CredentialType } from './credentialType';
 export interface CatalogCredential { 
     supportedTypes: Array<CredentialType>;
     defaultType: CredentialType;
+    /**
+     * Scheme of `user-secret` for the system (C4 `SystemInfo.userSecretScheme`, CC-222). `Basic`, the form of `add_secret` has the field of the login (`username`) next to the secret; `Bearer` or absent, one token (the contract before 6.3.1 had only this).
+     */
+    userSecretScheme?: CatalogCredential.UserSecretSchemeEnum;
+    /**
+     * Kind of installation (C4 `SystemInfo.deployment`, CC-222), information only; it does not decide about the field of the login.
+     */
+    deployment?: CatalogCredential.DeploymentEnum;
 }
 export namespace CatalogCredential {
+    export const UserSecretSchemeEnum = {
+        Bearer: 'Bearer',
+        Basic: 'Basic',
+    } as const;
+    export type UserSecretSchemeEnum = typeof UserSecretSchemeEnum[keyof typeof UserSecretSchemeEnum];
+    export const DeploymentEnum = {
+        Dc: 'dc',
+        Cloud: 'cloud',
+    } as const;
+    export type DeploymentEnum = typeof DeploymentEnum[keyof typeof DeploymentEnum];
 }
 
 

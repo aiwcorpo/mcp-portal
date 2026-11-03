@@ -65,6 +65,8 @@ export interface MockState extends M3State, AdminState {
   /** Requests of the user; null means the scenario's seed. */
   requests: MockRequest[] | null;
   iga: MockIga;
+  /** Jira asks for a login next to the token (userSecretScheme Basic, CC-222). */
+  basicLogin: boolean;
   pendingOAuth: { system: SystemId; returnPath: string } | null;
 }
 
@@ -91,6 +93,7 @@ export function initialMockState(): MockState {
     connections: {},
     requests: null,
     iga: 'direct',
+    basicLogin: false,
     pendingOAuth: null,
     ...initialM3State(),
     ...initialAdminState(),
@@ -148,7 +151,11 @@ const iso = (time: number): string => new Date(time).toISOString().replace(/\.\d
  * tool list and the link wizard look like the mockups; dates are relative to now so that "expires in
  * 5 days" stays true.
  */
-function baseCatalog(scenario: MockScenario, now: number): PortalCatalogServer[] {
+function baseCatalog(
+  scenario: MockScenario,
+  now: number,
+  basicLogin = false,
+): PortalCatalogServer[] {
   const source = scenario === 'mixed' ? 'mixed' : 'states';
   const servers = exampleBody<PortalCatalog>('getPortalCatalog', source).servers;
   for (const server of servers) {
@@ -162,6 +169,15 @@ function baseCatalog(scenario: MockScenario, now: number): PortalCatalogServer[]
     return servers;
   }
   const jira = servers.find((server) => server.system === 'jira');
+  if (jira && basicLogin) {
+    // Jira Cloud: the e-mail of the account and an API token (CC-222).
+    jira.credential = {
+      supportedTypes: ['user-secret'],
+      defaultType: 'user-secret',
+      userSecretScheme: 'Basic',
+      deployment: 'cloud',
+    };
+  }
   if (jira) {
     jira.tools = [
       tool('jira', 'search_issues', 'Wyszukiwanie zgłoszeń (JQL)', {
@@ -316,15 +332,17 @@ export function mockCatalog(state: MockState, now: number = Date.now()): PortalC
       .filter((request) => request.status === 'pending')
       .map((request) => request.entitlement),
   );
-  const servers = baseCatalog(state.scenario, now).map((server): PortalCatalogServer => {
-    const override = state.connections[server.system];
-    const connection =
-      override === undefined
-        ? (server.connection ?? null)
-        : override && connectionOf(server.system, override, server.connection, now);
-    const row = deriveRow(server, connection, pending);
-    return { ...server, connection, ...row, tools: withKillSwitches(server, state.killSwitches) };
-  });
+  const servers = baseCatalog(state.scenario, now, state.basicLogin).map(
+    (server): PortalCatalogServer => {
+      const override = state.connections[server.system];
+      const connection =
+        override === undefined
+          ? (server.connection ?? null)
+          : override && connectionOf(server.system, override, server.connection, now);
+      const row = deriveRow(server, connection, pending);
+      return { ...server, connection, ...row, tools: withKillSwitches(server, state.killSwitches) };
+    },
+  );
   return { servers };
 }
 
@@ -481,6 +499,14 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
         return portalBffExample('putMySecret', 'secret_invalid');
       }
       const system = params['system'] as SystemId;
+      // Basic needs the login and a single token must not carry one (CC-222): the broker answers 400 either way.
+      const basic =
+        baseCatalog(store.state.scenario, Date.now(), store.state.basicLogin).find(
+          (server) => server.system === system,
+        )?.credential?.userSecretScheme === 'Basic';
+      if (basic !== (body.username !== undefined)) {
+        return failure('invalid_request', 400);
+      }
       const expiresAt = body.expiresAt ?? null;
       const soon =
         expiresAt !== null && Date.parse(expiresAt) - Date.now() < EXPIRING_WITHIN_DAYS * DAY_MS;

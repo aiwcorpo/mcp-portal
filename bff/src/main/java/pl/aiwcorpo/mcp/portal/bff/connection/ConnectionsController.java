@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +34,9 @@ import pl.aiwcorpo.mcp.portal.bff.web.RequestIds;
 import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Connections of the current user (C12 over C4). The secret of {@code PUT .../secret} lives only in the request
@@ -51,8 +54,12 @@ class ConnectionsController {
     private final UserTokens tokens;
     private final BrokerClient broker;
     private final AuditLog audit;
+    private static final Pattern USERNAME = Pattern.compile(
+            "^[^:\\p{Cc}\\p{Cf}\\p{Cs}\\u2028\\u2029\\ufdd0-\\ufdef\\ufffe\\uffff\\u034f\\u115f\\u1160\\u3164\\uffa0\\u2800\\ufe00-\\ufe0f]+$");
+
     private final Clock clock;
     private final SessionRateLimiter limiter;
+    private final JsonMapper secretTreeReader = StrictJson.builder().build();
     private final ObjectReader secretReader = StrictJson.builder().build()
             .readerFor(BrokerModel.PutSecretRequest.class)
             .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
@@ -156,6 +163,11 @@ class ConnectionsController {
         }
         BrokerModel.PutSecretRequest body;
         try {
+            // A null login is not a missing one: the contract has no null for a string field.
+            JsonNode tree = secretTreeReader.readTree(rawBody);
+            if (tree != null && tree.has("username") && !tree.get("username").isString()) {
+                return null;
+            }
             body = secretReader.readValue(rawBody);
         } catch (JacksonException e) {
             return null;
@@ -163,8 +175,20 @@ class ConnectionsController {
         return valid(body) ? body : null;
     }
 
+    /**
+     * {@code username} of C12 (CC-222): 1..255 characters, no ':' (RFC 7617) and the character set of {@code backendUser}
+     * (CC-121), so no control, format or surrogate characters, separators or invisible fillers. Whether the system takes a
+     * login at all is the broker's to say (400); the login is not logged, not audited and not returned.
+     */
+    private static boolean validUsername(String username) {
+        return username.codePointCount(0, username.length()) <= 255 && USERNAME.matcher(username).matches();
+    }
+
     private static boolean valid(BrokerModel.PutSecretRequest body) {
         if (body == null || body.secret() == null || body.secret().isEmpty() || body.secret().length() > MAX_SECRET_LENGTH) {
+            return false;
+        }
+        if (body.username() != null && !validUsername(body.username())) {
             return false;
         }
         if (body.expiresAt() == null) {

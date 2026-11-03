@@ -77,8 +77,8 @@ for (const scheme of ['dark', 'light'] as const) {
       .getByRole('button', { name: 'Sklasyfikuj i zatwierdź (jira__delete_comment)' })
       .click();
     const dialog = page.getByRole('dialog', { name: 'Klasyfikacja narzędzia' });
-    await dialog.getByLabel('Zapis UPDATE').check();
-    await expect(dialog.getByLabel('update: zmiana danych')).toBeVisible();
+    await dialog.getByLabel('Odczyt READ_ONLY').check();
+    await expect(dialog.getByLabel('read: odczyt danych')).toBeVisible();
     await expectNoViolations(page);
     await dialog.getByRole('button', { name: 'Anuluj' }).click();
 
@@ -92,6 +92,10 @@ for (const scheme of ['dark', 'light'] as const) {
       .getByRole('button', { name: 'Wyłącz' })
       .click();
     await expect(page.getByText('Wyłączono: Jira: update_issue.')).toBeVisible();
+    await expectNoViolations(page);
+
+    await page.goto('/connect/jira?mockBasic=in');
+    await expect(page.getByLabel('Login w systemie (np. adres e-mail konta)')).toBeVisible();
     await expectNoViolations(page);
 
     await page.goto('/connections?mockSecretMissing=in');

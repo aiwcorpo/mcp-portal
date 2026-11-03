@@ -55,7 +55,10 @@
             }
           </ol>
         </details>
-        <app-secret-form [system]="sys" />
+        <app-secret-form
+          [system]="sys"
+          [scheme]="state.value.server.credential?.userSecretScheme"
+        />
       </section>
     }
   }

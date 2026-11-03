@@ -4,12 +4,12 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 6.2.0 (jary `mcp-contracts`, `mcp-manifest` i `test-vectors` w `~/.m2` albo w rejestrze Maven z `MCP_MAVEN_REPOSITORY_URL`, np. GitHub Packages `https://maven.pkg.github.com/aiwcorpo/mcp-contracts`; ustawienia w `.ci/settings.xml`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 6.3.2 (jary `mcp-contracts`, `mcp-manifest` i `test-vectors` w `~/.m2` albo w rejestrze Maven z `MCP_MAVEN_REPOSITORY_URL`, np. GitHub Packages `https://maven.pkg.github.com/aiwcorpo/mcp-contracts`; ustawienia w `.ci/settings.xml`).
 Obraz: `Dockerfile` w korzeniu repozytorium (cele `bff`, `web`, `portal`), `scripts/build-images.sh`; opis w [../README.md](../README.md).
 
 ## Uruchomienie lokalne
 
-Wymagane: JDK 25 (`scripts/select-jdk.sh` szuka go sam; `JAVA_HOME` ma pierwszeństwo) i `mcp-contracts` 6.2.0 w `~/.m2` albo w rejestrze. Dwa tryby.
+Wymagane: JDK 25 (`scripts/select-jdk.sh` szuka go sam; `JAVA_HOME` ma pierwszeństwo) i `mcp-contracts` 6.3.2 w `~/.m2` albo w rejestrze. Dwa tryby.
 
 Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
@@ -240,7 +240,7 @@ Kontrakty 4.0.0 (stan M4; M5 opisuje sekcja niżej). Szczegóły decyzji w `STAT
 | `RegistryAdminTest` | tylko admin, widoki sprawdzane względem schematu, neutralizacja definicji, przykłady C12, zatwierdzenie z audytem, `409`, `422`, mapowanie statusów |
 | `RateLimitsTest` | limity na sesję (okno, `Retry-After`, liczenie tylko żądań do brokera), `429` z brokera i gateway'a |
 
-## M6: wyłącznik awaryjny i klasyfikacja narzędzi adaptera (kontrakty 6.2.0)
+## M6: wyłącznik awaryjny i klasyfikacja narzędzi adaptera (kontrakty 6.3.2)
 
 - Wyłącznik awaryjny (A9, CC-194), grupa `mcp-platform-admin`: `GET /api/v1/admin/kill-switches` (lista sprawdzana względem schematu, powód
   jako tekst nieufny ze znakami ukrytymi zapisanymi jawnie), `PUT` i `DELETE` pod `.../registry/servers/{serverId}/kill-switch` i
@@ -248,8 +248,13 @@ Kontrakty 4.0.0 (stan M4; M5 opisuje sekcja niżej). Szczegóły decyzji w `STAT
   (`DELETE`) wymaga go i bez niego daje `401 step_up_required` z `stepUpUrl` wracającym na stronę, z której poszło żądanie (U12). Zapis
   w gatewayu (`kill_switch_set`, `kill_switch_cleared`) jest źródłem prawdy; portal zapisuje `admin_change` tylko dla prób bez skutku
   (odmowa, brak MFA, awaria gatewaya) i nigdy nie przepisuje tekstu powodu do audytu.
-- `approve` niesie `risk` i `action` dla narzędzia z adaptera (CC-193); BFF sprawdza wartości enum (`400`), a parę i to, czy wpis jest z
-  adaptera, zostawia gatewayowi (`422 classification_inconsistent`, `classification_required`, `classification_not_allowed` z `reason`).
+- `approve` niesie `risk` i `action` dla narzędzia z adaptera (CC-193); BFF sprawdza wartości enum (`400`, opisane w kontrakcie od CC-210),
+  a parę, to czy wpis jest z adaptera i że adapter przyjmuje tylko `READ_ONLY` (CC-227), zostawia gatewayowi (`422 classification_inconsistent`,
+  `classification_required`, `classification_not_allowed` z `reason`).
+- `PUT .../secret` przyjmuje `username` (CC-222): 1..255 znaków, bez `:` i znaków sterujących, formatujących, separatorów i wypełniaczy
+  (to samo sito co `backendUser`); poza tym login przechodzi do brokera, który rozstrzyga, czy system go przyjmuje (`400`). Nie jest
+  logowany, audytowany ani zwracany; `toString` rekordu go ukrywa. Katalog niesie `userSecretScheme` i `deployment` z `GET /v1/systems`
+  (wartości spoza enum są pomijane).
   Obniżenie wcześniejszej klasyfikacji to `acceptRiskLowering` ze świeżym MFA, jak każde obniżenie.
 - Widoki rejestru przyjmują wpis oczekujący z `source: adapter` bez `risk` i `action` (z pustym `resourceRefs`), `classifiedBy` i
   `classifiedAt`; wpis spoza adaptera dalej musi mieć obie wartości. Katalog przekazuje `disabledBy` tylko przy `disabled: true`.

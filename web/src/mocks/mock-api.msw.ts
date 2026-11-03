@@ -89,7 +89,7 @@ const store = new MockStore(readState(), writeState);
  * ?mockScenario=default|mixed|empty|errors|wide switches the data set, ?mockOAuth=<outcome> the result
  * of the next OAuth provider round trip, ?mockSession=in|out starts with or without a session and
  * ?mockAdmin=in signs in as an administrator (the Administracja tab), ?mockAdapter=in puts two tools of an adapter
- * in the registry, ?mockSecretMissing=in puts the Jira connection in the error state and
+ * in the registry, ?mockSecretMissing=in puts the Jira connection in the error state, ?mockBasic=in makes the Jira token form ask for a login and
  * ?mockAuthenticator=none|active|locked|disabled sets the Authenticator registration and
  * ?mockIga=direct|redirect|groups|down the behaviour of the IGA adapter, all for the rest of the browser session. The preview of the pending operation is /confirm/cnf_4k9Qe2LxW7tB3mZp.
  */
@@ -119,6 +119,9 @@ function applyScenarioFromUrl(): void {
   }
   if (params.get('mockAdapter') === 'in') {
     store.update({ adapter: true });
+  }
+  if (params.get('mockBasic') === 'in') {
+    store.update({ basicLogin: true });
   }
   if (params.get('mockSecretMissing') === 'in') {
     // The secret of the Jira token is gone from the store (CC-205): the connection is in the error state.

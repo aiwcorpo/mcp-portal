@@ -124,7 +124,8 @@ public final class CatalogAssembler {
             actions.add("disconnect");
         }
         PortalCatalog.Credential credential = system == null || system.supportedTypes().isEmpty() ? null
-                : new PortalCatalog.Credential(system.supportedTypes(), system.defaultType());
+                : new PortalCatalog.Credential(system.supportedTypes(), system.defaultType(),
+                        system.userSecretScheme(), system.deployment());
         return new PortalCatalog.Server(server.serverId(), server.system(), server.version(),
                 publicUrls.server(server.serverId()), status, List.copyOf(actions), credential, connection, tools);
     }

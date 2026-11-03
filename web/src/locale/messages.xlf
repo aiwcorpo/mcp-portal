@@ -802,7 +802,7 @@
         <note category="location">src/app/features/admin/classify-dialog.html:7,12</note>
       </notes>
       <segment>
-        <source> To narzędzie pochodzi z obcego serwera, który nie określa, jak groźna jest operacja. Ustal to sam: od poziomu ryzyka zależy, czy wywołanie wymaga kodu z Authenticatora, i jakie reguły je obejmują. </source>
+        <source> To narzędzie pochodzi z obcego serwera, który nie określa, jak groźna jest operacja. Adapter jest tylko do odczytu: możesz je zatwierdzić wyłącznie jako Odczyt (read). Narzędzie, które zapisuje albo usuwa dane, nie przejdzie przez adapter, więc go nie zatwierdzaj. </source>
       </segment>
     </unit>
     <unit id="classify.hints">
@@ -2627,9 +2627,49 @@
         <source>Przejdź do połączeń z systemami</source>
       </segment>
     </unit>
+    <unit id="secret.usernameLabel">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.html:25,28</note>
+      </notes>
+      <segment>
+        <source>Login w systemie (np. adres e-mail konta)</source>
+      </segment>
+    </unit>
+    <unit id="secret.usernameRequired">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.html:48,50</note>
+      </notes>
+      <segment>
+        <source>Wpisz login.</source>
+      </segment>
+    </unit>
+    <unit id="secret.usernameInvalid">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.html:51,53</note>
+      </notes>
+      <segment>
+        <source>Login nie może zawierać dwukropka ani znaków sterujących.</source>
+      </segment>
+    </unit>
+    <unit id="secret.usernameHint">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.html:57,59</note>
+      </notes>
+      <segment>
+        <source> Ten system loguje się parą login i hasło albo token API. Login nie jest nigdzie zapisywany w logach portalu. </source>
+      </segment>
+    </unit>
+    <unit id="secret.passwordLabel">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.html:66,68</note>
+      </notes>
+      <segment>
+        <source>Hasło albo token API</source>
+      </segment>
+    </unit>
     <unit id="secret.tokenLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:23,25</note>
+        <note category="location">src/app/features/connect/secret-form.html:68,70</note>
       </notes>
       <segment>
         <source>Token PAT</source>
@@ -2637,7 +2677,7 @@
     </unit>
     <unit id="secret.tokenPlaceholder">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:32,34</note>
+        <note category="location">src/app/features/connect/secret-form.html:79,81</note>
       </notes>
       <segment>
         <source>Wklej token</source>
@@ -2645,7 +2685,7 @@
     </unit>
     <unit id="secret.tokenTooLong">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:52,54</note>
+        <note category="location">src/app/features/connect/secret-form.html:99,101</note>
       </notes>
       <segment>
         <source> Token jest za długi (maksymalnie <ph id="0" equiv="INTERPOLATION" disp="{{ maxLength }}"/> znaków). </source>
@@ -2653,7 +2693,7 @@
     </unit>
     <unit id="secret.tokenRequired">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:56,58</note>
+        <note category="location">src/app/features/connect/secret-form.html:103,105</note>
       </notes>
       <segment>
         <source> Wklej token. </source>
@@ -2661,7 +2701,7 @@
     </unit>
     <unit id="secret.expiresLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:64,67</note>
+        <note category="location">src/app/features/connect/secret-form.html:111,114</note>
       </notes>
       <segment>
         <source>Data wygaśnięcia tokenu (opcjonalnie)</source>
@@ -2669,7 +2709,7 @@
     </unit>
     <unit id="secret.expiresHint">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:73,74</note>
+        <note category="location">src/app/features/connect/secret-form.html:120,121</note>
       </notes>
       <segment>
         <source>Ustaw najkrótszy możliwy termin.</source>
@@ -2677,7 +2717,7 @@
     </unit>
     <unit id="secret.expiresMark">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:76,77</note>
+        <note category="location">src/app/features/connect/secret-form.html:123,124</note>
       </notes>
       <segment>
         <source> Oznaczymy token jako wygasający 7 dni przed terminem.</source>
@@ -2685,7 +2725,7 @@
     </unit>
     <unit id="secret.noRedisplay">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:83,86</note>
+        <note category="location">src/app/features/connect/secret-form.html:130,133</note>
       </notes>
       <segment>
         <source> Po zapisie token nie jest już nigdzie wyświetlany. </source>
@@ -2693,7 +2733,7 @@
     </unit>
     <unit id="common.cancel2">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:87,88</note>
+        <note category="location">src/app/features/connect/secret-form.html:134,135</note>
         <note category="location">src/app/features/requests/request-dialog.html:77,79</note>
       </notes>
       <segment>
@@ -2702,7 +2742,7 @@
     </unit>
     <unit id="secret.save">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:89,91</note>
+        <note category="location">src/app/features/connect/secret-form.html:136,138</note>
       </notes>
       <segment>
         <source> Sprawdź i zapisz </source>

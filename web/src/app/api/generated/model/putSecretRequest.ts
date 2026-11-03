@@ -11,9 +11,13 @@
 
 export interface PutSecretRequest { 
     /**
-     * Single token (PAT or API key), never login and password (CC-049).
+     * Single token (PAT or API key), or the password or API token belonging to `username` (CC-222). Never a ready `login:password` string.
      */
     secret: string;
+    /**
+     * Login of the user in the target system, for a system whose `userSecretScheme` is `Basic` (Jira or Confluence Cloud with the e-mail, an OpenSearch installation of the customer with its own accounts; CC-222). No `:` (RFC 7617), the character set of `backendUser` (CC-121, no control characters C0 and C1, no format characters such as zero-width, bidi and soft hyphen, no line or paragraph separators, no invisible fillers). Absent for a single token. Together with `secret` it is one secret of the connection, kept where the broker keeps every `user-secret`, with the same policy. Never logged, never returned (the connection shows only `backendUser` from whoami).
+     */
+    username?: string;
     /**
      * ISO 8601 date-time in UTC (suffix Z).
      */

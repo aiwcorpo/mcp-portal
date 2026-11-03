@@ -38,6 +38,11 @@ test.describe('README screenshots', () => {
     await expect(page.getByText('przestało działać, połącz konto ponownie')).toBeVisible();
     await shot(page, '04-polaczenie-w-bledzie');
 
+    await page.goto('/connect/jira?mockBasic=in');
+    await page.getByLabel('Login w systemie (np. adres e-mail konta)').fill('anna.nowak@firma.pl');
+    await expect(page.getByLabel('Hasło albo token API')).toBeVisible();
+    await shot(page, '09-formularz-z-loginem');
+
     await page.goto('/endpoint');
     await page.getByRole('checkbox', { name: /^Jira/ }).check();
     await page.getByLabel('Tylko odczyt').check();
@@ -57,8 +62,8 @@ test.describe('README screenshots', () => {
       .getByRole('button', { name: 'Sklasyfikuj i zatwierdź (jira__delete_comment)' })
       .click();
     const dialog = page.getByRole('dialog', { name: 'Klasyfikacja narzędzia' });
-    await dialog.getByLabel('Usuwanie DESTRUCTIVE').check();
-    await expect(dialog.getByLabel('delete: usunięcie danych')).toBeVisible();
+    await dialog.getByLabel('Odczyt READ_ONLY').check();
+    await expect(dialog.getByLabel('read: odczyt danych')).toBeVisible();
     await shot(page, '07-klasyfikacja-narzedzia');
     await dialog.getByRole('button', { name: 'Anuluj' }).click();
 

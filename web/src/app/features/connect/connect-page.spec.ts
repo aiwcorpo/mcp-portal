@@ -299,3 +299,107 @@ describe('connectOptions', () => {
     expect(connectOptions(server(['copy_link']), null)).toEqual({ oauth: false, token: false });
   });
 });
+
+describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
+  const { server, store } = useMockApi();
+  const bodies: Record<string, unknown>[] = [];
+
+  beforeAll(() => {
+    server.events.on('request:start', async ({ request }) => {
+      if (request.method === 'PUT' && request.url.includes('/secret')) {
+        bodies.push((await request.clone().json()) as Record<string, unknown>);
+      }
+    });
+  });
+  beforeEach(() => {
+    bodies.length = 0;
+  });
+
+  /** Jira Cloud with a token only for the user, in the Basic scheme (login plus password or API token). */
+  function serveJiraBasic(): void {
+    store.update({ basicLogin: true });
+    server.use(
+      http.get('/api/v1/catalog', () =>
+        HttpResponse.json({
+          servers: [
+            serverFixture('jira', {
+              status: 'not_connected',
+              actions: ['add_secret'],
+              credential: {
+                supportedTypes: ['user-secret'],
+                defaultType: 'user-secret',
+                userSecretScheme: 'Basic',
+                deployment: 'cloud',
+              },
+            }),
+          ],
+        }),
+      ),
+    );
+  }
+
+  function usernameInput(): HTMLInputElement | null {
+    return document.querySelector<HTMLInputElement>('input[formcontrolname="username"]');
+  }
+
+  it('asks for the login next to the password or API token, for Jira Cloud', async () => {
+    serveJiraBasic();
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(text()).toContain('Połącz Jira'));
+
+    expect(text()).toContain('Login w systemie (np. adres e-mail konta)');
+    expect(text()).toContain('Hasło albo token API');
+    expect(usernameInput()?.type).toBe('text');
+    expect(tokenInput().type).toBe('password');
+  });
+
+  it('has no login field for a single token (Jira of the example, Bearer)', async () => {
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(text()).toContain('Token PAT'));
+
+    expect(usernameInput()).toBeNull();
+  });
+
+  it('sends the login with the secret, trimmed, and shows nothing of it afterwards', async () => {
+    serveJiraBasic();
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(usernameInput()).toBeTruthy());
+
+    type(usernameInput()!, ' anna@firma.pl ');
+    type(tokenInput(), 'api-token-1');
+    button('Sprawdź i zapisz').click();
+
+    await until(() => expect(text()).toContain('Połączono z Jira jako'));
+    expect(bodies).toEqual([{ secret: 'api-token-1', username: 'anna@firma.pl' }]);
+    expect(text()).not.toContain('anna@firma.pl');
+    expect(text()).not.toContain('api-token-1');
+  });
+
+  it('refuses an empty login and a login with a colon or a hidden character without a request', async () => {
+    serveJiraBasic();
+    configureTestApp();
+    await openRoute('/connect/jira');
+    await until(() => expect(usernameInput()).toBeTruthy());
+
+    type(tokenInput(), 'api-token-1');
+    button('Sprawdź i zapisz').click();
+    await until(() => expect(text()).toContain('Wpisz login.'));
+
+    // Built from code points: a literal hidden character would not survive the style check of the repository.
+    for (const bad of [
+      'anna:admin',
+      `anna${String.fromCodePoint(0x200b)}nowak`,
+      `anna${String.fromCodePoint(0x202e)}nowak`,
+    ]) {
+      type(usernameInput()!, bad);
+      button('Sprawdź i zapisz').click();
+      await until(() =>
+        expect(text()).toContain('Login nie może zawierać dwukropka ani znaków sterujących.'),
+      );
+    }
+    expect(bodies).toEqual([]);
+  });
+});

@@ -20,16 +20,35 @@ test('classify a tool of an adapter: nothing is preselected, only fitting pairs 
   const confirm = dialog.getByRole('button', { name: 'Zatwierdź z tą klasyfikacją' });
   await expect(confirm).toBeDisabled();
 
-  await dialog.getByLabel('Usuwanie DESTRUCTIVE').check();
-  await expect(dialog.getByRole('radio', { name: /^read:/ })).toHaveCount(0);
-  await expect(dialog.getByRole('radio', { name: /^update:/ })).toHaveCount(0);
-  await dialog.getByLabel('delete: usunięcie danych').check();
+  // An adapter is read only (CC-227): the dialog offers Odczyt and read, nothing that writes or deletes.
+  await expect(dialog.getByRole('radio')).toHaveCount(1);
+  await dialog.getByLabel('Odczyt READ_ONLY').check();
+  await expect(dialog.getByRole('radio', { name: /^read:/ })).toBeChecked();
+  await expect(dialog.getByRole('radio', { name: /^(update|delete|admin):/ })).toHaveCount(0);
   await confirm.click();
 
   await expect(page.getByText('Zatwierdzono definicję jira__delete_comment.')).toBeVisible();
   await expect(page.getByRole('row', { name: /jira__delete_comment/ })).toContainText(
-    'Zatwierdzone · Usuwanie',
+    'Zatwierdzone · Odczyt',
   );
+});
+
+test('an entry whose stored classification was voided needs the lowering dialog and a fresh MFA, then resumes by itself', async ({
+  page,
+}) => {
+  await page.goto('/admin?mockAdmin=in&mockAdapter=in');
+  await page.getByRole('button', { name: 'Pokaż różnice (jira__link_issues)' }).click();
+  await expect(page.getByText('Obniżenie ryzyka.')).toBeVisible();
+  await page.getByRole('button', { name: 'Sklasyfikuj i zatwierdź (jira__link_issues)' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Klasyfikacja narzędzia' });
+  await dialog.getByLabel('Odczyt READ_ONLY').check();
+  await dialog.getByRole('button', { name: 'Zatwierdź z tą klasyfikacją' }).click();
+  await page
+    .getByRole('dialog', { name: 'Zatwierdzić obniżenie ryzyka?' })
+    .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka' })
+    .click();
+
+  await expect(page.getByText('Zatwierdzono definicję jira__link_issues.')).toBeVisible();
 });
 
 test('a lower classification than before needs the dialogs and a fresh MFA, then resumes by itself', async ({

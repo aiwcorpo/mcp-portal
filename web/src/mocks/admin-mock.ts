@@ -47,7 +47,13 @@ interface SeedTool {
   /** Present when the tool has an approved entry. */
   approved?: ToolEntry;
   /** Present while a definition waits for approval. */
-  pending?: { entry: ToolEntry | AdapterToolEntry; source: Source; version: string };
+  pending?: {
+    entry: ToolEntry | AdapterToolEntry;
+    source: Source;
+    version: string;
+    /** The stored classification of an adapter entry that the gateway invalidated (CC-227): the floor of the risk. */
+    floor?: Risk;
+  };
 }
 
 interface SeedServer {
@@ -367,6 +373,23 @@ const ADAPTER_TOOLS: SeedTool[] = [
     },
   },
   {
+    // Classified UPDATE before the gateway moved to 6.3.x: the classification is void, the entry waits again with the floor.
+    name: 'link_issues',
+    pending: {
+      source: 'adapter',
+      version: '0.23.1',
+      floor: 'UPDATE',
+      entry: adapterEntry(
+        'link_issues',
+        'Powiązanie zgłoszeń',
+        'Links two issues.',
+        { readOnlyHint: false },
+        { from: ISSUE_KEY, to: ISSUE_KEY },
+        ['from', 'to'],
+      ),
+    },
+  },
+  {
     name: 'add_worklog',
     pending: {
       source: 'adapter',
@@ -398,7 +421,7 @@ const ADAPTER_TOOLS: SeedTool[] = [
   },
 ];
 
-/** Allowed pairs of CC-207, the same table as the portal's classification dialog. */
+/** Pairs that fit each other (CC-207). An adapter accepts only READ_ONLY with read (CC-227). */
 const ALLOWED: Record<Risk, readonly ToolAction[]> = {
   READ_ONLY: ['read'],
   UPDATE: ['update', 'admin'],
@@ -456,7 +479,7 @@ interface Resolved {
   seed: SeedServer;
   tool: SeedTool;
   approved: ToolEntry | null;
-  pending: { entry: AnyEntry; source: Source; version: string } | null;
+  pending: { entry: AnyEntry; source: Source; version: string; floor?: Risk } | null;
 }
 
 function resolveTool(state: Readonly<AdminState>, seed: SeedServer, tool: SeedTool): Resolved {
@@ -491,7 +514,9 @@ export function mockRegistry(state: Readonly<AdminState>): RegistryServer[] {
           change: resolved.approved ? 'changed' : 'new',
           source: resolved.pending.source,
           approvedInVersion: resolved.approved ? '1.3.0' : null,
-          ...(lowersRisk(resolved.approved, resolved.pending.entry) ? { riskLowered: true } : {}),
+          ...(lowersRisk(resolved.approved, resolved.pending.entry) || resolved.pending.floor
+            ? { riskLowered: true }
+            : {}),
         };
       }
       const key = keyOf(seed.serverId, tool.name);
@@ -534,7 +559,9 @@ export function mockPendingTool(
     approvedInVersion: resolved.approved ? '1.3.0' : null,
     pendingVersion: resolved.pending.version,
     source: resolved.pending.source,
-    ...(lowersRisk(resolved.approved, resolved.pending.entry) ? { riskLowered: true } : {}),
+    ...(lowersRisk(resolved.approved, resolved.pending.entry) || resolved.pending.floor
+      ? { riskLowered: true }
+      : {}),
   };
 }
 
@@ -607,6 +634,9 @@ export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHan
         if (!fromAdapter && (risk !== undefined || action !== undefined)) {
           return rejected('classification_not_allowed', `${toolName} is not from an adapter`);
         }
+        if (fromAdapter && risk !== undefined && risk !== 'READ_ONLY') {
+          return rejected('classification_not_allowed', `an adapter is read only, not ${risk}`);
+        }
         if (risk !== undefined && action !== undefined && !ALLOWED[risk].includes(action)) {
           return rejected('classification_inconsistent', `${risk} does not fit ${action}`);
         }
@@ -614,7 +644,9 @@ export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHan
         // An adapter entry is compared with the classification given earlier; any other with the approved entry.
         const earlier = admin().classified[key]?.risk ?? pending.approvedEntry?.risk;
         const lowers = fromAdapter
-          ? earlier !== undefined && risk !== undefined && RISK_ORDER[risk] < RISK_ORDER[earlier]
+          ? // riskLowered: the stored classification was voided and stays the floor (CC-227).
+            pending.riskLowered === true ||
+            (earlier !== undefined && risk !== undefined && RISK_ORDER[risk] < RISK_ORDER[earlier])
           : lowersRisk(pending.approvedEntry, pending.pendingEntry);
         if (lowers && acceptRiskLowering !== true) {
           return rejected('risk_lowered', `${toolName} lowers risk`);
