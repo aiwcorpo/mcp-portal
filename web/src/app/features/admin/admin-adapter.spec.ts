@@ -136,7 +136,10 @@ describe('AdminPage: tools of an adapter', () => {
 
   it.each([
     ['classification_inconsistent', 'Ryzyko i akcja nie pasują do siebie.'],
-    ['classification_not_allowed', 'Klasyfikować można tylko narzędzia z adaptera.'],
+    [
+      'classification_not_allowed',
+      'Adapter jest tylko do odczytu: jego narzędzie można zatwierdzić wyłącznie jako Odczyt (read)',
+    ],
   ])('shows the 422 %s in the dialog and keeps the choice', async (reason, message) => {
     server.use(
       http.post(
@@ -277,6 +280,47 @@ describe('AdminPage: tools of an adapter', () => {
 
       await until(() => expect(text()).toContain('Zatwierdzono definicję jira__link_issues.'));
       expect(store.state.classified['mcp-jira/link_issues']).toMatchObject({ risk: 'READ_ONLY' });
+    });
+
+    it('treats a 422 risk_lowered of an unflagged entry as a lowering: dialog, fresh MFA, again with acceptRiskLowering (U12)', async () => {
+      // merge_issues is voided too, but this gateway does not report riskLowered for it.
+      const { navigation, harness } = await startClassification('jira__merge_issues');
+      expect(text()).not.toContain('Obniżenie ryzyka.');
+      await chooseAndConfirm('READ_ONLY');
+
+      // The first request carries no acceptRiskLowering and is refused with 422 risk_lowered; the portal then asks.
+      await until(() => expect(text(dialog())).toContain('Zatwierdzić obniżenie ryzyka?'));
+      expect(bodies).toEqual([
+        { definitionHash: expect.stringMatching(/^sha256:/), risk: 'READ_ONLY', action: 'read' },
+      ]);
+      button('Zatwierdź obniżenie ryzyka', dialog()).click();
+      await until(() => expect(navigation.assign).toHaveBeenCalled());
+      expect(bodies.at(-1)).toEqual({
+        definitionHash: expect.stringMatching(/^sha256:/),
+        acceptRiskLowering: true,
+        risk: 'READ_ONLY',
+        action: 'read',
+      });
+      expect(store.state.registryApproved).toEqual([]);
+
+      store.update({ mfaFresh: true });
+      await harness.navigateByUrl('/catalog');
+      await harness.navigateByUrl('/admin?mfa=ok');
+
+      await until(() => expect(text()).toContain('Zatwierdzono definicję jira__merge_issues.'));
+      expect(store.state.classified['mcp-jira/merge_issues']).toMatchObject({ risk: 'READ_ONLY' });
+    });
+
+    it('does not send again when the lowering is not confirmed', async () => {
+      await startClassification('jira__merge_issues');
+      await chooseAndConfirm('READ_ONLY');
+      await until(() => expect(text(dialog())).toContain('Zatwierdzić obniżenie ryzyka?'));
+
+      button('Anuluj', dialog()).click();
+
+      await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
+      expect(bodies.length).toBe(1);
+      expect(store.state.registryApproved).toEqual([]);
     });
   });
 });

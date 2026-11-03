@@ -67,7 +67,7 @@ function manifestRejectedMessage(reason: string | undefined): string {
     case 'classification_required':
       return $localize`:@@error.classification_required:To narzędzie pochodzi z adaptera i wymaga klasyfikacji: wybierz ryzyko i akcję.`;
     case 'classification_not_allowed':
-      return $localize`:@@error.classification_not_allowed:Klasyfikować można tylko narzędzia z adaptera. Ta definicja pochodzi z innego źródła.`;
+      return $localize`:@@error.classification_not_allowed:Gateway nie przyjmuje takiej klasyfikacji. Adapter jest tylko do odczytu: jego narzędzie można zatwierdzić wyłącznie jako Odczyt (read), a definicji z innego źródła nie klasyfikuje się.`;
     case 'adapter_mode_mismatch':
       return $localize`:@@error.adapter_mode_mismatch:Tryb serwera w gatewayu nie zgadza się ze źródłem manifestu. Sprawdź konfigurację adaptera.`;
     default:

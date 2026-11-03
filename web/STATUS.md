@@ -16,6 +16,8 @@ wydania), klient i mocki z niej. `npm test`: 539 testów; `npm run e2e`: 198 prz
 - 503 katalogu: ogólny komunikat z ponowieniem (istniejący).
 - Obraz `mcp-portal-web:m6-9a9a80d`. Zrzut 09 w README (formularz z loginem).
 
+- Przegląd migracji 6.3.2: `422 risk_lowered` przy `approve` wpisu adaptera (gateway bez flagi `riskLowered`) jest traktowane jak obniżenie: dialog obniżenia, `acceptRiskLowering`, świeże MFA i wznowienie (U12); mock `merge_issues` jest nieoflagowany. `classification_not_allowed` ma jeden tekst o tym, że adapter przyjmuje tylko Odczyt (`read`). Test jednostkowy i e2e.
+
 ## M6: stan
 
 Liczby: `npm test` 29 plików, 535 testów; `npm run e2e` 194 przeszły, 12 pominiętych (zrzuty, tylko z `SHOTS_DIR` albo `README_SHOTS_DIR`); `ci/run.sh` bez kroku kontenerowego: OK.

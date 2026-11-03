@@ -463,7 +463,7 @@
         <note category="location">src/app/core/error-messages.ts:70</note>
       </notes>
       <segment>
-        <source>Klasyfikować można tylko narzędzia z adaptera. Ta definicja pochodzi z innego źródła.</source>
+        <source>Gateway nie przyjmuje takiej klasyfikacji. Adapter jest tylko do odczytu: jego narzędzie można zatwierdzić wyłącznie jako Odczyt (read), a definicji z innego źródła nie klasyfikuje się.</source>
       </segment>
     </unit>
     <unit id="error.adapter_mode_mismatch">
@@ -1484,7 +1484,7 @@
     </unit>
     <unit id="admin.noVersion">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:92</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:95</note>
       </notes>
       <segment>
         <source>brak wersji</source>
@@ -1492,7 +1492,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.change">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:336</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:354</note>
       </notes>
       <segment>
         <source>z <ph id="0" equiv="from" disp="riskLabel(from)"/> na <ph id="1" equiv="to" disp="target"/></source>
@@ -1500,7 +1500,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.floor">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:337</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:355</note>
       </notes>
       <segment>
         <source>poniżej najwyższego dotąd zgłoszonego poziomu (teraz <ph id="0" equiv="to" disp="target"/>)</source>
@@ -1508,7 +1508,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:342</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:360</note>
       </notes>
       <segment>
         <source>Zatwierdzić obniżenie ryzyka?</source>
@@ -1516,7 +1516,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:343</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:361</note>
       </notes>
       <segment>
         <source>Narzędzie <ph id="0" equiv="tool" disp="name"/> obniża ryzyko <ph id="1" equiv="change" disp="change"/>. Po zatwierdzeniu nowy poziom staje się obowiązujący, a dla narzędzi, które były nieodwracalne, przestaje być wymagany kod z Authenticatora. Zatwierdź tylko, jeśli zmiana jest zamierzona.</source>
@@ -1524,7 +1524,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:344</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:362</note>
       </notes>
       <segment>
         <source>Zatwierdź obniżenie ryzyka</source>
@@ -1532,7 +1532,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:358</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:376</note>
       </notes>
       <segment>
         <source>Zatwierdzić zmianę, której nie widać?</source>
@@ -1540,7 +1540,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:359</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:377</note>
       </notes>
       <segment>
         <source>Skrót definicji jest inny, a żadna pokazana linia się nie zmieniła. Zmiana dotyczy elementu spoza widoku, na przykład poświadczenia serwera. Zatwierdź tylko, jeśli znasz jej przyczynę.</source>
@@ -1548,7 +1548,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:360</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:378</note>
       </notes>
       <segment>
         <source>Zatwierdź mimo to</source>
@@ -1556,7 +1556,7 @@
     </unit>
     <unit id="admin.serverConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:375</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:393</note>
       </notes>
       <segment>
         <source>Zatwierdzić definicję zgłoszoną przez serwer?</source>
@@ -1564,7 +1564,7 @@
     </unit>
     <unit id="admin.serverConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:376</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:394</note>
       </notes>
       <segment>
         <source>Definicję <ph id="0" equiv="tool" disp="name"/> przedstawił działający serwer, nie potok CI. Nikt nie przeglądał jej w kodzie. Zatwierdź ją tylko, jeśli opis i schemat są zgodne z oczekiwanym.</source>
@@ -1572,7 +1572,7 @@
     </unit>
     <unit id="admin.serverConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:377</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:395</note>
       </notes>
       <segment>
         <source>Zatwierdź</source>

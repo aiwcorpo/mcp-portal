@@ -53,6 +53,8 @@ interface SeedTool {
     version: string;
     /** The stored classification of an adapter entry that the gateway invalidated (CC-227): the floor of the risk. */
     floor?: Risk;
+    /** A gateway older than the fix does not report riskLowered for such an entry; the portal must cope (422 risk_lowered). */
+    unflagged?: boolean;
   };
 }
 
@@ -390,6 +392,24 @@ const ADAPTER_TOOLS: SeedTool[] = [
     },
   },
   {
+    // As link_issues, but the gateway does not flag it (riskLowered absent): only the 422 risk_lowered tells.
+    name: 'merge_issues',
+    pending: {
+      source: 'adapter',
+      version: '0.23.1',
+      floor: 'UPDATE',
+      unflagged: true,
+      entry: adapterEntry(
+        'merge_issues',
+        'Scalenie zgłoszeń',
+        'Merges an issue into another.',
+        { readOnlyHint: false },
+        { from: ISSUE_KEY, to: ISSUE_KEY },
+        ['from', 'to'],
+      ),
+    },
+  },
+  {
     name: 'add_worklog',
     pending: {
       source: 'adapter',
@@ -450,6 +470,17 @@ function lowersRisk(approved: ToolEntry | null, pending: AnyEntry): boolean {
 
 const keyOf = (serverId: string, tool: string) => `${serverId}/${tool}`;
 
+/** The stored classification the gateway voided for an adapter entry (CC-227), whether or not it reports it. */
+function floorOf(
+  state: Readonly<AdminState>,
+  serverId: string,
+  toolName: string,
+): Risk | undefined {
+  return seedOf(state)
+    .find((seed) => seed.serverId === serverId)
+    ?.tools.find((candidate) => candidate.name === toolName)?.pending?.floor;
+}
+
 /** `sub` of the administrator the mock plays, as the gateway records it in `setBy` and `classifiedBy`. */
 const MOCK_ADMIN_SUB = '3c1d6b7e-5a43-4f49-9d4f-0a7b1a1f2c11';
 
@@ -479,7 +510,13 @@ interface Resolved {
   seed: SeedServer;
   tool: SeedTool;
   approved: ToolEntry | null;
-  pending: { entry: AnyEntry; source: Source; version: string; floor?: Risk } | null;
+  pending: {
+    entry: AnyEntry;
+    source: Source;
+    version: string;
+    floor?: Risk;
+    unflagged?: boolean;
+  } | null;
 }
 
 function resolveTool(state: Readonly<AdminState>, seed: SeedServer, tool: SeedTool): Resolved {
@@ -514,7 +551,8 @@ export function mockRegistry(state: Readonly<AdminState>): RegistryServer[] {
           change: resolved.approved ? 'changed' : 'new',
           source: resolved.pending.source,
           approvedInVersion: resolved.approved ? '1.3.0' : null,
-          ...(lowersRisk(resolved.approved, resolved.pending.entry) || resolved.pending.floor
+          ...(lowersRisk(resolved.approved, resolved.pending.entry) ||
+          (resolved.pending.floor && !resolved.pending.unflagged)
             ? { riskLowered: true }
             : {}),
         };
@@ -559,7 +597,8 @@ export function mockPendingTool(
     approvedInVersion: resolved.approved ? '1.3.0' : null,
     pendingVersion: resolved.pending.version,
     source: resolved.pending.source,
-    ...(lowersRisk(resolved.approved, resolved.pending.entry) || resolved.pending.floor
+    ...(lowersRisk(resolved.approved, resolved.pending.entry) ||
+    (resolved.pending.floor && !resolved.pending.unflagged)
       ? { riskLowered: true }
       : {}),
   };
@@ -645,7 +684,7 @@ export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHan
         const earlier = admin().classified[key]?.risk ?? pending.approvedEntry?.risk;
         const lowers = fromAdapter
           ? // riskLowered: the stored classification was voided and stays the floor (CC-227).
-            pending.riskLowered === true ||
+            floorOf(admin(), serverId, toolName) !== undefined ||
             (earlier !== undefined && risk !== undefined && RISK_ORDER[risk] < RISK_ORDER[earlier])
           : lowersRisk(pending.approvedEntry, pending.pendingEntry);
         if (lowers && acceptRiskLowering !== true) {

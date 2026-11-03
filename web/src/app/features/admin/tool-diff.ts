@@ -48,7 +48,10 @@ const CLASSIFICATION_REASONS: ReadonlySet<string> = new Set([
 ]);
 
 type Outcome =
-  { kind: 'done' } | { kind: 'classification-refused'; message: string } | { kind: 'stopped' };
+  | { kind: 'done' }
+  | { kind: 'classification-refused'; message: string }
+  | { kind: 'lowering-required' }
+  | { kind: 'stopped' };
 
 /**
  * The approved and the pending definition of one tool, side by side, and the approval of the pending one.
@@ -214,7 +217,15 @@ export class ToolDiff {
       if (lowering && !(await this.confirmRiskLowering(view.riskFrom, choice.risk))) {
         return;
       }
-      const outcome = await this.send(choice, lowering);
+      let outcome = await this.send(choice, lowering);
+      if (outcome.kind === 'lowering-required') {
+        // The gateway did not flag the entry (riskLowered), yet refuses the classification as a lowering (422 risk_lowered):
+        // it is one, so the administrator confirms it and the request goes again with acceptRiskLowering (and the fresh MFA).
+        if (!(await this.confirmRiskLowering(view.riskFrom, choice.risk))) {
+          return;
+        }
+        outcome = await this.send(choice, true);
+      }
       if (outcome.kind !== 'classification-refused') {
         return;
       }
@@ -315,6 +326,13 @@ export class ToolDiff {
         CLASSIFICATION_REASONS.has(failure.reason)
       ) {
         return { kind: 'classification-refused', message: failureMessage(failure) };
+      } else if (
+        failure.code === 'manifest_rejected' &&
+        failure.reason === 'risk_lowered' &&
+        classification &&
+        !lowering
+      ) {
+        return { kind: 'lowering-required' };
       } else if (failure.code === 'manifest_rejected') {
         this.refusedHash.set(approvedHash);
         this.failure.set(failure);

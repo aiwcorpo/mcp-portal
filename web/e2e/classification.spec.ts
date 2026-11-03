@@ -85,3 +85,21 @@ test('a connection whose secret is gone says so and offers to connect again', as
     'Połączenie przestało działać, połącz konto ponownie',
   );
 });
+
+test('a gateway that does not flag a voided classification: the 422 risk_lowered turns into the lowering dialog and the MFA', async ({
+  page,
+}) => {
+  await page.goto('/admin?mockAdmin=in&mockAdapter=in');
+  await page.getByRole('button', { name: 'Pokaż różnice (jira__merge_issues)' }).click();
+  await expect(page.getByText('Obniżenie ryzyka.')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sklasyfikuj i zatwierdź (jira__merge_issues)' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Klasyfikacja narzędzia' });
+  await dialog.getByLabel('Odczyt READ_ONLY').check();
+  await dialog.getByRole('button', { name: 'Zatwierdź z tą klasyfikacją' }).click();
+  await page
+    .getByRole('dialog', { name: 'Zatwierdzić obniżenie ryzyka?' })
+    .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka' })
+    .click();
+
+  await expect(page.getByText('Zatwierdzono definicję jira__merge_issues.')).toBeVisible();
+});
