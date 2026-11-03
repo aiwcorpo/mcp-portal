@@ -55,8 +55,8 @@ class UpstreamGuardsTest {
         GatewayModel.Catalog catalog = BrokerData.validCatalog(new GatewayModel.Catalog(List.of(
                 new GatewayModel.CatalogServer("mcp-jira", "jira", "1.0.0", null),
                 new GatewayModel.CatalogServer("mcp-gitlab", "gitlab", "1.0.0", List.of(
-                        new GatewayModel.CatalogTool("gitlab__a", null, "READ_ONLY", "read", "maybe", null, "", false, null),
-                        new GatewayModel.CatalogTool("gitlab__b", "b", "HARMLESS", "read", "granted", List.of(), null, null, null))),
+                        new GatewayModel.CatalogTool("gitlab__a", null, "READ_ONLY", "read", "maybe", null, "", false, null, null),
+                        new GatewayModel.CatalogTool("gitlab__b", "b", "HARMLESS", "read", "granted", List.of(), null, null, null, null))),
                 new GatewayModel.CatalogServer("mcp-x", "sharepoint", "1.0.0", List.of()))));
         assertThat(catalog.servers()).extracting(GatewayModel.CatalogServer::system).containsExactly("jira", "gitlab");
         assertThat(catalog.servers().getFirst().tools()).isEmpty();
@@ -68,5 +68,18 @@ class UpstreamGuardsTest {
             assertThat(tool.title()).isNull();
             assertThat(tool.disabled()).isNull();
         });
+    }
+
+    @Test
+    void disabledByIsKeptOnlyForADisabledToolAndOnlyWithAKnownValue() {
+        GatewayModel.Catalog catalog = BrokerData.validCatalog(new GatewayModel.Catalog(List.of(
+                new GatewayModel.CatalogServer("mcp-jira", "jira", "1.0.0", List.of(
+                        new GatewayModel.CatalogTool("jira__a", "a", "UPDATE", "update", "granted", List.of(), null, true, "kill_switch", null),
+                        new GatewayModel.CatalogTool("jira__b", "b", "UPDATE", "update", "granted", List.of(), null, true, "maintenance", null),
+                        new GatewayModel.CatalogTool("jira__c", "c", "UPDATE", "update", "granted", List.of(), null, true, null, null),
+                        new GatewayModel.CatalogTool("jira__d", "d", "UPDATE", "update", "granted", List.of(), null, null, "kill_switch", null))))));
+
+        assertThat(catalog.servers().getFirst().tools()).extracting(GatewayModel.CatalogTool::disabledBy)
+                .containsExactly("kill_switch", null, null, null);
     }
 }

@@ -88,7 +88,7 @@ class McpEndpointVectorsTest {
         for (JsonNode tool : tools) {
             result.add(new GatewayModel.CatalogTool(tool.get("name").asString(), "", tool.get("risk").asString(), "read",
                     tool.get("access").asString(), List.of(), null, tool.get("disabled").asBoolean() ? Boolean.TRUE : null,
-                    null));
+                    null, null));
         }
         return result;
     }

@@ -19,6 +19,7 @@ public final class BrokerData {
     static final Set<String> CREDENTIAL_TYPES = Set.of("user-oauth", "user-secret", "token-exchange", "service-account");
     static final Set<String> CONNECTION_STATUSES = Set.of("connected", "expiring", "expired", "revoked", "error");
     static final Set<String> RISKS = Set.of("READ_ONLY", "UPDATE", "DESTRUCTIVE");
+    static final Set<String> DISABLED_BY = Set.of("kill_switch", "approval", "configuration");
     static final Set<String> TOOL_ACTIONS = Set.of("read", "update", "delete", "admin");
 
     private static final Logger log = LoggerFactory.getLogger(BrokerData.class);
@@ -91,6 +92,9 @@ public final class BrokerData {
                     tool.requiredEntitlements() == null ? List.of() : tool.requiredEntitlements(),
                     tool.title() == null || tool.title().isEmpty() ? null : tool.title(),
                     Boolean.TRUE.equals(tool.disabled()) ? Boolean.TRUE : null,
+                    // Present only for a disabled tool (CC-194); a value outside the enum is left out, not guessed.
+                    Boolean.TRUE.equals(tool.disabled()) && tool.disabledBy() != null && DISABLED_BY.contains(tool.disabledBy())
+                            ? tool.disabledBy() : null,
                     // The gateway computes this flag; a DESTRUCTIVE tool is never shown without it.
                     Boolean.TRUE.equals(tool.requiresConfirmation()) || "DESTRUCTIVE".equals(tool.risk())
                             ? Boolean.TRUE : null));

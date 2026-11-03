@@ -2,7 +2,6 @@ package pl.aiwcorpo.mcp.portal.bff.admin;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -26,6 +25,7 @@ import pl.aiwcorpo.mcp.portal.bff.security.StepUpPolicy;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
 import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayAdminClient;
+import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayModel;
 import pl.aiwcorpo.mcp.portal.bff.upstream.RegistryData;
 import pl.aiwcorpo.mcp.portal.bff.upstream.TextHygiene;
 import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
@@ -44,13 +44,12 @@ import tools.jackson.databind.ObjectReader;
  * definition of one tool for a diff, and the approval of a pending definition. The portal checks the group
  * {@code mcp-platform-admin} of the session before it calls the gateway, and the gateway checks it again on the exchanged
  * token. What the gateway returns is checked against C5 and every text of a definition is neutralized before it
- * reaches the browser ({@link RegistryData}).
+ * reaches the browser ({@link RegistryData}). An entry that comes from an adapter is approved together with its
+ * classification (risk and action, CC-193), which the gateway checks (CC-207).
  */
 @RestController
 class RegistryAdminController {
 
-    private static final Set<String> SERVER_IDS = Set.of("mcp-jira", "mcp-confluence", "mcp-gitlab", "mcp-servicedesk",
-            "mcp-opensearch");
     private static final String MANIFEST_REJECTED = "manifest_rejected";
     private static final String HASH_MISMATCH = "hash_mismatch";
 
@@ -78,7 +77,7 @@ class RegistryAdminController {
 
     @GetMapping("/api/v1/admin/registry")
     List<JsonNode> registry(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
-        requireAdmin(authentication);
+        AdminTargets.requireAdmin(authentication);
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
             List<JsonNode> servers = RegistryData.validRegistry(gateway.registry(token, RequestIds.of(request)));
@@ -94,8 +93,8 @@ class RegistryAdminController {
     @GetMapping("/api/v1/admin/registry/servers/{serverId}/tools/{tool}/pending")
     JsonNode pending(@PathVariable String serverId, @PathVariable String tool, Authentication authentication,
                      HttpServletRequest request, HttpServletResponse response) {
-        requireAdmin(authentication);
-        requireTarget(serverId, tool);
+        AdminTargets.requireAdmin(authentication);
+        AdminTargets.requireTarget(serverId, tool);
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
             JsonNode pending = RegistryData.validPending(gateway.pendingTool(token, RequestIds.of(request), serverId, tool), tool);
@@ -116,22 +115,22 @@ class RegistryAdminController {
         PortalUser user = PortalUser.from(authentication);
         String requestId = RequestIds.of(request);
         long started = clock.millis();
-        String target = SERVER_IDS.contains(serverId) ? serverId : null;
+        String target = AdminTargets.SERVER_IDS.contains(serverId) ? serverId : null;
         if (!user.isAdmin()) {
-            audit.definitionApprovalFailed(requestId, user, target, validTool(tool), null, AuditLog.Outcome.accessDenied(),
+            audit.definitionApprovalFailed(requestId, user, target, AdminTargets.validTool(tool), null, AuditLog.Outcome.accessDenied(),
                     clock.millis() - started);
-            throw forbidden();
+            throw AdminTargets.forbidden();
         }
         // Approval unblocks a changed definition for everyone, so it must come from the portal page itself (as `viewed`).
         if (!"same-origin".equals(request.getHeader("Sec-Fetch-Site"))) {
-            audit.definitionApprovalFailed(requestId, user, target, validTool(tool), null, AuditLog.Outcome.accessDenied(),
+            audit.definitionApprovalFailed(requestId, user, target, AdminTargets.validTool(tool), null, AuditLog.Outcome.accessDenied(),
                     clock.millis() - started);
             throw new ApiException(HttpStatus.FORBIDDEN, ApiError.of(ApiError.CSRF_INVALID));
         }
-        if (target == null || validTool(tool).isEmpty()) {
-            audit.definitionApprovalFailed(requestId, user, target, validTool(tool), null, AuditLog.Outcome.notFoundOrDenied(),
+        if (target == null || AdminTargets.validTool(tool).isEmpty()) {
+            audit.definitionApprovalFailed(requestId, user, target, AdminTargets.validTool(tool), null, AuditLog.Outcome.notFoundOrDenied(),
                     clock.millis() - started);
-            throw notFound();
+            throw AdminTargets.notFound();
         }
         ApproveBody body = parse(rawBody);
         if (body == null) {
@@ -141,6 +140,12 @@ class RegistryAdminController {
         }
         String hash = body.definitionHash();
         boolean lowering = Boolean.TRUE.equals(body.acceptRiskLowering());
+        // Whether the pair fits the entry (only an adapter entry takes one) and each other is the gateway's to say (422).
+        if (!RegistryData.validClassification(body.risk(), body.action())) {
+            audit.definitionApprovalFailed(requestId, user, target, tool, hash, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
+                    clock.millis() - started);
+            throw ApiException.badRequest();
+        }
         if (lowering) {
             // The only way to lower a risk (CC-167): the administrator has to prove a fresh second factor first.
             try {
@@ -153,7 +158,8 @@ class RegistryAdminController {
         }
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response);
-            gateway.approveTool(token, requestId, serverId, tool, hash, lowering);
+            gateway.approveTool(token, requestId, serverId, tool,
+                    new GatewayModel.ApproveRequest(hash, lowering ? Boolean.TRUE : null, body.risk(), body.action()));
         } catch (UpstreamException e) {
             return approvalFailure(e, user, requestId, serverId, tool, hash, started);
         } catch (RuntimeException e) {
@@ -172,11 +178,11 @@ class RegistryAdminController {
         switch (e.status()) {
             case 403 -> {
                 audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.accessDenied(), latency);
-                throw forbidden();
+                throw AdminTargets.forbidden();
             }
             case 404 -> {
                 audit.definitionApprovalFailed(requestId, user, serverId, tool, hash, AuditLog.Outcome.notFoundOrDenied(), latency);
-                throw notFound();
+                throw AdminTargets.notFound();
             }
             case 409 -> {
                 if (HASH_MISMATCH.equals(e.error())) {
@@ -208,36 +214,10 @@ class RegistryAdminController {
     /** A view that the gateway refuses is shown as the contract says; everything else is an unavailable upstream. */
     private static RuntimeException viewFailure(UpstreamException e) {
         return switch (e.status()) {
-            case 403 -> forbidden();
-            case 404 -> notFound();
+            case 403 -> AdminTargets.forbidden();
+            case 404 -> AdminTargets.notFound();
             default -> e;
         };
-    }
-
-    private static void requireAdmin(Authentication authentication) {
-        if (!PortalUser.from(authentication).isAdmin()) {
-            throw forbidden();
-        }
-    }
-
-    /** A server or tool that cannot exist is a resource that is not there (the contract has no 400 for these paths). */
-    private static void requireTarget(String serverId, String tool) {
-        if (!SERVER_IDS.contains(serverId) || validTool(tool).isEmpty()) {
-            throw notFound();
-        }
-    }
-
-    /** The tool name when it is a {@code ToolName}, otherwise the empty string (an audit event leaves the field out). */
-    private static String validTool(String tool) {
-        return tool != null && tool.length() <= 64 && RegistryData.TOOL_NAME.matcher(tool).matches() ? tool : "";
-    }
-
-    private static ApiException notFound() {
-        return new ApiException(HttpStatus.NOT_FOUND, ApiError.of(ApiError.NOT_FOUND_OR_DENIED));
-    }
-
-    private static ApiException forbidden() {
-        return new ApiException(HttpStatus.FORBIDDEN, ApiError.of(ApiError.ACCESS_DENIED));
     }
 
     private ApproveBody parse(byte[] rawBody) {
@@ -253,8 +233,11 @@ class RegistryAdminController {
         }
     }
 
-    /** {@code acceptRiskLowering} false, null or absent is a plain approval. */
-    record ApproveBody(String definitionHash, Boolean acceptRiskLowering) {
+    /**
+     * {@code acceptRiskLowering} false, null or absent is a plain approval. {@code risk} and {@code action} are the
+     * classification of an adapter tool (CC-193), sent to the gateway only when the administrator gave them.
+     */
+    record ApproveBody(String definitionHash, Boolean acceptRiskLowering, String risk, String action) {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

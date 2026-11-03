@@ -19,7 +19,7 @@ public final class GatewayModel {
 
     /**
      * {@code CatalogTool}. {@code disabled} and {@code requiresConfirmation} default to false in the contract, so
-     * the BFF sends them only when true ({@code null} otherwise); {@code title} is absent when the tool has none.
+     * the BFF sends them only when true ({@code null} otherwise); {@code title} is absent when the tool has none; {@code disabledBy} (CC-194) only when {@code disabled} is true.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record CatalogTool(
@@ -31,13 +31,19 @@ public final class GatewayModel {
             List<String> requiredEntitlements,
             String title,
             Boolean disabled,
+            String disabledBy,
             Boolean requiresConfirmation) {
     }
 
     /** {@code ApproveRequest}: the hash the administrator saw, which the gateway compares with the current pending one;
-     * {@code acceptRiskLowering} is set only when true (an older gateway rejects the unknown field, CC-167). */
+     * {@code acceptRiskLowering} is set only when true (an older gateway rejects the unknown field, CC-167);
+     * {@code risk} and {@code action} are the classification of an adapter tool (CC-193) and absent otherwise. */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record ApproveRequest(String definitionHash, Boolean acceptRiskLowering) {
+    public record ApproveRequest(String definitionHash, Boolean acceptRiskLowering, String risk, String action) {
+    }
+
+    /** {@code KillSwitchRequest} (CC-194): the administrator's free text, kept by the registry and never part of an audit event. */
+    public record KillSwitchRequest(String reason) {
     }
 
     /** {@code ConfirmationView}: what the pending call really is, as the gateway recorded it. */

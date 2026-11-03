@@ -135,6 +135,13 @@ public final class ContractSchemas {
         return responseSpec.path("content").path("application/json").path("examples").path(example).path("value");
     }
 
+    /** Example value of the request body of an operation, e.g. {@code approve_adapter_tool} of {@code approveAdminTool}. */
+    public JsonNode requestExample(String method, String pathTemplate, String example) {
+        JsonNode requestBody = resolve(document.path("paths").path(pathTemplate).path(method.toLowerCase(Locale.ROOT))
+                .path("requestBody"));
+        return requestBody.path("content").path("application/json").path("examples").path(example).path("value");
+    }
+
     private Schema schemaAt(JsonNode schemaNode) {
         ObjectNode root = JSON.createObjectNode();
         root.put("$schema", "https://json-schema.org/draft/2020-12/schema");

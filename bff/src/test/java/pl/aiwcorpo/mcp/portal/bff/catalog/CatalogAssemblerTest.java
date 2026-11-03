@@ -43,7 +43,7 @@ class CatalogAssemblerTest {
 
     private static CatalogTool tool(String name, String access, String... entitlements) {
         return new CatalogTool(name, "Description of " + name, "READ_ONLY", "read", access, List.of(entitlements),
-                null, null, null);
+                null, null, null, null);
     }
 
     private static CatalogServer server(String system, CatalogTool... tools) {
@@ -68,15 +68,15 @@ class CatalogAssemblerTest {
         Catalog c5 = new Catalog(List.of(
                 new CatalogServer("mcp-jira", "jira", "1.4.0", List.of(
                         new CatalogTool("jira__get_issue", "Returns one Jira issue by key.", "READ_ONLY", "read", "granted",
-                                List.of("mcp-jira-read"), "Pobranie zgłoszenia", null, null),
+                                List.of("mcp-jira-read"), "Pobranie zgłoszenia", null, null, null),
                         new CatalogTool("jira__delete_issue", "Deletes an issue permanently.", "DESTRUCTIVE", "delete", "denied",
-                                List.of("mcp-jira-destructive"), null, null, true))),
+                                List.of("mcp-jira-destructive"), null, null, null, true))),
                 new CatalogServer("mcp-gitlab", "gitlab", "1.0.0", List.of(
                         new CatalogTool("gitlab__get_project", "Returns one GitLab project by path.", "READ_ONLY", "read",
-                                "granted", List.of("mcp-gitlab-read"), null, null, null))),
+                                "granted", List.of("mcp-gitlab-read"), null, null, null, null))),
                 new CatalogServer("mcp-confluence", "confluence", "1.0.0", List.of(
                         new CatalogTool("confluence__get_page", "Returns one Confluence page.", "READ_ONLY", "read", "denied",
-                                List.of("mcp-confluence-read"), null, null, null)))));
+                                List.of("mcp-confluence-read"), null, null, null, null)))));
 
         PortalCatalog result = ASSEMBLER.assemble(c5, List.of(new Connection("jira", "user-secret", "connected",
                         "jkowalski", "2027-01-31T00:00:00Z", "2026-10-01T08:00:00Z", "2026-10-26T19:58:00Z")), SYSTEMS,

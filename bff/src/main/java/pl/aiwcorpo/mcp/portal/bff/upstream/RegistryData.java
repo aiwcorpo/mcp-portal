@@ -29,11 +29,14 @@ public final class RegistryData {
     private static final Set<String> TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
             "definitionHash");
     private static final Set<String> REGISTRY_TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
-            "definitionHash", "status", "change", "source", "approvedInVersion", "riskLowered");
+            "definitionHash", "status", "change", "source", "approvedInVersion", "riskLowered", "classifiedBy",
+            "classifiedAt");
+    private static final Set<String> KILL_SWITCH_FIELDS = Set.of("scope", "serverId", "tool", "setBy", "setAt", "reason");
     private static final Set<String> PENDING_FIELDS = Set.of("approvedEntry", "pendingEntry", "pendingHash",
             "pendingVersion", "source", "approvedInVersion", "riskLowered");
     private static final Set<String> ACTIONS = Set.of("read", "update", "delete", "admin");
-    private static final Set<String> SOURCES = Set.of("ci", "server");
+    private static final String ADAPTER = "adapter";
+    private static final Set<String> SOURCES = Set.of("ci", "server", ADAPTER);
 
     private RegistryData() {
     }
@@ -63,8 +66,10 @@ public final class RegistryData {
         JsonNode approved = pending.get("approvedEntry");
         JsonNode entry = pending.get("pendingEntry");
         JsonNode approvedIn = pending.get("approvedInVersion");
-        boolean fits = (approved.isNull() || validTool(approved, TOOL_FIELDS, false))
-                && validTool(entry, TOOL_FIELDS, false)
+        // An adapter does not classify (CC-193): its pending entry has no risk and action, and no resourceRefs.
+        boolean fromAdapter = ADAPTER.equals(text(pending.get("source")));
+        boolean fits = (approved.isNull() || validTool(approved, TOOL_FIELDS, Kind.CLASSIFIED))
+                && validTool(entry, TOOL_FIELDS, fromAdapter ? Kind.ADAPTER_ENTRY : Kind.CLASSIFIED)
                 // The administrator approves the tool of the path, so the diff must be about that tool.
                 && tool.equals(entry.get("name").asString())
                 && (approved.isNull() || tool.equals(approved.get("name").asString()))
@@ -88,29 +93,47 @@ public final class RegistryData {
             return false;
         }
         for (JsonNode tool : server.get("tools")) {
-            if (!validTool(tool, REGISTRY_TOOL_FIELDS, true)) {
+            if (!validRegistryTool(tool)) {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean validTool(JsonNode tool, Set<String> fields, boolean registry) {
+    /** How the entry is classified: {@code ToolEntry} has risk and action, {@code AdapterToolEntry} must not have them. */
+    private enum Kind { CLASSIFIED, ADAPTER_ENTRY, ANY }
+
+    private static boolean validTool(JsonNode tool, Set<String> fields, Kind kind) {
         if (tool == null || !tool.isObject() || !onlyFields(tool, fields)
                 || !TOOL_NAME.matcher(text(tool.get("name"))).matches() || text(tool.get("name")).length() > 64
-                || !BrokerData.RISKS.contains(text(tool.get("risk")))
-                || !ACTIONS.contains(text(tool.get("action")))
                 || tool.get("resourceRefs") == null || !tool.get("resourceRefs").isArray()
                 || tool.get("definition") == null || !tool.get("definition").isObject()
                 || !hash(tool.get("definitionHash"))) {
             return false;
         }
-        if (!registry) {
-            return true;
-        }
-        String status = text(tool.get("status"));
+        boolean hasRisk = tool.has("risk");
+        boolean hasAction = tool.has("action");
+        return switch (kind) {
+            case CLASSIFIED -> classification(tool);
+            case ADAPTER_ENTRY -> !hasRisk && !hasAction && tool.get("resourceRefs").isEmpty();
+            // A registry entry of an adapter may wait without its classification; a half of it is never valid.
+            case ANY -> hasRisk == hasAction && (!hasRisk || classification(tool));
+        };
+    }
+
+    private static boolean classification(JsonNode tool) {
+        return BrokerData.RISKS.contains(text(tool.get("risk"))) && ACTIONS.contains(text(tool.get("action")));
+    }
+
+    private static boolean validRegistryTool(JsonNode tool) {
+        String status = text(tool == null ? null : tool.get("status"));
         boolean pending = "pending_approval".equals(status);
         if (!pending && !"approved".equals(status)) {
+            return false;
+        }
+        // risk and action are missing only from a pending entry whose source is adapter (CC-193).
+        boolean pendingAdapter = pending && ADAPTER.equals(text(tool.get("source")));
+        if (!validTool(tool, REGISTRY_TOOL_FIELDS, pendingAdapter ? Kind.ANY : Kind.CLASSIFIED)) {
             return false;
         }
         // change and source are there exactly when the entry is pending (CC-097, CC-162).
@@ -120,11 +143,54 @@ public final class RegistryData {
         if (pending && (!Set.of("new", "changed").contains(text(tool.get("change"))) || !SOURCES.contains(text(tool.get("source"))))) {
             return false;
         }
+        // The administrator who classified a tool of an adapter and when (CC-193), both or neither.
+        boolean classifiedBy = tool.has("classifiedBy");
+        if (classifiedBy != tool.has("classifiedAt")
+                || classifiedBy && (text(tool.get("classifiedBy")).isEmpty() || text(tool.get("classifiedBy")).length() > 255
+                        || !ContractValues.isTimestamp(text(tool.get("classifiedAt"))))) {
+            return false;
+        }
         JsonNode approvedIn = tool.get("approvedInVersion");
         // riskLowered (CC-167) can only be true for an entry that waits for a decision.
         JsonNode lowered = tool.get("riskLowered");
         return (approvedIn == null || approvedIn.isNull() || semver(approvedIn))
                 && (lowered == null || lowered.isBoolean() && (pending || !lowered.asBoolean()));
+    }
+
+    /** Both absent (the entry is not from an adapter) or a pair of known values; whether they fit is the gateway's to say. */
+    public static boolean validClassification(String risk, String action) {
+        return risk == null && action == null || risk != null && action != null && BrokerData.RISKS.contains(risk)
+                && ACTIONS.contains(action);
+    }
+
+    /** The active switches as {@code KillSwitchList}, or null when the answer breaks the closed schema; reasons are neutralized. */
+    public static JsonNode validKillSwitches(JsonNode list) {
+        if (list == null || !list.isObject() || !onlyFields(list, Set.of("switches")) || list.get("switches") == null
+                || !list.get("switches").isArray()) {
+            return null;
+        }
+        for (JsonNode entry : list.get("switches")) {
+            if (!validKillSwitch(entry)) {
+                return null;
+            }
+        }
+        return neutralized(list);
+    }
+
+    private static boolean validKillSwitch(JsonNode entry) {
+        if (entry == null || !entry.isObject() || !onlyFields(entry, KILL_SWITCH_FIELDS)
+                || !SERVER_IDS.contains(text(entry.get("serverId")))
+                || text(entry.get("setBy")).isEmpty() || text(entry.get("setBy")).length() > 255
+                || !ContractValues.isTimestamp(text(entry.get("setAt")))
+                || text(entry.get("reason")).isEmpty() || text(entry.get("reason")).length() > 200) {
+            return false;
+        }
+        // tool is there exactly when the scope is tool.
+        return switch (text(entry.get("scope"))) {
+            case "server" -> !entry.has("tool");
+            case "tool" -> TOOL_NAME.matcher(text(entry.get("tool"))).matches() && text(entry.get("tool")).length() <= 64;
+            default -> false;
+        };
     }
 
     private static boolean onlyFields(JsonNode node, Set<String> allowed) {

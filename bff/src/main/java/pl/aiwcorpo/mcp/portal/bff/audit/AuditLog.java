@@ -90,6 +90,15 @@ public class AuditLog {
     }
 
     /**
+     * {@code admin_change} for an emergency switch that was not changed (refused, step-up missing, gateway unavailable).
+     * A switch that was changed is recorded by the gateway ({@code kill_switch_set}, {@code kill_switch_cleared}); the
+     * administrator's text is never written here.
+     */
+    public void killSwitchFailed(String requestId, PortalUser user, String serverId, String tool, Outcome outcome, long latencyMs) {
+        definitionApprovalFailed(requestId, user, serverId, tool, null, outcome, latencyMs);
+    }
+
+    /**
      * A write on a confirmation that the portal itself refused (the gateway audits the ones it accepts): a sign of a
      * request that did not come from the preview page of the user.
      */

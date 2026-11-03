@@ -416,4 +416,156 @@ class RegistryAdminTest extends PortalHarness {
         }
         assertThat(GATEWAY.findAll(anyRequestedFor(urlPathMatching(GATEWAY_REGISTRY + "/.*/approve")))).isEmpty();
     }
+
+    private static final String APPROVE_ADAPTER = "{\"definitionHash\":\"" + HASH + "\",\"risk\":\"UPDATE\",\"action\":\"update\"}";
+
+    @Test
+    void theClassificationOfAnAdapterToolGoesToTheGatewayAsGiven() {
+        TestBrowser browser = admin();
+
+        HttpResponse<String> response = approve(browser, APPROVE, APPROVE_ADAPTER, true);
+
+        C12.assertResponse("POST", APPROVE_TEMPLATE, response);
+        assertThat(response.statusCode()).isEqualTo(204);
+        assertThat(approvals().getLast().getBodyAsString()).isEqualTo(APPROVE_ADAPTER);
+        JsonNode example = C12.requestExample("POST", APPROVE_TEMPLATE, "approve_adapter_tool");
+        assertThat(example.get("risk").asString()).isEqualTo("UPDATE");
+        assertThat(approve(browser, APPROVE, example.toString(), true).statusCode()).isEqualTo(204);
+        assertThat(JSON.readTree(approvals().getLast().getBodyAsString())).isEqualTo(example);
+    }
+
+    @Test
+    void aClassificationWithAnUnknownValueNeverReachesTheGateway() {
+        TestBrowser browser = admin();
+        for (String body : List.of(
+                "{\"definitionHash\":\"" + HASH + "\",\"risk\":\"HARMLESS\",\"action\":\"update\"}",
+                "{\"definitionHash\":\"" + HASH + "\",\"risk\":\"UPDATE\",\"action\":\"drop\"}",
+                "{\"definitionHash\":\"" + HASH + "\",\"risk\":\"UPDATE\"}",
+                "{\"definitionHash\":\"" + HASH + "\",\"action\":\"update\"}",
+                "{\"definitionHash\":\"" + HASH + "\",\"risk\":5,\"action\":\"update\"}")) {
+            assertThat(approve(browser, APPROVE, body, true).statusCode()).as(body).isEqualTo(400);
+        }
+        assertThat(approvals()).isEmpty();
+        assertThat(lastAuditEvent().get("outcome").asString()).isEqualTo("error");
+    }
+
+    @Test
+    void theRefusalsOfAClassificationArePassedOnWithTheirReason() {
+        TestBrowser browser = admin();
+        for (String reason : List.of("classification_inconsistent", "classification_required", "classification_not_allowed")) {
+            stubApprove(422, "{\"error\":\"manifest_rejected\",\"reason\":\"" + reason + "\",\"message\":\"m\"}");
+
+            HttpResponse<String> response = approve(browser, APPROVE, APPROVE_ADAPTER, true);
+
+            C12.assertResponse("POST", APPROVE_TEMPLATE, response);
+            assertThat(response.statusCode()).isEqualTo(422);
+            assertThat(JSON.readTree(response.body()).get("reason").asString()).isEqualTo(reason);
+            ContractSchemas.assertValid(AUDIT, lastAuditEvent());
+        }
+    }
+
+    @Test
+    void loweringAClassificationNeedsTheFreshMfaLikeAnyLowering() {
+        TestBrowser stale = login(CAROL, Instant.now().minus(java.time.Duration.ofHours(2)));
+        stale.get("/api/v1/me");
+        String body = "{\"definitionHash\":\"" + HASH + "\",\"risk\":\"READ_ONLY\",\"action\":\"read\",\"acceptRiskLowering\":true}";
+
+        HttpResponse<String> refused = approve(stale, APPROVE, body, true);
+
+        assertThat(refused.statusCode()).isEqualTo(401);
+        assertThat(JSON.readTree(refused.body()).get("error").asString()).isEqualTo("step_up_required");
+        assertThat(approvals()).isEmpty();
+        assertThat(approve(admin(), APPROVE, body, true).statusCode()).isEqualTo(204);
+        assertThat(JSON.readTree(approvals().getLast().getBodyAsString())).isEqualTo(JSON.readTree(body));
+    }
+
+    private static tools.jackson.databind.node.ObjectNode adapterRegistryTool() {
+        tools.jackson.databind.node.ArrayNode registry = (tools.jackson.databind.node.ArrayNode)
+                C12.responseExample("GET", REGISTRY, 200, "jira").deepCopy();
+        for (JsonNode tool : registry.get(0).get("tools")) {
+            if ("pending_approval".equals(tool.get("status").asString())) {
+                tools.jackson.databind.node.ObjectNode entry = (tools.jackson.databind.node.ObjectNode) tool;
+                entry.put("source", "adapter").remove(List.of("risk", "action"));
+                entry.putArray("resourceRefs");
+                return entry;
+            }
+        }
+        throw new IllegalStateException("the example has no pending tool");
+    }
+
+    private static String registryWith(tools.jackson.databind.node.ObjectNode adapterTool) {
+        tools.jackson.databind.node.ArrayNode registry = (tools.jackson.databind.node.ArrayNode)
+                C12.responseExample("GET", REGISTRY, 200, "jira").deepCopy();
+        tools.jackson.databind.node.ArrayNode tools = (tools.jackson.databind.node.ArrayNode) registry.get(0).get("tools");
+        for (int i = 0; i < tools.size(); i++) {
+            if ("pending_approval".equals(tools.get(i).get("status").asString())) {
+                tools.set(i, adapterTool);
+            }
+        }
+        return registry.toString();
+    }
+
+    @Test
+    void aPendingToolOfAnAdapterWithoutRiskAndActionIsShownAndAHalfOfThePairIsNot() {
+        TestBrowser browser = admin();
+        tools.jackson.databind.node.ObjectNode adapter = adapterRegistryTool();
+        stubGet(GATEWAY_REGISTRY, 200, registryWith(adapter));
+
+        HttpResponse<String> response = browser.get(REGISTRY);
+
+        C12.assertResponse("GET", REGISTRY, response);
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).contains("\"source\":\"adapter\"");
+
+        adapter.put("risk", "UPDATE");
+        stubGet(GATEWAY_REGISTRY, 200, registryWith(adapter));
+        assertThat(browser.get(REGISTRY).statusCode()).as("risk without action").isEqualTo(503);
+        adapter.put("action", "update");
+        stubGet(GATEWAY_REGISTRY, 200, registryWith(adapter));
+        assertThat(browser.get(REGISTRY).statusCode()).as("the whole pair on a pending adapter entry").isEqualTo(200);
+
+        adapter.put("source", "server").remove(List.of("risk", "action"));
+        stubGet(GATEWAY_REGISTRY, 200, registryWith(adapter));
+        assertThat(browser.get(REGISTRY).statusCode()).as("a pipeline or server entry always has them").isEqualTo(503);
+    }
+
+    @Test
+    void anApprovedToolKeepsWhoClassifiedItAndWhen() {
+        TestBrowser browser = admin();
+        tools.jackson.databind.node.ObjectNode tool = adapterRegistryTool();
+        tool.put("status", "approved").put("risk", "UPDATE").put("action", "update").remove(List.of("change", "source"));
+        tool.put("classifiedBy", "3c1d6b7e-5a43-4f49-9d4f-0a7b1a1f2c11").put("classifiedAt", "2026-11-03T09:12:44Z");
+        stubGet(GATEWAY_REGISTRY, 200, registryWith(tool));
+
+        HttpResponse<String> response = browser.get(REGISTRY);
+
+        C12.assertResponse("GET", REGISTRY, response);
+        assertThat(response.body()).contains("\"classifiedBy\":\"3c1d6b7e-5a43-4f49-9d4f-0a7b1a1f2c11\"");
+        tool.remove("classifiedAt");
+        stubGet(GATEWAY_REGISTRY, 200, registryWith(tool));
+        assertThat(browser.get(REGISTRY).statusCode()).isEqualTo(503);
+        tool.put("classifiedAt", "yesterday");
+        stubGet(GATEWAY_REGISTRY, 200, registryWith(tool));
+        assertThat(browser.get(REGISTRY).statusCode()).isEqualTo(503);
+    }
+
+    @Test
+    void theDiffOfAnAdapterToolHasNoClassificationInThePendingEntry() {
+        TestBrowser browser = admin();
+        tools.jackson.databind.node.ObjectNode diff = (tools.jackson.databind.node.ObjectNode)
+                C12.responseExample("GET", PENDING_TEMPLATE, 200, "new_tool").deepCopy();
+        tools.jackson.databind.node.ObjectNode entry = (tools.jackson.databind.node.ObjectNode) diff.get("pendingEntry");
+        entry.remove(List.of("risk", "action"));
+        entry.putArray("resourceRefs");
+        diff.put("source", "adapter");
+        stubGet(GATEWAY_REGISTRY + "/mcp-jira/tools/update_issue/pending", 200, diff.toString());
+
+        HttpResponse<String> response = browser.get(PENDING);
+
+        C12.assertResponse("GET", PENDING_TEMPLATE, response);
+        assertThat(response.statusCode()).isEqualTo(200);
+        entry.put("risk", "UPDATE").put("action", "update");
+        stubGet(GATEWAY_REGISTRY + "/mcp-jira/tools/update_issue/pending", 200, diff.toString());
+        assertThat(browser.get(PENDING).statusCode()).as("an adapter does not classify").isEqualTo(503);
+    }
 }

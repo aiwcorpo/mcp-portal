@@ -35,12 +35,41 @@ public class GatewayAdminClient {
                 response -> calls.read(response, JsonNode.class));
     }
 
-    public void approveTool(BearerToken token, String requestId, String serverId, String tool, String definitionHash,
-                            boolean acceptRiskLowering) {
+    public void approveTool(BearerToken token, String requestId, String serverId, String tool,
+                            GatewayModel.ApproveRequest approval) {
         calls.call(calls.authorize(calls.http().post()
                         .uri("/admin/v1/registry/servers/{serverId}/tools/{tool}/approve", serverId, tool)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(new GatewayModel.ApproveRequest(definitionHash, acceptRiskLowering ? Boolean.TRUE : null)), token, requestId),
+                        .body(approval), token, requestId),
+                response -> null);
+    }
+
+    public JsonNode killSwitches(BearerToken token, String requestId) {
+        return calls.call(calls.authorize(calls.http().get().uri("/admin/v1/kill-switches"), token, requestId),
+                response -> calls.read(response, JsonNode.class));
+    }
+
+    public void switchOffServer(BearerToken token, String requestId, String serverId, String reason) {
+        calls.call(calls.authorize(calls.http().put().uri("/admin/v1/registry/servers/{serverId}/kill-switch", serverId)
+                .contentType(MediaType.APPLICATION_JSON).body(new GatewayModel.KillSwitchRequest(reason)), token, requestId),
+                response -> null);
+    }
+
+    public void switchOnServer(BearerToken token, String requestId, String serverId) {
+        calls.call(calls.authorize(calls.http().delete().uri("/admin/v1/registry/servers/{serverId}/kill-switch", serverId),
+                token, requestId), response -> null);
+    }
+
+    public void switchOffTool(BearerToken token, String requestId, String serverId, String tool, String reason) {
+        calls.call(calls.authorize(calls.http().put()
+                .uri("/admin/v1/registry/servers/{serverId}/tools/{tool}/kill-switch", serverId, tool)
+                .contentType(MediaType.APPLICATION_JSON).body(new GatewayModel.KillSwitchRequest(reason)), token, requestId),
+                response -> null);
+    }
+
+    public void switchOnTool(BearerToken token, String requestId, String serverId, String tool) {
+        calls.call(calls.authorize(calls.http().delete()
+                .uri("/admin/v1/registry/servers/{serverId}/tools/{tool}/kill-switch", serverId, tool), token, requestId),
                 response -> null);
     }
 
