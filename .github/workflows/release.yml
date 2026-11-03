@@ -6,8 +6,11 @@
 # credentials; publish has packages: write for the whole job, so everything it runs before the push is kept small: the
 # build is the same script as locally, dependencies install with --ignore-scripts, and GITHUB_TOKEN is read only by the
 # login step (through env, not through the text of the script).
-# The mcp-contracts artifacts are read from the packages of aiwcorpo/mcp-contracts with the secret MCP_CONTRACTS_READ_TOKEN
-# (a token with read:packages only, in the environment "release").
+# The mcp-contracts artifacts are read from the packages of aiwcorpo/mcp-contracts with the GITHUB_TOKEN of the run and
+# permissions: packages: read (write in publish, which includes read); no personal access token is stored. For that the
+# packages mcp-contracts (Maven mcp-contracts, mcp-manifest and the npm package @aiwcorpo/mcp-contracts) must grant this
+# repository read access: package settings, "Manage Actions access", "Add repository", mcp-portal, role Read (once per package,
+# by an owner of the organization). Without it the token gets 403 and verify stops at the first download.
 name: release
 
 on:
@@ -22,11 +25,12 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      packages: read
     env:
       MCP_MAVEN_REPOSITORY_URL: https://maven.pkg.github.com/aiwcorpo/mcp-contracts
-      MCP_MAVEN_REPOSITORY_USER: ${{ vars.MCP_CONTRACTS_READ_USER }}
-      MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.MCP_CONTRACTS_READ_TOKEN }}
-      NODE_AUTH_TOKEN: ${{ secrets.MCP_CONTRACTS_READ_TOKEN }}
+      MCP_MAVEN_REPOSITORY_USER: ${{ github.actor }}
+      MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       # actions/checkout v4.2.2
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -71,9 +75,9 @@ jobs:
       packages: write
     env:
       MCP_MAVEN_REPOSITORY_URL: https://maven.pkg.github.com/aiwcorpo/mcp-contracts
-      MCP_MAVEN_REPOSITORY_USER: ${{ vars.MCP_CONTRACTS_READ_USER }}
-      MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.MCP_CONTRACTS_READ_TOKEN }}
-      NODE_AUTH_TOKEN: ${{ secrets.MCP_CONTRACTS_READ_TOKEN }}
+      MCP_MAVEN_REPOSITORY_USER: ${{ github.actor }}
+      MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       # actions/checkout v4.2.2
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
