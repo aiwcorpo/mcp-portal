@@ -75,7 +75,7 @@ step_style() {
   local -a files=()
   while IFS= read -r -d '' file; do
     files+=("$file")
-  done < <(find src e2e e2e-live scripts ci -type f ! -path 'src/app/api/generated/*' ! -name '*.png' -print0 2>/dev/null)
+  done < <(find src e2e e2e-live scripts ci docker -type f ! -path 'src/app/api/generated/*' ! -name '*.png' -print0 2>/dev/null)
   files+=(README.md STATUS.md package.json Makefile)
   [[ "${#files[@]}" -gt 4 ]] || { echo "ci: no files to check" >&2; return 1; }
   perl -CSD -ne 'if (/[\x{00A0}\x{200B}\x{202F}\x{FEFF}\x{2018}\x{2019}\x{201C}\x{201D}\x{2026}]/) { print "$ARGV:$.: hidden or typographic character\n"; $bad = 1 } close ARGV if eof; END { exit $bad }' "${files[@]}" || bad=1

@@ -2,6 +2,7 @@
   "name": "mcp-portal-web",
   "version": "0.1.0",
   "private": true,
+  "license": "Apache-2.0",
   "packageManager": "npm@11.16.0",
   "engines": {
     "node": ">=24"
@@ -16,6 +17,7 @@
     "start:mocks": "ng serve --configuration mocks",
     "build:e2e": "ng build --configuration e2e",
     "e2e": "npm run build:e2e && playwright test",
+    "screenshots": "npm run build:e2e && README_SHOTS_DIR=../docs/screenshots playwright test e2e/readme-shots.spec.ts --project=desktop",
     "i18n:extract": "ng extract-i18n",
     "i18n:check": "ng extract-i18n --output-path .angular/i18n-check && diff -u src/locale/messages.xlf .angular/i18n-check/messages.xlf"
   },

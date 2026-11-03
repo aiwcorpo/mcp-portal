@@ -25,7 +25,10 @@ contracts_version="$(pom_property mcp-contracts.version)"
 wiremock_version="$(pom_property wiremock.version)"
 contracts_jar="$m2/pl/aiwcorpo/mcp/mcp-contracts/$contracts_version/mcp-contracts-$contracts_version.jar"
 wiremock_jar="$m2/org/wiremock/wiremock-standalone/$wiremock_version/wiremock-standalone-$wiremock_version.jar"
-java_bin="${JAVA_HOME:+$JAVA_HOME/bin/}java"
+# shellcheck source=select-jdk.sh
+source "$bff_dir/scripts/select-jdk.sh"
+select_jdk || exit 1
+java_bin="$JAVA_HOME/bin/java"
 
 start_one() {
   local name="$1" port="$2" dir="$3"

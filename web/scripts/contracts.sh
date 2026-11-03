@@ -58,7 +58,13 @@ elif [[ -n "${CONTRACTS_SOURCE_DIR:-}" ]]; then
     exit 1
   fi
 elif [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
-  (cd "$web_dir" && npm pack --silent "@aiwcorpo/mcp-contracts@$version" --pack-destination "$(dirname "$target")" >/dev/null)
+  # The scope registry is in web/.npmrc; the token goes through a temporary user config (npm expands the variable),
+  # so it is neither in a file of the repository nor on a command line.
+  userconfig="$(mktemp)"
+  trap 'rm -f "$userconfig"' EXIT
+  printf '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n' > "$userconfig"
+  (cd "$web_dir" && npm pack --silent --userconfig "$userconfig" "@aiwcorpo/mcp-contracts@$version" \
+    --pack-destination "$(dirname "$target")" >/dev/null)
 else
   cat >&2 <<MSG
 contracts: $relative is missing. Provide the tarball of mcp-contracts $version with one of:

@@ -4,16 +4,16 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 5.1.0 (jary `mcp-contracts` i `mcp-manifest` w `~/.m2`, z repozytorium `mcp-contracts`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 6.2.0 (jary `mcp-contracts`, `mcp-manifest` i `test-vectors` w `~/.m2` albo w rejestrze Maven z `MCP_MAVEN_REPOSITORY_URL`, np. GitHub Packages `https://maven.pkg.github.com/aiwcorpo/mcp-contracts`; ustawienia w `.ci/settings.xml`).
+Obraz: `Dockerfile` w korzeniu repozytorium (cele `bff`, `web`, `portal`), `scripts/build-images.sh`; opis w [../README.md](../README.md).
 
 ## Uruchomienie lokalne
 
-Wymagane: JDK 25 i `mcp-contracts` 5.1.0 w `~/.m2`. Dwa tryby.
+Wymagane: JDK 25 (`scripts/select-jdk.sh` szuka go sam; `JAVA_HOME` ma pierwszeństwo) i `mcp-contracts` 6.2.0 w `~/.m2` albo w rejestrze. Dwa tryby.
 
 Z mockami (bez `mcp-platform-dev`; dane C4/C5 z mocków WireMock z jara kontraktów):
 
 ```bash
-export JAVA_HOME=/opt/homebrew/Cellar/openjdk@25/25.0.4.1/libexec/openjdk.jdk/Contents/Home   # wymagana Java 25
 ./mvnw -q test-compile                  # raz: pobiera jary WireMock i kontraktów do ~/.m2
 ./scripts/run-mocks.sh start            # C4 :18721, C5 :18722, discovery OIDC :18723
 PORTAL_MOCKS=1 ./scripts/run-dev.sh     # BFF na http://localhost:18720
@@ -37,7 +37,7 @@ hasło keystore'ów i porty przy każdym starcie, nic nie jest kopiowane do tego
 nadpisać zmienną `PORTAL_*` (tabela niżej). Prawdziwy broker zamiast stuba:
 `PORTAL_BROKER_URL=https://localhost:18100 ./scripts/run-dev.sh`.
 
-Skrypt sprawdza wersję Javy (z `JAVA_HOME` albo `PATH`) i kończy się czytelnym komunikatem, gdy nie jest to 25, oraz
+Skrypt znajduje JDK 25 (`scripts/select-jdk.sh`) i kończy się czytelnym komunikatem, gdy go nie ma, oraz
 włącza profil Spring `dev`. Podmiana mocków na prawdziwe usługi to zmiana dwóch adresów (`PORTAL_BROKER_URL`,
 `PORTAL_GATEWAY_ADMIN_URL`). Logowanie przez Keycloak wymaga w realmie `corp` redirect URI
 `<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`.
@@ -239,6 +239,27 @@ Kontrakty 4.0.0 (stan M4; M5 opisuje sekcja niżej). Szczegóły decyzji w `STAT
 | `IgaDataTest`, `KeycloakGroupsAccessGovernanceTest`, `IgaConfigTest` | adresy `requestUrl`, wynik adaptera, katalog bez wniosków, wybór adaptera |
 | `RegistryAdminTest` | tylko admin, widoki sprawdzane względem schematu, neutralizacja definicji, przykłady C12, zatwierdzenie z audytem, `409`, `422`, mapowanie statusów |
 | `RateLimitsTest` | limity na sesję (okno, `Retry-After`, liczenie tylko żądań do brokera), `429` z brokera i gateway'a |
+
+## M6: wyłącznik awaryjny i klasyfikacja narzędzi adaptera (kontrakty 6.2.0)
+
+- Wyłącznik awaryjny (A9, CC-194), grupa `mcp-platform-admin`: `GET /api/v1/admin/kill-switches` (lista sprawdzana względem schematu, powód
+  jako tekst nieufny ze znakami ukrytymi zapisanymi jawnie), `PUT` i `DELETE` pod `.../registry/servers/{serverId}/kill-switch` i
+  `.../tools/{tool}/kill-switch`. Włączenie (`PUT`, ciało `{"reason"}` 1..200 znaków bez znaków ukrytych) nie wymaga świeżego MFA; zdjęcie
+  (`DELETE`) wymaga go i bez niego daje `401 step_up_required` z `stepUpUrl` wracającym na stronę, z której poszło żądanie (U12). Zapis
+  w gatewayu (`kill_switch_set`, `kill_switch_cleared`) jest źródłem prawdy; portal zapisuje `admin_change` tylko dla prób bez skutku
+  (odmowa, brak MFA, awaria gatewaya) i nigdy nie przepisuje tekstu powodu do audytu.
+- `approve` niesie `risk` i `action` dla narzędzia z adaptera (CC-193); BFF sprawdza wartości enum (`400`), a parę i to, czy wpis jest z
+  adaptera, zostawia gatewayowi (`422 classification_inconsistent`, `classification_required`, `classification_not_allowed` z `reason`).
+  Obniżenie wcześniejszej klasyfikacji to `acceptRiskLowering` ze świeżym MFA, jak każde obniżenie.
+- Widoki rejestru przyjmują wpis oczekujący z `source: adapter` bez `risk` i `action` (z pustym `resourceRefs`), `classifiedBy` i
+  `classifiedAt`; wpis spoza adaptera dalej musi mieć obie wartości. Katalog przekazuje `disabledBy` tylko przy `disabled: true`.
+- Wektory `http-broken-escape`, `http-lone-percent`, `http-half-escape` (CC-202) przechodzą przez HTTP jako surowe żądanie, bo
+  `java.net.URI` nie zbuduje adresu z `%zz`; `TestBrowser.getRawTarget` wysyła je gniazdem.
+
+| Test | Co sprawdza |
+| --- | --- |
+| `KillSwitchTest` | tylko admin, lista sprawdzana względem schematu, włączenie bez MFA, zdjęcie z MFA i `stepUpUrl` ze strony, ciało żądania, mapowanie odpowiedzi gatewaya, audyt prób bez skutku, brak powodu w audycie |
+| `RegistryAdminTest` (dodane) | klasyfikacja przekazana gatewayowi, nieznane wartości, odmowy `422` z `reason`, obniżenie z MFA, wpis adaptera bez `risk` i `action`, `classifiedBy` |
 
 ## Struktura
 

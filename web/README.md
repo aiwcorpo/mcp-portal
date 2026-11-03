@@ -2,7 +2,7 @@
 
 Frontend portalu platformy MCP (strumień ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, teksty po polsku przez `$localize`. Rozmawia wyłącznie z BFF przez API C12
-(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 5.1.0). BFF (`../bff`, ws-07) serwuje zbudowane
+(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 6.2.0). BFF (`../bff`, ws-07) serwuje zbudowane
 pliki z tego samego originu.
 
 Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
@@ -10,14 +10,33 @@ Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
 ## Wymagania
 
 - Node 24, npm 11.
-- Repozytorium `mcp-contracts` obok `mcp-portal` (`../../mcp-contracts` względem `web/`): paczka
-  `release/aiwcorpo-mcp-contracts-5.1.0.tgz` jest zależnością deweloperską (OpenAPI, handlery MSW).
+- Paczka `@aiwcorpo/mcp-contracts` 6.2.0 (OpenAPI, handlery MSW, wektory) jako zależność deweloperska; leży w `web/.contracts/`
+  (katalog poza gitem), skąd czyta ją npm. Wypełnia go `scripts/contracts.sh`, patrz "Paczka kontraktów" niżej.
 - Java 25 tylko do ponownego wygenerowania klienta API (`npm run generate:api`).
 - Chromium dla Playwright: `npx playwright install chromium` (raz).
 
 ```bash
-npm ci
+scripts/contracts.sh && npm ci
 ```
+
+### Paczka kontraktów
+
+`package.json` wskazuje plik: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-6.2.0.tgz"`. Katalog
+`.contracts/` jest w `.gitignore`, więc repozytorium nie trzyma żadnego tarballa. `scripts/contracts.sh` kładzie tam paczkę
+z pierwszego dostępnego źródła: plik już leży (sprawdza `CONTRACTS_TARBALL_SHA256`, gdy ustawiona), `CONTRACTS_TARBALL=<plik>`,
+`CONTRACTS_TARBALL_URL=<adres>`, `CONTRACTS_SOURCE_DIR=<checkout mcp-contracts na tagu v6.2.0>` (robi tam `npm pack`; paczka z tego
+samego tagu ma te same bajty) albo, przy ustawionym `NODE_AUTH_TOKEN` (token z `read:packages`), `npm pack` z GitHub Packages.
+`ci/run.sh` woła go sam przed `npm ci`.
+
+Przejście na GitHub Packages bez pliku pośredniego: w `package.json` zmienić wpis na `"@aiwcorpo/mcp-contracts": "6.2.0"`,
+dodać do swojego `~/.npmrc` (token nie trafia do pliku w repozytorium; `web/.npmrc` ma już adres rejestru dla zakresu `@aiwcorpo`):
+
+```
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+i uruchomić `NODE_AUTH_TOKEN=<token> npm install`, który zaktualizuje `package-lock.json` (adres i suma z rejestru zamiast pliku).
+`scripts/contracts.sh` przy takiej zależności nic nie robi.
 
 ## Uruchomienie lokalne
 
@@ -48,6 +67,11 @@ Podgląd operacji: `/confirm/cnf_4k9Qe2LxW7tB3mZp` (wygasa 120 s po pierwszym ot
 Token zaczynający się od `invalid` daje `422 secret_invalid`. Mock `getMcpEndpoint` stosuje parser filtra z
 kontraktu (`src/app/core/mcp-filter.ts`, przypięty wektorami `endpoint-filter/` i `mcp-endpoint/`), więc zły
 filtr daje `400 invalid_filter`.
+
+Dodatkowe parametry adresu (też do końca sesji przeglądarki): `mockAdapter=in` (dwa narzędzia adaptera czekają w rejestrze Jiry
+na klasyfikację, jedno było sklasyfikowane i zmieniło się: obniżenie wymaga MFA), `mockSecretMissing=in` (połączenie Jiry w stanie
+`error`). Wyłączniki awaryjne mock trzyma w stanie (`/admin/kill-switches`), zdjęcie wymaga "świeżego MFA" tak jak zatwierdzenie
+z obniżeniem ryzyka.
 
 Z prawdziwym BFF (ws-01, port 18090):
 
@@ -121,7 +145,8 @@ npm run e2e                  # build konfiguracji e2e + Playwright (Chromium, 12
 naruszenie CSP albo nieobsłużony wyjątek. Testy dostępności używają axe-core (WCAG 2.1 A/AA) w trybie
 ciemnym (domyślnym) i jasnym (przełącznik w nagłówku).
 
-Zrzuty ekranów kluczowych widoków do porównania z makietami (`mcp-platform-plan/design/`), 1280 i 360 px:
+Zrzuty do README repozytorium (1280 px, dane z mocków): `npm run screenshots` zapisuje je w `../docs/screenshots`.
+Zrzuty kluczowych widoków do porównania z makietami (`mcp-platform-plan/design/`), 1280 i 360 px:
 
 ```bash
 SHOTS_DIR=/ścieżka/do/katalogu npx playwright test e2e/screenshots.spec.ts   # po npm run build:e2e
@@ -135,7 +160,7 @@ Nazwy plików zaczynają się od numeru makiety, np. `01-serwery-mcp-rozwiniete-
 Jeden punkt wejścia: `ci/run.sh` (wołany przez `make ci`). Kroki: `style` (znaki ukryte i typograficzne, frazy
 zakazane), `lint`, `i18n`, `unit`, `build`, `e2e`; podzbiór przez `CI_STEPS=style,unit ci/run.sh`.
 `ci/run.sh --container` robi to samo w obrazie z `ci/Dockerfile` (Node 24 i Chromium z obrazu Playwright
-1.64.1). Montuje tylko `web/` i paczkę kontraktów, obie tylko do odczytu, i kopiuje źródła bez `node_modules`. Paczka kontraktów: z checkoutu obok (domyślnie), z pliku `CONTRACTS_TARBALL` albo z serwera paczek `CONTRACTS_TARBALL_URL` (z `CONTRACTS_TARBALL_SHA256`). Na pull requestach wystarczy `CI_STEPS=style` (bez npm i paczki), pełny przebieg na głównej gałęzi. `PW_WORKERS` (domyślnie 4 w kontenerze) ogranicza liczbę przeglądarek. Pliki `.gitlab-ci.yml`, `Jenkinsfile`
+1.64.1). Montuje tylko `web/` (z paczką kontraktów w `.contracts/`) tylko do odczytu, i kopiuje źródła bez `node_modules`. Paczka kontraktów: `scripts/contracts.sh` (plik w `web/.contracts/`, `CONTRACTS_TARBALL`, `CONTRACTS_TARBALL_URL` z `CONTRACTS_TARBALL_SHA256`, `CONTRACTS_SOURCE_DIR` albo GitHub Packages przez `NODE_AUTH_TOKEN`); podane jako ścieżka na hoście są sprowadzane przed montowaniem. Na pull requestach wystarczy `CI_STEPS=style` (bez npm i paczki), pełny przebieg na głównej gałęzi. `PW_WORKERS` (domyślnie 4 w kontenerze) ogranicza liczbę przeglądarek. Pliki `.gitlab-ci.yml`, `Jenkinsfile`
 i workflow GitHub Actions mogą tylko wołać ten skrypt. 
 
 ## Adres MCP i ostrzeżenie o rozmiarze listy
@@ -155,8 +180,9 @@ przypomina, że klient musi iść za `nextCursor` (CC-181).
 Gdy akcja kończy się `step_up_required`, portal zapisuje w `sessionStorage` karty jeden wpis: rodzaj akcji i
 identyfikatory (serwer i narzędzie, skrót zatwierdzanej definicji), ważny 5 minut, nigdy tokeny, klucze ani
 hasła. Po powrocie z `?mfa=ok` akcja wykonuje się raz, bez drugiego kliknięcia: zatwierdzenie definicji (tylko gdy
-skrót jest ten sam, który administrator widział), start rejestracji Authenticatora, usunięcie Authenticatora
-(po ostrzeżeniu zatwierdzonym przed MFA). Samo `?mfa=ok` w adresie nic nie uruchamia. Formularz z tokenem nie
+skrót jest ten sam, który administrator widział, a przy narzędziu adaptera także z klasyfikacją wybraną przed MFA),
+zdjęcie wyłącznika awaryjnego (tylko gdy wyłącznik jeszcze działa), start rejestracji Authenticatora, usunięcie
+Authenticatora (po ostrzeżeniu zatwierdzonym przed MFA). Samo `?mfa=ok` w adresie nic nie uruchamia. Formularz z tokenem nie
 jest wznawiany: sekretu nie wolno zapisać, więc użytkownik wpisuje go ponownie.
 
 ## Klient API
@@ -166,7 +192,7 @@ jest wznawiany: sekretu nie wolno zapisać, więc użytkownik wpisuje go ponowni
 Nie edytować ręcznie.
 
 ```bash
-export JAVA_HOME="$(/usr/libexec/java_home -v 25)"   # macOS; gdzie indziej katalog dowolnego JDK 25
+export JAVA_HOME=<katalog JDK 25>       # macOS: "$(/usr/libexec/java_home -v 25)"
 npm run generate:api
 git diff --stat src/app/api/generated     # zmiany tylko po aktualizacji kontraktu
 ```
@@ -177,7 +203,7 @@ i `xsrfInterceptor` (`src/app/core/xsrf.interceptor.ts`) dokleja `X-XSRF-TOKEN` 
 czyta z ciasteczka `__Host-XSRF-TOKEN` (kontrakt, CC-055), a gdy go nie ma, z `XSRF-TOKEN` (nazwa, której BFF
 używał do M1); wbudowany mechanizm Angulara (jedna nazwa) jest wyłączony przez `withNoXsrfProtection()`.
 
-Zmiana wersji kontraktów: podmienić ścieżkę paczki w `package.json` (`@aiwcorpo/mcp-contracts`),
+Zmiana wersji kontraktów: podmienić nazwę paczki w `package.json` (`@aiwcorpo/mcp-contracts`), `scripts/contracts.sh`,
 `npm install`, `npm run generate:api`, testy.
 
 ## Teksty i i18n
@@ -202,7 +228,8 @@ src/app/
   features/connections/ Połączenia z systemami
   features/endpoint/    Adres MCP: jeden adres platformy, kreator filtra bez zapisu, konfiguracja klienta
   features/requests/    Wnioski: lista, dialog "Złóż wniosek" z uprawnieniami z IGA
-  features/admin/       Administracja (lazy, tylko isAdmin): rejestr, różnice definicji, zatwierdzanie
+  features/admin/       Administracja (lazy, tylko isAdmin): rejestr, różnice definicji, zatwierdzanie, klasyfikacja
+                        narzędzi adaptera (dialog), wyłączniki awaryjne (`/admin/kill-switches`)
 src/mocks/              warstwa stanowa nad handlerami MSW z kontraktów; start MSW w przeglądarce
 src/testing/            pomocnicze dla testów jednostkowych (MSW w Node, TestBed)
 e2e/                    Playwright

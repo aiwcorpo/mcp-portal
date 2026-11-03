@@ -7,14 +7,9 @@ set -euo pipefail
 
 bff_dir="$(cd "$(dirname "$0")/.." && pwd)"
 
-# The build targets Java 25 (class file 69); an older JDK fails with UnsupportedClassVersionError.
-java_bin="${JAVA_HOME:+$JAVA_HOME/bin/}java"
-java_major="$("$java_bin" -XshowSettings:properties -version 2>&1 | sed -n 's/^ *java.specification.version = //p')"
-if [[ -z "$java_major" || "$java_major" -lt 25 ]]; then
-  echo "Java 25 is required (found: ${java_major:-none} from $java_bin). Set JAVA_HOME to a JDK 25, e.g." >&2
-  echo "  export JAVA_HOME=/opt/homebrew/Cellar/openjdk@25/25.0.4.1/libexec/openjdk.jdk/Contents/Home" >&2
-  exit 1
-fi
+# shellcheck source=select-jdk.sh
+source "$bff_dir/scripts/select-jdk.sh"
+select_jdk || exit 1
 mocks=false
 [[ "${PORTAL_MOCKS:-}" == "1" ]] && mocks=true
 

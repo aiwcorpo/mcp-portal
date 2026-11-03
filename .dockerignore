@@ -1,0 +1,6 @@
+*
+!Dockerfile
+!bff/target/mcp-portal-bff-*.jar
+!bff/docker/entrypoint.sh
+!web/dist/portal
+!web/docker/nginx.conf

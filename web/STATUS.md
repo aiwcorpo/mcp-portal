@@ -85,7 +85,7 @@ npm run i18n:check     bez różnic
 npm run e2e            146 passed, 8 skipped (zrzuty: tylko z SHOTS_DIR); desktop 1280 px i mobile-360; axe AA ciemny i jasny
 ```
 
-Zrzuty: `<scratchpad>/m3-web-shots/`
+Zrzuty (poza repozytorium): katalog `SHOTS_DIR` z `e2e/screenshots.spec.ts` (kamień M3).
 (`SHOTS_DIR=... npx playwright test e2e/screenshots.spec.ts` po `npm run build:e2e`). Obrazy: `mcp-portal-web:m3-<sha>`
 (skrypt w scratchpadzie koordynatora: `build-web-image.sh`, buduje z `git archive HEAD`).
 
@@ -169,7 +169,7 @@ npm run e2e            88 passed, 2 skipped (zrzuty: tylko z SHOTS_DIR); Chromiu
 npm run i18n:check     bez różnic (252 komunikaty)
 ```
 
-Zrzuty ekranów (1280 i 360 px, nazwy z numerem makiety): `<scratchpad>/m2-web-shots/`
+Zrzuty ekranów (1280 i 360 px, nazwy z numerem makiety): `SHOTS_DIR` z `e2e/screenshots.spec.ts` (kamień M2, poza repozytorium).
 (52 pliki; generuje je `e2e/screenshots.spec.ts` przy ustawionym `SHOTS_DIR`).
 
 ## Co działa z kryterium M2 (zakres web, na mockach)

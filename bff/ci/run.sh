@@ -6,7 +6,7 @@
 #   ci/run.sh --container      the same inside the image built from ci/Dockerfile (needs docker and ~/.m2 with mcp-contracts)
 #   CI_STEPS=style ci/run.sh   a subset (comma separated: style, build); an unknown or empty list is an error
 #
-# Needs a JDK 25 (JAVA_HOME or PATH) for the build step and the mcp-contracts artifacts either in ~/.m2 or in the registry
+# Needs a JDK 25 (found by scripts/select-jdk.sh; JAVA_HOME wins) for the build step and the mcp-contracts artifacts either in ~/.m2 or in the registry
 # named by MCP_MAVEN_REPOSITORY_URL (+ _USER, _PASSWORD; settings in .ci/settings.xml). CI_MVNW replaces ./mvnw (tests).
 set -euo pipefail
 
@@ -36,7 +36,11 @@ step_style() {
   local files=() bad=0 file
   while IFS= read -r -d '' file; do
     files+=("$file")
-  done < <(find src ci scripts dev .ci README.md STATUS.md pom.xml Makefile -type f ! -name '*.p12' ! -name '*.jar' -print0) || return 1
+  done < <(find src ci scripts docker dev .ci README.md STATUS.md pom.xml Makefile -type f ! -name '*.p12' ! -name '*.jar' -print0) || return 1
+  # The documents and scripts of the repository root, when the checkout has them (a copy of bff/ alone does not).
+  for file in ../README.md ../CHANGELOG.md ../SECURITY.md ../CONTRIBUTING.md ../NOTICE ../Dockerfile ../scripts/build-images.sh; do
+    [[ -f "$file" ]] && files+=("$file")
+  done
   [[ "${#files[@]}" -gt 0 ]] || { echo "style: no files found" >&2; return 1; }
   # <<>> opens the names literally (plain <> would treat "|" or a leading "<" in a file name as a command or mode).
   perl -CSD -e 'while (<<>>) { if (/[\x{00A0}\x{200B}\x{202F}\x{FEFF}\x{2018}\x{2019}\x{201C}\x{201D}\x{2026}]/) { print "$ARGV:$.: hidden or typographic character\n"; $bad = 1 } close ARGV if eof } exit($bad // 0)' -- "${files[@]}" || bad=1
@@ -46,12 +50,9 @@ step_style() {
 
 step_build() {
   echo "== build"
-  if [[ -z "${JAVA_HOME:-}" ]] && ! command -v java >/dev/null; then
-    echo "ci/run.sh: no JDK; set JAVA_HOME to a JDK 25 or use the image of ci/Dockerfile" >&2
-    return 1
-  fi
-  local java_bin="${JAVA_HOME:+$JAVA_HOME/bin/}java"
-  "$java_bin" -version 2>&1 | grep -q 'version "25' || { echo "JDK 25 is required (JAVA_HOME or PATH)" >&2; return 1; }
+  # shellcheck source=../scripts/select-jdk.sh
+  source "$bff_dir/scripts/select-jdk.sh"
+  select_jdk || return 1
   local mvnw="${CI_MVNW:-./mvnw}" args=(-B -ntp)
   if [[ -n "${MCP_MAVEN_REPOSITORY_URL:-}" ]]; then
     args+=(-s .ci/settings.xml)
