@@ -39,6 +39,19 @@ jobs:
           java-version: '25'
           cache: maven
           cache-dependency-path: bff/pom.xml
+      - name: Base images are pinned by digest
+        run: |
+          # Every FROM and every ARG naming an image (*_IMAGE, BASE_IMAGE) in the Dockerfiles must end in @sha256:<64 hex>.
+          bad=0
+          for file in Dockerfile bff/ci/Dockerfile web/ci/Dockerfile; do
+            while IFS= read -r line; do
+              case "$line" in
+                *@sha256:????????????????????????????????????????????????????????????????) ;;
+                *) echo "no digest: $file: $line" >&2; bad=1 ;;
+              esac
+            done < <(grep -E '^(FROM [^ ]*|ARG [A-Z_]*IMAGE=.*)$' "$file" | grep -v '^FROM \${' | grep -v '^FROM [a-z]* AS ' )
+          done
+          exit "$bad"
       - name: Tag matches the versions of the BFF and the web part
         run: |
           version="${GITHUB_REF_NAME#v}"
@@ -71,7 +84,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-      # actions/setup-node v4.4.0 (SHA to be confirmed at the first run): the web build needs Node 24, which the runner image
+      # actions/setup-node v4.4.0 (SHA read with git ls-remote): the web build needs Node 24, which the runner image
       # does not guarantee; scripts/build-images.sh also refuses an older one.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:

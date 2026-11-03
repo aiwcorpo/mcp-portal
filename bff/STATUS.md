@@ -43,8 +43,8 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 - Obraz: `mcp-portal-bff:m6-e72ccbf`, `mcp-portal:m6-e72ccbf` (BFF z aplikacją) i `mcp-portal-web:m6-e72ccbf` (poprzednie `m6-ea6d179` zastąpione), z `scripts/build-images.sh` i `Dockerfile`
   tego repozytorium (nie z `mcp-platform-dev`). Sprawdzone uruchomieniem: `portal` startuje w profilu `dev`, `/actuator/health` UP,
   `/api/v1/me` 401, trasa SPA 200 z CSP i nonce; `web` odpowiada na `/__web/health` i serwuje `index.html` z CSP. Nie wdrożone na stos.
-- Do uzupełnienia przy pierwszym buildzie z siecią: digest `nginx:stable-alpine` w `Dockerfile` (cel `web`; obraz `m6-e72ccbf` zbudowano z `NGINX_IMAGE=nginx:1.27-alpine@sha256:6564...`, bo stable nie ma lokalnie) oraz digest `eclipse-temurin:25-jdk` w `ci/Dockerfile` (też nie ma lokalnie; obraz Playwright w `web/ci/Dockerfile` przypięty).
-- Nie sprawdzone: SHA `actions/setup-node` v4.4.0 w workflow (z pamięci, do potwierdzenia przy pierwszym uruchomieniu), workflow `.github/workflows/release.yml` (nie ma repozytorium ani paczek), `ci/run.sh --container` w całości (krok
+- Obrazy bazowe w `Dockerfile`, `bff/ci/Dockerfile` i `web/ci/Dockerfile` są przypięte digestem (nginx `stable-alpine` sha256:0e52bd05..., temurin 25-jdk sha256:83f4a7fc...), odczytanym z rejestru przez `docker buildx imagetools inspect`; workflow wydania przerywa, gdy któryś `FROM` albo `ARG *_IMAGE` nie ma `@sha256`. Obraz `m6-e72ccbf` zbudowano z `NGINX_IMAGE=nginx:1.27-alpine@sha256:6564...` (przed odczytem digestu stable), więc obraz `web` trzeba zbudować ponownie z domyślnym nginx stable.
+- Nie sprawdzone: workflow `.github/workflows/release.yml` (nie ma repozytorium ani paczek), `ci/run.sh --container` w całości (krok
   `npm ci` w kontenerze potrzebuje sieci, a ta maszyna jej nie ma), pobranie jarów z GitHub Packages.
 
 ## M2: wynik (2026-10-28)
