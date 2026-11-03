@@ -28,7 +28,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 ## M6: stan (2026-11-03)
 
-`clean verify`: 496 testów, 0 błędów (`bff/ci/run.sh`). Opis: sekcja "M6" w README.
+`clean verify`: 497 testów, 0 błędów (`bff/ci/run.sh`). Opis: sekcja "M6" w README.
 
 - Kontrakty 6.2.0: jary `mcp-contracts`, `mcp-manifest` i `test-vectors` z `~/.m2`; z rejestru, gdy ustawione `MCP_MAVEN_REPOSITORY_URL`
   (GitHub Packages: `https://maven.pkg.github.com/aiwcorpo/mcp-contracts`, ustawienia w `.ci/settings.xml`, ten sam mechanizm co dotąd).
@@ -39,10 +39,12 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 - `approve`: BFF sprawdza tylko wartości `risk` i `action` (`400` dla nieznanej wartości albo połowy pary); zgodność pary i to, że
   wpis jest z adaptera, rozstrzyga gateway (`422` z `reason`). `400` nie występuje w kontrakcie `approveAdminTool` (CC-210).
 - `adapter_mode_mismatch` i pozostałe powody `ManifestRejected` przechodzą bez zmian (wzorzec `^[a-z][a-z0-9_]*$`).
-- Obraz: `mcp-portal-bff:m6-ea6d179`, `mcp-portal:m6-ea6d179` (BFF z aplikacją) i `mcp-portal-web:m6-ea6d179`, z `scripts/build-images.sh` i `Dockerfile`
+- Przegląd M6 e3: zdjęcie wyłącznika wymaga `Sec-Fetch-Site: same-origin` (jak `approve`); włączenie nie.
+- Obraz: `mcp-portal-bff:m6-e72ccbf`, `mcp-portal:m6-e72ccbf` (BFF z aplikacją) i `mcp-portal-web:m6-e72ccbf` (poprzednie `m6-ea6d179` zastąpione), z `scripts/build-images.sh` i `Dockerfile`
   tego repozytorium (nie z `mcp-platform-dev`). Sprawdzone uruchomieniem: `portal` startuje w profilu `dev`, `/actuator/health` UP,
   `/api/v1/me` 401, trasa SPA 200 z CSP i nonce; `web` odpowiada na `/__web/health` i serwuje `index.html` z CSP. Nie wdrożone na stos.
-- Nie sprawdzone: workflow `.github/workflows/release.yml` (nie ma repozytorium ani paczek), `ci/run.sh --container` w całości (krok
+- Do uzupełnienia przy pierwszym buildzie z siecią: digest `nginx:stable-alpine` w `Dockerfile` (cel `web`; obraz `m6-e72ccbf` zbudowano z `NGINX_IMAGE=nginx:1.27-alpine@sha256:6564...`, bo stable nie ma lokalnie) oraz digest `eclipse-temurin:25-jdk` w `ci/Dockerfile` (też nie ma lokalnie; obraz Playwright w `web/ci/Dockerfile` przypięty).
+- Nie sprawdzone: SHA `actions/setup-node` v4.4.0 w workflow (z pamięci, do potwierdzenia przy pierwszym uruchomieniu), workflow `.github/workflows/release.yml` (nie ma repozytorium ani paczek), `ci/run.sh --container` w całości (krok
   `npm ci` w kontenerze potrzebuje sieci, a ta maszyna jej nie ma), pobranie jarów z GitHub Packages.
 
 ## M2: wynik (2026-10-28)

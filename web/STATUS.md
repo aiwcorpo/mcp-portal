@@ -1,12 +1,12 @@
 # STATUS: mcp-portal/web (ws-08)
 
-M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, dialog klasyfikacji narzędzi adaptera, stan `error` połączenia, wznawianie po MFA dla wyłącznika i klasyfikacji. Obraz `mcp-portal-web:m6-ea6d179` (bez wdrażania). Szczegóły w sekcji "M6: stan".
+M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, dialog klasyfikacji narzędzi adaptera, stan `error` połączenia, wznawianie po MFA dla wyłącznika i klasyfikacji. Obraz `mcp-portal-web:m6-e72ccbf` (bez wdrażania). Szczegóły w sekcji "M6: stan".
 
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.
 
 ## M6: stan
 
-Liczby: `npm test` 29 plików, 534 testy; `npm run e2e` 194 przeszły, 12 pominiętych (zrzuty, tylko z `SHOTS_DIR` albo `README_SHOTS_DIR`); `ci/run.sh` bez kroku kontenerowego: OK.
+Liczby: `npm test` 29 plików, 535 testów; `npm run e2e` 194 przeszły, 12 pominiętych (zrzuty, tylko z `SHOTS_DIR` albo `README_SHOTS_DIR`); `ci/run.sh` bez kroku kontenerowego: OK.
 
 - Kontrakty 6.2.0: paczka npm w `web/.contracts/` (poza gitem), `scripts/contracts.sh` (plik, adres z sumą, checkout na tagu z `npm pack`, GitHub Packages
   przez `NODE_AUTH_TOKEN`). `npm pack` z rozpakowanej paczki daje identyczne bajty (sha256 `3e244f22...`), więc checkout na tagu `v6.2.0` odtwarza tę samą paczkę.
@@ -20,6 +20,7 @@ Liczby: `npm test` 29 plików, 534 testy; `npm run e2e` 194 przeszły, 12 pomini
 - `RegistryTool.risk` i `.action` opcjonalne (także `ToolEntry` w wygenerowanych typach: generator gubi `required` z `allOf`, patrz CC-210).
 - Stan `error` połączenia: wiersz katalogu "Połączenie przestało działać, połącz konto ponownie", wiersz połączeń "przestało działać, połącz konto ponownie",
   przycisk jak dla `reconnect_required` (OAuth: "Połącz", token: "Odnów").
+- Przegląd M6 e3: intencja zdjęcia niesie `setAt` widzianego wyłącznika; wyłącznik zdjęty i włączony od nowa w czasie MFA nie jest zdejmowany, strona to mówi.
 - U12: `ResumeIntentStore` zna `lift-kill-switch` i `approve-tool` z klasyfikacją; po `?mfa=ok` wyłącznik jest zdejmowany tylko wtedy, gdy nadal działa, a
   zatwierdzenie z klasyfikacją tylko dla tego samego skrótu. Test: drugi `step_up_required` po powrocie to błąd, nie pętla.
 - Mock: `?mockAdapter=in` (trzy narzędzia adaptera: nowe, nowe z mylącą adnotacją `readOnlyHint: true`, sklasyfikowane i zmienione), `?mockSecretMissing=in`,
