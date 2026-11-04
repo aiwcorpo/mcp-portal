@@ -6,6 +6,8 @@
 #   2. CONTRACTS_TARBALL=<file>             a tarball on disk
 #   3. CONTRACTS_TARBALL_URL=<url>          a package server
 #   4. CONTRACTS_SOURCE_DIR=<checkout>      `npm pack` in a checkout of mcp-contracts at the release tag (dist/ built there)
+#   5. CONTRACTS_FROM_NPMJS=1               `npm pack` of the published package from the public registry (npmjs), no token;
+#                                           CONTRACTS_TARBALL_SHA256 should be set, since it pins the bytes
 #
 # After mcp-contracts is published to npmjs, the dependency in package.json becomes a registry version and
 # there is nothing to prepare. When it is a registry version ("6.3.2" instead of a file: path) there is nothing to prepare.
@@ -57,11 +59,18 @@ elif [[ -n "${CONTRACTS_SOURCE_DIR:-}" ]]; then
     echo "contracts: the checkout produced $packed, package.json wants $name (check out the tag v$version)" >&2
     exit 1
   fi
+elif [[ "${CONTRACTS_FROM_NPMJS:-}" == "1" ]]; then
+  # From an empty directory, so no .npmrc of the checkout can redirect the scope to another registry.
+  scratch="$(mktemp -d)"
+  trap 'rm -rf "$scratch"' EXIT
+  (cd "$scratch" && npm pack --silent --registry https://registry.npmjs.org/ "@aiwcorpo/mcp-contracts@$version" \
+    --pack-destination "$scratch" >/dev/null)
+  cp "$scratch/$name" "$target"
 else
   cat >&2 <<MSG
 contracts: $relative is missing. Provide the tarball of mcp-contracts $version with one of:
   CONTRACTS_TARBALL=<file> (for example mcp-contracts/release/$name), CONTRACTS_TARBALL_URL=<url>
-  or CONTRACTS_SOURCE_DIR=<checkout at tag v$version>.
+  CONTRACTS_SOURCE_DIR=<checkout at tag v$version> or CONTRACTS_FROM_NPMJS=1 (public registry).
 MSG
   exit 1
 fi

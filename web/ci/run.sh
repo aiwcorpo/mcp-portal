@@ -11,7 +11,7 @@
 #
 # Needs Node 24 and the contracts tarball named in package.json, which scripts/contracts.sh puts in .contracts/ (ignored by
 # git): from CONTRACTS_TARBALL (a file), CONTRACTS_TARBALL_URL (package server, CONTRACTS_TARBALL_SHA256 checks it),
-# CONTRACTS_SOURCE_DIR (a checkout of mcp-contracts at the release tag) (npm pack there).
+# CONTRACTS_SOURCE_DIR (a checkout of mcp-contracts at the release tag) (npm pack there) or, with CONTRACTS_FROM_NPMJS=1, the public npm registry.
 # --container mounts only this directory, read-only. The e2e step needs Chromium for Playwright (the image has it; locally:
 # npx playwright install chromium) and uses port 18731.
 set -euo pipefail
@@ -30,7 +30,7 @@ if [[ "${1:-}" == "--container" ]]; then
   fi
   exec docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp/ci-home -e CI=1 -e CI_STEPS="${CI_STEPS:-}" \
     -e CI_INSTALL=1 -e PW_WORKERS="${PW_WORKERS:-4}" -e CONTRACTS_TARBALL_URL="${CONTRACTS_TARBALL_URL:-}" \
-    -e CONTRACTS_TARBALL_SHA256="${CONTRACTS_TARBALL_SHA256:-}" \
+    -e CONTRACTS_TARBALL_SHA256="${CONTRACTS_TARBALL_SHA256:-}" -e CONTRACTS_FROM_NPMJS="${CONTRACTS_FROM_NPMJS:-}" \
     -v "$web_dir:/src/web:ro" -w /tmp "$image" bash -c '
       set -euo pipefail
       mkdir -p /tmp/ws/mcp-portal/web
