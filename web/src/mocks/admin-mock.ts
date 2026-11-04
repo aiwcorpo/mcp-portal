@@ -196,7 +196,7 @@ const SEED: SeedServer[] = [
         name: 'get_issue',
         approved: entry(
           'get_issue',
-          'Pobranie zgłoszenia',
+          'Get issue',
           'Returns one Jira issue.',
           'READ_ONLY',
           'read',
@@ -209,7 +209,7 @@ const SEED: SeedServer[] = [
         name: 'update_issue',
         approved: entry(
           'update_issue',
-          'Zmiana zgłoszenia',
+          'Update issue',
           'Updates the summary of an issue.',
           'UPDATE',
           'update',
@@ -225,7 +225,7 @@ const SEED: SeedServer[] = [
           version: '1.4.0',
           entry: entry(
             'update_issue',
-            'Zmiana zgłoszenia',
+            'Update issue',
             INJECTED_DESCRIPTION,
             'UPDATE',
             'update',
@@ -249,7 +249,7 @@ const SEED: SeedServer[] = [
         name: 'delete_branch',
         approved: entry(
           'delete_branch',
-          'Usunięcie gałęzi',
+          'Delete branch',
           'Deletes a branch of a project.',
           'DESTRUCTIVE',
           'delete',
@@ -264,7 +264,7 @@ const SEED: SeedServer[] = [
           version: '1.8.0',
           entry: entry(
             'delete_branch',
-            'Usunięcie gałęzi',
+            'Delete branch',
             'Deletes a branch of a project.',
             'UPDATE',
             'update',
@@ -287,7 +287,7 @@ const SEED: SeedServer[] = [
         name: 'get_ticket',
         approved: entry(
           'get_ticket',
-          'Pobranie zgłoszenia serwisowego',
+          'Get ticket',
           'Returns one service desk ticket.',
           'READ_ONLY',
           'read',
@@ -307,7 +307,7 @@ const SEED: SeedServer[] = [
         name: 'search_logs',
         approved: entry(
           'search_logs',
-          'Przeszukanie logów',
+          'Search logs',
           'Searches log indices.',
           'READ_ONLY',
           'read',
@@ -354,7 +354,7 @@ const ADAPTER_TOOLS: SeedTool[] = [
     name: 'transition_issue',
     approved: entry(
       'transition_issue',
-      'Zmiana statusu zgłoszenia',
+      'Change issue status',
       'Moves an issue to another status.',
       'UPDATE',
       'update',
@@ -366,7 +366,7 @@ const ADAPTER_TOOLS: SeedTool[] = [
       version: '0.23.1',
       entry: adapterEntry(
         'transition_issue',
-        'Zmiana statusu zgłoszenia',
+        'Change issue status',
         'Moves an issue to another status and notifies the watchers.',
         { readOnlyHint: false },
         { issueKey: ISSUE_KEY, status: { type: 'string', maxLength: 64 } },
@@ -383,7 +383,7 @@ const ADAPTER_TOOLS: SeedTool[] = [
       floor: 'UPDATE',
       entry: adapterEntry(
         'link_issues',
-        'Powiązanie zgłoszeń',
+        'Link issues',
         'Links two issues.',
         { readOnlyHint: false },
         { from: ISSUE_KEY, to: ISSUE_KEY },
@@ -401,7 +401,7 @@ const ADAPTER_TOOLS: SeedTool[] = [
       unflagged: true,
       entry: adapterEntry(
         'merge_issues',
-        'Scalenie zgłoszeń',
+        'Merge issues',
         'Merges an issue into another.',
         { readOnlyHint: false },
         { from: ISSUE_KEY, to: ISSUE_KEY },
@@ -416,7 +416,7 @@ const ADAPTER_TOOLS: SeedTool[] = [
       version: '0.23.1',
       entry: adapterEntry(
         'add_worklog',
-        'Dodanie wpisu czasu pracy',
+        'Add worklog',
         'Logs time spent on an issue.',
         { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
         { issueKey: ISSUE_KEY, timeSpent: { type: 'string', maxLength: 16 } },
@@ -431,7 +431,7 @@ const ADAPTER_TOOLS: SeedTool[] = [
       version: '0.23.1',
       entry: adapterEntry(
         'delete_comment',
-        'Usunięcie komentarza',
+        'Delete comment',
         'Removes a comment from an issue.',
         { readOnlyHint: true, destructiveHint: false },
         { issueKey: ISSUE_KEY, commentId: { type: 'string', maxLength: 16 } },

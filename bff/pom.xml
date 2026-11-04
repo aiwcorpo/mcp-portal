@@ -13,7 +13,7 @@
 
     <groupId>pl.aiwcorpo.mcp</groupId>
     <artifactId>mcp-portal-bff</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>MCP Portal BFF</name>
     <description>Backend for the MCP portal frontend: OIDC session, C12 API, aggregation of C4, C5 and C13.</description>
     <url>https://github.com/aiwcorpo/mcp-portal</url>

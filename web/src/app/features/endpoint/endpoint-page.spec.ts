@@ -204,7 +204,7 @@ describe('EndpointPage', () => {
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
 
     const search = document.querySelector<HTMLInputElement>('input[type="search"]')!;
-    search.value = 'komentarza';
+    search.value = 'add comment';
     search.dispatchEvent(new Event('input'));
 
     await until(() => expect(text()).not.toContain('jira__search_issues'));

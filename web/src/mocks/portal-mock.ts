@@ -180,21 +180,21 @@ function baseCatalog(
   }
   if (jira) {
     jira.tools = [
-      tool('jira', 'search_issues', 'Wyszukiwanie zgłoszeń (JQL)', {
+      tool('jira', 'search_issues', 'Search issues', {
         entitlement: 'mcp-jira-read',
       }),
       jira.tools[0],
-      tool('jira', 'create_issue', 'Tworzenie zgłoszenia', {
+      tool('jira', 'create_issue', 'Create issue', {
         entitlement: 'mcp-jira-write',
         risk: 'UPDATE',
         action: 'update',
       }),
-      tool('jira', 'add_comment', 'Dodanie komentarza', {
+      tool('jira', 'add_comment', 'Add comment', {
         entitlement: 'mcp-jira-write',
         risk: 'UPDATE',
         action: 'update',
       }),
-      tool('jira', 'delete_issue', 'Usunięcie zgłoszenia', {
+      tool('jira', 'delete_issue', 'Delete issue', {
         entitlement: 'mcp-jira-destructive',
         risk: 'DESTRUCTIVE',
         action: 'delete',
@@ -209,7 +209,7 @@ function baseCatalog(
         tool(
           'jira',
           `report_number_${String(index).padStart(2, '0')}_for_quarter`,
-          `Raport ${index + 1}`,
+          `Report ${index + 1}`,
           {
             entitlement: 'mcp-jira-read',
           },
@@ -220,7 +220,7 @@ function baseCatalog(
   const gitlab = servers.find((server) => server.system === 'gitlab');
   if (gitlab) {
     gitlab.tools = [
-      tool('gitlab', 'list_merge_requests', 'Lista merge requestów', {
+      tool('gitlab', 'list_merge_requests', 'List merge requests', {
         entitlement: 'mcp-gitlab-read',
       }),
       ...gitlab.tools,

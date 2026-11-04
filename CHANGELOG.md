@@ -1,27 +1,29 @@
 # Changelog
 
-Format: wersje SemVer; kolejność od najnowszej. Do pierwszego wydania numery w `bff/pom.xml` i `web/package.json` są
-robocze (`0.1.0-SNAPSHOT`, `0.1.0`); obrazy testowe mają tag `m<numer kamienia>-<sha>`.
+Versions follow SemVer, newest first. Test images built before the first release are tagged `m<milestone>-<sha>`.
 
-## Nie wydane (M6, kontrakty 6.3.2)
+## 1.0.0
 
-- Kontrakty `mcp-contracts` 6.3.2 (BFF: jary z `~/.m2` albo z rejestru; web: tarball w `web/.contracts/`, katalog poza gitem).
-- Wyłącznik awaryjny (A9, CC-194): lista aktywnych, włączenie serwera lub narzędzia bez MFA, zdjęcie po świeżym MFA
-  (po powrocie z IdP zdjęcie wykonuje się samo), znacznik w rejestrze i katalogu (`disabledBy`).
-- Klasyfikacja narzędzi adaptera (CC-193, CC-227): dialog tylko z Odczytem i `read` (adapter jest tylko do odczytu), podpowiedzi
-  serwera jako tekst niezaufany, komunikaty `classification_*` w dialogu; ponowna klasyfikacja wpisu z unieważnioną klasyfikacją
-  zapisu to obniżenie (`acceptRiskLowering`, świeże MFA, wznowienie po powrocie).
-- Pole loginu w formularzu tokenu dla `userSecretScheme: Basic` (CC-222), `username` w `PUT .../secret` (nie logowany).
-- `400` w `approveAdminTool` (CC-210) objęte testem kontraktowym; `503` katalogu przy nieczytelnych wyłącznikach (CC-224).
-- `RegistryTool.risk` i `.action` opcjonalne (wpis adaptera czeka bez nich), `classifiedBy` i `classifiedAt`.
-- Połączenie w stanie `error` (brak sekretu, CC-205): wiersz mówi, że przestało działać, i prosi o ponowne połączenie.
-- Wektory `http-broken-escape`, `http-lone-percent` i `http-half-escape` (CC-202) sprawdzane surowym żądaniem.
-- Opcjonalny TLS na porcie BFF (`PORTAL_PUBLIC_TLS_ENABLED`, `_CERTIFICATE`, `_PRIVATE_KEY`, `_PRIVATE_KEY_PASSWORD`; PEM, pakiet SSL
-  Spring Boota), domyślnie wyłączony; bez zmian kontraktów i bez mTLS.
-- Dockerfile w repozytorium (cele `bff`, `web`, `portal`), zrzuty ekranu w README, LICENSE (Apache-2.0), NOTICE,
-  SECURITY.md, CONTRIBUTING.md.
+First release. It needs `mcp-contracts` 6.3.2 and a gateway on the same contracts.
 
-## M5 - 2026-10-31
+- Portal for users: the MCP servers they may use, connecting accounts (OAuth, personal tokens, tokens with a login for the
+  `Basic` scheme), requests for entitlements through the IGA adapter, the `/mcp` address with its filter, audit logs of
+  their own calls, and the preview of a pending irreversible operation that is confirmed with a code from the Authenticator.
+- Authenticator: registration with a QR code and a key shown once, lock after 5 wrong codes, switch-off after 20, removal
+  with a fresh MFA.
+- Administration: review and approval of tool definitions as a diff (including risk lowering and definitions reported
+  by a running server), classification of the tools of foreign servers (read only), emergency switches for a server or a tool
+  (switching off needs no MFA, lifting does; after the return from the IdP the action carries itself out).
+- BFF (Java 25, Spring Boot 4.1): OIDC sign-in, server-side session, the C12 API, aggregation of the gateway, the broker and the
+  IGA; the browser never gets a token or a secret. Optional TLS on the BFF port.
+- Interface in English (source language) and Polish: one build, the language comes from the stored choice or the browser, a
+  switch in the header and on the sign-in screen. Texts from the BFF and the contracts are shown as they arrive.
+- Images from one `Dockerfile` (targets `bff`, `web`, `portal`), `ci/run.sh` for the BFF and the web part as the single CI entry
+  point, screenshots in `docs/screenshots/en` and `docs/screenshots/pl`, Apache-2.0 licence, NOTICE, SECURITY.md, CONTRIBUTING.md.
+- CI workflows run without a token or a secret; the contracts come from Maven Central and npmjs.
 
-- Jeden adres `/mcp` z filtrem w query zamiast zapisanych linków (kontrakty 5.1.0), kreator adresu bez zapisu,
-  licznik bajtów, ostrzeżenie o rozmiarze listy; `ci/run.sh` jako jedyny punkt wejścia CI.
+## Before 1.0.0
+
+The milestones M1 to M6 were never released. Their changes are folded into 1.0.0; the last ones were the `/mcp` address with a
+filter instead of saved links (M5, contracts 5.1.0) and the emergency switch, the classification of adapter tools, the login
+field of the token form and the optional TLS port (M6, contracts 6.3.2).

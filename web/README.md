@@ -1,98 +1,100 @@
 # mcp-portal/web
 
-Frontend portalu platformy MCP (strumień ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
-Material 22.2, teksty po polsku przez `$localize`. Rozmawia wyłącznie z BFF przez API C12
-(`/api/v1`, kontrakt `portal-bff.v1.yaml` z `mcp-contracts` 6.3.2). BFF (`../bff`, ws-07) serwuje zbudowane
-pliki z tego samego originu.
+Frontend of the MCP platform portal (workstream ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
+Material 22.2, texts through `$localize`. It talks only to the BFF through the C12 API (`/api/v1`, contract
+`portal-bff.v1.yaml` from `mcp-contracts` 6.3.2). The BFF (`../bff`, ws-07) serves the built files from the same origin.
 
-Zakres obecnej wersji i podział na kamienie: [STATUS.md](STATUS.md).
+Scope of the current version and the split into milestones: [STATUS.md](STATUS.md).
 
-## Wymagania
+## Requirements
 
 - Node 24, npm 11.
-- Paczka `@aiwcorpo/mcp-contracts` 6.3.2 (OpenAPI, handlery MSW, wektory) jako zależność deweloperska; leży w `web/.contracts/`
-  (katalog poza gitem), skąd czyta ją npm. Wypełnia go `scripts/contracts.sh`, patrz "Paczka kontraktów" niżej.
-- Java 25 tylko do ponownego wygenerowania klienta API (`npm run generate:api`).
-- Chromium dla Playwright: `npx playwright install chromium` (raz).
+- The `@aiwcorpo/mcp-contracts` 6.3.2 package (OpenAPI, MSW handlers, vectors) as a dev dependency. It lives in
+  `web/.contracts/` (git-ignored), where npm reads it from. `scripts/contracts.sh` fills that directory, see
+  "Contracts package" below.
+- Java 25, only to regenerate the API client (`npm run generate:api`).
+- Chromium for Playwright: `npx playwright install chromium` (once).
 
 ```bash
 scripts/contracts.sh && npm ci
 ```
 
-### Paczka kontraktów
+### Contracts package
 
-`package.json` wskazuje plik: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-6.3.2.tgz"`. Katalog
-`.contracts/` jest w `.gitignore`, więc repozytorium nie trzyma żadnego tarballa. `scripts/contracts.sh` kładzie tam paczkę
-z pierwszego dostępnego źródła: plik już leży (sprawdza `CONTRACTS_TARBALL_SHA256`, gdy ustawiona), `CONTRACTS_TARBALL=<plik>`,
-`CONTRACTS_TARBALL_URL=<adres>`, `CONTRACTS_SOURCE_DIR=<checkout mcp-contracts na tagu v6.3.2>` (robi tam `npm pack`; paczka z tego
-samego tagu ma te same bajty) (albo plik wydania z `mcp-contracts/release/` jako `CONTRACTS_TARBALL`).
-`ci/run.sh` woła go sam przed `npm ci`.
+`package.json` points at a file: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-6.3.2.tgz"`.
+`.contracts/` is in `.gitignore`, so the repository holds no tarball. `scripts/contracts.sh` puts the package there from the
+first available source: a file already in place (checked against `CONTRACTS_TARBALL_SHA256` when set),
+`CONTRACTS_TARBALL=<file>`, `CONTRACTS_TARBALL_URL=<url>`, `CONTRACTS_SOURCE_DIR=<mcp-contracts checkout at tag v6.3.2>`
+(runs `npm pack` there; a package from the same tag has the same bytes) or `CONTRACTS_FROM_NPMJS=1` (`npm pack` of the published
+package from npmjs, no token; set `CONTRACTS_TARBALL_SHA256` to pin the bytes, as the GitHub workflows do). A release file from `mcp-contracts/release/`
+also works as `CONTRACTS_TARBALL`. `ci/run.sh` calls the script itself before `npm ci`.
 
-Po wydaniu `mcp-contracts` w npmjs: w `package.json` zmienić wpis na `"@aiwcorpo/mcp-contracts": "6.3.2"` i uruchomić `npm install`, który
-zaktualizuje `package-lock.json` (adres i suma z rejestru zamiast pliku). Nie trzeba żadnego tokenu ani `.npmrc`.
-`scripts/contracts.sh` przy takiej zależności nic nie robi.
+Once `mcp-contracts` is published on npmjs, change the entry in `package.json` to `"@aiwcorpo/mcp-contracts": "6.3.2"` and run
+`npm install`, which updates `package-lock.json` (registry URL and checksum instead of a file). No token or `.npmrc` is
+needed. With such a dependency `scripts/contracts.sh` does nothing.
 
-## Uruchomienie lokalne
+## Running locally
 
-Na mockach (bez BFF), MSW w przeglądarce:
+On mocks (no BFF), MSW in the browser:
 
 ```bash
 npm run start:mocks          # http://localhost:18730
 ```
 
-Mock jest stanowy: logowanie i wylogowanie, zapis (bez MFA) i usunięcie połączenia, powrót z OAuth, wniosek o
-dostęp, adres MCP z filtrem (`GET /me/mcp-endpoint`, liczony wg reguł gatewaya). Odpowiedzi pochodzą z przykładów C12 (`@aiwcorpo/mcp-contracts/msw`; katalog
-z przykładu `states`, rozszerzony o kilka narzędzi), ich handlery pilnują też CSRF. Statusy wierszy i akcje
-liczy `deriveRow` według tabeli z kontraktu (test na wektorach `catalog-actions/`).
+The mock is stateful: login and logout, saving (without MFA) and deleting a connection, OAuth return, access request, and
+the MCP address with a filter (`GET /me/mcp-endpoint`, computed by the gateway rules). Responses come from the C12 examples
+(`@aiwcorpo/mcp-contracts/msw`; the catalog from the `states` example, extended with a few tools), and their handlers also
+enforce CSRF. Row statuses and actions are computed by `deriveRow` from the contract table (tested against the
+`catalog-actions/` vectors).
 
-Parametry adresu, ważne do końca sesji przeglądarki (stan w ciasteczku `mcp-portal-mock`, bez sekretów):
+URL parameters, valid until the browser session ends (state in the `mcp-portal-mock` cookie, no secrets):
 
-| Parametr | Wartości |
+| Parameter | Values |
 | --- | --- |
-| `mockScenario` | `default` (przykład `states`: wygasający token, wymagane ponowne połączenie, brak uprawnień, konto serwisowe, wymiana tokenu), `mixed` (przykład `mixed`: połączone i niepołączone), `empty` (brak serwerów), `wide` (53 narzędzia: przekracza domyślny próg ostrzeżenia i limit 512 bajtów przy 16 długich nazwach), `errors` (`503 upstream_unavailable` z `requestId`); zmiana scenariusza zeruje zmiany |
-| `mockAuthenticator` | `none`, `active`, `locked`, `disabled`: rejestracja Authenticatora (domyślnie `none`; start rejestracji i usunięcie wymagają świeżego MFA, które mock "robi" przy przekierowaniu step-up) |
-| `mockIga` | zachowanie adaptera IGA: `direct` (wniosek tworzony od razu, domyślnie), `redirect` (odpowiedź z adresem formularza IGA), `groups` (adapter Keycloak bez wniosków: `422 not_requestable`), `down` (`503`) |
-| `mockAdmin` | `in`: sesja administratora (zakładka Administracja, rejestr z oczekującymi definicjami; hak `window.__portalMock.changePendingDefinition(serverId, tool)` zmienia definicję po otwarciu różnic, żeby wywołać `409`) |
-| `mockOAuth` | wynik następnego powrotu od dostawcy: `ok`, `cancelled`, `flow_invalid`, `provider_error` |
-| `mockSession` | `in` albo `out`: start z sesją albo bez niej (z `?loginError=<kod>` pokazuje błędy logowania) |
+| `mockScenario` | `default` (`states` example: expiring token, reconnect required, no entitlements, service account, token exchange), `mixed` (`mixed` example: connected and not connected), `empty` (no servers), `wide` (53 tools: exceeds the default warning threshold and the 512-byte limit with 16 long names), `errors` (`503 upstream_unavailable` with `requestId`); changing the scenario resets changes |
+| `mockAuthenticator` | `none`, `active`, `locked`, `disabled`: Authenticator enrollment (default `none`; starting enrollment and removal need fresh MFA, which the mock "performs" on the step-up redirect) |
+| `mockIga` | IGA adapter behavior: `direct` (request created at once, default), `redirect` (response with the IGA form URL), `groups` (Keycloak adapter without requests: `422 not_requestable`), `down` (`503`) |
+| `mockAdmin` | `in`: administrator session (Administration tab, registry with pending definitions; the hook `window.__portalMock.changePendingDefinition(serverId, tool)` changes a definition after the diff is opened, to trigger `409`) |
+| `mockOAuth` | result of the next return from the provider: `ok`, `cancelled`, `flow_invalid`, `provider_error` |
+| `mockSession` | `in` or `out`: start with or without a session (with `?loginError=<code>` shows login errors) |
 
-Podgląd operacji: `/confirm/cnf_4k9Qe2LxW7tB3mZp` (wygasa 120 s po pierwszym otwarciu), `/confirm/cnf_Zb3Qm8TnR5vKd2Wy` (argument ze znakami sterującymi), każdy inny identyfikator to 404. Kod rejestracji Authenticatora to RFC 6238 z ziarna `GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ` (`src/mocks/totp.ts`).
+Operation preview: `/confirm/cnf_4k9Qe2LxW7tB3mZp` (expires 120 s after first opening), `/confirm/cnf_Zb3Qm8TnR5vKd2Wy` (argument with control characters); any other id is 404. The Authenticator enrollment code is RFC 6238 from the seed `GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ` (`src/mocks/totp.ts`).
 
-Token zaczynający się od `invalid` daje `422 secret_invalid`. Mock `getMcpEndpoint` stosuje parser filtra z
-kontraktu (`src/app/core/mcp-filter.ts`, przypięty wektorami `endpoint-filter/` i `mcp-endpoint/`), więc zły
-filtr daje `400 invalid_filter`.
+A token starting with `invalid` gives `422 secret_invalid`. The `getMcpEndpoint` mock uses the filter parser from the
+contract (`src/app/core/mcp-filter.ts`, pinned by the `endpoint-filter/` and `mcp-endpoint/` vectors), so a bad filter
+gives `400 invalid_filter`.
 
-Dodatkowe parametry adresu (też do końca sesji przeglądarki): `mockAdapter=in` (dwa narzędzia adaptera czekają w rejestrze Jiry
-na klasyfikację, jedno było sklasyfikowane i zmieniło się: obniżenie wymaga MFA), `mockSecretMissing=in` (połączenie Jiry w stanie
-`error`), `mockBasic=in` (formularz tokenu Jiry z polem loginu, `userSecretScheme: Basic`). Wyłączniki awaryjne mock trzyma w stanie (`/admin/kill-switches`), zdjęcie wymaga "świeżego MFA" tak jak zatwierdzenie
-z obniżeniem ryzyka.
+More URL parameters (also valid until the browser session ends): `mockAdapter=in` (two adapter tools wait in the Jira registry
+for classification, one was classified and then changed: lowering needs MFA), `mockSecretMissing=in` (Jira connection in state
+`error`), `mockBasic=in` (Jira token form with a login field, `userSecretScheme: Basic`). The mock keeps kill switches in its state
+(`/admin/kill-switches`); lifting one needs "fresh MFA", like approval with a risk reduction.
 
-Z prawdziwym BFF (ws-01, port 18090):
+With the real BFF (ws-01, port 18090):
 
 ```bash
 npm start                    # http://localhost:18730, proxy /api -> http://localhost:18090 (proxy.conf.json)
 ```
 
-Klient `mcp-portal-bff` w Keycloak ma redirect URI na `http://localhost:18090`, więc po zalogowaniu
-przeglądarka wraca na port 18090. Ciasteczka na `localhost` nie zależą od portu: wystarczy wrócić na
-`http://localhost:18730`, sesja działa przez proxy.
+The `mcp-portal-bff` client in Keycloak has its redirect URI on `http://localhost:18090`, so after login the browser returns
+to port 18090. Cookies on `localhost` do not depend on the port: go back to `http://localhost:18730` and the session works
+through the proxy.
 
-## Build dla BFF (ws-07)
+## Build for the BFF (ws-07)
 
 ```bash
 npm ci && npm run build
 ```
 
-Wynik: `mcp-portal/web/dist/portal/` (płasko, bez podkatalogu `browser/`): `index.html`, `main-<hash>.js`,
+Output: `mcp-portal/web/dist/portal/` (flat, no `browser/` subdirectory): `index.html`, `main-<hash>.js`,
 `polyfills-<hash>.js`, `chunk-<hash>.js`, `styles-<hash>.css`, `favicon.svg`, `3rdpartylicenses.txt`.
-Build produkcyjny nie zawiera MSW ani `mockServiceWorker.js`.
+The production build contains neither MSW nor `mockServiceWorker.js`.
 
-Co BFF musi zrobić przy serwowaniu:
+What the BFF has to do when serving:
 
-1. Pliki z `dist/portal/` pod `/`. Każda ścieżka spoza `/api/**`, która nie jest plikiem, dostaje
-   `index.html` (trasy SPA: `/catalog`, `/connect/jira`, `/connections`, ...).
-2. W `index.html` zamienić każde wystąpienie `__CSP_NONCE__` na losowy nonce na każdą odpowiedź (co najmniej
-   128 bitów, base64) i wysłać nagłówek:
+1. Serve the files from `dist/portal/` under `/`. Every path outside `/api/**` that is not a file gets
+   `index.html` (SPA routes: `/catalog`, `/connect/jira`, `/connections`, ...).
+2. In `index.html`, replace every occurrence of `__CSP_NONCE__` with a random nonce per response (at least
+   128 bits, base64) and send the header:
 
    ```
    Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'nonce-<nonce>';
@@ -100,144 +102,144 @@ Co BFF musi zrobić przy serwowaniu:
      form-action 'self'; frame-ancestors 'none'
    ```
 
-   Nonce jest potrzebny tylko dla stylów: Angular wstawia style komponentów (także Angular Material) jako
-   elementy `<style>` i nadaje im nonce z atrybutu `ngCspNonce` na `<app-root>`. Skrypty to wyłącznie pliki
-   (`script-src 'self'`), krytyczny CSS nie jest wstawiany inline (`inlineCritical: false`), czcionki są
-   systemowe. Bez podmiany nonce przeglądarka zablokuje style komponentów i strona będzie wyraźnie rozsypana, więc
-   błąd widać od razu.
-3. `index.html` z `Cache-Control: no-store`; pliki z hashem w nazwie można cache'ować jako niezmienne.
-4. Reszta jak w C12: ciasteczko `XSRF-TOKEN` czytelne dla JS (nie HttpOnly, `Path=/`), ustawione najpóźniej
-   przy `GET /api/v1/me`; `401 {"error":"unauthenticated"}` dla `/api/**` zamiast przekierowania do IdP.
+   The nonce is needed only for styles: Angular inserts component styles (Angular Material too) as `<style>`
+   elements and gives them the nonce from the `ngCspNonce` attribute on `<app-root>`. Scripts are files only
+   (`script-src 'self'`), critical CSS is not inlined (`inlineCritical: false`), fonts are system fonts. Without the
+   nonce substitution the browser blocks component styles and the page is visibly broken, so the mistake shows at once.
+3. `index.html` with `Cache-Control: no-store`; files with a hash in the name can be cached as immutable.
+4. The rest as in C12: an `XSRF-TOKEN` cookie readable by JS (not HttpOnly, `Path=/`), set by `GET /api/v1/me` at the latest;
+   `401 {"error":"unauthenticated"}` for `/api/**` instead of a redirect to the IdP.
 
-`scripts/serve-csp.mjs` to referencyjna implementacja punktów 1-3 (Node, bez zależności); na niej działają
-testy e2e. Jedyna różnica to `worker-src 'self'`, potrzebne tylko service workerowi MSW w buildzie e2e.
+`scripts/serve-csp.mjs` is the reference implementation of points 1-3 (Node, no dependencies); the e2e tests run on it.
+The only difference is `worker-src 'self'`, needed only by the MSW service worker in the e2e build.
 
-Przekierowanie do dostawcy OAuth (`authorizeUrl`) frontend wykonuje tylko dla `https:`; `http:` wyłącznie dla
-`localhost`, `127.0.0.1` i `[::1]` (mocki ws-01).
+The frontend redirects to the OAuth provider (`authorizeUrl`) only for `https:`; `http:` only for `localhost`, `127.0.0.1`
+and `[::1]` (ws-01 mocks).
 
-Frontend buduje `GET /api/v1/auth/login?returnPath=<ścieżka>` przez `URLSearchParams`, więc `returnPath`
-przychodzi zakodowany w query. BFF dekoduje parametr raz, standardowo, i waliduje wynik wzorcem `ReturnPath`
-(CC-032). Zapis tokenu nie wymaga step-up MFA (CC-090); `stepUpUrlFor` w `core/auth-urls.ts` zostaje dla
-potwierdzeń (M3).
+The frontend builds `GET /api/v1/auth/login?returnPath=<path>` with `URLSearchParams`, so `returnPath` arrives encoded in the
+query. The BFF decodes the parameter once, the standard way, and validates the result against the `ReturnPath` pattern
+(CC-032). Saving a token needs no step-up MFA (CC-090); `stepUpUrlFor` in `core/auth-urls.ts` stays for confirmations (M3).
 
-Powrót z dostawcy OAuth: frontend wysyła `returnPath=/catalog?system=<system>` (albo `/connections?...`), bo BFF
-dopisuje tylko `connected=<system>` albo `connectError=<kod>` (kody `ConnectErrorCode`, w tym `cancelled`), a
-komunikat błędu ma nazwać system. Wartości z adresu są sprawdzane względem zamkniętych list; nieznane dają
-ogólny komunikat.
+Return from the OAuth provider: the frontend sends `returnPath=/catalog?system=<system>` (or `/connections?...`), because the BFF
+appends only `connected=<system>` or `connectError=<code>` (`ConnectErrorCode` codes, including `cancelled`), and the error
+message has to name the system. Values from the URL are checked against closed lists; unknown ones give a generic message.
 
-## Testy i lint
+## Tests and lint
 
 ```bash
-npm test                     # Vitest + jsdom, MSW (msw/node) z tymi samymi handlerami co tryb mocków
-npm run lint                 # angular-eslint, w tym reguły dostępności szablonów
-npm run i18n:check           # teksty w kodzie zgodne z src/locale/messages.xlf
-npm run e2e                  # build konfiguracji e2e + Playwright (Chromium, 1280 px i 360 px)
+npm test                     # Vitest + jsdom, MSW (msw/node) with the same handlers as the mock mode
+npm run lint                 # angular-eslint, including template accessibility rules
+npm run i18n:check           # texts in code match src/locale/messages.xlf
+npm run e2e                  # e2e config build + Playwright (Chromium, 1280 px and 360 px)
 ```
 
-`npm run e2e` buduje aplikację w trybie zoptymalizowanym z MSW (`dist/e2e/`) i serwuje ją przez
-`scripts/serve-csp.mjs` z powyższą polityką CSP. Każdy test e2e kończy się błędem, jeśli przeglądarka zgłosi
-naruszenie CSP albo nieobsłużony wyjątek. Testy dostępności używają axe-core (WCAG 2.1 A/AA) w trybie
-ciemnym (domyślnym) i jasnym (przełącznik w nagłówku).
+`npm run e2e` builds the app in optimized mode with MSW (`dist/e2e/`) and serves it through `scripts/serve-csp.mjs` with the
+CSP above. Every e2e test fails if the browser reports a CSP violation or an unhandled exception. Accessibility tests use
+axe-core (WCAG 2.1 A/AA) in the dark (default) and light (switch in the header) theme.
 
-Zrzuty do README repozytorium (1280 x 800 px, jasny motyw, dane z mocków): `npm run screenshots` zapisuje je w `../docs/screenshots`.
-Zrzuty kluczowych widoków do porównania z makietami (`mcp-platform-plan/design/`), 1280 i 360 px:
+Screenshots for the repository README (1280 x 800 px, light theme, mock data): `npm run screenshots` writes them to `../docs/screenshots`.
+Screenshots of key views to compare with the mockups (`mcp-platform-plan/design/`), 1280 and 360 px:
 
 ```bash
-SHOTS_DIR=/ścieżka/do/katalogu npx playwright test e2e/screenshots.spec.ts   # po npm run build:e2e
+SHOTS_DIR=/path/to/dir npx playwright test e2e/screenshots.spec.ts   # after npm run build:e2e
 ```
 
-Nazwy plików zaczynają się od numeru makiety, np. `01-serwery-mcp-rozwiniete-desktop.png` albo
+File names start with the mockup number, e.g. `01-serwery-mcp-rozwiniete-desktop.png` or
 `08-adres-mcp-mobile-360.png`.
 
 ## CI
 
-Jeden punkt wejścia: `ci/run.sh` (wołany przez `make ci`). Kroki: `style` (znaki ukryte i typograficzne, frazy
-zakazane), `lint`, `i18n`, `unit`, `build`, `e2e`; podzbiór przez `CI_STEPS=style,unit ci/run.sh`.
-`ci/run.sh --container` robi to samo w obrazie z `ci/Dockerfile` (Node 24 i Chromium z obrazu Playwright
-1.64.1). Montuje tylko `web/` (z paczką kontraktów w `.contracts/`) tylko do odczytu, i kopiuje źródła bez `node_modules`. Paczka kontraktów: `scripts/contracts.sh` (plik w `web/.contracts/`, `CONTRACTS_TARBALL`, `CONTRACTS_TARBALL_URL` z `CONTRACTS_TARBALL_SHA256`, `CONTRACTS_SOURCE_DIR` albo GitHub Packages przez `NODE_AUTH_TOKEN`); podane jako ścieżka na hoście są sprowadzane przed montowaniem. Na pull requestach wystarczy `CI_STEPS=style` (bez npm i paczki), pełny przebieg na głównej gałęzi. `PW_WORKERS` (domyślnie 4 w kontenerze) ogranicza liczbę przeglądarek. Pliki `.gitlab-ci.yml`, `Jenkinsfile`
-i workflow GitHub Actions mogą tylko wołać ten skrypt. 
+One entry point: `ci/run.sh` (called by `make ci`). Steps: `style` (hidden and typographic characters, forbidden phrases),
+`lint`, `i18n`, `unit`, `build`, `e2e`; a subset through `CI_STEPS=style,unit ci/run.sh`.
+`ci/run.sh --container` does the same in the image from `ci/Dockerfile` (Node 24 and Chromium from the Playwright 1.64.1
+image). It mounts only `web/` (with the contracts package in `.contracts/`), read-only, and copies the sources without `node_modules`.
+Contracts package: `scripts/contracts.sh` (file in `web/.contracts/`, `CONTRACTS_TARBALL`, `CONTRACTS_TARBALL_URL` with
+`CONTRACTS_TARBALL_SHA256`, `CONTRACTS_SOURCE_DIR`, or `CONTRACTS_FROM_NPMJS=1` for the public npm registry); paths given on the host are
+brought in before mounting. Pull requests need only `CI_STEPS=style` (no npm, no package); the full run happens on the main
+branch. `PW_WORKERS` (default 4 in the container) limits the number of browsers. `.gitlab-ci.yml`, `Jenkinsfile` and GitHub
+Actions workflows may only call this script.
 
-## Adres MCP i ostrzeżenie o rozmiarze listy
+## MCP address and the list size warning
 
-Strona `/endpoint` pokazuje adres całej platformy (`<publicBaseUrl>/mcp`) i pozwala zawęzić go filtrem
-(`systems`, `tools`, `access`, `exclude`). Nic się nie zapisuje; adres i konfiguracje klientów zwraca BFF.
-Kreator składa query sam i liczy bajty: limit to 512 bajtów, nie 100 narzędzi (CC-185). Gdy wybór się nie mieści,
-nie wysyła zapytania i podpowiada systemy i wykluczenia.
+The `/endpoint` page shows the address of the whole platform (`<publicBaseUrl>/mcp`) and lets you narrow it with a filter
+(`systems`, `tools`, `access`, `exclude`). Nothing is saved; the BFF returns the address and client configurations.
+The wizard builds the query itself and counts bytes: the limit is 512 bytes, not 100 tools (CC-185). When the selection does
+not fit, it sends no request and suggests systems and exclusions.
 
-Ostrzeżenie o rozmiarze listy pojawia się od `toolCount >= 50`. Próg nie jest ustalony (czeka na pomiar kosztu
-listy w tokenach w teście obciążeniowym M5), dlatego jest konfiguracją: `<meta name="mcp-tool-list-warning"
-content="N">` w `index.html` (dodatnia liczba całkowita, inaczej obowiązuje 50). Powyżej 100 narzędzi strona
-przypomina, że klient musi iść za `nextCursor` (CC-181).
+The list size warning appears from `toolCount >= 50`. The threshold is not settled (it waits for a measurement of the list's
+token cost in the M5 load test), so it is configuration: `<meta name="mcp-tool-list-warning"
+content="N">` in `index.html` (a positive integer, otherwise 50 applies). Above 100 tools the page reminds that the client must
+follow `nextCursor` (CC-181).
 
-## Wznawianie akcji po MFA
+## Resuming an action after MFA
 
-Gdy akcja kończy się `step_up_required`, portal zapisuje w `sessionStorage` karty jeden wpis: rodzaj akcji i
-identyfikatory (serwer i narzędzie, skrót zatwierdzanej definicji), ważny 5 minut, nigdy tokeny, klucze ani
-hasła. Po powrocie z `?mfa=ok` akcja wykonuje się raz, bez drugiego kliknięcia: zatwierdzenie definicji (tylko gdy
-skrót jest ten sam, który administrator widział, a przy narzędziu adaptera także z klasyfikacją wybraną przed MFA),
-zdjęcie wyłącznika awaryjnego (tylko gdy wyłącznik jeszcze działa), start rejestracji Authenticatora, usunięcie
-Authenticatora (po ostrzeżeniu zatwierdzonym przed MFA). Samo `?mfa=ok` w adresie nic nie uruchamia. Formularz z tokenem nie
-jest wznawiany: sekretu nie wolno zapisać, więc użytkownik wpisuje go ponownie.
+When an action ends with `step_up_required`, the portal stores one entry in the tab's `sessionStorage`: the action kind and
+identifiers (server and tool, hash of the definition being approved), valid for 5 minutes, never tokens, keys or
+passwords. After the return with `?mfa=ok` the action runs once, without a second click: approving a definition (only when
+the hash is the one the administrator saw, and for an adapter tool also with the classification chosen before MFA),
+lifting a kill switch (only when it is still active), starting Authenticator enrollment, removing the
+Authenticator (after the warning confirmed before MFA). `?mfa=ok` alone in the URL starts nothing. A form with a token is not
+resumed: the secret must not be stored, so the user types it again.
 
-## Klient API
+## API client
 
-`src/app/api/generated/` jest generowany z `portal-bff.v1.bundled.yaml` (openapi-generator 7.26.0,
-`typescript-angular`, `openapitools.json`) i trzymany w repozytorium, żeby build nie wymagał Javy ani sieci.
-Nie edytować ręcznie.
+`src/app/api/generated/` is generated from `portal-bff.v1.bundled.yaml` (openapi-generator 7.26.0,
+`typescript-angular`, `openapitools.json`) and kept in the repository so the build needs neither Java nor network.
+Do not edit by hand.
 
 ```bash
-export JAVA_HOME=<katalog JDK 25>       # macOS: "$(/usr/libexec/java_home -v 25)"
+export JAVA_HOME=<JDK 25 directory>       # macOS: "$(/usr/libexec/java_home -v 25)"
 npm run generate:api
-git diff --stat src/app/api/generated     # zmiany tylko po aktualizacji kontraktu
+git diff --stat src/app/api/generated     # changes only after a contract update
 ```
 
-`--type-mappings set=Array`: tablice z `uniqueItems` przychodzą w JSON jako tablice, a domyślny `Set` w
-typach kłamałby. `basePath` klienta jest pusty (`provideApi({ basePath: '' })`), więc wywołania są względne
-i `xsrfInterceptor` (`src/app/core/xsrf.interceptor.ts`) dokleja `X-XSRF-TOKEN` do POST, PUT i DELETE. Wartość
-czyta z ciasteczka `__Host-XSRF-TOKEN` (kontrakt, CC-055), a gdy go nie ma, z `XSRF-TOKEN` (nazwa, której BFF
-używał do M1); wbudowany mechanizm Angulara (jedna nazwa) jest wyłączony przez `withNoXsrfProtection()`.
+`--type-mappings set=Array`: arrays with `uniqueItems` arrive in JSON as arrays, and the default `Set` in the types would
+lie. The client `basePath` is empty (`provideApi({ basePath: '' })`), so calls are relative, and `xsrfInterceptor`
+(`src/app/core/xsrf.interceptor.ts`) adds `X-XSRF-TOKEN` to POST, PUT and DELETE. It reads the value from the
+`__Host-XSRF-TOKEN` cookie (contract, CC-055), and when that is missing from `XSRF-TOKEN` (the name the BFF used until M1);
+Angular's built-in mechanism (one name) is switched off by `withNoXsrfProtection()`.
 
-Zmiana wersji kontraktów: podmienić nazwę paczki w `package.json` (`@aiwcorpo/mcp-contracts`), `scripts/contracts.sh`,
-`npm install`, `npm run generate:api`, testy.
+Changing the contracts version: replace the package name in `package.json` (`@aiwcorpo/mcp-contracts`), `scripts/contracts.sh`,
+`npm install`, `npm run generate:api`, tests.
 
-## Teksty i i18n
+## Texts and i18n
 
-Źródłem tekstów jest angielski: w kodzie i szablonach teksty są po angielsku z identyfikatorami (`i18n="@@..."`,
-`` $localize`:@@...:` ``), `sourceLocale` to `en`. Polskie tłumaczenie to `src/locale/messages.pl.xlf` (XLIFF 2, ten sam
-identyfikator, `<target>`). Jedna kompilacja obsługuje oba języki: `scripts/i18n.mjs json` (uruchamiany przez `prebuild`,
-`prestart`) zamienia plik polski na `public/i18n/messages.pl.json` (poza gitem), a `main.ts` przed startem aplikacji wybiera
-język (zapisany wybór w `localStorage`, potem `navigator.languages`: `pl` albo angielski) i dla polskiego rejestruje
-tłumaczenia przez `loadTranslations`. Moduły aplikacji ładują się dopiero potem (`import()` w `main.ts`), bo `$localize` wylicza
-się przy wczytaniu modułu. Przełącznik języka w nagłówku i na ekranie logowania zapisuje wybór i przeładowuje stronę. BFF i
-nginx serwują `i18n/messages.pl.json` jak każdy inny plik statyczny; CSP bez zmian (`connect-src 'self'`).
+English is the source: texts in code and templates are in English with identifiers (`i18n="@@..."`,
+`` $localize`:@@...:` ``), `sourceLocale` is `en`. The Polish translation is `src/locale/messages.pl.xlf` (XLIFF 2, same
+identifier, `<target>`). One build serves both languages: `scripts/i18n.mjs json` (run by `prebuild`,
+`prestart`) turns the Polish file into `public/i18n/messages.pl.json` (git-ignored), and `main.ts` picks the language before the
+app starts (saved choice in `localStorage`, then `navigator.languages`: `pl` or English) and for Polish registers the
+translations through `loadTranslations`. The app modules load only afterwards (`import()` in `main.ts`), because `$localize` is
+evaluated when a module loads. The language switch in the header and on the login screen saves the choice and reloads the page. The BFF and
+nginx serve `i18n/messages.pl.json` like any other static file; CSP is unchanged (`connect-src 'self'`).
 
-`npm run i18n:extract` -> `src/locale/messages.xlf`; nowy tekst trzeba dopisać do `messages.pl.xlf` (jednostka z tym samym
-`id` i `<target>`). `npm run i18n:check` kończy się błędem, gdy `messages.xlf` nie odpowiada tekstom w kodzie, gdy jakiś tekst
-nie ma polskiego tłumaczenia albo gdy tłumaczenie ma inne znaczniki i interpolacje niż źródło (do uruchamiania w CI).
-Testy e2e działają po angielsku (`locale: 'en-US'`); po polsku jest jeden zestaw dymny, `e2e/polish.spec.ts`.
-Komunikaty błędów pochodzą wyłącznie z kodów (C10 i kody C12 z CC-012/CC-022, `src/app/core/error-messages.ts`);
-pole `message` z odpowiedzi BFF nigdy nie jest wyświetlane.
+`npm run i18n:extract` -> `src/locale/messages.xlf`; a new text has to be added to `messages.pl.xlf` (a unit with the same
+`id` and `<target>`). `npm run i18n:check` fails when `messages.xlf` does not match the texts in code, when a text
+has no Polish translation, or when a translation has different markup and interpolations than the source (meant for CI).
+E2e tests run in English (`locale: 'en-US'`); there is one Polish smoke suite, `e2e/polish.spec.ts`.
+Error messages come only from codes (C10 and C12 codes from CC-012/CC-022, `src/app/core/error-messages.ts`);
+the `message` field of a BFF response is never displayed.
 
-## Struktura
+## Structure
 
 ```
 src/app/
-  api/generated/        klient C12 (generowany)
-  core/                 sesja, mapowanie błędów, URL-e logowania, guard admina, motyw, interceptory (sesja, XSRF)
-  shared/               komunikaty, etykiety, stan wiersza, powrót z OAuth, ładowanie i błąd ładowania, dialog
-  features/login/       ekran logowania i błędy loginError
-  features/catalog/     Serwery MCP (tabela z rozwijanymi wierszami)
-  features/connect/     Połącz konto (OAuth, token PAT)
-  features/connections/ Połączenia z systemami
-  features/endpoint/    Adres MCP: jeden adres platformy, kreator filtra bez zapisu, konfiguracja klienta
-  features/requests/    Wnioski: lista, dialog "Złóż wniosek" z uprawnieniami z IGA
-  features/admin/       Administracja (lazy, tylko isAdmin): rejestr, różnice definicji, zatwierdzanie, klasyfikacja
-                        narzędzi adaptera (dialog), wyłączniki awaryjne (`/admin/kill-switches`)
-src/mocks/              warstwa stanowa nad handlerami MSW z kontraktów; start MSW w przeglądarce
-src/testing/            pomocnicze dla testów jednostkowych (MSW w Node, TestBed)
+  api/generated/        C12 client (generated)
+  core/                 session, error mapping, login URLs, admin guard, theme, interceptors (session, XSRF)
+  shared/               messages, labels, row state, OAuth return, loading and load error, dialog
+  features/login/       login screen and loginError errors
+  features/catalog/     MCP servers (table with expandable rows)
+  features/connect/     Connect account (OAuth, PAT token)
+  features/connections/ System connections
+  features/endpoint/    MCP address: one platform address, filter wizard without saving, client configuration
+  features/requests/    Requests: list, "Submit request" dialog with IGA entitlements
+  features/admin/       Administration (lazy, isAdmin only): registry, definition diffs, approval, adapter tool
+                        classification (dialog), kill switches (`/admin/kill-switches`)
+src/mocks/              stateful layer over the MSW handlers from the contracts; MSW start in the browser
+src/testing/            unit test helpers (MSW in Node, TestBed)
 e2e/                    Playwright
-scripts/serve-csp.mjs   serwer statyczny z CSP i nonce (wzorzec dla BFF, używany w e2e)
+scripts/serve-csp.mjs   static server with CSP and nonce (pattern for the BFF, used in e2e)
 ```
 
-`src/app/core/mock-api.ts` w buildzie produkcyjnym nic nie robi; konfiguracje `mocks` i `e2e` podmieniają go
-na `src/mocks/mock-api.msw.ts` (`fileReplacements` w `angular.json`).
+`src/app/core/mock-api.ts` does nothing in the production build; the `mocks` and `e2e` configurations replace it
+with `src/mocks/mock-api.msw.ts` (`fileReplacements` in `angular.json`).

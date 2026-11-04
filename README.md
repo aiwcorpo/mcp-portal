@@ -85,8 +85,8 @@ docker run -d --name mcp-portal -p 8080:8080 \
 
 Requirements that the BFF checks at start and refuses to start without: `https` under `PORTAL_PUBLIC_BASE_URL`, the client
 certificate `CN=mcp-portal-bff` for talking to the broker and the gateway (mTLS), and a chosen IGA adapter. The redirect URI of
-the client in the IdP is `<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`. All variables: the "Konfiguracja" table in
-[bff/README.md](bff/README.md#konfiguracja). Behind a proxy set `PORTAL_TRUSTED_PROXY_HOST` (the proxy name, resolved at start)
+the client in the IdP is `<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`. All variables: the "Configuration" table in
+[bff/README.md](bff/README.md#configuration). Behind a proxy set `PORTAL_TRUSTED_PROXY_HOST` (the proxy name, resolved at start)
 or `PORTAL_TRUSTED_PROXIES` (a regular expression of addresses), otherwise `X-Forwarded-*` is ignored.
 
 ### From source
@@ -101,9 +101,9 @@ The contract artifacts come in two ways, and neither needs a file in the git of 
   Maven Central, plain Maven is enough.
 - The web part reads the npm package from `web/.contracts/` (outside git), which `web/scripts/contracts.sh` fills: from a
   file (`CONTRACTS_TARBALL`; the release file is in `mcp-contracts/release/`), from an address (`CONTRACTS_TARBALL_URL`,
-  `CONTRACTS_TARBALL_SHA256` checks the sum) or from a local checkout of `mcp-contracts` at the tag `v6.3.2`
+  `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v6.3.2`
   (`CONTRACTS_SOURCE_DIR`, runs `npm pack`). After the release to npmjs, moving to the registry is one change in
-  `web/package.json`, described in [web/README.md](web/README.md#paczka-kontraktów).
+  `web/package.json`, described in [web/README.md](web/README.md#contracts-package).
 
 ```bash
 bff/ci/run.sh                 # style, mvn clean verify (BFF tests)
@@ -122,7 +122,7 @@ in the commit, not what lies in the working directory. It pushes nothing to a re
 - **Health.** `GET /actuator/health` (no details) on the container port. The `web` image answers `ok` on `/__web/health`.
 - **TLS on the BFF port.** Optional, off by default: `PORTAL_PUBLIC_TLS_ENABLED=true` with `PORTAL_PUBLIC_TLS_CERTIFICATE` and
   `PORTAL_PUBLIC_TLS_PRIVATE_KEY` (PEM, file paths); description and consequences in
-  [bff/README.md](bff/README.md#tls-na-porcie-bff-opcjonalnie). It applies to the `bff` and `portal` images. The `web` image
+  [bff/README.md](bff/README.md#tls-on-the-bff-port-optional). It applies to the `bff` and `portal` images. The `web` image
   stays on HTTP at 8080: it is a static nginx only behind the proxy, it carries no session cookies, and TLS would need an
   `nginx.conf` template and a certificate in the image without any effect on session security; whoever wants to encrypt that
   hop too does it on the proxy. The images have no `HEALTHCHECK`, so with TLS the stack switches the probe to https.
