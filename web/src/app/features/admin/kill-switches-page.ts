@@ -51,7 +51,7 @@ const keyOf = (serverId: string, tool: string | null | undefined): string =>
   `${serverId}/${tool ?? ''}`;
 
 /**
- * "Wyłączniki awaryjne" (A9, CC-194): what an administrator has switched off, with switching off a server or one tool
+ * "Emergency switches" (A9, CC-194): what an administrator has switched off, with switching off a server or one tool
  * and lifting a switch. Switching off needs no second factor because an incident must not wait for one; lifting needs a
  * fresh MFA, and the lift is carried out by itself after the return from the IdP (U12).
  */
@@ -112,8 +112,8 @@ export class KillSwitchesPage implements OnInit {
             key: keyOf(entry.serverId, entry.tool),
             scope:
               entry.scope === 'server'
-                ? $localize`:@@killSwitches.scopeServer:Serwer`
-                : $localize`:@@killSwitches.scopeTool:Narzędzie`,
+                ? $localize`:@@killSwitches.scopeServer:Server`
+                : $localize`:@@killSwitches.scopeTool:Tool`,
             target: neutraliseText(
               entry.scope === 'server'
                 ? serverName
@@ -179,9 +179,9 @@ export class KillSwitchesPage implements OnInit {
     const tool = this.tool() || null;
     const target = tool ? `${this.serverName(id)}: ${tool}` : this.serverName(id);
     const confirmed = await this.confirm({
-      title: $localize`:@@killSwitches.offTitle:Wyłączyć awaryjnie?`,
-      message: $localize`:@@killSwitches.offMessage:${target}:target: przestanie być dostępne dla wszystkich użytkowników i agentów, na każdej instancji gatewaya najpóźniej po 5 sekundach. Wywołania, które już ruszyły, nie są przerywane. Włączenie nie wymaga potwierdzenia tożsamości, zdjęcie wymaga.`,
-      confirmLabel: $localize`:@@killSwitches.offConfirm:Wyłącz`,
+      title: $localize`:@@killSwitches.offTitle:Switch off now?`,
+      message: $localize`:@@killSwitches.offMessage:${target}:target: will stop being available to all users and agents, on every gateway instance within 5 seconds at the latest. Calls that have already started are not interrupted. Switching off needs no identity confirmation; lifting does.`,
+      confirmLabel: $localize`:@@killSwitches.offConfirm:Switch off`,
       destructive: true,
     });
     if (!confirmed) {
@@ -197,7 +197,7 @@ export class KillSwitchesPage implements OnInit {
           ? this.adminApi.putAdminToolKillSwitch(id, tool, body)
           : this.adminApi.putAdminServerKillSwitch(id, body),
       );
-      this.done.set($localize`:@@killSwitches.offDone:Wyłączono: ${target}:target:.`);
+      this.done.set($localize`:@@killSwitches.offDone:Switched off: ${target}:target:.`);
       this.reason.set('');
       this.tool.set('');
       await this.read();
@@ -214,9 +214,9 @@ export class KillSwitchesPage implements OnInit {
     }
     const target = row.target;
     const confirmed = await this.confirm({
-      title: $localize`:@@killSwitches.liftTitle:Zdjąć wyłącznik?`,
-      message: $localize`:@@killSwitches.liftMessage:${target}:target: znów będzie dostępne dla użytkowników, którzy mają do niego uprawnienia. Zdjęcie wymaga świeżego potwierdzenia tożsamości (MFA).`,
-      confirmLabel: $localize`:@@killSwitches.liftConfirm:Zdejmij wyłącznik`,
+      title: $localize`:@@killSwitches.liftTitle:Lift the switch?`,
+      message: $localize`:@@killSwitches.liftMessage:${target}:target: will be available again to users who have entitlements to it. Lifting requires fresh identity confirmation (MFA).`,
+      confirmLabel: $localize`:@@killSwitches.liftConfirm:Lift switch`,
     });
     if (confirmed) {
       await this.performLift(row.entry.serverId, row.toolName, target, row.entry.setAt);
@@ -238,7 +238,7 @@ export class KillSwitchesPage implements OnInit {
           ? this.adminApi.deleteAdminToolKillSwitch(serverId, tool)
           : this.adminApi.deleteAdminServerKillSwitch(serverId),
       );
-      this.done.set($localize`:@@killSwitches.liftDone:Zdjęto wyłącznik: ${target}:target:.`);
+      this.done.set($localize`:@@killSwitches.liftDone:Lifted switch: ${target}:target:.`);
       await this.read();
     } catch (error) {
       const failure = toApiFailure(error);

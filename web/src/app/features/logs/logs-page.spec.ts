@@ -49,14 +49,14 @@ describe('LogsPage', () => {
     await openRoute('/logs');
     await until(() => expect(text()).toContain('confluence__delete_page'));
 
-    expect(text()).toContain('Czeka na potwierdzenie');
+    expect(text()).toContain('Waiting for confirmation');
     expect(text()).toContain('Claude Code');
     expect(text()).toContain('Confluence DEV / 48213');
-    expect(text()).toContain('Wykonano');
-    expect(text()).toContain('Tylko Twoje wywołania. Wartości argumentów nie są tu pokazywane.');
+    expect(text()).toContain('Done');
+    expect(text()).toContain('Only your calls. Argument values are not shown here.');
     expect(document.getElementById('logs-q')).toBeTruthy();
     expect((document.getElementById('logs-period') as HTMLSelectElement).value).toBe('7d');
-    expect(text()).toContain('Wszystkie wyniki');
+    expect(text()).toContain('All results');
     const ids = Array.from(document.querySelectorAll('tbody tr:not(.details) code')).map(
       (node) => node.textContent,
     );
@@ -66,25 +66,25 @@ describe('LogsPage', () => {
   it('shows the contract labels for every confirmation outcome, including unknown values', async () => {
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Czeka na potwierdzenie'));
+    await until(() => expect(text()).toContain('Waiting for confirmation'));
 
     for (const label of [
-      'Potwierdzone kodem',
-      'Wygasło',
-      'Błędny kod',
-      'Unieważnione',
-      'Anulowane',
-      'Zablokowane przez oczekującą',
-      'Odmowa (brak uprawnienia)',
-      'Odmowa (poza filtrem adresu)',
-      'Błąd',
-      'Zbyt wiele wywołań',
-      'Inny wynik',
+      'Confirmed with a code',
+      'Expired',
+      'Wrong code',
+      'Invalidated',
+      'Cancelled',
+      'Blocked by a pending operation',
+      'Refused (no entitlement)',
+      'Refused (outside the address filter)',
+      'Error',
+      'Too many calls',
+      'Other result',
     ]) {
       expect(text(), label).toContain(label);
     }
-    expect(resultInfo('result_from_a_newer_gateway').label).toBe('Inny wynik');
-    expect(resultInfo('constructor').label).toBe('Inny wynik');
+    expect(resultInfo('result_from_a_newer_gateway').label).toBe('Other result');
+    expect(resultInfo('constructor').label).toBe('Other result');
   });
 
   it('shows the count of wrong codes and the explanation in the details of a row', async () => {
@@ -108,17 +108,15 @@ describe('LogsPage', () => {
     );
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Potwierdzone kodem'));
+    await until(() => expect(text()).toContain('Confirmed with a code'));
     expect(document.querySelector('[data-testid="wrong-code-count"]')).toBeNull();
 
-    labelled('Pokaż szczegóły: jira__delete_issue').click();
+    labelled('Show details: jira__delete_issue').click();
     await until(() =>
       expect(document.querySelector('[data-testid="wrong-code-count"]')?.textContent).toBe('2'),
     );
-    expect(text()).toContain('Usuwanie');
-    expect(labelled('Ukryj szczegóły: jira__delete_issue').getAttribute('aria-expanded')).toBe(
-      'true',
-    );
+    expect(text()).toContain('Delete');
+    expect(labelled('Hide details: jira__delete_issue').getAttribute('aria-expanded')).toBe('true');
   });
 
   it('sends the filters to the API and starts again from the first page', async () => {
@@ -133,8 +131,8 @@ describe('LogsPage', () => {
 
     select('logs-group', 'confirmation');
     await until(() => expect(queries.at(-1)?.get('result')).toBe('confirmation'));
-    await until(() => expect(text()).toContain('Czeka na potwierdzenie'));
-    expect(text()).not.toContain('Wykonano');
+    await until(() => expect(text()).toContain('Waiting for confirmation'));
+    expect(text()).not.toContain('Done');
 
     select('logs-period', '24h');
     await until(() =>
@@ -148,24 +146,24 @@ describe('LogsPage', () => {
     expect(queries.at(-1)?.get('cursor')).toBeNull();
   });
 
-  it('puts limits and step-up refusals in "Odmowy" and missing credentials in "Błędy" (CC-142)', async () => {
+  it('puts limits and step-up refusals in "Refusals" and missing credentials in "Errors" (CC-142)', async () => {
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Zbyt wiele wywołań'));
+    await until(() => expect(text()).toContain('Too many calls'));
 
     select('logs-group', 'denied');
     await until(() => {
-      expect(text()).not.toContain('Wykonano');
-      expect(text()).toContain('Zbyt wiele wywołań');
+      expect(text()).not.toContain('Done');
+      expect(text()).toContain('Too many calls');
     });
-    expect(text()).toContain('Odmowa (brak uprawnienia)');
-    expect(text()).toContain('Narzędzie wyłączone');
-    expect(text()).not.toContain('Brak połączenia z systemem');
+    expect(text()).toContain('Refused (no entitlement)');
+    expect(text()).toContain('Tool switched off');
+    expect(text()).not.toContain('No connection to the system');
 
     select('logs-group', 'error');
     await until(() => {
-      expect(text()).not.toContain('Zbyt wiele wywołań');
-      expect(text()).toContain('Błąd');
+      expect(text()).not.toContain('Too many calls');
+      expect(text()).toContain('Error');
     });
   });
 
@@ -176,29 +174,29 @@ describe('LogsPage', () => {
     const input = document.getElementById('logs-q') as HTMLInputElement;
     input.value = 'nothing-called-this';
     input.dispatchEvent(new Event('input'));
-    await until(() => expect(text()).toContain('Żadne wywołanie nie pasuje do filtrów.'));
+    await until(() => expect(text()).toContain('No call matches the filters.'));
   });
 
   it('adds the next page with the cursor of the last answer', async () => {
     const queries = recordQueries();
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Pokaż więcej'));
+    await until(() => expect(text()).toContain('Show more'));
     const before = document.querySelectorAll('tbody tr:not(.details)').length;
     expect(before).toBe(50);
 
-    button('Pokaż więcej').click();
+    button('Show more').click();
     await until(() =>
       expect(document.querySelectorAll('tbody tr:not(.details)').length).toBeGreaterThan(before),
     );
     expect(queries.at(-1)?.get('cursor')).toBe('c50');
-    await until(() => expect(text()).not.toContain('Pokaż więcej'));
+    await until(() => expect(text()).not.toContain('Show more'));
   });
 
-  it('keeps the rows and offers a retry when "Pokaż więcej" fails', async () => {
+  it('keeps the rows and offers a retry when "Show more" fails', async () => {
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Pokaż więcej'));
+    await until(() => expect(text()).toContain('Show more'));
     server.use(
       http.get(
         '/api/v1/activity/calls',
@@ -206,11 +204,11 @@ describe('LogsPage', () => {
         { once: true },
       ),
     );
-    button('Pokaż więcej').click();
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    button('Show more').click();
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
     expect(document.querySelectorAll('tbody tr:not(.details)').length).toBe(50);
-    button('Spróbuj ponownie').click();
-    await until(() => expect(text()).not.toContain('Usługa jest chwilowo niedostępna.'));
+    button('Try again').click();
+    await until(() => expect(text()).not.toContain('The service is temporarily unavailable.'));
   });
 
   it('shows one error for the whole page when the list cannot be read', async () => {
@@ -224,7 +222,7 @@ describe('LogsPage', () => {
     );
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Nie udało się pobrać danych.'));
+    await until(() => expect(text()).toContain('Could not load the data.'));
     expect(text()).toContain('abcdef12');
     expect(document.querySelector('table')).toBeNull();
   });
@@ -233,7 +231,7 @@ describe('LogsPage', () => {
     server.use(http.get('/api/v1/activity/calls', () => HttpResponse.json([])));
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Brak wywołań w wybranym okresie.'));
+    await until(() => expect(text()).toContain('No calls in the selected period.'));
   });
 
   it('ignores an answer to a filter the user has already changed', async () => {
@@ -272,7 +270,7 @@ describe('LogsPage', () => {
   it('starts again from the first page when the cursor has expired (400)', async () => {
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Pokaż więcej'));
+    await until(() => expect(text()).toContain('Show more'));
     const cursors: (string | null)[] = [];
     server.events.on('request:start', ({ request }) => {
       const url = new URL(request.url);
@@ -287,12 +285,12 @@ describe('LogsPage', () => {
         { once: true },
       ),
     );
-    button('Pokaż więcej').click();
-    await until(() => expect(text()).toContain('Lista jest nieaktualna.'));
-    expect(text()).not.toContain('Niepoprawne dane wejściowe');
-    button('Wczytaj od początku').click();
-    await until(() => expect(text()).not.toContain('Lista jest nieaktualna.'));
-    await until(() => expect(text()).toContain('Pokaż więcej'));
+    button('Show more').click();
+    await until(() => expect(text()).toContain('The list is out of date.'));
+    expect(text()).not.toContain('Invalid input');
+    button('Load from the start').click();
+    await until(() => expect(text()).not.toContain('The list is out of date.'));
+    await until(() => expect(text()).toContain('Show more'));
     expect(cursors).toEqual(['c50', null]);
   });
 
@@ -316,25 +314,27 @@ describe('LogsPage', () => {
   it('has a filter column: the normalized filter of the address, or "bez filtra"', async () => {
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Czeka na potwierdzenie'));
+    await until(() => expect(text()).toContain('Waiting for confirmation'));
 
     const header = Array.from(document.querySelectorAll('thead th')).map((cell) =>
       cell.textContent?.trim(),
     );
-    expect(header).toContain('Filtr');
+    expect(header).toContain('Filter');
     const cells = Array.from(document.querySelectorAll('td.filter')).map((cell) =>
       text(cell).trim(),
     );
     expect(cells).toContain('systems=confluence,jira');
     expect(cells).toContain('systems=opensearch&access=write');
-    expect(cells).toContain('bez filtra');
+    expect(cells).toContain('no filter');
   });
 
   it('explains a call cut by the filter of the address and treats the old value as unknown', async () => {
     configureTestApp();
     await openRoute('/logs');
-    await until(() => expect(text()).toContain('Odmowa (poza filtrem adresu)'));
-    expect(resultInfo('denied_filter_scope').explanation).toContain('Filtr w adresie tylko zawęża');
-    expect(resultInfo('denied_link_scope').label).toBe('Inny wynik');
+    await until(() => expect(text()).toContain('Refused (outside the address filter)'));
+    expect(resultInfo('denied_filter_scope').explanation).toContain(
+      'A filter in the address only narrows',
+    );
+    expect(resultInfo('denied_link_scope').label).toBe('Other result');
   });
 });

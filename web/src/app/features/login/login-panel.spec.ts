@@ -20,16 +20,16 @@ describe('LoginPanel', () => {
     await fixture.whenStable();
 
     expect(text(fixture.nativeElement)).toContain('Portal MCP');
-    expect(text(fixture.nativeElement)).toContain('Zaloguj się kontem firmowym.');
-    expect(button('Zaloguj przez konto firmowe', fixture.nativeElement)).toBeTruthy();
+    expect(text(fixture.nativeElement)).toContain('Sign in with your company account.');
+    expect(button('Sign in with your company account', fixture.nativeElement)).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[role="alert"]')).toBeNull();
   });
 
   it.each<[LoginErrorCode, string]>([
-    ['cancelled', 'Logowanie anulowane.'],
-    ['idp_error', 'Usługa logowania nie odpowiada. Spróbuj za chwilę.'],
-    ['session_expired', 'Sesja wygasła. Zaloguj się ponownie.'],
-    ['step_up_failed', 'Nie udało się potwierdzić tożsamości. Spróbuj zarejestrować ponownie.'],
+    ['cancelled', 'Sign-in cancelled.'],
+    ['idp_error', 'The sign-in service is not responding. Try again in a moment.'],
+    ['session_expired', 'Session expired. Sign in again.'],
+    ['step_up_failed', 'Could not verify your identity. Try registering again.'],
   ])('loginError=%s', async (code, message) => {
     configureTestApp();
     TestBed.inject(SessionService).loginError.set(code);
@@ -46,7 +46,7 @@ describe('LoginPanel', () => {
     const fixture = render();
     await fixture.whenStable();
 
-    button('Zaloguj przez konto firmowe', fixture.nativeElement).click();
+    button('Sign in with your company account', fixture.nativeElement).click();
 
     expect(session.loginError()).toBeNull();
     await until(() => expect(navigation.assign).toHaveBeenCalled());
@@ -56,10 +56,10 @@ describe('LoginPanel', () => {
     configureTestApp();
     const loggedOut = render('logged_out');
     await loggedOut.whenStable();
-    expect(text(loggedOut.nativeElement)).toContain('Wylogowano.');
+    expect(text(loggedOut.nativeElement)).toContain('Signed out.');
 
     const expired = render('expired');
     await expired.whenStable();
-    expect(text(expired.nativeElement)).toContain('Sesja wygasła. Zaloguj się ponownie.');
+    expect(text(expired.nativeElement)).toContain('Session expired. Sign in again.');
   });
 });

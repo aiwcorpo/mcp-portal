@@ -122,37 +122,37 @@ function flatten(value: unknown, path: string, out: string[]): void {
 /** The reviewable text of a tool entry, one line per fact (description, risk, resources, schema, hints). */
 export function describeEntry(entry: EntryLike): string[] {
   const lines = [
-    $localize`:@@admin.diff.entryName:wpis: ${quoted(entry.name)}:name:`,
-    $localize`:@@admin.diff.defName:nazwa: ${quoted(entry.definition.name)}:name:`,
-    $localize`:@@admin.diff.title:tytuł: ${quoted(entry.definition.title)}:title:`,
-    $localize`:@@admin.diff.description:opis: ${quoted(entry.definition.description)}:description:`,
+    $localize`:@@admin.diff.entryName:entry: ${quoted(entry.name)}:name:`,
+    $localize`:@@admin.diff.defName:name: ${quoted(entry.definition.name)}:name:`,
+    $localize`:@@admin.diff.title:title: ${quoted(entry.definition.title)}:title:`,
+    $localize`:@@admin.diff.description:description: ${quoted(entry.definition.description)}:description:`,
     ...(entry.risk && entry.action
       ? [
-          $localize`:@@admin.diff.risk:ryzyko: ${riskLabel(entry.risk)}:label: (${quoted(entry.risk)}:risk:)`,
-          $localize`:@@admin.diff.action:akcja: ${quoted(entry.action)}:action:`,
+          $localize`:@@admin.diff.risk:risk: ${riskLabel(entry.risk)}:label: (${quoted(entry.risk)}:risk:)`,
+          $localize`:@@admin.diff.action:action: ${quoted(entry.action)}:action:`,
         ]
-      : [$localize`:@@admin.diff.unclassified:ryzyko i akcja: do nadania przez administratora`]),
+      : [$localize`:@@admin.diff.unclassified:risk and action: to be assigned by an administrator`]),
   ];
   for (const ref of entry.resourceRefs) {
     lines.push(
-      $localize`:@@admin.diff.resource:zasób: argument ${quoted(ref.argument)}:argument: (${quoted(ref.type)}:type:)`,
+      $localize`:@@admin.diff.resource:resource: argument ${quoted(ref.argument)}:argument: (${quoted(ref.type)}:type:)`,
     );
   }
   const schema: string[] = [];
   flatten(entry.definition.inputSchema, '', schema);
-  lines.push(...schema.map((line) => $localize`:@@admin.diff.schema:schemat.${line}:line:`));
+  lines.push(...schema.map((line) => $localize`:@@admin.diff.schema:schema.${line}:line:`));
   if (entry.definition.outputSchema) {
     const output: string[] = [];
     flatten(entry.definition.outputSchema, '', output);
     lines.push(
-      ...output.map((line) => $localize`:@@admin.diff.outputSchema:schemat wyniku.${line}:line:`),
+      ...output.map((line) => $localize`:@@admin.diff.outputSchema:output schema.${line}:line:`),
     );
   }
   if (entry.definition.annotations) {
     const hints: string[] = [];
     flatten(entry.definition.annotations, '', hints);
     lines.push(
-      ...hints.map((line) => $localize`:@@admin.diff.annotations:wskazówki.${line}:line:`),
+      ...hints.map((line) => $localize`:@@admin.diff.annotations:hints.${line}:line:`),
     );
   }
   return lines;
@@ -236,6 +236,6 @@ export function riskChangeText(
   const from = riskLabel(approved.risk);
   const to = riskLabel(pending.risk);
   return change === 'raised'
-    ? $localize`:@@admin.riskRaised:Ryzyko rośnie: ${from}:from: na ${to}:to:.`
-    : $localize`:@@admin.riskLowered:Ryzyko maleje: ${from}:from: na ${to}:to:. Obniżenia ryzyka gateway nie zatwierdza.`;
+    ? $localize`:@@admin.riskRaised:Risk goes up: ${from}:from: to ${to}:to:.`
+    : $localize`:@@admin.riskLowered:Risk goes down: ${from}:from: to ${to}:to:. The gateway does not approve risk lowering.`;
 }

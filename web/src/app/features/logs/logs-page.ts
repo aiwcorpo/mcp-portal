@@ -71,7 +71,7 @@ function toRow(call: ActivityCall): Row {
 
 /**
  * Activity log (mockup 06, CC-095): my tool calls, one row per call with its final result. Filters are
- * sent to the BFF (search, period, result group); "Pokaż więcej" follows the opaque cursor of the last
+ * sent to the BFF (search, period, result group); "Show more" follows the opaque cursor of the last
  * answer. The list never shows argument values: the API does not carry them.
  */
 @Component({
@@ -90,8 +90,8 @@ export class LogsPage {
   protected readonly periodLabel = periodLabel;
   protected readonly groupLabel = groupLabel;
   protected readonly searchMax = SEARCH_MAX;
-  protected readonly showLabel = $localize`:@@logs.showDetails:Pokaż szczegóły`;
-  protected readonly hideLabel = $localize`:@@logs.hideDetails:Ukryj szczegóły`;
+  protected readonly showLabel = $localize`:@@logs.showDetails:Show details`;
+  protected readonly hideLabel = $localize`:@@logs.hideDetails:Hide details`;
 
   protected readonly search = signal('');
   protected readonly period = signal<Period>('7d');

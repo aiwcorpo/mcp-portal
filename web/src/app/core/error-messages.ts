@@ -1,53 +1,53 @@
 import { ApiFailure, PortalErrorCode } from './api-error';
 
 const MESSAGES: Record<PortalErrorCode, () => string> = {
-  unauthenticated: () => $localize`:@@error.unauthenticated:Sesja wygasła. Zaloguj się ponownie.`,
-  access_denied: () => $localize`:@@error.access_denied:Nie masz uprawnień do tej operacji.`,
+  unauthenticated: () => $localize`:@@error.unauthenticated:Session expired. Sign in again.`,
+  access_denied: () => $localize`:@@error.access_denied:You are not allowed to perform this operation.`,
   tool_disabled: () =>
-    $localize`:@@error.tool_disabled:Narzędzie jest wyłączone przez administratora.`,
+    $localize`:@@error.tool_disabled:The tool has been switched off by an administrator.`,
   confirmation_required: () =>
-    $localize`:@@error.confirmation_required:Ta operacja wymaga potwierdzenia.`,
+    $localize`:@@error.confirmation_required:This operation requires confirmation.`,
   confirmation_failed: () =>
-    $localize`:@@error.confirmation_failed:Potwierdzenie nie powiodło się lub wygasło.`,
+    $localize`:@@error.confirmation_failed:Confirmation failed or expired.`,
   confirmation_superseded: () =>
-    $localize`:@@error.confirmation_superseded:Operacja została zastąpiona nowszą.`,
+    $localize`:@@error.confirmation_superseded:The operation was replaced by a newer one.`,
   confirmation_cancelled: () =>
-    $localize`:@@error.confirmation_cancelled:Operacja została anulowana.`,
+    $localize`:@@error.confirmation_cancelled:The operation was cancelled.`,
   confirmation_blocked: () =>
-    $localize`:@@error.confirmation_blocked:Inna operacja nieodwracalna czeka na kod.`,
+    $localize`:@@error.confirmation_blocked:Another irreversible operation is waiting for a code.`,
   already_registered: () =>
-    $localize`:@@error.already_registered:Authenticator jest już zarejestrowany. Usuń go, żeby zarejestrować od nowa.`,
-  invalid_code: () => $localize`:@@error.invalid_code:Kod nieprawidłowy.`,
+    $localize`:@@error.already_registered:Authenticator is already registered. Remove it to register again.`,
+  invalid_code: () => $localize`:@@error.invalid_code:Invalid code.`,
   enrollment_invalid: () =>
-    $localize`:@@error.enrollment_invalid:Rejestracja wygasła albo wpisano 3 błędne kody.`,
+    $localize`:@@error.enrollment_invalid:Registration expired or 3 wrong codes were entered.`,
   credential_required: () =>
-    $localize`:@@error.credential_required:Najpierw połącz konto w tym systemie.`,
+    $localize`:@@error.credential_required:Connect your account in this system first.`,
   not_found_or_denied: () =>
-    $localize`:@@error.not_found_or_denied:Nie znaleziono zasobu albo nie masz do niego dostępu.`,
-  invalid_argument: () => $localize`:@@error.invalid_argument:Niepoprawne dane wejściowe.`,
-  rate_limited: () => $localize`:@@error.rate_limited:Za dużo żądań. Spróbuj ponownie za chwilę.`,
+    $localize`:@@error.not_found_or_denied:Resource not found or you do not have access to it.`,
+  invalid_argument: () => $localize`:@@error.invalid_argument:Invalid input.`,
+  rate_limited: () => $localize`:@@error.rate_limited:Too many requests. Try again in a moment.`,
   step_up_required: () =>
-    $localize`:@@error.step_up_required:Ta operacja wymaga ponownego uwierzytelnienia (MFA).`,
+    $localize`:@@error.step_up_required:This operation requires re-authentication (MFA).`,
   upstream_unavailable: () =>
-    $localize`:@@error.upstream_unavailable:Usługa jest chwilowo niedostępna.`,
+    $localize`:@@error.upstream_unavailable:The service is temporarily unavailable.`,
   internal_error: () =>
-    $localize`:@@error.internal_error:Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.`,
+    $localize`:@@error.internal_error:An unexpected error occurred. Try again later.`,
   invalid_request: () =>
-    $localize`:@@error.invalid_request:Żądanie zostało odrzucone jako niepoprawne.`,
+    $localize`:@@error.invalid_request:The request was rejected as invalid.`,
   csrf_invalid: () =>
-    $localize`:@@error.csrf_invalid:Formularz stracił ważność. Odśwież stronę i spróbuj ponownie.`,
-  secret_invalid: () => $localize`:@@error.secret_invalid:Token nieprawidłowy albo wygasł.`,
+    $localize`:@@error.csrf_invalid:The form has expired. Refresh the page and try again.`,
+  secret_invalid: () => $localize`:@@error.secret_invalid:Token is invalid or expired.`,
   hash_mismatch: () =>
-    $localize`:@@error.hash_mismatch:Definicja zmieniła się w międzyczasie. Odśwież widok.`,
+    $localize`:@@error.hash_mismatch:The definition changed in the meantime. Refresh the view.`,
   not_requestable: () =>
-    $localize`:@@error.not_requestable:System uprawnień nie przyjmuje wniosków z portalu. Złóż wniosek bezpośrednio w systemie uprawnień.`,
+    $localize`:@@error.not_requestable:The entitlement system does not accept requests from the portal. Submit the request directly in the entitlement system.`,
   manifest_rejected: () =>
-    $localize`:@@error.manifest_rejected:Definicja została odrzucona i nie może być zatwierdzona.`,
+    $localize`:@@error.manifest_rejected:The definition was rejected and cannot be approved.`,
   flow_invalid: () =>
-    $localize`:@@error.flow_invalid:Link połączenia wygasł albo był już użyty. Zacznij od nowa.`,
+    $localize`:@@error.flow_invalid:The connection link expired or was already used. Start again.`,
   provider_error: () =>
-    $localize`:@@error.provider_error:System nie odpowiedział poprawnie. Spróbuj za chwilę.`,
-  cancelled: () => $localize`:@@error.cancelled:Łączenie anulowane.`,
+    $localize`:@@error.provider_error:The system did not respond correctly. Try again in a moment.`,
+  cancelled: () => $localize`:@@error.cancelled:Connection cancelled.`,
 };
 
 export function errorMessage(code: PortalErrorCode): string {
@@ -57,19 +57,19 @@ export function errorMessage(code: PortalErrorCode): string {
 function manifestRejectedMessage(reason: string | undefined): string {
   switch (reason) {
     case 'risk_lowered':
-      return $localize`:@@error.risk_lowered:Nowa definicja obniża poziom ryzyka narzędzia, więc nie zostanie zatwierdzona. Popraw ryzyko w manifeście i wdróż serwer ponownie.`;
+      return $localize`:@@error.risk_lowered:The new definition lowers the tool's risk level, so it will not be approved. Fix the risk in the manifest and redeploy the server.`;
     case 'environment_mismatch':
-      return $localize`:@@error.environment_mismatch:Manifest jest przeznaczony dla innego środowiska i został odrzucony.`;
+      return $localize`:@@error.environment_mismatch:The manifest is meant for a different environment and was rejected.`;
     case 'credential_type_mismatch':
-      return $localize`:@@error.credential_type_mismatch:Manifest nie zgadza się z typem poświadczenia skonfigurowanym dla systemu i został odrzucony.`;
+      return $localize`:@@error.credential_type_mismatch:The manifest does not match the credential type configured for the system and was rejected.`;
     case 'classification_inconsistent':
-      return $localize`:@@error.classification_inconsistent:Ryzyko i akcja nie pasują do siebie. Odczyt łączy się z akcją read, zapis z update lub admin, usuwanie z delete lub admin.`;
+      return $localize`:@@error.classification_inconsistent:Risk and action do not match. Read pairs with the read action, write with update or admin, delete with delete or admin.`;
     case 'classification_required':
-      return $localize`:@@error.classification_required:To narzędzie pochodzi z adaptera i wymaga klasyfikacji: wybierz ryzyko i akcję.`;
+      return $localize`:@@error.classification_required:This tool comes from an adapter and needs classification: choose a risk and an action.`;
     case 'classification_not_allowed':
-      return $localize`:@@error.classification_not_allowed:Gateway nie przyjmuje takiej klasyfikacji. Adapter jest tylko do odczytu: jego narzędzie można zatwierdzić wyłącznie jako Odczyt (read), a definicji z innego źródła nie klasyfikuje się.`;
+      return $localize`:@@error.classification_not_allowed:The gateway does not accept this classification. The adapter is read-only: its tool can only be approved as Read (read), and definitions from other sources are not classified.`;
     case 'adapter_mode_mismatch':
-      return $localize`:@@error.adapter_mode_mismatch:Tryb serwera w gatewayu nie zgadza się ze źródłem manifestu. Sprawdź konfigurację adaptera.`;
+      return $localize`:@@error.adapter_mode_mismatch:The server mode in the gateway does not match the manifest source. Check the adapter configuration.`;
     default:
       return errorMessage('manifest_rejected');
   }
@@ -80,10 +80,10 @@ export function failureMessage(failure: ApiFailure): string {
     return manifestRejectedMessage(failure.reason);
   }
   if (failure.code === 'invalid_request' && failure.reason === 'invalid_filter') {
-    return $localize`:@@error.invalid_filter:Takiego filtru nie da się zapisać w adresie. Zmień wybór.`;
+    return $localize`:@@error.invalid_filter:This filter cannot be saved in the address. Change the selection.`;
   }
   if (failure.code === 'rate_limited' && failure.retryAfterSeconds) {
-    return $localize`:@@error.rate_limited_retry:Za dużo żądań. Spróbuj ponownie za ${failure.retryAfterSeconds}:seconds: s.`;
+    return $localize`:@@error.rate_limited_retry:Too many requests. Try again in ${failure.retryAfterSeconds}:seconds: s.`;
   }
   return errorMessage(failure.code);
 }

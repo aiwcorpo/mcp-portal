@@ -44,52 +44,52 @@ describe('AuthenticatorRegisterPage', () => {
     store.update({ mfaFresh: true });
     const navigation = configureTestApp();
     const harness = await openRoute('/authenticator/register');
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+    await until(() => expect(text()).toContain('Register Authenticator'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Add the account in the app'));
     return { navigation, harness };
   }
 
   it('walks through the four steps and shows the seed only in step 2', async () => {
     const { harness } = await toScanStep();
 
-    expect(text()).toContain('1. Informacja');
-    expect(text()).toContain('2. Skanowanie');
-    expect(text()).toContain('Kod QR i klucz pokazujemy tylko teraz.');
-    expect(text()).toMatch(/ważna jeszcze (09|10):\d{2}\./);
+    expect(text()).toContain('1. Information');
+    expect(text()).toContain('2. Scanning');
+    expect(text()).toContain('The QR code and key are shown only now.');
+    expect(text()).toMatch(/valid for another (09|10):\d{2}\./);
     expect(document.querySelector('app-qr-code svg[role="img"] path')?.getAttribute('d')).toMatch(
       /^M\d/,
     );
     expect(document.querySelector('[data-testid="enrollment-key"]')?.textContent).toBe(GROUPED_KEY);
-    expect(document.querySelector('[aria-current="step"]')?.textContent).toContain('Skanowanie');
-    expect(text()).not.toContain('Pokaż ponownie');
+    expect(document.querySelector('[aria-current="step"]')?.textContent).toContain('Scanning');
+    expect(text()).not.toContain('Show again');
     expect(TestBed.inject(Router).url).toBe('/authenticator/register');
     expect(document.title).not.toContain(MOCK_TOTP_SEED);
 
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Enter the first code'));
     expectSeedNowhere();
     expect(document.querySelector('app-qr-code')).toBeNull();
 
     typeCode(await currentCode(MOCK_TOTP_SEED));
-    button('Sprawdź').click();
+    button('Check').click();
     await harness.fixture.whenStable();
-    await until(() => expect(text()).toContain('Authenticator zarejestrowany'));
-    expect(text()).toContain('Od teraz operacje nieodwracalne potwierdzasz kodem z aplikacji.');
+    await until(() => expect(text()).toContain('Authenticator registered'));
+    expect(text()).toContain('From now on you confirm irreversible operations with a code from the app.');
     expect(store.state.authenticator.state).toBe('active');
     expectSeedNowhere();
   });
 
   it('keeps the key out of the DOM again after going back from step 3 and after leaving the page', async () => {
     const { harness } = await toScanStep();
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
-    button('Wstecz').click();
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Enter the first code'));
+    button('Back').click();
+    await until(() => expect(text()).toContain('Register Authenticator'));
     expectSeedNowhere();
 
     store.update({ mfaFresh: true });
-    button('Dalej').click();
+    button('Next').click();
     await until(() => expect(document.querySelector('app-qr-code')).not.toBeNull());
     await harness.navigateByUrl('/catalog');
     expectSeedNowhere();
@@ -101,15 +101,15 @@ describe('AuthenticatorRegisterPage', () => {
     // No waiting: a frozen page never gets a later change detection.
     expect(document.querySelector('app-qr-code')).toBeNull();
     expectSeedNowhere();
-    expect(text()).toContain('Zarejestruj Authenticator');
+    expect(text()).toContain('Register Authenticator');
   });
 
   it('sends the user to the IdP for a fresh MFA and comes back to the same page', async () => {
     const navigation = configureTestApp();
     await TestBed.inject(SessionService).load();
     await openRoute('/authenticator/register');
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-    button('Dalej').click();
+    await until(() => expect(text()).toContain('Register Authenticator'));
+    button('Next').click();
 
     await until(() => expect(navigation.assign).toHaveBeenCalled());
     const target = new URL(navigation.assign.mock.calls[0][0], location.origin);
@@ -131,7 +131,7 @@ describe('AuthenticatorRegisterPage', () => {
     );
     await openRoute('/authenticator/register?mfa=ok');
 
-    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+    await until(() => expect(text()).toContain('Add the account in the app'));
     expect(store.state.enrollStarts).toBe(1);
     expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
   });
@@ -145,11 +145,11 @@ describe('AuthenticatorRegisterPage', () => {
       TestBed.inject(SessionService).username(),
     );
     const harness = await openRoute('/authenticator/register?mfa=ok');
-    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+    await until(() => expect(text()).toContain('Add the account in the app'));
 
     await harness.navigateByUrl('/catalog');
     await harness.navigateByUrl('/authenticator/register?mfa=ok');
-    await until(() => expect(text()).toContain('Kontynuuj rejestrację'));
+    await until(() => expect(text()).toContain('Continue registration'));
     expect(store.state.enrollStarts).toBe(1);
   });
 
@@ -157,35 +157,35 @@ describe('AuthenticatorRegisterPage', () => {
     store.update({ mfaFresh: true });
     configureTestApp();
     await openRoute('/authenticator/register?mfa=ok');
-    await until(() => expect(text()).toContain('Tożsamość potwierdzona.'));
+    await until(() => expect(text()).toContain('Identity confirmed.'));
     expect(TestBed.inject(Router).url).toBe('/authenticator/register');
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(store.state.enrollStarts).toBe(0);
-    expect(text()).not.toContain('Dodaj konto w aplikacji');
+    expect(text()).not.toContain('Add the account in the app');
 
-    button('Kontynuuj rejestrację').click();
-    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
+    button('Continue registration').click();
+    await until(() => expect(text()).toContain('Add the account in the app'));
   });
 
   it('shows the error instead of another redirect when the start is refused right after the MFA', async () => {
     const navigation = configureTestApp();
     await openRoute('/authenticator/register?mfa=ok');
-    await until(() => expect(text()).toContain('Kontynuuj rejestrację'));
-    button('Kontynuuj rejestrację').click();
+    await until(() => expect(text()).toContain('Continue registration'));
+    button('Continue registration').click();
     await until(() =>
-      expect(text()).toContain('Ta operacja wymaga ponownego uwierzytelnienia (MFA).'),
+      expect(text()).toContain('This operation requires re-authentication (MFA).'),
     );
     expect(navigation.assign).not.toHaveBeenCalled();
-    expect(text()).toContain('Zarejestruj Authenticator');
+    expect(text()).toContain('Register Authenticator');
   });
 
   it('says so when a registration is already active', async () => {
     store.update({ authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' } });
     configureTestApp();
     await openRoute('/authenticator/register');
-    await until(() => expect(text()).toContain('Authenticator jest już zarejestrowany'));
-    expect(text()).toContain('Usunięcie wymaga potwierdzenia tożsamości (MFA).');
-    expect(text()).not.toContain('Dalej');
+    await until(() => expect(text()).toContain('Authenticator is already registered'));
+    expect(text()).toContain('Removal requires identity confirmation (MFA).');
+    expect(text()).not.toContain('Next');
   });
 
   it('handles 409 already_registered returned by the start', async () => {
@@ -196,9 +196,9 @@ describe('AuthenticatorRegisterPage', () => {
     );
     configureTestApp();
     await openRoute('/authenticator/register');
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Authenticator jest już zarejestrowany'));
+    await until(() => expect(text()).toContain('Register Authenticator'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Authenticator is already registered'));
   });
 
   it('shows 429 and lets the user retry from step 1', async () => {
@@ -212,49 +212,49 @@ describe('AuthenticatorRegisterPage', () => {
     );
     configureTestApp();
     await openRoute('/authenticator/register');
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Za dużo żądań. Spróbuj ponownie za 120 s.'));
-    expect(text()).toContain('1. Informacja');
-    expect(button('Dalej').disabled).toBe(false);
+    await until(() => expect(text()).toContain('Register Authenticator'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Too many requests. Try again in 120 s.'));
+    expect(text()).toContain('1. Information');
+    expect(button('Next').disabled).toBe(false);
   });
 
   it('keeps step 3 open after a wrong code and validates the shape before sending', async () => {
     await toScanStep();
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Enter the first code'));
 
     typeCode('481');
-    button('Sprawdź').click();
-    await until(() => expect(text()).toContain('Kod ma 6 cyfr.'));
+    button('Check').click();
+    await until(() => expect(text()).toContain('The code has 6 digits.'));
 
     typeCode('000000');
-    button('Sprawdź').click();
-    await until(() => expect(text()).toContain('Kod nieprawidłowy.'));
+    button('Check').click();
+    await until(() => expect(text()).toContain('Invalid code.'));
     expect(codeInput().getAttribute('aria-invalid')).toBe('true');
-    expect(text()).toContain('Wpisz kod widoczny w aplikacji przy koncie "MCP Platform".');
+    expect(text()).toContain('Enter the code shown in the app for the "MCP Platform" account.');
   });
 
   it('ends the registration after three wrong codes', async () => {
     await toScanStep();
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Enter the first code'));
     for (const attempt of [1, 2]) {
       typeCode('000000');
-      button('Sprawdź').click();
+      button('Check').click();
       await until(() => expect(store.state.enrollment?.wrong).toBe(attempt));
-      await until(() => expect(button('Sprawdź').getAttribute('aria-disabled')).not.toBe('true'));
-      expect(text()).toContain('Kod nieprawidłowy.');
+      await until(() => expect(button('Check').getAttribute('aria-disabled')).not.toBe('true'));
+      expect(text()).toContain('Invalid code.');
     }
     typeCode('000000');
-    button('Sprawdź').click();
-    await until(() => expect(text()).toContain('Rejestracja wygasła albo wpisano 3 błędne kody.'));
-    expect(text()).toContain('Usuń w aplikacji konto "MCP Platform" dodane przed chwilą.');
+    button('Check').click();
+    await until(() => expect(text()).toContain('The registration expired or 3 wrong codes were entered.'));
+    expect(text()).toContain('Delete the "MCP Platform" account you just added in the app.');
     expectSeedNowhere();
 
     store.update({ mfaFresh: true });
-    button('Zacznij od nowa').click();
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
+    button('Start over').click();
+    await until(() => expect(text()).toContain('Register Authenticator'));
   });
 
   it('expires on its own when the ten minutes run out, and clears the seed', async () => {
@@ -273,10 +273,10 @@ describe('AuthenticatorRegisterPage', () => {
     );
     configureTestApp();
     await openRoute('/authenticator/register');
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
-    await until(() => expect(text()).toContain('Rejestracja wygasła albo wpisano 3 błędne kody.'));
+    await until(() => expect(text()).toContain('Register Authenticator'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Add the account in the app'));
+    await until(() => expect(text()).toContain('The registration expired or 3 wrong codes were entered.'));
     expectSeedNowhere();
   });
 
@@ -286,11 +286,11 @@ describe('AuthenticatorRegisterPage', () => {
     TestBed.configureTestingModule({ providers: [{ provide: Clipboard, useValue: { copy } }] });
     store.update({ mfaFresh: true });
     await openRoute('/authenticator/register');
-    await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-    button('Dalej').click();
-    await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
-    button('Kopiuj').click();
-    await until(() => expect(text()).toContain('Klucz skopiowany do schowka.'));
+    await until(() => expect(text()).toContain('Register Authenticator'));
+    button('Next').click();
+    await until(() => expect(text()).toContain('Add the account in the app'));
+    button('Copy').click();
+    await until(() => expect(text()).toContain('Key copied to the clipboard.'));
     expect(copy).toHaveBeenCalledWith(MOCK_TOTP_SEED);
   });
 
@@ -314,13 +314,13 @@ describe('AuthenticatorRegisterPage', () => {
       });
       store.update({ mfaFresh: true });
       await openRoute('/authenticator/register');
-      await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-      button('Dalej').click();
-      await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
-      button('Kopiuj').click();
-      await until(() => expect(text()).toContain('Klucz skopiowany do schowka.'));
-      button('Dalej').click();
-      await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
+      await until(() => expect(text()).toContain('Register Authenticator'));
+      button('Next').click();
+      await until(() => expect(text()).toContain('Add the account in the app'));
+      button('Copy').click();
+      await until(() => expect(text()).toContain('Key copied to the clipboard.'));
+      button('Next').click();
+      await until(() => expect(text()).toContain('Enter the first code'));
     }
 
     afterEach(() => Reflect.deleteProperty(navigator, 'clipboard'));
@@ -329,7 +329,7 @@ describe('AuthenticatorRegisterPage', () => {
       const clipboard = clipboardWith(MOCK_TOTP_SEED);
       await copyThenContinue();
       await until(() => expect(clipboard.writeText).toHaveBeenCalledWith(''));
-      expect(text()).not.toContain('Wyczyść schowek');
+      expect(text()).not.toContain('Clear the clipboard');
     });
 
     it('is left alone when it holds something else', async () => {
@@ -338,14 +338,14 @@ describe('AuthenticatorRegisterPage', () => {
       await until(() => expect(clipboard.readText).toHaveBeenCalled());
       await new Promise((resolve) => setTimeout(resolve, 50));
       expect(clipboard.writeText).not.toHaveBeenCalled();
-      expect(text()).not.toContain('Wyczyść schowek');
+      expect(text()).not.toContain('Clear the clipboard');
     });
 
     it('asks the user to clear it when the browser does not let the page read it', async () => {
       const clipboard = clipboardWith(new Error('NotAllowedError'));
       await copyThenContinue();
       await until(() =>
-        expect(text()).toContain('Klucz został skopiowany do schowka. Wyczyść schowek'),
+        expect(text()).toContain('The key was copied to the clipboard. Clear the clipboard'),
       );
       expect(clipboard.writeText).not.toHaveBeenCalled();
     });
@@ -355,13 +355,13 @@ describe('AuthenticatorRegisterPage', () => {
       configureTestApp();
       store.update({ mfaFresh: true });
       await openRoute('/authenticator/register');
-      await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
-      button('Dalej').click();
-      await until(() => expect(text()).toContain('Dodaj konto w aplikacji'));
-      button('Dalej').click();
-      await until(() => expect(text()).toContain('Wpisz pierwszy kod'));
+      await until(() => expect(text()).toContain('Register Authenticator'));
+      button('Next').click();
+      await until(() => expect(text()).toContain('Add the account in the app'));
+      button('Next').click();
+      await until(() => expect(text()).toContain('Enter the first code'));
       expect(clipboard.readText).not.toHaveBeenCalled();
-      expect(text()).not.toContain('Wyczyść schowek');
+      expect(text()).not.toContain('Clear the clipboard');
     });
   });
 });

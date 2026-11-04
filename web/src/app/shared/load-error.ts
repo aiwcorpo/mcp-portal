@@ -13,19 +13,19 @@ import { requestReference } from './error-notice';
     <section class="panel" role="alert">
       @switch (failure().code) {
         @case ('access_denied') {
-          <h2 i18n="@@loadError.forbidden">Nie masz dostępu do tej strony.</h2>
+          <h2 i18n="@@loadError.forbidden">You do not have access to this page.</h2>
           <a mat-stroked-button routerLink="/catalog" i18n="@@loadError.toServers"
-            >Wróć do serwerów</a
+            >Back to servers</a
           >
         }
         @case ('not_found_or_denied') {
-          <h2 i18n="@@loadError.notFound">Nie ma takiej strony.</h2>
+          <h2 i18n="@@loadError.notFound">Page not found.</h2>
           <a mat-stroked-button routerLink="/catalog" i18n="@@loadError.toServers2"
-            >Wróć do serwerów</a
+            >Back to servers</a
           >
         }
         @default {
-          <h2 i18n="@@loadError.title">Nie udało się pobrać danych.</h2>
+          <h2 i18n="@@loadError.title">Could not load the data.</h2>
           <p class="muted">{{ message() }}</p>
           @if (retryable()) {
             <button
@@ -34,12 +34,12 @@ import { requestReference } from './error-notice';
               (click)="retry.emit()"
               i18n="@@loadError.retry"
             >
-              Odśwież
+              Refresh
             </button>
           }
           @if (requestRef(); as ref) {
             <p class="request-ref muted">
-              <ng-container i18n="@@common.requestRef2">Identyfikator do zgłoszenia:</ng-container>
+              <ng-container i18n="@@common.requestRef2">Reference for support:</ng-container>
               <code>{{ ref }}</code>
             </p>
           }

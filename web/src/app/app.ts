@@ -19,6 +19,7 @@ import { ThemeService } from './core/theme.service';
 import { LoginPanel } from './features/login/login-panel';
 import { ErrorNotice } from './shared/error-notice';
 import { LoadError } from './shared/load-error';
+import { LocaleSwitch } from './shared/locale-switch';
 import { Loading } from './shared/loading';
 
 @Component({
@@ -32,6 +33,7 @@ import { Loading } from './shared/loading';
     ErrorNotice,
     Loading,
     LoadError,
+    LocaleSwitch,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -48,7 +50,7 @@ export class App {
   private readonly path = signal(this.router.url.split(/[?#]/)[0]);
   /** The preview of a pending operation is a page of its own without the tabs (mockup 14). */
   protected readonly previewOpen = computed(() => this.path().startsWith('/confirm/'));
-  /** Registering the Authenticator belongs to "Połączenia z systemami" (mockups 25-28). */
+  /** Registering the Authenticator belongs to "System connections" (mockups 25-28). */
   protected readonly connectionsActive = computed(
     () => this.path().startsWith('/connections') || this.path().startsWith('/authenticator'),
   );

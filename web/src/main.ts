@@ -1,10 +1,6 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { App } from './app/app';
-import { appConfig } from './app/app.config';
-import { startMockApi } from './app/core/mock-api';
+import { initLocale } from './app/core/locale';
 
-startMockApi()
-  .then((mockProviders) =>
-    bootstrapApplication(App, { providers: [...appConfig.providers, ...mockProviders] }),
-  )
+initLocale()
+  .then(() => import('./app/bootstrap'))
+  .then(({ bootstrap }) => bootstrap())
   .catch((error: unknown) => console.error(error));

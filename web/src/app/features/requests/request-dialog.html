@@ -1,11 +1,11 @@
-<h2 mat-dialog-title i18n="@@request.title">Złóż wniosek</h2>
+<h2 mat-dialog-title i18n="@@request.title">Submit request</h2>
 <mat-dialog-content>
   @if (systemChoice) {
     <div class="field">
       <label for="request-system" i18n="@@request.system">System</label>
       <select id="request-system" [value]="system() ?? ''" (change)="onSystem($event)">
         <option value="" [selected]="system() === null" i18n="@@request.systemPlaceholder">
-          Wybierz system
+          Select a system
         </option>
         @for (id of systems; track id) {
           <option [value]="id" [selected]="id === system()">{{ systemName(id) }}</option>
@@ -22,7 +22,7 @@
   @let state = entitlements();
   @if (state?.status === 'loading') {
     <p class="muted" role="status" i18n="@@request.loading">
-      Pobieram uprawnienia z systemu uprawnień...
+      Loading entitlements from the entitlement system...
     </p>
   } @else if (loadFailure(); as problem) {
     <app-error-notice
@@ -33,10 +33,10 @@
   } @else if (state?.status === 'ready') {
     @if (options().length) {
       <div class="field">
-        <label for="request-entitlement" i18n="@@request.entitlement">Uprawnienie</label>
+        <label for="request-entitlement" i18n="@@request.entitlement">Entitlement</label>
         <select id="request-entitlement" [value]="chosen() ?? ''" (change)="onEntitlement($event)">
           <option value="" [selected]="chosen() === null" i18n="@@request.entitlementPlaceholder">
-            Wybierz uprawnienie
+            Select an entitlement
           </option>
           @for (option of options(); track option.entitlement) {
             <option [value]="option.entitlement" [selected]="option.entitlement === chosen()">
@@ -50,18 +50,20 @@
       </div>
       @if (description(); as text) {
         <div class="description">
-          <p class="source muted" i18n="@@request.descriptionSource">Opis z systemu uprawnień:</p>
+          <p class="source muted" i18n="@@request.descriptionSource">
+            Description from the entitlement system:
+          </p>
           <p class="text" dir="ltr">{{ text.text }}</p>
           @if (text.neutralised) {
             <p class="muted small" i18n="@@request.neutralised">
-              Ukryte znaki w opisie zastąpiono znacznikami [U+XXXX].
+              Hidden characters in the description were replaced with [U+XXXX] markers.
             </p>
           }
         </div>
       }
     } @else {
       <p class="muted" i18n="@@request.none">
-        Dla tego systemu nie ma uprawnień, o które możesz poprosić z portalu.
+        This system has no entitlements you can request from the portal.
       </p>
     }
   }
@@ -70,11 +72,11 @@
     <app-error-notice [failure]="sendFailure" />
   }
   <p class="muted small" i18n="@@request.note">
-    Jeśli system uprawnień poprosi o uzasadnienie, podasz je po przekierowaniu.
+    If the entitlement system asks for a justification, you will provide it after the redirect.
   </p>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-stroked-button type="button" mat-dialog-close i18n="@@common.cancel2">Anuluj</button>
+  <button mat-stroked-button type="button" mat-dialog-close i18n="@@common.cancel2">Cancel</button>
   <button
     mat-flat-button
     type="button"
@@ -82,6 +84,6 @@
     (click)="submit()"
     i18n="@@request.submit"
   >
-    Złóż wniosek
+    Submit request
   </button>
 </mat-dialog-actions>

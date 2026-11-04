@@ -18,10 +18,10 @@ export interface ClassifyDialogData {
 }
 
 const ACTION_LABELS: Record<ToolAction, () => string> = {
-  read: () => $localize`:@@classify.action.read:read: odczyt danych`,
-  update: () => $localize`:@@classify.action.update:update: zmiana danych`,
-  delete: () => $localize`:@@classify.action.delete:delete: usunięcie danych`,
-  admin: () => $localize`:@@classify.action.admin:admin: operacja administracyjna`,
+  read: () => $localize`:@@classify.action.read:read: reads data`,
+  update: () => $localize`:@@classify.action.update:update: changes data`,
+  delete: () => $localize`:@@classify.action.delete:delete: deletes data`,
+  admin: () => $localize`:@@classify.action.admin:admin: administrative operation`,
 };
 
 /**

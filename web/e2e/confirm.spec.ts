@@ -13,7 +13,7 @@ test('the preview is read only, has no tabs and records the view with an explici
   );
   await page.goto(PREVIEW);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Operacja nieodwracalna czeka na kod' }),
+    page.getByRole('heading', { level: 1, name: 'An irreversible operation is waiting for a code' }),
   ).toBeVisible();
   await viewed;
 
@@ -21,11 +21,11 @@ test('the preview is read only, has no tabs and records the view with an explici
   await expect(page.getByText('confluence__delete_page')).toBeVisible();
   const names = await page.locator('.facts dt code').allInnerTexts();
   expect(names).toEqual(['pageId', 'spaceKey', 'title', 'versionComment']);
-  await expect(page.getByText('(obcięto)')).toBeVisible();
-  await expect(page.getByText('wpisz w sesji agenta kod z aplikacji MCP Platform')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Zatwierdź' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Odrzuć' })).toHaveCount(0);
-  await expect(page.getByRole('navigation', { name: 'Nawigacja główna' })).toHaveCount(0);
+  await expect(page.getByText('(truncated)')).toBeVisible();
+  await expect(page.getByText('enter the code from the MCP Platform app in the agent session')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Approve' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Reject' })).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0);
 });
 
 test('a GET alone never marks the preview as viewed', async ({ page }) => {
@@ -39,42 +39,42 @@ test('a GET alone never marks the preview as viewed', async ({ page }) => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
   });
   await page.goto(PREVIEW);
-  await expect(page.getByRole('button', { name: 'Anuluj operację' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Cancel operation' })).toBeVisible();
   await page.waitForTimeout(500);
   expect(posts.filter((url) => url.endsWith('/viewed'))).toEqual([]);
 });
 
-test('another operation replacing this one turns the page into "nieaktualny"', async ({ page }) => {
+test('another operation replacing this one turns the page into "out of date"', async ({ page }) => {
   await page.goto(PREVIEW);
-  await expect(page.getByRole('button', { name: 'Anuluj operację' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Cancel operation' })).toBeVisible();
   await page.evaluate(() =>
     (
       window as never as { __portalMock: { supersedeConfirmation(): void } }
     ).__portalMock.supersedeConfirmation(),
   );
-  await expect(page.getByText('Ten link jest nieaktualny.')).toBeVisible({ timeout: 12_000 });
-  await expect(page.getByRole('button', { name: 'Anuluj operację' })).toHaveCount(0);
+  await expect(page.getByText('This link is out of date.')).toBeVisible({ timeout: 12_000 });
+  await expect(page.getByRole('button', { name: 'Cancel operation' })).toHaveCount(0);
 });
 
-test('an unknown link says "nieaktualny"', async ({ page }) => {
+test('an unknown link says "out of date"', async ({ page }) => {
   await page.goto('/confirm/cnf_does_not_exist');
-  await expect(page.getByText('Ten link jest nieaktualny.')).toBeVisible();
+  await expect(page.getByText('This link is out of date.')).toBeVisible();
 });
 
 test('the countdown follows the clock', async ({ page }) => {
   await page.clock.install();
   await page.goto(PREVIEW);
-  await expect(page.getByText(/wygasa za 0[12]:\d{2}/)).toBeVisible();
+  await expect(page.getByText(/expires in 0[12]:\d{2}/)).toBeVisible();
   await page.clock.fastForward('01:00');
-  await expect(page.getByText(/wygasa za 01:0\d/)).toBeVisible();
+  await expect(page.getByText(/expires in 01:0\d/)).toBeVisible();
 });
 
 test('cancel the operation from the preview', async ({ page }) => {
   await page.goto(PREVIEW);
-  await page.getByRole('button', { name: 'Anuluj operację' }).click();
-  await expect(page.getByText('Operacja anulowana.')).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel operation' }).click();
+  await expect(page.getByText('Operation cancelled.')).toBeVisible();
   await page.reload();
-  await expect(page.getByText('Ten link jest nieaktualny.')).toBeVisible();
+  await expect(page.getByText('This link is out of date.')).toBeVisible();
 });
 
 test('a right-to-left override in an argument is shown as a marker and keeps the logical order', async ({
@@ -119,7 +119,7 @@ test('a right-to-left override in an argument is shown as a marker and keeps the
   }
   expect(characters.bidi).toBe('isolate');
   expect(characters.whiteSpace).toBe('pre-wrap');
-  await expect(page.getByText('Wartości zawierają znaki sterujące.')).toBeVisible();
+  await expect(page.getByText('Values contain control characters.')).toBeVisible();
 
   const lines = await value.evaluate((node) => {
     const range = document.createRange();

@@ -1,12 +1,12 @@
-<h1 i18n="@@endpoint.title">Adres MCP</h1>
+<h1 i18n="@@endpoint.title">MCP address</h1>
 <p class="lead" i18n="@@endpoint.lead">
-  Jeden adres obejmuje wszystkie systemy, do których masz uprawnienia. Klient pokazuje modelowi
-  narzędzia o nazwach <code>system__narzędzie</code>, a platforma kieruje wywołanie do właściwego
-  systemu. Niczego tu nie zapisujesz: poniższy wybór tylko zmienia adres.
+  One address covers all systems you have entitlements for. The client shows the model tools named
+  <code>system__tool</code>, and the platform routes each call to the right system. Nothing is saved
+  here: the choices below only change the address.
 </p>
 
 <section class="result" aria-labelledby="endpoint-result-title" [attr.aria-busy]="refreshing()">
-  <h2 id="endpoint-result-title" i18n="@@endpoint.resultTitle">Twój adres</h2>
+  <h2 id="endpoint-result-title" i18n="@@endpoint.resultTitle">Your address</h2>
   @if (shown(); as result) {
     <app-endpoint-ready
       [url]="result.url"
@@ -16,29 +16,29 @@
     @if (result.toolCount === 0 && result.filter) {
       <app-notice kind="warning">
         <span data-testid="empty-filter" i18n="@@endpoint.emptyFilter"
-          >Ten filtr nie zostawia żadnego narzędzia, które możesz wywołać. Klient zobaczy pustą
-          listę. Zmień wybór albo wróć do adresu bez filtra.</span
+          >This filter leaves no tool that you can call. The client will see an empty list. Change
+          the selection or go back to the address without a filter.</span
         >
       </app-notice>
     }
     @if (result.toolCount >= warningThreshold) {
       <app-notice kind="warning">
         <span data-testid="size-warning" i18n="@@endpoint.sizeWarning"
-          >Lista ma około {{ result.toolCount }} narzędzi. Opisy narzędzi zajmują kontekst modelu i
-          pogarszają wybór, więc zawęź adres do systemów, które są potrzebne, albo do samego
-          odczytu.</span
+          >The list has about {{ result.toolCount }} tools. Tool descriptions take up model context
+          and make tool selection worse, so narrow the address to the systems you need, or to
+          read-only tools.</span
         >
         @if (result.toolCount > pageSize) {
           <span data-testid="paging-note" i18n="@@endpoint.pagingNote">
-            Gateway zwraca {{ pageSize }} narzędzi na stronę; klient musi pobrać kolejne strony,
-            inaczej zobaczy tylko pierwszą.</span
+            The gateway returns {{ pageSize }} tools per page; the client must fetch the next pages,
+            otherwise it will only see the first one.</span
           >
         }
       </app-notice>
     }
   } @else if (composed().problem) {
     <p class="muted" i18n="@@endpoint.noAddress">
-      Adres pojawi się, gdy wybór zmieści się w limicie.
+      The address will appear once the selection fits within the limit.
     </p>
   } @else {
     @let state = endpoint();
@@ -50,20 +50,19 @@
   }
   <app-notice kind="warning">
     <ng-container i18n="@@endpoint.injection"
-      >Jedna sesja sięga do wszystkich wybranych systemów. Tekst z jednego z nich, na przykład
-      strona w Confluence z podrzuconym poleceniem, może skłonić model do zapisu w innym.
-      Uprawnienia się nie zmieniają, a operacje nieodwracalne dalej wymagają kodu z Authenticatora,
-      ale zasięg takiego ataku rośnie. Do pracy tylko z czytaniem wybierz "Tylko
-      odczyt".</ng-container
+      >One session reaches all selected systems. Text from one of them, for example a Confluence
+      page with a planted instruction, can push the model to write to another. Entitlements do not
+      change, and irreversible operations still require a code from the Authenticator, but the reach
+      of such an attack grows. For read-only work, choose "Read-only".</ng-container
     >
   </app-notice>
 </section>
 
 <section class="narrow-down" aria-labelledby="endpoint-filter-title">
-  <h2 id="endpoint-filter-title" i18n="@@endpoint.filterTitle">Zawęź listę narzędzi</h2>
+  <h2 id="endpoint-filter-title" i18n="@@endpoint.filterTitle">Narrow the tool list</h2>
   <p class="muted" i18n="@@endpoint.filterLead">
-    Filtr nie nadaje uprawnień. Zawęża tylko to, co klient zobaczy, więc nie zastępuje ograniczenia
-    dostępu.
+    A filter does not grant entitlements. It only narrows what the client sees, so it is not a
+    substitute for access restrictions.
   </p>
 
   @let state = catalog();
@@ -75,9 +74,9 @@
     <app-authenticator-banner [needed]="needsAuthenticator()" />
 
     <fieldset class="choice">
-      <legend i18n="@@endpoint.systems">Systemy</legend>
+      <legend i18n="@@endpoint.systems">Systems</legend>
       <p class="hint" id="systems-hint" i18n="@@endpoint.systemsHint">
-        Bez zaznaczenia adres obejmuje wszystkie systemy.
+        With nothing selected, the address covers all systems.
       </p>
       <ul class="systems" aria-describedby="systems-hint">
         @for (option of systemOptions(); track option.system) {
@@ -94,7 +93,7 @@
     </fieldset>
 
     <fieldset class="choice">
-      <legend i18n="@@endpoint.access">Rodzaj narzędzi</legend>
+      <legend i18n="@@endpoint.access">Tool type</legend>
       <div class="radios">
         <label
           ><input
@@ -104,7 +103,7 @@
             [checked]="access() === 'all'"
             (change)="setAccess('all')"
           />
-          <ng-container i18n="@@endpoint.accessAll">Odczyt i zmiany</ng-container></label
+          <ng-container i18n="@@endpoint.accessAll">Read and changes</ng-container></label
         >
         <label
           ><input
@@ -114,7 +113,7 @@
             [checked]="access() === 'read'"
             (change)="setAccess('read')"
           />
-          <ng-container i18n="@@endpoint.accessRead">Tylko odczyt</ng-container></label
+          <ng-container i18n="@@endpoint.accessRead">Read-only</ng-container></label
         >
         <label
           ><input
@@ -125,14 +124,14 @@
             (change)="setAccess('write')"
           />
           <ng-container i18n="@@endpoint.accessWrite"
-            >Tylko zmiany (zapis i usuwanie)</ng-container
+            >Changes only (write and delete)</ng-container
           ></label
         >
       </div>
     </fieldset>
 
     <fieldset class="choice">
-      <legend i18n="@@endpoint.toolsLegend">Pojedyncze narzędzia</legend>
+      <legend i18n="@@endpoint.toolsLegend">Individual tools</legend>
       <div class="radios">
         <label
           ><input
@@ -142,7 +141,7 @@
             [checked]="toolMode() === 'only'"
             (change)="setToolMode('only')"
           />
-          <ng-container i18n="@@endpoint.modeOnly">Tylko zaznaczone</ng-container></label
+          <ng-container i18n="@@endpoint.modeOnly">Only selected</ng-container></label
         >
         <label
           ><input
@@ -152,14 +151,12 @@
             [checked]="toolMode() === 'except'"
             (change)="setToolMode('except')"
           />
-          <ng-container i18n="@@endpoint.modeExcept"
-            >Wszystkie oprócz zaznaczonych</ng-container
-          ></label
+          <ng-container i18n="@@endpoint.modeExcept">All except selected</ng-container></label
         >
       </div>
       <p class="hint" i18n="@@endpoint.toolsHint">
-        Wybierz kilka narzędzi albo wyklucz kilka. Długa lista nie zmieści się w adresie, wtedy użyj
-        systemów i wykluczeń.
+        Pick a few tools or exclude a few. A long list will not fit in the address; use systems and
+        exclusions instead.
       </p>
       <div class="toolbar">
         <input
@@ -168,12 +165,12 @@
           [value]="query()"
           (input)="onQuery($event)"
           i18n-placeholder="@@endpoint.search"
-          placeholder="Szukaj narzędzia"
+          placeholder="Search tools"
           i18n-aria-label="@@endpoint.searchLabel"
-          aria-label="Szukaj narzędzia"
+          aria-label="Search tools"
         />
         <p class="muted" role="status" i18n="@@endpoint.pickedCount">
-          Zaznaczono: {{ effectivePicked().length }}
+          Selected: {{ effectivePicked().length }}
         </p>
       </div>
 
@@ -199,18 +196,18 @@
                   @switch (row.block) {
                     @case ('disabled') {
                       <span class="note muted" i18n="@@endpoint.disabled"
-                        >Wyłączone przez administratora.</span
+                        >Switched off by an administrator.</span
                       >
                     }
                     @case ('denied') {
                       <span class="note muted" i18n="@@endpoint.denied"
-                        >Brak uprawnienia, nie pojawi się na liście.</span
+                        >No entitlement, it will not appear in the list.</span
                       >
                     }
                     @default {
                       @if (row.tool.requiresConfirmation) {
                         <span class="note muted" i18n="@@endpoint.confirmNote"
-                          >Wymaga kodu z Authenticatora.</span
+                          >Requires a code from the Authenticator.</span
                         >
                       }
                     }
@@ -219,15 +216,13 @@
                     <span class="note muted">
                       @if (connection === 'not_connected') {
                         <ng-container i18n="@@endpoint.notConnected"
-                          >Konto niepołączone, wywołanie poprosi o połączenie.</ng-container
+                          >Account not connected, the call will ask you to connect.</ng-container
                         >
                       } @else {
-                        <ng-container i18n="@@endpoint.reconnect"
-                          >Wymaga ponownego połączenia.</ng-container
-                        >
+                        <ng-container i18n="@@endpoint.reconnect">Needs reconnecting.</ng-container>
                       }
                       <a [routerLink]="['/connect', group.server.system]"
-                        ><ng-container i18n="@@endpoint.connect">Połącz</ng-container
+                        ><ng-container i18n="@@endpoint.connect">Connect</ng-container
                         ><span class="visually-hidden"> ({{ group.name }})</span></a
                       >
                     </span>
@@ -245,13 +240,13 @@
           </ul>
         </section>
       } @empty {
-        <p class="muted" i18n="@@endpoint.noTools">Żadne narzędzie nie pasuje do wyszukiwania.</p>
+        <p class="muted" i18n="@@endpoint.noTools">No tool matches the search.</p>
       }
     </fieldset>
 
     <div class="counter" [class.over]="composed().problem">
       <p role="status" data-testid="query-bytes" i18n="@@endpoint.bytes">
-        Filtr w adresie: {{ composed().bytes }} z {{ maxBytes }} bajtów
+        Filter in the address: {{ composed().bytes }} of {{ maxBytes }} bytes
       </p>
       @if (problemText(); as message) {
         <p class="error" role="alert" data-testid="query-problem">{{ message }}</p>
@@ -259,7 +254,7 @@
     </div>
     <div class="actions">
       <button mat-stroked-button type="button" (click)="clearChoice()" i18n="@@endpoint.clear">
-        Bez filtra
+        No filter
       </button>
     </div>
   }

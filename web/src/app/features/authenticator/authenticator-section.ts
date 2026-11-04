@@ -82,9 +82,9 @@ export class AuthenticatorSection implements OnInit {
       this.dialog
         .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
           data: {
-            title: $localize`:@@authRemove.title:Usunąć Authenticator?`,
-            message: $localize`:@@authRemove.message:Bez Authenticatora agent nie wykona operacji nieodwracalnych. Usunięcie wymaga potwierdzenia tożsamości (MFA).`,
-            confirmLabel: $localize`:@@authRemove.confirm:Usuń`,
+            title: $localize`:@@authRemove.title:Remove the Authenticator?`,
+            message: $localize`:@@authRemove.message:Without the Authenticator the agent will not run irreversible operations. Removal requires identity confirmation (MFA).`,
+            confirmLabel: $localize`:@@authRemove.confirm:Remove`,
             destructive: true,
           },
         })

@@ -16,7 +16,7 @@ const QUIET_ZONE = 4;
       [attr.viewBox]="'0 0 ' + drawing.size + ' ' + drawing.size"
       role="img"
       i18n-aria-label="@@qr.label"
-      aria-label="Kod QR do zeskanowania w aplikacji Authenticator"
+      aria-label="QR code to scan in the Authenticator app"
       focusable="false"
       shape-rendering="crispEdges"
     >

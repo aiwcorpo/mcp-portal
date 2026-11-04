@@ -23,8 +23,9 @@ traces in sources).
 ## Commits
 
 Subject in English, imperative, up to 72 characters. The body describes the change, not the process. Tests go in the
-same commit as the code they cover. Texts in the interface are Polish and go through `$localize` with an id;
-`npm run i18n:extract` updates `web/src/locale/messages.xlf`.
+same commit as the code they cover. Texts in the interface are English (the source language) and go through `$localize` with an id;
+`npm run i18n:extract` updates `web/src/locale/messages.xlf`, and the Polish translation goes into `web/src/locale/messages.pl.xlf`
+(`npm run i18n:check` fails on a missing one).
 
 ## License
 

@@ -1,7 +1,7 @@
-<h1 class="visually-hidden" i18n="@@killSwitches.title">Wyłączniki awaryjne</h1>
+<h1 class="visually-hidden" i18n="@@killSwitches.title">Emergency switches</h1>
 
 <p class="back">
-  <a routerLink="/admin" i18n="@@killSwitches.back">Rejestr serwerów</a>
+  <a routerLink="/admin" i18n="@@killSwitches.back">Server registry</a>
 </p>
 
 @if (done(); as text) {
@@ -10,15 +10,15 @@
 @if (resumeRefused()) {
   <app-notice kind="warning" [dismissible]="true" (dismiss)="resumeRefused.set(false)">
     <ng-container i18n="@@killSwitches.resumeRefused"
-      >Wyłącznik zmienił się, zanim potwierdziłeś tożsamość (ktoś go zdjął i włączył od nowa), więc
-      niczego nie zdjęto. Sprawdź nowy powód i zdejmij go ponownie.</ng-container
+      >The switch changed before you confirmed your identity (someone lifted it and switched it on
+      again), so nothing was lifted. Check the new reason and lift it again.</ng-container
     >
   </app-notice>
 }
 @if (resumed() && !failure()) {
   <app-notice kind="success" [dismissible]="true" (dismiss)="resumed.set(false)">
     <ng-container i18n="@@killSwitches.mfaResumed"
-      >Tożsamość potwierdzona. Zdejmuję wyłącznik, który wybrano przed potwierdzeniem.</ng-container
+      >Identity confirmed. Lifting the switch you picked before the confirmation.</ng-container
     >
   </app-notice>
 }
@@ -33,42 +33,42 @@
   <app-load-error [failure]="current.failure" (retry)="load()" />
 } @else {
   <p class="lead" i18n="@@killSwitches.lead">
-    Wyłącznik odcina serwer albo jedno narzędzie dla wszystkich: najpóźniej po 5 sekundach na każdej
-    instancji gatewaya. Zatwierdzenie definicji go nie zdejmuje, restart też nie. Włączenie nie
-    wymaga potwierdzenia tożsamości, zdjęcie wymaga.
+    A switch cuts off a server or one tool for everyone: within 5 seconds at the latest on every
+    gateway instance. Approving a definition does not lift it, and neither does a restart.
+    Switching off needs no identity confirmation; lifting does.
   </p>
 
   <section aria-labelledby="active-title">
-    <h2 id="active-title" class="section" i18n="@@killSwitches.active">Włączone wyłączniki</h2>
+    <h2 id="active-title" class="section" i18n="@@killSwitches.active">Active switches</h2>
     @if (rows().length) {
       <table class="table" role="table">
         <caption class="visually-hidden" i18n="@@killSwitches.caption">
-          Wyłączniki awaryjne, które są włączone
+          Emergency switches that are on
         </caption>
         <thead role="rowgroup">
           <tr role="row">
-            <th scope="col" role="columnheader" i18n="@@killSwitches.colScope">Zakres</th>
+            <th scope="col" role="columnheader" i18n="@@killSwitches.colScope">Scope</th>
             <th scope="col" role="columnheader" i18n="@@killSwitches.colTarget">
-              Co jest wyłączone
+              What is switched off
             </th>
-            <th scope="col" role="columnheader" i18n="@@killSwitches.colSince">Od</th>
-            <th scope="col" role="columnheader" i18n="@@killSwitches.colReason">Powód</th>
+            <th scope="col" role="columnheader" i18n="@@killSwitches.colSince">Since</th>
+            <th scope="col" role="columnheader" i18n="@@killSwitches.colReason">Reason</th>
             <th scope="col" role="columnheader">
-              <span class="visually-hidden" i18n="@@killSwitches.colActions">Akcje</span>
+              <span class="visually-hidden" i18n="@@killSwitches.colActions">Actions</span>
             </th>
           </tr>
         </thead>
         <tbody role="rowgroup">
           @for (row of rows(); track row.key) {
             <tr role="row">
-              <td role="cell" data-label="Zakres" i18n-data-label="@@killSwitches.colScope">
+              <td role="cell" data-label="Scope" i18n-data-label="@@killSwitches.colScope">
                 {{ row.scope }}
               </td>
               <th
                 scope="row"
                 role="rowheader"
                 class="target"
-                data-label="Co jest wyłączone"
+                data-label="What is switched off"
                 i18n-data-label="@@killSwitches.colTargetLabel"
               >
                 <code>{{ row.target }}</code>
@@ -76,19 +76,19 @@
               <td
                 role="cell"
                 class="muted"
-                data-label="Od"
+                data-label="Since"
                 i18n-data-label="@@killSwitches.colSince"
               >
                 {{ row.entry.setAt | date: 'dd.MM.yyyy HH:mm' }}
                 <span class="by"
-                  ><ng-container i18n="@@killSwitches.by">włączył</ng-container>&ngsp;
+                  ><ng-container i18n="@@killSwitches.by">set by</ng-container>&ngsp;
                   <code>{{ row.entry.setBy | safeText }}</code></span
                 >
               </td>
               <td
                 role="cell"
                 class="reason"
-                data-label="Powód"
+                data-label="Reason"
                 i18n-data-label="@@killSwitches.colReason"
               >
                 {{ row.entry.reason | safeText }}
@@ -101,7 +101,7 @@
                   [disabled]="busy()"
                   (click)="lift(row)"
                 >
-                  <ng-container i18n="@@killSwitches.lift">Zdejmij</ng-container
+                  <ng-container i18n="@@killSwitches.lift">Lift</ng-container
                   ><span class="visually-hidden"> ({{ row.target }})</span>
                 </button>
               </td>
@@ -111,32 +111,32 @@
       </table>
     } @else {
       <p class="muted" role="status" i18n="@@killSwitches.none">
-        Żaden wyłącznik nie jest włączony.
+        No switch is on.
       </p>
     }
   </section>
 
   <section aria-labelledby="off-title" class="off">
     <h2 id="off-title" class="section" i18n="@@killSwitches.offHeading">
-      Wyłącz serwer lub narzędzie
+      Switch off a server or tool
     </h2>
     <form class="form" (ngSubmit)="switchOff()">
       <div class="field">
-        <label for="ks-server" i18n="@@killSwitches.server">Serwer</label>
+        <label for="ks-server" i18n="@@killSwitches.server">Server</label>
         <select
           id="ks-server"
           name="server"
           [ngModel]="serverId()"
           (ngModelChange)="onServer($event)"
         >
-          <option value="" i18n="@@killSwitches.serverPlaceholder">Wybierz serwer</option>
+          <option value="" i18n="@@killSwitches.serverPlaceholder">Choose a server</option>
           @for (option of servers(); track option.id) {
             <option [value]="option.id">{{ option.name }} ({{ option.id }})</option>
           }
         </select>
       </div>
       <div class="field">
-        <label for="ks-tool" i18n="@@killSwitches.tool">Narzędzie</label>
+        <label for="ks-tool" i18n="@@killSwitches.tool">Tool</label>
         <select
           id="ks-tool"
           name="tool"
@@ -144,14 +144,14 @@
           [ngModel]="tool()"
           (ngModelChange)="tool.set($event)"
         >
-          <option value="" i18n="@@killSwitches.wholeServer">Cały serwer</option>
+          <option value="" i18n="@@killSwitches.wholeServer">Whole server</option>
           @for (name of tools(); track name) {
             <option [value]="name">{{ name | safeText }}</option>
           }
         </select>
       </div>
       <div class="field wide">
-        <label for="ks-reason" i18n="@@killSwitches.reason">Powód</label>
+        <label for="ks-reason" i18n="@@killSwitches.reason">Reason</label>
         <input
           id="ks-reason"
           name="reason"
@@ -164,8 +164,8 @@
         />
         <p id="ks-reason-hint" class="muted hint">
           <ng-container i18n="@@killSwitches.reasonHint"
-            >Widzą go administratorzy na tej liście; nie trafia do logów audytu. Zostało
-            znaków:</ng-container
+            >Administrators see it on this list; it does not go to the audit logs. Characters
+            left:</ng-container
           >
           {{ reasonLeft() }}
         </p>
@@ -178,7 +178,7 @@
           [disabled]="!canSwitchOff() || busy()"
           i18n="@@killSwitches.submit"
         >
-          Wyłącz
+          Switch off
         </button>
       </div>
     </form>

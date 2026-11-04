@@ -20,7 +20,7 @@ export type NoticeKind = 'success' | 'error' | 'info' | 'warning';
           type="button"
           class="close"
           i18n-aria-label="@@notice.close"
-          aria-label="Zamknij komunikat"
+          aria-label="Close message"
           (click)="dismiss.emit()"
         >
           <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">

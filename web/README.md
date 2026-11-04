@@ -25,17 +25,11 @@ scripts/contracts.sh && npm ci
 `.contracts/` jest w `.gitignore`, więc repozytorium nie trzyma żadnego tarballa. `scripts/contracts.sh` kładzie tam paczkę
 z pierwszego dostępnego źródła: plik już leży (sprawdza `CONTRACTS_TARBALL_SHA256`, gdy ustawiona), `CONTRACTS_TARBALL=<plik>`,
 `CONTRACTS_TARBALL_URL=<adres>`, `CONTRACTS_SOURCE_DIR=<checkout mcp-contracts na tagu v6.3.2>` (robi tam `npm pack`; paczka z tego
-samego tagu ma te same bajty) albo, przy ustawionym `NODE_AUTH_TOKEN` (token z `read:packages`), `npm pack` z GitHub Packages.
+samego tagu ma te same bajty) (albo plik wydania z `mcp-contracts/release/` jako `CONTRACTS_TARBALL`).
 `ci/run.sh` woła go sam przed `npm ci`.
 
-Przejście na GitHub Packages bez pliku pośredniego: w `package.json` zmienić wpis na `"@aiwcorpo/mcp-contracts": "6.3.2"`,
-dodać do swojego `~/.npmrc` (token nie trafia do pliku w repozytorium; `web/.npmrc` ma już adres rejestru dla zakresu `@aiwcorpo`):
-
-```
-//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
-```
-
-i uruchomić `NODE_AUTH_TOKEN=<token> npm install`, który zaktualizuje `package-lock.json` (adres i suma z rejestru zamiast pliku).
+Po wydaniu `mcp-contracts` w npmjs: w `package.json` zmienić wpis na `"@aiwcorpo/mcp-contracts": "6.3.2"` i uruchomić `npm install`, który
+zaktualizuje `package-lock.json` (adres i suma z rejestru zamiast pliku). Nie trzeba żadnego tokenu ani `.npmrc`.
 `scripts/contracts.sh` przy takiej zależności nic nie robi.
 
 ## Uruchomienie lokalne
@@ -208,10 +202,19 @@ Zmiana wersji kontraktów: podmienić nazwę paczki w `package.json` (`@aiwcorpo
 
 ## Teksty i i18n
 
-Teksty są w kodzie po polsku z identyfikatorami (`i18n="@@..."`, `` $localize`:@@...:` ``), `sourceLocale`
-to `pl` (z niego pochodzi też `LOCALE_ID`, np. format dat). Plik źródłowy do tłumaczeń:
-`npm run i18n:extract` -> `src/locale/messages.xlf` (XLIFF 2). `npm run i18n:check` kończy się błędem, gdy
-plik w repozytorium nie odpowiada tekstom w kodzie (do uruchamiania w CI).
+Źródłem tekstów jest angielski: w kodzie i szablonach teksty są po angielsku z identyfikatorami (`i18n="@@..."`,
+`` $localize`:@@...:` ``), `sourceLocale` to `en`. Polskie tłumaczenie to `src/locale/messages.pl.xlf` (XLIFF 2, ten sam
+identyfikator, `<target>`). Jedna kompilacja obsługuje oba języki: `scripts/i18n.mjs json` (uruchamiany przez `prebuild`,
+`prestart`) zamienia plik polski na `public/i18n/messages.pl.json` (poza gitem), a `main.ts` przed startem aplikacji wybiera
+język (zapisany wybór w `localStorage`, potem `navigator.languages`: `pl` albo angielski) i dla polskiego rejestruje
+tłumaczenia przez `loadTranslations`. Moduły aplikacji ładują się dopiero potem (`import()` w `main.ts`), bo `$localize` wylicza
+się przy wczytaniu modułu. Przełącznik języka w nagłówku i na ekranie logowania zapisuje wybór i przeładowuje stronę. BFF i
+nginx serwują `i18n/messages.pl.json` jak każdy inny plik statyczny; CSP bez zmian (`connect-src 'self'`).
+
+`npm run i18n:extract` -> `src/locale/messages.xlf`; nowy tekst trzeba dopisać do `messages.pl.xlf` (jednostka z tym samym
+`id` i `<target>`). `npm run i18n:check` kończy się błędem, gdy `messages.xlf` nie odpowiada tekstom w kodzie, gdy jakiś tekst
+nie ma polskiego tłumaczenia albo gdy tłumaczenie ma inne znaczniki i interpolacje niż źródło (do uruchamiania w CI).
+Testy e2e działają po angielsku (`locale: 'en-US'`); po polsku jest jeden zestaw dymny, `e2e/polish.spec.ts`.
 Komunikaty błędów pochodzą wyłącznie z kodów (C10 i kody C12 z CC-012/CC-022, `src/app/core/error-messages.ts`);
 pole `message` z odpowiedzi BFF nigdy nie jest wyświetlane.
 

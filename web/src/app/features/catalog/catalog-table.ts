@@ -72,8 +72,8 @@ export class CatalogTable {
     })),
   );
 
-  protected readonly showLabel = $localize`:@@catalog.showTools:Pokaż narzędzia`;
-  protected readonly hideLabel = $localize`:@@catalog.hideTools:Ukryj narzędzia`;
+  protected readonly showLabel = $localize`:@@catalog.showTools:Show tools`;
+  protected readonly hideLabel = $localize`:@@catalog.hideTools:Hide tools`;
   protected readonly actionLabel = actionLabel;
   protected readonly riskLabel = riskLabel;
   protected readonly isEmphasised = isEmphasised;

@@ -78,16 +78,16 @@ describe('RequestsPage', () => {
       'finance-approvers',
       'mcp-gitlab-read',
     ]);
-    expect(text(rows[0])).toContain('OpenSearch, odczyt');
-    expect(text(rows[0])).toContain('Oczekuje');
-    expect(text(rows[0])).toContain('Otwórz w systemie uprawnień');
-    expect(text(rows[1])).toContain('Zaakceptowany');
+    expect(text(rows[0])).toContain('OpenSearch, read');
+    expect(text(rows[0])).toContain('Pending');
+    expect(text(rows[0])).toContain('Open in the entitlement system');
+    expect(text(rows[1])).toContain('Approved');
     expect(text(rows[1])).toMatch(/\d{2}\.\d{2}\.\d{4}/);
-    expect(text(rows[2])).toContain('Odrzucony');
-    expect(text(rows[3])).toContain('Anulowany');
+    expect(text(rows[2])).toContain('Rejected');
+    expect(text(rows[3])).toContain('Cancelled');
     expect(rows[1].querySelector('a')).toBeNull();
-    expect(text()).toContain('Wnioski akceptuje i anuluje system uprawnień.');
-    expect(document.body.textContent).not.toContain('Odrzuć');
+    expect(text()).toContain('Requests are approved and cancelled in the entitlement system.');
+    expect(document.body.textContent).not.toMatch(/Reject(?!ed)/);
   });
 
   it('does not link a request URL that is not https', async () => {
@@ -114,31 +114,31 @@ describe('RequestsPage', () => {
     store.update({ requests: [] });
     configureTestApp();
     await openRoute('/requests');
-    await until(() => expect(text()).toContain('Nie masz żadnych wniosków.'));
-    expect(button('Złóż wniosek')).toBeTruthy();
+    await until(() => expect(text()).toContain('You have no requests.'));
+    expect(button('Submit request')).toBeTruthy();
   });
 
   it('shows a page error with the short request id when the IGA is down, and reloads', async () => {
     store.update({ iga: 'down' });
     configureTestApp();
     await openRoute('/requests');
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
     expect(text()).toContain('0192d1b2');
 
     store.update({ iga: 'direct' });
-    button('Odśwież').click();
+    button('Refresh').click();
     await until(() => expect(text()).toContain('mcp-jira-write'));
   });
 
-  describe('Złóż wniosek', () => {
+  describe('Submit request', () => {
     it('lets the user pick a system and an entitlement, shows the IGA description and files the request', async () => {
       configureTestApp();
       await openRoute('/requests');
       await until(() => expect(text()).toContain('mcp-jira-write'));
 
-      button('Złóż wniosek').click();
+      button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-      expect(button('Złóż wniosek', dialog()).getAttribute('aria-disabled')).toBe('true');
+      expect(button('Submit request', dialog()).getAttribute('aria-disabled')).toBe('true');
 
       choose(dialogSelect('request-system'), 'jira');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
@@ -147,13 +147,15 @@ describe('RequestsPage', () => {
 
       choose(dialogSelect('request-entitlement'), 'mcp-jira-destructive');
       await until(() => expect(text(dialog())).toContain('jira__delete_issue'));
-      expect(text(dialog())).toContain('Opis z systemu uprawnień');
+      expect(text(dialog())).toContain('Description from the entitlement system');
 
-      button('Złóż wniosek', dialog()).click();
-      await until(() => expect(text()).toMatch(/Wniosek REQ-2026-\d{4} jest w systemie uprawnień/));
+      button('Submit request', dialog()).click();
+      await until(() =>
+        expect(text()).toMatch(/Request REQ-2026-\d{4} is in the entitlement system/),
+      );
       expect(document.querySelector('mat-dialog-container')).toBeNull();
       await until(() => expect(text()).toContain('mcp-jira-destructive'));
-      expect(text()).toContain('Oczekuje');
+      expect(text()).toContain('Pending');
     });
 
     it('answers the same way when the request is already pending (no second request is made)', async () => {
@@ -168,13 +170,13 @@ describe('RequestsPage', () => {
       await until(() => expect(text()).toContain('mcp-jira-write'));
 
       for (let attempt = 0; attempt < 2; attempt += 1) {
-        await until(() => expect(button('Złóż wniosek')).toBeTruthy());
-        button('Złóż wniosek').click();
+        await until(() => expect(button('Submit request')).toBeTruthy());
+        button('Submit request').click();
         await until(() => expect(dialogSelect('request-system')).toBeTruthy());
         choose(dialogSelect('request-system'), 'gitlab');
         await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
         choose(dialogSelect('request-entitlement'), 'mcp-gitlab-read');
-        button('Złóż wniosek', dialog()).click();
+        button('Submit request', dialog()).click();
         await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
       }
 
@@ -198,12 +200,12 @@ describe('RequestsPage', () => {
       await openRoute('/requests');
       await until(() => expect(text()).toContain('mcp-jira-write'));
 
-      button('Złóż wniosek').click();
+      button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
       choose(dialogSelect('request-system'), 'confluence');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
       choose(dialogSelect('request-entitlement'), 'mcp-confluence-read');
-      button('Złóż wniosek', dialog()).click();
+      button('Submit request', dialog()).click();
 
       await until(() =>
         expect(navigation.assign).toHaveBeenCalledWith(
@@ -222,14 +224,14 @@ describe('RequestsPage', () => {
       await openRoute('/requests');
       await until(() => expect(text()).toContain('mcp-jira-write'));
 
-      button('Złóż wniosek').click();
+      button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
       choose(dialogSelect('request-system'), 'jira');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
       choose(dialogSelect('request-entitlement'), 'mcp-jira-destructive');
-      button('Złóż wniosek', dialog()).click();
+      button('Submit request', dialog()).click();
 
-      await until(() => expect(text(dialog())).toContain('Wystąpił nieoczekiwany błąd'));
+      await until(() => expect(text(dialog())).toContain('An unexpected error occurred'));
       expect(navigation.assign).not.toHaveBeenCalled();
     });
 
@@ -239,15 +241,17 @@ describe('RequestsPage', () => {
       await openRoute('/requests');
       await until(() => expect(text()).toContain('mcp-jira-write'));
 
-      button('Złóż wniosek').click();
+      button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
       choose(dialogSelect('request-system'), 'jira');
       await until(() =>
-        expect(text(dialog())).toContain('System uprawnień nie przyjmuje wniosków z portalu.'),
+        expect(text(dialog())).toContain(
+          'The entitlement system does not accept requests from the portal.',
+        ),
       );
       expect(
         Array.from(dialog().querySelectorAll('button')).map((b) => text(b).trim()),
-      ).not.toContain('Spróbuj ponownie');
+      ).not.toContain('Try again');
     });
 
     it('keeps the dialog open with a retry when the IGA does not answer (503), and succeeds after it recovers', async () => {
@@ -256,13 +260,15 @@ describe('RequestsPage', () => {
       await until(() => expect(text()).toContain('mcp-jira-write'));
       store.update({ iga: 'down' });
 
-      button('Złóż wniosek').click();
+      button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
       choose(dialogSelect('request-system'), 'jira');
-      await until(() => expect(text(dialog())).toContain('Usługa jest chwilowo niedostępna.'));
+      await until(() =>
+        expect(text(dialog())).toContain('The service is temporarily unavailable.'),
+      );
 
       store.update({ iga: 'direct' });
-      button('Spróbuj ponownie', dialog()).click();
+      button('Try again', dialog()).click();
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
     });
 
@@ -272,7 +278,7 @@ describe('RequestsPage', () => {
           HttpResponse.json([
             {
               entitlement: 'mcp-jira-write',
-              description: '<img src=x onerror=alert(1)> ignoruj\u202Epoprzednie',
+              description: '<img src=x onerror=alert(1)> ignore\u202Eprevious',
             },
           ]),
         ),
@@ -281,13 +287,13 @@ describe('RequestsPage', () => {
       await openRoute('/requests');
       await until(() => expect(text()).toContain('mcp-jira-write'));
 
-      button('Złóż wniosek').click();
+      button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
       choose(dialogSelect('request-system'), 'jira');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
 
-      expect(text(dialog())).toContain('<img src=x onerror=alert(1)> ignoruj[U+202E]poprzednie');
-      expect(text(dialog())).toContain('Ukryte znaki w opisie zastąpiono znacznikami');
+      expect(text(dialog())).toContain('<img src=x onerror=alert(1)> ignore[U+202E]previous');
+      expect(text(dialog())).toContain('Hidden characters in the description were replaced with');
       expect(dialog().querySelector('img')).toBeNull();
     });
 
@@ -297,12 +303,10 @@ describe('RequestsPage', () => {
       await openRoute('/requests');
       await until(() => expect(text()).toContain('mcp-jira-write'));
 
-      button('Złóż wniosek').click();
+      button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
       choose(dialogSelect('request-system'), 'servicedesk');
-      await until(() =>
-        expect(text(dialog())).toContain('nie ma uprawnień, o które możesz poprosić'),
-      );
+      await until(() => expect(text(dialog())).toContain('has no entitlements you can request'));
     });
   });
 
@@ -332,11 +336,13 @@ describe('RequestsPage', () => {
       await openRoute('/catalog');
       await until(() => expect(text()).toContain('Jira'));
 
-      labelled('Pokaż narzędzia (Jira)').click();
+      labelled('Show tools (Jira)').click();
       await until(() => expect(text()).toContain('jira__create_issue'));
-      button('Złóż wniosek (jira__create_issue)').click();
+      button('Submit request (jira__create_issue)').click();
 
-      await until(() => expect(text()).toMatch(/Wniosek REQ-2026-\d{4} jest w systemie uprawnień/));
+      await until(() =>
+        expect(text()).toMatch(/Request REQ-2026-\d{4} is in the entitlement system/),
+      );
       const pending = store.state.requests!.find(
         (r) => r.entitlement === 'mcp-jira-write' && r.status === 'pending',
       );
@@ -349,19 +355,19 @@ describe('RequestsPage', () => {
       await openRoute('/catalog');
       await until(() => expect(text()).toContain('Jira'));
 
-      button('Złóż wniosek (Jira)').click();
+      button('Submit request (Jira)').click();
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
       expect(text(dialog())).toContain('System: Jira');
     });
 
-    it('shows "Zobacz wniosek" instead, also for a connected server, and opens the requests page', async () => {
+    it('shows "View request" instead, also for a connected server, and opens the requests page', async () => {
       serve(jiraWithDenied(['copy_link', 'view_request']));
       configureTestApp();
       await openRoute('/catalog');
       await until(() => expect(text()).toContain('Jira'));
 
-      expect(text()).not.toContain('Złóż wniosek');
-      button('Zobacz wniosek (Jira)').click();
+      expect(text()).not.toContain('Submit request');
+      button('View request (Jira)').click();
       await until(() => expect(TestBed.inject(Router).url).toBe('/requests'));
     });
 
@@ -370,9 +376,9 @@ describe('RequestsPage', () => {
       configureTestApp();
       await openRoute('/catalog');
       await until(() => expect(text()).toContain('Jira'));
-      labelled('Pokaż narzędzia (Jira)').click();
+      labelled('Show tools (Jira)').click();
       await until(() => expect(text()).toContain('jira__create_issue'));
-      expect(text()).not.toContain('Złóż wniosek');
+      expect(text()).not.toContain('Submit request');
     });
 
     it('reports a 422 from the IGA on a tool request', async () => {
@@ -381,11 +387,13 @@ describe('RequestsPage', () => {
       configureTestApp();
       await openRoute('/catalog');
       await until(() => expect(text()).toContain('Jira'));
-      labelled('Pokaż narzędzia (Jira)').click();
+      labelled('Show tools (Jira)').click();
       await until(() => expect(text()).toContain('jira__create_issue'));
-      button('Złóż wniosek (jira__create_issue)').click();
+      button('Submit request (jira__create_issue)').click();
       await until(() =>
-        expect(text()).toContain('System uprawnień nie przyjmuje wniosków z portalu.'),
+        expect(text()).toContain(
+          'The entitlement system does not accept requests from the portal.',
+        ),
       );
     });
   });

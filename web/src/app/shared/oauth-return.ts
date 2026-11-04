@@ -59,19 +59,19 @@ export function oauthReturnMessage(
     if (!named || !alive || !backendUser) {
       return null;
     }
-    return $localize`:@@oauth.connectedAs:Połączono z ${named}:system: jako ${backendUser}:user:.`;
+    return $localize`:@@oauth.connectedAs:Connected to ${named}:system: as ${backendUser}:user:.`;
   }
   switch (result.code) {
     case 'flow_invalid':
-      return $localize`:@@oauth.flowInvalid:Link połączenia wygasł albo był już użyty. Zacznij od nowa.`;
+      return $localize`:@@oauth.flowInvalid:The connection link expired or was already used. Start again.`;
     case 'cancelled':
       return named
-        ? $localize`:@@oauth.cancelled:Łączenie z ${named}:system: anulowane.`
-        : $localize`:@@oauth.cancelledUnknown:Łączenie anulowane.`;
+        ? $localize`:@@oauth.cancelled:Connecting to ${named}:system: cancelled.`
+        : $localize`:@@oauth.cancelledUnknown:Connection cancelled.`;
     default:
       return named
-        ? $localize`:@@oauth.providerError:${named}:system: nie odpowiedział poprawnie. Spróbuj za chwilę.`
-        : $localize`:@@oauth.providerErrorUnknown:System nie odpowiedział poprawnie. Spróbuj za chwilę.`;
+        ? $localize`:@@oauth.providerError:${named}:system: did not respond correctly. Try again in a moment.`
+        : $localize`:@@oauth.providerErrorUnknown:The system did not respond correctly. Try again in a moment.`;
   }
 }
 

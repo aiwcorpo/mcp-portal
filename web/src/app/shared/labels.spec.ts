@@ -15,9 +15,9 @@ describe('daysUntil', () => {
 
 describe('daysText', () => {
   it('handles today, one day and many', () => {
-    expect(daysText(0)).toBe('dziś');
-    expect(daysText(1)).toBe('za 1 dzień');
-    expect(daysText(5)).toBe('za 5 dni');
+    expect(daysText(0)).toBe('today');
+    expect(daysText(1)).toBe('in 1 day');
+    expect(daysText(5)).toBe('in 5 days');
   });
 });
 
@@ -28,34 +28,34 @@ describe('catalogStatusText', () => {
       status: 'expiring',
       expiresAt: '2026-11-02T10:00:00Z',
     });
-    expect(catalogStatusText('expiring', connection, NOW)).toBe('Token wygasa za 5 dni');
+    expect(catalogStatusText('expiring', connection, NOW)).toBe('Token expires in 5 days');
     expect(catalogStatusText('expiring', { ...connection, type: 'user-oauth' }, NOW)).toBe(
-      'Połączenie wygasa za 5 dni',
+      'Connection expires in 5 days',
     );
   });
 
   it('falls back to the plain label without a date and for other statuses', () => {
-    expect(catalogStatusText('expiring', null, NOW)).toBe('Wkrótce wygasa');
-    expect(catalogStatusText('connected', null, NOW)).toBe('Połączone');
-    expect(catalogStatusText('reconnect_required', null, NOW)).toBe('Wymaga ponownego połączenia');
-    expect(catalogStatusText('not_connected', null, NOW)).toBe('Niepołączone');
-    expect(catalogStatusText('request_pending', null, NOW)).toBe('Wniosek oczekuje');
-    expect(catalogStatusText('no_access', null, NOW)).toBe('Brak uprawnienia');
+    expect(catalogStatusText('expiring', null, NOW)).toBe('Expires soon');
+    expect(catalogStatusText('connected', null, NOW)).toBe('Connected');
+    expect(catalogStatusText('reconnect_required', null, NOW)).toBe('Needs reconnecting');
+    expect(catalogStatusText('not_connected', null, NOW)).toBe('Not connected');
+    expect(catalogStatusText('request_pending', null, NOW)).toBe('Request pending');
+    expect(catalogStatusText('no_access', null, NOW)).toBe('No entitlement');
   });
 });
 
 describe('actionLabel', () => {
   it('names the way to renew by what exists', () => {
     expect(actionLabel('reconnect', connectionFixture('jira', { type: 'user-oauth' }))).toBe(
-      'Połącz',
+      'Connect',
     );
     expect(actionLabel('reconnect', connectionFixture('jira', { type: 'user-secret' }))).toBe(
-      'Odnów',
+      'Renew',
     );
     expect(actionLabel('add_secret', connectionFixture('jira', { type: 'user-secret' }))).toBe(
-      'Odnów',
+      'Renew',
     );
-    expect(actionLabel('add_secret', null)).toBe('Dodaj token');
-    expect(actionLabel('disconnect')).toBe('Rozłącz');
+    expect(actionLabel('add_secret', null)).toBe('Add token');
+    expect(actionLabel('disconnect')).toBe('Disconnect');
   });
 });

@@ -25,7 +25,7 @@ export interface RequestDialogData {
 }
 
 /**
- * "Złóż wniosek" (mockup 18): the entitlements come from the IGA catalog of the chosen system (CC-154) and the
+ * "Submit request" (mockup 18): the entitlements come from the IGA catalog of the chosen system (CC-154) and the
  * description is text of that system, shown as text only. The request itself is then either created or the
  * browser is sent to the IGA form, whatever the adapter does.
  */

@@ -59,15 +59,15 @@ function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
       return {
         text:
           connection?.status === 'error'
-            ? $localize`:@@conn.brokenReconnect:przestało działać, połącz konto ponownie`
-            : $localize`:@@conn.reconnectNeeded:wymaga ponownego połączenia`,
+            ? $localize`:@@conn.brokenReconnect:stopped working, reconnect the account`
+            : $localize`:@@conn.reconnectNeeded:needs reconnecting`,
         date: null,
         tone: 'warn',
       };
     case 'request_pending':
-      return { text: $localize`:@@conn.pending:wniosek oczekuje`, date: null, tone: 'neutral' };
+      return { text: $localize`:@@conn.pending:request pending`, date: null, tone: 'neutral' };
     case 'no_access':
-      return { text: $localize`:@@conn.noAccess:brak uprawnienia`, date: null, tone: 'neutral' };
+      return { text: $localize`:@@conn.noAccess:no entitlement`, date: null, tone: 'neutral' };
     default:
   }
   if (!connection) {
@@ -84,8 +84,8 @@ function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
   return {
     text:
       connection.type === 'user-oauth'
-        ? $localize`:@@conn.autoRefreshed:odświeżane automatycznie`
-        : $localize`:@@conn.noExpiry:bez terminu`,
+        ? $localize`:@@conn.autoRefreshed:refreshed automatically`
+        : $localize`:@@conn.noExpiry:no expiry`,
     date: null,
     tone: 'neutral',
   };
@@ -222,7 +222,7 @@ export class ConnectionsPage implements OnInit {
   }
 
   /**
-   * A service account has no connection record, so "Ostatnie użycie" comes from the newest call in the
+   * A service account has no connection record, so "Last used" comes from the newest call in the
    * activity log (decision of 2026-10-28). The column is extra information: when the log cannot be read the
    * cell stays empty and the rest of the page is shown.
    */
@@ -291,7 +291,7 @@ export class ConnectionsPage implements OnInit {
           const result = await this.connectionActions.requestWithChoice(server.system);
           if (result?.kind === 'created') {
             this.actionDone.set(
-              $localize`:@@conn.requestCreated:Wniosek ${neutraliseText(result.requestId).text}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
+              $localize`:@@conn.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. You can check its status in the Requests tab.`,
             );
             await this.load();
           }

@@ -38,7 +38,7 @@ describe('toApiFailure', () => {
       httpError(429, { error: 'rate_limited' }, { 'Retry-After': '12' }),
     );
     expect(failure.retryAfterSeconds).toBe(12);
-    expect(failureMessage(failure)).toBe('Za dużo żądań. Spróbuj ponownie za 12 s.');
+    expect(failureMessage(failure)).toBe('Too many requests. Try again in 12 s.');
   });
 
   it('keeps the request id from the body or X-Request-Id, and only when it is a plain identifier', () => {
@@ -64,6 +64,6 @@ describe('toApiFailure', () => {
       httpError(400, { error: 'invalid_request', message: 'ORA-00942' }),
     );
     expect(JSON.stringify(failure)).not.toContain('ORA-00942');
-    expect(failureMessage(failure)).toBe('Żądanie zostało odrzucone jako niepoprawne.');
+    expect(failureMessage(failure)).toBe('The request was rejected as invalid.');
   });
 });

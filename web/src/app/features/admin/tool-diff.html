@@ -8,43 +8,43 @@
     @if (resumeRefused()) {
       <app-notice kind="warning">
         <ng-container i18n="@@admin.resumeRefused"
-          >Definicja zmieniła się, zanim potwierdziłeś tożsamość, więc niczego nie zatwierdzono.
-          Sprawdź różnice i zatwierdź ponownie.</ng-container
+          >The definition changed before you confirmed your identity, so nothing was approved.
+          Check the differences and approve again.</ng-container
         >
       </app-notice>
     }
     @if (changedMeanwhile()) {
       <app-notice kind="warning">
         <ng-container i18n="@@admin.changedMeanwhile"
-          >Definicja zmieniła się od czasu, gdy ją otwarto. Pokazuję aktualne różnice; sprawdź je i
-          zatwierdź ponownie.</ng-container
+          >The definition changed since it was opened. Showing the current differences; check them
+          and approve again.</ng-container
         >
       </app-notice>
     }
 
     @if (v.fromAdapter) {
       <app-notice kind="warning">
-        <strong i18n="@@admin.adapterWarningTitle">Źródło: adapter obcego serwera.</strong>
+        <strong i18n="@@admin.adapterWarningTitle">Source: foreign server adapter.</strong>
         <ng-container i18n="@@admin.adapterWarning">
-          Tę definicję przedstawił adapter, a nie potok CI. Nikt jej nie przeglądał w kodzie, a
-          wersja ({{ v.value.pendingVersion | safeText }}) pochodzi od serwera. Narzędzie nie ma
-          ryzyka ani akcji: nadasz je przy zatwierdzaniu, a dopóki tego nie zrobisz, agenci go nie
-          widzą.
+          The adapter presented this definition, not the CI pipeline. Nobody reviewed it in code,
+          and the version ({{ v.value.pendingVersion | safeText }}) comes from the server. The tool
+          has no risk or action: you assign them when approving, and until you do, agents cannot
+          see it.
         </ng-container>
       </app-notice>
     } @else if (v.fromServer) {
       <app-notice kind="warning">
-        <strong i18n="@@admin.serverWarningTitle">Źródło: serwer.</strong>
+        <strong i18n="@@admin.serverWarningTitle">Source: server.</strong>
         <ng-container i18n="@@admin.serverWarning">
-          Tę definicję przedstawił działający serwer, a nie potok CI z przeglądanego commitu. Nikt
-          jej nie przeglądał w kodzie, a podana wersja ({{ v.value.pendingVersion | safeText }})
-          pochodzi od serwera. Przeczytaj opis i schemat uważnie, zanim zatwierdzisz.
+          A running server presented this definition, not the CI pipeline from a reviewed commit.
+          Nobody reviewed it in code, and the given version ({{ v.value.pendingVersion | safeText }})
+          comes from the server. Read the description and schema carefully before you approve.
         </ng-container>
       </app-notice>
     } @else {
       <p class="source muted">
         <ng-container i18n="@@admin.ciSource"
-          >Źródło: potok CI (przeglądany commit), wersja
+          >Source: CI pipeline (reviewed commit), version
           {{ v.value.pendingVersion | safeText }}.</ng-container
         >
       </p>
@@ -52,42 +52,42 @@
 
     @if (v.hiddenChange) {
       <app-notice kind="warning">
-        <strong i18n="@@admin.hiddenTitle">Skrót się zmienił, a pokazane pola nie.</strong>
+        <strong i18n="@@admin.hiddenTitle">The hash changed, but the shown fields did not.</strong>
         <ng-container i18n="@@admin.hiddenText">
-          Zmienił się element definicji spoza widoku, na przykład poświadczenie serwera.
-          Zatwierdzenie wymaga jawnego potwierdzenia.
+          A part of the definition outside the view changed, for example the server credential.
+          Approving requires explicit confirmation.
         </ng-container>
       </app-notice>
     }
     @if (!v.hashConsistent) {
       <app-notice kind="error" i18n="@@admin.hashInconsistent">
-        Skrót podany przez serwer nie zgadza się ze skrótem pokazanej definicji. Nie zatwierdzaj;
-        zgłoś to administratorom platformy.
+        The hash given by the server does not match the hash of the shown definition. Do not
+        approve; report it to the platform administrators.
       </app-notice>
     }
     @if (v.riskLowered) {
       <app-notice kind="error">
-        <strong i18n="@@admin.riskLoweredTitle">Obniżenie ryzyka.</strong>&ngsp;
+        <strong i18n="@@admin.riskLoweredTitle">Risk lowering.</strong>&ngsp;
         @if (v.riskFrom && v.riskTo) {
           <ng-container i18n="@@admin.riskLoweredFromTo"
-            >Ryzyko narzędzia spada z {{ riskName(v.riskFrom) }} na
+            >The tool risk drops from {{ riskName(v.riskFrom) }} to
             {{ riskName(v.riskTo) }}.</ng-container
           >
         } @else if (v.riskTo) {
           <ng-container i18n="@@admin.riskLoweredFloor"
-            >Ryzyko jest niższe niż najwyższe dotąd zgłoszone ({{
+            >The risk is lower than the highest reported so far ({{
               riskName(v.riskTo)
             }}).</ng-container
           >
         } @else {
           <ng-container i18n="@@admin.riskLoweredUnclassified"
-            >Ryzyko jest niższe niż najwyższe dotąd zgłoszone.</ng-container
+            >The risk is lower than the highest reported so far.</ng-container
           >
         }
         <ng-container i18n="@@admin.riskLoweredWarning"
-          >Narzędzie jest ukryte przed agentami do Twojej decyzji. Zatwierdzenie obniża obowiązujący
-          poziom, a dla narzędzia, które było nieodwracalne, znika wymóg kodu z Authenticatora.
-          Wymaga świeżego potwierdzenia tożsamości (MFA).</ng-container
+          >The tool is hidden from agents until you decide. Approving lowers the effective level,
+          and for a tool that was irreversible, the requirement for a code from the Authenticator
+          goes away. Requires fresh identity confirmation (MFA).</ng-container
         >
       </app-notice>
     } @else if (v.riskText) {
@@ -95,7 +95,7 @@
     }
     @if (v.diff.neutralised) {
       <app-notice kind="info" i18n="@@admin.neutralised">
-        W definicji były ukryte znaki. Zastąpiono je znacznikami w postaci [U+XXXX].
+        The definition contained hidden characters. They were replaced with markers of the form [U+XXXX].
       </app-notice>
     }
 
@@ -103,10 +103,10 @@
       <section class="column" aria-labelledby="before-{{ toolName() }}">
         <h2 [id]="'before-' + toolName()" class="column-title muted">
           @if (v.isNew) {
-            <ng-container i18n="@@admin.beforeNew">Przed (brak, nowe narzędzie)</ng-container>
+            <ng-container i18n="@@admin.beforeNew">Before (none, new tool)</ng-container>
           } @else {
             <ng-container i18n="@@admin.before"
-              >Przed ({{ (v.value.approvedInVersion | safeText) || noVersion }})</ng-container
+              >Before ({{ (v.value.approvedInVersion | safeText) || noVersion }})</ng-container
             >
           }
         </h2>
@@ -119,16 +119,16 @@
               [class.removed]="line.mark === 'removed'"
               ><span class="sign" aria-hidden="true">{{ line.mark === 'removed' ? '-' : ' ' }}</span
               >@if (line.mark === 'removed') {<span class="visually-hidden" i18n="@@admin.removedLine"
-                  >Usunięto: </span
+                  >Removed: </span
                 >}{{ line.text }}
 </span>}@if (!v.diff.before.length) {<span class="muted" i18n="@@admin.nothingBefore"
-              >Brak wcześniejszej definicji.</span
+              >No earlier definition.</span
             >}</code></pre>
       </section>
       <section class="column" aria-labelledby="after-{{ toolName() }}">
         <h2 [id]="'after-' + toolName()" class="column-title muted">
           <ng-container i18n="@@admin.after"
-            >Po ({{ v.value.pendingVersion | safeText }})</ng-container
+            >After ({{ v.value.pendingVersion | safeText }})</ng-container
           >
         </h2>
         <pre
@@ -140,7 +140,7 @@
               [class.added]="line.mark === 'added'"
               ><span class="sign" aria-hidden="true">{{ line.mark === 'added' ? '+' : ' ' }}</span
               >@if (line.mark === 'added') {<span class="visually-hidden" i18n="@@admin.addedLine"
-                  >Dodano: </span
+                  >Added: </span
                 >}{{ line.text }}
 </span>}</code></pre>
       </section>
@@ -158,16 +158,16 @@
         (click)="approve()"
       >
         @if (v.fromAdapter) {
-          <ng-container i18n="@@admin.approveClassify">Sklasyfikuj i zatwierdź</ng-container>
+          <ng-container i18n="@@admin.approveClassify">Classify and approve</ng-container>
         } @else if (v.riskLowered) {
-          <ng-container i18n="@@admin.approveLowering">Zatwierdź obniżenie ryzyka</ng-container>
+          <ng-container i18n="@@admin.approveLowering">Approve risk lowering</ng-container>
         } @else {
-          <ng-container i18n="@@admin.approve">Zatwierdź definicję</ng-container>
+          <ng-container i18n="@@admin.approve">Approve definition</ng-container>
         }
         <span class="visually-hidden"> ({{ toolName() }})</span>
       </button>
       <p class="muted hint" i18n="@@admin.approveHint">
-        Brak zatwierdzenia nie niszczy niczego: narzędzie zostaje ukryte przed agentami.
+        Not approving breaks nothing: the tool stays hidden from agents.
       </p>
     </div>
   </section>

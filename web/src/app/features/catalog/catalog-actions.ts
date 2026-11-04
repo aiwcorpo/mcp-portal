@@ -1,6 +1,6 @@
 import { CatalogAction, CatalogTool, PortalCatalogServer } from '../../api/generated';
 
-/** Every action of C12 is handled; "Rozłącz" is only offered on the connections page. */
+/** Every action of C12 is handled; "Disconnect" is only offered on the connections page. */
 export const SUPPORTED_ACTIONS: readonly CatalogAction[] = [
   'copy_link',
   'connect_oauth',
@@ -52,7 +52,7 @@ function pick(server: PortalCatalogServer, order: readonly CatalogAction[]): Cat
 }
 
 /**
- * "Złóż wniosek" next to a denied tool (CC-113): the server must offer `request_access` (it does so only when
+ * "Submit request" next to a denied tool (CC-113): the server must offer `request_access` (it does so only when
  * a denied tool names entitlements and no request for them is pending) and the tool itself names an
  * entitlement to ask for.
  */

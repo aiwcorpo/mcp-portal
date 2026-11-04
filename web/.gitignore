@@ -13,3 +13,4 @@ npm-debug.log
 .vscode/
 .DS_Store
 /.contracts
+/public/i18n

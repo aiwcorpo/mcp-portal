@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 18731;
+const PORT = Number(process.env['PW_PORT'] ?? 18731);
 
 export default defineConfig({
   testDir: './e2e',
@@ -12,7 +12,7 @@ export default defineConfig({
   reporter: process.env['CI'] ? 'line' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
-    locale: 'pl-PL',
+    locale: 'en-US',
     trace: 'retain-on-failure',
     serviceWorkers: 'allow',
   },

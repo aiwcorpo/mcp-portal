@@ -50,10 +50,10 @@ function changesText(created: number, changed: number): string {
   }
   const parts: string[] = [];
   if (created) {
-    parts.push($localize`:@@admin.newCount:nowe: ${created}:count:`);
+    parts.push($localize`:@@admin.newCount:new: ${created}:count:`);
   }
   if (changed) {
-    parts.push($localize`:@@admin.changedCount:zmienione: ${changed}:count:`);
+    parts.push($localize`:@@admin.changedCount:changed: ${changed}:count:`);
   }
   return parts.join(', ');
 }
@@ -62,15 +62,15 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
   const pending = tool.status === 'pending_approval';
   const risk = riskOrUnclassified(tool.risk);
   const waiting = !pending
-    ? $localize`:@@admin.toolApproved:Zatwierdzone · ${risk}:risk:`
+    ? $localize`:@@admin.toolApproved:Approved · ${risk}:risk:`
     : tool.riskLowered
-      ? $localize`:@@admin.toolRiskLowered:Obniżenie ryzyka · ${risk}:risk:`
+      ? $localize`:@@admin.toolRiskLowered:Risk lowering · ${risk}:risk:`
       : tool.change === 'new'
-        ? $localize`:@@admin.toolNew:Nowe · ${risk}:risk:`
-        : $localize`:@@admin.toolChanged:Zmienione · ${risk}:risk:`;
+        ? $localize`:@@admin.toolNew:New · ${risk}:risk:`
+        : $localize`:@@admin.toolChanged:Changed · ${risk}:risk:`;
   // An emergency switch (CC-194) is the stronger fact: nothing else matters while the tool is off.
   const state = switchedOff
-    ? $localize`:@@admin.toolSwitchedOff:Wyłączone awaryjnie · ${risk}:risk:`
+    ? $localize`:@@admin.toolSwitchedOff:Switched off · ${risk}:risk:`
     : waiting;
   return {
     tool,
@@ -85,7 +85,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
 
 /**
  * "Administracja" (mockup 07): the registry as the gateway holds it. A new or changed tool is not given to
- * agents until it is approved here; the view only reads and approves, there is no "Odrzuć" (CC-097).
+ * agents until it is approved here; the view only reads and approves, there is no "Reject" (CC-097).
  */
 @Component({
   selector: 'app-admin-page',
@@ -107,8 +107,8 @@ export class AdminPage implements OnInit {
 
   private readonly adminApi = inject(AdminService);
 
-  protected readonly showLabel = $localize`:@@admin.showTools:Pokaż narzędzia`;
-  protected readonly hideLabel = $localize`:@@admin.hideTools:Ukryj narzędzia`;
+  protected readonly showLabel = $localize`:@@admin.showTools:Show tools`;
+  protected readonly hideLabel = $localize`:@@admin.hideTools:Hide tools`;
   protected readonly registry = signal<LoadState<RegistryServer[]>>(LOADING);
   protected readonly done = signal<string | null>(null);
   /** The emergency switches that are on; a failed read leaves the list empty, the registry is shown anyway. */
@@ -149,12 +149,12 @@ export class AdminPage implements OnInit {
         pendingCount: pendingTools.length,
         changes: changesText(created, pendingTools.length - created),
         state: serverOff
-          ? $localize`:@@admin.serverSwitchedOff:Wyłączony awaryjnie`
+          ? $localize`:@@admin.serverSwitchedOff:Switched off`
           : !enabled
-            ? $localize`:@@admin.serverDisabled:Wyłączony`
+            ? $localize`:@@admin.serverDisabled:Disabled`
             : pendingTools.length
-              ? $localize`:@@admin.serverPending:Do zatwierdzenia`
-              : $localize`:@@admin.serverActive:Aktywny`,
+              ? $localize`:@@admin.serverPending:Pending approval`
+              : $localize`:@@admin.serverActive:Active`,
         tone: serverOff || !enabled ? 'error' : pendingTools.length ? 'warn' : 'ok',
         tools,
       };
@@ -235,7 +235,7 @@ export class AdminPage implements OnInit {
     this.diffOpen.update((set) => removeFrom(set, tool.key));
     this.mfaReturned.set(false);
     this.resumedFromMfa.set(false);
-    this.done.set($localize`:@@admin.approved:Zatwierdzono definicję ${tool.name}:tool:.`);
+    this.done.set($localize`:@@admin.approved:Approved the definition of ${tool.name}:tool:.`);
     await this.read();
   }
 

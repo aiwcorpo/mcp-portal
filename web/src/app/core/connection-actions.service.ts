@@ -98,9 +98,9 @@ export class ConnectionActions {
       this.dialog
         .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
           data: {
-            title: $localize`:@@disconnect.title:Rozłączyć konto ${name}:system:?`,
-            message: $localize`:@@disconnect.message:Portal usunie zapisane poświadczenie. Narzędzia tego systemu przestaną działać, dopóki nie połączysz konta ponownie.`,
-            confirmLabel: $localize`:@@disconnect.confirm:Rozłącz`,
+            title: $localize`:@@disconnect.title:Disconnect account ${name}:system:?`,
+            message: $localize`:@@disconnect.message:The portal will delete the stored credential. Tools of this system will stop working until you connect the account again.`,
+            confirmLabel: $localize`:@@disconnect.confirm:Disconnect`,
             destructive: true,
           },
         })
@@ -119,5 +119,5 @@ export class ConnectionActions {
 }
 
 export function disconnectedMessage(system: SystemId): string {
-  return $localize`:@@disconnect.done:Rozłączono konto ${systemName(system)}:system:.`;
+  return $localize`:@@disconnect.done:Disconnected account ${systemName(system)}:system:.`;
 }

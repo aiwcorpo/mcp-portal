@@ -19,26 +19,26 @@ import { Notice } from '../../shared/notice';
       @if (current.state === 'none') {
         <app-notice kind="warning">
           <ng-container i18n="@@authBanner.none"
-            >Narzędzia "Usuwanie" wymagają kodu z Authenticatora, a nie masz go jeszcze
-            zarejestrowanego.</ng-container
+            >"Delete" tools need a code from the Authenticator, and you have not registered
+            it yet.</ng-container
           >&ngsp;<a routerLink="/authenticator/register" i18n="@@authBanner.register"
-            >Zarejestruj Authenticator</a
+            >Register Authenticator</a
           >
         </app-notice>
       } @else if (current.state === 'disabled') {
         <app-notice kind="warning">
           <ng-container i18n="@@authBanner.disabled"
-            >Authenticator jest wyłączony po 20 błędnych kodach w ciągu doby, więc narzędzia
-            "Usuwanie" nie zadziałają.</ng-container
+            >The Authenticator is switched off after 20 wrong codes in one day, so "Delete"
+            tools will not work.</ng-container
           >&ngsp;<a routerLink="/authenticator/register" i18n="@@authBanner.registerAgain"
-            >Zarejestruj ponownie</a
+            >Register again</a
           >
         </app-notice>
       } @else if (current.lockedUntil) {
         <app-notice kind="warning">
           <ng-container i18n="@@authBanner.locked"
-            >Authenticator jest zablokowany do {{ current.lockedUntil | date: 'HH:mm' }} po 5
-            błędnych kodach. Narzędzia "Usuwanie" zadziałają po tym czasie.</ng-container
+            >The Authenticator is locked until {{ current.lockedUntil | date: 'HH:mm' }} after 5
+            wrong codes. "Delete" tools will work after that time.</ng-container
           >
         </app-notice>
       }

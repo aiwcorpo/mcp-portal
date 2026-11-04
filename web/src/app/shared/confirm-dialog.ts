@@ -20,7 +20,7 @@ export interface ConfirmDialogData {
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-stroked-button type="button" [mat-dialog-close]="false" i18n="@@common.cancel">
-        Anuluj
+        Cancel
       </button>
       <button
         mat-flat-button

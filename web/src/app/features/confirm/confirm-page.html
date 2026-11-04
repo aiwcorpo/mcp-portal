@@ -8,55 +8,55 @@
   }
   @case ('stale') {
     <section class="panel" role="status">
-      <h1 i18n="@@confirm.staleTitle">Ten link jest nieaktualny.</h1>
+      <h1 i18n="@@confirm.staleTitle">This link is out of date.</h1>
       <p class="muted" i18n="@@confirm.staleText">
-        Operacja została zastąpiona, wykonana albo wygasła. Nie wpisuj kodu dla tej operacji.
+        The operation was replaced, completed or expired. Do not enter a code for this operation.
       </p>
     </section>
   }
   @case ('cancelled') {
     <section class="panel" role="status">
-      <h1 i18n="@@confirm.cancelledTitle">Operacja anulowana.</h1>
+      <h1 i18n="@@confirm.cancelledTitle">Operation cancelled.</h1>
       <p class="muted" i18n="@@confirm.cancelledText">
-        Agent nie wykona jej bez nowego wywołania. Kody z aplikacji, które były ważne do tej chwili,
-        przestały działać: przy następnej operacji poczekaj na nowy kod (30 do 60 s).
+        The agent will not run it without a new call. Codes from the app that were valid until now
+        no longer work: for the next operation, wait for a new code (30 to 60 s).
       </p>
     </section>
   }
   @case ('ready') {
     @if (expired()) {
       <section class="panel" role="status">
-        <h1 i18n="@@confirm.expiredTitle">Czas minął.</h1>
+        <h1 i18n="@@confirm.expiredTitle">Time is up.</h1>
         <p class="muted" i18n="@@confirm.expiredText">
-          Poproś agenta o ponowienie. Nie wpisuj kodu dla tej operacji.
+          Ask the agent to retry. Do not enter a code for this operation.
         </p>
       </section>
     } @else {
       <header class="head">
-        <h1 i18n="@@confirm.title">Operacja nieodwracalna czeka na kod</h1>
+        <h1 i18n="@@confirm.title">An irreversible operation is waiting for a code</h1>
         <p class="timer mono">
-          <ng-container i18n="@@confirm.expiresIn">wygasa za</ng-container>
+          <ng-container i18n="@@confirm.expiresIn">expires in</ng-container>
           {{ remainingText() }}
         </p>
       </header>
 
       @if (viewedFailed()) {
         <app-notice kind="warning" i18n="@@confirm.viewedFailed">
-          Nie udało się zapisać otwarcia podglądu. Ochrona "pierwsza wygrywa" nie jest teraz
-          aktywna: inna operacja nieodwracalna może zastąpić tę.
+          Could not record that the preview was opened. The "first one wins" protection is not
+          active now: another irreversible operation may replace this one.
         </app-notice>
       }
       @if (refreshFailed()) {
         <app-notice kind="warning" i18n="@@confirm.refreshFailed">
-          Nie udało się sprawdzić, czy operacja jest nadal aktualna. Poczekaj chwilę.
+          Could not check whether the operation is still current. Wait a moment.
         </app-notice>
       }
       @if (cancelFailure(); as failure) {
         @if (failure.code === 'not_found_or_denied') {
           <app-notice kind="error">
             <ng-container i18n="@@confirm.cancelNotFound"
-              >Nie udało się anulować: operacja mogła zostać wykonana albo wygasła.</ng-container
-            >&ngsp;<a routerLink="/logs" i18n="@@confirm.toLogs">Sprawdź w logach aktywności</a>
+              >Could not cancel: the operation may have been completed or expired.</ng-container
+            >&ngsp;<a routerLink="/logs" i18n="@@confirm.toLogs">Check the activity logs</a>
           </app-notice>
         } @else {
           <app-error-notice [failure]="failure" />
@@ -64,7 +64,7 @@
       }
       @if (anyNeutralised()) {
         <app-notice kind="warning" i18n="@@confirm.neutralised">
-          Wartości zawierają znaki sterujące. Pokazano je jako [U+XXXX] albo &lt;U+XXXX&gt;.
+          Values contain control characters. They are shown as [U+XXXX] or &lt;U+XXXX&gt;.
         </app-notice>
       }
 
@@ -74,20 +74,20 @@
           <dd>{{ systemLabel() }}</dd>
         </div>
         <div class="fact">
-          <dt i18n="@@confirm.tool">Narzędzie</dt>
+          <dt i18n="@@confirm.tool">Tool</dt>
           <dd>
             <code dir="ltr" class="untrusted">{{ toolText().text }}</code>
           </dd>
         </div>
         @if (resourceText().text) {
           <div class="fact">
-            <dt i18n="@@confirm.resource">Zasób</dt>
+            <dt i18n="@@confirm.resource">Resource</dt>
             <dd dir="ltr" class="untrusted">{{ resourceText().text }}</dd>
           </div>
         }
       </dl>
 
-      <h2 class="args-title" i18n="@@confirm.args">Argumenty</h2>
+      <h2 class="args-title" i18n="@@confirm.args">Arguments</h2>
       <dl class="facts">
         @for (row of rows(); track row.name) {
           <div class="fact">
@@ -99,24 +99,24 @@
                 row.value
               }}</span>
               @if (row.truncated) {
-                &ngsp;<span class="truncated" i18n="@@confirm.truncated">(obcięto)</span>
+                &ngsp;<span class="truncated" i18n="@@confirm.truncated">(truncated)</span>
               }
             </dd>
           </div>
         } @empty {
-          <p class="muted" i18n="@@confirm.noArgs">Operacja nie ma argumentów.</p>
+          <p class="muted" i18n="@@confirm.noArgs">The operation has no arguments.</p>
         }
       </dl>
 
       <div class="after">
         <p class="lead" i18n="@@confirm.instruction">
-          Jeśli to się zgadza, wpisz w sesji agenta kod z aplikacji MCP Platform.
+          If this is correct, enter the code from the MCP Platform app in the agent session.
         </p>
         <p class="muted" i18n="@@confirm.optional">
-          Ten podgląd jest opcjonalny: kod działa także bez otwierania tej strony.
+          This preview is optional: the code also works without opening this page.
         </p>
         <p class="muted" i18n="@@confirm.notThis">
-          Jeśli to nie ta operacja, nie wpisuj kodu i anuluj ją.
+          If this is not the right operation, do not enter a code and cancel it.
         </p>
         <button
           mat-stroked-button
@@ -126,7 +126,7 @@
           (click)="cancel()"
           i18n="@@confirm.cancel"
         >
-          Anuluj operację
+          Cancel operation
         </button>
       </div>
     }

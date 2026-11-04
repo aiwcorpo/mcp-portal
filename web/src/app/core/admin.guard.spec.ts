@@ -13,7 +13,7 @@ describe('adminGuard', () => {
     configureTestApp();
     await TestBed.inject(SessionService).load();
     await openRoute('/admin');
-    await until(() => expect(text()).toContain('Nie ma takiej strony'));
+    await until(() => expect(text()).toContain('Page not found'));
   });
 
   it('lets an admin load the lazy admin routes', async () => {

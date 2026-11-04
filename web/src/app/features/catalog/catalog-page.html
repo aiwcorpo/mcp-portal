@@ -1,4 +1,4 @@
-<h1 class="visually-hidden" i18n="@@catalog.title">Serwery MCP</h1>
+<h1 class="visually-hidden" i18n="@@catalog.title">MCP servers</h1>
 
 <app-oauth-return [servers]="loadedServers()" />
 
@@ -25,9 +25,9 @@
     [value]="query()"
     (input)="onQuery($event)"
     i18n-placeholder="@@catalog.searchPlaceholder"
-    placeholder="Szukaj serwera lub narzędzia"
+    placeholder="Search for a server or tool"
     i18n-aria-label="@@catalog.searchLabel"
-    aria-label="Szukaj serwera lub narzędzia"
+    aria-label="Search for a server or tool"
   />
   @if (visibleServers().length) {
     <app-catalog-table
@@ -40,14 +40,14 @@
     />
   } @else {
     <p class="muted none" role="status" i18n="@@catalog.noMatches">
-      Żaden serwer ani narzędzie nie pasuje do wyszukiwania.
+      No server or tool matches the search.
     </p>
   }
 } @else {
   <section class="empty">
-    <h2 i18n="@@catalog.emptyTitle">Nie masz jeszcze dostępu do żadnego serwera MCP</h2>
+    <h2 i18n="@@catalog.emptyTitle">You do not have access to any MCP server yet</h2>
     <p class="muted" i18n="@@catalog.emptyText">
-      Dostęp nadaje system uprawnień. Po akceptacji wniosku serwery pojawią się tutaj.
+      Access is granted by the entitlement system. Once a request is approved, the servers appear here.
     </p>
   </section>
 }

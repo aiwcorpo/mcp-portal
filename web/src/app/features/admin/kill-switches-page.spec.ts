@@ -49,7 +49,7 @@ describe('KillSwitchesPage', () => {
     const navigation = configureTestApp();
     await TestBed.inject(SessionService).load();
     const harness = await openRoute(url);
-    await until(() => expect(text()).toContain('Włączone wyłączniki'));
+    await until(() => expect(text()).toContain('Active switches'));
     return { navigation, harness };
   }
 
@@ -60,16 +60,16 @@ describe('KillSwitchesPage', () => {
     );
     fill('ks-tool', 'update_issue');
     fill('ks-reason', reason);
-    await until(() => expect(button('Wyłącz').getAttribute('aria-disabled')).not.toBe('true'));
-    button('Wyłącz').click();
-    await until(() => expect(text(dialog())).toContain('Wyłączyć awaryjnie?'));
-    button('Wyłącz', dialog()).click();
+    await until(() => expect(button('Switch off').getAttribute('aria-disabled')).not.toBe('true'));
+    button('Switch off').click();
+    await until(() => expect(text(dialog())).toContain('Switch off now?'));
+    button('Switch off', dialog()).click();
   }
 
   it('says so when nothing is switched off', async () => {
     await open();
 
-    expect(text()).toContain('Żaden wyłącznik nie jest włączony.');
+    expect(text()).toContain('No switch is on.');
     expect(document.querySelector('table')).toBeNull();
   });
 
@@ -96,9 +96,9 @@ describe('KillSwitchesPage', () => {
     await open();
 
     const body = text(document.querySelector('tbody')!);
-    expect(body).toContain('Narzędzie');
+    expect(body).toContain('Tool');
     expect(body).toContain('jira__update_issue');
-    expect(body).toContain('Serwer');
+    expect(body).toContain('Server');
     expect(body).toContain('Confluence');
     expect(body).toContain('3c1d6b7e-5a43-4f49-9d4f-0a7b1a1f2c11');
     expect(body).toContain('Awaria dostawcy');
@@ -111,7 +111,7 @@ describe('KillSwitchesPage', () => {
 
     await switchOffTool();
 
-    await until(() => expect(text()).toContain('Wyłączono: Jira: update_issue.'));
+    await until(() => expect(text()).toContain('Switched off: Jira: update_issue.'));
     expect(requests).toEqual([
       { method: 'PUT', url: SWITCH_OFF, body: { reason: 'Zapisy psują workflow' } },
     ]);
@@ -127,12 +127,12 @@ describe('KillSwitchesPage', () => {
 
     fill('ks-server', 'mcp-confluence');
     fill('ks-reason', 'Awaria dostawcy');
-    await until(() => expect(button('Wyłącz').getAttribute('aria-disabled')).not.toBe('true'));
-    button('Wyłącz').click();
-    await until(() => expect(text(dialog())).toContain('Wyłączyć awaryjnie?'));
-    button('Wyłącz', dialog()).click();
+    await until(() => expect(button('Switch off').getAttribute('aria-disabled')).not.toBe('true'));
+    button('Switch off').click();
+    await until(() => expect(text(dialog())).toContain('Switch off now?'));
+    button('Switch off', dialog()).click();
 
-    await until(() => expect(text()).toContain('Wyłączono: Confluence.'));
+    await until(() => expect(text()).toContain('Switched off: Confluence.'));
     expect(requests.map((request) => request.url)).toEqual([
       '/api/v1/admin/registry/servers/mcp-confluence/kill-switch',
     ]);
@@ -140,17 +140,17 @@ describe('KillSwitchesPage', () => {
 
   it('sends nothing when the confirmation is cancelled, and needs a server and a reason', async () => {
     await open();
-    expect(button('Wyłącz').getAttribute('aria-disabled')).toBe('true');
+    expect(button('Switch off').getAttribute('aria-disabled')).toBe('true');
     fill('ks-server', 'mcp-jira');
-    expect(button('Wyłącz').getAttribute('aria-disabled')).toBe('true');
+    expect(button('Switch off').getAttribute('aria-disabled')).toBe('true');
     fill('ks-reason', '   ');
-    expect(button('Wyłącz').getAttribute('aria-disabled')).toBe('true');
+    expect(button('Switch off').getAttribute('aria-disabled')).toBe('true');
     fill('ks-reason', 'Awaria');
-    await until(() => expect(button('Wyłącz').getAttribute('aria-disabled')).not.toBe('true'));
+    await until(() => expect(button('Switch off').getAttribute('aria-disabled')).not.toBe('true'));
 
-    button('Wyłącz').click();
-    await until(() => expect(text(dialog())).toContain('Wyłączyć awaryjnie?'));
-    button('Anuluj', dialog()).click();
+    button('Switch off').click();
+    await until(() => expect(text(dialog())).toContain('Switch off now?'));
+    button('Cancel', dialog()).click();
 
     await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
     expect(requests).toEqual([]);
@@ -161,7 +161,7 @@ describe('KillSwitchesPage', () => {
 
     fill('ks-reason', 'x'.repeat(150));
 
-    await until(() => expect(text()).toContain('Zostało znaków: 50'));
+    await until(() => expect(text()).toContain('Characters left: 50'));
     expect(field('ks-reason').getAttribute('maxlength')).toBe('200');
   });
 
@@ -175,7 +175,7 @@ describe('KillSwitchesPage', () => {
 
     await switchOffTool();
 
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
     expect(store.state.killSwitches).toEqual([]);
     expect(field('ks-reason').value).toBe('Zapisy psują workflow');
   });
@@ -198,9 +198,9 @@ describe('KillSwitchesPage', () => {
 
     async function startLift() {
       const opened = await open();
-      button('Zdejmij (jira__update_issue)').click();
-      await until(() => expect(text(dialog())).toContain('Zdjąć wyłącznik?'));
-      button('Zdejmij wyłącznik', dialog()).click();
+      button('Lift (jira__update_issue)').click();
+      await until(() => expect(text(dialog())).toContain('Lift the switch?'));
+      button('Lift switch', dialog()).click();
       return opened;
     }
 
@@ -224,8 +224,8 @@ describe('KillSwitchesPage', () => {
       await harness.navigateByUrl('/catalog');
       await harness.navigateByUrl('/admin/kill-switches?mfa=ok');
 
-      await until(() => expect(text()).toContain('Zdjęto wyłącznik: jira__update_issue.'));
-      expect(text()).toContain('Tożsamość potwierdzona. Zdejmuję wyłącznik');
+      await until(() => expect(text()).toContain('Lifted switch: jira__update_issue.'));
+      expect(text()).toContain('Identity confirmed. Lifting the switch');
       expect(store.state.killSwitches).toEqual([]);
       expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
       expect(document.querySelector('mat-dialog-container')).toBeNull();
@@ -237,7 +237,7 @@ describe('KillSwitchesPage', () => {
       store.update({ mfaFresh: true });
       const { navigation } = await startLift();
 
-      await until(() => expect(text()).toContain('Zdjęto wyłącznik: jira__update_issue.'));
+      await until(() => expect(text()).toContain('Lifted switch: jira__update_issue.'));
       expect(navigation.assign).not.toHaveBeenCalled();
       expect(store.state.killSwitches).toEqual([]);
     });
@@ -260,7 +260,7 @@ describe('KillSwitchesPage', () => {
       const before = requests.length;
       await harness.navigateByUrl('/admin/kill-switches?mfa=ok');
 
-      await until(() => expect(text()).toContain('Żaden wyłącznik nie jest włączony.'));
+      await until(() => expect(text()).toContain('No switch is on.'));
       expect(requests.length).toBe(before);
     });
 
@@ -285,7 +285,7 @@ describe('KillSwitchesPage', () => {
       const before = requests.length;
       await harness.navigateByUrl('/admin/kill-switches?mfa=ok');
 
-      await until(() => expect(text()).toContain('Wyłącznik zmienił się, zanim potwierdziłeś'));
+      await until(() => expect(text()).toContain('The switch changed before you confirmed'));
       expect(requests.length).toBe(before);
       expect(store.state.killSwitches.length).toBe(1);
     });
@@ -298,7 +298,7 @@ describe('KillSwitchesPage', () => {
       await harness.navigateByUrl('/catalog');
       await harness.navigateByUrl('/admin/kill-switches?mfa=ok');
 
-      await until(() => expect(text()).toContain('wymaga ponownego uwierzytelnienia'));
+      await until(() => expect(text()).toContain('requires re-authentication'));
       expect(navigation.assign).toHaveBeenCalledTimes(1);
     });
   });
@@ -309,9 +309,9 @@ describe('KillSwitchesPage', () => {
     await TestBed.inject(SessionService).load();
     await openRoute('/admin/kill-switches');
 
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
     store.update({ scenario: 'default' });
-    button('Odśwież').click();
-    await until(() => expect(text()).toContain('Żaden wyłącznik nie jest włączony.'));
+    button('Refresh').click();
+    await until(() => expect(text()).toContain('No switch is on.'));
   });
 });

@@ -39,10 +39,10 @@ interface Seed {
 }
 
 const STEPS: readonly { key: 'info' | 'scan' | 'code' | 'done'; label: () => string }[] = [
-  { key: 'info', label: () => $localize`:@@enroll.stepInfo:Informacja` },
-  { key: 'scan', label: () => $localize`:@@enroll.stepScan:Skanowanie` },
-  { key: 'code', label: () => $localize`:@@enroll.stepCode:Pierwszy kod` },
-  { key: 'done', label: () => $localize`:@@enroll.stepDone:Gotowe` },
+  { key: 'info', label: () => $localize`:@@enroll.stepInfo:Information` },
+  { key: 'scan', label: () => $localize`:@@enroll.stepScan:Scanning` },
+  { key: 'code', label: () => $localize`:@@enroll.stepCode:First code` },
+  { key: 'done', label: () => $localize`:@@enroll.stepDone:Done` },
 ];
 
 export const REGISTER_PATH = '/authenticator/register';
@@ -191,7 +191,7 @@ export class AuthenticatorRegisterPage implements OnInit {
     }
     this.mfaConfirmed.set(this.returnedFromMfa);
     this.step.set('info');
-    // "Dalej" was clicked before the MFA: the registration starts now, without a second click.
+    // "Next" was clicked before the MFA: the registration starts now, without a second click.
     if (this.returnedFromMfa && this.resume.take('enroll-authenticator', this.session.username())) {
       void this.start();
     }

@@ -332,10 +332,10 @@ function problemMessage(problem: FilterProblem | null): string | null {
     case null:
       return null;
     case 'query_too_long':
-      return $localize`:@@endpoint.problem.tooLong:Adres byłby dłuższy niż ${MAX_QUERY_BYTES}:max: bajtów. Zamiast wielu narzędzi wybierz całe systemy albo wyklucz kilka narzędzi.`;
+      return $localize`:@@endpoint.problem.tooLong:The address would be longer than ${MAX_QUERY_BYTES}:max: bytes. Instead of many tools, choose whole systems or exclude a few tools.`;
     case 'too_many_entries':
-      return $localize`:@@endpoint.problem.tooMany:Za dużo wpisów w jednym parametrze (do 5 systemów, do 100 narzędzi). Wybierz całe systemy albo wyklucz kilka narzędzi.`;
+      return $localize`:@@endpoint.problem.tooMany:Too many entries in one parameter (up to 5 systems, up to 100 tools). Choose whole systems or exclude a few tools.`;
     default:
-      return $localize`:@@endpoint.problem.other:Z tego wyboru nie da się złożyć adresu. Zmień wybór.`;
+      return $localize`:@@endpoint.problem.other:This selection cannot be turned into an address. Change the selection.`;
   }
 }

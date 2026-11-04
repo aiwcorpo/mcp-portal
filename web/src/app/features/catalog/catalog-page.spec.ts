@@ -37,18 +37,18 @@ describe('CatalogPage', () => {
     await openRoute('/catalog');
     await until(() => expect(text()).toContain('GitLab'));
 
-    expect(text(row('Jira'))).toContain('Token wygasa za 5 dni');
-    expect(text(row('Jira'))).toContain('Token PAT');
-    expect(text(row('Jira'))).toContain('5 narz.');
-    expect(button('Odnów (Jira)', row('Jira')).classList).toContain('mat-mdc-unelevated-button');
-    expect(button('Kopiuj link (Jira)', row('Jira'))).toBeTruthy();
-    expect(text(row('GitLab'))).toContain('Wymaga ponownego połączenia');
-    expect(button('Połącz (GitLab)', row('GitLab'))).toBeTruthy();
-    expect(text(row('Confluence'))).toContain('Brak uprawnienia');
-    expect(button('Złóż wniosek (Confluence)', row('Confluence'))).toBeTruthy();
-    expect(text(row('Service Desk'))).toContain('Konto serwisowe');
-    expect(text(row('Service Desk'))).toContain('Połączone');
-    expect(document.body.textContent).not.toContain('Rozłącz');
+    expect(text(row('Jira'))).toContain('Token expires in 5 days');
+    expect(text(row('Jira'))).toContain('PAT token');
+    expect(text(row('Jira'))).toContain('5 tools');
+    expect(button('Renew (Jira)', row('Jira')).classList).toContain('mat-mdc-unelevated-button');
+    expect(button('Copy link (Jira)', row('Jira'))).toBeTruthy();
+    expect(text(row('GitLab'))).toContain('Needs reconnecting');
+    expect(button('Connect (GitLab)', row('GitLab'))).toBeTruthy();
+    expect(text(row('Confluence'))).toContain('No entitlement');
+    expect(button('Submit request (Confluence)', row('Confluence'))).toBeTruthy();
+    expect(text(row('Service Desk'))).toContain('Service account');
+    expect(text(row('Service Desk'))).toContain('Connected');
+    expect(document.body.textContent).not.toContain('Disconnect');
   });
 
   describe('Authenticator banner', () => {
@@ -66,12 +66,12 @@ describe('CatalogPage', () => {
       server.use(serve([destructive]));
       configureTestApp();
       await openRoute('/catalog');
-      await until(() => expect(text()).toContain('Zarejestruj Authenticator'));
+      await until(() => expect(text()).toContain('Register Authenticator'));
       expect(text()).toContain(
-        'Narzędzia "Usuwanie" wymagają kodu z Authenticatora, a nie masz go jeszcze zarejestrowanego.',
+        '"Delete" tools need a code from the Authenticator, and you have not registered it yet.',
       );
       const link = Array.from(document.querySelectorAll('app-authenticator-banner a')).find(
-        (candidate) => candidate.textContent?.includes('Zarejestruj Authenticator'),
+        (candidate) => candidate.textContent?.includes('Register Authenticator'),
       );
       expect(link?.getAttribute('href')).toBe('/authenticator/register');
     });
@@ -88,8 +88,8 @@ describe('CatalogPage', () => {
       server.use(serve([destructive]));
       configureTestApp();
       await openRoute('/catalog');
-      await until(() => expect(text()).toContain('Zarejestruj ponownie'));
-      expect(text()).toContain('wyłączony po 20 błędnych kodach w ciągu doby');
+      await until(() => expect(text()).toContain('Register again'));
+      expect(text()).toContain('switched off after 20 wrong codes in one day');
     });
 
     it('names the end of a block and offers no unlock', async () => {
@@ -103,9 +103,9 @@ describe('CatalogPage', () => {
       server.use(serve([destructive]));
       configureTestApp();
       await openRoute('/catalog');
-      await until(() => expect(text()).toMatch(/zablokowany do \d{2}:\d{2} po 5 błędnych kodach/));
-      expect(text()).not.toContain('Zarejestruj');
-      expect(text()).not.toContain('Odblokuj');
+      await until(() => expect(text()).toMatch(/locked until \d{2}:\d{2} after 5 wrong codes/));
+      expect(text()).not.toContain('Register');
+      expect(text()).not.toContain('Unlock');
     });
 
     it('stays away when the registration is active or no tool needs a code', async () => {
@@ -116,7 +116,7 @@ describe('CatalogPage', () => {
       await until(() => expect(text()).toContain('Jira'));
       await new Promise((resolve) => setTimeout(resolve, 50));
       expect(text()).not.toContain('Authenticator jest');
-      expect(text()).not.toContain('Zarejestruj');
+      expect(text()).not.toContain('Register');
     });
 
     it('stays away when no tool needs a code', async () => {
@@ -125,7 +125,7 @@ describe('CatalogPage', () => {
       await openRoute('/catalog');
       await until(() => expect(text()).toContain('Jira'));
       await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(text()).not.toContain('Zarejestruj');
+      expect(text()).not.toContain('Register');
     });
 
     it('does not break the catalog when the registration cannot be read', async () => {
@@ -139,8 +139,8 @@ describe('CatalogPage', () => {
       await openRoute('/catalog');
       await until(() => expect(text()).toContain('Jira'));
       await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(text()).not.toContain('Zarejestruj');
-      expect(text()).not.toContain('Nie udało się pobrać danych');
+      expect(text()).not.toContain('Register');
+      expect(text()).not.toContain('Could not load the data');
     });
   });
 
@@ -153,8 +153,8 @@ describe('CatalogPage', () => {
           actions: ['copy_link', 'disconnect'],
           connection: connectionFixture('jira'),
         }),
-        'Połączone',
-        ['Kopiuj link (Jira)'],
+        'Connected',
+        ['Copy link (Jira)'],
       ],
       [
         'expiring',
@@ -166,8 +166,8 @@ describe('CatalogPage', () => {
             expiresAt: new Date(Date.now() + 3 * 86_400_000).toISOString(),
           }),
         }),
-        'Połączenie wygasa za 3 dni',
-        ['Połącz (Jira)', 'Kopiuj link (Jira)'],
+        'Connection expires in 3 days',
+        ['Connect (Jira)', 'Copy link (Jira)'],
       ],
       [
         'reconnect_required',
@@ -176,8 +176,8 @@ describe('CatalogPage', () => {
           actions: ['add_secret', 'disconnect'],
           connection: connectionFixture('jira', { type: 'user-secret', status: 'expired' }),
         }),
-        'Wymaga ponownego połączenia',
-        ['Odnów (Jira)'],
+        'Needs reconnecting',
+        ['Renew (Jira)'],
       ],
       [
         'not_connected',
@@ -185,8 +185,8 @@ describe('CatalogPage', () => {
           status: 'not_connected',
           actions: ['connect_oauth', 'add_secret'],
         }),
-        'Niepołączone',
-        ['Połącz przez OAuth (Jira)', 'Dodaj token (Jira)'],
+        'Not connected',
+        ['Connect with OAuth (Jira)', 'Add token (Jira)'],
       ],
       [
         'request_pending',
@@ -195,8 +195,8 @@ describe('CatalogPage', () => {
           actions: ['view_request'],
           tools: [toolFixture('jira__get', { access: 'denied' })],
         }),
-        'Wniosek oczekuje',
-        ['Zobacz wniosek (Jira)'],
+        'Request pending',
+        ['View request (Jira)'],
       ],
       [
         'no_access',
@@ -205,8 +205,8 @@ describe('CatalogPage', () => {
           actions: ['request_access'],
           tools: [toolFixture('jira__get', { access: 'denied' })],
         }),
-        'Brak uprawnienia',
-        ['Złóż wniosek (Jira)'],
+        'No entitlement',
+        ['Submit request (Jira)'],
       ],
     ];
 
@@ -239,14 +239,14 @@ describe('CatalogPage', () => {
     configureTestApp();
     const harness = await openRoute('/catalog');
     await until(() => expect(text()).toContain('Jira'));
-    labelled('Pokaż narzędzia (Jira)', row('Jira')).click();
+    labelled('Show tools (Jira)', row('Jira')).click();
     await harness.fixture.whenStable();
 
     const rows = Array.from(row('Jira').querySelectorAll('tr.tool')).map((tr) => text(tr));
-    expect(rows[0]).toContain('Wyłączone awaryjnie przez administratora.');
-    expect(rows[1]).toContain('Czeka na zatwierdzenie przez administratora.');
-    expect(rows[2]).toContain('Wyłączone przez administratora.');
-    expect(rows[3]).toContain('Wyłączone przez administratora.');
+    expect(rows[0]).toContain('Switched off in an emergency by an administrator.');
+    expect(rows[1]).toContain('Waiting for approval by an administrator.');
+    expect(rows[2]).toContain('Switched off by an administrator.');
+    expect(rows[3]).toContain('Switched off by an administrator.');
   });
 
   it('calls for connecting again when the connection is in the error state (the secret is gone)', async () => {
@@ -263,9 +263,9 @@ describe('CatalogPage', () => {
     await openRoute('/catalog');
 
     await until(() =>
-      expect(text(row('Jira'))).toContain('Połączenie przestało działać, połącz konto ponownie'),
+      expect(text(row('Jira'))).toContain('Connection stopped working, connect the account again'),
     );
-    expect(button('Odnów (Jira)', row('Jira'))).toBeTruthy();
+    expect(button('Renew (Jira)', row('Jira'))).toBeTruthy();
   });
 
   it('expands the tools of a server: id, title, entitlement, risk and notes', async () => {
@@ -274,17 +274,17 @@ describe('CatalogPage', () => {
         serverFixture('jira', {
           tools: [
             toolFixture('jira__search_issues', {
-              title: 'Wyszukiwanie zgłoszeń (JQL)',
+              title: 'Search issues (JQL)',
               requiredEntitlements: ['mcp-jira-read'],
             }),
             toolFixture('jira__delete_issue', {
-              title: 'Usunięcie zgłoszenia',
+              title: 'Delete issue',
               risk: 'DESTRUCTIVE',
               action: 'delete',
               requiresConfirmation: true,
               requiredEntitlements: ['mcp-jira-destructive'],
             }),
-            toolFixture('jira__move', { disabled: true, title: 'Przeniesienie' }),
+            toolFixture('jira__move', { disabled: true, title: 'Move' }),
           ],
         }),
       ]),
@@ -293,7 +293,7 @@ describe('CatalogPage', () => {
     const harness = await openRoute('/catalog');
     await until(() => expect(text()).toContain('Jira'));
 
-    const toggle = labelled('Pokaż narzędzia (Jira)', row('Jira'));
+    const toggle = labelled('Show tools (Jira)', row('Jira'));
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(toggle.hasAttribute('aria-controls')).toBe(false);
     toggle.click();
@@ -303,11 +303,11 @@ describe('CatalogPage', () => {
     expect(document.getElementById(toggle.getAttribute('aria-controls') ?? '')).toBeTruthy();
     const body = text(row('Jira'));
     expect(body).toContain('jira__search_issues');
-    expect(body).toContain('Wyszukiwanie zgłoszeń (JQL)');
-    expect(body).toContain('mcp-jira-read · Odczyt');
-    expect(body).toContain('mcp-jira-destructive · Usuwanie');
-    expect(body).toContain('Wymaga kodu z Authenticatora.');
-    expect(body).toContain('Wyłączone przez administratora.');
+    expect(body).toContain('Search issues (JQL)');
+    expect(body).toContain('mcp-jira-read · Read');
+    expect(body).toContain('mcp-jira-destructive · Delete');
+    expect(body).toContain('Requires a code from the Authenticator.');
+    expect(body).toContain('Switched off by an administrator.');
     expect(row('Jira').querySelector('code.tool-name')?.tagName).toBe('CODE');
   });
 
@@ -333,7 +333,7 @@ describe('CatalogPage', () => {
     search.value = 'brak takiego';
     search.dispatchEvent(new Event('input'));
     await harness.fixture.whenStable();
-    expect(text()).toContain('Żaden serwer ani narzędzie nie pasuje do wyszukiwania.');
+    expect(text()).toContain('No server or tool matches the search.');
   });
 
   it('shows the wait from Retry-After when starting OAuth hits a limit (429)', async () => {
@@ -349,9 +349,9 @@ describe('CatalogPage', () => {
     await openRoute('/catalog');
     await until(() => expect(text()).toContain('GitLab'));
 
-    button('Połącz (GitLab)').click();
+    button('Connect (GitLab)').click();
 
-    await until(() => expect(text()).toContain('Za dużo żądań. Spróbuj ponownie za 45 s.'));
+    await until(() => expect(text()).toContain('Too many requests. Try again in 45 s.'));
     expect(navigation.assign).not.toHaveBeenCalled();
   });
 
@@ -361,10 +361,10 @@ describe('CatalogPage', () => {
     await until(() => expect(text()).toContain('Jira'));
     const copy = vi.spyOn(TestBed.inject(Clipboard), 'copy').mockReturnValue(true);
 
-    button('Kopiuj link (Jira)').click();
+    button('Copy link (Jira)').click();
 
     expect(copy).toHaveBeenCalledWith('https://mcp.aiwcorpo.pl/s/mcp-jira/mcp');
-    await until(() => expect(text()).toContain('Skopiowano adres serwera Jira.'));
+    await until(() => expect(text()).toContain('Copied the address of the Jira server.'));
   });
 
   it('reconnects an OAuth connection through the provider, naming the system in the return path', async () => {
@@ -378,7 +378,7 @@ describe('CatalogPage', () => {
     await openRoute('/catalog');
     await until(() => expect(text()).toContain('GitLab'));
 
-    button('Połącz (GitLab)').click();
+    button('Connect (GitLab)').click();
 
     await until(() => expect(navigation.assign).toHaveBeenCalledOnce());
     expect(navigation.assign.mock.calls[0][0]).toMatch(
@@ -392,7 +392,7 @@ describe('CatalogPage', () => {
     await openRoute('/catalog');
     await until(() => expect(text()).toContain('Jira'));
 
-    button('Odnów (Jira)').click();
+    button('Renew (Jira)').click();
 
     await until(() => expect(TestBed.inject(Router).url).toBe('/connect/jira'));
   });
@@ -408,16 +408,16 @@ describe('CatalogPage', () => {
       );
       configureTestApp();
       await openRoute('/catalog?system=gitlab&connected=gitlab');
-      await until(() => expect(text()).toContain('Połączono z GitLab jako anna.nowak.'));
+      await until(() => expect(text()).toContain('Connected to GitLab as anna.nowak.'));
       await until(() => expect(location.search).not.toContain('connected'));
       expect(location.search).not.toContain('system');
     });
 
     it.each([
-      ['flow_invalid', 'Link połączenia wygasł albo był już użyty. Zacznij od nowa.'],
-      ['provider_error', 'GitLab nie odpowiedział poprawnie. Spróbuj za chwilę.'],
-      ['identity_mismatch', 'GitLab nie odpowiedział poprawnie. Spróbuj za chwilę.'],
-      ['cancelled', 'Łączenie z GitLab anulowane.'],
+      ['flow_invalid', 'The connection link expired or was already used. Start again.'],
+      ['provider_error', 'GitLab did not respond correctly. Try again in a moment.'],
+      ['identity_mismatch', 'GitLab did not respond correctly. Try again in a moment.'],
+      ['cancelled', 'Connecting to GitLab cancelled.'],
     ])('connectError=%s', async (code, message) => {
       configureTestApp();
       await openRoute(`/catalog?connectError=${code}&system=gitlab`);
@@ -436,16 +436,16 @@ describe('CatalogPage', () => {
       );
       configureTestApp();
       await openRoute('/catalog?system=gitlab&connected=gitlab');
-      await until(() => expect(text(row('GitLab'))).toContain('Niepołączone'));
+      await until(() => expect(text(row('GitLab'))).toContain('Not connected'));
 
-      expect(text()).not.toContain('Połączono z GitLab');
+      expect(text()).not.toContain('Connected to GitLab');
       await until(() => expect(location.search).not.toContain('connected'));
     });
 
     it('does not trust an unknown connectError or system name', async () => {
       configureTestApp();
       await openRoute('/catalog?system=<img>&connectError=<script>');
-      await until(() => expect(text()).toContain('System nie odpowiedział poprawnie.'));
+      await until(() => expect(text()).toContain('The system did not respond correctly.'));
       expect(document.querySelector('img')).toBeNull();
       expect(text()).not.toContain('<script>');
     });
@@ -453,9 +453,9 @@ describe('CatalogPage', () => {
     it('can be dismissed', async () => {
       configureTestApp();
       await openRoute('/catalog?connectError=cancelled&system=gitlab');
-      await until(() => expect(text()).toContain('anulowane'));
-      labelled('Zamknij komunikat').click();
-      await until(() => expect(text()).not.toContain('Łączenie z GitLab anulowane.'));
+      await until(() => expect(text()).toContain('cancelled'));
+      labelled('Close message').click();
+      await until(() => expect(text()).not.toContain('Connecting to GitLab cancelled.'));
     });
   });
 
@@ -463,8 +463,8 @@ describe('CatalogPage', () => {
     server.use(serve([]));
     configureTestApp();
     await openRoute('/catalog');
-    await until(() => expect(text()).toContain('Nie masz jeszcze dostępu do żadnego serwera MCP'));
-    expect(text()).toContain('Po akceptacji wniosku serwery pojawią się tutaj.');
+    await until(() => expect(text()).toContain('You do not have access to any MCP server yet'));
+    expect(text()).toContain('Once a request is approved, the servers appear here.');
   });
 
   it('shows a C10 message, the short request id and never the backend text, and retries', async () => {
@@ -485,13 +485,13 @@ describe('CatalogPage', () => {
     );
     configureTestApp();
     await openRoute('/catalog');
-    await until(() => expect(text()).toContain('Nie udało się pobrać danych.'));
-    expect(text()).toContain('Usługa jest chwilowo niedostępna.');
-    expect(text()).toMatch(/Identyfikator do zgłoszenia:\s*7f3a9c21/);
+    await until(() => expect(text()).toContain('Could not load the data.'));
+    expect(text()).toContain('The service is temporarily unavailable.');
+    expect(text()).toMatch(/Reference for support:\s*7f3a9c21/);
     expect(text()).not.toContain('7f3a9c21-aaaa');
     expect(text()).not.toContain('ConnectException');
 
-    button('Odśwież').click();
+    button('Refresh').click();
     await until(() => expect(text()).toContain('Jira'));
   });
 
@@ -506,7 +506,7 @@ describe('CatalogPage', () => {
     configureTestApp();
     const harness = await openRoute('/catalog');
     await until(() => expect(text()).toContain('Jira'));
-    labelled('Pokaż narzędzia (Jira)').click();
+    labelled('Show tools (Jira)').click();
     await harness.fixture.whenStable();
 
     expect(text(row('Jira'))).toContain('<img src=x onerror=alert(1)>');

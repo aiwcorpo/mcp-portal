@@ -92,7 +92,7 @@ export class ToolDiff {
   readonly gone = output();
 
   protected readonly riskName = riskLabel;
-  protected readonly noVersion = $localize`:@@admin.noVersion:brak wersji`;
+  protected readonly noVersion = $localize`:@@admin.noVersion:no version`;
   protected readonly pending = signal<LoadState<PendingTool>>(LOADING);
   protected readonly approving = signal(false);
   protected readonly failure = signal<ApiFailure | null>(null);
@@ -351,15 +351,15 @@ export class ToolDiff {
     const name = this.toolName();
     const target = to ? riskLabel(to) : riskOrUnclassified(undefined);
     const change = from
-      ? $localize`:@@admin.riskLoweringConfirm.change:z ${riskLabel(from)}:from: na ${target}:to:`
-      : $localize`:@@admin.riskLoweringConfirm.floor:poniżej najwyższego dotąd zgłoszonego poziomu (teraz ${target}:to:)`;
+      ? $localize`:@@admin.riskLoweringConfirm.change:from ${riskLabel(from)}:from: to ${target}:to:`
+      : $localize`:@@admin.riskLoweringConfirm.floor:below the highest level reported so far (now ${target}:to:)`;
     const confirmed = await firstValueFrom(
       this.dialog
         .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
           data: {
-            title: $localize`:@@admin.riskLoweringConfirm.title:Zatwierdzić obniżenie ryzyka?`,
-            message: $localize`:@@admin.riskLoweringConfirm.message:Narzędzie ${name}:tool: obniża ryzyko ${change}:change:. Po zatwierdzeniu nowy poziom staje się obowiązujący, a dla narzędzi, które były nieodwracalne, przestaje być wymagany kod z Authenticatora. Zatwierdź tylko, jeśli zmiana jest zamierzona.`,
-            confirmLabel: $localize`:@@admin.riskLoweringConfirm.confirm:Zatwierdź obniżenie ryzyka`,
+            title: $localize`:@@admin.riskLoweringConfirm.title:Approve risk lowering?`,
+            message: $localize`:@@admin.riskLoweringConfirm.message:The tool ${name}:tool: lowers its risk ${change}:change:. After approval the new level takes effect, and for tools that were irreversible a code from the Authenticator is no longer required. Approve only if the change is intended.`,
+            confirmLabel: $localize`:@@admin.riskLoweringConfirm.confirm:Approve risk lowering`,
             destructive: true,
           },
         })
@@ -373,9 +373,9 @@ export class ToolDiff {
       this.dialog
         .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
           data: {
-            title: $localize`:@@admin.hiddenConfirm.title:Zatwierdzić zmianę, której nie widać?`,
-            message: $localize`:@@admin.hiddenConfirm.message:Skrót definicji jest inny, a żadna pokazana linia się nie zmieniła. Zmiana dotyczy elementu spoza widoku, na przykład poświadczenia serwera. Zatwierdź tylko, jeśli znasz jej przyczynę.`,
-            confirmLabel: $localize`:@@admin.hiddenConfirm.confirm:Zatwierdź mimo to`,
+            title: $localize`:@@admin.hiddenConfirm.title:Approve a change you cannot see?`,
+            message: $localize`:@@admin.hiddenConfirm.message:The definition hash is different, but no shown line changed. The change concerns an element outside the view, for example the server credential. Approve only if you know the reason.`,
+            confirmLabel: $localize`:@@admin.hiddenConfirm.confirm:Approve anyway`,
             destructive: true,
           },
         })
@@ -390,9 +390,9 @@ export class ToolDiff {
       this.dialog
         .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
           data: {
-            title: $localize`:@@admin.serverConfirm.title:Zatwierdzić definicję zgłoszoną przez serwer?`,
-            message: $localize`:@@admin.serverConfirm.message:Definicję ${name}:tool: przedstawił działający serwer, nie potok CI. Nikt nie przeglądał jej w kodzie. Zatwierdź ją tylko, jeśli opis i schemat są zgodne z oczekiwanym.`,
-            confirmLabel: $localize`:@@admin.serverConfirm.confirm:Zatwierdź`,
+            title: $localize`:@@admin.serverConfirm.title:Approve a definition reported by the server?`,
+            message: $localize`:@@admin.serverConfirm.message:A running server presented the definition of ${name}:tool:, not the CI pipeline. Nobody reviewed it in code. Approve it only if the description and schema match what you expect.`,
+            confirmLabel: $localize`:@@admin.serverConfirm.confirm:Approve`,
             destructive: true,
           },
         })

@@ -19,7 +19,12 @@
     "e2e": "npm run build:e2e && playwright test",
     "screenshots": "npm run build:e2e && README_SHOTS_DIR=../docs/screenshots playwright test e2e/readme-shots.spec.ts --project=desktop",
     "i18n:extract": "ng extract-i18n",
-    "i18n:check": "ng extract-i18n --output-path .angular/i18n-check && diff -u src/locale/messages.xlf .angular/i18n-check/messages.xlf"
+    "i18n:check": "ng extract-i18n --output-path .angular/i18n-check && diff -u src/locale/messages.xlf .angular/i18n-check/messages.xlf && node scripts/i18n.mjs check",
+    "i18n:json": "node scripts/i18n.mjs json",
+    "prestart": "npm run i18n:json",
+    "prebuild": "npm run i18n:json",
+    "prestart:mocks": "npm run i18n:json",
+    "prebuild:e2e": "npm run i18n:json"
   },
   "dependencies": {
     "@angular/cdk": "22.2.4",

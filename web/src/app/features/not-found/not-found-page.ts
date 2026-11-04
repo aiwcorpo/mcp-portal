@@ -7,8 +7,8 @@ import { RouterLink } from '@angular/router';
   imports: [MatButtonModule, RouterLink],
   template: `
     <section class="panel">
-      <h1 i18n="@@notFound.title">Nie ma takiej strony.</h1>
-      <a mat-stroked-button routerLink="/catalog" i18n="@@notFound.toCatalog">Wróć do serwerów</a>
+      <h1 i18n="@@notFound.title">Page not found.</h1>
+      <a mat-stroked-button routerLink="/catalog" i18n="@@notFound.toCatalog">Back to servers</a>
     </section>
   `,
   styles: `

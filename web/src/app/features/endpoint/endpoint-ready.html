@@ -1,9 +1,9 @@
 <div class="form-field url-field">
-  <label for="endpoint-url" i18n="@@ready.url">Adres MCP</label>
+  <label for="endpoint-url" i18n="@@ready.url">MCP address</label>
   <div class="url-row">
     <input id="endpoint-url" type="text" class="mono" readonly [value]="url()" />
     <button mat-stroked-button type="button" (click)="copy(url(), urlLabel)" i18n="@@ready.copyUrl">
-      Kopiuj<span class="visually-hidden"> adres MCP</span>
+      Copy<span class="visually-hidden"> MCP address</span>
     </button>
   </div>
 </div>
@@ -16,14 +16,14 @@
   [selectedIndex]="active()"
   (selectedIndexChange)="active.set($event)"
   i18n-aria-label="@@ready.configsLabel"
-  aria-label="Konfiguracja klienta"
+  aria-label="Client configuration"
 >
   @for (tab of tabs; track tab.key) {
     <mat-tab [label]="tab.label">
       <div class="config-head">
         <span class="muted">{{ tab.hint }}</span>
         <button mat-stroked-button type="button" (click)="copy(activeConfig(), configLabel)">
-          <ng-container i18n="@@ready.copyConfig">Kopiuj</ng-container
+          <ng-container i18n="@@ready.copyConfig">Copy</ng-container
           ><span class="visually-hidden"> ({{ tab.label }})</span>
         </button>
       </div>
@@ -33,11 +33,11 @@
 </mat-tab-group>
 
 <p class="muted note" i18n="@@ready.note">
-  Konfiguracja nie zawiera tokenu ani hasła. Przy pierwszym połączeniu klient poprosi o logowanie
-  kontem firmowym.
+  The configuration contains no token or password. On the first connection the client will ask you
+  to sign in with your company account.
 </p>
 
 <p class="count" data-testid="tool-count" i18n="@@ready.count">
-  Na liście będzie około <strong>{{ toolCount() }}</strong> narzędzi. To szacunek z katalogu,
-  dokładną listę zwraca gateway.
+  The list will have about <strong>{{ toolCount() }}</strong> tools. This is an estimate from the
+  catalog; the gateway returns the exact list.
 </p>

@@ -12,7 +12,7 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'kill-switches',
-    title: $localize`:@@route.killSwitches:Wyłączniki awaryjne`,
+    title: $localize`:@@route.killSwitches:Emergency switches`,
     loadComponent: () => import('./kill-switches-page').then((m) => m.KillSwitchesPage),
   },
 ];

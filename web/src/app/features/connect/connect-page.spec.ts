@@ -24,16 +24,16 @@ describe('ConnectPage', () => {
   it('offers the token form of Jira (PAT, renewal) with instructions and no MFA step', async () => {
     configureTestApp();
     await openRoute('/connect/jira');
-    await until(() => expect(text()).toContain('Połącz Jira'));
+    await until(() => expect(text()).toContain('Connect Jira'));
 
-    expect(text()).toContain('Jak utworzyć możliwie wąski token');
-    expect(text()).toContain('Token PAT');
-    expect(text()).toContain('Data wygaśnięcia tokenu (opcjonalnie)');
-    expect(text()).toContain('Po zapisie token nie jest już nigdzie wyświetlany.');
+    expect(text()).toContain('How to create the narrowest possible token');
+    expect(text()).toContain('PAT token');
+    expect(text()).toContain('Token expiry date (optional)');
+    expect(text()).toContain('After saving, the token is not shown anywhere again.');
     expect(text()).not.toContain('MFA');
     expect(tokenInput().type).toBe('password');
     expect(tokenInput().getAttribute('autocomplete')).toBe('off');
-    expect(tokenInput().placeholder).toBe('Wklej token');
+    expect(tokenInput().placeholder).toBe('Paste the token');
     expect(tokenInput().hasAttribute('maxlength')).toBe(false);
     expect(tokenInput().hasAttribute('data-1p-ignore')).toBe(true);
     expect(dateInput().hasAttribute('min')).toBe(false);
@@ -55,9 +55,9 @@ describe('ConnectPage', () => {
     );
     configureTestApp();
     await openRoute('/connect/gitlab');
-    await until(() => expect(text()).toContain('Połącz GitLab'));
+    await until(() => expect(text()).toContain('Connect GitLab'));
 
-    expect(text()).toContain('Połącz przez OAuth');
+    expect(text()).toContain('Connect with OAuth');
     expect(text()).toContain('read_api');
     expect(tokenInput()).toBeTruthy();
   });
@@ -67,18 +67,18 @@ describe('ConnectPage', () => {
     await openRoute('/connect/jira');
     await until(() => expect(tokenInput()).toBeTruthy());
 
-    expect(text()).toContain('Ustaw najkrótszy możliwy termin.');
-    expect(text()).not.toContain('Oznaczymy token jako wygasający 7 dni przed terminem.');
+    expect(text()).toContain('Set the shortest possible term.');
+    expect(text()).not.toContain('We will mark the token as expiring 7 days before the date.');
 
     type(dateInput(), '2027-01-15');
     dateInput().dispatchEvent(new Event('change'));
     await until(() =>
-      expect(text()).toContain('Oznaczymy token jako wygasający 7 dni przed terminem.'),
+      expect(text()).toContain('We will mark the token as expiring 7 days before the date.'),
     );
 
     type(dateInput(), '');
     await until(() =>
-      expect(text()).not.toContain('Oznaczymy token jako wygasający 7 dni przed terminem.'),
+      expect(text()).not.toContain('We will mark the token as expiring 7 days before the date.'),
     );
   });
 
@@ -95,10 +95,10 @@ describe('ConnectPage', () => {
 
     type(tokenInput(), 'jira-pat-test-value-0001');
     type(dateInput(), '2027-01-31');
-    button('Sprawdź i zapisz').click();
+    button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Połączono z Jira jako jkowalski.'));
-    expect(text()).toContain('Token ważny do 31.01.2027.');
+    await until(() => expect(text()).toContain('Connected to Jira as jkowalski.'));
+    expect(text()).toContain('Token valid until 31.01.2027.');
     expect(tokenInput()).toBeNull();
     expect(JSON.parse(bodies[0])).toEqual({
       secret: 'jira-pat-test-value-0001',
@@ -122,20 +122,20 @@ describe('ConnectPage', () => {
     await until(() => expect(tokenInput()).toBeTruthy());
 
     type(tokenInput(), 'token-without-date');
-    button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Połączono z Jira jako jkowalski.'));
+    button('Check and save').click();
+    await until(() => expect(text()).toContain('Connected to Jira as jkowalski.'));
     expect(JSON.parse(bodies[0])).toEqual({ secret: 'token-without-date' });
   });
 
-  it('shows "Token nieprawidłowy albo wygasł." under the field and clears it', async () => {
+  it('shows "Token is invalid or expired." under the field and clears it', async () => {
     configureTestApp();
     await openRoute('/connect/jira');
     await until(() => expect(tokenInput()).toBeTruthy());
 
     type(tokenInput(), 'invalid-token-value');
-    button('Sprawdź i zapisz').click();
+    button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Token nieprawidłowy albo wygasł.'));
+    await until(() => expect(text()).toContain('Token is invalid or expired.'));
     expect(tokenInput().value).toBe('');
     expect(tokenInput().getAttribute('aria-invalid')).toBe('true');
     expect(text()).not.toContain('invalid-token-value');
@@ -152,10 +152,10 @@ describe('ConnectPage', () => {
     await until(() => expect(tokenInput()).toBeTruthy());
 
     type(tokenInput(), 'some-token-value');
-    button('Sprawdź i zapisz').click();
+    button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Żądanie zostało odrzucone jako niepoprawne.'));
-    expect(text()).not.toContain('innego konta');
+    await until(() => expect(text()).toContain('The request was rejected as invalid.'));
+    expect(text()).not.toContain('another account');
     expect(tokenInput().value).toBe('');
   });
 
@@ -173,9 +173,9 @@ describe('ConnectPage', () => {
     await until(() => expect(tokenInput()).toBeTruthy());
 
     type(tokenInput(), 'some-token');
-    button('Sprawdź i zapisz').click();
+    button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
     expect(text()).toContain('0192d1b2');
     expect(tokenInput().value).toBe('');
   });
@@ -194,11 +194,11 @@ describe('ConnectPage', () => {
     await until(() => expect(tokenInput()).toBeTruthy());
 
     type(tokenInput(), 'some-token');
-    button('Sprawdź i zapisz').click();
+    button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Za dużo żądań. Spróbuj ponownie za 30 s.'));
+    await until(() => expect(text()).toContain('Too many requests. Try again in 30 s.'));
     expect(tokenInput().value).toBe('');
-    expect(button('Sprawdź i zapisz').getAttribute('aria-disabled')).not.toBe('true');
+    expect(button('Check and save').getAttribute('aria-disabled')).not.toBe('true');
   });
 
   it('requires a token before sending, trims it and rejects whitespace or more than 4096 characters', async () => {
@@ -212,22 +212,22 @@ describe('ConnectPage', () => {
     await openRoute('/connect/jira');
     await until(() => expect(tokenInput()).toBeTruthy());
 
-    button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Wklej token.'));
+    button('Check and save').click();
+    await until(() => expect(text()).toContain('Paste the token.'));
 
     type(tokenInput(), '   ');
-    button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Wklej token.'));
+    button('Check and save').click();
+    await until(() => expect(text()).toContain('Paste the token.'));
 
     type(tokenInput(), 'x'.repeat(4097));
-    button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Token jest za długi'));
+    button('Check and save').click();
+    await until(() => expect(text()).toContain('The token is too long'));
     expect(tokenInput().value).toHaveLength(4097);
     expect(bodies).toEqual([]);
 
     type(tokenInput(), '  glpat-trimmed-0003\n');
-    button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Połączono z Jira jako jkowalski.'));
+    button('Check and save').click();
+    await until(() => expect(text()).toContain('Connected to Jira as jkowalski.'));
     expect(JSON.parse(bodies[0]).secret).toBe('glpat-trimmed-0003');
   });
 
@@ -238,9 +238,9 @@ describe('ConnectPage', () => {
     document.cookie = 'XSRF-TOKEN=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
     type(tokenInput(), 'some-token');
-    button('Sprawdź i zapisz').click();
+    button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Formularz stracił ważność.'));
+    await until(() => expect(text()).toContain('The form has expired.'));
   });
 
   it('says there is nothing to connect when the catalog offers no way to connect', async () => {
@@ -259,14 +259,14 @@ describe('ConnectPage', () => {
     );
     configureTestApp();
     await openRoute('/connect/jira');
-    await until(() => expect(text()).toContain('Tego systemu nie trzeba łączyć'));
+    await until(() => expect(text()).toContain('This system does not need connecting'));
     expect(tokenInput()).toBeNull();
   });
 
   it('reports an unknown system as not found', async () => {
     configureTestApp();
     await openRoute('/connect/sharepoint');
-    await until(() => expect(text()).toContain('Nie ma takiej strony.'));
+    await until(() => expect(text()).toContain('Page not found.'));
   });
 });
 
@@ -346,10 +346,10 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
     serveJiraBasic();
     configureTestApp();
     await openRoute('/connect/jira');
-    await until(() => expect(text()).toContain('Połącz Jira'));
+    await until(() => expect(text()).toContain('Connect Jira'));
 
-    expect(text()).toContain('Login w systemie (np. adres e-mail konta)');
-    expect(text()).toContain('Hasło albo token API');
+    expect(text()).toContain('Login in the system (for example the account email address)');
+    expect(text()).toContain('Password or API token');
     expect(usernameInput()?.type).toBe('text');
     expect(tokenInput().type).toBe('password');
   });
@@ -357,7 +357,7 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
   it('has no login field for a single token (Jira of the example, Bearer)', async () => {
     configureTestApp();
     await openRoute('/connect/jira');
-    await until(() => expect(text()).toContain('Token PAT'));
+    await until(() => expect(text()).toContain('PAT token'));
 
     expect(usernameInput()).toBeNull();
   });
@@ -370,9 +370,9 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
 
     type(usernameInput()!, ' anna@firma.pl ');
     type(tokenInput(), 'api-token-1');
-    button('Sprawdź i zapisz').click();
+    button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Połączono z Jira jako'));
+    await until(() => expect(text()).toContain('Connected to Jira as'));
     expect(bodies).toEqual([{ secret: 'api-token-1', username: 'anna@firma.pl' }]);
     expect(text()).not.toContain('anna@firma.pl');
     expect(text()).not.toContain('api-token-1');
@@ -385,8 +385,8 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
     await until(() => expect(usernameInput()).toBeTruthy());
 
     type(tokenInput(), 'api-token-1');
-    button('Sprawdź i zapisz').click();
-    await until(() => expect(text()).toContain('Wpisz login.'));
+    button('Check and save').click();
+    await until(() => expect(text()).toContain('Enter the login.'));
 
     // Built from code points: a literal hidden character would not survive the style check of the repository.
     for (const bad of [
@@ -395,9 +395,9 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
       `anna${String.fromCodePoint(0x202e)}nowak`,
     ]) {
       type(usernameInput()!, bad);
-      button('Sprawdź i zapisz').click();
+      button('Check and save').click();
       await until(() =>
-        expect(text()).toContain('Login nie może zawierać dwukropka ani znaków sterujących.'),
+        expect(text()).toContain('The login cannot contain a colon or control characters.'),
       );
     }
     expect(bodies).toEqual([]);

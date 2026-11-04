@@ -1,5 +1,5 @@
 <button type="button" class="skip-link" (click)="focusMain()" i18n="@@shell.skip">
-  Przejdź do treści
+  Skip to content
 </button>
 
 @if (session.me(); as me) {
@@ -8,9 +8,10 @@
       <a class="brand" routerLink="/catalog">{{ appName }}</a>
       <div class="user">
         <span class="who"
-          ><span class="visually-hidden" i18n="@@shell.loggedAs">Zalogowano jako </span
+          ><span class="visually-hidden" i18n="@@shell.loggedAs">Signed in as </span
           >{{ me.displayName }}</span
         >
+        <app-locale-switch />
         <button
           mat-button
           type="button"
@@ -19,7 +20,7 @@
           (click)="theme.toggle()"
           i18n="@@shell.darkMode"
         >
-          Tryb ciemny
+          Dark mode
         </button>
         <button
           mat-button
@@ -28,46 +29,46 @@
           (click)="logout()"
           i18n="@@shell.logout"
         >
-          Wyloguj
+          Sign out
         </button>
       </div>
     </div>
     @if (!previewOpen()) {
-      <nav class="tabs" i18n-aria-label="@@shell.navLabel" aria-label="Nawigacja główna">
+      <nav class="tabs" i18n-aria-label="@@shell.navLabel" aria-label="Main navigation">
         <a
           routerLink="/catalog"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
           i18n="@@nav.catalog"
-          >Serwery MCP</a
+          >MCP servers</a
         >
         <a
           routerLink="/connections"
           [class.active]="connectionsActive()"
           [attr.aria-current]="connectionsActive() ? 'page' : null"
           i18n="@@nav.connections"
-          >Połączenia z systemami</a
+          >System connections</a
         >
         <a
           routerLink="/endpoint"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
           i18n="@@nav.endpoint"
-          >Adres MCP</a
+          >MCP address</a
         >
         <a
           routerLink="/requests"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
           i18n="@@nav.requests"
-          >Wnioski</a
+          >Requests</a
         >
         <a
           routerLink="/logs"
           routerLinkActive="active"
           ariaCurrentWhenActive="page"
           i18n="@@nav.logs"
-          >Logi audytowe</a
+          >Audit logs</a
         >
         @if (session.isAdmin()) {
           <a
@@ -75,7 +76,7 @@
             routerLinkActive="active"
             ariaCurrentWhenActive="page"
             i18n="@@nav.admin"
-            >Administracja</a
+            >Administration</a
           >
         }
       </nav>

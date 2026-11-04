@@ -25,12 +25,16 @@ export const test = base.extend<{ pageProblems: string[] }>({
 });
 
 /**
- * Step 1 of the Authenticator registration: "Dalej" sends the browser through the (mock) IdP for a fresh
+ * Step 1 of the Authenticator registration: "Next" sends the browser through the (mock) IdP for a fresh
  * MFA and back, where the registration starts by itself (U12).
  */
-export async function startEnrollment(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Dalej' }).click();
-  await expect(page.getByRole('heading', { name: 'Dodaj konto w aplikacji' })).toBeVisible();
+export async function startEnrollment(
+  page: Page,
+  next = 'Next',
+  heading = 'Add the account in the app',
+): Promise<void> {
+  await page.getByRole('button', { name: next }).click();
+  await expect(page.getByRole('heading', { name: heading })).toBeVisible();
 }
 
 export { expect };

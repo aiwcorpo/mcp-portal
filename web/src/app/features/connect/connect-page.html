@@ -2,9 +2,9 @@
 <section class="card" aria-labelledby="connect-title">
   <h1 id="connect-title">
     @if (sys) {
-      <ng-container i18n="@@connect.titleFor">Połącz {{ name() }}</ng-container>
+      <ng-container i18n="@@connect.titleFor">Connect {{ name() }}</ng-container>
     } @else {
-      <ng-container i18n="@@connect.title">Połącz konto</ng-container>
+      <ng-container i18n="@@connect.title">Connect account</ng-container>
     }
   </h1>
 
@@ -19,15 +19,15 @@
     />
   } @else if (!state.value || !sys) {
     <app-notice kind="info" i18n="@@connect.nothing">
-      Tego systemu nie trzeba łączyć albo nie masz do niego dostępu. Stan znajdziesz w katalogu.
+      This system does not need connecting, or you do not have access to it. You can see its status in the catalog.
     </app-notice>
   } @else {
     @if (state.value.options.oauth) {
       <section class="block" aria-labelledby="oauth-heading">
-        <h2 id="oauth-heading" i18n="@@connect.oauthHeading">Połącz przez OAuth</h2>
+        <h2 id="oauth-heading" i18n="@@connect.oauthHeading">Connect with OAuth</h2>
         <p class="muted" i18n="@@connect.oauthText">
-          Przejdziesz do strony logowania systemu {{ name() }}, a po zatwierdzeniu dostępu wrócisz
-          do portalu. Portal nie widzi Twojego hasła.
+          You will go to the {{ name() }} sign-in page and return to the portal after approving
+          access. The portal never sees your password.
         </p>
         @if (oauthFailure(); as failure) {
           <app-error-notice [failure]="failure" />
@@ -39,16 +39,16 @@
           (click)="startOAuth(sys)"
           i18n="@@connect.oauthButton"
         >
-          Przejdź do logowania w systemie
+          Go to the system sign-in
         </button>
       </section>
     }
 
     @if (state.value.options.token) {
       <section class="block" aria-labelledby="token-heading">
-        <h2 id="token-heading" i18n="@@connect.tokenHeading">Dodaj token</h2>
+        <h2 id="token-heading" i18n="@@connect.tokenHeading">Add token</h2>
         <details class="how">
-          <summary i18n="@@connect.howTo">Jak utworzyć możliwie wąski token</summary>
+          <summary i18n="@@connect.howTo">How to create the narrowest possible token</summary>
           <ol class="steps">
             @for (step of instructions(); track $index) {
               <li>{{ step }}</li>

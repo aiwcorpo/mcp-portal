@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'app-loading',
   template: `
     <div class="loading" role="status">
-      <p class="label" i18n="@@common.loadingText">Ładowanie...</p>
+      <p class="label" i18n="@@common.loadingText">Loading...</p>
       <div class="rows" aria-hidden="true">
         @for (row of rows(); track row) {
           <div class="row">

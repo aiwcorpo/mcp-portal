@@ -9,78 +9,78 @@ interface ResultInfo {
 
 /** Labels of `ActivityCall.result` (contract CC-095 table plus the auxiliary results of C10). */
 const RESULTS: Record<string, () => ResultInfo> = {
-  ok: () => ({ label: $localize`:@@logs.result.ok:Wykonano`, tone: 'plain' }),
-  error: () => ({ label: $localize`:@@logs.result.error:Błąd`, tone: 'danger' }),
+  ok: () => ({ label: $localize`:@@logs.result.ok:Done`, tone: 'plain' }),
+  error: () => ({ label: $localize`:@@logs.result.error:Error`, tone: 'danger' }),
   denied_not_granted: () => ({
-    label: $localize`:@@logs.result.denied_not_granted:Odmowa (brak uprawnienia)`,
+    label: $localize`:@@logs.result.denied_not_granted:Refused (no entitlement)`,
     tone: 'danger',
   }),
   denied_filter_scope: () => ({
-    label: $localize`:@@logs.result.denied_filter_scope:Odmowa (poza filtrem adresu)`,
+    label: $localize`:@@logs.result.denied_filter_scope:Refused (outside the address filter)`,
     tone: 'danger',
-    explanation: $localize`:@@logs.explain.denied_filter_scope:Masz uprawnienie do tego narzędzia, ale adres, którego użył klient, je wyklucza. Filtr w adresie tylko zawęża listę.`,
+    explanation: $localize`:@@logs.explain.denied_filter_scope:You have an entitlement for this tool, but the address the client used excludes it. A filter in the address only narrows the list.`,
   }),
   denied_policy: () => ({
-    label: $localize`:@@logs.result.denied_policy:Odmowa (polityka)`,
+    label: $localize`:@@logs.result.denied_policy:Refused (policy)`,
     tone: 'danger',
   }),
   tool_disabled: () => ({
-    label: $localize`:@@logs.result.tool_disabled:Narzędzie wyłączone`,
+    label: $localize`:@@logs.result.tool_disabled:Tool switched off`,
     tone: 'danger',
   }),
   credential_required: () => ({
-    label: $localize`:@@logs.result.credential_required:Brak połączenia z systemem`,
+    label: $localize`:@@logs.result.credential_required:No connection to the system`,
     tone: 'danger',
   }),
   rate_limited: () => ({
-    label: $localize`:@@logs.result.rate_limited:Zbyt wiele wywołań`,
+    label: $localize`:@@logs.result.rate_limited:Too many calls`,
     tone: 'danger',
-    explanation: $localize`:@@logs.explain.rate_limited:Wywołanie odrzucone przez limit. Odczekaj chwilę i powtórz.`,
+    explanation: $localize`:@@logs.explain.rate_limited:Call rejected by the rate limit. Wait a moment and try again.`,
   }),
   step_up_required: () => ({
-    label: $localize`:@@logs.result.step_up_required:Wymaga potwierdzenia tożsamości`,
+    label: $localize`:@@logs.result.step_up_required:Identity confirmation required`,
     tone: 'danger',
   }),
   confirmation_pending: () => ({
-    label: $localize`:@@logs.result.confirmation_pending:Czeka na potwierdzenie`,
+    label: $localize`:@@logs.result.confirmation_pending:Waiting for confirmation`,
     tone: 'warn',
-    explanation: $localize`:@@logs.explain.confirmation_pending:Operacja czeka na kod z Authenticatora (120 s).`,
+    explanation: $localize`:@@logs.explain.confirmation_pending:The operation is waiting for a code from the Authenticator (120 s).`,
   }),
   confirmed: () => ({
-    label: $localize`:@@logs.result.confirmed:Potwierdzone kodem`,
+    label: $localize`:@@logs.result.confirmed:Confirmed with a code`,
     tone: 'plain',
   }),
   expired: () => ({
-    label: $localize`:@@logs.result.expired:Wygasło`,
+    label: $localize`:@@logs.result.expired:Expired`,
     tone: 'muted',
-    explanation: $localize`:@@logs.explain.expired:Poprawny kod nie został wpisany w ciągu 120 s.`,
+    explanation: $localize`:@@logs.explain.expired:A valid code was not entered within 120 s.`,
   }),
   confirmation_failed: () => ({
-    label: $localize`:@@logs.result.confirmation_failed:Błędny kod`,
+    label: $localize`:@@logs.result.confirmation_failed:Wrong code`,
     tone: 'danger',
-    explanation: $localize`:@@logs.explain.confirmation_failed:Wyczerpano 3 próby wpisania kodu.`,
+    explanation: $localize`:@@logs.explain.confirmation_failed:All 3 attempts to enter the code were used.`,
   }),
   superseded: () => ({
-    label: $localize`:@@logs.result.superseded:Unieważnione`,
+    label: $localize`:@@logs.result.superseded:Invalidated`,
     tone: 'muted',
-    explanation: $localize`:@@logs.explain.superseded:Zastąpione nowszą operacją nieodwracalną.`,
+    explanation: $localize`:@@logs.explain.superseded:Replaced by a newer irreversible operation.`,
   }),
   cancelled: () => ({
-    label: $localize`:@@logs.result.cancelled:Anulowane`,
+    label: $localize`:@@logs.result.cancelled:Cancelled`,
     tone: 'muted',
-    explanation: $localize`:@@logs.explain.cancelled:Anulowane w podglądzie operacji.`,
+    explanation: $localize`:@@logs.explain.cancelled:Cancelled in the operation preview.`,
   }),
   blocked_by_pending: () => ({
-    label: $localize`:@@logs.result.blocked_by_pending:Zablokowane przez oczekującą`,
+    label: $localize`:@@logs.result.blocked_by_pending:Blocked by a pending operation`,
     tone: 'danger',
-    explanation: $localize`:@@logs.explain.blocked_by_pending:Odrzucone, bo inna operacja nieodwracalna z otwartym podglądem czekała na kod.`,
+    explanation: $localize`:@@logs.explain.blocked_by_pending:Rejected because another irreversible operation with an open preview was waiting for a code.`,
   }),
 };
 
 /** A result this version does not know is shown as a generic label (contract: never hide or reject the row). */
 export function resultInfo(result: string): ResultInfo {
   const known = Object.hasOwn(RESULTS, result) ? RESULTS[result] : undefined;
-  return known ? known() : { label: $localize`:@@logs.result.unknown:Inny wynik`, tone: 'muted' };
+  return known ? known() : { label: $localize`:@@logs.result.unknown:Other result`, tone: 'muted' };
 }
 
 const CLIENT_NAMES: Record<string, string> = {
@@ -102,15 +102,15 @@ export const RESULT_GROUPS: readonly ResultGroup[] = ['', 'ok', 'denied', 'error
 export function groupLabel(group: ResultGroup): string {
   switch (group) {
     case 'ok':
-      return $localize`:@@logs.group.ok:Wykonane`;
+      return $localize`:@@logs.group.ok:Completed`;
     case 'denied':
-      return $localize`:@@logs.group.denied:Odmowy`;
+      return $localize`:@@logs.group.denied:Refusals`;
     case 'error':
-      return $localize`:@@logs.group.error:Błędy`;
+      return $localize`:@@logs.group.error:Errors`;
     case 'confirmation':
-      return $localize`:@@logs.group.confirmation:Potwierdzenia kodem`;
+      return $localize`:@@logs.group.confirmation:Code confirmations`;
     default:
-      return $localize`:@@logs.group.all:Wszystkie wyniki`;
+      return $localize`:@@logs.group.all:All results`;
   }
 }
 
@@ -125,11 +125,11 @@ const PERIOD_MS: Record<Period, number> = {
 export function periodLabel(period: Period): string {
   switch (period) {
     case '24h':
-      return $localize`:@@logs.period.day:Ostatnie 24 godziny`;
+      return $localize`:@@logs.period.day:Last 24 hours`;
     case '30d':
-      return $localize`:@@logs.period.month:Ostatnie 30 dni`;
+      return $localize`:@@logs.period.month:Last 30 days`;
     default:
-      return $localize`:@@logs.period.week:Ostatnie 7 dni`;
+      return $localize`:@@logs.period.week:Last 7 days`;
   }
 }
 

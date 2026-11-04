@@ -21,7 +21,7 @@
       "sourceRoot": "src",
       "prefix": "app",
       "i18n": {
-        "sourceLocale": "pl"
+        "sourceLocale": "en"
       },
       "architect": {
         "build": {

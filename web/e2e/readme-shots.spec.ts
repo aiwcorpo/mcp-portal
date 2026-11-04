@@ -1,224 +1,318 @@
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Page } from '@playwright/test';
-import { MOCK_TOTP_SEED, JIRA_CONFIRMATION_ID } from '../src/mocks/m3-mock';
+import { JIRA_CONFIRMATION_ID, MOCK_TOTP_SEED } from '../src/mocks/m3-mock';
 import { expect, startEnrollment, test } from './fixtures';
 
 /**
- * Screenshots for the README of the repository, taken from the mock build: the data are the examples of the contracts
- * (a made-up user, made-up systems), no real account and no token appears. Off by default:
- * `npm run screenshots` writes them to ../docs/screenshots.
+ * Screenshots for the README of the repository, taken from the mock build in English and in Polish: the data are the
+ * examples of the contracts (a made-up user, made-up systems), no real account and no token appears. Off by default:
+ * `npm run screenshots` writes them to ../docs/screenshots/en and ../docs/screenshots/pl, same file names in both.
  */
 const DIRECTORY = process.env['README_SHOTS_DIR'];
 
-test.describe('README screenshots', () => {
-  test.skip(!DIRECTORY, 'set README_SHOTS_DIR to take screenshots');
-  test.skip(({ viewport }) => (viewport?.width ?? 0) < 1000, 'the README shows the desktop layout');
+type Lang = 'en' | 'pl';
 
-  async function shot(page: Page, name: string, fullPage = false): Promise<void> {
-    await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
-    await page.screenshot({ path: join(DIRECTORY ?? '.', `${name}.png`), fullPage });
+function units(file: string, element: 'source' | 'target'): Map<string, string> {
+  const result = new Map<string, string>();
+  const text = readFileSync(file, 'utf8');
+  for (const match of text.matchAll(
+    /<unit id="([^"]+)">[\s\S]*?<source>([\s\S]*?)<\/source>(?:\s*<target>([\s\S]*?)<\/target>)?/g,
+  )) {
+    const value = element === 'source' ? match[2] : match[3];
+    if (value !== undefined) {
+      result.set(match[1], normalise(value));
+    }
   }
+  return result;
+}
 
-  test.use({ viewport: { width: 1280, height: 800 } });
+function normalise(xml: string): string {
+  return xml
+    .replace(/<ph [^>]*\/>/g, '{}')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-  // The documentation asks for the light theme; the portal opens dark by default (core/theme.service.ts).
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('mcp-portal-theme', 'light'));
-  });
+const SOURCE = units('src/locale/messages.xlf', 'source');
+const POLISH = units('src/locale/messages.pl.xlf', 'target');
+const TRANSLATIONS = new Map<string, string>();
+for (const [id, english] of SOURCE) {
+  const polish = POLISH.get(id);
+  if (polish !== undefined) {
+    TRANSLATIONS.set(english, polish);
+  }
+}
 
-  test('user screens', async ({ page }) => {
-    await page.goto('/?mockSession=out');
-    await expect(page.getByRole('button', { name: 'Zaloguj przez konto firmowe' })).toBeVisible();
-    await shot(page, '01-logowanie');
+/** The UI text in the language of the run: English is the source text, Polish is looked up in messages.pl.xlf. */
+function textIn(lang: Lang, english: string): string {
+  if (lang === 'en') {
+    return english;
+  }
+  const direct = TRANSLATIONS.get(english);
+  if (direct !== undefined) {
+    return direct;
+  }
+  const parametrised = /^(.*?) \((.+)\)$/.exec(english);
+  const template = parametrised ? TRANSLATIONS.get(`${parametrised[1]} ({})`) : undefined;
+  if (parametrised && template !== undefined) {
+    return template.replace('{}', parametrised[2]);
+  }
+  const suffixed = /^(.*?)([:(].*)$/.exec(english);
+  const base = suffixed ? TRANSLATIONS.get(suffixed[1].trim()) : undefined;
+  if (suffixed && base !== undefined) {
+    return `${base}${english.includes('(') && suffixed[2].startsWith('(') ? ' ' : ''}${suffixed[2]}`;
+  }
+  throw new Error(`no Polish translation for "${english}"`);
+}
 
-    await page.goto('/catalog?mockSession=in');
-    await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
-    await page.getByRole('button', { name: /^Pokaż narzędzia \(Jira\)/ }).click();
-    await shot(page, '02-serwery-mcp');
+for (const lang of ['en', 'pl'] as const) {
+  test.describe(`README screenshots (${lang})`, () => {
+    test.skip(!DIRECTORY, 'set README_SHOTS_DIR to take screenshots');
+    test.skip(
+      ({ viewport }) => (viewport?.width ?? 0) < 1000,
+      'the README shows the desktop layout',
+    );
 
-    await page.goto('/connections?mockAuthenticator=active');
-    await expect(page.getByRole('heading', { name: 'Authenticator' })).toBeVisible();
-    await shot(page, '03-polaczenia-z-systemami');
+    // Many pictures per test and a busy workstation: the default 30 s is too tight.
+    test.setTimeout(120_000);
 
-    await page.goto('/connections?mockSecretMissing=in');
-    await expect(page.getByText('przestało działać, połącz konto ponownie')).toBeVisible();
-    await shot(page, '04-polaczenie-w-bledzie');
+    const t = (english: string) => textIn(lang, english);
 
-    await page.goto('/connect/jira?mockBasic=in');
-    await page.getByLabel('Login w systemie (np. adres e-mail konta)').fill('anna.nowak@firma.pl');
-    await expect(page.getByLabel('Hasło albo token API')).toBeVisible();
-    await shot(page, '09-formularz-z-loginem');
+    async function shot(page: Page, name: string, fullPage = false): Promise<void> {
+      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+      await page.screenshot({ path: join(DIRECTORY ?? '.', lang, `${name}.png`), fullPage });
+    }
 
-    await page.goto('/endpoint');
-    await page.getByRole('checkbox', { name: /^Jira/ }).check();
-    await page.getByLabel('Tylko odczyt').check();
-    await expect(page.getByLabel('Adres MCP', { exact: true })).toHaveValue(/systems=jira/);
-    await shot(page, '05-adres-mcp');
-  });
+    test.use({ viewport: { width: 1280, height: 800 }, locale: lang === 'pl' ? 'pl-PL' : 'en-US' });
 
-  test('administration screens', async ({ page }) => {
-    await page.goto('/admin?mockAdmin=in');
-    await page.getByRole('button', { name: 'Pokaż różnice (confluence__update_page)' }).click();
-    await expect(page.getByText('Przed (1.3.0)')).toBeVisible();
-    await shot(page, '06-administracja-roznice');
-
-    await page.goto('/admin?mockAdmin=in&mockAdapter=in');
-    await page.getByRole('button', { name: 'Pokaż różnice (jira__delete_comment)' }).click();
-    await page
-      .getByRole('button', { name: 'Sklasyfikuj i zatwierdź (jira__delete_comment)' })
-      .click();
-    const dialog = page.getByRole('dialog', { name: 'Klasyfikacja narzędzia' });
-    await dialog.getByLabel('Odczyt READ_ONLY').check();
-    await expect(dialog.getByLabel('read: odczyt danych')).toBeVisible();
-    await shot(page, '07-klasyfikacja-narzedzia');
-    await dialog.getByRole('button', { name: 'Anuluj' }).click();
-
-    await page.goto('/admin/kill-switches?mockAdmin=in');
-    await page.getByLabel('Serwer', { exact: true }).selectOption('mcp-jira');
-    await page.getByLabel('Narzędzie', { exact: true }).selectOption('update_issue');
-    await page
-      .getByLabel('Powód', { exact: true })
-      .fill('Zapisy psują workflow po aktualizacji Jiry');
-    await page.getByRole('button', { name: 'Wyłącz', exact: true }).click();
-    await page
-      .getByRole('dialog', { name: 'Wyłączyć awaryjnie?' })
-      .getByRole('button', { name: 'Wyłącz' })
-      .click();
-    await expect(page.getByText('Wyłączono: Jira: update_issue.')).toBeVisible();
-    await shot(page, '08-wylacznik-awaryjny');
-  });
-
-  test('confirmation screens', async ({ page }) => {
-    // The key is the invented seed of the mock build (a made-up value, not a secret of any account).
-    await page.goto('/authenticator/register?mockAuthenticator=none');
-    await startEnrollment(page);
-    await expect(page.getByTestId('enrollment-key')).toContainText(MOCK_TOTP_SEED.slice(0, 4));
-    await shot(page, '10-rejestracja-authenticatora-qr');
-
-    await page.getByRole('button', { name: 'Dalej' }).click();
-    await page.getByLabel('Kod z aplikacji (6 cyfr)').fill('000000');
-    await page.getByRole('button', { name: 'Sprawdź' }).click();
-    await expect(page.getByText('Kod nieprawidłowy.')).toBeVisible();
-    await shot(page, '11-rejestracja-authenticatora-kod');
-
-    await page.goto('/connections?mockAuthenticator=active');
-    await expect(page.getByText(/Aktywny · od \d{2}\.\d{2}\.\d{4}/)).toBeVisible();
-    await shot(page, '12a-authenticator-aktywny');
-    await page.goto('/connections?mockAuthenticator=locked');
-    await expect(page.getByText('Blokadę zdejmuje tylko upływ czasu.')).toBeVisible();
-    await shot(page, '12b-authenticator-zablokowany');
-    await page.goto('/connections?mockAuthenticator=disabled');
-    await expect(page.getByRole('link', { name: 'Zarejestruj ponownie' })).toBeVisible();
-    await shot(page, '12c-authenticator-wylaczony');
-
-    await page.goto(`/confirm/${JIRA_CONFIRMATION_ID}`);
-    await expect(page.getByText('ABC-1182').first()).toBeVisible();
-    await expect(page.getByText(/wygasa za 0[12]:\d{2}/)).toBeVisible();
-    await shot(page, '13-podglad-operacji');
-
-    await page.getByRole('button', { name: 'Anuluj operację' }).click();
-    await expect(page.getByText('Operacja anulowana.')).toBeVisible();
-    await shot(page, '14a-operacja-anulowana');
-
-    // The mock keeps its state in a cookie; dropping it makes the cancelled operation pending again.
-    await page.context().clearCookies();
-    // Polling is paused on a hidden page; otherwise the mock answers 404 first and the page says "nieaktualny".
-    await page.addInitScript(() => {
-      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    // The documentation asks for the light theme; the portal opens dark by default (core/theme.service.ts).
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(() => localStorage.setItem('mcp-portal-theme', 'light'));
     });
-    await page.clock.install();
-    await page.goto(`/confirm/${JIRA_CONFIRMATION_ID}`);
-    await expect(page.getByText(/wygasa za/)).toBeVisible();
-    await page.clock.fastForward('02:05');
-    await expect(page.getByText('Czas minął.')).toBeVisible();
-    await shot(page, '14b-czas-minal');
+
+    test('user screens', async ({ page }) => {
+      await page.goto('/?mockSession=out');
+      await expect(
+        page.getByRole('button', { name: t('Sign in with your company account') }),
+      ).toBeVisible();
+      await shot(page, '01-sign-in');
+
+      await page.goto('/catalog?mockSession=in');
+      await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+      await page.getByRole('button', { name: `${t('Show tools')} (Jira)` }).click();
+      await shot(page, '02-mcp-servers');
+
+      await page.goto('/connections?mockAuthenticator=active');
+      await expect(page.getByRole('heading', { name: 'Authenticator' })).toBeVisible();
+      await shot(page, '03-system-connections');
+
+      await page.goto('/connections?mockSecretMissing=in');
+      await expect(page.getByText(t('stopped working, reconnect the account'))).toBeVisible();
+      await shot(page, '04-connection-error');
+
+      await page.goto('/connect/jira?mockBasic=in');
+      await page
+        .getByLabel(t('Login in the system (for example the account email address)'))
+        .fill('anna.nowak@firma.pl');
+      await expect(page.getByLabel(t('Password or API token'))).toBeVisible();
+      await shot(page, '09-form-with-login');
+
+      await page.goto('/endpoint');
+      await page.getByRole('checkbox', { name: /^Jira/ }).check();
+      await page.getByLabel(t('Read-only')).check();
+      // "MCP address" has two Polish translations (title case and lower case), so match both.
+      await expect(page.getByRole('textbox', { name: /^(MCP address|Adres MCP)$/ })).toHaveValue(
+        /systems=jira/,
+      );
+      await shot(page, '05-mcp-address');
+    });
+
+    test('administration screens', async ({ page }) => {
+      await page.goto('/admin?mockAdmin=in');
+      await page
+        .getByRole('button', { name: `${t('Show differences')} (confluence__update_page)` })
+        .click();
+      await expect(page.getByText(t('Before (1.3.0)'))).toBeVisible();
+      await shot(page, '06-admin-differences');
+
+      await page.goto('/admin?mockAdmin=in&mockAdapter=in');
+      await page
+        .getByRole('button', { name: `${t('Show differences')} (jira__delete_comment)` })
+        .click();
+      await page
+        .getByRole('button', { name: `${t('Classify and approve')} (jira__delete_comment)` })
+        .click();
+      const dialog = page.getByRole('dialog', { name: t('Tool classification') });
+      await dialog.getByLabel(/READ_ONLY/).check();
+      await expect(dialog.getByLabel(/read:/)).toBeVisible();
+      await shot(page, '07-tool-classification');
+      await dialog.getByRole('button', { name: t('Cancel') }).click();
+
+      await switchOffUpdateIssue(page);
+      await shot(page, '08-emergency-switch');
+    });
+
+    async function switchOffUpdateIssue(page: Page): Promise<void> {
+      await page.goto('/admin/kill-switches?mockAdmin=in');
+      await page.getByLabel(t('Server'), { exact: true }).selectOption('mcp-jira');
+      await page.getByLabel(t('Tool'), { exact: true }).selectOption('update_issue');
+      await page
+        .getByLabel(t('Reason'), { exact: true })
+        .fill('Writes break the workflow after the Jira update');
+      await page.getByRole('button', { name: t('Switch off'), exact: true }).click();
+      await page
+        .getByRole('dialog', { name: t('Switch off now?') })
+        .getByRole('button', { name: t('Switch off') })
+        .click();
+      await expect(
+        page.getByRole('button', { name: `${t('Lift')} (jira__update_issue)` }),
+      ).toBeVisible();
+    }
+
+    test('confirmation screens', async ({ page }) => {
+      // The key is the invented seed of the mock build (a made-up value, not a secret of any account).
+      await page.goto('/authenticator/register?mockAuthenticator=none');
+      await startEnrollment(page, t('Next'), t('Add the account in the app'));
+      await expect(page.getByTestId('enrollment-key')).toContainText(MOCK_TOTP_SEED.slice(0, 4));
+      await shot(page, '10-authenticator-register-qr');
+
+      await page.getByRole('button', { name: t('Next') }).click();
+      await page.getByLabel(t('Code from the app (6 digits)')).fill('000000');
+      await page.getByRole('button', { name: t('Check') }).click();
+      await expect(page.getByText(t('Invalid code.'))).toBeVisible();
+      await shot(page, '11-authenticator-register-code');
+
+      await page.goto('/connections?mockAuthenticator=active');
+      await expect(page.getByRole('heading', { name: 'Authenticator' })).toBeVisible();
+      await expect(page.getByRole('button', { name: t('Remove') })).toBeVisible();
+      await shot(page, '12a-authenticator-active');
+      await page.goto('/connections?mockAuthenticator=locked');
+      await expect(
+        page.getByText(
+          t('A lock is lifted only by time. Removing and registering again does not shorten it.'),
+        ),
+      ).toBeVisible();
+      await shot(page, '12b-authenticator-locked');
+      await page.goto('/connections?mockAuthenticator=disabled');
+      await expect(page.getByRole('link', { name: t('Register again') }).first()).toBeVisible();
+      await shot(page, '12c-authenticator-disabled');
+
+      await page.goto(`/confirm/${JIRA_CONFIRMATION_ID}`);
+      await expect(page.getByText('ABC-1182').first()).toBeVisible();
+      await expect(page.getByText(/0[12]:\d{2}/)).toBeVisible();
+      await shot(page, '13-confirmation-preview');
+
+      await page.getByRole('button', { name: t('Cancel operation') }).click();
+      await expect(page.getByRole('heading', { name: t('Operation cancelled.') })).toBeVisible();
+      await shot(page, '14a-operation-cancelled');
+
+      // The mock keeps its state in a cookie; dropping it makes the cancelled operation pending again.
+      await page.context().clearCookies();
+      // Polling is paused on a hidden page; otherwise the mock answers 404 first and the page says "out of date".
+      await page.addInitScript(() => {
+        Object.defineProperty(document, 'visibilityState', {
+          configurable: true,
+          get: () => 'hidden',
+        });
+      });
+      await page.clock.install();
+      await page.goto(`/confirm/${JIRA_CONFIRMATION_ID}`);
+      await expect(page.getByText(/0[12]:\d{2}/)).toBeVisible();
+      await page.clock.fastForward('02:05');
+      await expect(page.getByRole('heading', { name: t('Time is up.') })).toBeVisible();
+      await shot(page, '14b-operation-expired');
+    });
+
+    test('connection, log and request screens', async ({ page }) => {
+      await page.goto('/connect/jira');
+      await expect(page.getByLabel(t('PAT token'), { exact: true })).toBeVisible();
+      await page.getByText(t('How to create the narrowest possible token')).click();
+      await page.getByLabel(t('Token expiry date (optional)')).fill('2027-01-31');
+      await expect(
+        page.getByText(t('We will mark the token as expiring 7 days before the date.')),
+      ).toBeVisible();
+      await shot(page, '15-add-token-jira', true);
+
+      await page.goto('/logs');
+      await page
+        .getByRole('button', { name: `${t('Show details')}: confluence__delete_page` })
+        .first()
+        .click();
+      await expect(page.getByText(t('Request ID')).first()).toBeVisible();
+      await shot(page, '16-audit-logs');
+
+      await page.goto('/requests');
+      await page.getByRole('button', { name: t('Submit request') }).click();
+      const first = page.getByRole('dialog', { name: t('Submit request') });
+      await first.getByLabel(t('System')).selectOption('confluence');
+      await first.getByLabel(t('Entitlement')).selectOption('mcp-confluence-read');
+      await first.getByRole('button', { name: t('Submit request') }).click();
+      await page.getByRole('button', { name: t('Close message') }).click();
+      await expect(page.getByRole('row', { name: /mcp-confluence-read/ })).toContainText(
+        t('Pending'),
+      );
+      await shot(page, '17a-requests-list');
+      await page.getByRole('button', { name: t('Submit request') }).click();
+      const dialog = page.getByRole('dialog', { name: t('Submit request') });
+      await dialog.getByLabel(t('System')).selectOption('jira');
+      await dialog.getByLabel(t('Entitlement')).selectOption({ index: 1 });
+      await shot(page, '17b-requests-form');
+
+      await page.goto('/requests?mockIga=groups');
+      await page.getByRole('button', { name: t('Submit request') }).click();
+      const groups = page.getByRole('dialog', { name: t('Submit request') });
+      await groups.getByLabel(t('System')).selectOption('jira');
+      await expect(
+        groups.getByText(
+          t(
+            'The entitlement system does not accept requests from the portal. Submit the request directly in the entitlement system.',
+          ),
+        ),
+      ).toBeVisible();
+      await shot(page, '17c-requests-not-accepted');
+    });
+
+    test('administration approval dialogs and the step-up return', async ({ page }) => {
+      await page.goto('/admin?mockAdmin=in');
+      await page
+        .getByRole('button', { name: `${t('Show differences')} (gitlab__delete_branch)` })
+        .click();
+      await shot(page, '18a-risk-lowering-list');
+      await page
+        .getByRole('button', { name: `${t('Approve risk lowering')} (gitlab__delete_branch)` })
+        .click();
+      await expect(page.getByRole('dialog', { name: t('Approve risk lowering?') })).toBeVisible();
+      await shot(page, '18b-risk-lowering-dialog');
+
+      await page.goto('/admin?mockAdmin=in');
+      await page
+        .getByRole('button', { name: `${t('Show differences')} (jira__update_issue)` })
+        .click();
+      await expect(page.getByText(t('Source: server.'))).toBeVisible();
+      await page
+        .getByRole('button', { name: `${t('Approve definition')} (jira__update_issue)` })
+        .click();
+      await expect(
+        page.getByRole('dialog', { name: t('Approve a definition reported by the server?') }),
+      ).toBeVisible();
+      await shot(page, '19-server-definition-dialog');
+
+      await switchOffUpdateIssue(page);
+      await page.goto('/admin/kill-switches');
+      await page.getByRole('button', { name: `${t('Lift')} (jira__update_issue)` }).click();
+      await page
+        .getByRole('dialog', { name: t('Lift the switch?') })
+        .getByRole('button', { name: t('Lift switch') })
+        .click();
+      await expect(page.getByText(/^(Identity confirmed|Tożsamość potwierdzona)\./)).toBeVisible();
+      await shot(page, '20-step-up-return');
+    });
   });
-
-  test('connection, log and request screens', async ({ page }) => {
-    await page.goto('/connect/jira');
-    await expect(page.getByLabel('Token PAT', { exact: true })).toBeVisible();
-    await page.getByText('Jak utworzyć możliwie wąski token').click();
-    await expect(page.getByText(/Tokeny dostępu osobistego/)).toBeVisible();
-    await page.getByLabel('Data wygaśnięcia tokenu (opcjonalnie)').fill('2027-01-31');
-    await expect(
-      page.getByText('Oznaczymy token jako wygasający 7 dni przed terminem.'),
-    ).toBeVisible();
-    await shot(page, '15-dodaj-token-jira', true);
-
-    await page.goto('/logs');
-    await expect(page.getByText('Czeka na potwierdzenie')).toBeVisible();
-    await page
-      .getByRole('button', { name: 'Pokaż szczegóły: confluence__delete_page' })
-      .first()
-      .click();
-    await expect(page.getByText('Identyfikator żądania').first()).toBeVisible();
-    await shot(page, '16-logi-audytowe');
-
-    await page.goto('/requests');
-    await page.getByRole('button', { name: 'Złóż wniosek' }).click();
-    const first = page.getByRole('dialog', { name: 'Złóż wniosek' });
-    await first.getByLabel('System').selectOption('confluence');
-    await first.getByLabel('Uprawnienie').selectOption('mcp-confluence-read');
-    await first.getByRole('button', { name: 'Złóż wniosek' }).click();
-    await page.getByRole('button', { name: 'Zamknij komunikat' }).click();
-    await expect(page.getByRole('row', { name: /mcp-confluence-read/ })).toContainText('Oczekuje');
-    await expect(page.getByRole('row', { name: /mcp-jira-write.*Zaakceptowany/ })).toBeVisible();
-    await shot(page, '17a-wnioski-lista');
-    await page.getByRole('button', { name: 'Złóż wniosek' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Złóż wniosek' });
-    await dialog.getByLabel('System').selectOption('jira');
-    await dialog.getByLabel('Uprawnienie').selectOption({ index: 1 });
-    await shot(page, '17b-wnioski-formularz');
-
-    await page.goto('/requests?mockIga=groups');
-    await page.getByRole('button', { name: 'Złóż wniosek' }).click();
-    const groups = page.getByRole('dialog', { name: 'Złóż wniosek' });
-    await groups.getByLabel('System').selectOption('jira');
-    await expect(
-      groups.getByText('System uprawnień nie przyjmuje wniosków z portalu.'),
-    ).toBeVisible();
-    await shot(page, '17c-wnioski-bez-przyjmowania');
-  });
-
-  test('administration approval dialogs and the step-up return', async ({ page }) => {
-    await page.goto('/admin?mockAdmin=in');
-    await page.getByRole('button', { name: 'Pokaż różnice (gitlab__delete_branch)' }).click();
-    await expect(page.getByText(/Ryzyko narzędzia spada z Usuwanie na Zapis/)).toBeVisible();
-    await shot(page, '18a-obnizenie-ryzyka-lista');
-    await page
-      .getByRole('button', { name: 'Zatwierdź obniżenie ryzyka (gitlab__delete_branch)' })
-      .click();
-    await expect(page.getByRole('dialog', { name: 'Zatwierdzić obniżenie ryzyka?' })).toBeVisible();
-    await shot(page, '18b-obnizenie-ryzyka-dialog');
-
-    await page.goto('/admin?mockAdmin=in');
-    await page.getByRole('button', { name: 'Pokaż różnice (jira__update_issue)' }).click();
-    await expect(page.getByText('Źródło: serwer.')).toBeVisible();
-    await page.getByRole('button', { name: 'Zatwierdź definicję (jira__update_issue)' }).click();
-    await expect(
-      page.getByRole('dialog', { name: 'Zatwierdzić definicję zgłoszoną przez serwer?' }),
-    ).toBeVisible();
-    await shot(page, '19-definicja-z-serwera');
-
-    await page.goto('/admin/kill-switches?mockAdmin=in');
-    await page.getByLabel('Serwer', { exact: true }).selectOption('mcp-jira');
-    await page.getByLabel('Narzędzie', { exact: true }).selectOption('update_issue');
-    await page
-      .getByLabel('Powód', { exact: true })
-      .fill('Zapisy psują workflow po aktualizacji Jiry');
-    await page.getByRole('button', { name: 'Wyłącz', exact: true }).click();
-    await page
-      .getByRole('dialog', { name: 'Wyłączyć awaryjnie?' })
-      .getByRole('button', { name: 'Wyłącz' })
-      .click();
-    await expect(page.getByText('Wyłączono: Jira: update_issue.')).toBeVisible();
-    await page.goto('/admin/kill-switches');
-    await page.getByRole('button', { name: 'Zdejmij (jira__update_issue)' }).click();
-    await page
-      .getByRole('dialog', { name: 'Zdjąć wyłącznik?' })
-      .getByRole('button', { name: 'Zdejmij wyłącznik' })
-      .click();
-    await expect(page.getByText('Tożsamość potwierdzona. Zdejmuję wyłącznik')).toBeVisible();
-    await shot(page, '20-powrot-po-potwierdzeniu');
-  });
-});
+}

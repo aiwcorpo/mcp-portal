@@ -1,27 +1,27 @@
 <section class="authenticator" aria-labelledby="authenticator-title">
   <h2 id="authenticator-title" i18n="@@auth.title">Authenticator</h2>
   <p class="muted" i18n="@@auth.intro">
-    Konto "MCP Platform" w Microsoft Authenticator. Kodem z niego potwierdzasz operacje
-    nieodwracalne agentów.
+    The "MCP Platform" account in Microsoft Authenticator. You confirm irreversible agent
+    operations with a code from it.
   </p>
 
   @if (mfaConfirmed() && !removed()) {
     <app-notice kind="info">
       @if (resumed()) {
         <ng-container i18n="@@auth.mfaResumed"
-          >Tożsamość potwierdzona. Usuwam Authenticator.</ng-container
+          >Identity confirmed. Removing the Authenticator.</ng-container
         >
       } @else {
         <ng-container i18n="@@auth.mfaDone"
-          >Tożsamość potwierdzona. Możesz teraz usunąć Authenticator.</ng-container
+          >Identity confirmed. You can now remove the Authenticator.</ng-container
         >
       }
     </app-notice>
   }
   @if (removed()) {
     <app-notice kind="success" i18n="@@auth.removed">
-      Authenticator usunięty. Agent nie wykona operacji nieodwracalnych, dopóki nie zarejestrujesz
-      go ponownie.
+      Authenticator removed. The agent will not run irreversible operations until you register
+      it again.
     </app-notice>
   }
   @if (failure(); as problem) {
@@ -31,8 +31,8 @@
   @let current = status();
   @if (current.state === 'disabled') {
     <app-notice kind="warning" i18n="@@auth.disabledBanner">
-      Authenticator został wyłączony po 20 błędnych kodach w ciągu doby. Agent nie wykona operacji
-      nieodwracalnych, dopóki nie zarejestrujesz go ponownie.
+      The Authenticator was switched off after 20 wrong codes in one day. The agent will not run
+      irreversible operations until you register it again.
     </app-notice>
   }
 
@@ -41,10 +41,10 @@
     <span class="state" [class.warn]="current.state !== 'active' || current.lockedUntil">
       @switch (current.state) {
         @case ('none') {
-          <ng-container i18n="@@auth.stateNone">Nie zarejestrowano</ng-container>
+          <ng-container i18n="@@auth.stateNone">Not registered</ng-container>
         }
         @case ('disabled') {
-          <ng-container i18n="@@auth.stateDisabled">Wyłączony</ng-container>
+          <ng-container i18n="@@auth.stateDisabled">Switched off</ng-container>
           @if (current.disabledAt) {
             &middot; {{ current.disabledAt | date: 'dd.MM.yyyy HH:mm' }}
           }
@@ -52,31 +52,31 @@
         @default {
           @if (current.lockedUntil) {
             <ng-container i18n="@@auth.stateLocked"
-              >Zablokowany do {{ current.lockedUntil | date: 'HH:mm' }}</ng-container
+              >Locked until {{ current.lockedUntil | date: 'HH:mm' }}</ng-container
             >
             &middot;
-            <ng-container i18n="@@auth.lockReason">5 błędnych kodów w 15 minut</ng-container>
+            <ng-container i18n="@@auth.lockReason">5 wrong codes in 15 minutes</ng-container>
           } @else {
-            <ng-container i18n="@@auth.stateActive">Aktywny</ng-container>
+            <ng-container i18n="@@auth.stateActive">Active</ng-container>
             @if (current.registeredAt) {
               &middot;
               <ng-container i18n="@@auth.since"
-                >od {{ current.registeredAt | date: 'dd.MM.yyyy' }}</ng-container
+                >since {{ current.registeredAt | date: 'dd.MM.yyyy' }}</ng-container
               >
             }
             &middot;
             @if (current.lastUsedAt; as lastUsed) {
               @if (isToday(lastUsed)) {
                 <ng-container i18n="@@auth.lastUsedToday"
-                  >ostatnie użycie dziś {{ lastUsed | date: 'HH:mm' }}</ng-container
+                  >last used today {{ lastUsed | date: 'HH:mm' }}</ng-container
                 >
               } @else {
                 <ng-container i18n="@@auth.lastUsedOn"
-                  >ostatnie użycie {{ lastUsed | date: 'dd.MM.yyyy' }}</ng-container
+                  >last used {{ lastUsed | date: 'dd.MM.yyyy' }}</ng-container
                 >
               }
             } @else {
-              <ng-container i18n="@@auth.neverUsed">jeszcze nieużywany</ng-container>
+              <ng-container i18n="@@auth.neverUsed">never used</ng-container>
             }
           }
         }
@@ -86,12 +86,12 @@
       @switch (current.state) {
         @case ('none') {
           <a mat-flat-button routerLink="/authenticator/register" i18n="@@auth.register"
-            >Zarejestruj</a
+            >Register</a
           >
         }
         @case ('disabled') {
           <a mat-flat-button routerLink="/authenticator/register" i18n="@@auth.registerAgain"
-            >Zarejestruj ponownie</a
+            >Register again</a
           >
         }
         @default {
@@ -103,7 +103,7 @@
             (click)="remove()"
             i18n="@@auth.remove"
           >
-            Usuń
+            Remove
           </button>
         }
       }
@@ -111,7 +111,7 @@
   </div>
   @if (current.lockedUntil) {
     <p class="muted hint" i18n="@@auth.lockHint">
-      Blokadę zdejmuje tylko upływ czasu. Usunięcie i ponowna rejestracja jej nie skracają.
+      A lock is lifted only by time. Removing and registering again does not shorten it.
     </p>
   }
 </section>

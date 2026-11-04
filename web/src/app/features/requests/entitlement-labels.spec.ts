@@ -2,10 +2,10 @@ import { entitlementTitle } from './entitlement-labels';
 
 describe('entitlementTitle', () => {
   it('names the system and the level from the mcp-<system>-<level> convention', () => {
-    expect(entitlementTitle('mcp-jira-write')).toBe('Jira, zapis');
-    expect(entitlementTitle('mcp-opensearch-read')).toBe('OpenSearch, odczyt');
+    expect(entitlementTitle('mcp-jira-write')).toBe('Jira, write');
+    expect(entitlementTitle('mcp-opensearch-read')).toBe('OpenSearch, read');
     expect(entitlementTitle('mcp-confluence-destructive')).toBe(
-      'Confluence, operacje nieodwracalne',
+      'Confluence, irreversible operations',
     );
   });
 

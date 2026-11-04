@@ -113,8 +113,8 @@ export class CatalogPage {
     const copied = this.clipboard.copy(server.url);
     this.snackBar.open(
       copied
-        ? $localize`:@@catalog.linkCopied:Skopiowano adres serwera ${systemName(server.system)}:system:.`
-        : $localize`:@@catalog.linkCopyFailed:Nie udało się skopiować adresu. Adres: ${server.url}:url:`,
+        ? $localize`:@@catalog.linkCopied:Copied the address of the ${systemName(server.system)}:system: server.`
+        : $localize`:@@catalog.linkCopyFailed:Could not copy the address. Address: ${server.url}:url:`,
       undefined,
       { duration: 5000 },
     );
@@ -156,7 +156,7 @@ export class CatalogPage {
       case 'created':
         this.banner.set({
           kind: 'success',
-          text: $localize`:@@catalog.requestCreated:Wniosek ${neutraliseText(result.requestId).text}:id: jest w systemie uprawnień. Jego stan sprawdzisz w zakładce Wnioski.`,
+          text: $localize`:@@catalog.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. Check its status in the Requests tab.`,
         });
         await this.load();
         return;

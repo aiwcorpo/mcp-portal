@@ -13,13 +13,13 @@ import { Notice } from './notice';
       <p class="message">{{ message() }}</p>
       @if (requestRef(); as ref) {
         <p class="request-ref">
-          <ng-container i18n="@@common.requestRef">Identyfikator do zgłoszenia:</ng-container>
+          <ng-container i18n="@@common.requestRef">Reference for support:</ng-container>
           <code>{{ ref }}</code>
         </p>
       }
       @if (retryable()) {
         <button mat-stroked-button type="button" (click)="retry.emit()" i18n="@@common.retry">
-          Spróbuj ponownie
+          Try again
         </button>
       }
     </app-notice>

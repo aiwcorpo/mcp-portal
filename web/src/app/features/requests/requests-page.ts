@@ -16,10 +16,10 @@ import { neutraliseText } from '../../shared/untrusted-text';
 import { entitlementTitle } from './entitlement-labels';
 
 const STATUS: Record<AccessRequestStatus, { label: () => string; tone: Tone }> = {
-  pending: { label: () => $localize`:@@request.status.pending:Oczekuje`, tone: 'warn' },
-  approved: { label: () => $localize`:@@request.status.approved:Zaakceptowany`, tone: 'ok' },
-  rejected: { label: () => $localize`:@@request.status.rejected:Odrzucony`, tone: 'error' },
-  cancelled: { label: () => $localize`:@@request.status.cancelled:Anulowany`, tone: 'neutral' },
+  pending: { label: () => $localize`:@@request.status.pending:Pending`, tone: 'warn' },
+  approved: { label: () => $localize`:@@request.status.approved:Approved`, tone: 'ok' },
+  rejected: { label: () => $localize`:@@request.status.rejected:Rejected`, tone: 'error' },
+  cancelled: { label: () => $localize`:@@request.status.cancelled:Cancelled`, tone: 'neutral' },
 };
 
 export function requestStatusLabel(status: AccessRequestStatus): string {
@@ -86,7 +86,7 @@ export class RequestsPage {
     const result = await this.actions.requestWithChoice(null);
     if (result?.kind === 'created') {
       this.done.set(
-        $localize`:@@requests.created:Wniosek ${neutraliseText(result.requestId).text}:id: jest w systemie uprawnień. Jego stan sprawdzisz tutaj.`,
+        $localize`:@@requests.created:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. You can check its status here.`,
       );
       await this.load();
     }

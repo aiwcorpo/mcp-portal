@@ -32,17 +32,17 @@ export class EndpointReady {
     {
       key: 'claudeCode',
       label: 'Claude Code',
-      hint: $localize`:@@ready.hintClaude:Uruchom w terminalu`,
+      hint: $localize`:@@ready.hintClaude:Run in a terminal`,
     },
     {
       key: 'copilot',
       label: 'Copilot',
-      hint: $localize`:@@ready.hintCopilot:Wklej do pliku .vscode/mcp.json`,
+      hint: $localize`:@@ready.hintCopilot:Paste into the .vscode/mcp.json file`,
     },
     {
       key: 'codex',
       label: 'Codex',
-      hint: $localize`:@@ready.hintCodex:Dodaj do pliku ~/.codex/config.toml`,
+      hint: $localize`:@@ready.hintCodex:Add to the ~/.codex/config.toml file`,
     },
   ];
   protected readonly active = signal(0);
@@ -54,13 +54,13 @@ export class EndpointReady {
     const copied = this.clipboard.copy(text);
     this.snackBar.open(
       copied
-        ? $localize`:@@ready.copied:Skopiowano: ${what}:what:.`
-        : $localize`:@@ready.copyFailed:Nie udało się skopiować. Zaznacz tekst i skopiuj go ręcznie.`,
+        ? $localize`:@@ready.copied:Copied: ${what}:what:.`
+        : $localize`:@@ready.copyFailed:Could not copy. Select the text and copy it manually.`,
       undefined,
       { duration: 4000 },
     );
   }
 
-  protected readonly urlLabel = $localize`:@@ready.urlCopied:adres MCP`;
-  protected readonly configLabel = $localize`:@@ready.configCopied:konfiguracja`;
+  protected readonly urlLabel = $localize`:@@ready.urlCopied:MCP address`;
+  protected readonly configLabel = $localize`:@@ready.configCopied:configuration`;
 }

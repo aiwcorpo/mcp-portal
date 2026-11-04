@@ -1,18 +1,18 @@
 <table class="table" role="table">
   <caption class="visually-hidden" i18n="@@catalog.caption">
-    Serwery MCP
+    MCP servers
   </caption>
   <thead role="rowgroup">
     <tr role="row">
       <th scope="col" role="columnheader" class="c-toggle">
-        <span class="visually-hidden" i18n="@@catalog.colToggle">Narzędzia</span>
+        <span class="visually-hidden" i18n="@@catalog.colToggle">Tools</span>
       </th>
-      <th scope="col" role="columnheader" i18n="@@catalog.colServer">Serwer</th>
-      <th scope="col" role="columnheader" i18n="@@catalog.colLogin">Logowanie</th>
-      <th scope="col" role="columnheader" i18n="@@catalog.colTools">Narzędzia</th>
-      <th scope="col" role="columnheader" i18n="@@catalog.colState">Stan</th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colServer">Server</th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colLogin">Sign-in</th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colTools">Tools</th>
+      <th scope="col" role="columnheader" i18n="@@catalog.colState">Status</th>
       <th scope="col" role="columnheader" class="c-actions">
-        <span class="visually-hidden" i18n="@@catalog.colActions">Akcje</span>
+        <span class="visually-hidden" i18n="@@catalog.colActions">Actions</span>
       </th>
     </tr>
   </thead>
@@ -45,7 +45,7 @@
         <th scope="row" role="rowheader" class="c-name">{{ row.name }}</th>
         <td role="cell" class="c-login muted">{{ row.login }}</td>
         <td role="cell" class="c-count muted">
-          <ng-container i18n="@@catalog.toolCount">{{ srv.tools.length }} narz.</ng-container>
+          <ng-container i18n="@@catalog.toolCount">{{ srv.tools.length }} tools</ng-container>
         </td>
         <td role="cell" [class]="'c-state state-' + row.tone">{{ row.status }}</td>
         <td role="cell" class="c-actions">
@@ -81,23 +81,23 @@
               }}</span>
               @if (tool.disabled && tool.disabledBy === 'kill_switch') {
                 <span class="note muted" i18n="@@catalog.toolKillSwitch"
-                  >Wyłączone awaryjnie przez administratora.</span
+                  >Switched off in an emergency by an administrator.</span
                 >
               } @else if (tool.disabled && tool.disabledBy === 'approval') {
                 <span class="note muted" i18n="@@catalog.toolApproval"
-                  >Czeka na zatwierdzenie przez administratora.</span
+                  >Waiting for approval by an administrator.</span
                 >
               } @else if (tool.disabled) {
                 <span class="note muted" i18n="@@catalog.toolDisabled"
-                  >Wyłączone przez administratora.</span
+                  >Switched off by an administrator.</span
                 >
               } @else if (tool.access === 'denied') {
                 <span class="note muted" i18n="@@catalog.toolDenied"
-                  >Brak uprawnienia do tego narzędzia.</span
+                  >No entitlement for this tool.</span
                 >
               } @else if (tool.requiresConfirmation) {
                 <span class="note muted" i18n="@@catalog.toolConfirm"
-                  >Wymaga kodu z Authenticatora.</span
+                  >Requires a code from the Authenticator.</span
                 >
               }
             </td>
@@ -122,7 +122,7 @@
                   [disabled]="busyTool() === tool.name || busy() === srv.serverId"
                   (click)="requestTool(srv, tool)"
                 >
-                  <ng-container i18n="@@catalog.requestTool">Złóż wniosek</ng-container
+                  <ng-container i18n="@@catalog.requestTool">Submit request</ng-container
                   ><span class="visually-hidden"> ({{ tool.name }})</span>
                 </button>
               }
@@ -133,7 +133,7 @@
           <tr role="row" class="tool">
             <td role="cell" class="c-toggle"></td>
             <td role="cell" colspan="5" class="muted" i18n="@@catalog.noTools">
-              Serwer nie udostępnia narzędzi.
+              The server offers no tools.
             </td>
           </tr>
         }

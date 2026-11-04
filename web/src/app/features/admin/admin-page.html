@@ -1,4 +1,4 @@
-<h1 class="visually-hidden" i18n="@@admin.title">Administracja</h1>
+<h1 class="visually-hidden" i18n="@@admin.title">Administration</h1>
 
 @if (done(); as text) {
   <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
@@ -8,12 +8,12 @@
   <app-notice kind="success" [dismissible]="true" (dismiss)="mfaReturned.set(false)">
     @if (resumedFromMfa()) {
       <ng-container i18n="@@admin.mfaResumed"
-        >Tożsamość potwierdzona. Zatwierdzam definicję, którą wybrano przed
-        potwierdzeniem.</ng-container
+        >Identity confirmed. Approving the definition you picked before the
+        confirmation.</ng-container
       >
     } @else {
       <ng-container i18n="@@admin.mfaDone"
-        >Tożsamość potwierdzona. Otwórz różnice i zatwierdź jeszcze raz.</ng-container
+        >Identity confirmed. Open the differences and approve again.</ng-container
       >
     }
   </app-notice>
@@ -26,39 +26,39 @@
   <app-load-error [failure]="state.failure" (retry)="load()" />
 } @else {
   <p class="lead" i18n="@@admin.lead">
-    Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI
-    zatwierdza sam tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj.
+    New and changed tools are not made available to agents until you approve them. The CI pipeline
+    approves only read tools on its own; write and delete tools wait here.
   </p>
   <p class="switches">
-    <a routerLink="/admin/kill-switches" i18n="@@admin.killSwitchesLink">Wyłączniki awaryjne</a>
+    <a routerLink="/admin/kill-switches" i18n="@@admin.killSwitchesLink">Emergency switches</a>
     @if (switches().length) {
       <span class="state-error"
         >&middot;
         <ng-container i18n="@@admin.killSwitchesOn"
-          >włączone: {{ switches().length }}</ng-container
+          >on: {{ switches().length }}</ng-container
         ></span
       >
     }
   </p>
   @if (totalPending() > 0) {
     <p class="summary" role="status" i18n="@@admin.pendingTotal">
-      Do zatwierdzenia: {{ totalPending() }}
+      Pending approval: {{ totalPending() }}
     </p>
   }
   @if (rows().length) {
     <table class="table" role="table">
       <caption class="visually-hidden" i18n="@@admin.caption">
-        Rejestr serwerów MCP
+        MCP server registry
       </caption>
       <thead role="rowgroup">
         <tr role="row">
           <th scope="col" role="columnheader" class="c-toggle">
-            <span class="visually-hidden" i18n="@@admin.colToggle">Narzędzia</span>
+            <span class="visually-hidden" i18n="@@admin.colToggle">Tools</span>
           </th>
-          <th scope="col" role="columnheader" i18n="@@admin.colServer">Serwer</th>
-          <th scope="col" role="columnheader" i18n="@@admin.colVersion">Wersja</th>
-          <th scope="col" role="columnheader" i18n="@@admin.colChanges">Zmiany</th>
-          <th scope="col" role="columnheader" i18n="@@admin.colState">Stan</th>
+          <th scope="col" role="columnheader" i18n="@@admin.colServer">Server</th>
+          <th scope="col" role="columnheader" i18n="@@admin.colVersion">Version</th>
+          <th scope="col" role="columnheader" i18n="@@admin.colChanges">Changes</th>
+          <th scope="col" role="columnheader" i18n="@@admin.colState">State</th>
         </tr>
       </thead>
       @for (row of rows(); track row.server.serverId) {
@@ -93,12 +93,12 @@
             <td
               role="cell"
               class="mono muted"
-              data-label="Wersja"
+              data-label="Version"
               i18n-data-label="@@admin.colVersion"
             >
               {{ row.server.version | safeText }}
             </td>
-            <td role="cell" class="muted" data-label="Zmiany" i18n-data-label="@@admin.colChanges">
+            <td role="cell" class="muted" data-label="Changes" i18n-data-label="@@admin.colChanges">
               @if (row.changes) {
                 {{ row.changes }}
               } @else {
@@ -108,7 +108,7 @@
             <td
               role="cell"
               [class]="'state-' + row.tone"
-              data-label="Stan"
+              data-label="State"
               i18n-data-label="@@admin.colState"
             >
               {{ row.state }}
@@ -126,14 +126,14 @@
                   @if (item.pending) {
                     @if (item.tool.source === 'server') {
                       <span class="source source-server" i18n="@@admin.sourceServer"
-                        >Źródło: serwer</span
+                        >Source: server</span
                       >
                     } @else if (item.tool.source === 'adapter') {
                       <span class="source source-server" i18n="@@admin.sourceAdapter"
-                        >Źródło: adapter</span
+                        >Source: adapter</span
                       >
                     } @else {
-                      <span class="source" i18n="@@admin.sourceCi">Źródło: CI</span>
+                      <span class="source" i18n="@@admin.sourceCi">Source: CI</span>
                     }
                   }
                 </td>
@@ -151,9 +151,9 @@
                       (click)="toggleDiff(item.key)"
                     >
                       @if (diffOpen().has(item.key)) {
-                        <ng-container i18n="@@admin.hideDiff">Ukryj różnice</ng-container>
+                        <ng-container i18n="@@admin.hideDiff">Hide differences</ng-container>
                       } @else {
-                        <ng-container i18n="@@admin.showDiff">Pokaż różnice</ng-container>
+                        <ng-container i18n="@@admin.showDiff">Show differences</ng-container>
                       }
                       <span class="visually-hidden"> ({{ item.name }})</span>
                     </button>
@@ -181,7 +181,7 @@
               <tr role="row" class="tool">
                 <td role="cell" class="c-toggle"></td>
                 <td role="cell" colspan="4" class="muted" i18n="@@admin.noTools">
-                  Serwer nie ma zarejestrowanych narzędzi.
+                  The server has no registered tools.
                 </td>
               </tr>
             }
@@ -190,6 +190,6 @@
       }
     </table>
   } @else {
-    <p class="muted" role="status" i18n="@@admin.empty">Rejestr nie zawiera żadnego serwera.</p>
+    <p class="muted" role="status" i18n="@@admin.empty">The registry has no servers.</p>
   }
 }

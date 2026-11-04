@@ -42,23 +42,23 @@ describe('ConfirmPage', () => {
   it('shows system, tool, resource and the arguments sorted by name, read only', async () => {
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Operacja nieodwracalna czeka na kod'));
+    await until(() => expect(text()).toContain('An irreversible operation is waiting for a code'));
 
-    expect(text()).toMatch(/wygasa za 0[012]:\d{2}/);
+    expect(text()).toMatch(/expires in 0[012]:\d{2}/);
     expect(text()).toContain('SystemConfluence');
-    expect(text()).toContain('Narzędzieconfluence__delete_page');
-    expect(text()).toContain('ZasóbConfluence DEV / 48213');
+    expect(text()).toContain('Toolconfluence__delete_page');
+    expect(text()).toContain('ResourceConfluence DEV / 48213');
     const names = Array.from(document.querySelectorAll('.facts dt code')).map((c) => c.textContent);
     expect(names).toEqual(['pageId', 'spaceKey', 'title', 'versionComment']);
-    expect(text()).toContain('(obcięto)');
+    expect(text()).toContain('(truncated)');
     expect(text()).toContain(
-      'Jeśli to się zgadza, wpisz w sesji agenta kod z aplikacji MCP Platform.',
+      'If this is correct, enter the code from the MCP Platform app in the agent session.',
     );
     expect(text()).toContain(
-      'Ten podgląd jest opcjonalny: kod działa także bez otwierania tej strony.',
+      'This preview is optional: the code also works without opening this page.',
     );
-    expect(button('Anuluj operację')).toBeTruthy();
-    expect(text()).not.toMatch(/Zatwierdź|Odrzuć/);
+    expect(button('Cancel operation')).toBeTruthy();
+    expect(text()).not.toMatch(/Approve|Reject/);
   });
 
   it('sorts arguments by name even if the answer arrives unsorted', () => {
@@ -85,7 +85,7 @@ describe('ConfirmPage', () => {
     visibility('hidden');
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
+    await until(() => expect(text()).toContain('Cancel operation'));
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(viewed).not.toHaveBeenCalled();
 
@@ -98,7 +98,7 @@ describe('ConfirmPage', () => {
     Object.defineProperty(document, 'prerendering', { configurable: true, value: true });
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
+    await until(() => expect(text()).toContain('Cancel operation'));
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(viewed).not.toHaveBeenCalled();
   });
@@ -114,11 +114,11 @@ describe('ConfirmPage', () => {
     configureTestApp();
     await openRoute(path);
     await until(() =>
-      expect(text()).toContain('Ochrona "pierwsza wygrywa" nie jest teraz aktywna'),
+      expect(text()).toContain('The "first one wins" protection is not active now'),
     );
     failing = false;
     await until(() =>
-      expect(text()).not.toContain('Ochrona "pierwsza wygrywa" nie jest teraz aktywna'),
+      expect(text()).not.toContain('The "first one wins" protection is not active now'),
     );
     expect(store.state.confirmations[DEMO_CONFIRMATION_ID]?.viewed).toBe(true);
   });
@@ -126,16 +126,16 @@ describe('ConfirmPage', () => {
   it('says the link is out of date when the answer is 404', async () => {
     configureTestApp();
     await openRoute('/confirm/cnf_unknown');
-    await until(() => expect(text()).toContain('Ten link jest nieaktualny.'));
-    expect(text()).toContain('Nie wpisuj kodu dla tej operacji.');
-    expect(text()).not.toContain('Anuluj operację');
+    await until(() => expect(text()).toContain('This link is out of date.'));
+    expect(text()).toContain('Do not enter a code for this operation.');
+    expect(text()).not.toContain('Cancel operation');
   });
 
   it('notices by polling that another operation replaced this one', async () => {
     fast();
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
+    await until(() => expect(text()).toContain('Cancel operation'));
     store.update({
       confirmations: {
         ...store.state.confirmations,
@@ -145,27 +145,27 @@ describe('ConfirmPage', () => {
         },
       },
     });
-    await until(() => expect(text()).toContain('Ten link jest nieaktualny.'));
-    expect(text()).not.toContain('Anuluj operację');
+    await until(() => expect(text()).toContain('This link is out of date.'));
+    expect(text()).not.toContain('Cancel operation');
   });
 
   it('keeps showing the operation, with a warning, when polling fails for another reason', async () => {
     fast();
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
+    await until(() => expect(text()).toContain('Cancel operation'));
     server.use(
       http.get(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}`, () =>
         HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
       ),
     );
     await until(() =>
-      expect(text()).toContain('Nie udało się sprawdzić, czy operacja jest nadal aktualna.'),
+      expect(text()).toContain('Could not check whether the operation is still current.'),
     );
-    expect(text()).toContain('Anuluj operację');
+    expect(text()).toContain('Cancel operation');
   });
 
-  it('turns into "Czas minął" when the 120 seconds are over', async () => {
+  it('turns into "Time is up" when the 120 seconds are over', async () => {
     server.use(
       http.get(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}`, () =>
         HttpResponse.json({
@@ -176,11 +176,11 @@ describe('ConfirmPage', () => {
     );
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
-    await until(() => expect(text()).toContain('Czas minął.'));
-    expect(text()).toContain('Poproś agenta o ponowienie.');
-    expect(text()).toContain('Nie wpisuj kodu dla tej operacji.');
-    expect(text()).not.toContain('Anuluj operację');
+    await until(() => expect(text()).toContain('Cancel operation'));
+    await until(() => expect(text()).toContain('Time is up.'));
+    expect(text()).toContain('Ask the agent to retry.');
+    expect(text()).toContain('Do not enter a code for this operation.');
+    expect(text()).not.toContain('Cancel operation');
     expect(CONFIRMATION_TTL_MS).toBe(120_000);
   });
 
@@ -202,75 +202,75 @@ describe('ConfirmPage', () => {
       );
     }
 
-    it('does not make the page say "Czas minął" and does not hide "Anuluj operację"', async () => {
+    it('does not make the page say "Time is up" and does not hide "Cancel operation"', async () => {
       serverSays(100_000);
       const real = Date.now.bind(Date);
       vi.spyOn(Date, 'now').mockImplementation(() => real() + 130_000);
       const viewed = countCalls(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}/viewed`, 'post');
       configureTestApp();
       await openRoute(path);
-      await until(() => expect(text()).toContain('Anuluj operację'));
-      expect(text()).not.toContain('Czas minął.');
-      expect(text()).toMatch(/wygasa za 01:(3|4|5)\d/);
+      await until(() => expect(text()).toContain('Cancel operation'));
+      expect(text()).not.toContain('Time is up.');
+      expect(text()).toMatch(/expires in 01:(3|4|5)\d/);
       await until(() => expect(viewed).toHaveBeenCalledTimes(1));
     });
 
-    it('does not turn "Czas minął" into a view when the server clock says the time is over', async () => {
+    it('does not turn "Time is up" into a view when the server clock says the time is over', async () => {
       serverSays(-5000);
       const viewed = countCalls(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}/viewed`, 'post');
       configureTestApp();
       await openRoute(path);
-      await until(() => expect(text()).toContain('Czas minął.'));
+      await until(() => expect(text()).toContain('Time is up.'));
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(viewed).not.toHaveBeenCalled();
-      expect(text()).not.toContain('Anuluj operację');
+      expect(text()).not.toContain('Cancel operation');
     });
   });
 
   it('cancels the operation from the preview', async () => {
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
-    button('Anuluj operację').click();
-    await until(() => expect(text()).toContain('Operacja anulowana.'));
+    await until(() => expect(text()).toContain('Cancel operation'));
+    button('Cancel operation').click();
+    await until(() => expect(text()).toContain('Operation cancelled.'));
     expect(store.state.confirmations[DEMO_CONFIRMATION_ID]?.cancelled).toBe(true);
-    expect(text()).toContain('poczekaj na nowy kod (30 do 60 s)');
-    expect(text()).not.toContain('Anuluj operację');
+    expect(text()).toContain('wait for a new code (30 to 60 s)');
+    expect(text()).not.toContain('Cancel operation');
   });
 
   it('explains a failed cancel with a link to the activity log', async () => {
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
+    await until(() => expect(text()).toContain('Cancel operation'));
     server.use(
       http.post(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}/cancel`, () =>
         HttpResponse.json({ error: 'not_found_or_denied' }, { status: 404 }),
       ),
     );
-    button('Anuluj operację').click();
+    button('Cancel operation').click();
     await until(() =>
       expect(text()).toContain(
-        'Nie udało się anulować: operacja mogła zostać wykonana albo wygasła.',
+        'Could not cancel: the operation may have been completed or expired.',
       ),
     );
     expect(document.querySelector('a[href="/logs"]')?.textContent).toContain(
-      'Sprawdź w logach aktywności',
+      'Check the activity logs',
     );
-    expect(text()).toContain('Anuluj operację');
+    expect(text()).toContain('Cancel operation');
   });
 
   it('says nothing was cancelled when the gateway cannot burn the codes (503)', async () => {
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Anuluj operację'));
+    await until(() => expect(text()).toContain('Cancel operation'));
     server.use(
       http.post(`/api/v1/confirmations/${DEMO_CONFIRMATION_ID}/cancel`, () =>
         HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
       ),
     );
-    button('Anuluj operację').click();
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
-    expect(text()).not.toContain('Operacja anulowana.');
+    button('Cancel operation').click();
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
+    expect(text()).not.toContain('Operation cancelled.');
   });
 
   it('shows the whole-page error when the first read fails', async () => {
@@ -281,13 +281,13 @@ describe('ConfirmPage', () => {
     );
     configureTestApp();
     await openRoute(path);
-    await until(() => expect(text()).toContain('Nie udało się pobrać danych.'));
+    await until(() => expect(text()).toContain('Could not load the data.'));
   });
 
   it('renders values from the agent as inert text with control characters made visible', async () => {
     configureTestApp();
     await openRoute(`/confirm/${BIDI_CONFIRMATION_ID}`);
-    await until(() => expect(text()).toContain('Operacja nieodwracalna czeka na kod'));
+    await until(() => expect(text()).toContain('An irreversible operation is waiting for a code'));
 
     const value = Array.from(document.querySelectorAll('[data-testid="argument-value"]'))
       .map((node) => node.textContent ?? '')
@@ -296,7 +296,7 @@ describe('ConfirmPage', () => {
     for (const code of [0x202e, 0x2066, 0x07]) {
       expect(document.body.textContent).not.toContain(String.fromCodePoint(code));
     }
-    expect(text()).toContain('Wartości zawierają znaki sterujące.');
+    expect(text()).toContain('Values contain control characters.');
     for (const node of document.querySelectorAll('.untrusted')) {
       expect(node.getAttribute('dir')).toBe('ltr');
     }

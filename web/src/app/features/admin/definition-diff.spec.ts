@@ -34,14 +34,14 @@ function entry(overrides: Partial<ToolEntry> = {}, description = 'Updates a page
 describe('describeEntry', () => {
   it('lists description, risk, resources, every schema leaf and the hints', () => {
     const lines = describeEntry(entry());
-    expect(lines).toContain('opis: "Updates a page."');
-    expect(lines).toContain('ryzyko: Zapis ("UPDATE")');
-    expect(lines).toContain('akcja: "update"');
-    expect(lines).toContain('zasób: argument "pageId" ("Confluence::Page")');
-    expect(lines).toContain('schemat.properties.pageId.maxLength: 12');
-    expect(lines).toContain('schemat.required: "pageId", "body"');
-    expect(lines).toContain('schemat.additionalProperties: false');
-    expect(lines).toContain('wskazówki.readOnlyHint: false');
+    expect(lines).toContain('description: "Updates a page."');
+    expect(lines).toContain('risk: Write ("UPDATE")');
+    expect(lines).toContain('action: "update"');
+    expect(lines).toContain('resource: argument "pageId" ("Confluence::Page")');
+    expect(lines).toContain('schema.properties.pageId.maxLength: 12');
+    expect(lines).toContain('schema.required: "pageId", "body"');
+    expect(lines).toContain('schema.additionalProperties: false');
+    expect(lines).toContain('hints.readOnlyHint: false');
   });
 
   it('is the same for equal definitions whatever the key order', () => {
@@ -79,13 +79,13 @@ describe('diffDefinitions', () => {
     const { before, after } = diffDefinitions(entry(), next);
 
     expect(before.filter((line) => line.mark === 'removed').map((line) => line.text)).toEqual([
-      'opis: "Updates a page."',
-      'schemat.properties.pageId.maxLength: 12',
+      'description: "Updates a page."',
+      'schema.properties.pageId.maxLength: 12',
     ]);
     expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toEqual([
-      'opis: "Updates a page and its parent."',
-      'schemat.properties.pageId.maxLength: 64',
-      'schemat.properties.parentId.type: "string"',
+      'description: "Updates a page and its parent."',
+      'schema.properties.pageId.maxLength: 64',
+      'schema.properties.parentId.type: "string"',
     ]);
   });
 
@@ -99,13 +99,13 @@ describe('diffDefinitions', () => {
     const next = entry({ risk: 'DESTRUCTIVE', action: 'delete', resourceRefs: [] });
     const { before, after } = diffDefinitions(entry(), next);
     expect(before.filter((line) => line.mark === 'removed').map((line) => line.text)).toEqual([
-      'ryzyko: Zapis ("UPDATE")',
-      'akcja: "update"',
-      'zasób: argument "pageId" ("Confluence::Page")',
+      'risk: Write ("UPDATE")',
+      'action: "update"',
+      'resource: argument "pageId" ("Confluence::Page")',
     ]);
     expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toEqual([
-      'ryzyko: Usuwanie ("DESTRUCTIVE")',
-      'akcja: "delete"',
+      'risk: Delete ("DESTRUCTIVE")',
+      'action: "delete"',
     ]);
   });
 
@@ -116,7 +116,7 @@ describe('diffDefinitions', () => {
     );
     expect(neutralised).toBe(true);
     expect(after.map((line) => line.text)).toContain(
-      'opis: "Safe[U+202E] text[U+200B] and <b>markup</b>"',
+      'description: "Safe[U+202E] text[U+200B] and <b>markup</b>"',
     );
   });
 
@@ -126,23 +126,23 @@ describe('diffDefinitions', () => {
 });
 
 describe('hostile text', () => {
-  const forged = 'ok\nryzyko: Odczyt ("READ_ONLY")\r\n\tschemat.additionalProperties: false';
+  const forged = 'ok\nrisk: Read ("READ_ONLY")\r\n\tschema.additionalProperties: false';
 
   it('keeps line breaks, CR and tabs of a value inside one quoted line', () => {
     const lines = describeEntry(entry({}, forged));
     expect(lines.every((line) => !/[\n\r\t]/.test(line))).toBe(true);
-    expect(lines.filter((line) => line.startsWith('ryzyko:'))).toEqual([
-      'ryzyko: Zapis ("UPDATE")',
+    expect(lines.filter((line) => line.startsWith('risk:'))).toEqual([
+      'risk: Write ("UPDATE")',
     ]);
     expect(lines[3]).toBe(
-      'opis: "ok[U+000A]ryzyko: Odczyt (\\"READ_ONLY\\")[U+000D][U+000A][U+0009]schemat.additionalProperties: false"',
+      'description: "ok[U+000A]risk: Read (\\"READ_ONLY\\")[U+000D][U+000A][U+0009]schema.additionalProperties: false"',
     );
   });
 
   it('cannot hide a risk change behind a forged line', () => {
     const { after } = diffDefinitions(entry(), entry({ risk: 'DESTRUCTIVE' }, forged));
     expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toContain(
-      'ryzyko: Usuwanie ("DESTRUCTIVE")',
+      'risk: Delete ("DESTRUCTIVE")',
     );
   });
 
@@ -151,13 +151,13 @@ describe('hostile text', () => {
     hostile.definition = {
       ...hostile.definition,
       inputSchema: {
-        properties: { 'a\nschemat.required: x': { description: 'v\nw', enum: ['1\n2'] } },
+        properties: { 'a\nschema.required: x': { description: 'v\nw', enum: ['1\n2'] } },
       },
     };
-    const lines = describeEntry(hostile).filter((line) => line.startsWith('schemat.'));
+    const lines = describeEntry(hostile).filter((line) => line.startsWith('schema.'));
     expect(lines).toEqual([
-      'schemat.properties."a[U+000A]schemat.required: x".description: "v[U+000A]w"',
-      'schemat.properties."a[U+000A]schemat.required: x".enum: "1[U+000A]2"',
+      'schema.properties."a[U+000A]schema.required: x".description: "v[U+000A]w"',
+      'schema.properties."a[U+000A]schema.required: x".enum: "1[U+000A]2"',
     ]);
   });
 });
@@ -169,10 +169,10 @@ describe('what the hash covers', () => {
     const { before, after, changed } = diffDefinitions(entry(), renamed);
     expect(changed).toBe(true);
     expect(before.filter((line) => line.mark === 'removed').map((line) => line.text)).toEqual([
-      'nazwa: "update_page"',
+      'name: "update_page"',
     ]);
     expect(after.filter((line) => line.mark === 'added').map((line) => line.text)).toEqual([
-      'nazwa: "other_name"',
+      'name: "other_name"',
     ]);
   });
 
@@ -219,8 +219,8 @@ describe('riskChange', () => {
   it('words the change for the approver', () => {
     const approved = entry();
     const raised = entry({ risk: 'DESTRUCTIVE' });
-    expect(riskChangeText('raised', approved, raised)).toBe('Ryzyko rośnie: Zapis na Usuwanie.');
-    expect(riskChangeText('lowered', raised, approved)).toContain('Ryzyko maleje');
+    expect(riskChangeText('raised', approved, raised)).toBe('Risk goes up: Write to Delete.');
+    expect(riskChangeText('lowered', raised, approved)).toContain('Risk goes down');
     expect(riskChangeText('same', approved, approved)).toBeNull();
   });
 });
@@ -238,8 +238,8 @@ describe('an entry of an adapter', () => {
 
   it('is described without a risk and says the administrator gives it', () => {
     const lines = describeEntry(adapterEntry());
-    expect(lines).toContain('ryzyko i akcja: do nadania przez administratora');
-    expect(lines.some((line) => line.startsWith('ryzyko:'))).toBe(false);
+    expect(lines).toContain('risk and action: to be assigned by an administrator');
+    expect(lines.some((line) => line.startsWith('risk:'))).toBe(false);
   });
 
   it('has no risk change to compare, so nothing is read as a lowering', () => {

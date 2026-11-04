@@ -1,150 +1,164 @@
 # mcp-portal
 
-Portal platformy MCP: strona, na której użytkownik widzi serwery MCP dostępne dla niego, łączy konta w systemach
-(Jira, Confluence, GitLab, Service Desk, OpenSearch), składa wnioski o uprawnienia i składa adres `/mcp` z filtrem, a
-administrator zatwierdza definicje narzędzi, klasyfikuje narzędzia obcych serwerów i w razie incydentu wyłącza serwer albo
-narzędzie. Dwa komponenty w jednym repozytorium:
+The portal of the MCP platform: the page where a user sees the MCP servers available to them, connects accounts in the
+systems (Jira, Confluence, GitLab, Service Desk, OpenSearch), submits requests for entitlements and builds the `/mcp` address
+with a filter, and where an administrator approves tool definitions, classifies the tools of foreign servers and, in an
+incident, switches a server or a tool off. Two components in one repository:
 
-| Katalog | Co to | Opis |
+| Directory | What it is | Description |
 | --- | --- | --- |
-| `bff/` | backend (Java 25, Spring Boot 4.1): logowanie OIDC, sesja po stronie serwera, API C12, agregacja gateway'a (C5), brokera (C4) i IGA (C13); przeglądarka nie dostaje żadnego tokenu ani sekretu | [bff/README.md](bff/README.md) |
-| `web/` | frontend (Angular 22, Angular Material): tylko API C12, bez ręcznie pisanych typów API | [web/README.md](web/README.md) |
+| `bff/` | backend (Java 25, Spring Boot 4.1): OIDC sign-in, server-side session, the C12 API, aggregation of the gateway (C5), the broker (C4) and the IGA (C13); the browser gets no token and no secret | [bff/README.md](bff/README.md) |
+| `web/` | frontend (Angular 22, Angular Material): only the C12 API, no hand-written API types | [web/README.md](web/README.md) |
 
-Dla kogo: to produkt dla operatorów i użytkowników platformy, wdrażany jako obrazy kontenerów, a nie biblioteka. Instalacja
-i codzienna obsługa całej platformy: repozytorium `mcp-docs` (w przygotowaniu); tutaj to, czego potrzeba do postawienia i
-utrzymania samego portalu. Kontrakty: `mcp-contracts` 6.3.2. Licencja: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
-zgłaszanie podatności: [SECURITY.md](SECURITY.md); zmiany: [CHANGELOG.md](CHANGELOG.md); praca nad kodem:
+Who it is for: operators and users of the platform. It is deployed as container images, it is not a library. Installation
+and everyday operation of the whole platform: the `mcp-docs` repository (in preparation); this file covers what is needed to set
+up and maintain the portal itself. Contracts: `mcp-contracts` 6.3.2. Licence: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
+reporting vulnerabilities: [SECURITY.md](SECURITY.md); changes: [CHANGELOG.md](CHANGELOG.md); working on the code:
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Zrzuty ekranu
+## Language
 
-Zrobione z buildu na mockach MSW (dane z przykładów kontraktu, wymyślony użytkownik, żadnego prawdziwego konta ani tokenu);
-odtwarzanie: `cd web && npm run screenshots` (1280 x 800 px, jasny motyw, Chromium z cache Playwrighta). Zrzuty 10 do 20 odpowiadają pozycjom 1 do 11 listy
-`mcp-docs/docs/screenshots-needed.md` (10 = poz. 1, 11 = poz. 2, 12a-12c = poz. 3, 13 = poz. 4, 14a-14b = poz. 5, 15 = poz. 6, 16 = poz. 7,
-17a-17c = poz. 8, 18a-18b = poz. 9, 19 = poz. 10, 20 = poz. 11). Zrzutów aplikacji klienckich i rysunku architektury (poz. 12 do 15) tu nie ma:
-nie powstają z portalu.
+The interface is in English (the source language of the texts) and in Polish. The portal opens in the language the
+browser asks for (Polish for `pl`, English otherwise); the button in the header (and on the sign-in screen) switches and
+remembers the choice in the browser. The Polish texts are in `web/src/locale/messages.pl.xlf`, loaded as one JSON file
+(`/i18n/messages.pl.json`) before the application starts, so there is one build, one image and no change in the BFF.
+Texts that come from the BFF or from the contracts (error codes, descriptions from the servers) are shown as they arrive.
+
+## Screenshots
+
+Taken from the mock build (MSW; the data are the examples of the contract, a made-up user, no real account and no token),
+in the light theme, 1280 x 800 px. English pictures are in `docs/screenshots/en/`, the same pictures with the Polish
+interface (same file names) in `docs/screenshots/pl/`. To take them again: `cd web && npm run screenshots`.
 
 | | |
 | --- | --- |
-| ![Logowanie](docs/screenshots/01-logowanie.png) Logowanie przez konto firmowe (OIDC). | ![Serwery MCP](docs/screenshots/02-serwery-mcp.png) Serwery MCP ze statusem, akcją i narzędziami z poziomem ryzyka. |
-| ![Połączenia z systemami](docs/screenshots/03-polaczenia-z-systemami.png) Połączenia z systemami i Authenticator. | ![Połączenie w błędzie](docs/screenshots/04-polaczenie-w-bledzie.png) Połączenie, któremu zniknął sekret: wiersz prosi o ponowne połączenie. |
-| ![Adres MCP](docs/screenshots/05-adres-mcp.png) Adres `/mcp` z filtrem i gotowe polecenia dla klientów. | ![Różnice definicji](docs/screenshots/06-administracja-roznice.png) Administracja: różnice między zatwierdzoną a oczekującą definicją. |
-| ![Klasyfikacja](docs/screenshots/07-klasyfikacja-narzedzia.png) Klasyfikacja narzędzia obcego serwera: adapter jest tylko do odczytu, więc dialog oferuje wyłącznie Odczyt i `read`. | ![Wyłącznik awaryjny](docs/screenshots/08-wylacznik-awaryjny.png) Wyłącznik awaryjny: lista włączonych, włączenie bez MFA, zdjęcie po świeżym MFA. |
-| ![Formularz z loginem](docs/screenshots/09-formularz-z-loginem.png) Token w schemacie Basic (login i hasło albo token): pole loginu obok hasła albo tokenu API; login nie wraca z serwera i nie trafia do logów. | ![Rejestracja Authenticatora, kod QR](docs/screenshots/10-rejestracja-authenticatora-qr.png) Rejestracja Authenticatora, krok "Dodaj konto w aplikacji": kod QR, klucz do ręcznego wpisania i czas do końca rejestracji. Kod i klucz pochodzą z wymyślonego ziarna mocka. |
-| ![Rejestracja Authenticatora, pierwszy kod](docs/screenshots/11-rejestracja-authenticatora-kod.png) Krok "Wpisz pierwszy kod" z błędem "Kod nieprawidłowy.". | ![Authenticator aktywny](docs/screenshots/12a-authenticator-aktywny.png) Authenticator aktywny. |
-| ![Authenticator zablokowany](docs/screenshots/12b-authenticator-zablokowany.png) Authenticator zablokowany po 5 błędnych kodach; blokadę zdejmuje tylko upływ czasu. | ![Authenticator wyłączony](docs/screenshots/12c-authenticator-wylaczony.png) Authenticator wyłączony po 20 błędnych kodach; trzeba zarejestrować go ponownie. |
-| ![Podgląd operacji czekającej na kod](docs/screenshots/13-podglad-operacji.png) Podgląd operacji nieodwracalnej, która czeka na kod: odliczanie, argumenty, przycisk anulowania (wymyślony `jira__delete_issue`, klucz ABC-1182). | ![Operacja anulowana](docs/screenshots/14a-operacja-anulowana.png) Ten sam podgląd po anulowaniu. |
-| ![Czas minął](docs/screenshots/14b-czas-minal.png) Ten sam podgląd po upływie czasu. | ![Dodawanie tokenu Jira](docs/screenshots/15-dodaj-token-jira.png) Dodawanie tokenu Jira: instrukcja wąskiego tokenu i opcjonalna data wygaśnięcia. |
-| ![Logi audytowe](docs/screenshots/16-logi-audytowe.png) Logi audytowe z filtrami i rozwiniętym wierszem (identyfikator żądania); wyniki: wykonano, odmowa, czeka na potwierdzenie. | ![Lista wniosków](docs/screenshots/17a-wnioski-lista.png) Wnioski: lista ze statusami Oczekuje, Zaakceptowany, Odrzucony i Anulowany. |
-| ![Formularz wniosku](docs/screenshots/17b-wnioski-formularz.png) Formularz "Złóż wniosek" z katalogiem uprawnień. | ![Wnioski bez przyjmowania](docs/screenshots/17c-wnioski-bez-przyjmowania.png) Adapter `keycloak-groups`: komunikat, że system uprawnień nie przyjmuje wniosków z portalu. |
-| ![Obniżenie ryzyka na liście](docs/screenshots/18a-obnizenie-ryzyka-lista.png) Administracja: narzędzie z oznaczeniem "Obniżenie ryzyka" i różnicami definicji. | ![Dialog obniżenia ryzyka](docs/screenshots/18b-obnizenie-ryzyka-dialog.png) Dialog "Zatwierdzić obniżenie ryzyka?". |
-| ![Definicja zgłoszona przez serwer](docs/screenshots/19-definicja-z-serwera.png) Dialog "Zatwierdzić definicję zgłoszoną przez serwer?" (źródło: serwer, nie CI). | ![Powrót po potwierdzeniu tożsamości](docs/screenshots/20-powrot-po-potwierdzeniu.png) Powrót po potwierdzeniu tożsamości: "Tożsamość potwierdzona. Zdejmuję wyłącznik...". |
+| ![Sign-in with the company account (OIDC)](docs/screenshots/en/01-sign-in.png) Sign-in with the company account (OIDC). | ![MCP servers with status, action and the tools with their risk level](docs/screenshots/en/02-mcp-servers.png) MCP servers with status, action and the tools with their risk level. |
+| ![System connections and the Authenticator](docs/screenshots/en/03-system-connections.png) System connections and the Authenticator. | ![A connection that lost its secret](docs/screenshots/en/04-connection-error.png) A connection that lost its secret: the row asks to connect the account again. |
+| ![The `/mcp` address with the filter and ready commands for clients](docs/screenshots/en/05-mcp-address.png) The `/mcp` address with the filter and ready commands for clients. | ![Administration](docs/screenshots/en/06-admin-differences.png) Administration: differences between the approved and the pending definition. |
+| ![Classification of a foreign server tool](docs/screenshots/en/07-tool-classification.png) Classification of a foreign server tool: the adapter is read only, so the dialog offers only Read and `read`. | ![Emergency switches](docs/screenshots/en/08-emergency-switch.png) Emergency switches: list of active ones, switching off without MFA, lifting after a fresh MFA. |
+| ![A token in the Basic scheme (login and password or token)](docs/screenshots/en/09-form-with-login.png) A token in the Basic scheme (login and password or token): a login field next to the password or API token; the login does not come back from the server and does not reach the logs. | ![Authenticator registration, step "Add the account in the app"](docs/screenshots/en/10-authenticator-register-qr.png) Authenticator registration, step "Add the account in the app": QR code, key for manual entry and the time left. The code and the key come from the made-up seed of the mock. |
+| ![Step "Enter the first code" with the error "Invalid code."](docs/screenshots/en/11-authenticator-register-code.png) Step "Enter the first code" with the error "Invalid code." | ![Authenticator active](docs/screenshots/en/12a-authenticator-active.png) Authenticator active. |
+| ![Authenticator locked after 5 wrong codes; only time lifts the lock](docs/screenshots/en/12b-authenticator-locked.png) Authenticator locked after 5 wrong codes; only time lifts the lock. | ![Authenticator switched off after 20 wrong codes; it has to be registered again](docs/screenshots/en/12c-authenticator-disabled.png) Authenticator switched off after 20 wrong codes; it has to be registered again. |
+| ![Preview of an irreversible operation waiting for a code](docs/screenshots/en/13-confirmation-preview.png) Preview of an irreversible operation waiting for a code: countdown, arguments, cancel button (made-up `jira__delete_issue`, key ABC-1182). | ![The same preview after cancelling](docs/screenshots/en/14a-operation-cancelled.png) The same preview after cancelling. |
+| ![The same preview after the time ran out](docs/screenshots/en/14b-operation-expired.png) The same preview after the time ran out. | ![Adding a Jira token](docs/screenshots/en/15-add-token-jira.png) Adding a Jira token: instructions for a narrow token and an optional expiry date. |
+| ![Audit logs with filters and an expanded row (request ID); results](docs/screenshots/en/16-audit-logs.png) Audit logs with filters and an expanded row (request ID); results: done, refused, waiting for confirmation. | ![Requests](docs/screenshots/en/17a-requests-list.png) Requests: the list with the statuses Pending, Approved, Rejected and Cancelled. |
+| ![The "Submit request" form with the entitlement catalog](docs/screenshots/en/17b-requests-form.png) The "Submit request" form with the entitlement catalog. | ![The `keycloak-groups` adapter](docs/screenshots/en/17c-requests-not-accepted.png) The `keycloak-groups` adapter: the message that the entitlement system does not accept requests from the portal. |
+| ![Administration](docs/screenshots/en/18a-risk-lowering-list.png) Administration: a tool marked "Risk lowering" with the definition differences. | ![The "Approve risk lowering?" dialog](docs/screenshots/en/18b-risk-lowering-dialog.png) The "Approve risk lowering?" dialog. |
+| ![The "Approve a definition reported by the server?" dialog (source](docs/screenshots/en/19-server-definition-dialog.png) The "Approve a definition reported by the server?" dialog (source: server, not CI). | ![Return after confirming identity](docs/screenshots/en/20-step-up-return.png) Return after confirming identity: "Identity confirmed. Lifting the switch..." |
 
-## Instalacja
+Pictures 10 to 20 correspond to items 1 to 11 of the list in `mcp-docs/docs/screenshots-needed.md` (10 = item 1, 11 = item 2,
+12a-12c = item 3, 13 = item 4, 14a-14b = item 5, 15 = item 6, 16 = item 7, 17a-17c = item 8, 18a-18b = item 9, 19 = item 10,
+20 = item 11). Screenshots of client applications and the architecture drawing (items 12 to 15) are not taken from the portal.
 
-### Z obrazów
+## Installation
 
-Obrazy powstają z `Dockerfile` w korzeniu repozytorium; nazwy i tagi po pierwszym wydaniu: `ghcr.io/aiwcorpo/mcp-portal-bff`,
-`ghcr.io/aiwcorpo/mcp-portal-web` i `ghcr.io/aiwcorpo/mcp-portal` (BFF razem z aplikacją), tag `v<wersja>`. Do tego czasu
-obrazy buduje się lokalnie (niżej) i mają tag `m6-<sha>`.
+### From images
 
-| Cel `Dockerfile` | Obraz | Zawartość |
+The images are built from the `Dockerfile` in the repository root. Names and tags after the first release:
+`ghcr.io/aiwcorpo/mcp-portal-bff`, `ghcr.io/aiwcorpo/mcp-portal-web` and `ghcr.io/aiwcorpo/mcp-portal` (the BFF with the
+application), tag `v<version>`. Until then the images are built locally (below) and tagged `m6-<sha>`.
+
+| `Dockerfile` target | Image | Contents |
 | --- | --- | --- |
-| `bff` | `mcp-portal-bff` | BFF, port 8080; aplikację serwuje reverse proxy przed nim |
-| `web` | `mcp-portal-web` | nginx ze zbudowaną aplikacją, port 8080, bez stanu, tylko do odczytu |
-| `portal` | `mcp-portal` | BFF z aplikacją w środku (`PORTAL_WEB_DIST=/app/web`): jeden kontener, jeden origin |
+| `bff` | `mcp-portal-bff` | the BFF, port 8080; the application is served by the reverse proxy in front of it |
+| `web` | `mcp-portal-web` | nginx with the built application, port 8080, no state, read only |
+| `portal` | `mcp-portal` | the BFF with the application inside (`PORTAL_WEB_DIST=/app/web`): one container, one origin |
 
-Portal ma być wystawiony pod jedną domeną razem z gatewayem (`/mcp`, `/s/`) i własnym API (`/api`), więc przed nim stoi
-reverse proxy; wzorcowa konfiguracja jest w `mcp-platform-dev` (`proxy/`, `docker-compose.yml`). Najprostszy start to cel
-`portal`:
+The portal is meant to be exposed under one domain together with the gateway (`/mcp`, `/s/`) and its own API (`/api`), so a
+reverse proxy stands in front of it; the reference configuration is in `mcp-platform-dev` (`proxy/`, `docker-compose.yml`).
+The simplest start is the `portal` target:
 
 ```bash
 docker run -d --name mcp-portal -p 8080:8080 \
-  -e PORTAL_PUBLIC_BASE_URL=<publiczny adres portalu, https> \
-  -e PORTAL_OIDC_ISSUER_URI=<issuer OIDC, ten sam co w tokenach> \
+  -e PORTAL_PUBLIC_BASE_URL=<public address of the portal, https> \
+  -e PORTAL_OIDC_ISSUER_URI=<OIDC issuer, the same as in the tokens> \
   -e PORTAL_OIDC_CLIENT_ID=mcp-portal-bff \
-  -e PORTAL_OIDC_CLIENT_SECRET=<sekret klienta poufnego> \
-  -e PORTAL_BROKER_URL=https://<broker>:8443 -e PORTAL_BROKER_TLS_NAME=<nazwa w certyfikacie brokera> \
-  -e PORTAL_GATEWAY_ADMIN_URL=https://<gateway>:8443 -e PORTAL_GATEWAY_ADMIN_TLS_NAME=<nazwa w certyfikacie gatewaya> \
-  -e PORTAL_TLS_KEYSTORE=/certs/keystore.p12 -e PORTAL_TLS_KEYSTORE_PASSWORD=<hasło> \
-  -e PORTAL_TLS_TRUSTSTORE=/certs/truststore.p12 -e PORTAL_TLS_TRUSTSTORE_PASSWORD=<hasło> \
+  -e PORTAL_OIDC_CLIENT_SECRET=<secret of the confidential client> \
+  -e PORTAL_BROKER_URL=https://<broker>:8443 -e PORTAL_BROKER_TLS_NAME=<name in the broker certificate> \
+  -e PORTAL_GATEWAY_ADMIN_URL=https://<gateway>:8443 -e PORTAL_GATEWAY_ADMIN_TLS_NAME=<name in the gateway certificate> \
+  -e PORTAL_TLS_KEYSTORE=/certs/keystore.p12 -e PORTAL_TLS_KEYSTORE_PASSWORD=<password> \
+  -e PORTAL_TLS_TRUSTSTORE=/certs/truststore.p12 -e PORTAL_TLS_TRUSTSTORE_PASSWORD=<password> \
   -e PORTAL_IGA_ADAPTER=keycloak-groups -e PORTAL_IGA_CATALOG_FILE=/config/iga-catalog.yaml \
   -v "$PWD/certs:/certs:ro" -v "$PWD/config:/config:ro" \
   mcp-portal:<tag>
 ```
 
-Wymagania, które BFF sprawdza przy starcie i odmawia startu, gdy ich nie ma: `https` pod `PORTAL_PUBLIC_BASE_URL`, certyfikat
-klienta `CN=mcp-portal-bff` do rozmowy z brokerem i gatewayem (mTLS) oraz wybrany adapter IGA. Redirect URI klienta w IdP to
-`<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`. Wszystkie zmienne: tabela "Konfiguracja" w [bff/README.md](bff/README.md#konfiguracja).
-Za proxy ustaw `PORTAL_TRUSTED_PROXY_HOST` (nazwa proxy, adres rozwiązywany przy starcie) albo `PORTAL_TRUSTED_PROXIES`
-(wyrażenie regularne adresów), inaczej `X-Forwarded-*` są ignorowane.
+Requirements that the BFF checks at start and refuses to start without: `https` under `PORTAL_PUBLIC_BASE_URL`, the client
+certificate `CN=mcp-portal-bff` for talking to the broker and the gateway (mTLS), and a chosen IGA adapter. The redirect URI of
+the client in the IdP is `<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback`. All variables: the "Konfiguracja" table in
+[bff/README.md](bff/README.md#konfiguracja). Behind a proxy set `PORTAL_TRUSTED_PROXY_HOST` (the proxy name, resolved at start)
+or `PORTAL_TRUSTED_PROXIES` (a regular expression of addresses), otherwise `X-Forwarded-*` is ignored.
 
-### Ze źródeł
+### From source
 
-Linux i macOS z bash 3.2 lub nowszym; Windows tylko przez WSL2. Potrzebne: git, docker, JDK 25 (skrypty same go szukają,
-`JAVA_HOME` ma pierwszeństwo), Node 24 i artefakty `mcp-contracts` 6.3.2.
+Linux and macOS with bash 3.2 or newer; Windows only through WSL2. Needed: git, docker, JDK 25 (the scripts find it;
+`JAVA_HOME` wins), Node 24 and the `mcp-contracts` 6.3.2 artifacts.
 
-Artefakty kontraktów wchodzą dwiema drogami, żadna nie wymaga pliku w gicie tego repozytorium:
+The contract artifacts come in two ways, and neither needs a file in the git of this repository:
 
-- BFF czyta jary `mcp-contracts` i `mcp-manifest` z `~/.m2` albo z rejestru Maven z `MCP_MAVEN_REPOSITORY_URL`
-  (`_USER`, `_PASSWORD`; ustawienia w `bff/.ci/settings.xml`). Dla GitHub Packages:
-  `MCP_MAVEN_REPOSITORY_URL=https://maven.pkg.github.com/aiwcorpo/mcp-contracts`, użytkownik i token z `read:packages`.
-- Web czyta paczkę npm z katalogu `web/.contracts/` (poza gitem), który wypełnia `web/scripts/contracts.sh`: z pliku
-  (`CONTRACTS_TARBALL`), z adresu (`CONTRACTS_TARBALL_URL`, `CONTRACTS_TARBALL_SHA256` sprawdza sumę), z lokalnego
-  checkoutu `mcp-contracts` na tagu `v6.3.2` (`CONTRACTS_SOURCE_DIR`, robi `npm pack`) albo z GitHub Packages
-  (`NODE_AUTH_TOKEN`). Przejście na rejestr to jedna zmiana w `web/package.json`, opis w [web/README.md](web/README.md#paczka-kontraktów).
+- The BFF reads the `mcp-contracts` and `mcp-manifest` jars from `~/.m2` or from the Maven registry in
+  `MCP_MAVEN_REPOSITORY_URL` (`_USER`, `_PASSWORD`; settings in `bff/.ci/settings.xml`). Once `mcp-contracts` is released to
+  Maven Central, plain Maven is enough.
+- The web part reads the npm package from `web/.contracts/` (outside git), which `web/scripts/contracts.sh` fills: from a
+  file (`CONTRACTS_TARBALL`; the release file is in `mcp-contracts/release/`), from an address (`CONTRACTS_TARBALL_URL`,
+  `CONTRACTS_TARBALL_SHA256` checks the sum) or from a local checkout of `mcp-contracts` at the tag `v6.3.2`
+  (`CONTRACTS_SOURCE_DIR`, runs `npm pack`). After the release to npmjs, moving to the registry is one change in
+  `web/package.json`, described in [web/README.md](web/README.md#paczka-kontraktów).
 
 ```bash
-bff/ci/run.sh                 # style, mvn clean verify (testy BFF)
-web/ci/run.sh                 # style, lint, i18n, testy jednostkowe, build, Playwright
-scripts/build-images.sh       # obrazy mcp-portal-bff:m6-<sha>, mcp-portal-web:m6-<sha>, mcp-portal:m6-<sha> z gita (HEAD albo podany ref)
+bff/ci/run.sh                 # style, mvn clean verify (BFF tests)
+web/ci/run.sh                 # style, lint, i18n, unit tests, build, Playwright
+scripts/build-images.sh       # images mcp-portal-bff:m6-<sha>, mcp-portal-web:m6-<sha>, mcp-portal:m6-<sha> from git (HEAD or a given ref)
 ```
 
-`scripts/build-images.sh` buduje jar i aplikację w tymczasowej kopii z `git archive`, więc w obrazie jest to, co w
-commicie, a nie to, co leży w katalogu roboczym. Niczego nie wysyła do rejestru.
+`scripts/build-images.sh` builds the jar and the application in a temporary copy from `git archive`, so the image holds what is
+in the commit, not what lies in the working directory. It pushes nothing to a registry.
 
-## Obsługa
+## Operation
 
-- **Stan i restart.** BFF trzyma sesje w pamięci procesu (bezczynność 30 min, 8 h bezwzględnie). Restart i nowa wersja
-  wylogowują użytkowników; nic poza tym nie ginie, bo portal nie ma bazy. Wiele instancji wymaga przypięcia sesji do
-  instancji na proxy.
-- **Zdrowie.** `GET /actuator/health` (bez szczegółów) na porcie kontenera. Obraz `web` odpowiada `ok` na `/__web/health`.
-- **TLS na porcie BFF.** Opcjonalny, domyślnie wyłączony: `PORTAL_PUBLIC_TLS_ENABLED=true` z `PORTAL_PUBLIC_TLS_CERTIFICATE` i
-  `PORTAL_PUBLIC_TLS_PRIVATE_KEY` (PEM, ścieżki plików), opis i skutki w [bff/README.md](bff/README.md#tls-na-porcie-bff-opcjonalnie).
-  Dotyczy obrazów `bff` i `portal`. Obraz `web` zostaje przy HTTP na 8080: to statyczny nginx tylko za proxy, nie niesie ciasteczek
-  sesji, a TLS wymagałby szablonu `nginx.conf` i certyfikatu w obrazie bez wpływu na bezpieczeństwo sesji; kto chce szyfrować
-  także ten odcinek, robi to na proxy. Obrazy nie mają `HEALTHCHECK`, więc sondę przy TLS stos przestawia na https.
-- **Logi.** Stdout w formacie tekstowym; zdarzenia audytu C8 (`component: portal`) to osobny logger `pl.aiwcorpo.mcp.audit`,
-  jedna linia JSON na zdarzenie. Treść wyłącznika (`reason`) i wartości sekretów nigdy tam nie trafiają.
-- **Nowa wersja.** Zmień tag obrazu i zrestartuj kontener. Wersje obrazów są niezmienne; wycofanie to poprzedni tag.
-  Wyłącznik awaryjny i klasyfikacja wymagają gatewaya na kontraktach 6.3.2; wdrażaj najpierw gateway, potem portal.
-- **Sekret klienta OIDC.** Rotacja: nowy sekret w IdP, `PORTAL_OIDC_CLIENT_SECRET` w kontenerze, restart.
-- **Certyfikat klienta (mTLS).** Wymiana keystore'a wymaga restartu. Nazwa w certyfikacie serwera (`*_TLS_NAME`) jest
-  sprawdzana niezależnie od hosta w URL.
-- **Wyłącznik awaryjny (A9).** Administracja, "Wyłączniki awaryjne": wybierz serwer (albo serwer i narzędzie), wpisz powód,
-  potwierdź. Skutek na każdej instancji gatewaya najpóźniej po 5 s; przyjęte już wywołania nie są przerywane. Włączenie nie
-  wymaga MFA, zdjęcie wymaga świeżego MFA (po powrocie z IdP zdjęcie wykonuje się samo). Wyłącznik przeżywa restart i
-  zatwierdzanie definicji; zdejmuje go tylko operacja zdjęcia.
-- **Narzędzia obcych serwerów.** Narzędzie z adaptera czeka bez ryzyka i akcji, agenci go nie widzą. W Administracji
-  "Sklasyfikuj i zatwierdź": adapter jest tylko do odczytu, więc można nadać wyłącznie Odczyt (`read`); narzędzie, które zapisuje
-  albo usuwa dane, nie przejdzie przez adapter. Podpowiedzi serwera są tylko tekstem do przeczytania. Zmiana definicji cofa
-  narzędzie do oczekujących. Klasyfikacja zapisu (`UPDATE`, `DESTRUCTIVE`) zapisana przed gatewayem 6.3.x jest nieważna: wpis wraca
-  do oczekujących, a ponowne zatwierdzenie jako Odczyt to obniżenie, które wymaga świeżego MFA (po powrocie z IdP wykonuje się samo).
-- **Token z loginem.** System w schemacie `Basic` (`userSecretScheme` w katalogu, np. Jira Data Center z loginem i hasłem) pokazuje w
-  formularzu pole loginu obok hasła albo tokenu API. Login idzie do brokera razem z sekretem; BFF go nie loguje, nie zapisuje w
-  audycie i nie zwraca. Brak loginu przy `Basic` albo login przy `Bearer` to 400 z brokera.
-- **Katalog niedostępny (503).** Gdy gateway nie może odczytać stanu wyłączników, katalog odpowiada 503 i portal pokazuje
-  "Usługa jest chwilowo niedostępna" z przyciskiem ponowienia; to stan przejściowy, nie awaria portalu.
-- **Połączenie w błędzie.** Gdy broker zgłosi, że sekret zniknął z magazynu (`secret_missing`) albo nie udało się zapisać
-  odświeżonego tokenu, wiersz w "Połączeniach z systemami" mówi, że połączenie przestało działać; użytkownik łączy konto od nowa.
-  Po stronie operatora: sprawdź OpenBao i audyt brokera (powody `secret_missing`, `refresh_token_lost`).
+- **State and restart.** The BFF keeps sessions in process memory (30 minutes idle, 8 hours absolute). A restart and a new
+  version sign users out; nothing else is lost, because the portal has no database. Several instances need session
+  affinity on the proxy.
+- **Health.** `GET /actuator/health` (no details) on the container port. The `web` image answers `ok` on `/__web/health`.
+- **TLS on the BFF port.** Optional, off by default: `PORTAL_PUBLIC_TLS_ENABLED=true` with `PORTAL_PUBLIC_TLS_CERTIFICATE` and
+  `PORTAL_PUBLIC_TLS_PRIVATE_KEY` (PEM, file paths); description and consequences in
+  [bff/README.md](bff/README.md#tls-na-porcie-bff-opcjonalnie). It applies to the `bff` and `portal` images. The `web` image
+  stays on HTTP at 8080: it is a static nginx only behind the proxy, it carries no session cookies, and TLS would need an
+  `nginx.conf` template and a certificate in the image without any effect on session security; whoever wants to encrypt that
+  hop too does it on the proxy. The images have no `HEALTHCHECK`, so with TLS the stack switches the probe to https.
+- **Logs.** Stdout in text format; the C8 audit events (`component: portal`) go to a separate logger,
+  `pl.aiwcorpo.mcp.audit`, one JSON line per event. The text of a switch (`reason`) and secret values never get there.
+- **New version.** Change the image tag and restart the container. Image versions are immutable; a rollback is the previous tag.
+  The emergency switch and the classification need a gateway on contracts 6.3.2; deploy the gateway first, then the portal.
+- **OIDC client secret.** Rotation: a new secret in the IdP, `PORTAL_OIDC_CLIENT_SECRET` in the container, restart.
+- **Client certificate (mTLS).** Replacing the keystore needs a restart. The name in the server certificate (`*_TLS_NAME`) is
+  checked independently of the host in the URL.
+- **Emergency switch (A9).** Administration, "Emergency switches": choose a server (or a server and a tool), enter a reason,
+  confirm. The effect on every gateway instance comes within 5 s at the latest; calls already accepted are not interrupted.
+  Switching off needs no MFA, lifting needs a fresh MFA (after the return from the IdP the lift carries itself out). The switch
+  survives a restart and the approval of definitions; only the lift operation removes it.
+- **Tools of foreign servers.** A tool from an adapter waits with no risk and no action, and agents do not see it. In
+  Administration, "Classify and approve": the adapter is read only, so only Read (`read`) can be assigned; a tool that
+  writes or deletes data will not pass through the adapter. Hints from the server are text to read, nothing more. A change
+  of the definition sends the tool back to pending. A write classification (`UPDATE`, `DESTRUCTIVE`) saved before gateway
+  6.3.x is invalid: the entry goes back to pending, and approving it again as Read is a lowering that needs a fresh MFA
+  (after the return from the IdP it carries itself out).
+- **Token with a login.** A system in the `Basic` scheme (`userSecretScheme` in the catalog, for example Jira Data Center with
+  a login and password) shows a login field next to the password or API token in the form. The login goes to the broker with the
+  secret; the BFF does not log it, does not write it to the audit and does not return it. A missing login with `Basic`, or a
+  login with `Bearer`, is a 400 from the broker.
+- **Catalog unavailable (503).** When the gateway cannot read the state of the switches, the catalog answers 503 and the portal
+  shows "The service is temporarily unavailable" with a retry button; this is a transient state, not a portal failure.
+- **Connection in error.** When the broker reports that the secret is gone from the store (`secret_missing`) or that a refreshed
+  token could not be saved, the row in "System connections" says the connection stopped working; the user connects the account
+  again. On the operator side: check OpenBao and the broker audit (reasons `secret_missing`, `refresh_token_lost`).
 
-## Struktura
+## Layout
 
 ```
-Dockerfile              cele bff, web, portal
-scripts/build-images.sh obrazy z gita, bez wysyłania
+Dockerfile              targets bff, web, portal
+scripts/build-images.sh images from git, nothing is pushed
 bff/                    Spring Boot BFF (ci/, scripts/, docker/, dev/)
 web/                    Angular (ci/, scripts/, e2e/, src/)
-docs/screenshots/       zrzuty ekranu do tego README
+docs/screenshots/       en/ and pl/: pictures for this README
 ```

@@ -67,22 +67,22 @@ describe('ConnectionsPage', () => {
     await openRoute('/connections');
     await until(() => expect(text()).toContain('Service Desk'));
 
-    expect(text(row('Jira'))).toContain('Token PAT');
+    expect(text(row('Jira'))).toContain('PAT token');
     expect(text(row('Jira'))).toContain('jkowalski');
-    expect(text(row('Jira'))).toMatch(/\d{2}\.\d{2}\.\d{4} · za 5 dni/);
-    expect(text(row('Jira'))).toMatch(/dziś \d{2}:\d{2}/);
-    expect(button('Odnów (Jira)', row('Jira'))).toBeTruthy();
-    expect(button('Rozłącz (Jira)', row('Jira'))).toBeTruthy();
-    expect(text(row('GitLab'))).toContain('odświeżane automatycznie');
+    expect(text(row('Jira'))).toMatch(/\d{2}\.\d{2}\.\d{4} · in 5 days/);
+    expect(text(row('Jira'))).toMatch(/today \d{2}:\d{2}/);
+    expect(button('Renew (Jira)', row('Jira'))).toBeTruthy();
+    expect(button('Disconnect (Jira)', row('Jira'))).toBeTruthy();
+    expect(text(row('GitLab'))).toContain('refreshed automatically');
     expect(text(row('GitLab'))).toContain('20.10.2026');
-    expect(text(row('Confluence'))).toContain('wymaga ponownego połączenia');
-    expect(button('Połącz (Confluence)', row('Confluence'))).toBeTruthy();
-    expect(text(row('Service Desk'))).toContain('Konto serwisowe');
+    expect(text(row('Confluence'))).toContain('needs reconnecting');
+    expect(button('Connect (Confluence)', row('Confluence'))).toBeTruthy();
+    expect(text(row('Service Desk'))).toContain('Service account');
     expect(row('Service Desk').querySelector('button')).toBeNull();
-    expect(text(row('OpenSearch'))).toContain('brak uprawnienia');
-    expect(button('Złóż wniosek (OpenSearch)', row('OpenSearch'))).toBeTruthy();
-    expect(text(row('OpenSearch'))).not.toContain('Dodaj token');
-    expect(text()).toContain('Ostatnie użycie');
+    expect(text(row('OpenSearch'))).toContain('no entitlement');
+    expect(button('Submit request (OpenSearch)', row('OpenSearch'))).toBeTruthy();
+    expect(text(row('OpenSearch'))).not.toContain('Add token');
+    expect(text()).toContain('Last used');
   });
 
   it('says the connection stopped working and asks to connect again when the secret is gone (error)', async () => {
@@ -110,10 +110,10 @@ describe('ConnectionsPage', () => {
     const confluence = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
       text(tr).includes('Confluence'),
     )!;
-    expect(text(jira)).toContain('przestało działać, połącz konto ponownie');
-    expect(button('Odnów (Jira)', jira)).toBeTruthy();
+    expect(text(jira)).toContain('stopped working, reconnect the account');
+    expect(button('Renew (Jira)', jira)).toBeTruthy();
     // A revoked connection keeps the older wording: it does not say the secret is gone.
-    expect(text(confluence)).toContain('wymaga ponownego połączenia');
+    expect(text(confluence)).toContain('needs reconnecting');
   });
 
   it('disconnects after confirmation and reloads', async () => {
@@ -121,14 +121,14 @@ describe('ConnectionsPage', () => {
     const harness = await openRoute('/connections');
     await until(() => expect(text()).toContain('Jira'));
 
-    button('Rozłącz (Jira)').click();
+    button('Disconnect (Jira)').click();
     await harness.fixture.whenStable();
     const dialog = document.querySelector('mat-dialog-container')!;
-    expect(text(dialog)).toContain('Rozłączyć konto Jira?');
-    button('Rozłącz', dialog).click();
+    expect(text(dialog)).toContain('Disconnect account Jira?');
+    button('Disconnect', dialog).click();
 
-    await until(() => expect(text()).toContain('Rozłączono konto Jira.'));
-    await until(() => expect(text(row('Jira'))).toContain('Dodaj token'));
+    await until(() => expect(text()).toContain('Disconnected account Jira.'));
+    await until(() => expect(text(row('Jira'))).toContain('Add token'));
   });
 
   it('keeps the connection when the dialog is cancelled', async () => {
@@ -136,12 +136,12 @@ describe('ConnectionsPage', () => {
     const harness = await openRoute('/connections');
     await until(() => expect(text()).toContain('Jira'));
 
-    button('Rozłącz (Jira)').click();
+    button('Disconnect (Jira)').click();
     await harness.fixture.whenStable();
-    button('Anuluj', document.querySelector('mat-dialog-container')!).click();
+    button('Cancel', document.querySelector('mat-dialog-container')!).click();
 
     await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
-    expect(text()).not.toContain('Rozłączono');
+    expect(text()).not.toContain('Disconnected');
   });
 
   it('shows the C10 message, the request id, and retries', async () => {
@@ -158,10 +158,10 @@ describe('ConnectionsPage', () => {
     );
     configureTestApp();
     await openRoute('/connections');
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
     expect(text()).toContain('abcdef12');
 
-    button('Odśwież').click();
+    button('Refresh').click();
     await until(() => expect(text()).toContain('Jira'));
   });
 
@@ -169,7 +169,7 @@ describe('ConnectionsPage', () => {
     server.use(serve([]));
     configureTestApp();
     await openRoute('/connections');
-    await until(() => expect(text()).toContain('Nie masz jeszcze żadnych połączeń'));
+    await until(() => expect(text()).toContain('You have no connections yet'));
   });
 
   describe('last use of a service account', () => {
@@ -188,7 +188,7 @@ describe('ConnectionsPage', () => {
       configureTestApp();
       await openRoute('/connections');
       await until(() => expect(text()).toContain('Service Desk'));
-      await until(() => expect(lastUseCell()).toMatch(/\d{2}\.\d{2}\.\d{4}|dziś \d{2}:\d{2}/));
+      await until(() => expect(lastUseCell()).toMatch(/\d{2}\.\d{2}\.\d{4}|today \d{2}:\d{2}/));
       expect(queries.map((query) => query.get('q'))).toEqual(['servicedesk__']);
       expect(queries[0].get('limit')).toBe('20');
     });
@@ -235,7 +235,7 @@ describe('ConnectionsPage', () => {
       await openRoute('/connections');
       await until(() => expect(text()).toContain('Service Desk'));
       expect(lastUseCell()).toBe('—');
-      expect(text()).not.toContain('Nie udało się pobrać danych');
+      expect(text()).not.toContain('Could not load the data');
     });
   });
 
@@ -251,12 +251,12 @@ describe('ConnectionsPage', () => {
 
     it('offers registration when there is none', async () => {
       await open({ state: 'none' });
-      expect(text()).toContain('Konto "MCP Platform" w Microsoft Authenticator.');
-      expect(text()).toContain('Nie zarejestrowano');
+      expect(text()).toContain('The "MCP Platform" account in Microsoft Authenticator.');
+      expect(text()).toContain('Not registered');
       expect(document.querySelector('app-authenticator-section a')?.getAttribute('href')).toBe(
         '/authenticator/register',
       );
-      expect(text()).not.toContain('Usuń');
+      expect(text()).not.toContain('Remove');
     });
 
     it('shows an active registration with its dates and a removal button', async () => {
@@ -265,13 +265,13 @@ describe('ConnectionsPage', () => {
         registeredAt: '2026-10-27T09:00:00Z',
         lastUsedAt: new Date().toISOString(),
       });
-      expect(text()).toMatch(/Aktywny · od 27\.10\.2026 · ostatnie użycie dziś \d{2}:\d{2}/);
-      expect(button('Usuń')).toBeTruthy();
+      expect(text()).toMatch(/Active · since 27\.10\.2026 · last used today \d{2}:\d{2}/);
+      expect(button('Remove')).toBeTruthy();
     });
 
     it('says when an active registration was never used', async () => {
       await open({ state: 'active', registeredAt: '2026-10-27T09:00:00Z' });
-      expect(text()).toContain('jeszcze nieużywany');
+      expect(text()).toContain('never used');
     });
 
     it('shows the end of a block, without an unlock action', async () => {
@@ -280,10 +280,10 @@ describe('ConnectionsPage', () => {
         registeredAt: '2026-10-27T09:00:00Z',
         lockedUntil: new Date(Date.now() + 600_000).toISOString(),
       });
-      expect(text()).toMatch(/Zablokowany do \d{2}:\d{2} · 5 błędnych kodów w 15 minut/);
-      expect(text()).toContain('Blokadę zdejmuje tylko upływ czasu.');
-      expect(text()).not.toMatch(/Odblokuj/);
-      expect(button('Usuń')).toBeTruthy();
+      expect(text()).toMatch(/Locked until \d{2}:\d{2} · 5 wrong codes in 15 minutes/);
+      expect(text()).toContain('A lock is lifted only by time.');
+      expect(text()).not.toMatch(/Unlock/);
+      expect(button('Remove')).toBeTruthy();
     });
 
     it('shows a switched-off authenticator with the banner and the single action', async () => {
@@ -294,38 +294,38 @@ describe('ConnectionsPage', () => {
         disabledReason: 'daily_failure_limit',
       });
       expect(text()).toContain(
-        'Authenticator został wyłączony po 20 błędnych kodach w ciągu doby.',
+        'The Authenticator was switched off after 20 wrong codes in one day.',
       );
-      expect(text()).toContain('Wyłączony · 28.10.2026');
+      expect(text()).toContain('Switched off · 28.10.2026');
       expect(document.querySelector('app-authenticator-section a')?.textContent).toContain(
-        'Zarejestruj ponownie',
+        'Register again',
       );
-      expect(text()).not.toContain('Usuń');
+      expect(text()).not.toContain('Remove');
     });
 
     it('removes the registration after a warning and a fresh MFA', async () => {
       store.update({ mfaFresh: true });
       const { harness } = await open({ state: 'active', registeredAt: '2026-10-27T09:00:00Z' });
-      button('Usuń').click();
+      button('Remove').click();
       await harness.fixture.whenStable();
       const dialog = document.querySelector('mat-dialog-container')!;
-      expect(text(dialog)).toContain('Usunąć Authenticator?');
+      expect(text(dialog)).toContain('Remove the Authenticator?');
       expect(text(dialog)).toContain(
-        'Bez Authenticatora agent nie wykona operacji nieodwracalnych.',
+        'Without the Authenticator the agent will not run irreversible operations.',
       );
-      expect(text(dialog)).toContain('Usunięcie wymaga potwierdzenia tożsamości (MFA).');
-      button('Usuń', dialog).click();
+      expect(text(dialog)).toContain('Removal requires identity confirmation (MFA).');
+      button('Remove', dialog).click();
 
-      await until(() => expect(text()).toContain('Authenticator usunięty.'));
-      await until(() => expect(text()).toContain('Nie zarejestrowano'));
+      await until(() => expect(text()).toContain('Authenticator removed.'));
+      await until(() => expect(text()).toContain('Not registered'));
       expect(store.state.authenticator.state).toBe('none');
     });
 
     it('keeps the registration when the warning is cancelled', async () => {
       const { harness } = await open({ state: 'active', registeredAt: '2026-10-27T09:00:00Z' });
-      button('Usuń').click();
+      button('Remove').click();
       await harness.fixture.whenStable();
-      button('Anuluj', document.querySelector('mat-dialog-container')!).click();
+      button('Cancel', document.querySelector('mat-dialog-container')!).click();
       await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
       expect(store.state.authenticator.state).toBe('active');
     });
@@ -335,9 +335,9 @@ describe('ConnectionsPage', () => {
         state: 'active',
         registeredAt: '2026-10-27T09:00:00Z',
       });
-      button('Usuń').click();
+      button('Remove').click();
       await harness.fixture.whenStable();
-      button('Usuń', document.querySelector('mat-dialog-container')!).click();
+      button('Remove', document.querySelector('mat-dialog-container')!).click();
 
       await until(() => expect(navigation.assign).toHaveBeenCalled());
       const target = new URL(navigation.assign.mock.calls[0][0], location.origin);
@@ -359,7 +359,7 @@ describe('ConnectionsPage', () => {
       );
       await openRoute('/connections?mfa=ok');
 
-      await until(() => expect(text()).toContain('Authenticator usunięty.'));
+      await until(() => expect(text()).toContain('Authenticator removed.'));
       expect(store.state.authenticator.state).toBe('none');
       expect(sessionStorage.getItem('mcp-portal-resume')).toBeNull();
       expect(document.querySelector('mat-dialog-container')).toBeNull();
@@ -377,7 +377,7 @@ describe('ConnectionsPage', () => {
         'somebody-else',
       );
       await openRoute('/connections?mfa=ok');
-      await until(() => expect(text()).toContain('Możesz teraz usunąć Authenticator.'));
+      await until(() => expect(text()).toContain('You can now remove the Authenticator.'));
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(store.state.authenticator.state).toBe('active');
     });
@@ -394,7 +394,7 @@ describe('ConnectionsPage', () => {
         TestBed.inject(SessionService).username(),
       );
       await openRoute('/connections?mfa=ok');
-      await until(() => expect(text()).toContain('Możesz teraz usunąć Authenticator.'));
+      await until(() => expect(text()).toContain('You can now remove the Authenticator.'));
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(store.state.authenticator.state).toBe('active');
     });
@@ -414,9 +414,9 @@ describe('ConnectionsPage', () => {
         state: 'active',
         registeredAt: '2026-10-27T09:00:00Z',
       });
-      button('Usuń').click();
+      button('Remove').click();
       await harness.fixture.whenStable();
-      button('Usuń', document.querySelector('mat-dialog-container')!).click();
+      button('Remove', document.querySelector('mat-dialog-container')!).click();
       await until(() => expect(navigation.assign).toHaveBeenCalled());
       expect(JSON.parse(sessionStorage.getItem('mcp-portal-resume') ?? '{}').intent).toEqual({
         kind: 'remove-authenticator',
@@ -431,7 +431,7 @@ describe('ConnectionsPage', () => {
       });
       configureTestApp();
       await openRoute('/connections?mfa=ok');
-      await until(() => expect(text()).toContain('Możesz teraz usunąć Authenticator.'));
+      await until(() => expect(text()).toContain('You can now remove the Authenticator.'));
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(store.state.authenticator.state).toBe('active');
     });
@@ -440,7 +440,7 @@ describe('ConnectionsPage', () => {
       store.update({ authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' } });
       configureTestApp();
       await openRoute('/connections?mfa=ok');
-      await until(() => expect(text()).toContain('Tożsamość potwierdzona.'));
+      await until(() => expect(text()).toContain('Identity confirmed.'));
     });
 
     it('shows one error for the whole page when the registration cannot be read', async () => {
@@ -451,7 +451,7 @@ describe('ConnectionsPage', () => {
       );
       configureTestApp();
       await openRoute('/connections');
-      await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+      await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
       expect(document.querySelector('table')).toBeNull();
     });
   });

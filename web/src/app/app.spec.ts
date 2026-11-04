@@ -20,12 +20,12 @@ describe('App shell', () => {
     const fixture = await render();
     await until(() => expect(text(fixture.nativeElement)).toContain('Jan Kowalski'));
     const nav = fixture.nativeElement.querySelector('nav');
-    expect(text(nav)).toContain('Serwery MCP');
-    expect(text(nav)).toContain('Połączenia z systemami');
-    expect(text(nav)).toContain('Adres MCP');
-    expect(text(nav)).toContain('Wnioski');
-    expect(text(nav)).not.toContain('Administracja');
-    expect(button('Wyloguj', fixture.nativeElement)).toBeTruthy();
+    expect(text(nav)).toContain('MCP servers');
+    expect(text(nav)).toContain('System connections');
+    expect(text(nav)).toContain('MCP address');
+    expect(text(nav)).toContain('Requests');
+    expect(text(nav)).not.toContain('Administration');
+    expect(button('Sign out', fixture.nativeElement)).toBeTruthy();
   });
 
   it('shows the login screen without a session and redirects to the BFF login', async () => {
@@ -33,11 +33,11 @@ describe('App shell', () => {
     const navigation = configureTestApp();
     const fixture = await render();
     await until(() =>
-      expect(text(fixture.nativeElement)).toContain('Zaloguj się kontem firmowym.'),
+      expect(text(fixture.nativeElement)).toContain('Sign in with your company account.'),
     );
     expect(fixture.nativeElement.querySelector('nav')).toBeNull();
 
-    button('Zaloguj przez konto firmowe', fixture.nativeElement).click();
+    button('Sign in with your company account', fixture.nativeElement).click();
     expect(navigation.assign).toHaveBeenCalledWith('/api/v1/auth/login?returnPath=%2F');
   });
 
@@ -46,9 +46,9 @@ describe('App shell', () => {
     const fixture = await render();
     await until(() => expect(text(fixture.nativeElement)).toContain('Jan Kowalski'));
 
-    button('Wyloguj', fixture.nativeElement).click();
+    button('Sign out', fixture.nativeElement).click();
 
-    await until(() => expect(text(fixture.nativeElement)).toContain('Wylogowano.'));
+    await until(() => expect(text(fixture.nativeElement)).toContain('Signed out.'));
     expect(store.state.session).toBe(false);
   });
 
@@ -64,7 +64,7 @@ describe('App shell', () => {
 
     await TestBed.inject(Router).navigateByUrl('/catalog');
 
-    await until(() => expect(text(fixture.nativeElement)).toContain('Sesja wygasła.'));
+    await until(() => expect(text(fixture.nativeElement)).toContain('Session expired.'));
   });
 
   it('defines no route under the paths the reverse proxy gives to the BFF and the gateway (CC-089)', () => {
@@ -82,7 +82,7 @@ describe('App shell', () => {
     configureTestApp();
     const fixture = await render();
     await until(() =>
-      expect(text(fixture.nativeElement)).toContain('Wystąpił nieoczekiwany błąd.'),
+      expect(text(fixture.nativeElement)).toContain('An unexpected error occurred.'),
     );
   });
 });

@@ -1,12 +1,12 @@
-<h2 mat-dialog-title i18n="@@classify.title">Klasyfikacja narzędzia</h2>
+<h2 mat-dialog-title i18n="@@classify.title">Tool classification</h2>
 <mat-dialog-content>
   <p class="tool">
     <code>{{ data.toolName }}</code>
   </p>
   <p i18n="@@classify.lead">
-    To narzędzie pochodzi z obcego serwera, który nie określa, jak groźna jest operacja. Adapter
-    jest tylko do odczytu: możesz je zatwierdzić wyłącznie jako Odczyt (read). Narzędzie, które
-    zapisuje albo usuwa dane, nie przejdzie przez adapter, więc go nie zatwierdzaj.
+    This tool comes from a foreign server that does not say how dangerous the operation is. The
+    adapter is read only: you can approve the tool only as Read (read). A tool that writes or
+    deletes data will not pass through the adapter, so do not approve it.
   </p>
 
   @if (data.retry; as retry) {
@@ -16,7 +16,7 @@
   @if (data.hints.length) {
     <section class="hints" aria-labelledby="classify-hints">
       <h3 id="classify-hints" class="hint-title" i18n="@@classify.hints">
-        Podpowiedzi serwera (niezaufane, bez wpływu na wybór)
+        Server hints (untrusted, no effect on the choice)
       </h3>
       <ul dir="ltr">
         @for (hint of data.hints; track $index) {
@@ -26,11 +26,11 @@
     </section>
   }
   @if (previousText; as previous) {
-    <p class="muted" i18n="@@classify.previous">Poprzednia klasyfikacja: {{ previous }}.</p>
+    <p class="muted" i18n="@@classify.previous">Previous classification: {{ previous }}.</p>
   }
 
   <fieldset>
-    <legend i18n="@@classify.risk">Ryzyko</legend>
+    <legend i18n="@@classify.risk">Risk</legend>
     @for (option of risks; track option) {
       <label class="choice">
         <input
@@ -48,9 +48,9 @@
   </fieldset>
 
   <fieldset [disabled]="!risk()">
-    <legend i18n="@@classify.action">Akcja</legend>
+    <legend i18n="@@classify.action">Action</legend>
     @if (!risk()) {
-      <p class="muted" i18n="@@classify.pickRiskFirst">Najpierw wybierz ryzyko.</p>
+      <p class="muted" i18n="@@classify.pickRiskFirst">Pick a risk first.</p>
     }
     @for (option of actions(); track option) {
       <label class="choice">
@@ -67,7 +67,7 @@
   </fieldset>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-stroked-button type="button" mat-dialog-close i18n="@@classify.cancel">Anuluj</button>
+  <button mat-stroked-button type="button" mat-dialog-close i18n="@@classify.cancel">Cancel</button>
   <button
     mat-flat-button
     type="button"
@@ -75,6 +75,6 @@
     (click)="confirm()"
     i18n="@@classify.confirm"
   >
-    Zatwierdź z tą klasyfikacją
+    Approve with this classification
   </button>
 </mat-dialog-actions>

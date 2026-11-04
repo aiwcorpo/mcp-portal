@@ -64,9 +64,9 @@ describe('EndpointPage', () => {
     await openRoute('/endpoint');
 
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
-    expect(text()).toContain('Adres MCP');
+    expect(text()).toContain('MCP address');
     expect(text()).not.toContain('Moje linki');
-    expect(text()).toContain(`Na liście będzie około ${usableTools()} narzędzi`);
+    expect(text()).toContain(`The list will have about ${usableTools()} tools`);
     expect(paths.some((path) => path.includes('virtual-servers'))).toBe(false);
   });
 
@@ -74,8 +74,8 @@ describe('EndpointPage', () => {
     configureTestApp();
     await openRoute('/endpoint');
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
-    expect(text()).toContain('Jedna sesja sięga do wszystkich wybranych systemów.');
-    expect(text()).toContain('Tylko odczyt');
+    expect(text()).toContain('One session reaches all selected systems.');
+    expect(text()).toContain('Read-only');
   });
 
   it('sends the chosen systems as a typed parameter and shows the canonical address', async () => {
@@ -90,7 +90,7 @@ describe('EndpointPage', () => {
     await whenAddress('https://mcp.aiwcorpo.pl/mcp?systems=gitlab,jira');
     expect(queries.at(-1)?.get('systems')).toBe('gitlab,jira');
     expect(queries.at(-1)?.has('tools')).toBe(false);
-    expect(text()).toContain('Filtr w adresie: 19 z 512 bajtów');
+    expect(text()).toContain('Filter in the address: 19 of 512 bytes');
   });
 
   it('narrows to read-only and to write-only tools', async () => {
@@ -105,7 +105,7 @@ describe('EndpointPage', () => {
       .filter(
         (tool) => tool.access === 'granted' && !tool.disabled && tool.risk === 'READ_ONLY',
       ).length;
-    await until(() => expect(text()).toContain(`około ${readTools} narzędzi`));
+    await until(() => expect(text()).toContain(`about ${readTools} tools`));
 
     radio('access', 'write').click();
     await whenAddress('https://mcp.aiwcorpo.pl/mcp?access=write');
@@ -164,7 +164,7 @@ describe('EndpointPage', () => {
     radio('access', 'read').click();
     await whenAddress('https://mcp.aiwcorpo.pl/mcp?systems=jira&access=read');
 
-    button('Bez filtra').click();
+    button('No filter').click();
 
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
     expect(radio('access', 'all').checked).toBe(true);
@@ -176,11 +176,11 @@ describe('EndpointPage', () => {
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
 
     expect(checkbox('jira__search_issues').disabled).toBe(false);
-    expect(text()).toContain('Wymaga kodu z Authenticatora.');
+    expect(text()).toContain('Requires a code from the Authenticator.');
     expect(checkbox('gitlab__get_project').disabled).toBe(true);
-    expect(text()).toContain('Wyłączone przez administratora.');
-    expect(text()).toContain('Brak uprawnienia, nie pojawi się na liście.');
-    expect(text()).toContain('Wymaga ponownego połączenia.');
+    expect(text()).toContain('Switched off by an administrator.');
+    expect(text()).toContain('No entitlement, it will not appear in the list.');
+    expect(text()).toContain('Needs reconnecting.');
   });
 
   it('says that a not connected system stays on the list and points to the connection', async () => {
@@ -192,7 +192,7 @@ describe('EndpointPage', () => {
     configureTestApp();
     await openRoute('/endpoint');
     await until(() =>
-      expect(text()).toContain('Konto niepołączone, wywołanie poprosi o połączenie.'),
+      expect(text()).toContain('Account not connected, the call will ask you to connect.'),
     );
     expect(document.querySelector('a[href="/connect/jira"]')).toBeTruthy();
     expect(checkbox('jira__get').disabled).toBe(false);
@@ -235,11 +235,11 @@ describe('EndpointPage', () => {
         checkbox(`jira__operation_number_${String(index).padStart(2, '0')}`).click();
       }
 
-      await until(() => expect(text()).toContain('bajtów. Zamiast wielu narzędzi'));
+      await until(() => expect(text()).toContain('bytes. Instead of many tools'));
       const counter = document.querySelector('[data-testid="query-bytes"]')!.textContent!;
-      expect(Number(/(\d+) z 512/.exec(counter)![1])).toBeGreaterThan(512);
+      expect(Number(/(\d+) of 512/.exec(counter)![1])).toBeGreaterThan(512);
       expect(addressField()).toBeNull();
-      expect(text()).toContain('Adres pojawi się, gdy wybór zmieści się w limicie.');
+      expect(text()).toContain('The address will appear once the selection fits within the limit.');
       await new Promise((resolve) => setTimeout(resolve, 400));
       // The series of clicks produced no request for the part that does not fit; at most the ones that did.
       for (const query of queries.slice(before)) {
@@ -256,7 +256,7 @@ describe('EndpointPage', () => {
       for (let index = 0; index < 20; index += 1) {
         checkbox(`jira__operation_number_${String(index).padStart(2, '0')}`).click();
       }
-      await until(() => expect(text()).toContain('wyklucz kilka narzędzi'));
+      await until(() => expect(text()).toContain('exclude a few tools'));
 
       radio('tool-mode', 'except').click();
       await whenAddress('https://mcp.aiwcorpo.pl/mcp');
@@ -272,9 +272,7 @@ describe('EndpointPage', () => {
       await until(() =>
         expect(document.querySelector('[data-testid="size-warning"]')).toBeTruthy(),
       );
-      expect(text()).toContain(
-        'zawęź adres do systemów, które są potrzebne, albo do samego odczytu',
-      );
+      expect(text()).toContain('narrow the address to the systems you need, or to read-only tools');
       expect(document.querySelector('[data-testid="paging-note"]')).toBeNull();
 
       radio('access', 'read').click();
@@ -303,8 +301,8 @@ describe('EndpointPage', () => {
       configureTestApp();
       await openRoute('/endpoint');
       await until(() => expect(document.querySelector('[data-testid="paging-note"]')).toBeTruthy());
-      expect(text()).toContain('Lista ma około 140 narzędzi.');
-      expect(text()).toContain('100 narzędzi na stronę');
+      expect(text()).toContain('The list has about 140 tools.');
+      expect(text()).toContain('100 tools per page');
     });
   });
 
@@ -330,7 +328,7 @@ describe('EndpointPage', () => {
     checkbox('Jira').click();
 
     await until(() =>
-      expect(text()).toContain('Takiego filtru nie da się zapisać w adresie. Zmień wybór.'),
+      expect(text()).toContain('This filter cannot be saved in the address. Change the selection.'),
     );
     expect(text()).not.toContain('internal detail');
   });
@@ -339,7 +337,7 @@ describe('EndpointPage', () => {
     store.update({ scenario: 'errors' });
     configureTestApp();
     await openRoute('/endpoint');
-    await until(() => expect(text()).toContain('Usługa jest chwilowo niedostępna.'));
+    await until(() => expect(text()).toContain('The service is temporarily unavailable.'));
     expect(addressField()).toBeNull();
   });
 
@@ -359,7 +357,7 @@ describe('EndpointPage', () => {
     tab('Copilot').click();
     await harness.fixture.whenStable();
     await until(() => expect(text()).toContain('.vscode/mcp.json'));
-    button('Kopiuj (Copilot)').click();
+    button('Copy (Copilot)').click();
     expect(copy).toHaveBeenLastCalledWith(
       JSON.stringify({
         servers: { 'aiwcorpo-mcp': { type: 'http', url: 'https://mcp.aiwcorpo.pl/mcp' } },
@@ -370,7 +368,7 @@ describe('EndpointPage', () => {
     await harness.fixture.whenStable();
     await until(() => expect(text()).toContain('[mcp_servers.aiwcorpo-mcp]'));
 
-    button('Kopiuj adres MCP').click();
+    button('Copy MCP address').click();
     expect(copy).toHaveBeenLastCalledWith('https://mcp.aiwcorpo.pl/mcp');
   });
 
@@ -392,7 +390,7 @@ describe('EndpointPage', () => {
     configureTestApp();
     await openRoute('/endpoint');
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
-    await until(() => expect(text()).toContain('Nie udało się pobrać danych.'));
+    await until(() => expect(text()).toContain('Could not load the data.'));
   });
 });
 
@@ -439,7 +437,7 @@ describe('EndpointPage, stale address and empty result', () => {
 
     checkbox('Jira').click();
     await until(() => expect(addressField()).toBeNull());
-    expect(document.body.textContent).not.toContain('Kopiuj adres MCP');
+    expect(document.body.textContent).not.toContain('Copy MCP address');
 
     await until(() => expect(gate.release).not.toBeNull());
     gate.release!();
