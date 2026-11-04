@@ -18,7 +18,7 @@ import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 import pl.aiwcorpo.mcp.portal.bff.support.DevEnvironment;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 
-/** mTLS to the C4 stub of mcp-platform-dev: client certificate required, server name pinned (CC-035). */
+/** mTLS to the C4 stub of the dev stack: client certificate required, server name pinned (CC-035). */
 @Tag("dev-env")
 class UpstreamTlsDevEnvironmentTest {
 
@@ -28,7 +28,7 @@ class UpstreamTlsDevEnvironmentTest {
 
     @BeforeAll
     static void requireEnvironment() {
-        assumeTrue(DEV.keycloakReachable(), "mcp-platform-dev is not running (make up)");
+        assumeTrue(DEV.keycloakReachable(), "the dev stack is not running (make up)");
     }
 
     private static BrokerClient broker(String tlsName, Path clientKeystore) {

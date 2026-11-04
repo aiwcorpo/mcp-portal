@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.core.io.Resource;
 
 /**
- * Adapter {@code mock} of C13 for mcp-platform-dev only: entitlements and requests from a YAML file outside the jar,
+ * Adapter {@code mock} of C13 for the dev stack only: entitlements and requests from a YAML file outside the jar,
  * new requests kept in memory until restart. A request belongs to the user whose identity claim
  * {@code requesterIdClaim} equals the entry's {@code user}; a login without that claim is an adapter error. Only an
  * entitlement of the catalog can be requested.

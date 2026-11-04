@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A running mcp-platform-dev ({@code make up}): configuration read from its {@code .env} and generated
+ * A running dev stack ({@code make up}): configuration read from its {@code .env} and generated
  * {@code .secrets/dev.env} at test time, never copied into this repository.
  */
 public final class DevEnvironment {
@@ -75,7 +75,7 @@ public final class DevEnvironment {
     public String value(String key) {
         String value = values.get(key);
         if (value == null) {
-            throw new IllegalStateException("mcp-platform-dev has no " + key);
+            throw new IllegalStateException("the dev stack has no " + key);
         }
         return value;
     }

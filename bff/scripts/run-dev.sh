@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Runs the BFF on the host (default port 18720). Two modes:
-#   ./scripts/run-dev.sh                  against a running mcp-platform-dev (`make up`); values are read from its .env
+#   ./scripts/run-dev.sh                  against a running dev stack (`make up`); values are read from its .env
 #                                         and generated .secrets/dev.env on every start, nothing is copied here;
-#   PORTAL_MOCKS=1 ./scripts/run-dev.sh   C4/C5 from ./scripts/run-mocks.sh, no mcp-platform-dev needed.
+#   PORTAL_MOCKS=1 ./scripts/run-dev.sh   C4/C5 from ./scripts/run-mocks.sh, no dev stack needed.
 set -euo pipefail
 
 bff_dir="$(cd "$(dirname "$0")/.." && pwd)"
@@ -21,7 +21,7 @@ if [[ -d "$dev_dir" ]]; then
 elif $mocks; then
   dev_dir=""
 else
-  echo "mcp-platform-dev not found at $dev_dir." >&2
+  echo "dev stack not found at $dev_dir." >&2
   echo "Check it out next to this repository or set MCP_PLATFORM_DEV_DIR; without it use PORTAL_MOCKS=1." >&2
   exit 1
 fi
@@ -33,7 +33,7 @@ value() {
     found="$(cat "$dev_dir/.env" "$dev_dir/.secrets/dev.env" 2>/dev/null | sed -n "s/^${key}=//p" | tail -n 1)"
   fi
   if [[ -z "$found" ]] && ! $mocks; then
-    echo "missing $key in ${dev_dir:-mcp-platform-dev} (.env or .secrets/dev.env); run make up there" >&2
+    echo "missing $key in ${dev_dir:-the dev stack} (.env or .secrets/dev.env); run make up there" >&2
     exit 1
   fi
   printf '%s' "$found"

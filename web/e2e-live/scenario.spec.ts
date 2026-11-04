@@ -4,7 +4,7 @@ const SHOTS = process.env['LIVE_SHOTS_DIR'];
 const PASSWORD = process.env['LIVE_ALICE_PASSWORD'];
 const BASE = process.env['LIVE_BASE_URL'] ?? 'http://localhost:18740';
 
-test.skip(!PASSWORD, 'set LIVE_ALICE_PASSWORD (make users in mcp-platform-dev)');
+test.skip(!PASSWORD, 'set LIVE_ALICE_PASSWORD (make users in the dev stack)');
 
 async function shot(page: Page, name: string): Promise<void> {
   if (!SHOTS) return;

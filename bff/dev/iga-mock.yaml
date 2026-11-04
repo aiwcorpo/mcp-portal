@@ -1,4 +1,4 @@
-# Data of the C13 adapter "mock" for mcp-platform-dev (users from keycloak/realm-corp.json).
+# Data of the C13 adapter "mock" for the dev stack (users from keycloak/realm-corp.json).
 # "user" is the value of the claim portal.iga.requester-id-claim (default preferred_username).
 entitlements:
   jira: [mcp-jira-read, mcp-jira-write, mcp-jira-destructive, mcp-jira-proj-ABC, mcp-jira-proj-DEF, mcp-jira-proj-HR]

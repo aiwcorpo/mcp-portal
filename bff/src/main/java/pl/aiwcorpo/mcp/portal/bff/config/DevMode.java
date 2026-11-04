@@ -4,7 +4,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 
 /**
- * Whether the Spring profile {@code dev} is active. Settings that only make sense against mcp-platform-dev (IGA mock,
+ * Whether the Spring profile {@code dev} is active. Settings that only make sense against the dev stack (IGA mock,
  * step-up without acr levels, return to ng serve, plain HTTP to stubs) are refused at start-up without it.
  */
 public record DevMode(boolean enabled) {

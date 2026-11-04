@@ -65,7 +65,7 @@ application), tag `v<version>`. Until then the images are built locally (below) 
 | `portal` | `mcp-portal` | the BFF with the application inside (`PORTAL_WEB_DIST=/app/web`): one container, one origin |
 
 The portal is meant to be exposed under one domain together with the gateway (`/mcp`, `/s/`) and its own API (`/api`), so a
-reverse proxy stands in front of it; the reference configuration is in `mcp-platform-dev` (`proxy/`, `docker-compose.yml`).
+reverse proxy stands in front of it; the reference configuration is in `examples/compose` of `mcp-docs` (`proxy/`, `compose.yaml`).
 The simplest start is the `portal` target:
 
 ```bash

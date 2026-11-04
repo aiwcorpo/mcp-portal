@@ -7,7 +7,7 @@
 #
 # Ports 18721 (C4) and 18722 (C5) are in the range of ws-07 (18720-18729); override with MOCK_BROKER_PORT and
 # MOCK_GATEWAY_ADMIN_PORT. A third process on 18723 (MOCK_IDP_PORT) serves only the OIDC discovery document of the
-# realm, so that the BFF starts without Keycloak; logging in still needs a real Keycloak (mcp-platform-dev). `Prefer: example=<name>` picks another stub example (README of mcp-contracts, "Mocki").
+# realm, so that the BFF starts without Keycloak; logging in still needs a real Keycloak (the dev stack). `Prefer: example=<name>` picks another stub example (README of mcp-contracts, "Mocki").
 set -euo pipefail
 
 bff_dir="$(cd "$(dirname "$0")/.." && pwd)"

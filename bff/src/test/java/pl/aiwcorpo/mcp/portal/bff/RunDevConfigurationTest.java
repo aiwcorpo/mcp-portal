@@ -56,7 +56,7 @@ class RunDevConfigurationTest {
         GATEWAY.start();
     }
 
-    /** The values run-dev.sh exports that do not depend on mcp-platform-dev. */
+    /** The values run-dev.sh exports that do not depend on the dev stack. */
     static Map<String, Object> scriptVariables() {
         return Map.of(
                 "PORTAL_IGA_MOCK_FILE", BFF_DIR.resolve("dev/iga-mock.yaml").toString(),

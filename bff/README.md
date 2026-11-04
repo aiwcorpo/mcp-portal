@@ -11,7 +11,7 @@ Image: `Dockerfile` in the repository root (targets `bff`, `web`, `portal`), `sc
 
 Requires JDK 25 (`scripts/select-jdk.sh` finds it; `JAVA_HOME` takes precedence) and `mcp-contracts` 6.3.2 in `~/.m2` or in the registry. Two modes.
 
-With mocks (no `mcp-platform-dev`; C4/C5 data comes from the WireMock mocks in the contracts jar):
+With mocks (no dev stack; C4/C5 data comes from the WireMock mocks in the contracts jar):
 
 ```bash
 ./mvnw -q test-compile                  # once: downloads the WireMock and contracts jars to ~/.m2
@@ -20,18 +20,18 @@ PORTAL_MOCKS=1 ./scripts/run-dev.sh     # BFF on http://localhost:18720
 ./scripts/run-mocks.sh stop
 ```
 
-Without `mcp-platform-dev` there is no Keycloak: the BFF starts (stub discovery on :18723), `/api/v1/me` returns 401 and
+Without the dev stack there is no Keycloak: the BFF starts (stub discovery on :18723), `/api/v1/me` returns 401 and
 login does not work. You can pass the values explicitly with `PORTAL_OIDC_ISSUER_URI` and `PORTAL_OIDC_CLIENT_SECRET` (for
-example for your own Keycloak). When a `mcp-platform-dev` directory exists (next to the repository, or `MCP_PLATFORM_DEV_DIR`),
+example for your own Keycloak). When a dev stack directory exists (next to the repository, or `MCP_PLATFORM_DEV_DIR`),
 the script takes the issuer and client secret from it, so login works after `make up` there.
 
-With the `mcp-platform-dev` stack (`make up`: Keycloak :18080, C4 and C5 stubs with mTLS):
+With the local dev stack (not public yet; the Compose install in `mcp-docs`, `examples/compose`, runs the platform for everybody) (`make up`: Keycloak :18080, C4 and C5 stubs with mTLS):
 
 ```bash
 ./scripts/run-dev.sh            # BFF on http://localhost:18720 (ws-07 port)
 ```
 
-This mode needs the directory `../../mcp-platform-dev` (another one: `MCP_PLATFORM_DEV_DIR=...`); a missing directory or
+This mode needs the directory `../../mcp-platform-dev`, a checkout of the dev stack that is not public yet (another one: `MCP_PLATFORM_DEV_DIR=...`); a missing directory or
 a missing key in `.env` / `.secrets/dev.env` ends with a readable message. On every start the script reads the
 `mcp-portal-bff` client secret, the keystore password and the ports; nothing is copied into this repository. Any value can
 be overridden with a `PORTAL_*` variable (table below). To use the real broker instead of the stub:
@@ -55,7 +55,7 @@ open 'http://localhost:18720/api/v1/auth/login?returnPath=/'     # log in as ali
 
 ```bash
 ./mvnw test             # unit + API (profile dev) over HTTP (fake IdP, WireMock C4/C5 stubs from mcp-contracts)
-./mvnw test -Pdev-env   # with a real Keycloak and mTLS stubs from mcp-platform-dev (make up, port 18090 free)
+./mvnw test -Pdev-env   # with a real Keycloak and mTLS stubs from the dev stack (make up, port 18090 free)
 ```
 
 | Test | What it checks |
@@ -87,7 +87,7 @@ Everything is set through environment variables (`application.yml`):
 | `PORTAL_TLS_TRUSTSTORE`, `PORTAL_TLS_TRUSTSTORE_PASSWORD` | internal CA | `certs/ca/truststore.p12` |
 | `PORTAL_WEB_DIST` | directory with the built frontend's `index.html` | `../web/dist/portal` |
 | `PORTAL_WEB_LOGIN_RETURN_ORIGIN` | dev only: origin of the `ng serve` frontend the BFF returns to after login (`scheme://host:port`, from configuration, never from the request) | empty; with `npm start` in `web/`: `http://localhost:4200` |
-| `SPRING_PROFILES_ACTIVE` | `dev` only for mcp-platform-dev; without it the BFF will not start with the `mock` IGA adapter, step-up without `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` or `portal.tls.insecure-plain-http-for-tests` | `dev` (set by `run-dev.sh`) |
+| `SPRING_PROFILES_ACTIVE` | `dev` only for the dev stack; without it the BFF will not start with the `mock` IGA adapter, step-up without `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` or `portal.tls.insecure-plain-http-for-tests` | `dev` (set by `run-dev.sh`) |
 | `PORTAL_LIMIT_SECRET_WRITE_MAX`, `PORTAL_LIMIT_SECRET_WRITE_WINDOW` | token write (`PUT .../secret`): at most this many requests per session in the window, then `429` with `Retry-After` (CC-156) | `10`, `1m` |
 | `PORTAL_LIMIT_AUTHENTICATOR_MAX`, `PORTAL_LIMIT_AUTHENTICATOR_WINDOW` | Authenticator writes (start, removal, confirmation) per session | `10`, `10m` |
 | `PORTAL_IGA_ADAPTER` | C13 adapter: `keycloak-groups` or `mock` (`dev` only); unset is a startup error | `mock` (profile `dev`) |
@@ -159,7 +159,7 @@ by `state` in the current user's session (one use, 15 min, at most 8 at a time),
 `/v/<slug>/mcp`) were dropped in contracts 5.0.0 (CC-175, CC-177) in favour of `GET /api/v1/me/mcp-endpoint` (below).
 
 `clientConfigs.claudeCode` is `claude mcp add --transport http [--client-id <id>] [--callback-port <port>] aiwcorpo-mcp "<address>"`.
-Keycloak in mcp-platform-dev does not allow dynamic client registration, so without both flags Authenticate in Claude Code does
+Keycloak in the dev stack does not allow dynamic client registration, so without both flags Authenticate in Claude Code does
 not work; profile `dev` sets `claude-code` and `33418` (the `claude-code` client in the realm needs the redirect URI
 `http://localhost:33418/callback`). Production with Entra ID may need a different client or none, so the flags are off by
 default. Copilot and Codex get only the address: there is no confirmed field for a client id in their configuration (see
@@ -225,12 +225,12 @@ has no decision endpoint (`POST /api/v1/confirmations/{id}` is 405).
 ## OIDC with separate addresses (no discovery)
 
 When the BFF in a container sees the IdP under a different address than the browser does, discovery at `issuer-uri` needed a
-relay on the public address (`idp-relay` in mcp-platform-dev). Instead, `PORTAL_OIDC_TOKEN_URI` switches to registration from
+relay on the public address (`idp-relay` in the dev stack). Instead, `PORTAL_OIDC_TOKEN_URI` switches to registration from
 explicit addresses, and then `PORTAL_OIDC_AUTHORIZATION_URI` (public address, for the browser) and `PORTAL_OIDC_JWK_SET_URI` are
 mandatory too; `PORTAL_OIDC_USER_INFO_URI` and `PORTAL_OIDC_END_SESSION_URI` (IdP logout over the back channel) are optional.
 `PORTAL_OIDC_ISSUER_URI` remains the expected `iss` (compared, not fetched). Http-only addresses are allowed in profile `dev`; the
 browser-facing address is https, or http on loopback in dev. Without `PORTAL_OIDC_TOKEN_URI`, discovery works as before. For
-mcp-platform-dev (compose change on the ws-01 side):
+the dev stack (compose change):
 `PORTAL_OIDC_AUTHORIZATION_URI=https://localhost:18746/realms/corp/protocol/openid-connect/auth`,
 `PORTAL_OIDC_TOKEN_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/token`,
 `PORTAL_OIDC_JWK_SET_URI=http://keycloak:8080/realms/corp/protocol/openid-connect/certs`,

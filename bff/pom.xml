@@ -118,7 +118,7 @@
     </build>
 
     <profiles>
-        <!-- Integration tests against Keycloak and the C4/C5 stubs of a running mcp-platform-dev (make up). -->
+        <!-- Integration tests against Keycloak and the C4/C5 stubs of a running dev stack (make up). -->
         <profile>
             <id>dev-env</id>
             <build>

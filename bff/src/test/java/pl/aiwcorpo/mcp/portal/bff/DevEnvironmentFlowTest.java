@@ -30,7 +30,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * End to end against mcp-platform-dev: Keycloak realm corp (real login, refresh, token exchange, back-channel
+ * End to end against the dev stack: Keycloak realm corp (real login, refresh, token exchange, back-channel
  * logout) and the C4/C5 contract stubs over mTLS with pinned TLS names. The BFF listens on 18090 because that is
  * the redirect URI registered for {@code mcp-portal-bff}. Run with {@code ./mvnw test -Pdev-env} after
  * {@code make up}.
@@ -39,7 +39,7 @@ import tools.jackson.databind.json.JsonMapper;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("dev")
 @Import(DevEnvironmentFlowTest.TestClock.class)
-@EnabledIf(value = "realmIsReady", disabledReason = "mcp-platform-dev is not running, or realm corp does not list "
+@EnabledIf(value = "realmIsReady", disabledReason = "the dev stack is not running, or realm corp does not list "
         + "http://localhost:18090/api/v1/auth/callback for mcp-portal-bff (ws-01, CC-089)")
 class DevEnvironmentFlowTest {
 
