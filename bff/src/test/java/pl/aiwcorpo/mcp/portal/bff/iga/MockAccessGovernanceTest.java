@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,17 @@ class MockAccessGovernanceTest {
         assertThat(iga.catalog("opensearch")).filteredOn(entitlement -> entitlement.name().equals("mcp-opensearch-ops"))
                 .singleElement().satisfies(entitlement -> assertThat(entitlement.description())
                         .contains("get_cluster_health", "get_backend_info"));
+    }
+
+    @Test
+    void devCatalogDescriptionsAreEnglish() {
+        MockAccessGovernance iga = new MockAccessGovernance(new FileSystemResource("dev/iga-mock.yaml"),
+                "preferred_username", Clock.systemUTC());
+        for (String system : List.of("jira", "confluence", "gitlab", "servicedesk", "opensearch")) {
+            assertThat(iga.catalog(system)).extracting(AccessGovernance.Entitlement::description)
+                    .filteredOn(description -> description != null)
+                    .isNotEmpty().allSatisfy(description -> assertThat(description).matches("[\\x20-\\x7E]+"));
+        }
     }
 
     @Test

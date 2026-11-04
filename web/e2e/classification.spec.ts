@@ -4,13 +4,13 @@ test('classify a tool of an adapter: nothing is preselected, only fitting pairs 
   page,
 }) => {
   await page.goto('/admin?mockAdmin=in&mockAdapter=in');
-  await expect(page.getByRole('row', { name: /jira__delete_comment/ })).toContainText(
+  await expect(page.getByRole('row', { name: /jira__edit_comment/ })).toContainText(
     'Source: adapter',
   );
-  await page.getByRole('button', { name: 'Show differences (jira__delete_comment)' }).click();
+  await page.getByRole('button', { name: 'Show differences (jira__edit_comment)' }).click();
   await expect(page.getByText('risk and action: to be assigned by an administrator')).toBeVisible();
   await page
-    .getByRole('button', { name: 'Classify and approve (jira__delete_comment)' })
+    .getByRole('button', { name: 'Classify and approve (jira__edit_comment)' })
     .click();
 
   const dialog = page.getByRole('dialog', { name: 'Tool classification' });
@@ -27,8 +27,8 @@ test('classify a tool of an adapter: nothing is preselected, only fitting pairs 
   await expect(dialog.getByRole('radio', { name: /^(update|delete|admin):/ })).toHaveCount(0);
   await confirm.click();
 
-  await expect(page.getByText('Approved the definition of jira__delete_comment.')).toBeVisible();
-  await expect(page.getByRole('row', { name: /jira__delete_comment/ })).toContainText(
+  await expect(page.getByText('Approved the definition of jira__edit_comment.')).toBeVisible();
+  await expect(page.getByRole('row', { name: /jira__edit_comment/ })).toContainText(
     'Approved · Read',
   );
 });
@@ -90,9 +90,9 @@ test('a gateway that does not flag a voided classification: the 422 risk_lowered
   page,
 }) => {
   await page.goto('/admin?mockAdmin=in&mockAdapter=in');
-  await page.getByRole('button', { name: 'Show differences (jira__merge_issues)' }).click();
+  await page.getByRole('button', { name: 'Show differences (jira__assign_issue)' }).click();
   await expect(page.getByText('Risk lowering.')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Classify and approve (jira__merge_issues)' }).click();
+  await page.getByRole('button', { name: 'Classify and approve (jira__assign_issue)' }).click();
   const dialog = page.getByRole('dialog', { name: 'Tool classification' });
   await dialog.getByLabel('Read READ_ONLY').check();
   await dialog.getByRole('button', { name: 'Approve with this classification' }).click();
@@ -101,5 +101,5 @@ test('a gateway that does not flag a voided classification: the 422 risk_lowered
     .getByRole('button', { name: 'Approve risk lowering' })
     .click();
 
-  await expect(page.getByText('Approved the definition of jira__merge_issues.')).toBeVisible();
+  await expect(page.getByText('Approved the definition of jira__assign_issue.')).toBeVisible();
 });

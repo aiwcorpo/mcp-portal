@@ -394,7 +394,7 @@ export function mockRequests(state: Readonly<MockState>, now: number = Date.now(
 }
 
 function isSystem(value: string | null): value is SystemId {
-  return value !== null && Object.hasOwn(IGA_CATALOG, value);
+  return value !== null && Object.hasOwn(IGA_ENTITLEMENTS, value);
 }
 
 function toAccessRequest(request: MockRequest): AccessRequest {
@@ -406,33 +406,51 @@ function toAccessRequest(request: MockRequest): AccessRequest {
   };
 }
 
-/** What the IGA offers per system (C13 `catalog`); descriptions are the IGA's own text. */
-const IGA_CATALOG: Partial<Record<SystemId, RequestableEntitlement[]>> = {
-  jira: [
-    { entitlement: 'mcp-jira-read', description: 'Odczyt zgłoszeń w Jirze.' },
-    {
-      entitlement: 'mcp-jira-write',
-      description: 'Tworzenie i zmiana zgłoszeń oraz komentarze w Jirze.',
-    },
-    {
-      entitlement: 'mcp-jira-destructive',
-      description:
-        'Daje dostęp do narzędzi nieodwracalnych w Jirze, np. jira__delete_issue. Każde użycie wymaga kodu z Authenticatora.',
-    },
-  ],
-  confluence: [
-    { entitlement: 'mcp-confluence-read', description: 'Odczyt stron Confluence.' },
-    { entitlement: 'mcp-confluence-write' },
-  ],
-  gitlab: [
-    { entitlement: 'mcp-gitlab-read', description: 'Odczyt projektów i merge requestów.' },
-    { entitlement: 'mcp-gitlab-write', description: 'Komentarze i zmiany w merge requestach.' },
-  ],
-  servicedesk: [
-    { entitlement: 'mcp-servicedesk-read', description: 'Odczyt zgłoszeń serwisowych.' },
-  ],
-  opensearch: [{ entitlement: 'mcp-opensearch-read', description: 'Odczyt logów w OpenSearch.' }],
+/**
+ * What the IGA offers per system (C13 `catalog`); descriptions are the IGA's own text, so the mock answers in the language
+ * of the page the way a real IGA would answer in its own. English matches dev/iga-mock.yaml of the BFF.
+ */
+const IGA_DESCRIPTIONS: Record<'en' | 'pl', Record<string, string>> = {
+  en: {
+    'mcp-jira-read': 'Read access to Jira issues and projects',
+    'mcp-jira-write': 'Create and update Jira issues',
+    'mcp-jira-destructive':
+      'Grants irreversible Jira tools such as jira__delete_issue. Every use needs a code from the Authenticator.',
+    'mcp-confluence-read': 'Read access to Confluence spaces',
+    'mcp-gitlab-read': 'Read access to GitLab projects',
+    'mcp-gitlab-write': 'Push and merge request access to GitLab projects',
+    'mcp-servicedesk-read': 'Read access to Service Desk tickets',
+    'mcp-opensearch-read': 'Search access to OpenSearch indexes',
+  },
+  pl: {
+    'mcp-jira-read': 'Odczyt zgłoszeń w Jirze.',
+    'mcp-jira-write': 'Tworzenie i zmiana zgłoszeń oraz komentarze w Jirze.',
+    'mcp-jira-destructive':
+      'Daje dostęp do narzędzi nieodwracalnych w Jirze, np. jira__delete_issue. Każde użycie wymaga kodu z Authenticatora.',
+    'mcp-confluence-read': 'Odczyt stron Confluence.',
+    'mcp-gitlab-read': 'Odczyt projektów i merge requestów.',
+    'mcp-gitlab-write': 'Komentarze i zmiany w merge requestach.',
+    'mcp-servicedesk-read': 'Odczyt zgłoszeń serwisowych.',
+    'mcp-opensearch-read': 'Odczyt logów w OpenSearch.',
+  },
 };
+
+const IGA_ENTITLEMENTS: Partial<Record<SystemId, string[]>> = {
+  jira: ['mcp-jira-read', 'mcp-jira-write', 'mcp-jira-destructive'],
+  confluence: ['mcp-confluence-read', 'mcp-confluence-write'],
+  gitlab: ['mcp-gitlab-read', 'mcp-gitlab-write'],
+  servicedesk: ['mcp-servicedesk-read'],
+  opensearch: ['mcp-opensearch-read'],
+};
+
+function igaCatalog(system: SystemId): RequestableEntitlement[] | undefined {
+  const language =
+    typeof document !== 'undefined' && document.documentElement.lang === 'pl' ? 'pl' : 'en';
+  return IGA_ENTITLEMENTS[system]?.map((entitlement) => {
+    const description = IGA_DESCRIPTIONS[language][entitlement];
+    return description === undefined ? { entitlement } : { entitlement, description };
+  });
+}
 
 function csrfValid(request: Request, cookies: Record<string, string>): boolean {
   const header = request.headers.get('X-XSRF-TOKEN');
@@ -568,7 +586,7 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       if (store.state.iga === 'groups') {
         return failure('not_requestable', 422);
       }
-      const offered = IGA_CATALOG[system] ?? [];
+      const offered = igaCatalog(system) ?? [];
       return HttpResponse.json(offered, { headers: { 'X-Request-Id': MOCK_REQUEST_ID } });
     }),
     http.post(at('/api/v1/access-requests'), async ({ request, cookies }) => {
@@ -583,9 +601,7 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       if (iga === 'down') {
         return unavailable();
       }
-      const known = Object.values(IGA_CATALOG).some((list) =>
-        list?.some((item) => item.entitlement === entitlement),
-      );
+      const known = Object.values(IGA_ENTITLEMENTS).some((list) => list?.includes(entitlement));
       if (iga === 'groups' || !known) {
         return failure('not_requestable', 422);
       }

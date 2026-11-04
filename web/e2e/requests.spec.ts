@@ -11,7 +11,7 @@ test('request an entitlement from a server row: choose it, see its description, 
   await expect(dialog.getByText('System: Confluence')).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Submit request' })).toBeDisabled();
   await dialog.getByLabel('Entitlement').selectOption('mcp-confluence-read');
-  await expect(dialog.getByText('Odczyt stron Confluence.')).toBeVisible();
+  await expect(dialog.getByText('Read access to Confluence spaces')).toBeVisible();
   await expect(dialog.getByText('Description from the entitlement system')).toBeVisible();
   await dialog.getByRole('button', { name: 'Submit request' }).click();
 

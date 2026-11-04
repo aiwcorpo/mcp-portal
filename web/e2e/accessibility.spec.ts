@@ -70,11 +70,11 @@ for (const scheme of ['dark', 'light'] as const) {
   }) => {
     await page.goto('/admin?mockAdmin=in&mockAdapter=in');
     await useScheme(page, scheme);
-    await page.getByRole('button', { name: 'Show differences (jira__delete_comment)' }).click();
+    await page.getByRole('button', { name: 'Show differences (jira__edit_comment)' }).click();
     await expect(page.getByText('Source: foreign server adapter.')).toBeVisible();
     await expectNoViolations(page);
     await page
-      .getByRole('button', { name: 'Classify and approve (jira__delete_comment)' })
+      .getByRole('button', { name: 'Classify and approve (jira__edit_comment)' })
       .click();
     const dialog = page.getByRole('dialog', { name: 'Tool classification' });
     await dialog.getByLabel('Read READ_ONLY').check();

@@ -144,10 +144,10 @@ for (const lang of ['en', 'pl'] as const) {
 
       await page.goto('/admin?mockAdmin=in&mockAdapter=in');
       await page
-        .getByRole('button', { name: `${t('Show differences')} (jira__delete_comment)` })
+        .getByRole('button', { name: `${t('Show differences')} (jira__edit_comment)` })
         .click();
       await page
-        .getByRole('button', { name: `${t('Classify and approve')} (jira__delete_comment)` })
+        .getByRole('button', { name: `${t('Classify and approve')} (jira__edit_comment)` })
         .click();
       const dialog = page.getByRole('dialog', { name: t('Tool classification') });
       await dialog.getByLabel(/READ_ONLY/).check();
@@ -282,11 +282,11 @@ for (const lang of ['en', 'pl'] as const) {
     test('administration approval dialogs and the step-up return', async ({ page }) => {
       await page.goto('/admin?mockAdmin=in');
       await page
-        .getByRole('button', { name: `${t('Show differences')} (gitlab__delete_branch)` })
+        .getByRole('button', { name: `${t('Show differences')} (jira__delete_issue)` })
         .click();
       await shot(page, '18a-risk-lowering-list');
       await page
-        .getByRole('button', { name: `${t('Approve risk lowering')} (gitlab__delete_branch)` })
+        .getByRole('button', { name: `${t('Approve risk lowering')} (jira__delete_issue)` })
         .click();
       await expect(page.getByRole('dialog', { name: t('Approve risk lowering?') })).toBeVisible();
       await shot(page, '18b-risk-lowering-dialog');

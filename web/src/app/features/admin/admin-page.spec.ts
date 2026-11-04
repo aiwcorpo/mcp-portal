@@ -59,13 +59,13 @@ describe('AdminPage', () => {
     expect(text(serverRow('Confluence'))).toContain('1.5.0');
     expect(text(serverRow('Confluence'))).toContain('new: 1, changed: 1');
     expect(text(serverRow('Confluence'))).toContain('Pending approval');
-    expect(text(serverRow('Jira'))).toContain('changed: 1');
+    expect(text(serverRow('Jira'))).toContain('changed: 2');
     expect(text(serverRow('Service Desk'))).toContain('Active');
     expect(text(serverRow('OpenSearch'))).toContain('Disabled');
     expect(text()).toContain('Pending approval: 4');
 
-    expect(text(toolRow('confluence__archive_page'))).toContain('New · Write');
-    expect(text(toolRow('confluence__archive_page'))).toContain('Source: CI');
+    expect(text(toolRow('confluence__add_label'))).toContain('New · Write');
+    expect(text(toolRow('confluence__add_label'))).toContain('Source: CI');
     expect(text(toolRow('confluence__update_page'))).toContain('Changed · Write');
     expect(text(toolRow('confluence__get_page'))).toContain('Approved · Read');
     expect(text(toolRow('jira__update_issue'))).toContain('Source: server');
@@ -142,18 +142,18 @@ describe('AdminPage', () => {
 
   it('shows a new tool with an empty "before" and approves it', async () => {
     await openAdmin();
-    await openDiff('confluence__archive_page');
+    await openDiff('confluence__add_label');
 
     expect(text()).toContain('Before (none, new tool)');
     expect(text()).toContain('Source: CI pipeline (reviewed commit), version 1.5.0.');
-    button('Approve definition (confluence__archive_page)').click();
+    button('Approve definition (confluence__add_label)').click();
 
-    await until(() => expect(text()).toContain('Approved the definition of confluence__archive_page.'));
+    await until(() => expect(text()).toContain('Approved the definition of confluence__add_label.'));
     await until(() =>
-      expect(text(toolRow('confluence__archive_page'))).toContain('Approved · Write'),
+      expect(text(toolRow('confluence__add_label'))).toContain('Approved · Write'),
     );
     expect(text(serverRow('Confluence'))).toContain('changed: 1');
-    expect(store.state.registryApproved).toEqual(['mcp-confluence/archive_page']);
+    expect(store.state.registryApproved).toEqual(['mcp-confluence/add_label']);
   });
 
   it('refuses a definition that changed after it was shown (409), shows the new one and approves it on a second try', async () => {
@@ -164,7 +164,7 @@ describe('AdminPage', () => {
     button('Approve definition (confluence__update_page)').click();
 
     await until(() => expect(text()).toContain('The definition changed since it was opened.'));
-    await until(() => expect(text()).toContain('Zmiana 1.'));
+    await until(() => expect(text()).toContain('Change 1.'));
     expect(store.state.registryApproved).toEqual([]);
 
     button('Approve definition (confluence__update_page)').click();
@@ -196,9 +196,9 @@ describe('AdminPage', () => {
     it('names the old and the new risk, warns about the lost code and labels the button', async () => {
       await openAdmin();
       await until(() =>
-        expect(text(toolRow('gitlab__delete_branch'))).toContain('Risk lowering · Write'),
+        expect(text(toolRow('jira__delete_issue'))).toContain('Risk lowering · Write'),
       );
-      await openDiff('gitlab__delete_branch', 'Approve risk lowering');
+      await openDiff('jira__delete_issue', 'Approve risk lowering');
 
       expect(text()).toContain('Risk lowering. The tool risk drops from Delete to Write.');
       expect(text()).toContain('the requirement for a code from the Authenticator goes away');
@@ -206,8 +206,8 @@ describe('AdminPage', () => {
 
     it('sends nothing when the dialog is cancelled and no acceptRiskLowering without it', async () => {
       await openAdmin();
-      await openDiff('gitlab__delete_branch', 'Approve risk lowering');
-      button('Approve risk lowering (gitlab__delete_branch)').click();
+      await openDiff('jira__delete_issue', 'Approve risk lowering');
+      button('Approve risk lowering (jira__delete_issue)').click();
       await until(() => expect(document.querySelector('mat-dialog-container')).toBeTruthy());
       await confirmDialog('Cancel');
       await until(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
@@ -218,9 +218,9 @@ describe('AdminPage', () => {
       const navigation = configureTestApp();
       await TestBed.inject(SessionService).load();
       await openRoute('/admin');
-      await openDiff('gitlab__delete_branch', 'Approve risk lowering');
+      await openDiff('jira__delete_issue', 'Approve risk lowering');
 
-      button('Approve risk lowering (gitlab__delete_branch)').click();
+      button('Approve risk lowering (jira__delete_issue)').click();
       await confirmDialog('Approve risk lowering');
       await until(() =>
         expect(navigation.assign).toHaveBeenCalledWith(
@@ -235,18 +235,18 @@ describe('AdminPage', () => {
       expect(store.state.registryApproved).toEqual([]);
 
       store.update({ mfaFresh: true });
-      button('Approve risk lowering (gitlab__delete_branch)').click();
+      button('Approve risk lowering (jira__delete_issue)').click();
       await confirmDialog('Approve risk lowering');
-      await until(() => expect(text()).toContain('Approved the definition of gitlab__delete_branch.'));
-      expect(store.state.registryApproved).toEqual(['mcp-gitlab/delete_branch']);
+      await until(() => expect(text()).toContain('Approved the definition of jira__delete_issue.'));
+      expect(store.state.registryApproved).toEqual(['mcp-jira/delete_issue']);
     });
 
     async function sendToTheMfa() {
       const navigation = configureTestApp();
       await TestBed.inject(SessionService).load();
       const harness = await openRoute('/admin');
-      await openDiff('gitlab__delete_branch', 'Approve risk lowering');
-      button('Approve risk lowering (gitlab__delete_branch)').click();
+      await openDiff('jira__delete_issue', 'Approve risk lowering');
+      button('Approve risk lowering (jira__delete_issue)').click();
       await confirmDialog('Approve risk lowering');
       await until(() => expect(navigation.assign).toHaveBeenCalled());
       await until(() => expect(bodies.length).toBe(1));
@@ -261,8 +261,8 @@ describe('AdminPage', () => {
       await harness.navigateByUrl('/catalog');
       await harness.navigateByUrl('/admin?mfa=ok');
 
-      await until(() => expect(text()).toContain('Approved the definition of gitlab__delete_branch.'));
-      expect(store.state.registryApproved).toEqual(['mcp-gitlab/delete_branch']);
+      await until(() => expect(text()).toContain('Approved the definition of jira__delete_issue.'));
+      expect(store.state.registryApproved).toEqual(['mcp-jira/delete_issue']);
       expect(bodies.at(-1)).toEqual({
         definitionHash: expect.stringMatching(/^sha256:/),
         acceptRiskLowering: true,
@@ -274,7 +274,7 @@ describe('AdminPage', () => {
     it('approves nothing when the definition changed while the administrator was at the IdP', async () => {
       const harness = await sendToTheMfa();
 
-      changePendingDefinition(store, 'mcp-gitlab', 'delete_branch');
+      changePendingDefinition(store, 'mcp-jira', 'delete_issue');
       store.update({ mfaFresh: true });
       await harness.navigateByUrl('/catalog');
       await harness.navigateByUrl('/admin?mfa=ok');
@@ -304,8 +304,8 @@ describe('AdminPage', () => {
         JSON.stringify({
           intent: {
             kind: 'approve-tool',
-            serverId: 'mcp-gitlab',
-            tool: 'delete_branch',
+            serverId: 'mcp-jira',
+            tool: 'delete_issue',
             hash: 'sha256:' + 'a'.repeat(64),
             acceptRiskLowering: true,
           },
@@ -323,10 +323,10 @@ describe('AdminPage', () => {
 
     it('does not send the field for an ordinary approval', async () => {
       await openAdmin();
-      await openDiff('confluence__archive_page');
-      button('Approve definition (confluence__archive_page)').click();
+      await openDiff('confluence__add_label');
+      button('Approve definition (confluence__add_label)').click();
       await until(() =>
-        expect(text()).toContain('Approved the definition of confluence__archive_page.'),
+        expect(text()).toContain('Approved the definition of confluence__add_label.'),
       );
       await until(() =>
         expect(bodies).toEqual([{ definitionHash: expect.stringMatching(/^sha256:/) }]),
@@ -337,7 +337,7 @@ describe('AdminPage', () => {
   it('shows the 422 risk_lowered text and keeps that definition from being sent again', async () => {
     let posts = 0;
     server.use(
-      http.post('/api/v1/admin/registry/servers/mcp-confluence/tools/archive_page/approve', () => {
+      http.post('/api/v1/admin/registry/servers/mcp-confluence/tools/add_label/approve', () => {
         posts += 1;
         return HttpResponse.json(
           { error: 'manifest_rejected', reason: 'risk_lowered', message: 'lowers risk' },
@@ -346,16 +346,16 @@ describe('AdminPage', () => {
       }),
     );
     await openAdmin();
-    await openDiff('confluence__archive_page');
-    button('Approve definition (confluence__archive_page)').click();
+    await openDiff('confluence__add_label');
+    button('Approve definition (confluence__add_label)').click();
     await until(() => expect(text()).toContain("The new definition lowers the tool's risk level"));
     expect(text()).not.toContain('lowers risk');
     await until(() =>
       expect(
-        button('Approve definition (confluence__archive_page)').getAttribute('aria-disabled'),
+        button('Approve definition (confluence__add_label)').getAttribute('aria-disabled'),
       ).toBe('true'),
     );
-    button('Approve definition (confluence__archive_page)').click();
+    button('Approve definition (confluence__add_label)').click();
     expect(posts).toBe(1);
   });
 
@@ -495,13 +495,13 @@ describe('AdminPage', () => {
 
   it('says so when somebody else approved the definition meanwhile (404)', async () => {
     await openAdmin();
-    await until(() => expect(button('Show differences (confluence__archive_page)')).toBeTruthy());
-    store.update({ registryApproved: ['mcp-confluence/archive_page'] });
+    await until(() => expect(button('Show differences (confluence__add_label)')).toBeTruthy());
+    store.update({ registryApproved: ['mcp-confluence/add_label'] });
 
-    button('Show differences (confluence__archive_page)').click();
+    button('Show differences (confluence__add_label)').click();
 
     await until(() =>
-      expect(text(toolRow('confluence__archive_page'))).toContain('Approved · Write'),
+      expect(text(toolRow('confluence__add_label'))).toContain('Approved · Write'),
     );
   });
 

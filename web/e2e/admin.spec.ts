@@ -38,7 +38,7 @@ test('a definition that changes while it is open is refused (409) and shown agai
   page,
 }) => {
   await page.goto('/admin?mockAdmin=in');
-  await page.getByRole('button', { name: 'Show differences (confluence__archive_page)' }).click();
+  await page.getByRole('button', { name: 'Show differences (confluence__add_label)' }).click();
   await expect(page.getByText('Before (none, new tool)')).toBeVisible();
 
   await page.evaluate(() =>
@@ -46,18 +46,18 @@ test('a definition that changes while it is open is refused (409) and shown agai
       window as unknown as {
         __portalMock: { changePendingDefinition: (server: string, tool: string) => void };
       }
-    ).__portalMock.changePendingDefinition('mcp-confluence', 'archive_page'),
+    ).__portalMock.changePendingDefinition('mcp-confluence', 'add_label'),
   );
   await page
-    .getByRole('button', { name: 'Approve definition (confluence__archive_page)' })
+    .getByRole('button', { name: 'Approve definition (confluence__add_label)' })
     .click();
 
   await expect(page.getByText('The definition changed since it was opened.')).toBeVisible();
-  await expect(page.getByText(/Moves a page to the archive\. Zmiana 1\./).first()).toBeVisible();
+  await expect(page.getByText(/Adds a label to a page\. Change 1\./).first()).toBeVisible();
   await page
-    .getByRole('button', { name: 'Approve definition (confluence__archive_page)' })
+    .getByRole('button', { name: 'Approve definition (confluence__add_label)' })
     .click();
-  await expect(page.getByText('Approved the definition of confluence__archive_page.')).toBeVisible();
+  await expect(page.getByText('Approved the definition of confluence__add_label.')).toBeVisible();
 });
 
 test('a definition from the running server carries a clear warning and a second confirmation; a risk lowering needs a dialog and a fresh MFA, then resumes without a second click', async ({
@@ -77,16 +77,16 @@ test('a definition from the running server carries a clear warning and a second 
   await dialog.getByRole('button', { name: 'Cancel' }).click();
   await expect(page.getByText('Approved the definition of jira__update_issue.')).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Show differences (gitlab__delete_branch)' }).click();
+  await page.getByRole('button', { name: 'Show differences (jira__delete_issue)' }).click();
   await expect(page.getByText(/The tool risk drops from Delete to Write/)).toBeVisible();
   await page
-    .getByRole('button', { name: 'Approve risk lowering (gitlab__delete_branch)' })
+    .getByRole('button', { name: 'Approve risk lowering (jira__delete_issue)' })
     .click();
   const lowering = page.getByRole('dialog', { name: 'Approve risk lowering?' });
   await lowering.getByRole('button', { name: 'Approve risk lowering' }).click();
 
   // The mock IdP gives a fresh MFA and returns to the admin page, where the approval is carried out by itself (U12).
-  await expect(page.getByText('Approved the definition of gitlab__delete_branch.')).toBeVisible();
+  await expect(page.getByText('Approved the definition of jira__delete_issue.')).toBeVisible();
 });
 
 test('the log says "Too many calls" for a call refused by a limit', async ({ page }) => {

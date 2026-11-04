@@ -123,7 +123,7 @@ const SEED: SeedServer[] = [
         name: 'get_page',
         approved: entry(
           'get_page',
-          'Pobranie strony',
+          'Get page',
           'Returns one Confluence page.',
           'READ_ONLY',
           'read',
@@ -133,18 +133,18 @@ const SEED: SeedServer[] = [
         ),
       },
       {
-        name: 'archive_page',
+        name: 'add_label',
         pending: {
           source: 'ci',
           version: '1.5.0',
           entry: entry(
-            'archive_page',
-            'Archiwizacja strony',
-            'Moves a page to the archive.',
+            'add_label',
+            'Add label',
+            'Adds a label to a page.',
             'UPDATE',
             'update',
-            { pageId: PAGE_ID },
-            ['pageId'],
+            { pageId: PAGE_ID, label: { type: 'string', maxLength: 64 } },
+            ['pageId', 'label'],
             [{ argument: 'pageId', type: 'Confluence::Page' }],
           ),
         },
@@ -153,7 +153,7 @@ const SEED: SeedServer[] = [
         name: 'update_page',
         approved: entry(
           'update_page',
-          'Zmiana strony',
+          'Update page',
           'Edit the content of a page.',
           'UPDATE',
           'update',
@@ -170,7 +170,7 @@ const SEED: SeedServer[] = [
           version: '1.5.0',
           entry: entry(
             'update_page',
-            'Zmiana strony',
+            'Update page',
             'Edit the content and the parent of a page.',
             'UPDATE',
             'update',
@@ -238,6 +238,33 @@ const SEED: SeedServer[] = [
           ),
         },
       },
+      {
+        name: 'delete_issue',
+        approved: entry(
+          'delete_issue',
+          'Delete issue',
+          'Deletes an issue.',
+          'DESTRUCTIVE',
+          'delete',
+          { issueKey: { type: 'string', pattern: '^[A-Z][A-Z0-9]+-[0-9]+$', maxLength: 32 } },
+          ['issueKey'],
+          [{ argument: 'issueKey', type: 'Jira::Issue' }],
+        ),
+        pending: {
+          source: 'ci',
+          version: '1.4.0',
+          entry: entry(
+            'delete_issue',
+            'Delete issue',
+            'Deletes an issue.',
+            'UPDATE',
+            'update',
+            { issueKey: { type: 'string', pattern: '^[A-Z][A-Z0-9]+-[0-9]+$', maxLength: 32 } },
+            ['issueKey'],
+            [{ argument: 'issueKey', type: 'Jira::Issue' }],
+          ),
+        },
+      },
     ],
   },
   {
@@ -246,35 +273,16 @@ const SEED: SeedServer[] = [
     version: '1.8.0',
     tools: [
       {
-        name: 'delete_branch',
+        name: 'list_merge_requests',
         approved: entry(
-          'delete_branch',
-          'Delete branch',
-          'Deletes a branch of a project.',
-          'DESTRUCTIVE',
-          'delete',
-          {
-            project: { type: 'string', maxLength: 255 },
-            branch: { type: 'string', maxLength: 255 },
-          },
-          ['project', 'branch'],
+          'list_merge_requests',
+          'List merge requests',
+          'Lists the merge requests of a project.',
+          'READ_ONLY',
+          'read',
+          { project: { type: 'string', maxLength: 255 } },
+          ['project'],
         ),
-        pending: {
-          source: 'ci',
-          version: '1.8.0',
-          entry: entry(
-            'delete_branch',
-            'Delete branch',
-            'Deletes a branch of a project.',
-            'UPDATE',
-            'update',
-            {
-              project: { type: 'string', maxLength: 255 },
-              branch: { type: 'string', maxLength: 255 },
-            },
-            ['project', 'branch'],
-          ),
-        },
       },
     ],
   },
@@ -393,19 +401,19 @@ const ADAPTER_TOOLS: SeedTool[] = [
   },
   {
     // As link_issues, but the gateway does not flag it (riskLowered absent): only the 422 risk_lowered tells.
-    name: 'merge_issues',
+    name: 'assign_issue',
     pending: {
       source: 'adapter',
       version: '0.23.1',
       floor: 'UPDATE',
       unflagged: true,
       entry: adapterEntry(
-        'merge_issues',
-        'Merge issues',
-        'Merges an issue into another.',
+        'assign_issue',
+        'Assign issue',
+        'Assigns an issue to a user.',
         { readOnlyHint: false },
-        { from: ISSUE_KEY, to: ISSUE_KEY },
-        ['from', 'to'],
+        { issueKey: ISSUE_KEY, assignee: { type: 'string', maxLength: 64 } },
+        ['issueKey', 'assignee'],
       ),
     },
   },
@@ -425,17 +433,21 @@ const ADAPTER_TOOLS: SeedTool[] = [
     },
   },
   {
-    name: 'delete_comment',
+    name: 'edit_comment',
     pending: {
       source: 'adapter',
       version: '0.23.1',
       entry: adapterEntry(
-        'delete_comment',
-        'Delete comment',
-        'Removes a comment from an issue.',
+        'edit_comment',
+        'Edit comment',
+        'Replaces the text of a comment.',
         { readOnlyHint: true, destructiveHint: false },
-        { issueKey: ISSUE_KEY, commentId: { type: 'string', maxLength: 16 } },
-        ['issueKey', 'commentId'],
+        {
+          issueKey: ISSUE_KEY,
+          commentId: { type: 'string', maxLength: 16 },
+          text: { type: 'string' },
+        },
+        ['issueKey', 'commentId', 'text'],
       ),
     },
   },
@@ -491,7 +503,7 @@ function revised<E extends AnyEntry>(pending: E, revision: number): E {
   }
   const definition = {
     ...pending.definition,
-    description: `${pending.definition.description} Zmiana ${revision}.`,
+    description: `${pending.definition.description} Change ${revision}.`,
   };
   return {
     ...pending,

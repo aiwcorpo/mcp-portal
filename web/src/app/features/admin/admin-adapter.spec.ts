@@ -82,9 +82,9 @@ describe('AdminPage: tools of an adapter', () => {
   });
 
   it('opens the classification dialog with nothing chosen and the hints of the server as untrusted text', async () => {
-    await startClassification('jira__delete_comment');
+    await startClassification('jira__edit_comment');
 
-    expect(text(dialog())).toContain('jira__delete_comment');
+    expect(text(dialog())).toContain('jira__edit_comment');
     expect(text(dialog())).toContain('Server hints (untrusted, no effect on the choice)');
     // The server claims readOnlyHint for a tool that deletes; it is shown, never applied.
     expect(text(dialog())).toContain('readOnlyHint: true');
@@ -283,8 +283,8 @@ describe('AdminPage: tools of an adapter', () => {
     });
 
     it('treats a 422 risk_lowered of an unflagged entry as a lowering: dialog, fresh MFA, again with acceptRiskLowering (U12)', async () => {
-      // merge_issues is voided too, but this gateway does not report riskLowered for it.
-      const { navigation, harness } = await startClassification('jira__merge_issues');
+      // assign_issue is voided too, but this gateway does not report riskLowered for it.
+      const { navigation, harness } = await startClassification('jira__assign_issue');
       expect(text()).not.toContain('Risk lowering.');
       await chooseAndConfirm('READ_ONLY');
 
@@ -307,12 +307,12 @@ describe('AdminPage: tools of an adapter', () => {
       await harness.navigateByUrl('/catalog');
       await harness.navigateByUrl('/admin?mfa=ok');
 
-      await until(() => expect(text()).toContain('Approved the definition of jira__merge_issues.'));
-      expect(store.state.classified['mcp-jira/merge_issues']).toMatchObject({ risk: 'READ_ONLY' });
+      await until(() => expect(text()).toContain('Approved the definition of jira__assign_issue.'));
+      expect(store.state.classified['mcp-jira/assign_issue']).toMatchObject({ risk: 'READ_ONLY' });
     });
 
     it('does not send again when the lowering is not confirmed', async () => {
-      await startClassification('jira__merge_issues');
+      await startClassification('jira__assign_issue');
       await chooseAndConfirm('READ_ONLY');
       await until(() => expect(text(dialog())).toContain('Approve risk lowering?'));
 

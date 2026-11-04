@@ -153,7 +153,7 @@ const CALL_SEEDS: CallSeed[] = [
   {
     minutesAgo: 4,
     client: 'claude-code',
-    tool: 'confluence__search',
+    tool: 'confluence__list_pages',
     risk: 'READ_ONLY',
     resource: { type: 'Confluence::Space', id: 'DEV' },
     result: 'ok',
@@ -178,7 +178,7 @@ const CALL_SEEDS: CallSeed[] = [
   {
     minutesAgo: 120,
     client: 'claude-code',
-    tool: 'opensearch__search',
+    tool: 'opensearch__search_logs',
     risk: 'READ_ONLY',
     resource: { type: 'OpenSearch::Index', id: 'logs-app' },
     result: 'denied_filter_scope',
@@ -207,7 +207,7 @@ const CALL_SEEDS: CallSeed[] = [
   {
     minutesAgo: 300,
     client: 'codex',
-    tool: 'gitlab__comment_mr',
+    tool: 'gitlab__comment_merge_request',
     risk: 'UPDATE',
     resource: { type: 'GitLab::Project', id: 'payments/api' },
     result: 'ok',
@@ -263,7 +263,7 @@ const CALL_SEEDS: CallSeed[] = [
   {
     minutesAgo: 700,
     client: 'copilot',
-    tool: 'confluence__move_page',
+    tool: 'confluence__update_page',
     risk: 'UPDATE',
     result: 'tool_disabled',
     errorCode: 'tool_disabled',
