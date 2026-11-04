@@ -4,6 +4,31 @@ M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, 
 
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.
 
+## Język UI: angielski źródłowy, polski jako tłumaczenie (2026-11-04)
+
+Obrazy `mcp-portal-bff`, `mcp-portal-web`, `mcp-portal:m6-cb8ed65` (bez wdrażania; w `web` i `portal` jest `i18n/messages.pl.json`).
+`npm test`: 30 plików, 544 testy; `ci/run.sh`: `ci: OK`, e2e 206 przeszło, 28 pominiętych (zrzuty); `bff make ci`: `ci: OK`, 525 testów.
+- Mechanizm: jedna kompilacja, tłumaczenia w czasie działania. `src/main.ts` woła `initLocale()` (`core/locale.ts`): zapisany wybór
+  (`localStorage`, klucz `mcp-portal-locale`), potem `navigator.languages` (`pl` albo `en`), domyślnie angielski. Dla `pl` pobiera
+  `/i18n/messages.pl.json`, rejestruje je przez `loadTranslations`, ładuje dane lokalne `pl` (data pipe) i ustawia `$localize.locale`
+  oraz `<html lang>`; dopiero potem `import()` modułów aplikacji (`$localize` liczy się przy wczytaniu modułu). Nieudane pobranie
+  zostawia angielski. Przełącznik (`shared/locale-switch.ts`) w nagłówku i na ekranie logowania zapisuje wybór i przeładowuje stronę.
+- Dlaczego nie `--localize` (/en/, /pl/): wymagałoby zmian w BFF (`SpaFallbackFilter`, nonce, ścieżki) i w nginx; tu BFF, nginx i CSP
+  bez zmian (`i18n/messages.pl.json` to zwykły plik statyczny, `connect-src 'self'`). Cena: przeładowanie strony przy zmianie języka.
+- `messages.xlf` (en, źródło), `messages.pl.xlf` (579 tekstów, polskie z poprzedniego źródła). `scripts/i18n.mjs json` (przed `build`,
+  `start`) robi z niego `public/i18n/messages.pl.json` (poza gitem); `i18n:check` = zgodność `messages.xlf` z kodem + każdy tekst
+  przetłumaczony + te same znaczniki i interpolacje.
+- Teksty z kontraktu i BFF (kody błędów, opisy serwerów, dane mocków) bez zmian; komunikaty mapowane z kodów są w obu językach.
+- e2e po angielsku (`locale: 'en-US'`), po polsku `e2e/polish.spec.ts` (3 testy, m.in. brak błędów w konsoli: wcześniej brakujące dane
+  `pl` dla date pipe dawały `NG02100`). `PW_PORT` zmienia port serwera Playwrighta (porty 18744/18745 zajmuje Docker stosu).
+- Zrzuty: `docs/screenshots/en/` i `pl/`, 26 plików o angielskich nazwach, `npm run screenshots`. README portalu po angielsku.
+- CI: `ci.yml` tylko `style` (`contents: read`, bez tokenu, `actions/checkout` przypięty do SHA v4.2.2, `persist-credentials: false`);
+  build i testy wrócą do GitHub Actions po wydaniu kontraktów w npmjs i Maven Central. Bez GitHub Packages w `.npmrc`,
+  `contracts.sh` i dokumentach. `release.yml`: bez `packages: read` i tokenów odczytu, więc do wydania kontraktów nie pobierze artefaktów
+  (wydanie obrazów robi `scripts/build-images.sh`).
+- Do zrobienia: `web/README.md` i `bff/README.md` zostały po polsku (poza sekcją i18n); `index.html` ma opis (`meta description`)
+  tylko po angielsku.
+
 ## Porządki do wydania: zrzuty i session.spec (2026-11-04)
 
 - Zrzuty README: `e2e/readme-shots.spec.ts` robi 26 obrazów (9 dotychczasowych ponownie, w jasnym motywie, jak wymaga `screenshots-needed.md`, i 17 nowych,
