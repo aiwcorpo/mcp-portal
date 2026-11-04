@@ -4,6 +4,19 @@ M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, 
 
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.
 
+## Wydanie 1.0.0: przygotowanie (2026-11-04)
+
+Obrazy `mcp-portal-bff`, `mcp-portal-web`, `mcp-portal:m6-9aa80f9` (bez wdrażania). `ci/run.sh`: `ci: OK`, e2e 206, `npm test` 544; `bff make ci`: `ci: OK`, 525.
+- Wersja 1.0.0 w `bff/pom.xml`, `web/package.json` i `package-lock.json`; CHANGELOG po angielsku; `bff/README.md` i `web/README.md` po angielsku
+  (tłumaczenie wierne, nie skrócone). `meta description` w `index.html` angielski.
+- `ci.yml`: znów `bff-build` i `web` (też dla pull requestów), `contents: read`, bez tokenu i sekretu; `setup-java` v4.9.1 (cf277c60...) bez cache,
+  `actions/checkout` v4.2.2 przypięty. BFF bierze kontrakty z Maven Central (domyślne repozytorium), web z npmjs przez `CONTRACTS_FROM_NPMJS=1`
+  (`scripts/contracts.sh`: `npm pack` z pustego katalogu, bajty sprawdzone `CONTRACTS_TARBALL_SHA256`). Do czasu wydania kontraktów 6.3.2
+  w Central i npmjs te joby nie przejdą (lokalnie niesprawdzone, bo kontraktów tam jeszcze nie ma). `release.yml` ma te same źródła w `env`
+  i nie używa już `settings.xml` w kroku SBOM.
+- Atrapa: tytuły narzędzi po angielsku jak `@ToolTitle` serwerów (Search issues, Change issue status, Delete branch, Search logs, ...);
+  opisy uprawnień IGA w atrapie zostają po polsku (dane systemu uprawnień). Zrzuty zrobione ponownie.
+
 ## Język UI: angielski źródłowy, polski jako tłumaczenie (2026-11-04)
 
 Obrazy `mcp-portal-bff`, `mcp-portal-web`, `mcp-portal:m6-cb8ed65` (bez wdrażania; w `web` i `portal` jest `i18n/messages.pl.json`).
