@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -26,20 +27,22 @@ import pl.aiwcorpo.mcp.portal.bff.support.TestPki;
  * client that trusts the test CA gets through, plain http does not; the session cookie is the same Secure
  * {@code __Host-} cookie as behind the proxy. Off, every other test of the module runs over plain http.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "PORTAL_PUBLIC_TLS_ENABLED=yes",
+        "PORTAL_PUBLIC_TLS_CERTIFICATE=target/server-tls-test/server-chain.pem",
+        "PORTAL_PUBLIC_TLS_PRIVATE_KEY=target/server-tls-test/server-key.pem"})
 @ActiveProfiles("dev")
 class ServerTlsTest {
 
     static final FakeIdp IDP = new FakeIdp();
     static final TestPki PKI;
 
+    static final Path TLS_DIR = Path.of("target", "server-tls-test");
+
     static {
         try {
-            PKI = new TestPki(java.nio.file.Files.createTempDirectory("portal-server-tls"));
-            // Environment post-processors read these before a DynamicPropertySource exists; plain paths, as an operator gives them.
-            System.setProperty("PORTAL_PUBLIC_TLS_ENABLED", "true");
-            System.setProperty("PORTAL_PUBLIC_TLS_CERTIFICATE", PKI.certificate().toString());
-            System.setProperty("PORTAL_PUBLIC_TLS_PRIVATE_KEY", PKI.privateKey().toString());
+            java.nio.file.Files.createDirectories(TLS_DIR);
+            PKI = new TestPki(TLS_DIR);
         } catch (IOException e) {
             throw new java.io.UncheckedIOException(e);
         }
@@ -59,9 +62,6 @@ class ServerTlsTest {
 
     @AfterAll
     static void stop() {
-        System.clearProperty("PORTAL_PUBLIC_TLS_ENABLED");
-        System.clearProperty("PORTAL_PUBLIC_TLS_CERTIFICATE");
-        System.clearProperty("PORTAL_PUBLIC_TLS_PRIVATE_KEY");
         IDP.close();
     }
 
@@ -114,5 +114,25 @@ class ServerTlsTest {
                 HttpResponse.BodyHandlers.ofString());
 
         assertThat(plain.statusCode()).isEqualTo(400);
+    }
+
+    @Test
+    void tls12IsAcceptedAndTls11IsNot() throws Exception {
+        for (String protocol : new String[] {"TLSv1.3", "TLSv1.2"}) {
+            javax.net.ssl.SSLParameters only = new javax.net.ssl.SSLParameters();
+            only.setProtocols(new String[] {protocol});
+            HttpClient client = HttpClient.newBuilder().sslContext(PKI.clientContext()).sslParameters(only).build();
+            HttpResponse<String> health = client.send(
+                    HttpRequest.newBuilder(URI.create("https://localhost:" + port + "/actuator/health")).build(),
+                    HttpResponse.BodyHandlers.ofString());
+            assertThat(health.statusCode()).as(protocol).isEqualTo(200);
+        }
+        // A JDK that still ships TLS 1.1 offers it on the client side; the server must not accept it.
+        javax.net.ssl.SSLParameters legacy = new javax.net.ssl.SSLParameters();
+        legacy.setProtocols(new String[] {"TLSv1.1"});
+        HttpClient client = HttpClient.newBuilder().sslContext(PKI.clientContext()).sslParameters(legacy).build();
+        assertThatThrownBy(() -> client.send(
+                HttpRequest.newBuilder(URI.create("https://localhost:" + port + "/actuator/health")).build(),
+                HttpResponse.BodyHandlers.ofString())).isInstanceOf(IOException.class);
     }
 }

@@ -56,7 +56,8 @@ class ServerTlsStartTest {
 
     @Test
     void enabledWithoutAnySettingRefusesToStart() {
-        assertThatThrownBy(() -> start(true, "PORTAL_PUBLIC_TLS_ENABLED=true")).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> start(true, "PORTAL_PUBLIC_TLS_ENABLED=true"))
+                .hasMessageContaining("PORTAL_PUBLIC_TLS_CERTIFICATE or PORTAL_PUBLIC_TLS_PRIVATE_KEY is empty");
     }
 
     @Test

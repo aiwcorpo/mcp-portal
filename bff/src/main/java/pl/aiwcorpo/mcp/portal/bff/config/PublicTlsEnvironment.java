@@ -26,10 +26,15 @@ public class PublicTlsEnvironment implements EnvironmentPostProcessor {
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (!Boolean.parseBoolean(environment.getProperty(ENABLED, "false"))) {
+        // Same conversion as server.ssl.enabled (yes, on, 1, TRUE), so the guard and the connector agree.
+        if (!environment.getProperty(ENABLED, Boolean.class, false)) {
             return;
         }
         String key = environment.getProperty(PRIVATE_KEY, "");
+        // Without this Tomcat falls back to ~/.keystore and fails with an error that names neither setting.
+        if (environment.getProperty(CERTIFICATE, "").isBlank() || key.isBlank()) {
+            throw new IllegalStateException(ENABLED + " is true but " + CERTIFICATE + " or " + PRIVATE_KEY + " is empty");
+        }
         if (!environment.acceptsProfiles(Profiles.of(DevMode.PROFILE)) && readableByOthers(key)) {
             throw new IllegalStateException("PORTAL_PUBLIC_TLS_PRIVATE_KEY is readable by all users of the host: " + key
                     + " (chmod o-rwx; the relaxation exists only with the Spring profile '" + DevMode.PROFILE + "')");

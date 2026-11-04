@@ -542,3 +542,5 @@ Decyzja człowieka z 2026-11-03: opcjonalny TLS na publicznym porcie, bez zmian 
   na https (opis w README). Obraz `web` (nginx, statyczny, za proxy) bez TLS: opis w README głównym.
 - Testy: `ServerTlsTest` (4) i `ServerTlsStartTest` (5, start/odmowy): klient z testowym CA, klient bez CA, zwykłe HTTP na porcie TLS (400), ciasteczko, brak plików i brak
   ustawień przy włączeniu = błąd startu. Wyłączone TLS to pozostałe testy.
+- Po przeglądzie Opus: flaga czytana konwerterem Springa (`yes`/`on`/`1`), jawne TLS 1.3 i 1.2 w pakiecie, `PublicTlsEnvironmentTest`, brak ustawień
+  przy włączeniu to czytelny błąd (Tomcat bez tego szuka `~/.keystore`), `ServerTlsTest` bez `System.setProperty`.

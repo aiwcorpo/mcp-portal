@@ -27,6 +27,13 @@ public final class TestPki {
 
     public TestPki(Path dir) {
         this.dir = dir;
+        for (String name : new String[] {"ca.p12", "server.p12", "server.csr", "server.crt", "ca.crt"}) {
+            try {
+                Files.deleteIfExists(dir.resolve(name));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
         keytool("-genkeypair", "-alias", "ca", "-keystore", "ca.p12", "-dname", "CN=portal-test-ca", "-keyalg", "EC",
                 "-groupname", "secp256r1", "-validity", "2", "-ext", "bc:c", "-ext", "ku:c=keyCertSign,cRLSign");
         keytool("-genkeypair", "-alias", "server", "-keystore", "server.p12", "-dname", "CN=localhost", "-keyalg", "EC",

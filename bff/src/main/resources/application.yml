@@ -19,6 +19,8 @@ spring:
             certificate: ${portal.public-tls.certificate-location:}
             private-key: ${portal.public-tls.private-key-location:}
             private-key-password: ${PORTAL_PUBLIC_TLS_PRIVATE_KEY_PASSWORD:}
+          options:
+            enabled-protocols: TLSv1.3,TLSv1.2
   security:
     oauth2:
       client:

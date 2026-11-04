@@ -62,7 +62,7 @@ open 'http://localhost:18720/api/v1/auth/login?returnPath=/'     # logowanie ali
 | Test | Co sprawdza |
 | --- | --- |
 | `PortalApiTest` | każda odpowiedź API walidowana schematem C12 (`portal-bff.v1.bundled.yaml` z jara kontraktów, status spoza kontraktu = błąd); logowanie z PKCE i nonce; ciasteczka `__Host-session` i `__Host-XSRF-TOKEN`; CSRF dla PUT/DELETE/POST; step-up (`step_up_required` + `stepUpUrl`, `max_age=0`, powrót); wymiana tokenów na `aud` brokera i gateway admin; audyt C8 walidowany `audit-event.schema.json`; SPA z fallbackiem, CSP z nonce, HSTS; `/api/**` nigdy HTML; na końcu: żadna odpowiedź ani linia logu nie zawiera tokenu IdP ani sekretu |
-| `ServerTlsTest` | TLS na porcie BFF włączony zmiennymi `PORTAL_PUBLIC_TLS_*` (PEM z testowego CA z keytoola): klient ufający CA dostaje `/actuator/health`, klient bez CA i zwykłe HTTP nie; ciasteczko sesji `Secure`/`HttpOnly`/`__Host-`; brak plików PEM to błąd startu; klucz czytelny dla innych: odmowa poza profilem `dev` (`ServerTlsStartTest`). Wyłączone TLS to wszystkie pozostałe testy (HTTP) |
+| `ServerTlsTest` | TLS na porcie BFF włączony zmiennymi `PORTAL_PUBLIC_TLS_*` (PEM z testowego CA z keytoola): klient ufający CA dostaje `/actuator/health`, klient bez CA i zwykłe HTTP nie; ciasteczko sesji `Secure`/`HttpOnly`/`__Host-`; brak plików PEM to błąd startu; klucz czytelny dla innych: odmowa poza profilem `dev` (`ServerTlsStartTest`, `PublicTlsEnvironmentTest`: zapisy `yes`/`on`/`1`/`TRUE`, klucz 0600 bez profilu `dev`). Wyłączone TLS to wszystkie pozostałe testy (HTTP) |
 | `RunDevConfigurationTest` | start z tą samą konfiguracją co `run-dev.sh` (profil `dev`, zmienne `PORTAL_*` jako zmienne środowiska z relaxed binding) i dane mocka IGA w katalogu |
 | `FrontendBuildTest` | prawdziwy build ws-08 z `../web/dist/portal` (pomijany, gdy nie zbudowany; `-Dportal.test.require-web-dist=true` robi z tego błąd): trasy SPA, nonce w stylach, pliki JS/CSS; powrót po logowaniu na `PORTAL_WEB_LOGIN_RETURN_ORIGIN` |
 | `CatalogAssemblerTest` | reguły statusów i akcji katalogu (CC-021); odtworzenie przykładu `mixed` z C12 z danych C5/C4/C13 |
@@ -145,6 +145,8 @@ gatewaya. Zmiany:
 - `PORTAL_TRUSTED_PROXY_HOST` i `entrypoint.sh` bez zmian: zaufanie do `X-Forwarded-*` dotyczy adresu proxy, nie TLS.
 - Ciasteczko `__Host-session` ma `Secure`, `HttpOnly`, `Path=/`, bez `Domain` niezależnie od TLS na porcie (ustawia to
   konfiguracja BFF, bo publiczny adres jest zawsze https); test `ServerTlsTest` sprawdza to na porcie z TLS.
+- Protokoły: TLS 1.3 i 1.2 (jawnie w pakiecie SSL); starsze są odrzucane. `PORTAL_PUBLIC_TLS_ENABLED` czytane jak
+  `server.ssl.enabled` (`true`, `yes`, `on`, `1`), więc kontrola klucza i prefiks `file:` działają przy każdym zapisie.
 - Nazwy mają te same sufiksy co `MCP_PUBLIC_TLS_*` w gatewayu. Jak w jego `DevstackGuard`: przy włączonym TLS klucz czytelny dla
   "others" (jakikolwiek bit `o`) to odmowa startu, chyba że aktywny jest profil `dev`; `chmod 600`/`640` wystarcza.
 - Certyfikat jest czytany przy starcie; jego wymiana wymaga restartu. Włączony TLS bez czytelnych plików PEM to błąd startu.
