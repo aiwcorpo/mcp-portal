@@ -4,6 +4,15 @@ M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, 
 
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.
 
+## Atrapa: tylko prawdziwe narzędzia, angielskie opisy IGA (2026-11-04)
+
+Obrazy `mcp-portal-bff`, `mcp-portal-web`, `mcp-portal:m6-afdd114` (bez wdrażania). `npm test` 544, e2e 206, `bff make ci` 526 testów.
+- Atrapa rejestru i aktywności używa tylko narzędzi, które mają serwery (nazwa, tytuł, ryzyko wg `@ToolTitle` i `@ToolRisk`): obniżenie ryzyka
+  pokazuje `jira__delete_issue` (zamiast `gitlab__delete_branch`), `confluence__add_label` zastąpiło `archive_page`, narzędzia obcego adaptera
+  `assign_issue` i `edit_comment` zastąpiły `merge_issues` i `delete_comment`, GitLab ma w atrapie `list_merge_requests`.
+- Katalog IGA w atrapie odpowiada w języku strony (`document.documentElement.lang`): angielskie opisy jak w `bff/dev/iga-mock.yaml`, polskie w polskiej wersji.
+  Test BFF `MockAccessGovernanceTest.devCatalogDescriptionsAreEnglish` pilnuje, żeby opisy w pliku `dev` zostały po angielsku.
+
 ## Wydanie 1.0.0: przygotowanie (2026-11-04)
 
 Obrazy `mcp-portal-bff`, `mcp-portal-web`, `mcp-portal:m6-9aa80f9` (bez wdrażania). `ci/run.sh`: `ci: OK`, e2e 206, `npm test` 544; `bff make ci`: `ci: OK`, 525.
