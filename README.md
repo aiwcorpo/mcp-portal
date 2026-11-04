@@ -19,7 +19,10 @@ zgłaszanie podatności: [SECURITY.md](SECURITY.md); zmiany: [CHANGELOG.md](CHAN
 ## Zrzuty ekranu
 
 Zrobione z buildu na mockach MSW (dane z przykładów kontraktu, wymyślony użytkownik, żadnego prawdziwego konta ani tokenu);
-odtwarzanie: `cd web && npm run screenshots`.
+odtwarzanie: `cd web && npm run screenshots` (1280 x 800 px, jasny motyw, Chromium z cache Playwrighta). Zrzuty 10 do 20 odpowiadają pozycjom 1 do 11 listy
+`mcp-docs/docs/screenshots-needed.md` (10 = poz. 1, 11 = poz. 2, 12a-12c = poz. 3, 13 = poz. 4, 14a-14b = poz. 5, 15 = poz. 6, 16 = poz. 7,
+17a-17c = poz. 8, 18a-18b = poz. 9, 19 = poz. 10, 20 = poz. 11). Zrzutów aplikacji klienckich i rysunku architektury (poz. 12 do 15) tu nie ma:
+nie powstają z portalu.
 
 | | |
 | --- | --- |
@@ -27,7 +30,15 @@ odtwarzanie: `cd web && npm run screenshots`.
 | ![Połączenia z systemami](docs/screenshots/03-polaczenia-z-systemami.png) Połączenia z systemami i Authenticator. | ![Połączenie w błędzie](docs/screenshots/04-polaczenie-w-bledzie.png) Połączenie, któremu zniknął sekret: wiersz prosi o ponowne połączenie. |
 | ![Adres MCP](docs/screenshots/05-adres-mcp.png) Adres `/mcp` z filtrem i gotowe polecenia dla klientów. | ![Różnice definicji](docs/screenshots/06-administracja-roznice.png) Administracja: różnice między zatwierdzoną a oczekującą definicją. |
 | ![Klasyfikacja](docs/screenshots/07-klasyfikacja-narzedzia.png) Klasyfikacja narzędzia obcego serwera: adapter jest tylko do odczytu, więc dialog oferuje wyłącznie Odczyt i `read`. | ![Wyłącznik awaryjny](docs/screenshots/08-wylacznik-awaryjny.png) Wyłącznik awaryjny: lista włączonych, włączenie bez MFA, zdjęcie po świeżym MFA. |
-| ![Formularz z loginem](docs/screenshots/09-formularz-z-loginem.png) Token w schemacie Basic (login i hasło albo token): pole loginu obok hasła albo tokenu API; login nie wraca z serwera i nie trafia do logów. | |
+| ![Formularz z loginem](docs/screenshots/09-formularz-z-loginem.png) Token w schemacie Basic (login i hasło albo token): pole loginu obok hasła albo tokenu API; login nie wraca z serwera i nie trafia do logów. | ![Rejestracja Authenticatora, kod QR](docs/screenshots/10-rejestracja-authenticatora-qr.png) Rejestracja Authenticatora, krok "Dodaj konto w aplikacji": kod QR, klucz do ręcznego wpisania i czas do końca rejestracji. Kod i klucz pochodzą z wymyślonego ziarna mocka. |
+| ![Rejestracja Authenticatora, pierwszy kod](docs/screenshots/11-rejestracja-authenticatora-kod.png) Krok "Wpisz pierwszy kod" z błędem "Kod nieprawidłowy.". | ![Authenticator aktywny](docs/screenshots/12a-authenticator-aktywny.png) Authenticator aktywny. |
+| ![Authenticator zablokowany](docs/screenshots/12b-authenticator-zablokowany.png) Authenticator zablokowany po 5 błędnych kodach; blokadę zdejmuje tylko upływ czasu. | ![Authenticator wyłączony](docs/screenshots/12c-authenticator-wylaczony.png) Authenticator wyłączony po 20 błędnych kodach; trzeba zarejestrować go ponownie. |
+| ![Podgląd operacji czekającej na kod](docs/screenshots/13-podglad-operacji.png) Podgląd operacji nieodwracalnej, która czeka na kod: odliczanie, argumenty, przycisk anulowania (wymyślony `jira__delete_issue`, klucz ABC-1182). | ![Operacja anulowana](docs/screenshots/14a-operacja-anulowana.png) Ten sam podgląd po anulowaniu. |
+| ![Czas minął](docs/screenshots/14b-czas-minal.png) Ten sam podgląd po upływie czasu. | ![Dodawanie tokenu Jira](docs/screenshots/15-dodaj-token-jira.png) Dodawanie tokenu Jira: instrukcja wąskiego tokenu i opcjonalna data wygaśnięcia. |
+| ![Logi audytowe](docs/screenshots/16-logi-audytowe.png) Logi audytowe z filtrami i rozwiniętym wierszem (identyfikator żądania); wyniki: wykonano, odmowa, czeka na potwierdzenie. | ![Lista wniosków](docs/screenshots/17a-wnioski-lista.png) Wnioski: lista ze statusami Oczekuje, Zaakceptowany, Odrzucony i Anulowany. |
+| ![Formularz wniosku](docs/screenshots/17b-wnioski-formularz.png) Formularz "Złóż wniosek" z katalogiem uprawnień. | ![Wnioski bez przyjmowania](docs/screenshots/17c-wnioski-bez-przyjmowania.png) Adapter `keycloak-groups`: komunikat, że system uprawnień nie przyjmuje wniosków z portalu. |
+| ![Obniżenie ryzyka na liście](docs/screenshots/18a-obnizenie-ryzyka-lista.png) Administracja: narzędzie z oznaczeniem "Obniżenie ryzyka" i różnicami definicji. | ![Dialog obniżenia ryzyka](docs/screenshots/18b-obnizenie-ryzyka-dialog.png) Dialog "Zatwierdzić obniżenie ryzyka?". |
+| ![Definicja zgłoszona przez serwer](docs/screenshots/19-definicja-z-serwera.png) Dialog "Zatwierdzić definicję zgłoszoną przez serwer?" (źródło: serwer, nie CI). | ![Powrót po potwierdzeniu tożsamości](docs/screenshots/20-powrot-po-potwierdzeniu.png) Powrót po potwierdzeniu tożsamości: "Tożsamość potwierdzona. Zdejmuję wyłącznik...". |
 
 ## Instalacja
 

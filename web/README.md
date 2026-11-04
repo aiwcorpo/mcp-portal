@@ -145,7 +145,7 @@ npm run e2e                  # build konfiguracji e2e + Playwright (Chromium, 12
 naruszenie CSP albo nieobsłużony wyjątek. Testy dostępności używają axe-core (WCAG 2.1 A/AA) w trybie
 ciemnym (domyślnym) i jasnym (przełącznik w nagłówku).
 
-Zrzuty do README repozytorium (1280 px, dane z mocków): `npm run screenshots` zapisuje je w `../docs/screenshots`.
+Zrzuty do README repozytorium (1280 x 800 px, jasny motyw, dane z mocków): `npm run screenshots` zapisuje je w `../docs/screenshots`.
 Zrzuty kluczowych widoków do porównania z makietami (`mcp-platform-plan/design/`), 1280 i 360 px:
 
 ```bash

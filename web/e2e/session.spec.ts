@@ -7,6 +7,9 @@ test('log out and log in again through the BFF endpoints', async ({ page }) => {
   await page.getByRole('button', { name: 'Wyloguj' }).click();
   await expect(page.getByText('Wylogowano.')).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Nawigacja główna' })).toHaveCount(0);
+  // logout() shows the login screen first and navigates to "/" (redirected to the catalog) afterwards. A click
+  // in between would send the user back to the page they left, so wait for the navigation to settle.
+  await expect(page).toHaveURL(/\/catalog$/);
 
   await page.getByRole('button', { name: 'Zaloguj przez konto firmowe' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Serwery MCP' })).toBeVisible();

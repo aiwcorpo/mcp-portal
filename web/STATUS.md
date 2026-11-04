@@ -4,6 +4,16 @@ M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, 
 
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.
 
+## Porządki do wydania: zrzuty i session.spec (2026-11-04)
+
+- Zrzuty README: `e2e/readme-shots.spec.ts` robi 26 obrazów (9 dotychczasowych ponownie, w jasnym motywie, jak wymaga `screenshots-needed.md`, i 17 nowych,
+  pozycje 1 do 11 listy), wszystkie z mocka, bez stosu i bez kont. Nowy mock `JIRA_CONFIRMATION_ID` (`jira__delete_issue`, ABC-1182) dla podglądu operacji.
+  Klucz na zrzucie rejestracji to wymyślone ziarno mocka. Pozycje 12 do 15 listy (Claude Code, Claude Desktop, rysunek) nie są zrzutami portalu.
+- `session.spec.ts` "log out and log in again": test klikał "Zaloguj" po tekście "Wylogowano.", zanim `logout()` skończył `navigateByUrl('/')`.
+  Wtedy `router.url` wciąż było `/connections`, więc powrót po logowaniu kończył na połączeniach, nie w katalogu. Pod obciążeniem (24 workery i 12 pętli
+  zajmujących CPU) 3 z 80 przebiegów padły przed poprawką. Poprawka w teście: czeka na URL `/catalog` przed kliknięciem. Kod produktu bez zmian
+  (powrót na stronę, z której wylogowano, nie jest błędem bezpieczeństwa).
+
 ## M6: kontrakty 6.3.2 (2026-11-03)
 
 Paczka `aiwcorpo-mcp-contracts-6.3.2.tgz` zrobiona `npm pack` z checkoutu `mcp-contracts` na `v6.3.2` do `web/.contracts/` (sha256 1811f148..., identyczny z plikiem

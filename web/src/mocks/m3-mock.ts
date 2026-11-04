@@ -22,7 +22,13 @@ export const CONFIRMATION_TTL_MS = 120_000;
 export const DEMO_CONFIRMATION_ID = 'cnf_4k9Qe2LxW7tB3mZp';
 /** Pending operation whose argument carries a right-to-left override, a line break and a control character. */
 export const BIDI_CONFIRMATION_ID = 'cnf_Zb3Qm8TnR5vKd2Wy';
-const KNOWN_CONFIRMATIONS: readonly string[] = [DEMO_CONFIRMATION_ID, BIDI_CONFIRMATION_ID];
+/** Pending Jira delete with plain arguments, the example of the user guide and of the README pictures. */
+export const JIRA_CONFIRMATION_ID = 'cnf_Hd6Ls1VcN8rXj4Ta';
+const KNOWN_CONFIRMATIONS: readonly string[] = [
+  DEMO_CONFIRMATION_ID,
+  BIDI_CONFIRMATION_ID,
+  JIRA_CONFIRMATION_ID,
+];
 
 export interface MockEnrollment {
   id: string;
@@ -84,6 +90,19 @@ export function demoConfirmation(
           value: '"cleanup\u202Egnp.exe\u2066 first line\nsecond line\u0007"',
           truncated: false,
         },
+      ],
+      expiresAt: iso(seenAt + CONFIRMATION_TTL_MS),
+    };
+  }
+  if (id === JIRA_CONFIRMATION_ID) {
+    return {
+      confirmationId: id,
+      tool: 'jira__delete_issue',
+      system: 'jira',
+      resource: { type: 'Jira::Issue', id: 'ABC-1182', parent: 'Jira::Project::ABC' },
+      arguments: [
+        { name: 'issueKey', value: '"ABC-1182"', truncated: false },
+        { name: 'deleteSubtasks', value: 'false', truncated: false },
       ],
       expiresAt: iso(seenAt + CONFIRMATION_TTL_MS),
     };
