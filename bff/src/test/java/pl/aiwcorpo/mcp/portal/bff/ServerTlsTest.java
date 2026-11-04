@@ -8,14 +8,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,7 +22,7 @@ import pl.aiwcorpo.mcp.portal.bff.support.FakeIdp;
 import pl.aiwcorpo.mcp.portal.bff.support.TestPki;
 
 /**
- * Optional TLS on the port of the BFF (PORTAL_SERVER_TLS_*): on, the port speaks https with the PEM certificate and a
+ * Optional TLS on the port of the BFF (PORTAL_PUBLIC_TLS_*): on, the port speaks https with the PEM certificate and a
  * client that trusts the test CA gets through, plain http does not; the session cookie is the same Secure
  * {@code __Host-} cookie as behind the proxy. Off, every other test of the module runs over plain http.
  */
@@ -40,6 +36,10 @@ class ServerTlsTest {
     static {
         try {
             PKI = new TestPki(java.nio.file.Files.createTempDirectory("portal-server-tls"));
+            // Environment post-processors read these before a DynamicPropertySource exists; plain paths, as an operator gives them.
+            System.setProperty("PORTAL_PUBLIC_TLS_ENABLED", "true");
+            System.setProperty("PORTAL_PUBLIC_TLS_CERTIFICATE", PKI.certificate().toString());
+            System.setProperty("PORTAL_PUBLIC_TLS_PRIVATE_KEY", PKI.privateKey().toString());
         } catch (IOException e) {
             throw new java.io.UncheckedIOException(e);
         }
@@ -55,13 +55,13 @@ class ServerTlsTest {
         registry.add("portal.tls.insecure-plain-http-for-tests", () -> "true");
         registry.add("portal.public-base-url", () -> "https://mcp.aiwcorpo.pl");
         registry.add("portal.web.dist-path", () -> "src/test/resources/spa-fixture");
-        registry.add("PORTAL_SERVER_TLS_ENABLED", () -> "true");
-        registry.add("PORTAL_SERVER_TLS_CERTIFICATE", () -> "file:" + PKI.certificate());
-        registry.add("PORTAL_SERVER_TLS_PRIVATE_KEY", () -> "file:" + PKI.privateKey());
     }
 
     @AfterAll
     static void stop() {
+        System.clearProperty("PORTAL_PUBLIC_TLS_ENABLED");
+        System.clearProperty("PORTAL_PUBLIC_TLS_CERTIFICATE");
+        System.clearProperty("PORTAL_PUBLIC_TLS_PRIVATE_KEY");
         IDP.close();
     }
 
@@ -114,37 +114,5 @@ class ServerTlsTest {
                 HttpResponse.BodyHandlers.ofString());
 
         assertThat(plain.statusCode()).isEqualTo(400);
-    }
-
-    @Test
-    void enabledWithoutCertificateFilesRefusesToStart(@TempDir Path empty) {
-        SpringApplicationBuilder builder = new SpringApplicationBuilder(PortalBffApplication.class)
-                .web(WebApplicationType.SERVLET).profiles("dev")
-                .properties("server.port=0", "PORTAL_SERVER_TLS_ENABLED=true",
-                        "PORTAL_SERVER_TLS_CERTIFICATE=file:" + empty.resolve("missing.pem"),
-                        "PORTAL_SERVER_TLS_PRIVATE_KEY=file:" + empty.resolve("missing.key"),
-                        "spring.security.oauth2.client.provider.keycloak.issuer-uri=" + IDP.issuer(),
-                        "spring.security.oauth2.client.registration.keycloak.client-id=" + FakeIdp.CLIENT_ID,
-                        "portal.public-base-url=https://mcp.aiwcorpo.pl",
-                        "portal.tls.insecure-plain-http-for-tests=true",
-                        "portal.broker.base-url=http://127.0.0.1:9", "portal.gateway-admin.base-url=http://127.0.0.1:9",
-                        "portal.web.dist-path=src/test/resources/spa-fixture");
-
-        assertThatThrownBy(builder::run).hasRootCauseInstanceOf(java.io.FileNotFoundException.class);
-    }
-
-    @Test
-    void enabledWithoutAnyCertificateSettingRefusesToStart() {
-        SpringApplicationBuilder builder = new SpringApplicationBuilder(PortalBffApplication.class)
-                .web(WebApplicationType.SERVLET).profiles("dev")
-                .properties("server.port=0", "PORTAL_SERVER_TLS_ENABLED=true",
-                        "spring.security.oauth2.client.provider.keycloak.issuer-uri=" + IDP.issuer(),
-                        "spring.security.oauth2.client.registration.keycloak.client-id=" + FakeIdp.CLIENT_ID,
-                        "portal.public-base-url=https://mcp.aiwcorpo.pl",
-                        "portal.tls.insecure-plain-http-for-tests=true",
-                        "portal.broker.base-url=http://127.0.0.1:9", "portal.gateway-admin.base-url=http://127.0.0.1:9",
-                        "portal.web.dist-path=src/test/resources/spa-fixture");
-
-        assertThatThrownBy(builder::run).isInstanceOf(Exception.class);
     }
 }

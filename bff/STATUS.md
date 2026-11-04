@@ -25,7 +25,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M6.1 | kontrakty 6.2.0 (jary), wektory `http-broken-escape` i pokrewne przez surowe żądanie | zrobione |
 | M6.2 | wyłącznik awaryjny (A9): `GET /admin/kill-switches`, `PUT` i `DELETE` serwera i narzędzia, zdjęcie ze step-up; `approve` z `risk` i `action`, widoki rejestru dla wpisu adaptera, `disabledBy` w katalogu | zrobione |
 | M6.3 | porządki do wydania: wyszukiwanie JDK 25, LICENSE, NOTICE, SECURITY, CONTRIBUTING, CHANGELOG, `Dockerfile` w korzeniu repozytorium, `scripts/build-images.sh`, workflow wydania (nie uruchomiony), README ze zrzutami; obraz `m6-ea6d179` bez wdrażania | zrobione |
-| M6.4 | opcjonalny TLS na porcie BFF (`PORTAL_SERVER_TLS_*`, PEM, pakiet SSL Spring Boota), `ServerTlsTest`, README | zrobione; obraz w raporcie |
+| M6.4 | opcjonalny TLS na porcie BFF (`PORTAL_PUBLIC_TLS_*`, PEM, pakiet SSL Spring Boota), `ServerTlsTest`, README | zrobione; obraz w raporcie |
 
 ## M6: stan (2026-11-03)
 
@@ -531,14 +531,14 @@ M5: w toku. Linia `M5: osiągnięty` wróci po przebiegu na prawdziwym runnerze 
 
 Decyzja człowieka z 2026-11-03: opcjonalny TLS na publicznym porcie, bez zmian kontraktów i bez mTLS.
 
-- Zmienne: `PORTAL_SERVER_TLS_ENABLED` (domyślnie `false`), `PORTAL_SERVER_TLS_CERTIFICATE`, `PORTAL_SERVER_TLS_PRIVATE_KEY`
-  (adresy `file:`), `PORTAL_SERVER_TLS_PRIVATE_KEY_PASSWORD`. Pakiet SSL `portal-server` w `application.yml`; połączenia wychodzące
+- Zmienne: `PORTAL_PUBLIC_TLS_ENABLED` (domyślnie `false`), `PORTAL_PUBLIC_TLS_CERTIFICATE`, `PORTAL_PUBLIC_TLS_PRIVATE_KEY`
+  (ścieżki plików), `PORTAL_PUBLIC_TLS_PRIVATE_KEY_PASSWORD`. Pakiet SSL `portal-server` w `application.yml`; połączenia wychodzące
   (broker, gateway) nie używają pakietów SSL Spring Boota (własny `SSLContext` z `PORTAL_TLS_*`), więc to jedyny pakiet.
-- Gateway w chwili pisania nie ma jeszcze zmiennych TLS portu publicznego, więc nazwy wg konwencji `PORTAL_*`; do zrównania, gdy
-  gateway wybierze swoje.
+- Nazwy zrównane z gatewayem (`MCP_PUBLIC_TLS_*`, commit 87b34af): `PORTAL_PUBLIC_TLS_*` z tymi samymi sufiksami, gołe ścieżki plików
+  (prefiks `file:` dodaje `PublicTlsEnvironment`). Ta sama klasa odmawia startu, gdy klucz jest czytelny dla "others" poza profilem `dev`.
 - Ciasteczka: bez zmian. `__Host-session` i tak ma `Secure`, `HttpOnly`, `Path=/`, `SameSite=Lax`, bez `Domain`; `__Host-XSRF-TOKEN`
   `Secure`. Sprawdza to `ServerTlsTest`.
 - `entrypoint.sh` i `PORTAL_TRUSTED_PROXY_HOST` bez zmian. Obraz nie ma `HEALTHCHECK`; sonda stosu (wget na http) przy TLS musi iść
   na https (opis w README). Obraz `web` (nginx, statyczny, za proxy) bez TLS: opis w README głównym.
-- Testy: `ServerTlsTest` (6): klient z testowym CA, klient bez CA, zwykłe HTTP na porcie TLS (400), ciasteczko, brak plików i brak
+- Testy: `ServerTlsTest` (4) i `ServerTlsStartTest` (5, start/odmowy): klient z testowym CA, klient bez CA, zwykłe HTTP na porcie TLS (400), ciasteczko, brak plików i brak
   ustawień przy włączeniu = błąd startu. Wyłączone TLS to pozostałe testy.

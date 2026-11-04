@@ -76,6 +76,7 @@ public final class TestPki {
             PrivateKey key = (PrivateKey) store.getKey("server", PASSWORD.toCharArray());
             String body = Base64.getMimeEncoder(64, "\n".getBytes(StandardCharsets.US_ASCII)).encodeToString(key.getEncoded());
             Files.writeString(dir.resolve("server-key.pem"), "-----BEGIN PRIVATE KEY-----\n" + body + "\n-----END PRIVATE KEY-----\n");
+            Files.setPosixFilePermissions(dir.resolve("server-key.pem"), java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

@@ -16,9 +16,9 @@ spring:
       pem:
         portal-server:
           keystore:
-            certificate: ${PORTAL_SERVER_TLS_CERTIFICATE:}
-            private-key: ${PORTAL_SERVER_TLS_PRIVATE_KEY:}
-            private-key-password: ${PORTAL_SERVER_TLS_PRIVATE_KEY_PASSWORD:}
+            certificate: ${portal.public-tls.certificate-location:}
+            private-key: ${portal.public-tls.private-key-location:}
+            private-key-password: ${PORTAL_PUBLIC_TLS_PRIVATE_KEY_PASSWORD:}
   security:
     oauth2:
       client:
@@ -39,9 +39,10 @@ spring:
 server:
   port: ${PORTAL_PORT:18090}
   ssl:
-    # Optional TLS on the port of the BFF. Off by default; on, the PEM files below are required and a missing or
-    # unreadable one stops the start. Not the portal.tls keystore, which is the client side of the mTLS to C4/C5.
-    enabled: ${PORTAL_SERVER_TLS_ENABLED:false}
+    # Optional TLS on the port of the BFF (PORTAL_PUBLIC_TLS_*, same suffixes as MCP_PUBLIC_TLS_* of the gateway). Off by
+    # default; on, the PEM files below are required and a missing or unreadable one stops the start. Paths get their
+    # file: prefix in PublicTlsEnvironment. Not the portal.tls keystore, which is the client side of the mTLS to C4/C5.
+    enabled: ${PORTAL_PUBLIC_TLS_ENABLED:false}
     bundle: portal-server
   forward-headers-strategy: native
   tomcat:
