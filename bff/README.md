@@ -62,6 +62,7 @@ open 'http://localhost:18720/api/v1/auth/login?returnPath=/'     # logowanie ali
 | Test | Co sprawdza |
 | --- | --- |
 | `PortalApiTest` | każda odpowiedź API walidowana schematem C12 (`portal-bff.v1.bundled.yaml` z jara kontraktów, status spoza kontraktu = błąd); logowanie z PKCE i nonce; ciasteczka `__Host-session` i `__Host-XSRF-TOKEN`; CSRF dla PUT/DELETE/POST; step-up (`step_up_required` + `stepUpUrl`, `max_age=0`, powrót); wymiana tokenów na `aud` brokera i gateway admin; audyt C8 walidowany `audit-event.schema.json`; SPA z fallbackiem, CSP z nonce, HSTS; `/api/**` nigdy HTML; na końcu: żadna odpowiedź ani linia logu nie zawiera tokenu IdP ani sekretu |
+| `ServerTlsTest` | TLS na porcie BFF włączony zmiennymi `PORTAL_SERVER_TLS_*` (PEM z testowego CA z keytoola): klient ufający CA dostaje `/actuator/health`, klient bez CA i zwykłe HTTP nie; ciasteczko sesji `Secure`/`HttpOnly`/`__Host-`; brak plików PEM to błąd startu. Wyłączone TLS to wszystkie pozostałe testy (HTTP) |
 | `RunDevConfigurationTest` | start z tą samą konfiguracją co `run-dev.sh` (profil `dev`, zmienne `PORTAL_*` jako zmienne środowiska z relaxed binding) i dane mocka IGA w katalogu |
 | `FrontendBuildTest` | prawdziwy build ws-08 z `../web/dist/portal` (pomijany, gdy nie zbudowany; `-Dportal.test.require-web-dist=true` robi z tego błąd): trasy SPA, nonce w stylach, pliki JS/CSS; powrót po logowaniu na `PORTAL_WEB_LOGIN_RETURN_ORIGIN` |
 | `CatalogAssemblerTest` | reguły statusów i akcji katalogu (CC-021); odtworzenie przykładu `mixed` z C12 z danych C5/C4/C13 |
@@ -97,6 +98,9 @@ Wszystko przez zmienne środowiska (`application.yml`):
 | `PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CLIENT_ID` | `--client-id` w komendzie `clientConfigs.claudeCode`; puste = bez flagi (litery, cyfry, `.`, `_`, `-`; inna wartość to błąd startu) | `claude-code` w profilu `dev`, poza nim puste |
 | `PORTAL_CLIENT_CONFIGS_CLAUDE_CODE_CALLBACK_PORT` | `--callback-port` w tej komendzie (1024-65535); puste = bez flagi | `33418` w profilu `dev`, poza nim puste |
 | `PORTAL_TRUSTED_PROXIES` | regex adresów proxy, od których przyjmowane są `X-Forwarded-*` | `127[.]0[.]0[.]1\|0:0:0:0:0:0:0:1` |
+| `PORTAL_SERVER_TLS_ENABLED` | `true` włącza TLS na porcie BFF (`PORTAL_PORT`); domyślnie wyłączone, port mówi wtedy zwykłym HTTP | `false` |
+| `PORTAL_SERVER_TLS_CERTIFICATE`, `PORTAL_SERVER_TLS_PRIVATE_KEY` | certyfikat serwera (z łańcuchem) i klucz prywatny w PEM (PKCS#8): URL w postaci `file:/ścieżka` (goła ścieżka byłaby szukana w classpath); wymagane przy `PORTAL_SERVER_TLS_ENABLED=true`, brak pliku to błąd startu | brak |
+| `PORTAL_SERVER_TLS_PRIVATE_KEY_PASSWORD` | hasło zaszyfrowanego klucza PEM; puste dla klucza bez hasła | puste |
 | `PORTAL_STEP_UP_MAX_AGE` | wiek ostatniego logowania dla operacji ze step-up | `5m` |
 | `PORTAL_STEP_UP_ACR_VALUES` | wartości `acr` uznawane za MFA; puste = tylko `auth_time`, dozwolone wyłącznie w profilu `dev` | puste (realm nie ma poziomów `acr`) |
 
@@ -124,6 +128,24 @@ connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; fram
 Audyt C8: logger `pl.aiwcorpo.mcp.audit`, jedna linia JSON na zdarzenie na stdout, `component: portal`,
 `componentId: mcp-portal-bff`, zdarzenie `connection_change` dla zapisu sekretu i odłączenia (także odmowy
 step-up i odrzucenia przez broker).
+
+### TLS na porcie BFF (opcjonalnie)
+
+Domyślnie port BFF mówi zwykłym HTTP, bo kończy go reverse proxy przed nim. Gdy ruch między proxy a BFF ma być szyfrowany
+(niesie ciasteczko sesji), ustaw `PORTAL_SERVER_TLS_ENABLED=true`, `PORTAL_SERVER_TLS_CERTIFICATE=file:/certs/tls.crt` i
+`PORTAL_SERVER_TLS_PRIVATE_KEY=file:/certs/tls.key` (PEM; klucz PKCS#8, z hasłem w `PORTAL_SERVER_TLS_PRIVATE_KEY_PASSWORD`).
+To zwykły pakiet SSL Spring Boota (`portal-server`), a nie keystore z `PORTAL_TLS_*`, który służy do mTLS w stronę brokera i
+gatewaya. Zmiany:
+
+- To samo `PORTAL_PORT` obsługuje wtedy wyłącznie HTTPS; zwykłe HTTP na tym porcie dostaje 400. Proxy musi łączyć się
+  przez `https://` i ufać CA certyfikatu (nazwa w certyfikacie = nazwa, z którą proxy łączy się z BFF).
+- Zdrowie: `GET https://<host>:<port>/actuator/health`. Sonda w kontenerze: `wget -q -O /dev/null --no-check-certificate
+  https://127.0.0.1:8080/actuator/health` (pętla zwrotna wewnątrz kontenera, więc bez weryfikacji łańcucha).
+- Obraz nie ma instrukcji `HEALTHCHECK`; sondę definiuje stos (compose, Kubernetes), więc przy TLS trzeba ją przestawić na https.
+- `PORTAL_TRUSTED_PROXY_HOST` i `entrypoint.sh` bez zmian: zaufanie do `X-Forwarded-*` dotyczy adresu proxy, nie TLS.
+- Ciasteczko `__Host-session` ma `Secure`, `HttpOnly`, `Path=/`, bez `Domain` niezależnie od TLS na porcie (ustawia to
+  konfiguracja BFF, bo publiczny adres jest zawsze https); test `ServerTlsTest` sprawdza to na porcie z TLS.
+- Certyfikat jest czytany przy starcie; jego wymiana wymaga restartu. Włączony TLS bez czytelnych plików PEM to błąd startu.
 
 ## M2: połączenia, wirtualne serwery, testy
 

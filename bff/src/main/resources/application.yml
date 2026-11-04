@@ -11,6 +11,14 @@ spring:
     resources:
       # The Angular build is served from portal.web.dist-path by SpaConfig only.
       add-mappings: false
+  ssl:
+    bundle:
+      pem:
+        portal-server:
+          keystore:
+            certificate: ${PORTAL_SERVER_TLS_CERTIFICATE:}
+            private-key: ${PORTAL_SERVER_TLS_PRIVATE_KEY:}
+            private-key-password: ${PORTAL_SERVER_TLS_PRIVATE_KEY_PASSWORD:}
   security:
     oauth2:
       client:
@@ -30,6 +38,11 @@ spring:
 
 server:
   port: ${PORTAL_PORT:18090}
+  ssl:
+    # Optional TLS on the port of the BFF. Off by default; on, the PEM files below are required and a missing or
+    # unreadable one stops the start. Not the portal.tls keystore, which is the client side of the mTLS to C4/C5.
+    enabled: ${PORTAL_SERVER_TLS_ENABLED:false}
+    bundle: portal-server
   forward-headers-strategy: native
   tomcat:
     remoteip:

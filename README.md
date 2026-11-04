@@ -98,6 +98,11 @@ commicie, a nie to, co leży w katalogu roboczym. Niczego nie wysyła do rejestr
   wylogowują użytkowników; nic poza tym nie ginie, bo portal nie ma bazy. Wiele instancji wymaga przypięcia sesji do
   instancji na proxy.
 - **Zdrowie.** `GET /actuator/health` (bez szczegółów) na porcie kontenera. Obraz `web` odpowiada `ok` na `/__web/health`.
+- **TLS na porcie BFF.** Opcjonalny, domyślnie wyłączony: `PORTAL_SERVER_TLS_ENABLED=true` z `PORTAL_SERVER_TLS_CERTIFICATE` i
+  `PORTAL_SERVER_TLS_PRIVATE_KEY` (PEM, adresy `file:`), opis i skutki w [bff/README.md](bff/README.md#tls-na-porcie-bff-opcjonalnie).
+  Dotyczy obrazów `bff` i `portal`. Obraz `web` zostaje przy HTTP na 8080: to statyczny nginx tylko za proxy, nie niesie ciasteczek
+  sesji, a TLS wymagałby szablonu `nginx.conf` i certyfikatu w obrazie bez wpływu na bezpieczeństwo sesji; kto chce szyfrować
+  także ten odcinek, robi to na proxy. Obrazy nie mają `HEALTHCHECK`, więc sondę przy TLS stos przestawia na https.
 - **Logi.** Stdout w formacie tekstowym; zdarzenia audytu C8 (`component: portal`) to osobny logger `pl.aiwcorpo.mcp.audit`,
   jedna linia JSON na zdarzenie. Treść wyłącznika (`reason`) i wartości sekretów nigdy tam nie trafiają.
 - **Nowa wersja.** Zmień tag obrazu i zrestartuj kontener. Wersje obrazów są niezmienne; wycofanie to poprzedni tag.

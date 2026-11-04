@@ -16,6 +16,8 @@ robocze (`0.1.0-SNAPSHOT`, `0.1.0`); obrazy testowe mają tag `m<numer kamienia>
 - `RegistryTool.risk` i `.action` opcjonalne (wpis adaptera czeka bez nich), `classifiedBy` i `classifiedAt`.
 - Połączenie w stanie `error` (brak sekretu, CC-205): wiersz mówi, że przestało działać, i prosi o ponowne połączenie.
 - Wektory `http-broken-escape`, `http-lone-percent` i `http-half-escape` (CC-202) sprawdzane surowym żądaniem.
+- Opcjonalny TLS na porcie BFF (`PORTAL_SERVER_TLS_ENABLED`, `_CERTIFICATE`, `_PRIVATE_KEY`, `_PRIVATE_KEY_PASSWORD`; PEM, pakiet SSL
+  Spring Boota), domyślnie wyłączony; bez zmian kontraktów i bez mTLS.
 - Dockerfile w repozytorium (cele `bff`, `web`, `portal`), zrzuty ekranu w README, LICENSE (Apache-2.0), NOTICE,
   SECURITY.md, CONTRIBUTING.md.
 
