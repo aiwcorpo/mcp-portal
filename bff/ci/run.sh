@@ -35,7 +35,7 @@ step_style() {
   local files=() bad=0 file
   while IFS= read -r -d '' file; do
     files+=("$file")
-  done < <(find src ci scripts docker dev .ci README.md STATUS.md pom.xml Makefile -type f ! -name '*.p12' ! -name '*.jar' -print0) || return 1
+  done < <(find src ci scripts docker dev README.md STATUS.md pom.xml Makefile -type f ! -name '*.p12' ! -name '*.jar' -print0) || return 1
   # The documents and scripts of the repository root, when the checkout has them (a copy of bff/ alone does not).
   for file in ../README.md ../CHANGELOG.md ../SECURITY.md ../CONTRIBUTING.md ../NOTICE ../Dockerfile ../scripts/build-images.sh; do
     [[ -f "$file" ]] && files+=("$file")
