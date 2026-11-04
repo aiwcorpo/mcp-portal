@@ -4,7 +4,7 @@ Backend portalu MCP (strumień ws-07): logowanie OIDC i sesja po stronie serwera
 agregacja C5 (gateway admin), C4 (credential broker) i C13 (IGA). Przeglądarka nigdy nie dostaje tokenów
 ani sekretów. BFF serwuje też zbudowany frontend Angular (`../web`) z tego samego originu.
 
-Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 6.3.2 (jary `mcp-contracts`, `mcp-manifest` i `test-vectors` w `~/.m2` albo w rejestrze Maven z `MCP_MAVEN_REPOSITORY_URL`, np. GitHub Packages `https://maven.pkg.github.com/aiwcorpo/mcp-contracts`; ustawienia w `.ci/settings.xml`).
+Stos: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Kontrakty: `mcp-contracts` 6.3.2 (jary `mcp-contracts`, `mcp-manifest` i `test-vectors` w `~/.m2` albo w rejestrze Maven z `MCP_MAVEN_REPOSITORY_URL`; ustawienia w `.ci/settings.xml`).
 Obraz: `Dockerfile` w korzeniu repozytorium (cele `bff`, `web`, `portal`), `scripts/build-images.sh`; opis w [../README.md](../README.md).
 
 ## Uruchomienie lokalne
@@ -352,9 +352,8 @@ i `.github/workflows/ci.yml` w korzeniu `mcp-portal` to cienkie nakładki wołaj
 Sekrety rejestru artefaktów (`MCP_MAVEN_REPOSITORY_URL`, `_USER`, `_PASSWORD`, token tylko do odczytu; ustawienia w `.ci/settings.xml`)
 trafiają wyłącznie do zadań na gałęzi głównej, nigdy do pipeline'ów merge requestów i pull requestów, które dostają krok `style`.
 Socket Dockera (zadanie `web`) tylko na gałęzi głównej i dedykowanym agencie.
-Izolacja nie wynika z samych plików nakładek (gałąź może je zmienić), tylko z ustawień systemu CI: GitHub: bez sekretów rejestru; zadania na `main` czytają pakiety
-`mcp-contracts` tokenem `GITHUB_TOKEN` z `permissions: packages: read`, a każdy pakiet musi dać temu repozytorium dostęp do odczytu
-(ustawienia pakietu, "Manage Actions access"); pull requesty dostają tylko `style`. GitLab: zmienne masked, protected, tylko do odczytu. Jenkins: etykieta
+Izolacja nie wynika z samych plików nakładek (gałąź może je zmienić), tylko z ustawień systemu CI: GitHub: bez sekretów rejestru i bez tokenu (`permissions: contents: read`);
+`ci.yml` robi tylko `style`, a build i testy czekają na wydanie `mcp-contracts` w publicznych rejestrach. GitLab: zmienne masked, protected, tylko do odczytu. Jenkins: etykieta
 `ci-style` to pula bez gniazda Dockera dla kroku `style`; poświadczenia `mcp-maven-registry` i `mcp-maven-registry-url` dostępne tylko dla
 zadań gałęzi `main`; węzeł `docker` przyjmuje wyłącznie zadania `main`; dla pull requestów Jenkinsfile pochodzi z zaufanej gałęzi
 (wtyczka z zaufanym źródłem Jenkinsfile), nie z gałęzi PR. `ci/run.sh` kończy się błędem przy nieznanym albo

@@ -1,8 +1,9 @@
 # Thin wrapper: all logic is in bff/ci/run.sh and web/ci/run.sh.
-# The mcp-contracts packages are read with the GITHUB_TOKEN of the run and permissions: packages: read; there is no stored
-# registry secret. That needs each package (Maven mcp-contracts and mcp-manifest, npm @aiwcorpo/mcp-contracts) to grant this
-# repository read access (package settings, "Manage Actions access"). Only the jobs on a push to main read packages; pull
-# requests get the style jobs, which need neither packages nor a token.
+# Only the style checks run here, on pull requests and on pushes to main. They need neither a token nor a secret nor any
+# package: permissions are contents: read and the checkout keeps no credentials. The build and the tests need the
+# mcp-contracts artifacts, which are not published anywhere a runner can read without a credential yet; they run through
+# bff/ci/run.sh and web/ci/run.sh on a workstation and in GitLab/Jenkins. When mcp-contracts is on npmjs and Maven Central,
+# add the jobs here without any token, since both registries are public.
 name: ci
 on:
   push:
@@ -14,42 +15,20 @@ jobs:
   bff-style:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # actions/checkout v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - run: bff/ci/run.sh
         env:
           CI_STEPS: style
   web-style:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # actions/checkout v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - run: web/ci/run.sh
         env:
           CI_STEPS: style
-  bff-build:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '25'
-      - run: bff/ci/run.sh
-        env:
-          MCP_MAVEN_REPOSITORY_URL: https://maven.pkg.github.com/aiwcorpo/mcp-contracts
-          MCP_MAVEN_REPOSITORY_USER: ${{ github.actor }}
-          MCP_MAVEN_REPOSITORY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-  web:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/checkout@v4
-      - run: web/ci/run.sh --container
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

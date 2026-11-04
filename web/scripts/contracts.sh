@@ -6,9 +6,9 @@
 #   2. CONTRACTS_TARBALL=<file>             a tarball on disk
 #   3. CONTRACTS_TARBALL_URL=<url>          a package server
 #   4. CONTRACTS_SOURCE_DIR=<checkout>      `npm pack` in a checkout of mcp-contracts at the release tag (dist/ built there)
-#   5. NODE_AUTH_TOKEN set                  `npm pack` from the registry of the @aiwcorpo scope in .npmrc (GitHub Packages)
 #
-# When the dependency in package.json is a registry version ("6.3.2" instead of a file: path) there is nothing to prepare.
+# After mcp-contracts is published to npmjs, the dependency in package.json becomes a registry version and
+# there is nothing to prepare. When it is a registry version ("6.3.2" instead of a file: path) there is nothing to prepare.
 set -euo pipefail
 
 web_dir="$(cd "$(dirname "$0")/.." && pwd)"
@@ -57,19 +57,11 @@ elif [[ -n "${CONTRACTS_SOURCE_DIR:-}" ]]; then
     echo "contracts: the checkout produced $packed, package.json wants $name (check out the tag v$version)" >&2
     exit 1
   fi
-elif [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
-  # The scope registry is in web/.npmrc; the token goes through a temporary user config (npm expands the variable),
-  # so it is neither in a file of the repository nor on a command line.
-  userconfig="$(mktemp)"
-  trap 'rm -f "$userconfig"' EXIT
-  printf '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n' > "$userconfig"
-  (cd "$web_dir" && npm pack --silent --userconfig "$userconfig" "@aiwcorpo/mcp-contracts@$version" \
-    --pack-destination "$(dirname "$target")" >/dev/null)
 else
   cat >&2 <<MSG
 contracts: $relative is missing. Provide the tarball of mcp-contracts $version with one of:
-  CONTRACTS_TARBALL=<file>, CONTRACTS_TARBALL_URL=<url>, CONTRACTS_SOURCE_DIR=<checkout at tag v$version>,
-  or NODE_AUTH_TOKEN=<token with read:packages> to download it from GitHub Packages.
+  CONTRACTS_TARBALL=<file> (for example mcp-contracts/release/$name), CONTRACTS_TARBALL_URL=<url>
+  or CONTRACTS_SOURCE_DIR=<checkout at tag v$version>.
 MSG
   exit 1
 fi
