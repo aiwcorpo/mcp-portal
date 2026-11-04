@@ -1,9 +1,7 @@
 # Thin wrapper: all logic is in bff/ci/run.sh and web/ci/run.sh, which also run in a developer's shell.
 #
-# Credentials for the registry with the mcp-contracts artifacts (MCP_MAVEN_REPOSITORY_URL, _USER, _PASSWORD) are CI/CD
-# variables that must be masked, read-only and PROTECTED: they exist only on protected branches, never in a merge request
-# pipeline, so code from a merge request cannot read them. Merge requests get the style checks; the build and the tests run
-# on the default branch and need the artifacts there. The web job needs a runner with Docker (it builds its own image).
+# No job needs a credential: the mcp-contracts artifacts come from Maven Central and npmjs. Merge requests get the style checks;
+# the build and the tests run on the default branch. The web job needs a runner with Docker (it builds its own image).
 stages:
   - verify
 

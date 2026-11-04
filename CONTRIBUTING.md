@@ -9,7 +9,7 @@ before it is implemented here. The web client is generated from `portal-bff.v1.b
 
 Linux and macOS with bash 3.2 or newer; Windows only through WSL2. The BFF needs JDK 25 (found by
 `bff/scripts/select-jdk.sh`), the web part Node 24 and npm 11. The `mcp-contracts` artifacts must be reachable: Maven
-jars from `~/.m2` or from the registry named by `MCP_MAVEN_REPOSITORY_URL`, the npm tarball in `web/.contracts/`
+jars from `~/.m2` or Maven Central, the npm tarball in `web/.contracts/`
 (`web/scripts/contracts.sh`). See the README, "Instalacja z źródeł".
 
 ```bash

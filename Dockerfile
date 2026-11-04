@@ -13,6 +13,8 @@ ARG JRE_IMAGE=eclipse-temurin:25-jre-alpine@sha256:b7528962e65d43064d8a8b67ba175
 ARG NGINX_IMAGE=nginx:stable-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949
 
 FROM ${JRE_IMAGE} AS bff
+LABEL org.opencontainers.image.source="https://github.com/aiwcorpo/mcp-portal" \
+      org.opencontainers.image.licenses="Apache-2.0"
 RUN addgroup -S portal && adduser -S -G portal -H -h /app portal
 WORKDIR /app
 COPY --chown=root:root bff/target/mcp-portal-bff-*.jar /app/app.jar
@@ -27,6 +29,8 @@ COPY --chown=root:root web/dist/portal /app/web
 ENV PORTAL_WEB_DIST=/app/web
 
 FROM ${NGINX_IMAGE} AS web
+LABEL org.opencontainers.image.source="https://github.com/aiwcorpo/mcp-portal" \
+      org.opencontainers.image.licenses="Apache-2.0"
 COPY web/docker/nginx.conf /etc/nginx/nginx.conf
 COPY web/dist/portal /usr/share/nginx/html
 USER 101

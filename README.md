@@ -96,9 +96,7 @@ Linux and macOS with bash 3.2 or newer; Windows only through WSL2. Needed: git, 
 
 The contract artifacts come in two ways, and neither needs a file in the git of this repository:
 
-- The BFF reads the `mcp-contracts` and `mcp-manifest` jars from `~/.m2` or from the Maven registry in
-  `MCP_MAVEN_REPOSITORY_URL` (`_USER`, `_PASSWORD`; settings in `bff/.ci/settings.xml`). Once `mcp-contracts` is released to
-  Maven Central, plain Maven is enough.
+- The BFF reads the `mcp-contracts` and `mcp-manifest` jars from `~/.m2` or from Maven Central.
 - The web part reads the npm package from `web/.contracts/` (outside git), which `web/scripts/contracts.sh` fills: from a
   file (`CONTRACTS_TARBALL`; the release file is in `mcp-contracts/release/`), from an address (`CONTRACTS_TARBALL_URL`,
   `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v6.3.2`

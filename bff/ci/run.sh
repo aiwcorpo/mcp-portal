@@ -6,8 +6,8 @@
 #   ci/run.sh --container      the same inside the image built from ci/Dockerfile (needs docker and ~/.m2 with mcp-contracts)
 #   CI_STEPS=style ci/run.sh   a subset (comma separated: style, build); an unknown or empty list is an error
 #
-# Needs a JDK 25 (found by scripts/select-jdk.sh; JAVA_HOME wins) for the build step and the mcp-contracts artifacts either in ~/.m2 or in the registry
-# named by MCP_MAVEN_REPOSITORY_URL (+ _USER, _PASSWORD; settings in .ci/settings.xml). CI_MVNW replaces ./mvnw (tests).
+# Needs a JDK 25 (found by scripts/select-jdk.sh; JAVA_HOME wins) for the build step and the mcp-contracts artifacts from ~/.m2 or
+# Maven Central. CI_MVNW replaces ./mvnw (tests).
 set -euo pipefail
 
 bff_dir="$(cd "$(dirname "$0")/.." && pwd)"
@@ -18,7 +18,6 @@ if [[ "${1:-}" == "--container" ]]; then
   docker build -q -f "$bff_dir/ci/Dockerfile" ${CI_BASE_IMAGE:+--build-arg "BASE_IMAGE=$CI_BASE_IMAGE"} -t "$image" "$bff_dir/ci" >/dev/null
   mkdir -p "$HOME/.m2"
   exec docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp/ci-home ${CI_STEPS+-e "CI_STEPS=$CI_STEPS"} \
-    -e MCP_MAVEN_REPOSITORY_URL -e MCP_MAVEN_REPOSITORY_USER -e MCP_MAVEN_REPOSITORY_PASSWORD \
     -v "$repo_root:/work" -v "$HOME/.m2:/tmp/ci-home/.m2" -w /work/bff "$image" ci/run.sh
 fi
 
@@ -54,9 +53,6 @@ step_build() {
   source "$bff_dir/scripts/select-jdk.sh"
   select_jdk || return 1
   local mvnw="${CI_MVNW:-./mvnw}" args=(-B -ntp)
-  if [[ -n "${MCP_MAVEN_REPOSITORY_URL:-}" ]]; then
-    args+=(-s .ci/settings.xml)
-  fi
   # clean: the count below is read from reports of this run only.
   "$mvnw" "${args[@]}" clean verify || return 1
   local total

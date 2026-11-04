@@ -11,7 +11,7 @@
 # NGINX_IMAGE overrides the nginx base image of the web target.
 #
 # Needs git, docker, JDK 25 (bff/scripts/select-jdk.sh finds it), Node 24 and the mcp-contracts artifacts: Maven jars in
-# ~/.m2 or in the registry of MCP_MAVEN_REPOSITORY_URL (+ _USER, _PASSWORD), the npm tarball through web/scripts/contracts.sh
+# ~/.m2 or on Maven Central, the npm tarball through web/scripts/contracts.sh
 # (CONTRACTS_TARBALL, CONTRACTS_TARBALL_URL or CONTRACTS_SOURCE_DIR; a tarball already in
 # web/.contracts/ of this checkout is used as it is).
 set -euo pipefail
@@ -33,9 +33,6 @@ git -C "$repo_root" archive "$ref" | tar -x -C "$work"
 
 echo "== bff"
 bff_args=(-B -ntp -DskipTests)
-if [[ -n "${MCP_MAVEN_REPOSITORY_URL:-}" ]]; then
-  bff_args+=(-s .ci/settings.xml)
-fi
 (cd "$work/bff" && ./mvnw "${bff_args[@]}" package)
 
 echo "== web"

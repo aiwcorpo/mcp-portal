@@ -4,7 +4,7 @@ Backend of the MCP portal (workstream ws-07): OIDC login and server-side session
 and aggregation of C5 (gateway admin), C4 (credential broker) and C13 (IGA). The browser never receives tokens or
 secrets. The BFF also serves the built Angular frontend (`../web`) from the same origin.
 
-Stack: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Contracts: `mcp-contracts` 6.3.2 (the `mcp-contracts`, `mcp-manifest` and `test-vectors` jars, from `~/.m2` or from the Maven registry set by `MCP_MAVEN_REPOSITORY_URL`; settings in `.ci/settings.xml`).
+Stack: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Contracts: `mcp-contracts` 6.3.2 (the `mcp-contracts`, `mcp-manifest` and `test-vectors` jars, from `~/.m2` or from Maven Central).
 Image: `Dockerfile` in the repository root (targets `bff`, `web`, `portal`), `scripts/build-images.sh`; described in [../README.md](../README.md).
 
 ## Running locally
@@ -352,13 +352,10 @@ goes to the audit. Details:
 prints the test count. It works locally without any CI system. In a container, `ci/run.sh --container` builds an image from
 `ci/Dockerfile` and runs the same script in it (repository and `~/.m2` as volumes). The files `.gitlab-ci.yml`, `Jenkinsfile`
 and `.github/workflows/ci.yml` in the `mcp-portal` root are thin wrappers that call `bff/ci/run.sh` and `web/ci/run.sh`.
-The artifact registry secrets (`MCP_MAVEN_REPOSITORY_URL`, `_USER`, `_PASSWORD`, a read-only token; settings in `.ci/settings.xml`)
-go only to jobs on the main branch, never to merge request or pull request pipelines, which get the `style` step.
+No job needs a registry secret: the `mcp-contracts` artifacts come from public registries.
 The Docker socket (job `web`) is available only on the main branch and a dedicated agent.
-Isolation does not come from the wrapper files alone (a branch can change them) but from the CI system's settings. GitHub: no registry secrets and no token (`permissions: contents: read`);
-`ci.yml` runs only `style`, and build and tests wait for `mcp-contracts` to be released to public registries. GitLab: variables masked, protected, read-only. Jenkins: the label
-`ci-style` is a pool without the Docker socket for the `style` step; the credentials `mcp-maven-registry` and `mcp-maven-registry-url` are available only to
-jobs of the `main` branch; the `docker` node accepts only `main` jobs; for pull requests the Jenkinsfile comes from a trusted branch
+Isolation does not come from the wrapper files alone (a branch can change them) but from the CI system's settings. GitHub: no registry secrets and no token (`permissions: contents: read`). Jenkins: the label
+`ci-style` is a pool without the Docker socket for the `style` step; the `docker` node accepts only `main` jobs; for pull requests the Jenkinsfile comes from a trusted branch
 (a plugin with a trusted Jenkinsfile source), not from the PR branch. `ci/run.sh` fails on an unknown or
 empty `CI_STEPS`, on a failed `mvnw` and on zero tests.
 
