@@ -22,7 +22,7 @@ env:
   # mcp-contracts 6.3.2 comes from the public registries: Maven Central (the default repository of Maven) and npmjs, the
   # tarball checked against the bytes of the release file. No credential is needed for the reads.
   CONTRACTS_FROM_NPMJS: '1'
-  CONTRACTS_TARBALL_SHA256: 1811f14fae8098f69402bd346eb463e1e367085b3808785e12c1b91f4d4b7e5c
+  CONTRACTS_TARBALL_SHA256: f99e6d182a7197aedb448c99a4b439087c23c8e85d6b9f6cefd9433c6c6a74c3
 
 jobs:
   verify:

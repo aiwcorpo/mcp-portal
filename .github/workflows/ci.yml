@@ -54,7 +54,7 @@ jobs:
     env:
       # The tarball of @aiwcorpo/mcp-contracts 6.3.2 from npmjs, checked against the bytes of the release file.
       CONTRACTS_FROM_NPMJS: '1'
-      CONTRACTS_TARBALL_SHA256: 1811f14fae8098f69402bd346eb463e1e367085b3808785e12c1b91f4d4b7e5c
+      CONTRACTS_TARBALL_SHA256: f99e6d182a7197aedb448c99a4b439087c23c8e85d6b9f6cefd9433c6c6a74c3
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
