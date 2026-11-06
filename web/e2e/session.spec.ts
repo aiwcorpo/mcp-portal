@@ -36,28 +36,28 @@ test('an unknown loginError value shows nothing', async ({ page }) => {
   await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
-test('connect GitLab through the provider: the result names the system and the account', async ({
+test('connect Gitlab through the provider: the result names the system and the account', async ({
   page,
 }) => {
   await page.goto('/catalog');
-  await page.getByRole('button', { name: 'Connect (GitLab)' }).click();
+  await page.getByRole('button', { name: 'Connect (Gitlab)' }).click();
 
-  await expect(page.getByText('Connected to GitLab as jkowalski.')).toBeVisible();
+  await expect(page.getByText('Connected to Gitlab as jkowalski.')).toBeVisible();
   await expect(page).toHaveURL(/\/catalog$/);
-  const row = page.locator('tbody', { has: page.getByRole('rowheader', { name: 'GitLab' }) });
+  const row = page.locator('tbody', { has: page.getByRole('rowheader', { name: 'Gitlab' }) });
   await expect(row).toContainText('Connected');
 });
 
 const OAUTH_FAILURES = {
-  cancelled: 'Connecting to GitLab cancelled.',
+  cancelled: 'Connecting to Gitlab cancelled.',
   flow_invalid: 'The connection link expired or was already used. Start again.',
-  provider_error: 'GitLab did not respond correctly. Try again in a moment.',
+  provider_error: 'Gitlab did not respond correctly. Try again in a moment.',
 };
 
 for (const [outcome, message] of Object.entries(OAUTH_FAILURES)) {
   test(`return from the provider with ${outcome}`, async ({ page }) => {
     await page.goto(`/catalog?mockOAuth=${outcome}`);
-    await page.getByRole('button', { name: 'Connect (GitLab)' }).click();
+    await page.getByRole('button', { name: 'Connect (Gitlab)' }).click();
 
     await expect(page.getByRole('alert')).toContainText(message);
     await expect(page).toHaveURL(/\/catalog$/);
@@ -90,8 +90,8 @@ test('dialog and snack bar work under the CSP: copy link and disconnect', async 
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/catalog');
-  await page.getByRole('button', { name: 'Copy link (Service Desk)' }).click();
-  await expect(page.getByText('Copied the address of the Service Desk server.')).toBeVisible();
+  await page.getByRole('button', { name: 'Copy link (Servicedesk)' }).click();
+  await expect(page.getByText('Copied the address of the Servicedesk server.')).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
     'https://mcp.aiwcorpo.pl/s/mcp-servicedesk/mcp',
   );
@@ -110,6 +110,6 @@ test('the catalog filter finds a tool and opens its server', async ({ page }) =>
   await page.goto('/catalog');
   await page.getByRole('searchbox', { name: 'Search for a server or tool' }).fill('delete_issue');
   await expect(page.getByText('jira__delete_issue')).toBeVisible();
-  await expect(page.getByRole('rowheader', { name: 'GitLab' })).toHaveCount(0);
+  await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toHaveCount(0);
   await expect(page.getByText('Requires a code from the Authenticator.')).toBeVisible();
 });

@@ -11,6 +11,15 @@
   <app-error-notice [failure]="failure" />
 }
 
+@if (invalidated(); as names) {
+  <app-notice kind="warning">
+    <ng-container i18n="@@connections.invalidated"
+      >An administrator changed the settings of the system, so the stored connection was deleted.
+      Connect the account again: {{ names }}.</ng-container
+    >
+  </app-notice>
+}
+
 @let state = catalog();
 @if (state.status === 'loading') {
   <app-loading />

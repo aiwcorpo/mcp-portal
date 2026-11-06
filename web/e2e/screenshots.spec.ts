@@ -39,15 +39,15 @@ test.describe('screenshots', () => {
 
     await page.goto('/catalog?mockSession=in');
     // Leaving before the mock session state is saved would drop the session set by the query.
-    await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+    await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
     await page.goto('/catalog');
-    await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+    await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
     await shot(page, project, '01-serwery-mcp-zwiniete');
     await page.getByRole('button', { name: /^Show tools \(Jira\)/ }).click();
     await shot(page, project, '01-serwery-mcp-rozwiniete');
 
     await page.goto('/catalog?mockScenario=mixed');
-    await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+    await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
     await shot(page, project, '01-serwery-mcp-stany-mixed');
 
     await page.goto('/catalog?mockScenario=empty');
@@ -68,12 +68,12 @@ test.describe('screenshots', () => {
     await shot(page, project, '05-token-pat-secret-invalid');
 
     await page.goto('/catalog?mockScenario=default&mockOAuth=ok');
-    await page.getByRole('button', { name: 'Connect (GitLab)' }).click();
-    await expect(page.getByText('Connected to GitLab as jkowalski.')).toBeVisible();
+    await page.getByRole('button', { name: 'Connect (Gitlab)' }).click();
+    await expect(page.getByText('Connected to Gitlab as jkowalski.')).toBeVisible();
     await shot(page, project, '21-powrot-z-oauth-sukces');
     for (const outcome of ['flow_invalid', 'provider_error', 'cancelled']) {
       await page.goto(`/catalog?mockScenario=default&mockOAuth=${outcome}`);
-      await page.getByRole('button', { name: /^(Connect|Connect with OAuth) \(GitLab\)$/ }).click();
+      await page.getByRole('button', { name: /^(Connect|Connect with OAuth) \(Gitlab\)$/ }).click();
       await expect(page.getByRole('alert')).toBeVisible();
       await shot(page, project, `22-powrot-z-oauth-${outcome}`);
     }
@@ -216,7 +216,7 @@ test.describe('screenshots', () => {
     await expect(page.getByText('Could not load the data.')).toBeVisible();
     await shot(page, project, '06-logi-blad-503');
     await page.goto('/connections?mockScenario=default');
-    await expect(page.getByRole('rowheader', { name: 'Service Desk' })).toBeVisible();
+    await expect(page.getByRole('rowheader', { name: 'Servicedesk' })).toBeVisible();
     await shot(page, project, '03-polaczenia-ostatnie-uzycie-z-logow');
   });
 });

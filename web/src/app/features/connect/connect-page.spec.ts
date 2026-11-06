@@ -40,7 +40,7 @@ describe('ConnectPage', () => {
     expect(document.querySelector('form')?.getAttribute('autocomplete')).toBe('off');
   });
 
-  it('offers OAuth and a token form for GitLab', async () => {
+  it('offers OAuth and a token form for Gitlab', async () => {
     server.use(
       http.get('/api/v1/catalog', () =>
         HttpResponse.json({
@@ -55,10 +55,10 @@ describe('ConnectPage', () => {
     );
     configureTestApp();
     await openRoute('/connect/gitlab');
-    await until(() => expect(text()).toContain('Connect GitLab'));
+    await until(() => expect(text()).toContain('Connect Gitlab'));
 
     expect(text()).toContain('Connect with OAuth');
-    expect(text()).toContain('read_api');
+    expect(text()).toContain('personal access tokens');
     expect(tokenInput()).toBeTruthy();
   });
 
@@ -107,7 +107,7 @@ describe('ConnectPage', () => {
     expect(text()).not.toContain('jira-pat-test-value-0001');
     expect(localStorage.length).toBe(0);
     expect(sessionStorage.length).toBe(0);
-    expect(store.state.connections.jira?.expiresAt).toBe('2027-01-31T00:00:00Z');
+    expect(store.state.connections['jira']?.expiresAt).toBe('2027-01-31T00:00:00Z');
   });
 
   it('accepts a missing date and any date, including a past one (CC-084)', async () => {

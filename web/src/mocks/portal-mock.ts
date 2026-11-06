@@ -7,6 +7,7 @@ import {
 } from '@aiwcorpo/mcp-contracts/msw';
 import { http, HttpResponse, type HttpHandler } from 'msw';
 import { AdminState, createAdminHandlers, initialAdminState } from './admin-mock';
+import { createDynamicAdminHandlers } from './dynamic-mock';
 import { mcpEndpointAnswer } from './endpoint-mock';
 import { M3State, createM3Handlers, initialM3State } from './m3-mock';
 import type {
@@ -22,7 +23,6 @@ import type {
   PortalCatalogServer,
   PutSecretRequest,
   RequestableEntitlement,
-  SystemId,
 } from '../app/api/generated';
 
 /**
@@ -61,13 +61,13 @@ export interface MockState extends M3State, AdminState {
   scenario: MockScenario;
   oauthOutcome: MockOAuthOutcome;
   /** Per system; absent means "as in the scenario's example". */
-  connections: Partial<Record<SystemId, MockConnection | null>>;
+  connections: Partial<Record<string, MockConnection | null>>;
   /** Requests of the user; null means the scenario's seed. */
   requests: MockRequest[] | null;
   iga: MockIga;
   /** Jira asks for a login next to the token (userSecretScheme Basic, CC-222). */
   basicLogin: boolean;
-  pendingOAuth: { system: SystemId; returnPath: string } | null;
+  pendingOAuth: { system: string; returnPath: string } | null;
 }
 
 /** Mock identity in the target systems, the same user as the C12 `me` example. */
@@ -102,6 +102,8 @@ export function initialMockState(): MockState {
 
 export class MockStore {
   private current: MockState;
+  /** Called by `reset`, for mock data that is not part of the state in the cookie (the administration registry). */
+  readonly onReset: (() => void)[] = [];
 
   constructor(
     initial: MockState = initialMockState(),
@@ -122,6 +124,7 @@ export class MockStore {
   reset(state: MockState = initialMockState()): void {
     this.current = state;
     this.persist(this.current);
+    this.onReset.forEach((hook) => hook());
   }
 }
 
@@ -229,7 +232,7 @@ function baseCatalog(
   return servers;
 }
 
-function defaultCredential(system: SystemId): CatalogCredential {
+function defaultCredential(system: string): CatalogCredential {
   if (system === 'servicedesk') {
     return { supportedTypes: ['service-account'], defaultType: 'service-account' };
   }
@@ -240,7 +243,7 @@ function defaultCredential(system: SystemId): CatalogCredential {
 }
 
 function connectionOf(
-  system: SystemId,
+  system: string,
   mock: MockConnection,
   base: Connection | null | undefined,
   now: number,
@@ -393,8 +396,8 @@ export function mockRequests(state: Readonly<MockState>, now: number = Date.now(
     : seed;
 }
 
-function isSystem(value: string | null): value is SystemId {
-  return value !== null && Object.hasOwn(IGA_ENTITLEMENTS, value);
+function isSystem(value: string | null): value is string {
+  return value !== null && /^[a-z][a-z0-9]{1,30}$/.test(value);
 }
 
 function toAccessRequest(request: MockRequest): AccessRequest {
@@ -435,18 +438,14 @@ const IGA_DESCRIPTIONS: Record<'en' | 'pl', Record<string, string>> = {
   },
 };
 
-const IGA_ENTITLEMENTS: Partial<Record<SystemId, string[]>> = {
-  jira: ['mcp-jira-read', 'mcp-jira-write', 'mcp-jira-destructive'],
-  confluence: ['mcp-confluence-read', 'mcp-confluence-write'],
-  gitlab: ['mcp-gitlab-read', 'mcp-gitlab-write'],
-  servicedesk: ['mcp-servicedesk-read'],
-  opensearch: ['mcp-opensearch-read'],
-};
+/** The groups of a system follow the C9 convention `mcp-<system>-<level>`; the IGA of the mock offers all three for any system. */
+const ENTITLEMENT_LEVELS = ['read', 'write', 'destructive'] as const;
+const ENTITLEMENT = /^mcp-[a-z][a-z0-9]{1,30}-(?:read|write|destructive)$/;
 
-function igaCatalog(system: SystemId): RequestableEntitlement[] | undefined {
+function igaCatalog(system: string): RequestableEntitlement[] | undefined {
   const language =
     typeof document !== 'undefined' && document.documentElement.lang === 'pl' ? 'pl' : 'en';
-  return IGA_ENTITLEMENTS[system]?.map((entitlement) => {
+  return ENTITLEMENT_LEVELS.map((level) => `mcp-${system}-${level}`).map((entitlement) => {
     const description = IGA_DESCRIPTIONS[language][entitlement];
     return description === undefined ? { entitlement } : { entitlement, description };
   });
@@ -516,7 +515,7 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       if (body.secret.startsWith('invalid')) {
         return portalBffExample('putMySecret', 'secret_invalid');
       }
-      const system = params['system'] as SystemId;
+      const system = params['system'] as string;
       // Basic needs the login and a single token must not carry one (CC-222): the broker answers 400 either way.
       const basic =
         baseCatalog(store.state.scenario, Date.now(), store.state.basicLogin).find(
@@ -545,7 +544,7 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
         return undefined;
       }
       store.update({
-        connections: { ...store.state.connections, [params['system'] as SystemId]: null },
+        connections: { ...store.state.connections, [params['system'] as string]: null },
       });
       return new HttpResponse(null, { status: 204 });
     }),
@@ -553,7 +552,7 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       if (!csrfValid(request, cookies)) {
         return undefined;
       }
-      const system = params['system'] as SystemId;
+      const system = params['system'] as string;
       const body = (await request.json().catch(() => ({}))) as { returnPath?: string };
       store.update({ pendingOAuth: { system, returnPath: body.returnPath ?? '/' } });
       const { authorizeUrl } = exampleBody<{ authorizeUrl: string }>('startConnectOAuth', 'gitlab');
@@ -601,7 +600,7 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       if (iga === 'down') {
         return unavailable();
       }
-      const known = Object.values(IGA_ENTITLEMENTS).some((list) => list?.includes(entitlement));
+      const known = ENTITLEMENT.test(entitlement);
       if (iga === 'groups' || !known) {
         return failure('not_requestable', 422);
       }
@@ -662,7 +661,21 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       store.state.session ? undefined : portalBffExample('getMe', 'unauthenticated'),
     requestId: MOCK_REQUEST_ID,
   });
-  return [...stateful, ...m3, ...adminHandlers, ...createPortalBffHandlers({ baseUrl })];
+  const dynamicHandlers = createDynamicAdminHandlers(store, {
+    at,
+    csrfValid,
+    failure,
+    unauthenticated: () =>
+      store.state.session ? undefined : portalBffExample('getMe', 'unauthenticated'),
+    requestId: MOCK_REQUEST_ID,
+  });
+  return [
+    ...stateful,
+    ...m3,
+    ...adminHandlers,
+    ...dynamicHandlers,
+    ...createPortalBffHandlers({ baseUrl }),
+  ];
 }
 
 /** What the BFF and the IdP would do after a successful login. */

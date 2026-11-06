@@ -85,7 +85,7 @@ describe('EndpointPage', () => {
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
 
     checkbox('Jira').click();
-    checkbox('GitLab').click();
+    checkbox('Gitlab').click();
 
     await whenAddress('https://mcp.aiwcorpo.pl/mcp?systems=gitlab,jira');
     expect(queries.at(-1)?.get('systems')).toBe('gitlab,jira');
@@ -152,7 +152,7 @@ describe('EndpointPage', () => {
 
     checkbox('jira__get_issue').click();
     await whenAddress('https://mcp.aiwcorpo.pl/mcp?tools=jira__get_issue');
-    checkbox('GitLab').click();
+    checkbox('Gitlab').click();
     await whenAddress('https://mcp.aiwcorpo.pl/mcp?systems=gitlab');
   });
 

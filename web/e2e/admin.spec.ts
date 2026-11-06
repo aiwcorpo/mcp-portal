@@ -15,7 +15,7 @@ test('review a changed definition as a diff and approve it', async ({ page }) =>
   const confluence = page.getByRole('row', { name: /^\s*Hide tools \(Confluence\)/ });
   await expect(confluence).toContainText('new: 1, changed: 1');
   await expect(confluence).toContainText('Pending approval');
-  await expect(page.getByRole('row', { name: /OpenSearch/ })).toContainText('Disabled');
+  await expect(page.getByRole('row', { name: /Opensearch/ })).toContainText('Disabled');
 
   await page.getByRole('button', { name: 'Show differences (confluence__update_page)' }).click();
   await expect(page.getByText('Before (1.3.0)')).toBeVisible();

@@ -8,14 +8,14 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { PortalCatalogServer, SystemId } from '../api/generated';
+import { PortalCatalogServer } from '../api/generated';
 import { ReturnErrorCode, isConnectErrorCode } from '../core/api-error';
 import { isSystemId, systemName } from './labels';
 import { Notice } from './notice';
 
 type OAuthReturn =
-  | { kind: 'connected'; system: SystemId | null }
-  | { kind: 'failed'; code: ReturnErrorCode; system: SystemId | null };
+  | { kind: 'connected'; system: string | null }
+  | { kind: 'failed'; code: ReturnErrorCode; system: string | null };
 
 const QUERY_KEYS = ['connected', 'connectError', 'system'];
 const SUCCESS_VISIBLE_MS = 10_000;

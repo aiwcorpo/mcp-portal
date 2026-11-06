@@ -7,7 +7,7 @@
         <option value="" [selected]="system() === null" i18n="@@request.systemPlaceholder">
           Select a system
         </option>
-        @for (id of systems; track id) {
+        @for (id of systems(); track id) {
           <option [value]="id" [selected]="id === system()">{{ systemName(id) }}</option>
         }
       </select>

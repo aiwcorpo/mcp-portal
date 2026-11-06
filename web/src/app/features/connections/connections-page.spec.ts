@@ -65,7 +65,7 @@ describe('ConnectionsPage', () => {
     );
     configureTestApp();
     await openRoute('/connections');
-    await until(() => expect(text()).toContain('Service Desk'));
+    await until(() => expect(text()).toContain('Servicedesk'));
 
     expect(text(row('Jira'))).toContain('PAT token');
     expect(text(row('Jira'))).toContain('jkowalski');
@@ -73,15 +73,15 @@ describe('ConnectionsPage', () => {
     expect(text(row('Jira'))).toMatch(/today \d{2}:\d{2}/);
     expect(button('Renew (Jira)', row('Jira'))).toBeTruthy();
     expect(button('Disconnect (Jira)', row('Jira'))).toBeTruthy();
-    expect(text(row('GitLab'))).toContain('refreshed automatically');
-    expect(text(row('GitLab'))).toContain('20.10.2026');
+    expect(text(row('Gitlab'))).toContain('refreshed automatically');
+    expect(text(row('Gitlab'))).toContain('20.10.2026');
     expect(text(row('Confluence'))).toContain('needs reconnecting');
     expect(button('Connect (Confluence)', row('Confluence'))).toBeTruthy();
-    expect(text(row('Service Desk'))).toContain('Service account');
-    expect(row('Service Desk').querySelector('button')).toBeNull();
-    expect(text(row('OpenSearch'))).toContain('no entitlement');
-    expect(button('Submit request (OpenSearch)', row('OpenSearch'))).toBeTruthy();
-    expect(text(row('OpenSearch'))).not.toContain('Add token');
+    expect(text(row('Servicedesk'))).toContain('Service account');
+    expect(row('Servicedesk').querySelector('button')).toBeNull();
+    expect(text(row('Opensearch'))).toContain('no entitlement');
+    expect(button('Submit request (Opensearch)', row('Opensearch'))).toBeTruthy();
+    expect(text(row('Opensearch'))).not.toContain('Add token');
     expect(text()).toContain('Last used');
   });
 
@@ -114,6 +114,40 @@ describe('ConnectionsPage', () => {
     expect(button('Renew (Jira)', jira)).toBeTruthy();
     // A revoked connection keeps the older wording: it does not say the secret is gone.
     expect(text(confluence)).toContain('needs reconnecting');
+  });
+
+  it('says plainly that an administrator changed the system and the connection has to be made again (needs_reconnect)', async () => {
+    server.use(
+      serve([
+        serverFixture('notes', {
+          status: 'reconnect_required',
+          actions: ['reconnect', 'disconnect'],
+          connection: connectionFixture('notes', { type: 'user-oauth', status: 'needs_reconnect' }),
+        }),
+        serverFixture('jira', { connection: connectionFixture('jira') }),
+      ]),
+    );
+    configureTestApp();
+    await openRoute('/connections');
+
+    await until(() => expect(text()).toContain('Notes'));
+    expect(text()).toContain('An administrator changed the settings of the system');
+    expect(text()).toContain('Connect the account again: Notes.');
+    const notes = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
+      text(tr).includes('Notes'),
+    )!;
+    expect(text(notes)).toContain(
+      'the administrator changed the system settings, connect the account again',
+    );
+    expect(button('Connect (Notes)', notes)).toBeTruthy();
+  });
+
+  it('shows no banner while every connection works', async () => {
+    configureTestApp();
+    await openRoute('/connections');
+    await until(() => expect(text()).toContain('Jira'));
+
+    expect(text()).not.toContain('An administrator changed the settings of the system');
   });
 
   it('disconnects after confirmation and reloads', async () => {
@@ -174,7 +208,7 @@ describe('ConnectionsPage', () => {
 
   describe('last use of a service account', () => {
     function lastUseCell(): string {
-      return row('Service Desk').querySelectorAll('td')[3].textContent!.trim();
+      return row('Servicedesk').querySelectorAll('td')[3].textContent!.trim();
     }
 
     it('comes from the newest call in the activity log', async () => {
@@ -187,7 +221,7 @@ describe('ConnectionsPage', () => {
       });
       configureTestApp();
       await openRoute('/connections');
-      await until(() => expect(text()).toContain('Service Desk'));
+      await until(() => expect(text()).toContain('Servicedesk'));
       await until(() => expect(lastUseCell()).toMatch(/\d{2}\.\d{2}\.\d{4}|today \d{2}:\d{2}/));
       expect(queries.map((query) => query.get('q'))).toEqual(['servicedesk__']);
       expect(queries[0].get('limit')).toBe('20');
@@ -202,7 +236,7 @@ describe('ConnectionsPage', () => {
               ts: '2026-10-28T10:00:00.000Z',
               tool: 'gitlab__get_project',
               result: 'ok',
-              resource: { type: 'GitLab::Project', id: 'group/servicedesk__tools' },
+              resource: { type: 'Gitlab::Project', id: 'group/servicedesk__tools' },
             },
             {
               requestId: '0192d1b2-7c3a-7d4e-8f10-000000000002',
@@ -221,7 +255,7 @@ describe('ConnectionsPage', () => {
       );
       configureTestApp();
       await openRoute('/connections');
-      await until(() => expect(text()).toContain('Service Desk'));
+      await until(() => expect(text()).toContain('Servicedesk'));
       await until(() => expect(lastUseCell()).toBe('20.10.2026'));
     });
 
@@ -233,7 +267,7 @@ describe('ConnectionsPage', () => {
       );
       configureTestApp();
       await openRoute('/connections');
-      await until(() => expect(text()).toContain('Service Desk'));
+      await until(() => expect(text()).toContain('Servicedesk'));
       expect(lastUseCell()).toBe('—');
       expect(text()).not.toContain('Could not load the data');
     });

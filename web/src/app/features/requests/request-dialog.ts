@@ -9,19 +9,19 @@ import {
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
-import { AccessRequestsService, RequestableEntitlement, SystemId } from '../../api/generated';
+import { AccessRequestsService, CatalogService, RequestableEntitlement } from '../../api/generated';
 import { AccessRequestFlow, AccessRequestResult } from '../../core/access-request-flow';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
-import { SYSTEM_IDS, isSystemId, systemName } from '../../shared/labels';
+import { isSystemId, systemName } from '../../shared/labels';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { entitlementTitle } from './entitlement-labels';
 
 export interface RequestDialogData {
   /** Preselected system (a server row); null lets the user choose it (the requests page). */
-  system: SystemId | null;
+  system: string | null;
 }
 
 /**
@@ -38,15 +38,17 @@ export interface RequestDialogData {
 })
 export class RequestDialog {
   private readonly accessRequestsApi = inject(AccessRequestsService);
+  private readonly catalogApi = inject(CatalogService);
   private readonly flow = inject(AccessRequestFlow);
   private readonly dialogRef =
     inject<MatDialogRef<RequestDialog, AccessRequestResult>>(MatDialogRef);
   private readonly data = inject<RequestDialogData>(MAT_DIALOG_DATA);
 
-  protected readonly systems = SYSTEM_IDS;
+  /** The systems of the catalog the user sees: runtime data of the gateway, read only when the dialog lets the user choose. */
+  protected readonly systems = signal<readonly string[]>([]);
   protected readonly systemName = systemName;
   protected readonly systemChoice = this.data.system === null;
-  protected readonly system = signal<SystemId | null>(this.data.system);
+  protected readonly system = signal<string | null>(this.data.system);
   protected readonly entitlements = signal<LoadState<RequestableEntitlement[]> | null>(null);
   protected readonly chosen = signal<string | null>(null);
   protected readonly sending = signal(false);
@@ -81,6 +83,17 @@ export class RequestDialog {
     const initial = this.system();
     if (initial) {
       untracked(() => void this.load(initial));
+    } else {
+      void this.loadSystems();
+    }
+  }
+
+  private async loadSystems(): Promise<void> {
+    try {
+      const catalog = await firstValueFrom(this.catalogApi.getPortalCatalog());
+      this.systems.set([...new Set(catalog.servers.map((server) => server.system))].sort());
+    } catch (error) {
+      this.failure.set(toApiFailure(error));
     }
   }
 
@@ -101,7 +114,7 @@ export class RequestDialog {
     this.chosen.set((event.target as HTMLSelectElement).value || null);
   }
 
-  protected async load(system: SystemId): Promise<void> {
+  protected async load(system: string): Promise<void> {
     const attempt = ++this.loadCounter;
     this.entitlements.set(LOADING);
     try {

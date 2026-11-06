@@ -1,4 +1,4 @@
-import type { CatalogTool, Connection, PortalCatalogServer, SystemId } from '../app/api/generated';
+import type { CatalogTool, Connection, PortalCatalogServer } from '../app/api/generated';
 
 export function toolFixture(name: string, overrides: Partial<CatalogTool> = {}): CatalogTool {
   return {
@@ -13,7 +13,7 @@ export function toolFixture(name: string, overrides: Partial<CatalogTool> = {}):
 }
 
 export function connectionFixture(
-  system: SystemId,
+  system: string,
   overrides: Partial<Connection> = {},
 ): Connection {
   return {
@@ -29,7 +29,7 @@ export function connectionFixture(
 }
 
 export function serverFixture(
-  system: SystemId,
+  system: string,
   overrides: Partial<PortalCatalogServer> = {},
 ): PortalCatalogServer {
   return {

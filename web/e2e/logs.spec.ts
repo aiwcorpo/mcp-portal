@@ -58,9 +58,9 @@ test('the log has no horizontal scroll on a narrow screen', async ({ page }) => 
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test('Service Desk shows the time of its last call from the log', async ({ page }) => {
+test('Servicedesk shows the time of its last call from the log', async ({ page }) => {
   await page.goto('/connections');
-  const row = page.getByRole('row', { name: /Service Desk/ });
+  const row = page.getByRole('row', { name: /Servicedesk/ });
   await expect(row).toContainText(/\d{2}\.\d{2}\.\d{4}|today \d{2}:\d{2}/);
 });
 

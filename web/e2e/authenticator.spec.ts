@@ -20,7 +20,7 @@ test('register the Authenticator with a fresh MFA, then remove it with another o
   page,
 }) => {
   await page.goto('/catalog');
-  await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
   await page
     .getByRole('link', { name: 'Register Authenticator' })
     .filter({ hasText: 'Register Authenticator' })

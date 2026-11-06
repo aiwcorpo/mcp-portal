@@ -19,12 +19,7 @@ import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import {
-  CatalogCredential,
-  ConnectionsService,
-  PutSecretResponse,
-  SystemId,
-} from '../../api/generated';
+import { CatalogCredential, ConnectionsService, PutSecretResponse } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { errorMessage } from '../../core/error-messages';
 import { ErrorNotice } from '../../shared/error-notice';
@@ -72,7 +67,7 @@ function isFieldFailure(failure: ApiFailure): boolean {
 export class SecretForm {
   private readonly connectionsApi = inject(ConnectionsService);
 
-  readonly system = input.required<SystemId>();
+  readonly system = input.required<string>();
   /** `CatalogCredential.userSecretScheme`: with `Basic` the form asks for the login next to the secret (CC-222). */
   readonly scheme = input<CatalogCredential['userSecretScheme']>();
   readonly connected = output<PutSecretResponse>();

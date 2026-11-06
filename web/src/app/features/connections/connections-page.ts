@@ -19,7 +19,6 @@ import {
   CatalogAction,
   CatalogService,
   PortalCatalogServer,
-  SystemId,
 } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { neutraliseText } from '../../shared/untrusted-text';
@@ -60,7 +59,9 @@ function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
         text:
           connection?.status === 'error'
             ? $localize`:@@conn.brokenReconnect:stopped working, reconnect the account`
-            : $localize`:@@conn.reconnectNeeded:needs reconnecting`,
+            : connection?.status === 'needs_reconnect'
+              ? $localize`:@@conn.invalidated:the administrator changed the system settings, connect the account again`
+              : $localize`:@@conn.reconnectNeeded:needs reconnecting`,
         date: null,
         tone: 'warn',
       };
@@ -105,7 +106,7 @@ const REACHED_SYSTEM: ReadonlySet<string> = new Set(['ok', 'confirmed', 'error']
  * `q` of the API also matches resource ids, so the tool name is checked here: a GitLab project called
  * "servicedesk__x" must not count as a use of Service Desk.
  */
-export function reachedSystem(call: ActivityCall, system: SystemId): boolean {
+export function reachedSystem(call: ActivityCall, system: string): boolean {
   return (
     call.tool.startsWith(`${system}__`) &&
     REACHED_SYSTEM.has(call.result) &&
@@ -116,7 +117,7 @@ export function reachedSystem(call: ActivityCall, system: SystemId): boolean {
 interface ConnectionsData {
   servers: PortalCatalogServer[];
   /** Time of the newest call per system without a user connection (service account), from the activity log. */
-  lastCalls: Partial<Record<SystemId, string>>;
+  lastCalls: Partial<Record<string, string>>;
   authenticator: AuthenticatorStatus;
 }
 
@@ -169,6 +170,13 @@ export class ConnectionsPage implements OnInit {
     const state = this.catalog();
     return state.status === 'ready' ? state.value.lastCalls : {};
   });
+  /** Systems whose connection the administrator invalidated by changing where the system points (7.0.0). */
+  protected readonly invalidated = computed(() =>
+    (this.servers() ?? [])
+      .filter((server) => server.connection?.status === 'needs_reconnect')
+      .map((server) => systemName(server.system))
+      .join(', '),
+  );
   protected readonly rows = computed<ConnectionRow[]>(() =>
     (this.servers() ?? []).map((server) => {
       const type = server.connection?.type ?? server.credential?.defaultType;
@@ -228,8 +236,8 @@ export class ConnectionsPage implements OnInit {
    */
   private async loadLastCalls(
     servers: PortalCatalogServer[],
-  ): Promise<Partial<Record<SystemId, string>>> {
-    const result: Partial<Record<SystemId, string>> = {};
+  ): Promise<Partial<Record<string, string>>> {
+    const result: Partial<Record<string, string>> = {};
     await Promise.all(
       servers
         .filter(

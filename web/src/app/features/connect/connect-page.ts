@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
-import { CatalogService, Connection, PortalCatalogServer, SystemId } from '../../api/generated';
+import { CatalogService, Connection, PortalCatalogServer } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
@@ -66,7 +66,7 @@ export class ConnectPage {
   /** Route parameter and query (withComponentInputBinding). */
   readonly system = input.required<string>();
 
-  protected readonly validSystem = computed<SystemId | null>(() => {
+  protected readonly validSystem = computed<string | null>(() => {
     const system = this.system();
     return isSystemId(system) ? system : null;
   });
@@ -76,7 +76,7 @@ export class ConnectPage {
   });
   protected readonly instructions = computed(() => {
     const system = this.validSystem();
-    return system ? tokenInstructions(system) : [];
+    return system ? tokenInstructions(systemName(system)) : [];
   });
 
   protected readonly data = signal<LoadState<PageData | null>>(LOADING);
@@ -115,7 +115,7 @@ export class ConnectPage {
     }
   }
 
-  protected async startOAuth(system: SystemId): Promise<void> {
+  protected async startOAuth(system: string): Promise<void> {
     if (this.oauthBusy()) {
       return;
     }

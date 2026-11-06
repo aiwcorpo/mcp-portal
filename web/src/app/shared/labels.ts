@@ -5,25 +5,22 @@ import {
   ConnectionStatus,
   CredentialType,
   Risk,
-  SystemId,
 } from '../api/generated';
 
-const SYSTEM_NAMES: Record<SystemId, string> = {
-  jira: 'Jira',
-  confluence: 'Confluence',
-  gitlab: 'GitLab',
-  servicedesk: $localize`:@@system.servicedesk:Service Desk`,
-  opensearch: 'OpenSearch',
-};
+/** `SystemId` of common.schema.json: the systems are runtime data of the broker and the gateway, not a list here. */
+export const SYSTEM_ID_PATTERN = /^[a-z][a-z0-9]{1,30}$/;
 
-export const SYSTEM_IDS: readonly SystemId[] = Object.values(SystemId);
-
-export function isSystemId(value: unknown): value is SystemId {
-  return typeof value === 'string' && (SYSTEM_IDS as readonly string[]).includes(value);
+export function isSystemId(value: unknown): value is string {
+  return typeof value === 'string' && SYSTEM_ID_PATTERN.test(value);
 }
 
-export function systemName(system: SystemId): string {
-  return SYSTEM_NAMES[system];
+/**
+ * The contracts carry no display name of a system, so the page shows its id with a capital letter ("jira" is "Jira").
+ * Asked for the id of a server (`mcp-<system>`) it gives the name of its system.
+ */
+export function systemName(system: string): string {
+  const id = system.startsWith('mcp-') ? system.slice(4) : system;
+  return id.charAt(0).toUpperCase() + id.slice(1);
 }
 
 const STATUS_LABELS: Record<CatalogStatus, string> = {
@@ -75,6 +72,10 @@ export function catalogStatusText(
   // does not heal itself, so the row says what to do, not only that something is wrong.
   if (status === 'reconnect_required' && connection?.status === 'error') {
     return $localize`:@@catalogStatus.connectionBroken:Connection stopped working, connect the account again`;
+  }
+  // needs_reconnect: an administrator changed where the system points; the broker deleted the grant and the secret (7.0.0).
+  if (status === 'reconnect_required' && connection?.status === 'needs_reconnect') {
+    return $localize`:@@catalogStatus.connectionInvalidated:The system settings changed, connect the account again`;
   }
   return STATUS_LABELS[status];
 }
@@ -132,6 +133,7 @@ const CONNECTION_STATUS_LABELS: Record<ConnectionStatus, string> = {
   expired: $localize`:@@connectionStatus.expired:Expired`,
   revoked: $localize`:@@connectionStatus.revoked:Revoked`,
   error: $localize`:@@connectionStatus.error:Stopped working`,
+  needs_reconnect: $localize`:@@connectionStatus.needs_reconnect:Connect again`,
 };
 
 export function connectionStatusLabel(status: ConnectionStatus): string {
@@ -159,6 +161,7 @@ const CONNECTION_STATUS_TONES: Record<ConnectionStatus, Tone> = {
   expired: 'warn',
   revoked: 'warn',
   error: 'warn',
+  needs_reconnect: 'warn',
 };
 
 export function connectionStatusTone(status: ConnectionStatus): Tone {

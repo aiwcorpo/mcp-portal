@@ -78,7 +78,7 @@ describe('RequestsPage', () => {
       'finance-approvers',
       'mcp-gitlab-read',
     ]);
-    expect(text(rows[0])).toContain('OpenSearch, read');
+    expect(text(rows[0])).toContain('Opensearch, read');
     expect(text(rows[0])).toContain('Pending');
     expect(text(rows[0])).toContain('Open in the entitlement system');
     expect(text(rows[1])).toContain('Approved');

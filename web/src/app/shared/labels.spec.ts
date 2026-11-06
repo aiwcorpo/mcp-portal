@@ -1,5 +1,13 @@
 import { connectionFixture } from '../../testing/fixtures';
-import { actionLabel, catalogStatusText, daysText, daysUntil } from './labels';
+import {
+  actionLabel,
+  catalogStatusText,
+  connectionStatusLabel,
+  daysText,
+  daysUntil,
+  isSystemId,
+  systemName,
+} from './labels';
 
 const NOW = Date.parse('2026-10-28T10:00:00Z');
 
@@ -57,5 +65,32 @@ describe('actionLabel', () => {
     );
     expect(actionLabel('add_secret', null)).toBe('Add token');
     expect(actionLabel('disconnect')).toBe('Disconnect');
+  });
+});
+
+describe('systems are runtime data', () => {
+  it('names any system by its id, and a server by its system', () => {
+    expect(systemName('jira')).toBe('Jira');
+    expect(systemName('notes')).toBe('Notes');
+    expect(systemName('mcp-notes')).toBe('Notes');
+  });
+
+  it('knows a system id by the pattern of the contract, not by a list', () => {
+    expect(isSystemId('notes')).toBe(true);
+    expect(isSystemId('a1')).toBe(true);
+    expect(isSystemId('Notes')).toBe(false);
+    expect(isSystemId('n')).toBe(false);
+    expect(isSystemId('a'.repeat(32))).toBe(false);
+    expect(isSystemId(null)).toBe(false);
+  });
+});
+
+describe('needs_reconnect', () => {
+  it('has its own labels in the catalog row and for the connection', () => {
+    const connection = connectionFixture('notes', { status: 'needs_reconnect' });
+    expect(catalogStatusText('reconnect_required', connection, NOW)).toBe(
+      'The system settings changed, connect the account again',
+    );
+    expect(connectionStatusLabel('needs_reconnect')).toBe('Connect again');
   });
 });

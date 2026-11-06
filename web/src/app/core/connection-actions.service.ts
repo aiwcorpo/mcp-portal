@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { CatalogTool, ConnectionsService, PortalCatalogServer, SystemId } from '../api/generated';
+import { CatalogTool, ConnectionsService, PortalCatalogServer } from '../api/generated';
 import { ConfirmDialog, ConfirmDialogData } from '../shared/confirm-dialog';
 import { systemName } from '../shared/labels';
 import { ApiFailure, toApiFailure } from './api-error';
@@ -32,7 +32,7 @@ export class ConnectionActions {
    * Sends the browser to the provider; returns a failure only when it stays on the page. The BFF adds
    * `system` to the return path after a failed OAuth connection (CC-111).
    */
-  async startOAuth(system: SystemId, returnPage: string): Promise<ApiFailure | null> {
+  async startOAuth(system: string, returnPage: string): Promise<ApiFailure | null> {
     try {
       const { authorizeUrl } = await firstValueFrom(
         this.connectionsApi.startConnectOAuth(system, {
@@ -79,7 +79,7 @@ export class ConnectionActions {
    * entitlement, so the dialog lets the user pick one of those the IGA offers (CC-154). Null when the
    * dialog was dismissed.
    */
-  async requestWithChoice(system: SystemId | null): Promise<AccessRequestResult | null> {
+  async requestWithChoice(system: string | null): Promise<AccessRequestResult | null> {
     const result = await firstValueFrom(
       this.dialog
         .open<RequestDialog, RequestDialogData, AccessRequestResult>(RequestDialog, {
@@ -92,7 +92,7 @@ export class ConnectionActions {
     return result ?? null;
   }
 
-  async confirmAndDisconnect(system: SystemId): Promise<DisconnectResult> {
+  async confirmAndDisconnect(system: string): Promise<DisconnectResult> {
     const name = systemName(system);
     const confirmed = await firstValueFrom(
       this.dialog
@@ -118,6 +118,6 @@ export class ConnectionActions {
   }
 }
 
-export function disconnectedMessage(system: SystemId): string {
+export function disconnectedMessage(system: string): string {
   return $localize`:@@disconnect.done:Disconnected account ${systemName(system)}:system:.`;
 }

@@ -35,19 +35,19 @@ describe('CatalogPage', () => {
   it('shows the example rows of the contract with status text and actions', async () => {
     configureTestApp();
     await openRoute('/catalog');
-    await until(() => expect(text()).toContain('GitLab'));
+    await until(() => expect(text()).toContain('Gitlab'));
 
     expect(text(row('Jira'))).toContain('Token expires in 5 days');
     expect(text(row('Jira'))).toContain('PAT token');
     expect(text(row('Jira'))).toContain('5 tools');
     expect(button('Renew (Jira)', row('Jira')).classList).toContain('mat-mdc-unelevated-button');
     expect(button('Copy link (Jira)', row('Jira'))).toBeTruthy();
-    expect(text(row('GitLab'))).toContain('Needs reconnecting');
-    expect(button('Connect (GitLab)', row('GitLab'))).toBeTruthy();
+    expect(text(row('Gitlab'))).toContain('Needs reconnecting');
+    expect(button('Connect (Gitlab)', row('Gitlab'))).toBeTruthy();
     expect(text(row('Confluence'))).toContain('No entitlement');
     expect(button('Submit request (Confluence)', row('Confluence'))).toBeTruthy();
-    expect(text(row('Service Desk'))).toContain('Service account');
-    expect(text(row('Service Desk'))).toContain('Connected');
+    expect(text(row('Servicedesk'))).toContain('Service account');
+    expect(text(row('Servicedesk'))).toContain('Connected');
     expect(document.body.textContent).not.toContain('Disconnect');
   });
 
@@ -320,7 +320,7 @@ describe('CatalogPage', () => {
     );
     configureTestApp();
     const harness = await openRoute('/catalog');
-    await until(() => expect(text()).toContain('GitLab'));
+    await until(() => expect(text()).toContain('Gitlab'));
 
     const search = document.querySelector<HTMLInputElement>('input[type="search"]')!;
     search.value = 'merge';
@@ -328,7 +328,7 @@ describe('CatalogPage', () => {
     await harness.fixture.whenStable();
 
     expect(text()).not.toContain('Jira');
-    expect(text(row('GitLab'))).toContain('gitlab__list_merge_requests');
+    expect(text(row('Gitlab'))).toContain('gitlab__list_merge_requests');
 
     search.value = 'brak takiego';
     search.dispatchEvent(new Event('input'));
@@ -347,9 +347,9 @@ describe('CatalogPage', () => {
     );
     const navigation = configureTestApp();
     await openRoute('/catalog');
-    await until(() => expect(text()).toContain('GitLab'));
+    await until(() => expect(text()).toContain('Gitlab'));
 
-    button('Connect (GitLab)').click();
+    button('Connect (Gitlab)').click();
 
     await until(() => expect(text()).toContain('Too many requests. Try again in 45 s.'));
     expect(navigation.assign).not.toHaveBeenCalled();
@@ -376,9 +376,9 @@ describe('CatalogPage', () => {
       }
     });
     await openRoute('/catalog');
-    await until(() => expect(text()).toContain('GitLab'));
+    await until(() => expect(text()).toContain('Gitlab'));
 
-    button('Connect (GitLab)').click();
+    button('Connect (Gitlab)').click();
 
     await until(() => expect(navigation.assign).toHaveBeenCalledOnce());
     expect(navigation.assign.mock.calls[0][0]).toMatch(
@@ -408,16 +408,16 @@ describe('CatalogPage', () => {
       );
       configureTestApp();
       await openRoute('/catalog?system=gitlab&connected=gitlab');
-      await until(() => expect(text()).toContain('Connected to GitLab as anna.nowak.'));
+      await until(() => expect(text()).toContain('Connected to Gitlab as anna.nowak.'));
       await until(() => expect(location.search).not.toContain('connected'));
       expect(location.search).not.toContain('system');
     });
 
     it.each([
       ['flow_invalid', 'The connection link expired or was already used. Start again.'],
-      ['provider_error', 'GitLab did not respond correctly. Try again in a moment.'],
-      ['identity_mismatch', 'GitLab did not respond correctly. Try again in a moment.'],
-      ['cancelled', 'Connecting to GitLab cancelled.'],
+      ['provider_error', 'Gitlab did not respond correctly. Try again in a moment.'],
+      ['identity_mismatch', 'Gitlab did not respond correctly. Try again in a moment.'],
+      ['cancelled', 'Connecting to Gitlab cancelled.'],
     ])('connectError=%s', async (code, message) => {
       configureTestApp();
       await openRoute(`/catalog?connectError=${code}&system=gitlab`);
@@ -436,9 +436,9 @@ describe('CatalogPage', () => {
       );
       configureTestApp();
       await openRoute('/catalog?system=gitlab&connected=gitlab');
-      await until(() => expect(text(row('GitLab'))).toContain('Not connected'));
+      await until(() => expect(text(row('Gitlab'))).toContain('Not connected'));
 
-      expect(text()).not.toContain('Connected to GitLab');
+      expect(text()).not.toContain('Connected to Gitlab');
       await until(() => expect(location.search).not.toContain('connected'));
     });
 
@@ -455,7 +455,7 @@ describe('CatalogPage', () => {
       await openRoute('/catalog?connectError=cancelled&system=gitlab');
       await until(() => expect(text()).toContain('cancelled'));
       labelled('Close message').click();
-      await until(() => expect(text()).not.toContain('Connecting to GitLab cancelled.'));
+      await until(() => expect(text()).not.toContain('Connecting to Gitlab cancelled.'));
     });
   });
 

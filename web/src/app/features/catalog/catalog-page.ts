@@ -3,7 +3,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
-import { CatalogService, PortalCatalogServer, SystemId } from '../../api/generated';
+import { CatalogService, PortalCatalogServer } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { AccessRequestResult } from '../../core/access-request-flow';
 import { neutraliseText } from '../../shared/untrusted-text';
@@ -172,7 +172,7 @@ export class CatalogPage {
   }
 
   private async disconnect(server: PortalCatalogServer): Promise<void> {
-    const system: SystemId = server.system;
+    const system: string = server.system;
     this.busyServer.set(server.serverId);
     const result = await this.connectionActions.confirmAndDisconnect(system);
     this.busyServer.set(null);

@@ -20,7 +20,7 @@ test('a Polish browser gets the Polish texts, and the switch changes and remembe
   await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
   const navigation = page.getByRole('navigation', { name: 'Nawigacja główna' });
   await expect(navigation.getByRole('link', { name: 'Połączenia z systemami' })).toBeVisible();
-  await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Wnioski' }).click();
   await expect(page.getByRole('button', { name: 'Złóż wniosek' })).toBeVisible();
