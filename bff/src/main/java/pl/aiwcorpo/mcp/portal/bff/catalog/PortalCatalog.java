@@ -26,9 +26,13 @@ public record PortalCatalog(List<Server> servers) {
             List<GatewayModel.CatalogTool> tools) {
     }
 
-    /** {@code CatalogCredential}; {@code userSecretScheme} decides about the login field of the token form (CC-222). */
+    /**
+     * {@code CatalogCredential}; {@code userSecretScheme} decides about the login field of the token form (CC-222).
+     * {@code displayName} (CC-243) and {@code userSecretVerified} (CC-247) are copied from the broker when it tells; both
+     * are left out otherwise, which the portal reads as the system id and as verified (CC-248).
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Credential(List<String> supportedTypes, String defaultType, String userSecretScheme,
-                             String deployment) {
+                             String deployment, String displayName, Boolean userSecretVerified) {
     }
 }

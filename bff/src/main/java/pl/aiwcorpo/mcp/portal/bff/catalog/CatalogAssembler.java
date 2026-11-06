@@ -125,7 +125,8 @@ public final class CatalogAssembler {
         }
         PortalCatalog.Credential credential = system == null || system.supportedTypes().isEmpty() ? null
                 : new PortalCatalog.Credential(system.supportedTypes(), system.defaultType(),
-                        system.userSecretScheme(), system.deployment());
+                        system.userSecretScheme(), system.deployment(), system.displayName(),
+                        system.userSecretVerified());
         return new PortalCatalog.Server(server.serverId(), server.system(), server.version(),
                 publicUrls.server(server.serverId()), status, List.copyOf(actions), credential, connection, tools);
     }

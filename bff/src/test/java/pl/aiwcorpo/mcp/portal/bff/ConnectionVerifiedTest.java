@@ -154,15 +154,54 @@ class ConnectionVerifiedTest extends PortalHarness {
         assertThat(response.statusCode()).isEqualTo(503);
     }
 
-    @Test
-    void theUserSecretVerifiedFlagOfASystemIsReadAndKeptOutOfTheCatalog() {
-        stub("GET", "/v1/systems", 200, "[{\"system\":\"jira\",\"supportedTypes\":[\"user-secret\"],"
-                + "\"defaultType\":\"user-secret\",\"oauthScopes\":[],\"userSecretVerified\":false}]");
-
+    private JsonNode jiraCredential(String systemInfo) {
+        stub("GET", "/v1/systems", 200, "[" + systemInfo + "]");
         HttpResponse<String> response = alice().get("/api/v1/catalog");
-
         C12.assertResponse("GET", "/api/v1/catalog", response);
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.body()).doesNotContain("userSecretVerified");
+        for (JsonNode server : JSON.readTree(response.body()).get("servers")) {
+            if ("jira".equals(server.get("system").asString())) {
+                return server.get("credential");
+            }
+        }
+        throw new AssertionError("no jira server in the catalog");
+    }
+
+    private static String systemInfo(String extra) {
+        return "{\"system\":\"jira\",\"supportedTypes\":[\"user-secret\"],\"defaultType\":\"user-secret\","
+                + "\"oauthScopes\":[]" + extra + "}";
+    }
+
+    @Test
+    void theCatalogCredentialCarriesTheDisplayNameAndAnUnverifiedFlagWhenTheBrokerTellsThem() {
+        JsonNode credential = jiraCredential(systemInfo(",\"displayName\":\"Jira Data Center\",\"userSecretVerified\":false"));
+
+        assertThat(credential.get("displayName").asString()).isEqualTo("Jira Data Center");
+        assertThat(credential.get("userSecretVerified").asBoolean()).isFalse();
+    }
+
+    @Test
+    void aVerifiedFlagThatIsTrueIsCopiedToo() {
+        JsonNode credential = jiraCredential(systemInfo(",\"userSecretVerified\":true"));
+
+        assertThat(credential.get("userSecretVerified").asBoolean()).isTrue();
+        assertThat(credential.has("displayName")).isFalse();
+    }
+
+    @Test
+    void whatTheBrokerDoesNotTellIsAbsentFromTheCatalogCredential() {
+        JsonNode credential = jiraCredential(systemInfo(""));
+
+        assertThat(credential.has("displayName")).isFalse();
+        assertThat(credential.has("userSecretVerified")).isFalse();
+    }
+
+    @Test
+    void aDisplayNameThatBreaksTheContractIsDroppedNotShown() {
+        for (String name : List.of("", "x".repeat(65), "a\\u202Eb", "a\\u200Bb", "a\\u0000b", "a\\u2028b")) {
+            JsonNode credential = jiraCredential(systemInfo(",\"displayName\":\"" + name + "\""));
+            assertThat(credential.has("displayName")).as(name).isFalse();
+            assertThat(credential.get("defaultType").asString()).isEqualTo("user-secret");
+        }
     }
 }

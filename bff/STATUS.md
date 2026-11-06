@@ -64,8 +64,10 @@ Testy: `AdminRefreshTokensTest` (10). README: sekcja "Fresh MFA for the administ
 - `whoami` systemu `generic-rest` (zamkniety obiekt, wzorce kontraktu, inny adapter to `400`), w widoku sprawdzany tak samo; powod `credential_type_not_supported_by_adapter`
   przechodzi jak kazdy inny (`reason` wg wzorca, bez listy w BFF).
 - `verified` wymagane w `Connection`, odpowiedzi `PUT secret` i zakonczeniu OAuth; `backendUser` moze byc null (polaczenie bez `verified` jest pomijane, odpowiedz sekretu
-  bez niego to `503`); status katalogu nie zalezy od `backendUser`; audyt bez `backendUser`, gdy null. `SystemInfo.userSecretVerified` czytane, nie oddawane (C12 `CatalogCredential` go nie ma).
-- Testy: `ConnectionVerifiedTest` (8), `AdminMirrorsTest` o whoami, system generic-rest z `user-secret`, powod adaptera.
+  bez niego to `503`); status katalogu nie zalezy od `backendUser`; audyt bez `backendUser`, gdy null. `SystemInfo.userSecretVerified` czytane; od CC-248 oddawane w katalogu (patrz nizej).
+- CC-248: `credential` wpisu katalogu ma opcjonalne `displayName` (poprawne 1..64 bez znakow ukrytych, inaczej pomijane) i `userSecretVerified` (kopiowane tak, jak podal broker,
+  brak = brak pola), z `SystemInfo`. `PortalCatalog.Credential` i `CatalogAssembler` wypelniaja oba.
+- Testy: `ConnectionVerifiedTest` (11), `AdminMirrorsTest` o whoami, system generic-rest z `user-secret`, powod adaptera.
 
 ## M6: stan (2026-11-03)
 

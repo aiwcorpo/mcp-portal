@@ -353,8 +353,10 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
 - Connections (CC-247): `verified` is required in a connection, in the answer to `PUT .../secret` and in the OAuth completion. A secret stored
   without a check has `verified: false` and `backendUser: null`; the BFF passes both on (a connection without `verified` breaks the
   contract and is left out; a secret answer without it is a `503`), the catalog status comes from the status of the connection alone, and
-  the audit event of such a write has no `backendUser`. The BFF reads `userSecretVerified` of `GET /v1/systems` but does not pass it
-  on: `CatalogCredential` of C12 has no field for it.
+  the audit event of such a write has no `backendUser`. The credential object of a catalog entry
+  carries `displayName` and `userSecretVerified` from `GET /v1/systems` when the broker tells them (CC-248): the name only when it is 1 to 64
+  characters without control, format or separator characters (otherwise it is dropped and the portal shows the system id), the flag as the
+  broker sent it (`false` makes the portal warn before the first token; absent is read as verified).
 - Audit: the gateway and the broker record every change. The portal writes `admin_change` only for an attempt that changed nothing
   (reasons such as `not_admin`, `step_up_required`, `precondition_failed`, the `reason` of an upstream rejection); override
   attempts carry `overrideId`, `overrideTarget` and `textSha256`, never the text.
