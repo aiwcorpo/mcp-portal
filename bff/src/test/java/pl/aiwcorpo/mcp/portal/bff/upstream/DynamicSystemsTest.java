@@ -118,4 +118,22 @@ class DynamicSystemsTest {
             assertThat(RegistryData.validRegistry(List.of(registryServer(broken)))).as(broken).isNull();
         }
     }
+
+    private static tools.jackson.databind.JsonNode serverWithTool(String toolExtra) {
+        return tools.jackson.databind.json.JsonMapper.builder().build().readTree(
+                "{\"serverId\":\"mcp-notes\",\"system\":\"notes\",\"version\":\"1.0.0\",\"tools\":[{\"name\":\"list_notes\","
+                        + "\"risk\":\"READ_ONLY\",\"action\":\"read\",\"resourceRefs\":[],"
+                        + "\"definition\":{\"name\":\"list_notes\"},\"definitionHash\":\"" + HASH + "\",\"status\":\"approved\""
+                        + toolExtra + "}]}");
+    }
+
+    @Test
+    void aToolMayNameTheAdditionalGroupOfItsSystemAndNothingElse() {
+        assertThat(RegistryData.validRegistry(List.of(serverWithTool("")))).hasSize(1);
+        assertThat(RegistryData.validRegistry(List.of(serverWithTool(",\"additionalGroup\":\"mcp-notes-ops\"")))).hasSize(1);
+        for (String broken : List.of(",\"additionalGroup\":\"ops\"", ",\"additionalGroup\":\"mcp-notes-\"",
+                ",\"additionalGroup\":7", ",\"additionalGroup\":\"mcp-notes-" + "x".repeat(70) + "\"")) {
+            assertThat(RegistryData.validRegistry(List.of(serverWithTool(broken)))).as(broken).isNull();
+        }
+    }
 }

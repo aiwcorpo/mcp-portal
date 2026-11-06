@@ -30,7 +30,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 ## M7: wersja 2.0.0, serwery i systemy jako dane (2026-11-06)
 
-`mvn test`: 577 testow (526 z 1.0.0, `AdminMirrorsTest` 23, `DynamicSystemsTest` 28), 0 bledow. Jary 7.0.0 z `~/.m2` (po CC-240). Opis: sekcja "2.0.0" w README.
+`mvn test`: 578 testow (526 z 1.0.0, `AdminMirrorsTest` 23, `DynamicSystemsTest` 28), 0 bledow. Jary 7.0.0 z `~/.m2` (po CC-240). Opis: sekcja "2.0.0" w README.
 
 - Usuniete: `AdminTargets.SERVER_IDS`, `RegistryData.SERVER_IDS`, `BrokerData.SYSTEMS`, `GatewayData.RESOURCE_TYPES`, wzorzec nazw narzedzi z piecioma
   systemami. Zastapily je wzorce kontraktu w `ContractValues` (z listą zarezerwowanych id, CC-237). Port C13 ma `systems()` (klucze katalogu IGA).

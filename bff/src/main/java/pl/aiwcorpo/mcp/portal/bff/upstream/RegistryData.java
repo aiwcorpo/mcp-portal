@@ -26,10 +26,12 @@ public final class RegistryData {
     private static final Set<String> SERVER_FIELDS = Set.of("serverId", "system", "version", "enabled", "tools",
             "policiesStatus", "policiesHash", "pendingPoliciesHash");
     private static final Set<String> TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
-            "definitionHash");
+            "definitionHash", "additionalGroup");
     private static final Set<String> REGISTRY_TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
             "definitionHash", "status", "change", "source", "approvedInVersion", "riskLowered", "classifiedBy",
-            "classifiedAt");
+            "classifiedAt", "additionalGroup");
+    /** {@code additionalGroup} of a tool entry (CC-242): a group of the server's own system, never read, write or destructive. */
+    private static final Pattern ADDITIONAL_GROUP = Pattern.compile("^mcp-[a-z][a-z0-9]{1,30}-[a-z][a-z0-9-]{0,30}$");
     private static final Set<String> KILL_SWITCH_FIELDS = Set.of("scope", "serverId", "tool", "setBy", "setAt", "reason");
     private static final Set<String> PENDING_FIELDS = Set.of("approvedEntry", "pendingEntry", "pendingHash",
             "pendingVersion", "source", "approvedInVersion", "riskLowered");
@@ -125,6 +127,12 @@ public final class RegistryData {
                 || tool.get("resourceRefs") == null || !tool.get("resourceRefs").isArray()
                 || tool.get("definition") == null || !tool.get("definition").isObject()
                 || !hash(tool.get("definitionHash"))) {
+            return false;
+        }
+        // A group that only narrows access is part of what the administrator approves; an adapter has none (CC-242).
+        if (tool.has("additionalGroup") && (kind == Kind.ADAPTER_ENTRY
+                || !ADDITIONAL_GROUP.matcher(text(tool.get("additionalGroup"))).matches()
+                || text(tool.get("additionalGroup")).length() > 70)) {
             return false;
         }
         boolean hasRisk = tool.has("risk");
