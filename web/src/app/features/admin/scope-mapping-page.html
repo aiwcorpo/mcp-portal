@@ -1,0 +1,126 @@
+<h1 class="visually-hidden" i18n="@@scopeMapping.title">Scope mapping</h1>
+
+<app-admin-nav />
+
+@if (done(); as text) {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
+}
+@if (mfaNote() === 'draft') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@scopeMapping.mfaDraft"
+      >Identity confirmed. Your changes are back in the form; check them and save
+      again.</ng-container
+    >
+  </app-notice>
+} @else if (mfaNote() === 'repeat') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@scopeMapping.mfaRepeat"
+      >Identity confirmed. Repeat the operation.</ng-container
+    >
+  </app-notice>
+}
+@if (failure(); as problem) {
+  <app-error-notice [failure]="problem" />
+  @if (problem.code === 'precondition_failed') {
+    <p class="muted hint" i18n="@@scopeMapping.reloaded">
+      The current mapping is shown below; your edits were not kept.
+    </p>
+  }
+}
+
+@let current = state();
+@if (current.status === 'loading') {
+  <app-loading />
+} @else if (current.status === 'error') {
+  <app-load-error [failure]="current.failure" (retry)="load()" />
+} @else {
+  <p class="lead" i18n="@@scopeMapping.lead">
+    A group grants the resource scopes listed next to it to everyone who is in it. A scope is
+    <code>&lt;Namespace&gt;::&lt;Type&gt;/&lt;id&gt;</code>; the type has to be declared by a
+    registered server and the part after the slash has to match its scope pattern. The whole
+    document is saved at once.
+  </p>
+
+  <form (ngSubmit)="save()" novalidate>
+    @if (rows().length) {
+      <ul class="rows" aria-label="Groups" i18n-aria-label="@@scopeMapping.groupsLabel">
+        @for (row of rows(); track row.key; let index = $index) {
+          @let found = problems().get(row.key);
+          @let show = touched();
+          <li class="row">
+            <div class="field">
+              <label [for]="'sm-group-' + row.key" i18n="@@scopeMapping.group">Group</label>
+              <input
+                [id]="'sm-group-' + row.key"
+                [name]="'group-' + row.key"
+                type="text"
+                autocomplete="off"
+                [attr.aria-invalid]="found?.group ? 'true' : null"
+                [attr.aria-describedby]="found?.group ? 'sm-group-err-' + row.key : null"
+                [ngModel]="row.group"
+                (ngModelChange)="edit(row.key, { group: $event })"
+              />
+              @if (found?.group && (show || row.group.length > 4)) {
+                <p class="problem" [id]="'sm-group-err-' + row.key">{{ found?.group }}</p>
+              }
+            </div>
+            <div class="field">
+              <label [for]="'sm-scopes-' + row.key" i18n="@@scopeMapping.scopes"
+                >Scopes (one per line)</label
+              >
+              <textarea
+                [id]="'sm-scopes-' + row.key"
+                [name]="'scopes-' + row.key"
+                spellcheck="false"
+                [attr.aria-invalid]="found?.scopes ? 'true' : null"
+                [attr.aria-describedby]="found?.scopes ? 'sm-scopes-err-' + row.key : null"
+                [ngModel]="row.scopes"
+                (ngModelChange)="edit(row.key, { scopes: $event })"
+              ></textarea>
+              @if (found?.scopes && (show || row.scopes.length > 0)) {
+                <p class="problem" [id]="'sm-scopes-err-' + row.key">{{ found?.scopes }}</p>
+              }
+            </div>
+            <div class="remove">
+              <button mat-flat-button type="button" class="quiet" (click)="removeRow(row.key)">
+                <ng-container i18n="@@scopeMapping.removeRow">Remove</ng-container
+                ><span class="visually-hidden"> ({{ row.group | safeText }})</span>
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted" role="status" i18n="@@scopeMapping.none">No group is mapped to a scope.</p>
+    }
+
+    <div class="actions">
+      <button mat-flat-button type="button" class="quiet" (click)="add()" i18n="@@scopeMapping.add">
+        Add group
+      </button>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || !dirty()"
+        i18n="@@scopeMapping.save"
+      >
+        Save mapping
+      </button>
+      @if (dirty()) {
+        <button
+          mat-flat-button
+          type="button"
+          class="quiet"
+          (click)="reload()"
+          i18n="@@scopeMapping.discard"
+        >
+          Discard changes
+        </button>
+      }
+    </div>
+    <p class="muted hint" i18n="@@scopeMapping.mfaHint">
+      Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back with
+      your edits.
+    </p>
+  </form>
+}

@@ -1,0 +1,144 @@
+@let state = pending();
+@if (state.status === 'loading') {
+  <app-loading [rows]="[1]" />
+} @else if (state.status === 'error') {
+  <app-load-error [failure]="state.failure" (retry)="load()" />
+} @else if (view(); as v) {
+  <section class="panel" [attr.aria-label]="serverName()">
+    @if (resumeRefused()) {
+      <app-notice kind="warning">
+        <ng-container i18n="@@policies.resumeRefused"
+          >The policies changed before you confirmed your identity, so nothing was approved. Check
+          the differences and approve again.</ng-container
+        >
+      </app-notice>
+    }
+    @if (changedMeanwhile()) {
+      <app-notice kind="warning">
+        <ng-container i18n="@@policies.changedMeanwhile"
+          >The policies changed since they were opened. Showing the current differences; check them
+          and approve again.</ng-container
+        >
+      </app-notice>
+    }
+    @if (v.value.source === 'server') {
+      <app-notice kind="warning">
+        <strong i18n="@@policies.serverWarningTitle">Source: server.</strong>
+        <ng-container i18n="@@policies.serverWarning">
+          A running server presented these policies, not the CI pipeline from a reviewed commit, and
+          the version ({{ v.value.pendingVersion | safeText }}) comes from the server. Read every
+          policy and every declaration before you approve.
+        </ng-container>
+      </app-notice>
+    } @else {
+      <p class="source muted">
+        <ng-container i18n="@@policies.ciSource"
+          >Source: CI pipeline (reviewed commit), version
+          {{ v.value.pendingVersion | safeText }}.</ng-container
+        >
+      </p>
+    }
+    @if (v.diff.firstRegistration) {
+      <app-notice kind="info" i18n="@@policies.first">
+        First registration: nothing was approved before, and the tools of this server stay blocked
+        until you approve.
+      </app-notice>
+    }
+    @if (v.diff.neutralised) {
+      <app-notice kind="info" i18n="@@policies.neutralised">
+        The text contained hidden characters. They were replaced with markers of the form [U+XXXX].
+      </app-notice>
+    }
+    @if (v.diff.truncated) {
+      <app-notice kind="warning" i18n="@@policies.truncated">
+        A very long text is cut in this view. The hash covers all of it, so approve only what you
+        can review elsewhere.
+      </app-notice>
+    }
+
+    <h3 class="group-title" i18n="@@policies.typesTitle">Resource types</h3>
+    @if (!v.diff.resourceTypes.changed && !v.diff.firstRegistration) {
+      <p class="muted hint" i18n="@@policies.typesSame">The declarations did not change.</p>
+    }
+    <div class="columns">
+      <section class="column" [attr.aria-labelledby]="'types-before-' + serverId()">
+        <h4 [id]="'types-before-' + serverId()" class="column-title muted">
+          @if (v.diff.firstRegistration) {
+            <ng-container i18n="@@policies.beforeNone">Before (none)</ng-container>
+          } @else {
+            <ng-container i18n="@@policies.typesBefore">Approved</ng-container>
+          }
+        </h4>
+        <pre
+          class="code"
+          dir="ltr"
+          tabindex="0"
+        ><code>@for (line of v.diff.resourceTypes.before; track $index) {<span class="line" [class.removed]="line.mark === 'removed'"><span class="sign" aria-hidden="true">{{ line.mark === 'removed' ? '-' : ' ' }}</span>@if (line.mark === 'removed') {<span class="visually-hidden" i18n="@@policies.removedLine">Removed: </span>}{{ line.text }}
+</span>}@if (!v.diff.resourceTypes.before.length) {<span class="muted" i18n="@@policies.nothingBefore">Nothing approved.</span>}</code></pre>
+      </section>
+      <section class="column" [attr.aria-labelledby]="'types-after-' + serverId()">
+        <h4 [id]="'types-after-' + serverId()" class="column-title muted">
+          <ng-container i18n="@@policies.after"
+            >Pending ({{ v.value.pendingVersion | safeText }})</ng-container
+          >
+        </h4>
+        <pre
+          class="code"
+          dir="ltr"
+          tabindex="0"
+        ><code>@for (line of v.diff.resourceTypes.after; track $index) {<span class="line" [class.added]="line.mark === 'added'"><span class="sign" aria-hidden="true">{{ line.mark === 'added' ? '+' : ' ' }}</span>@if (line.mark === 'added') {<span class="visually-hidden" i18n="@@policies.addedLine">Added: </span>}{{ line.text }}
+</span>}@if (!v.diff.resourceTypes.after.length) {<span class="muted" i18n="@@policies.noTypes">No declarations.</span>}</code></pre>
+      </section>
+    </div>
+
+    <h3 class="group-title" i18n="@@policies.policiesTitle">Policies and schema</h3>
+    @if (!v.diff.policies.changed && !v.diff.firstRegistration) {
+      <p class="muted hint" i18n="@@policies.policiesSame">The policies did not change.</p>
+    }
+    <div class="columns">
+      <section class="column" [attr.aria-labelledby]="'pol-before-' + serverId()">
+        <h4 [id]="'pol-before-' + serverId()" class="column-title muted">
+          @if (v.diff.firstRegistration) {
+            <ng-container i18n="@@policies.beforeNone2">Before (none)</ng-container>
+          } @else {
+            <ng-container i18n="@@policies.polBefore">Approved</ng-container>
+          }
+        </h4>
+        <pre
+          class="code"
+          dir="ltr"
+          tabindex="0"
+        ><code>@for (line of v.diff.policies.before; track $index) {<span class="line" [class.removed]="line.mark === 'removed'"><span class="sign" aria-hidden="true">{{ line.mark === 'removed' ? '-' : ' ' }}</span>@if (line.mark === 'removed') {<span class="visually-hidden" i18n="@@policies.removedLine2">Removed: </span>}{{ line.text }}
+</span>}@if (!v.diff.policies.before.length) {<span class="muted" i18n="@@policies.nothingBefore2">Nothing approved.</span>}</code></pre>
+      </section>
+      <section class="column" [attr.aria-labelledby]="'pol-after-' + serverId()">
+        <h4 [id]="'pol-after-' + serverId()" class="column-title muted">
+          <ng-container i18n="@@policies.after2"
+            >Pending ({{ v.value.pendingVersion | safeText }})</ng-container
+          >
+        </h4>
+        <pre
+          class="code"
+          dir="ltr"
+          tabindex="0"
+        ><code>@for (line of v.diff.policies.after; track $index) {<span class="line" [class.added]="line.mark === 'added'"><span class="sign" aria-hidden="true">{{ line.mark === 'added' ? '+' : ' ' }}</span>@if (line.mark === 'added') {<span class="visually-hidden" i18n="@@policies.addedLine2">Added: </span>}{{ line.text }}
+</span>}</code></pre>
+      </section>
+    </div>
+
+    @if (failure(); as problem) {
+      <app-error-notice [failure]="problem" />
+    }
+
+    <div class="actions">
+      <button mat-flat-button type="button" [disabled]="approving()" (click)="approve()">
+        <ng-container i18n="@@policies.approve">Approve policies</ng-container>
+        <span class="visually-hidden"> ({{ serverName() }})</span>
+      </button>
+      <p class="muted hint" i18n="@@policies.approveHint">
+        Not approving breaks nothing that works today: the tools of the server stay blocked. Needs a
+        fresh MFA.
+      </p>
+    </div>
+  </section>
+}

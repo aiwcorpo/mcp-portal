@@ -19,7 +19,7 @@ test('switch a tool off without MFA, see it in the registry and the catalog, lif
   const row = page.getByRole('row', { name: /jira__update_issue/ });
   await expect(row).toContainText('Writes break the workflow after the update');
 
-  await page.getByRole('link', { name: 'Server registry' }).click();
+  await page.getByRole('link', { name: 'Approvals' }).click();
   await expect(page.getByText('on: 1')).toBeVisible();
   await expect(page.getByRole('row', { name: /jira__update_issue/ })).toContainText(
     'Switched off',

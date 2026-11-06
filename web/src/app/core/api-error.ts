@@ -19,6 +19,13 @@ const C12_ERROR_CODES = [
   'already_registered',
   'not_requestable',
   'manifest_rejected',
+  'server_rejected',
+  'scope_mapping_rejected',
+  'override_rejected',
+  'system_rejected',
+  'server_exists',
+  'precondition_failed',
+  'precondition_required',
 ] as const;
 
 const DECLARED_ERROR_CODES = [
@@ -50,7 +57,30 @@ export interface ApiFailure {
   requestId?: string;
   /** Closed-form `reason` of a manifest_rejected (CC-133) or invalid_request (invalid_filter, CC-175) answer; the UI maps it to its own text. */
   reason?: string;
+  /**
+   * `message` of a 422 of an administrator write (server, scope mapping, override, system): the BFF has already
+   * neutralised and shortened it, and the page shows it once more through neutraliseText as a detail under its own text.
+   */
+  message?: string;
 }
+
+/** Codes of the 422 bodies of the administrator writes: each carries a closed `reason` and a free `message`. */
+const ADMIN_REJECTION_CODES: ReadonlySet<string> = new Set([
+  'server_rejected',
+  'scope_mapping_rejected',
+  'override_rejected',
+  'system_rejected',
+]);
+
+/** Codes that carry a closed `reason` (the page maps it to its own text). */
+const REJECTION_CODES: ReadonlySet<string> = new Set([
+  'manifest_rejected',
+  'invalid_request',
+  'server_rejected',
+  'scope_mapping_rejected',
+  'override_rejected',
+  'system_rejected',
+]);
 
 const KNOWN_CODES: ReadonlySet<string> = new Set(PORTAL_ERROR_CODES);
 
@@ -106,13 +136,18 @@ export function toApiFailure(error: unknown): ApiFailure {
   if (code === 'step_up_required' && typeof body['stepUpUrl'] === 'string') {
     failure.stepUpUrl = body['stepUpUrl'];
   }
-  if (
-    (code === 'manifest_rejected' || code === 'invalid_request') &&
-    typeof body['reason'] === 'string'
-  ) {
+  if (REJECTION_CODES.has(code) && typeof body['reason'] === 'string') {
     if (/^[a-z][a-z0-9_]*$/.test(body['reason'])) {
       failure.reason = body['reason'];
     }
+  }
+  if (
+    ADMIN_REJECTION_CODES.has(code) &&
+    typeof body['message'] === 'string' &&
+    body['message'].length > 0 &&
+    body['message'].length <= 500
+  ) {
+    failure.message = body['message'];
   }
   if (code === 'rate_limited') {
     const retryAfter = Number(body['retryAfterSeconds'] ?? error.headers.get('Retry-After'));

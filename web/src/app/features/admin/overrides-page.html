@@ -1,0 +1,241 @@
+<h1 class="visually-hidden" i18n="@@overrides.title">Overrides</h1>
+
+<app-admin-nav />
+
+@if (done(); as text) {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
+}
+@if (mfaNote() === 'draft') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@overrides.mfaDraft"
+      >Identity confirmed. Check the form and save again.</ng-container
+    >
+  </app-notice>
+} @else if (mfaNote() === 'repeat') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@overrides.mfaRepeat"
+      >Identity confirmed. Repeat the operation.</ng-container
+    >
+  </app-notice>
+}
+@if (failure(); as problem) {
+  <app-error-notice [failure]="problem" />
+}
+
+@let current = state();
+@if (current.status === 'loading') {
+  <app-loading />
+} @else if (current.status === 'error') {
+  <app-load-error [failure]="current.failure" (retry)="load()" />
+} @else {
+  <p class="lead" i18n="@@overrides.lead">
+    An override is one Cedar policy that only forbids. It is for an emergency: it applies to the
+    gateway's decision on a call, to every server or to one server, and it is read by all instances
+    within seconds. Adding one needs no second factor; removing one does.
+  </p>
+
+  <div class="toolbar">
+    <button
+      mat-flat-button
+      type="button"
+      [disabled]="busy()"
+      (click)="openCreate()"
+      i18n="@@overrides.add"
+    >
+      Add override
+    </button>
+  </div>
+
+  @if (rows().length) {
+    <table class="table" role="table">
+      <caption class="visually-hidden" i18n="@@overrides.caption">
+        Emergency overrides
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader" i18n="@@overrides.colId">Identifier</th>
+          <th scope="col" role="columnheader" i18n="@@overrides.colTarget">Target</th>
+          <th scope="col" role="columnheader" i18n="@@overrides.colPolicy">Policy</th>
+          <th scope="col" role="columnheader" i18n="@@overrides.colSet">Set</th>
+          <th scope="col" role="columnheader">
+            <span class="visually-hidden" i18n="@@overrides.colActions">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        @for (row of rows(); track row.override.id) {
+          <tr role="row">
+            <th
+              scope="row"
+              role="rowheader"
+              class="name"
+              data-label="Identifier"
+              i18n-data-label="@@overrides.colId"
+            >
+              <code>{{ row.override.id | safeText }}</code>
+            </th>
+            <td role="cell" data-label="Target" i18n-data-label="@@overrides.colTarget">
+              {{ row.target | safeText }}
+            </td>
+            <td role="cell" data-label="Policy" i18n-data-label="@@overrides.colPolicy">
+              <pre class="pre" dir="ltr">{{ row.override.text | safeText }}</pre>
+            </td>
+            <td role="cell" class="muted" data-label="Set" i18n-data-label="@@overrides.colSet">
+              {{ row.override.setAt | date: 'dd.MM.yyyy HH:mm' }}
+              <span class="block"
+                ><ng-container i18n="@@overrides.by">set by</ng-container>
+                <code>{{ row.override.setBy | safeText }}</code></span
+              >
+            </td>
+            <td role="cell" class="c-actions">
+              <button
+                mat-flat-button
+                type="button"
+                class="quiet"
+                [disabled]="busy()"
+                (click)="openEdit(row.override)"
+              >
+                <ng-container i18n="@@overrides.edit">Edit</ng-container
+                ><span class="visually-hidden"> ({{ row.override.id }})</span>
+              </button>
+              <button
+                mat-flat-button
+                type="button"
+                class="quiet"
+                [disabled]="busy()"
+                (click)="remove(row.override)"
+              >
+                <ng-container i18n="@@overrides.remove">Remove</ng-container
+                ><span class="visually-hidden"> ({{ row.override.id }})</span>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p class="muted" role="status" i18n="@@overrides.none">No override is set.</p>
+  }
+
+  @if (form(); as f) {
+    @let errs = errors();
+    @let show = touched();
+    <section class="editor" aria-labelledby="override-form-title">
+      <h2 id="override-form-title">
+        @if (f.mode === 'create') {
+          <ng-container i18n="@@overrides.formAdd">Add override</ng-container>
+        } @else {
+          <ng-container i18n="@@overrides.formEdit">Edit override</ng-container>
+        }
+      </h2>
+      <form class="form" (ngSubmit)="save()" novalidate>
+        <div class="field">
+          <label for="ov-name" i18n="@@overrides.name">Identifier</label>
+          @if (f.mode === 'create') {
+            <input
+              id="ov-name"
+              name="name"
+              type="text"
+              autocomplete="off"
+              [attr.aria-invalid]="show && errs['name'] ? 'true' : null"
+              [attr.aria-describedby]="'ov-name-hint'"
+              [ngModel]="f.name"
+              (ngModelChange)="change({ name: $event })"
+            />
+            <p id="ov-name-hint" class="muted hint">
+              <code>{{ prefix }}{{ f.name.trim() }}</code>
+            </p>
+            @if (show && errs['name']) {
+              <p class="problem">{{ errs['name'] }}</p>
+            }
+          } @else {
+            <p>
+              <code>{{ prefix }}{{ f.name | safeText }}</code>
+            </p>
+          }
+        </div>
+        <div class="field">
+          <label for="ov-target" i18n="@@overrides.target">Target</label>
+          <select
+            id="ov-target"
+            name="kind"
+            [ngModel]="f.kind"
+            (ngModelChange)="change({ kind: $event })"
+          >
+            <option value="gateway" i18n="@@overrides.optGateway">
+              Gateway (the decision on a call)
+            </option>
+            <option value="all-servers" i18n="@@overrides.optAll">All servers</option>
+            <option value="server" i18n="@@overrides.optServer">One server</option>
+          </select>
+        </div>
+        @if (f.kind === 'server') {
+          <div class="field">
+            <label for="ov-server" i18n="@@overrides.server">Server</label>
+            <select
+              id="ov-server"
+              name="server"
+              [attr.aria-invalid]="show && errs['server'] ? 'true' : null"
+              [ngModel]="f.server"
+              (ngModelChange)="change({ server: $event })"
+            >
+              <option value="" i18n="@@overrides.serverPlaceholder">Choose a server</option>
+              @for (id of servers(); track id) {
+                <option [value]="id">{{ systemName(id) }} ({{ id }})</option>
+              }
+            </select>
+            @if (show && errs['server']) {
+              <p class="problem">{{ errs['server'] }}</p>
+            }
+          </div>
+        }
+        <div class="field wide">
+          <label for="ov-text" i18n="@@overrides.text">Policy (Cedar, one forbid)</label>
+          <textarea
+            id="ov-text"
+            name="text"
+            spellcheck="false"
+            dir="ltr"
+            [attr.aria-invalid]="show && errs['text'] ? 'true' : null"
+            [attr.aria-describedby]="'ov-text-hint'"
+            [ngModel]="f.text"
+            (ngModelChange)="change({ text: $event })"
+          ></textarea>
+          <p id="ov-text-hint" class="muted hint" i18n="@@overrides.textHint">
+            The &#64;id annotation has to equal the identifier above. For the gateway the policy
+            decides the call action on a tool; for a server it must not mention tools or the call
+            action.
+          </p>
+          @if (show && errs['text']) {
+            <p class="problem">{{ errs['text'] }}</p>
+          }
+          <p>
+            <button
+              mat-flat-button
+              type="button"
+              class="quiet"
+              (click)="useTemplate()"
+              i18n="@@overrides.template"
+            >
+              Start from a template
+            </button>
+          </p>
+        </div>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()" i18n="@@overrides.save">
+            Save
+          </button>
+          <button
+            mat-flat-button
+            type="button"
+            class="quiet"
+            (click)="cancel()"
+            i18n="@@overrides.cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+}

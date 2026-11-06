@@ -67,3 +67,88 @@ describe('toApiFailure', () => {
     expect(failureMessage(failure)).toBe('The request was rejected as invalid.');
   });
 });
+
+describe('toApiFailure of the administrator writes', () => {
+  it('keeps the closed reason and the message of a rejected write', () => {
+    const failure = toApiFailure(
+      httpError(422, {
+        error: 'scope_mapping_rejected',
+        reason: 'scope_invalid',
+        message: 'abc does not match ^[A-Z]+$',
+      }),
+    );
+
+    expect(failure).toEqual({
+      code: 'scope_mapping_rejected',
+      status: 422,
+      reason: 'scope_invalid',
+      message: 'abc does not match ^[A-Z]+$',
+    });
+    expect(failureMessage(failure)).toContain('does not match the scope pattern');
+  });
+
+  it('drops a reason that is not a plain code and a message that is too long', () => {
+    const failure = toApiFailure(
+      httpError(422, {
+        error: 'override_rejected',
+        reason: 'Not A Code',
+        message: 'x'.repeat(501),
+      }),
+    );
+
+    expect(failure).toEqual({ code: 'override_rejected', status: 422 });
+    expect(failureMessage(failure)).toBe('The gateway did not accept the override.');
+  });
+
+  it('shows no backend text for an invalid_request, only for the four administrator rejections', () => {
+    const failure = toApiFailure(
+      httpError(400, { error: 'invalid_request', message: 'internal detail' }),
+    );
+
+    expect(failure.message).toBeUndefined();
+  });
+
+  it('has its own text for every reason the contract lists', () => {
+    const reasons = {
+      server_rejected: [
+        'server_id_mismatch',
+        'system_reserved',
+        'credential_types_mixed',
+        'credential_type_not_accepted',
+      ],
+      scope_mapping_rejected: [
+        'unknown_resource_type',
+        'scope_not_grantable',
+        'scope_invalid',
+        'group_duplicate',
+      ],
+      override_rejected: [
+        'not_forbid',
+        'not_one_policy',
+        'id_invalid',
+        'target_mismatch',
+        'invalid_policy',
+        'id_mismatch',
+        'target_unknown',
+      ],
+      system_rejected: [
+        'client_secret_required',
+        'token_url_not_settable',
+        'product_required',
+        'exchange_audience_required',
+        'system_reserved',
+        'default_type_not_supported',
+        'credential_types_mixed',
+        'oauth_required',
+      ],
+    } as const;
+    for (const [code, list] of Object.entries(reasons)) {
+      const generic = failureMessage({ code: code as 'server_rejected', status: 422 });
+      for (const reason of list) {
+        expect(failureMessage({ code: code as 'server_rejected', status: 422, reason })).not.toBe(
+          generic,
+        );
+      }
+    }
+  });
+});

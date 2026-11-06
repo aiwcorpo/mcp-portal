@@ -2,14 +2,14 @@
 
 Frontend of the MCP platform portal (workstream ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, texts through `$localize`. It talks only to the BFF through the C12 API (`/api/v1`, contract
-`portal-bff.v1.yaml` from `mcp-contracts` 6.3.2). The BFF (`../bff`, ws-07) serves the built files from the same origin.
+`portal-bff.v1.yaml` from `mcp-contracts` 7.0.0). The BFF (`../bff`, ws-07) serves the built files from the same origin.
 
 Scope of the current version and the split into milestones: [STATUS.md](STATUS.md).
 
 ## Requirements
 
 - Node 24, npm 11.
-- The `@aiwcorpo/mcp-contracts` 6.3.2 package (OpenAPI, MSW handlers, vectors) as a dev dependency. It lives in
+- The `@aiwcorpo/mcp-contracts` 7.0.0 package (OpenAPI, MSW handlers, vectors) as a dev dependency. It lives in
   `web/.contracts/` (git-ignored), where npm reads it from. `scripts/contracts.sh` fills that directory, see
   "Contracts package" below.
 - Java 25, only to regenerate the API client (`npm run generate:api`).
@@ -21,15 +21,15 @@ scripts/contracts.sh && npm ci
 
 ### Contracts package
 
-`package.json` points at a file: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-6.3.2.tgz"`.
+`package.json` points at a file: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-7.0.0.tgz"`.
 `.contracts/` is in `.gitignore`, so the repository holds no tarball. `scripts/contracts.sh` puts the package there from the
 first available source: a file already in place (checked against `CONTRACTS_TARBALL_SHA256` when set),
-`CONTRACTS_TARBALL=<file>`, `CONTRACTS_TARBALL_URL=<url>`, `CONTRACTS_SOURCE_DIR=<mcp-contracts checkout at tag v6.3.2>`
+`CONTRACTS_TARBALL=<file>`, `CONTRACTS_TARBALL_URL=<url>`, `CONTRACTS_SOURCE_DIR=<mcp-contracts checkout at tag v7.0.0>`
 (runs `npm pack` there; a package from the same tag has the same bytes) or `CONTRACTS_FROM_NPMJS=1` (`npm pack` of the published
 package from npmjs, no token; set `CONTRACTS_TARBALL_SHA256` to pin the bytes, as the GitHub workflows do). A release file from `mcp-contracts/release/`
 also works as `CONTRACTS_TARBALL`. `ci/run.sh` calls the script itself before `npm ci`.
 
-Once `mcp-contracts` is published on npmjs, change the entry in `package.json` to `"@aiwcorpo/mcp-contracts": "6.3.2"` and run
+Once `mcp-contracts` is published on npmjs, change the entry in `package.json` to `"@aiwcorpo/mcp-contracts": "7.0.0"` and run
 `npm install`, which updates `package-lock.json` (registry URL and checksum instead of a file). No token or `.npmrc` is
 needed. With such a dependency `scripts/contracts.sh` does nothing.
 
@@ -78,6 +78,26 @@ npm start                    # http://localhost:18730, proxy /api -> http://loca
 The `mcp-portal-bff` client in Keycloak has its redirect URI on `http://localhost:18090`, so after login the browser returns
 to port 18090. Cookies on `localhost` do not depend on the port: go back to `http://localhost:18730` and the session works
 through the proxy.
+
+## Administration screens (2.0.0)
+
+`/admin` is the approvals view (tool definitions, and the policies and resource types of a server next to them); the sub
+navigation (`AdminNav`) leads to `/admin/servers`, `/admin/systems`, `/admin/scope-mapping`, `/admin/overrides` and
+`/admin/kill-switches`. The code is in `src/app/features/admin/`.
+
+- No list of systems, servers or resource types is in the code. `systemName` writes the identifier with a capital letter
+  (the contracts have no display name), `SYSTEM_ID_PATTERN` and the patterns in `admin-validation.ts` follow `common.schema.json`,
+  and the systems of the request dialog, the servers of the override target and the datalist of the server form come from the
+  catalog, the registry and the broker.
+- Writes carry the ETag they were read with (`If-Match`; a create sends `If-None-Match: *`). `401 step_up_required` goes through
+  `AdminStepUp`: the form (never the client secret) is kept in `sessionStorage` as an `admin-draft` of `ResumeIntentStore`, the
+  browser goes to the IdP with `?mfa=ok` as the return address and the page takes the draft back; the approval of policies carries
+  itself out after the return. A second step-up request right after a return is shown as an error, not repeated.
+- Rejected writes (`server_rejected`, `scope_mapping_rejected`, `override_rejected`, `system_rejected`) are shown with the page's
+  own text for the closed `reason` and, under it, the gateway's `message` as inert text (`neutraliseText`).
+- Mock build: the registry data of these screens (servers, systems, mapping, overrides) is in `src/mocks/dynamic-mock.ts` and in
+  `sessionStorage`, not in the state cookie; `?mockPolicies=in` puts the policies of Jira (changed) and of a new Notes server up for
+  approval. The unit tests of the screens are `*-page.spec.ts` in the same folder, the end-to-end ones `e2e/dynamic-servers.spec.ts`.
 
 ## Build for the BFF (ws-07)
 

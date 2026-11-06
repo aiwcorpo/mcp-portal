@@ -13,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
-import { AdminService, PendingTool, Risk, ServerId } from '../../api/generated';
+import { AdminService, PendingTool, Risk } from '../../api/generated';
 import { failureMessage } from '../../core/error-messages';
 import { parseKeepingNumbers } from './raw-json';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
@@ -73,7 +73,7 @@ export class ToolDiff {
   private readonly resumeStore = inject(ResumeIntentStore);
   private readonly session = inject(SessionService);
 
-  readonly serverId = input.required<ServerId>();
+  readonly serverId = input.required<string>();
   /** Tool name in the registry (without the gateway prefix). */
   readonly tool = input.required<string>();
   /** Gateway-prefixed name, for texts and labels. */

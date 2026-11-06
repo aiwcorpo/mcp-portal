@@ -47,6 +47,10 @@ const PAGES = [
   { path: '/requests', ready: 'Requests' },
   { path: '/admin?mockAdmin=in', ready: 'Administration' },
   { path: '/admin/kill-switches?mockAdmin=in', ready: 'Emergency switches' },
+  { path: '/admin/servers?mockAdmin=in', ready: 'Servers' },
+  { path: '/admin/systems?mockAdmin=in', ready: 'Systems' },
+  { path: '/admin/scope-mapping?mockAdmin=in', ready: 'Scope mapping' },
+  { path: '/admin/overrides?mockAdmin=in', ready: 'Overrides' },
   { path: '/endpoint', ready: 'MCP address' },
 ];
 
@@ -225,8 +229,8 @@ for (const scheme of ['dark', 'light'] as const) {
     await expectNoViolations(page);
 
     await page.goto('/catalog?mockOAuth=provider_error');
-    await page.getByRole('button', { name: 'Connect (GitLab)' }).click();
-    await expect(page.getByRole('alert')).toContainText('GitLab did not respond correctly');
+    await page.getByRole('button', { name: 'Connect (Gitlab)' }).click();
+    await expect(page.getByRole('alert')).toContainText('Gitlab did not respond correctly');
     await expectNoViolations(page);
 
     await page.goto('/connections');
@@ -238,7 +242,7 @@ for (const scheme of ['dark', 'light'] as const) {
 
 test('keyboard only: skip link, tabs, row toggle and an action', async ({ page }) => {
   await page.goto('/catalog');
-  await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Skip to content' })).toBeFocused();
   await page.keyboard.press('Enter');
@@ -313,7 +317,7 @@ test('320 px: no WCAG 2.1 AA violations and no horizontal scroll', async ({ page
 
 test('focus moves to the main content after an in-app navigation', async ({ page }) => {
   await page.goto('/catalog');
-  await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
   await page.getByRole('link', { name: 'System connections' }).click();
   await expect(
     page.getByRole('heading', { level: 1, name: 'System connections' }),

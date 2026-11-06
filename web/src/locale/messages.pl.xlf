@@ -239,7 +239,7 @@
     </unit>
     <unit id="error.access_denied">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:5</note>
+        <note category="location">src/app/core/error-messages.ts:6</note>
       </notes>
       <segment>
         <source>You are not allowed to perform this operation.</source>
@@ -248,7 +248,7 @@
     </unit>
     <unit id="error.tool_disabled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:7</note>
+        <note category="location">src/app/core/error-messages.ts:8</note>
       </notes>
       <segment>
         <source>The tool has been switched off by an administrator.</source>
@@ -257,7 +257,7 @@
     </unit>
     <unit id="error.confirmation_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:9</note>
+        <note category="location">src/app/core/error-messages.ts:10</note>
       </notes>
       <segment>
         <source>This operation requires confirmation.</source>
@@ -266,7 +266,7 @@
     </unit>
     <unit id="error.confirmation_failed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:11</note>
+        <note category="location">src/app/core/error-messages.ts:12</note>
       </notes>
       <segment>
         <source>Confirmation failed or expired.</source>
@@ -275,7 +275,7 @@
     </unit>
     <unit id="error.confirmation_superseded">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:13</note>
+        <note category="location">src/app/core/error-messages.ts:14</note>
       </notes>
       <segment>
         <source>The operation was replaced by a newer one.</source>
@@ -284,7 +284,7 @@
     </unit>
     <unit id="error.confirmation_cancelled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:15</note>
+        <note category="location">src/app/core/error-messages.ts:16</note>
       </notes>
       <segment>
         <source>The operation was cancelled.</source>
@@ -293,7 +293,7 @@
     </unit>
     <unit id="error.confirmation_blocked">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:17</note>
+        <note category="location">src/app/core/error-messages.ts:18</note>
       </notes>
       <segment>
         <source>Another irreversible operation is waiting for a code.</source>
@@ -302,7 +302,7 @@
     </unit>
     <unit id="error.already_registered">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:19</note>
+        <note category="location">src/app/core/error-messages.ts:20</note>
       </notes>
       <segment>
         <source>Authenticator is already registered. Remove it to register again.</source>
@@ -311,7 +311,7 @@
     </unit>
     <unit id="error.invalid_code">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:20</note>
+        <note category="location">src/app/core/error-messages.ts:21</note>
       </notes>
       <segment>
         <source>Invalid code.</source>
@@ -320,7 +320,7 @@
     </unit>
     <unit id="error.enrollment_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:22</note>
+        <note category="location">src/app/core/error-messages.ts:23</note>
       </notes>
       <segment>
         <source>Registration expired or 3 wrong codes were entered.</source>
@@ -329,7 +329,7 @@
     </unit>
     <unit id="error.credential_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:24</note>
+        <note category="location">src/app/core/error-messages.ts:25</note>
       </notes>
       <segment>
         <source>Connect your account in this system first.</source>
@@ -338,7 +338,7 @@
     </unit>
     <unit id="error.not_found_or_denied">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:26</note>
+        <note category="location">src/app/core/error-messages.ts:27</note>
       </notes>
       <segment>
         <source>Resource not found or you do not have access to it.</source>
@@ -347,7 +347,7 @@
     </unit>
     <unit id="error.invalid_argument">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:27</note>
+        <note category="location">src/app/core/error-messages.ts:28</note>
       </notes>
       <segment>
         <source>Invalid input.</source>
@@ -356,7 +356,7 @@
     </unit>
     <unit id="error.rate_limited">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:28</note>
+        <note category="location">src/app/core/error-messages.ts:29</note>
       </notes>
       <segment>
         <source>Too many requests. Try again in a moment.</source>
@@ -365,7 +365,7 @@
     </unit>
     <unit id="error.step_up_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:30</note>
+        <note category="location">src/app/core/error-messages.ts:31</note>
       </notes>
       <segment>
         <source>This operation requires re-authentication (MFA).</source>
@@ -374,7 +374,7 @@
     </unit>
     <unit id="error.upstream_unavailable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:32</note>
+        <note category="location">src/app/core/error-messages.ts:33</note>
       </notes>
       <segment>
         <source>The service is temporarily unavailable.</source>
@@ -383,7 +383,7 @@
     </unit>
     <unit id="error.internal_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:34</note>
+        <note category="location">src/app/core/error-messages.ts:35</note>
       </notes>
       <segment>
         <source>An unexpected error occurred. Try again later.</source>
@@ -444,9 +444,72 @@
         <target>Definicja została odrzucona i nie może być zatwierdzona.</target>
       </segment>
     </unit>
-    <unit id="error.flow_invalid">
+    <unit id="error.server_rejected">
       <notes>
         <note category="location">src/app/core/error-messages.ts:47</note>
+      </notes>
+      <segment>
+        <source>The gateway did not accept the server settings.</source>
+        <target>Gateway nie przyjął ustawień serwera.</target>
+      </segment>
+    </unit>
+    <unit id="error.scope_mapping_rejected">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:49</note>
+      </notes>
+      <segment>
+        <source>The gateway did not accept the scope mapping. Nothing was saved.</source>
+        <target>Gateway nie przyjął mapowania zakresów. Nic nie zapisano.</target>
+      </segment>
+    </unit>
+    <unit id="error.override_rejected">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:51</note>
+      </notes>
+      <segment>
+        <source>The gateway did not accept the override.</source>
+        <target>Gateway nie przyjął nadpisania.</target>
+      </segment>
+    </unit>
+    <unit id="error.system_rejected">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:53</note>
+      </notes>
+      <segment>
+        <source>The credential broker did not accept the system settings.</source>
+        <target>Broker poświadczeń nie przyjął ustawień systemu.</target>
+      </segment>
+    </unit>
+    <unit id="error.server_exists">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:55</note>
+      </notes>
+      <segment>
+        <source>A server with this identifier already exists.</source>
+        <target>Serwer o tym identyfikatorze już istnieje.</target>
+      </segment>
+    </unit>
+    <unit id="error.precondition_failed">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:57</note>
+      </notes>
+      <segment>
+        <source>Someone changed this in the meantime. Reload the data and make your change again.</source>
+        <target>Ktoś zmienił te dane w międzyczasie. Wczytaj je ponownie i wprowadź zmianę jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="error.precondition_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:59</note>
+      </notes>
+      <segment>
+        <source>The data has to be loaded before it can be changed. Reload the page.</source>
+        <target>Dane trzeba wczytać, zanim się je zmieni. Odśwież stronę.</target>
+      </segment>
+    </unit>
+    <unit id="error.flow_invalid">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:61</note>
       </notes>
       <segment>
         <source>The connection link expired or was already used. Start again.</source>
@@ -455,7 +518,7 @@
     </unit>
     <unit id="error.provider_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:49</note>
+        <note category="location">src/app/core/error-messages.ts:63</note>
       </notes>
       <segment>
         <source>The system did not respond correctly. Try again in a moment.</source>
@@ -464,7 +527,7 @@
     </unit>
     <unit id="error.cancelled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:50</note>
+        <note category="location">src/app/core/error-messages.ts:64</note>
       </notes>
       <segment>
         <source>Connection cancelled.</source>
@@ -473,7 +536,7 @@
     </unit>
     <unit id="error.risk_lowered">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:60</note>
+        <note category="location">src/app/core/error-messages.ts:74</note>
       </notes>
       <segment>
         <source>The new definition lowers the tool&apos;s risk level, so it will not be approved. Fix the risk in the manifest and redeploy the server.</source>
@@ -482,7 +545,7 @@
     </unit>
     <unit id="error.environment_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:62</note>
+        <note category="location">src/app/core/error-messages.ts:76</note>
       </notes>
       <segment>
         <source>The manifest is meant for a different environment and was rejected.</source>
@@ -491,7 +554,7 @@
     </unit>
     <unit id="error.credential_type_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:64</note>
+        <note category="location">src/app/core/error-messages.ts:78</note>
       </notes>
       <segment>
         <source>The manifest does not match the credential type configured for the system and was rejected.</source>
@@ -500,7 +563,7 @@
     </unit>
     <unit id="error.classification_inconsistent">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:66</note>
+        <note category="location">src/app/core/error-messages.ts:80</note>
       </notes>
       <segment>
         <source>Risk and action do not match. Read pairs with the read action, write with update or admin, delete with delete or admin.</source>
@@ -509,7 +572,7 @@
     </unit>
     <unit id="error.classification_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:68</note>
+        <note category="location">src/app/core/error-messages.ts:82</note>
       </notes>
       <segment>
         <source>This tool comes from an adapter and needs classification: choose a risk and an action.</source>
@@ -518,7 +581,7 @@
     </unit>
     <unit id="error.classification_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:70</note>
+        <note category="location">src/app/core/error-messages.ts:84</note>
       </notes>
       <segment>
         <source>The gateway does not accept this classification. The adapter is read-only: its tool can only be approved as Read (read), and definitions from other sources are not classified.</source>
@@ -527,16 +590,223 @@
     </unit>
     <unit id="error.adapter_mode_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:72</note>
+        <note category="location">src/app/core/error-messages.ts:86</note>
       </notes>
       <segment>
         <source>The server mode in the gateway does not match the manifest source. Check the adapter configuration.</source>
         <target>Tryb serwera w gatewayu nie zgadza się ze źródłem manifestu. Sprawdź konfigurację adaptera.</target>
       </segment>
     </unit>
+    <unit id="error.server_id_mismatch">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:95</note>
+      </notes>
+      <segment>
+        <source>The server identifier must be mcp- followed by the system identifier.</source>
+        <target>Identyfikator serwera musi mieć postać mcp- i identyfikator systemu.</target>
+      </segment>
+    </unit>
+    <unit id="error.system_reserved">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:97</note>
+      </notes>
+      <segment>
+        <source>This system identifier is reserved for a component of the platform.</source>
+        <target>Ten identyfikator systemu jest zarezerwowany dla składnika platformy.</target>
+      </segment>
+    </unit>
+    <unit id="error.credential_types_mixed">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:99</note>
+      </notes>
+      <segment>
+        <source>A service account cannot be combined with a user credential type.</source>
+        <target>Konta serwisowego nie można łączyć z typem poświadczenia użytkownika.</target>
+      </segment>
+    </unit>
+    <unit id="error.credential_type_not_accepted">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:101</note>
+      </notes>
+      <segment>
+        <source>The credential type in use has to be one of the accepted types.</source>
+        <target>Używany typ poświadczenia musi być jednym z przyjmowanych.</target>
+      </segment>
+    </unit>
+    <unit id="error.unknown_resource_type">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:110</note>
+      </notes>
+      <segment>
+        <source>No registered server declares the resource type of one of the scopes. Nothing was saved.</source>
+        <target>Żaden zarejestrowany serwer nie deklaruje typu zasobu jednego z zakresów. Nic nie zapisano.</target>
+      </segment>
+    </unit>
+    <unit id="error.scope_not_grantable">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:112</note>
+      </notes>
+      <segment>
+        <source>The server declares no scope pattern for the type of one of the scopes, so it cannot be granted. Nothing was saved.</source>
+        <target>Serwer nie deklaruje wzorca zakresu dla typu jednego z zakresów, więc nie można go nadać. Nic nie zapisano.</target>
+      </segment>
+    </unit>
+    <unit id="error.scope_invalid">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:114</note>
+      </notes>
+      <segment>
+        <source>The part after the slash does not match the scope pattern of its type. Nothing was saved.</source>
+        <target>Część po ukośniku nie pasuje do wzorca zakresu swojego typu. Nic nie zapisano.</target>
+      </segment>
+    </unit>
+    <unit id="error.group_duplicate">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:116</note>
+      </notes>
+      <segment>
+        <source>A group appears twice. Nothing was saved.</source>
+        <target>Grupa występuje dwa razy. Nic nie zapisano.</target>
+      </segment>
+    </unit>
+    <unit id="error.not_forbid">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:125</note>
+      </notes>
+      <segment>
+        <source>An override can only forbid. Use a forbid policy.</source>
+        <target>Nadpisanie może tylko zakazywać. Użyj polityki forbid.</target>
+      </segment>
+    </unit>
+    <unit id="error.not_one_policy">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:127</note>
+      </notes>
+      <segment>
+        <source>The text has to hold exactly one policy.</source>
+        <target>Tekst musi zawierać dokładnie jedną politykę.</target>
+      </segment>
+    </unit>
+    <unit id="error.id_invalid">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:129</note>
+      </notes>
+      <segment>
+        <source>The identifier has to look like override- followed by a name.</source>
+        <target>Identyfikator musi mieć postać override- i nazwa.</target>
+      </segment>
+    </unit>
+    <unit id="error.target_mismatch">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:131</note>
+      </notes>
+      <segment>
+        <source>The policy does not fit the target: for the gateway it has to decide the call action on a tool, for a server it must not mention the tool or the call action.</source>
+        <target>Polityka nie pasuje do celu: dla gatewaya musi rozstrzygać akcję call na narzędziu, dla serwera nie może wymieniać narzędzia ani akcji call.</target>
+      </segment>
+    </unit>
+    <unit id="error.invalid_policy">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:133</note>
+      </notes>
+      <segment>
+        <source>The policy does not parse or does not validate against the schema of its target.</source>
+        <target>Polityka nie daje się sparsować albo nie przechodzi walidacji względem schematu swojego celu.</target>
+      </segment>
+    </unit>
+    <unit id="error.id_mismatch">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:135</note>
+      </notes>
+      <segment>
+        <source>The @id annotation in the text has to equal the identifier of the override.</source>
+        <target>Adnotacja @id w tekście musi być równa identyfikatorowi nadpisania.</target>
+      </segment>
+    </unit>
+    <unit id="error.target_unknown">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:137</note>
+      </notes>
+      <segment>
+        <source>There is no server with this identifier in the registry.</source>
+        <target>W rejestrze nie ma serwera o tym identyfikatorze.</target>
+      </segment>
+    </unit>
+    <unit id="error.client_secret_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:146</note>
+      </notes>
+      <segment>
+        <source>The client secret has to be entered again when the base address, the authorization or token address or the client identifier changes.</source>
+        <target>Sekret klienta trzeba podać ponownie, gdy zmienia się adres bazowy, adres autoryzacji lub tokenu albo identyfikator klienta.</target>
+      </segment>
+    </unit>
+    <unit id="error.token_url_not_settable">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:148</note>
+      </notes>
+      <segment>
+        <source>A token exchange system takes no token address: the broker uses the one of its identity provider.</source>
+        <target>System z wymianą tokenu nie ma adresu tokenu: broker używa adresu swojego dostawcy tożsamości.</target>
+      </segment>
+    </unit>
+    <unit id="error.product_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:150</note>
+      </notes>
+      <segment>
+        <source>This adapter needs the product (Jira or Confluence).</source>
+        <target>Ten adapter wymaga produktu (Jira albo Confluence).</target>
+      </segment>
+    </unit>
+    <unit id="error.exchange_audience_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:152</note>
+      </notes>
+      <segment>
+        <source>A token exchange system needs the audience of the token.</source>
+        <target>System z wymianą tokenu wymaga odbiorcy (audience) tokenu.</target>
+      </segment>
+    </unit>
+    <unit id="error.system_reserved_system">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:154</note>
+      </notes>
+      <segment>
+        <source>This system identifier is reserved for a component of the platform.</source>
+        <target>Ten identyfikator systemu jest zarezerwowany dla składnika platformy.</target>
+      </segment>
+    </unit>
+    <unit id="error.default_type_not_supported">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:156</note>
+      </notes>
+      <segment>
+        <source>The default credential type has to be one of the supported types.</source>
+        <target>Domyślny typ poświadczenia musi być jednym z obsługiwanych typów.</target>
+      </segment>
+    </unit>
+    <unit id="error.credential_types_mixed_system">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:158</note>
+      </notes>
+      <segment>
+        <source>A service account cannot be combined with a user credential type.</source>
+        <target>Konta serwisowego nie można łączyć z typem poświadczenia użytkownika.</target>
+      </segment>
+    </unit>
+    <unit id="error.oauth_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:160</note>
+      </notes>
+      <segment>
+        <source>OAuth needs the client settings: identifier, secret and the authorization and token addresses.</source>
+        <target>OAuth wymaga ustawień klienta: identyfikatora, sekretu oraz adresów autoryzacji i tokenu.</target>
+      </segment>
+    </unit>
     <unit id="error.invalid_filter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:83</note>
+        <note category="location">src/app/core/error-messages.ts:183</note>
       </notes>
       <segment>
         <source>This filter cannot be saved in the address. Change the selection.</source>
@@ -545,7 +815,7 @@
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:86</note>
+        <note category="location">src/app/core/error-messages.ts:186</note>
       </notes>
       <segment>
         <source>Too many requests. Try again in <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -559,6 +829,69 @@
       <segment>
         <source>Portal MCP</source>
         <target>Portal MCP</target>
+      </segment>
+    </unit>
+    <unit id="adminNav.label">
+      <notes>
+        <note category="location">src/app/features/admin/admin-nav.ts:9,11</note>
+      </notes>
+      <segment>
+        <source>Administration sections</source>
+        <target>Sekcje administracji</target>
+      </segment>
+    </unit>
+    <unit id="adminNav.registry">
+      <notes>
+        <note category="location">src/app/features/admin/admin-nav.ts:16,19</note>
+      </notes>
+      <segment>
+        <source>Approvals</source>
+        <target>Zatwierdzenia</target>
+      </segment>
+    </unit>
+    <unit id="adminNav.servers">
+      <notes>
+        <note category="location">src/app/features/admin/admin-nav.ts:23,26</note>
+      </notes>
+      <segment>
+        <source>Servers</source>
+        <target>Serwery</target>
+      </segment>
+    </unit>
+    <unit id="adminNav.systems">
+      <notes>
+        <note category="location">src/app/features/admin/admin-nav.ts:30,33</note>
+      </notes>
+      <segment>
+        <source>Systems</source>
+        <target>Systemy</target>
+      </segment>
+    </unit>
+    <unit id="adminNav.scopeMapping">
+      <notes>
+        <note category="location">src/app/features/admin/admin-nav.ts:37,40</note>
+      </notes>
+      <segment>
+        <source>Scope mapping</source>
+        <target>Mapowanie zakresów</target>
+      </segment>
+    </unit>
+    <unit id="adminNav.overrides">
+      <notes>
+        <note category="location">src/app/features/admin/admin-nav.ts:44,47</note>
+      </notes>
+      <segment>
+        <source>Overrides</source>
+        <target>Nadpisania</target>
+      </segment>
+    </unit>
+    <unit id="adminNav.killSwitches">
+      <notes>
+        <note category="location">src/app/features/admin/admin-nav.ts:51,55</note>
+      </notes>
+      <segment>
+        <source>Emergency switches</source>
+        <target>Wyłączniki awaryjne</target>
       </segment>
     </unit>
     <unit id="admin.title">
@@ -588,27 +921,27 @@
         <target>Tożsamość potwierdzona. Otwórz różnice i zatwierdź jeszcze raz.</target>
       </segment>
     </unit>
-    <unit id="admin.lead">
+    <unit id="admin.ignoredEntries">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:29,32</note>
+        <note category="location">src/app/features/admin/admin-page.html:25,28</note>
       </notes>
       <segment>
-        <source> New and changed tools are not made available to agents until you approve them. The CI pipeline approves only read tools on its own; write and delete tools wait here. </source>
-        <target> Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI zatwierdza sam tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj. </target>
+        <source>The approval made these scope mapping entries invalid, and evaluation ignores them until you correct the mapping:</source>
+        <target>Zatwierdzenie unieważniło te wpisy mapowania zakresów, a ocena je pomija, dopóki nie poprawisz mapowania:</target>
       </segment>
     </unit>
-    <unit id="admin.killSwitchesLink">
+    <unit id="admin.lead">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:33,35</note>
+        <note category="location">src/app/features/admin/admin-page.html:43,47</note>
       </notes>
       <segment>
-        <source>Emergency switches</source>
-        <target>Wyłączniki awaryjne</target>
+        <source> New and changed tools are not made available to agents until you approve them. The CI pipeline approves only read tools on its own; write and delete tools wait here. The policies and resource type declarations of a server are approved here too, and its tools stay blocked until then. </source>
+        <target> Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI sam zatwierdza tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj. Polityki i deklaracje typów zasobów serwera też zatwierdza się tutaj, a jego narzędzia pozostają zablokowane do tego czasu. </target>
       </segment>
     </unit>
     <unit id="admin.killSwitchesOn">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:38,39</note>
+        <note category="location">src/app/features/admin/admin-page.html:50,51</note>
       </notes>
       <segment>
         <source>on: <ph id="0" equiv="INTERPOLATION" disp="{{ switches().length }}"/></source>
@@ -617,16 +950,25 @@
     </unit>
     <unit id="admin.pendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:45,48</note>
+        <note category="location">src/app/features/admin/admin-page.html:55,58</note>
       </notes>
       <segment>
         <source> Pending approval: <ph id="0" equiv="INTERPOLATION" disp="{{ totalPending() }}"/> </source>
         <target> Do zatwierdzenia: <ph id="0" equiv="INTERPOLATION" disp="{{ totalPending() }}"/> </target>
       </segment>
     </unit>
+    <unit id="admin.policiesPendingTotal">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:60,63</note>
+      </notes>
+      <segment>
+        <source> Servers with policies pending approval: <ph id="0" equiv="INTERPOLATION" disp="{{ policiesPendingTotal() }}"/> </source>
+        <target> Serwery z politykami do zatwierdzenia: <ph id="0" equiv="INTERPOLATION" disp="{{ policiesPendingTotal() }}"/> </target>
+      </segment>
+    </unit>
     <unit id="admin.caption">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:51,53</note>
+        <note category="location">src/app/features/admin/admin-page.html:66,68</note>
       </notes>
       <segment>
         <source> MCP server registry </source>
@@ -635,7 +977,7 @@
     </unit>
     <unit id="admin.colToggle">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:56,58</note>
+        <note category="location">src/app/features/admin/admin-page.html:71,73</note>
       </notes>
       <segment>
         <source>Tools</source>
@@ -644,7 +986,7 @@
     </unit>
     <unit id="admin.colServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:58,59</note>
+        <note category="location">src/app/features/admin/admin-page.html:73,74</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -653,8 +995,8 @@
     </unit>
     <unit id="admin.colVersion">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:59,60</note>
-        <note category="location">src/app/features/admin/admin-page.html:97</note>
+        <note category="location">src/app/features/admin/admin-page.html:74,75</note>
+        <note category="location">src/app/features/admin/admin-page.html:112</note>
       </notes>
       <segment>
         <source>Version</source>
@@ -663,8 +1005,8 @@
     </unit>
     <unit id="admin.colChanges">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:60,61</note>
-        <note category="location">src/app/features/admin/admin-page.html:101</note>
+        <note category="location">src/app/features/admin/admin-page.html:75,76</note>
+        <note category="location">src/app/features/admin/admin-page.html:116</note>
       </notes>
       <segment>
         <source>Changes</source>
@@ -673,17 +1015,62 @@
     </unit>
     <unit id="admin.colState">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:61,63</note>
-        <note category="location">src/app/features/admin/admin-page.html:112</note>
+        <note category="location">src/app/features/admin/admin-page.html:76,78</note>
+        <note category="location">src/app/features/admin/admin-page.html:127</note>
       </notes>
       <segment>
         <source>State</source>
         <target>Stan</target>
       </segment>
     </unit>
+    <unit id="admin.policiesWaiting">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:137,139</note>
+      </notes>
+      <segment>
+        <source>Policies and resource types waiting for approval</source>
+        <target>Polityki i typy zasobów czekają na zatwierdzenie</target>
+      </segment>
+    </unit>
+    <unit id="admin.policiesBlocked">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:140,142</note>
+      </notes>
+      <segment>
+        <source>The tools of this server are blocked until you approve them.</source>
+        <target>Narzędzia tego serwera są zablokowane, dopóki ich nie zatwierdzisz.</target>
+      </segment>
+    </unit>
+    <unit id="admin.hidePolicies">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:153,154</note>
+      </notes>
+      <segment>
+        <source>Hide differences</source>
+        <target>Ukryj różnice</target>
+      </segment>
+    </unit>
+    <unit id="admin.showPolicies">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:155,156</note>
+      </notes>
+      <segment>
+        <source>Show differences</source>
+        <target>Pokaż różnice</target>
+      </segment>
+    </unit>
+    <unit id="admin.policiesWord">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:159,160</note>
+      </notes>
+      <segment>
+        <source>policies</source>
+        <target>polityki</target>
+      </segment>
+    </unit>
     <unit id="admin.sourceServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:129,131</note>
+        <note category="location">src/app/features/admin/admin-page.html:190,192</note>
       </notes>
       <segment>
         <source>Source: server</source>
@@ -692,7 +1079,7 @@
     </unit>
     <unit id="admin.sourceAdapter">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:133,135</note>
+        <note category="location">src/app/features/admin/admin-page.html:194,196</note>
       </notes>
       <segment>
         <source>Source: adapter</source>
@@ -701,7 +1088,7 @@
     </unit>
     <unit id="admin.sourceCi">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:136,137</note>
+        <note category="location">src/app/features/admin/admin-page.html:197,198</note>
       </notes>
       <segment>
         <source>Source: CI</source>
@@ -710,7 +1097,7 @@
     </unit>
     <unit id="admin.hideDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:154,155</note>
+        <note category="location">src/app/features/admin/admin-page.html:215,216</note>
       </notes>
       <segment>
         <source>Hide differences</source>
@@ -719,7 +1106,7 @@
     </unit>
     <unit id="admin.showDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:156,157</note>
+        <note category="location">src/app/features/admin/admin-page.html:217,218</note>
       </notes>
       <segment>
         <source>Show differences</source>
@@ -728,7 +1115,7 @@
     </unit>
     <unit id="admin.noTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:184,185</note>
+        <note category="location">src/app/features/admin/admin-page.html:245,246</note>
       </notes>
       <segment>
         <source> The server has no registered tools. </source>
@@ -737,7 +1124,7 @@
     </unit>
     <unit id="admin.empty">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:193,196</note>
+        <note category="location">src/app/features/admin/admin-page.html:254,257</note>
       </notes>
       <segment>
         <source>The registry has no servers.</source>
@@ -746,7 +1133,7 @@
     </unit>
     <unit id="admin.newCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:53</note>
+        <note category="location">src/app/features/admin/admin-page.ts:63</note>
       </notes>
       <segment>
         <source>new: <ph id="0" equiv="count" disp="created"/></source>
@@ -755,7 +1142,7 @@
     </unit>
     <unit id="admin.changedCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:56</note>
+        <note category="location">src/app/features/admin/admin-page.ts:66</note>
       </notes>
       <segment>
         <source>changed: <ph id="0" equiv="count" disp="changed"/></source>
@@ -764,7 +1151,7 @@
     </unit>
     <unit id="admin.toolApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:65</note>
+        <note category="location">src/app/features/admin/admin-page.ts:75</note>
       </notes>
       <segment>
         <source>Approved · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -773,7 +1160,7 @@
     </unit>
     <unit id="admin.toolRiskLowered">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:67</note>
+        <note category="location">src/app/features/admin/admin-page.ts:77</note>
       </notes>
       <segment>
         <source>Risk lowering · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -782,7 +1169,7 @@
     </unit>
     <unit id="admin.toolNew">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:69</note>
+        <note category="location">src/app/features/admin/admin-page.ts:79</note>
       </notes>
       <segment>
         <source>New · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -791,7 +1178,7 @@
     </unit>
     <unit id="admin.toolChanged">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:70</note>
+        <note category="location">src/app/features/admin/admin-page.ts:80</note>
       </notes>
       <segment>
         <source>Changed · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -800,7 +1187,7 @@
     </unit>
     <unit id="admin.toolSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:73</note>
+        <note category="location">src/app/features/admin/admin-page.ts:83</note>
       </notes>
       <segment>
         <source>Switched off · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -809,7 +1196,7 @@
     </unit>
     <unit id="admin.showTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:110</note>
+        <note category="location">src/app/features/admin/admin-page.ts:129</note>
       </notes>
       <segment>
         <source>Show tools</source>
@@ -818,7 +1205,7 @@
     </unit>
     <unit id="admin.hideTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:111</note>
+        <note category="location">src/app/features/admin/admin-page.ts:130</note>
       </notes>
       <segment>
         <source>Hide tools</source>
@@ -827,7 +1214,7 @@
     </unit>
     <unit id="admin.serverSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:152</note>
+        <note category="location">src/app/features/admin/admin-page.ts:177</note>
       </notes>
       <segment>
         <source>Switched off</source>
@@ -836,7 +1223,7 @@
     </unit>
     <unit id="admin.serverDisabled">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:154</note>
+        <note category="location">src/app/features/admin/admin-page.ts:179</note>
       </notes>
       <segment>
         <source>Disabled</source>
@@ -845,7 +1232,7 @@
     </unit>
     <unit id="admin.serverPending">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:156</note>
+        <note category="location">src/app/features/admin/admin-page.ts:181</note>
       </notes>
       <segment>
         <source>Pending approval</source>
@@ -854,16 +1241,25 @@
     </unit>
     <unit id="admin.serverActive">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:157</note>
+        <note category="location">src/app/features/admin/admin-page.ts:182</note>
       </notes>
       <segment>
         <source>Active</source>
         <target>Aktywny</target>
       </segment>
     </unit>
+    <unit id="admin.policiesApproved">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:253</note>
+      </notes>
+      <segment>
+        <source>Approved the policies of <ph id="0" equiv="server" disp="name"/>.</source>
+        <target>Zatwierdzono polityki serwera <ph id="0" equiv="server" disp="name"/>.</target>
+      </segment>
+    </unit>
     <unit id="admin.approved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:238</note>
+        <note category="location">src/app/features/admin/admin-page.ts:310</note>
       </notes>
       <segment>
         <source>Approved the definition of <ph id="0" equiv="tool" disp="tool.name"/>.</source>
@@ -879,9 +1275,45 @@
         <target>Administracja</target>
       </segment>
     </unit>
-    <unit id="route.killSwitches">
+    <unit id="route.adminServers">
       <notes>
         <note category="location">src/app/features/admin/admin.routes.ts:15</note>
+      </notes>
+      <segment>
+        <source>Servers</source>
+        <target>Serwery</target>
+      </segment>
+    </unit>
+    <unit id="route.adminSystems">
+      <notes>
+        <note category="location">src/app/features/admin/admin.routes.ts:20</note>
+      </notes>
+      <segment>
+        <source>Systems</source>
+        <target>Systemy</target>
+      </segment>
+    </unit>
+    <unit id="route.scopeMapping">
+      <notes>
+        <note category="location">src/app/features/admin/admin.routes.ts:25</note>
+      </notes>
+      <segment>
+        <source>Scope mapping</source>
+        <target>Mapowanie zakresów</target>
+      </segment>
+    </unit>
+    <unit id="route.overrides">
+      <notes>
+        <note category="location">src/app/features/admin/admin.routes.ts:30</note>
+      </notes>
+      <segment>
+        <source>Overrides</source>
+        <target>Nadpisania</target>
+      </segment>
+    </unit>
+    <unit id="route.killSwitches">
+      <notes>
+        <note category="location">src/app/features/admin/admin.routes.ts:35</note>
       </notes>
       <segment>
         <source>Emergency switches</source>
@@ -1124,25 +1556,16 @@
     </unit>
     <unit id="killSwitches.title">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:1,4</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:1,5</note>
       </notes>
       <segment>
         <source>Emergency switches</source>
         <target>Wyłączniki awaryjne</target>
       </segment>
     </unit>
-    <unit id="killSwitches.back">
-      <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:4,7</note>
-      </notes>
-      <segment>
-        <source>Server registry</source>
-        <target>Rejestr serwerów</target>
-      </segment>
-    </unit>
     <unit id="killSwitches.resumeRefused">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:13,16</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:11,14</note>
       </notes>
       <segment>
         <source>The switch changed before you confirmed your identity (someone lifted it and switched it on again), so nothing was lifted. Check the new reason and lift it again.</source>
@@ -1151,7 +1574,7 @@
     </unit>
     <unit id="killSwitches.mfaResumed">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:21,24</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:19,22</note>
       </notes>
       <segment>
         <source>Identity confirmed. Lifting the switch you picked before the confirmation.</source>
@@ -1160,7 +1583,7 @@
     </unit>
     <unit id="killSwitches.lead">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:36,41</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:34,39</note>
       </notes>
       <segment>
         <source> A switch cuts off a server or one tool for everyone: within 5 seconds at the latest on every gateway instance. Approving a definition does not lift it, and neither does a restart. Switching off needs no identity confirmation; lifting does. </source>
@@ -1169,7 +1592,7 @@
     </unit>
     <unit id="killSwitches.active">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:42,44</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:40,42</note>
       </notes>
       <segment>
         <source>Active switches</source>
@@ -1178,7 +1601,7 @@
     </unit>
     <unit id="killSwitches.caption">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:46,48</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:44,46</note>
       </notes>
       <segment>
         <source> Emergency switches that are on </source>
@@ -1187,8 +1610,8 @@
     </unit>
     <unit id="killSwitches.colScope">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:50,51</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:64</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:48,49</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:62</note>
       </notes>
       <segment>
         <source>Scope</source>
@@ -1197,7 +1620,7 @@
     </unit>
     <unit id="killSwitches.colTarget">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:52,54</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:50,52</note>
       </notes>
       <segment>
         <source> What is switched off </source>
@@ -1206,8 +1629,8 @@
     </unit>
     <unit id="killSwitches.colSince">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:54,55</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:80</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:52,53</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:78</note>
       </notes>
       <segment>
         <source>Since</source>
@@ -1216,8 +1639,8 @@
     </unit>
     <unit id="killSwitches.colReason">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:55,56</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:92</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:53,54</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:90</note>
       </notes>
       <segment>
         <source>Reason</source>
@@ -1226,7 +1649,7 @@
     </unit>
     <unit id="killSwitches.colActions">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:57,59</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:55,57</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -1235,7 +1658,7 @@
     </unit>
     <unit id="killSwitches.colTargetLabel">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:71,72</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:69,70</note>
       </notes>
       <segment>
         <source>What is switched off</source>
@@ -1244,7 +1667,7 @@
     </unit>
     <unit id="killSwitches.by">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:84,85</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:82,83</note>
       </notes>
       <segment>
         <source>set by</source>
@@ -1253,7 +1676,7 @@
     </unit>
     <unit id="killSwitches.lift">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:104,105</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:102,103</note>
       </notes>
       <segment>
         <source>Lift</source>
@@ -1262,16 +1685,16 @@
     </unit>
     <unit id="killSwitches.none">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:114,117</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:111,115</note>
       </notes>
       <segment>
-        <source> No switch is on. </source>
+        <source>No switch is on.</source>
         <target> Żaden wyłącznik nie jest włączony. </target>
       </segment>
     </unit>
     <unit id="killSwitches.offHeading">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:121,123</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:117,119</note>
       </notes>
       <segment>
         <source> Switch off a server or tool </source>
@@ -1280,7 +1703,7 @@
     </unit>
     <unit id="killSwitches.server">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:125,127</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:121,123</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -1289,7 +1712,7 @@
     </unit>
     <unit id="killSwitches.serverPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:132,133</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:128,129</note>
       </notes>
       <segment>
         <source>Choose a server</source>
@@ -1298,7 +1721,7 @@
     </unit>
     <unit id="killSwitches.tool">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:139,141</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:135,137</note>
       </notes>
       <segment>
         <source>Tool</source>
@@ -1307,7 +1730,7 @@
     </unit>
     <unit id="killSwitches.wholeServer">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:147,148</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:143,144</note>
       </notes>
       <segment>
         <source>Whole server</source>
@@ -1316,7 +1739,7 @@
     </unit>
     <unit id="killSwitches.reason">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:154,156</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:150,152</note>
       </notes>
       <segment>
         <source>Reason</source>
@@ -1325,7 +1748,7 @@
     </unit>
     <unit id="killSwitches.reasonHint">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:167,169</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:163,165</note>
       </notes>
       <segment>
         <source>Administrators see it on this list; it does not go to the audit logs. Characters left:</source>
@@ -1334,7 +1757,7 @@
     </unit>
     <unit id="killSwitches.submit">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:181,183</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:177,179</note>
       </notes>
       <segment>
         <source> Switch off </source>
@@ -1343,7 +1766,7 @@
     </unit>
     <unit id="killSwitches.scopeServer">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:115</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:116</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -1352,7 +1775,7 @@
     </unit>
     <unit id="killSwitches.scopeTool">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:116</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:117</note>
       </notes>
       <segment>
         <source>Tool</source>
@@ -1361,7 +1784,7 @@
     </unit>
     <unit id="killSwitches.offTitle">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:182</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:183</note>
       </notes>
       <segment>
         <source>Switch off now?</source>
@@ -1370,7 +1793,7 @@
     </unit>
     <unit id="killSwitches.offMessage">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:183</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:184</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="target" disp="target"/> will stop being available to all users and agents, on every gateway instance within 5 seconds at the latest. Calls that have already started are not interrupted. Switching off needs no identity confirmation; lifting does.</source>
@@ -1379,7 +1802,7 @@
     </unit>
     <unit id="killSwitches.offConfirm">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:184</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:185</note>
       </notes>
       <segment>
         <source>Switch off</source>
@@ -1388,7 +1811,7 @@
     </unit>
     <unit id="killSwitches.offDone">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:200</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:201</note>
       </notes>
       <segment>
         <source>Switched off: <ph id="0" equiv="target" disp="target"/>.</source>
@@ -1397,7 +1820,7 @@
     </unit>
     <unit id="killSwitches.liftTitle">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:217</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:218</note>
       </notes>
       <segment>
         <source>Lift the switch?</source>
@@ -1406,7 +1829,7 @@
     </unit>
     <unit id="killSwitches.liftMessage">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:218</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:219</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="target" disp="target"/> will be available again to users who have entitlements to it. Lifting requires fresh identity confirmation (MFA).</source>
@@ -1415,7 +1838,7 @@
     </unit>
     <unit id="killSwitches.liftConfirm">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:219</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:220</note>
       </notes>
       <segment>
         <source>Lift switch</source>
@@ -1424,11 +1847,1805 @@
     </unit>
     <unit id="killSwitches.liftDone">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:241</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:242</note>
       </notes>
       <segment>
         <source>Lifted switch: <ph id="0" equiv="target" disp="target"/>.</source>
         <target>Zdjęto wyłącznik: <ph id="0" equiv="target" disp="target"/>.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.title">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:1,5</note>
+      </notes>
+      <segment>
+        <source>Overrides</source>
+        <target>Nadpisania</target>
+      </segment>
+    </unit>
+    <unit id="overrides.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:11,13</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form and save again.</source>
+        <target>Tożsamość potwierdzona. Sprawdź formularz i zapisz jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:17,19</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.lead">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:32,37</note>
+      </notes>
+      <segment>
+        <source> An override is one Cedar policy that only forbids. It is for an emergency: it applies to the gateway&apos;s decision on a call, to every server or to one server, and it is read by all instances within seconds. Adding one needs no second factor; removing one does. </source>
+        <target> Nadpisanie to jedna polityka Cedar, która tylko zakazuje. Służy do sytuacji awaryjnych: dotyczy decyzji gatewaya o wywołaniu, wszystkich serwerów albo jednego serwera i wszystkie instancje czytają je w ciągu kilku sekund. Dodanie nie wymaga drugiego składnika; usunięcie wymaga. </target>
+      </segment>
+    </unit>
+    <unit id="overrides.add">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:45,47</note>
+      </notes>
+      <segment>
+        <source> Add override </source>
+        <target> Dodaj nadpisanie </target>
+      </segment>
+    </unit>
+    <unit id="overrides.caption">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:52,54</note>
+      </notes>
+      <segment>
+        <source> Emergency overrides </source>
+        <target> Nadpisania awaryjne </target>
+      </segment>
+    </unit>
+    <unit id="overrides.colId">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:56,57</note>
+        <note category="location">src/app/features/admin/overrides-page.html:72,73</note>
+      </notes>
+      <segment>
+        <source>Identifier</source>
+        <target>Identyfikator</target>
+      </segment>
+    </unit>
+    <unit id="overrides.colTarget">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:57,58</note>
+        <note category="location">src/app/features/admin/overrides-page.html:77</note>
+      </notes>
+      <segment>
+        <source>Target</source>
+        <target>Cel</target>
+      </segment>
+    </unit>
+    <unit id="overrides.colPolicy">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:58,59</note>
+        <note category="location">src/app/features/admin/overrides-page.html:80</note>
+      </notes>
+      <segment>
+        <source>Policy</source>
+        <target>Polityka</target>
+      </segment>
+    </unit>
+    <unit id="overrides.colSet">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:60</note>
+        <note category="location">src/app/features/admin/overrides-page.html:83</note>
+      </notes>
+      <segment>
+        <source>Set</source>
+        <target>Ustawiono</target>
+      </segment>
+    </unit>
+    <unit id="overrides.colActions">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:61,63</note>
+      </notes>
+      <segment>
+        <source>Actions</source>
+        <target>Akcje</target>
+      </segment>
+    </unit>
+    <unit id="overrides.by">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:86,87</note>
+      </notes>
+      <segment>
+        <source>set by</source>
+        <target>ustawił</target>
+      </segment>
+    </unit>
+    <unit id="overrides.edit">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:98,99</note>
+      </notes>
+      <segment>
+        <source>Edit</source>
+        <target>Edytuj</target>
+      </segment>
+    </unit>
+    <unit id="overrides.remove">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:108,109</note>
+      </notes>
+      <segment>
+        <source>Remove</source>
+        <target>Usuń</target>
+      </segment>
+    </unit>
+    <unit id="overrides.none">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:117,120</note>
+      </notes>
+      <segment>
+        <source>No override is set.</source>
+        <target>Żadne nadpisanie nie jest ustawione.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.formAdd">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:126,127</note>
+      </notes>
+      <segment>
+        <source>Add override</source>
+        <target>Dodaj nadpisanie</target>
+      </segment>
+    </unit>
+    <unit id="overrides.formEdit">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:128,130</note>
+      </notes>
+      <segment>
+        <source>Edit override</source>
+        <target>Edytuj nadpisanie</target>
+      </segment>
+    </unit>
+    <unit id="overrides.name">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:133,134</note>
+      </notes>
+      <segment>
+        <source>Identifier</source>
+        <target>Identyfikator</target>
+      </segment>
+    </unit>
+    <unit id="overrides.target">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:158,160</note>
+      </notes>
+      <segment>
+        <source>Target</source>
+        <target>Cel</target>
+      </segment>
+    </unit>
+    <unit id="overrides.optGateway">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:166,167</note>
+      </notes>
+      <segment>
+        <source> Gateway (the decision on a call) </source>
+        <target> Gateway (decyzja o wywołaniu) </target>
+      </segment>
+    </unit>
+    <unit id="overrides.optAll">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:168,169</note>
+      </notes>
+      <segment>
+        <source>All servers</source>
+        <target>Wszystkie serwery</target>
+      </segment>
+    </unit>
+    <unit id="overrides.optServer">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:169,171</note>
+      </notes>
+      <segment>
+        <source>One server</source>
+        <target>Jeden serwer</target>
+      </segment>
+    </unit>
+    <unit id="overrides.server">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:174,176</note>
+      </notes>
+      <segment>
+        <source>Server</source>
+        <target>Serwer</target>
+      </segment>
+    </unit>
+    <unit id="overrides.serverPlaceholder">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:182,183</note>
+      </notes>
+      <segment>
+        <source>Choose a server</source>
+        <target>Wybierz serwer</target>
+      </segment>
+    </unit>
+    <unit id="overrides.text">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:193,195</note>
+      </notes>
+      <segment>
+        <source>Policy (Cedar, one forbid)</source>
+        <target>Polityka (Cedar, jedno forbid)</target>
+      </segment>
+    </unit>
+    <unit id="overrides.textHint">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:205,207</note>
+      </notes>
+      <segment>
+        <source> The @id annotation has to equal the identifier above. For the gateway the policy decides the call action on a tool; for a server it must not mention tools or the call action. </source>
+        <target> Adnotacja @id musi być równa identyfikatorowi powyżej. Dla gatewaya polityka rozstrzyga akcję call na narzędziu; dla serwera nie może wymieniać narzędzi ani akcji call. </target>
+      </segment>
+    </unit>
+    <unit id="overrides.template">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:220,221</note>
+      </notes>
+      <segment>
+        <source> Start from a template </source>
+        <target> Zacznij od szablonu </target>
+      </segment>
+    </unit>
+    <unit id="overrides.save">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:226,227</note>
+      </notes>
+      <segment>
+        <source> Save </source>
+        <target> Zapisz </target>
+      </segment>
+    </unit>
+    <unit id="overrides.cancel">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.html:235,236</note>
+      </notes>
+      <segment>
+        <source> Cancel </source>
+        <target> Anuluj </target>
+      </segment>
+    </unit>
+    <unit id="overrides.errName">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:120</note>
+      </notes>
+      <segment>
+        <source>Use lower case letters, digits and hyphens, starting with a letter or digit (up to 55 characters).</source>
+        <target>Użyj małych liter, cyfr i myślników, zaczynając od litery lub cyfry (do 55 znaków).</target>
+      </segment>
+    </unit>
+    <unit id="overrides.errServer">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:123</note>
+      </notes>
+      <segment>
+        <source>Choose a server.</source>
+        <target>Wybierz serwer.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.errText">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:126</note>
+      </notes>
+      <segment>
+        <source>Enter the policy.</source>
+        <target>Wpisz politykę.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.errTextLong">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:129</note>
+      </notes>
+      <segment>
+        <source>The policy is longer than <ph id="0" equiv="max" disp="OVERRIDE_TEXT_MAX"/> characters.</source>
+        <target>Polityka jest dłuższa niż <ph id="0" equiv="max" disp="OVERRIDE_TEXT_MAX"/> znaków.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.targetGateway">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:141</note>
+      </notes>
+      <segment>
+        <source>Gateway</source>
+        <target>Gateway</target>
+      </segment>
+    </unit>
+    <unit id="overrides.targetAll">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:143</note>
+      </notes>
+      <segment>
+        <source>All servers</source>
+        <target>Wszystkie serwery</target>
+      </segment>
+    </unit>
+    <unit id="overrides.saved">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:290</note>
+      </notes>
+      <segment>
+        <source>Saved the override <ph id="0" equiv="id" disp="id"/>.</source>
+        <target>Zapisano nadpisanie <ph id="0" equiv="id" disp="id"/>.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.added">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:291</note>
+      </notes>
+      <segment>
+        <source>Added the override <ph id="0" equiv="id" disp="id"/>. It takes effect within seconds.</source>
+        <target>Dodano nadpisanie <ph id="0" equiv="id" disp="id"/>. Zacznie działać w ciągu kilku sekund.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.removeTitle">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:327</note>
+      </notes>
+      <segment>
+        <source>Remove the override <ph id="0" equiv="id" disp="id"/>?</source>
+        <target>Usunąć nadpisanie <ph id="0" equiv="id" disp="id"/>?</target>
+      </segment>
+    </unit>
+    <unit id="overrides.removeMessage">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:328</note>
+      </notes>
+      <segment>
+        <source>What it forbids becomes possible again as soon as every instance has read the change. Removing needs a fresh MFA.</source>
+        <target>To, co zakazywało, znów będzie możliwe, gdy każda instancja przeczyta zmianę. Usunięcie wymaga świeżego MFA.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.removeConfirm">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:329</note>
+      </notes>
+      <segment>
+        <source>Remove override</source>
+        <target>Usuń nadpisanie</target>
+      </segment>
+    </unit>
+    <unit id="overrides.removed">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:343</note>
+      </notes>
+      <segment>
+        <source>Removed the override <ph id="0" equiv="id" disp="id"/>.</source>
+        <target>Usunięto nadpisanie <ph id="0" equiv="id" disp="id"/>.</target>
+      </segment>
+    </unit>
+    <unit id="policies.resumeRefused">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:11,14</note>
+      </notes>
+      <segment>
+        <source>The policies changed before you confirmed your identity, so nothing was approved. Check the differences and approve again.</source>
+        <target>Polityki zmieniły się, zanim potwierdziłeś tożsamość, więc nic nie zatwierdzono. Sprawdź różnice i zatwierdź jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="policies.changedMeanwhile">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:19,22</note>
+      </notes>
+      <segment>
+        <source>The policies changed since they were opened. Showing the current differences; check them and approve again.</source>
+        <target>Polityki zmieniły się od otwarcia widoku. Pokazano aktualne różnice; sprawdź je i zatwierdź jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="policies.serverWarningTitle">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:26,27</note>
+      </notes>
+      <segment>
+        <source>Source: server.</source>
+        <target>Źródło: serwer.</target>
+      </segment>
+    </unit>
+    <unit id="policies.serverWarning">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:28,31</note>
+      </notes>
+      <segment>
+        <source> A running server presented these policies, not the CI pipeline from a reviewed commit, and the version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. Read every policy and every declaration before you approve. </source>
+        <target> Te polityki przedstawił działający serwer, nie potok CI ze sprawdzonego commitu, a wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Przeczytaj każdą politykę i każdą deklarację przed zatwierdzeniem. </target>
+      </segment>
+    </unit>
+    <unit id="policies.ciSource">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:36,38</note>
+      </notes>
+      <segment>
+        <source>Source: CI pipeline (reviewed commit), version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</source>
+        <target>Źródło: potok CI (sprawdzony commit), wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</target>
+      </segment>
+    </unit>
+    <unit id="policies.first">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:43,45</note>
+      </notes>
+      <segment>
+        <source> First registration: nothing was approved before, and the tools of this server stay blocked until you approve. </source>
+        <target> Pierwsza rejestracja: nic nie zatwierdzono wcześniej, a narzędzia tego serwera pozostają zablokowane do zatwierdzenia. </target>
+      </segment>
+    </unit>
+    <unit id="policies.neutralised">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:49,52</note>
+      </notes>
+      <segment>
+        <source> The text contained hidden characters. They were replaced with markers of the form [U+XXXX]. </source>
+        <target> Tekst zawierał ukryte znaki. Zastąpiono je znacznikami w postaci [U+XXXX]. </target>
+      </segment>
+    </unit>
+    <unit id="policies.truncated">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:54,56</note>
+      </notes>
+      <segment>
+        <source> A very long text is cut in this view. The hash covers all of it, so approve only what you can review elsewhere. </source>
+        <target> Bardzo długi tekst jest w tym widoku ucięty. Skrót obejmuje całość, więc zatwierdzaj tylko to, co możesz sprawdzić gdzie indziej. </target>
+      </segment>
+    </unit>
+    <unit id="policies.typesTitle">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:59,60</note>
+      </notes>
+      <segment>
+        <source>Resource types</source>
+        <target>Typy zasobów</target>
+      </segment>
+    </unit>
+    <unit id="policies.typesSame">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:61,63</note>
+      </notes>
+      <segment>
+        <source>The declarations did not change.</source>
+        <target>Deklaracje się nie zmieniły.</target>
+      </segment>
+    </unit>
+    <unit id="policies.beforeNone">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:67,68</note>
+      </notes>
+      <segment>
+        <source>Before (none)</source>
+        <target>Przed (brak)</target>
+      </segment>
+    </unit>
+    <unit id="policies.typesBefore">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:69,71</note>
+      </notes>
+      <segment>
+        <source>Approved</source>
+        <target>Zatwierdzone</target>
+      </segment>
+    </unit>
+    <unit id="policies.removedLine">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:76,77</note>
+      </notes>
+      <segment>
+        <source>Removed: </source>
+        <target>Usunięto: </target>
+      </segment>
+    </unit>
+    <unit id="policies.nothingBefore">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:77,78</note>
+      </notes>
+      <segment>
+        <source>Nothing approved.</source>
+        <target>Nic nie zatwierdzono.</target>
+      </segment>
+    </unit>
+    <unit id="policies.after">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:82,83</note>
+      </notes>
+      <segment>
+        <source>Pending (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
+        <target>Oczekujące (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</target>
+      </segment>
+    </unit>
+    <unit id="policies.addedLine">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:89,90</note>
+      </notes>
+      <segment>
+        <source>Added: </source>
+        <target>Dodano: </target>
+      </segment>
+    </unit>
+    <unit id="policies.noTypes">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:90,91</note>
+      </notes>
+      <segment>
+        <source>No declarations.</source>
+        <target>Brak deklaracji.</target>
+      </segment>
+    </unit>
+    <unit id="policies.policiesTitle">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:94,95</note>
+      </notes>
+      <segment>
+        <source>Policies and schema</source>
+        <target>Polityki i schemat</target>
+      </segment>
+    </unit>
+    <unit id="policies.policiesSame">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:96,98</note>
+      </notes>
+      <segment>
+        <source>The policies did not change.</source>
+        <target>Polityki się nie zmieniły.</target>
+      </segment>
+    </unit>
+    <unit id="policies.beforeNone2">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:102,103</note>
+      </notes>
+      <segment>
+        <source>Before (none)</source>
+        <target>Przed (brak)</target>
+      </segment>
+    </unit>
+    <unit id="policies.polBefore">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:104,106</note>
+      </notes>
+      <segment>
+        <source>Approved</source>
+        <target>Zatwierdzone</target>
+      </segment>
+    </unit>
+    <unit id="policies.removedLine2">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:111,112</note>
+      </notes>
+      <segment>
+        <source>Removed: </source>
+        <target>Usunięto: </target>
+      </segment>
+    </unit>
+    <unit id="policies.nothingBefore2">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:112,113</note>
+      </notes>
+      <segment>
+        <source>Nothing approved.</source>
+        <target>Nic nie zatwierdzono.</target>
+      </segment>
+    </unit>
+    <unit id="policies.after2">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:117,118</note>
+      </notes>
+      <segment>
+        <source>Pending (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
+        <target>Oczekujące (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</target>
+      </segment>
+    </unit>
+    <unit id="policies.addedLine2">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:124,125</note>
+      </notes>
+      <segment>
+        <source>Added: </source>
+        <target>Dodano: </target>
+      </segment>
+    </unit>
+    <unit id="policies.approve">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:135,136</note>
+      </notes>
+      <segment>
+        <source>Approve policies</source>
+        <target>Zatwierdź polityki</target>
+      </segment>
+    </unit>
+    <unit id="policies.approveHint">
+      <notes>
+        <note category="location">src/app/features/admin/policy-diff-view.html:139,142</note>
+      </notes>
+      <segment>
+        <source> Not approving breaks nothing that works today: the tools of the server stay blocked. Needs a fresh MFA. </source>
+        <target> Brak zatwierdzenia niczego nie psuje: narzędzia serwera pozostają zablokowane. Wymaga świeżego MFA. </target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.title">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:1,5</note>
+      </notes>
+      <segment>
+        <source>Scope mapping</source>
+        <target>Mapowanie zakresów</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:11,14</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Your changes are back in the form; check them and save again.</source>
+        <target>Tożsamość potwierdzona. Twoje zmiany wróciły do formularza; sprawdź je i zapisz jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:18,21</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.reloaded">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:26,31</note>
+      </notes>
+      <segment>
+        <source> The current mapping is shown below; your edits were not kept. </source>
+        <target> Poniżej aktualne mapowanie; Twoje zmiany nie zostały zachowane. </target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.lead">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:38,44</note>
+      </notes>
+      <segment>
+        <source> A group grants the resource scopes listed next to it to everyone who is in it. A scope is <pc id="0" equivStart="START_TAG_CODE" equivEnd="CLOSE_TAG_CODE" type="other" dispStart="&lt;code&gt;" dispEnd="&lt;/code&gt;">&lt;Namespace&gt;::&lt;Type&gt;/&lt;id&gt;</pc>; the type has to be declared by a registered server and the part after the slash has to match its scope pattern. The whole document is saved at once. </source>
+        <target> Grupa nadaje zakresy zasobów wypisane obok niej każdemu, kto do niej należy. Zakres to <pc id="0" equivStart="START_TAG_CODE" equivEnd="CLOSE_TAG_CODE" type="other" dispStart="&lt;code&gt;" dispEnd="&lt;/code&gt;">&lt;Namespace&gt;::&lt;Type&gt;/&lt;id&gt;</pc>; typ musi być zadeklarowany przez zarejestrowany serwer, a część po ukośniku musi pasować do jego wzorca zakresu. Cały dokument zapisuje się naraz. </target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.groupsLabel">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:46</note>
+      </notes>
+      <segment>
+        <source>Groups</source>
+        <target>Grupy</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.group">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:52,54</note>
+      </notes>
+      <segment>
+        <source>Group</source>
+        <target>Grupa</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.scopes">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:69,71</note>
+      </notes>
+      <segment>
+        <source>Scopes (one per line)</source>
+        <target>Zakresy (jeden w wierszu)</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.removeRow">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:86,87</note>
+      </notes>
+      <segment>
+        <source>Remove</source>
+        <target>Usuń</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.none">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:94,97</note>
+      </notes>
+      <segment>
+        <source>No group is mapped to a scope.</source>
+        <target>Żadna grupa nie ma przypisanego zakresu.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.add">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:99,101</note>
+      </notes>
+      <segment>
+        <source> Add group </source>
+        <target> Dodaj grupę </target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.save">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:107,109</note>
+      </notes>
+      <segment>
+        <source> Save mapping </source>
+        <target> Zapisz mapowanie </target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.discard">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:117,119</note>
+      </notes>
+      <segment>
+        <source> Discard changes </source>
+        <target> Odrzuć zmiany </target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.mfaHint">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:122,127</note>
+      </notes>
+      <segment>
+        <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back with your edits. </source>
+        <target> Zapis wymaga świeżego MFA. Jeśli jest potrzebne, przechodzisz do dostawcy tożsamości i wracasz ze swoimi zmianami. </target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.errGroup">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:61</note>
+      </notes>
+      <segment>
+        <source>A group name starts with mcp- and uses letters, digits, dots, underscores and hyphens.</source>
+        <target>Nazwa grupy zaczyna się od mcp- i składa się z liter, cyfr, kropek, podkreślników i myślników.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.errDuplicate">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:63</note>
+      </notes>
+      <segment>
+        <source>This group appears twice.</source>
+        <target>Ta grupa występuje dwa razy.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.errNoScopes">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:67</note>
+      </notes>
+      <segment>
+        <source>Enter at least one scope, for example Type::Name/id.</source>
+        <target>Wpisz co najmniej jeden zakres, na przykład Typ::Nazwa/id.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.errScope">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:72</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="scope" disp="bad"/> is not a scope id. Use &lt;Namespace&gt;::&lt;Type&gt;/&lt;id&gt;, ASCII only.</source>
+        <target><ph id="0" equiv="scope" disp="bad"/> nie jest identyfikatorem zakresu. Użyj &lt;Przestrzeń&gt;::&lt;Typ&gt;/&lt;id&gt;, tylko ASCII.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.saved">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:238</note>
+      </notes>
+      <segment>
+        <source>Saved the scope mapping. Servers pick it up within seconds.</source>
+        <target>Zapisano mapowanie zakresów. Serwery pobiorą je w ciągu kilku sekund.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.title">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:1,5</note>
+      </notes>
+      <segment>
+        <source>Servers</source>
+        <target>Serwery</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:11,13</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form and save again.</source>
+        <target>Tożsamość potwierdzona. Sprawdź formularz i zapisz jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:17,20</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.lead">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:32,37</note>
+      </notes>
+      <segment>
+        <source> The servers the gateway routes to. A server added here has no tools until its manifest is approved on the Approvals screen; removing one takes its tools away and refuses its calls. No restart is needed for either. </source>
+        <target> Serwery, do których gateway kieruje ruch. Dodany tutaj serwer nie ma narzędzi, dopóki jego manifest nie zostanie zatwierdzony w widoku Zatwierdzenia; usunięcie zabiera mu narzędzia i odrzuca jego wywołania. Żadna z tych zmian nie wymaga restartu. </target>
+      </segment>
+    </unit>
+    <unit id="adminServers.add">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:45,49</note>
+      </notes>
+      <segment>
+        <source> Add server </source>
+        <target> Dodaj serwer </target>
+      </segment>
+    </unit>
+    <unit id="adminServers.caption">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:52,54</note>
+      </notes>
+      <segment>
+        <source> Servers of the gateway </source>
+        <target> Serwery gatewaya </target>
+      </segment>
+    </unit>
+    <unit id="adminServers.colServer">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:56,57</note>
+        <note category="location">src/app/features/admin/servers-page.html:73</note>
+      </notes>
+      <segment>
+        <source>Server</source>
+        <target>Serwer</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.colAddress">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:57,58</note>
+        <note category="location">src/app/features/admin/servers-page.html:82</note>
+      </notes>
+      <segment>
+        <source>Address</source>
+        <target>Adres</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.colCredential">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:58,59</note>
+        <note category="location">src/app/features/admin/servers-page.html:86</note>
+      </notes>
+      <segment>
+        <source>Credential</source>
+        <target>Poświadczenie</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.colState">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:59,60</note>
+        <note category="location">src/app/features/admin/servers-page.html:90</note>
+      </notes>
+      <segment>
+        <source>State</source>
+        <target>Stan</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.colActions">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:61,64</note>
+      </notes>
+      <segment>
+        <source>Actions</source>
+        <target>Akcje</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.enabled">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:92,94</note>
+      </notes>
+      <segment>
+        <source>Enabled</source>
+        <target>Włączony</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.disabled">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:94,96</note>
+      </notes>
+      <segment>
+        <source>Disabled</source>
+        <target>Wyłączony</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.adapter">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:97,99</note>
+      </notes>
+      <segment>
+        <source>Adapter</source>
+        <target>Adapter</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.edit">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:108,109</note>
+      </notes>
+      <segment>
+        <source>Edit</source>
+        <target>Edytuj</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.disable">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:119,120</note>
+      </notes>
+      <segment>
+        <source>Disable</source>
+        <target>Wyłącz</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.remove">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:130,131</note>
+      </notes>
+      <segment>
+        <source>Remove</source>
+        <target>Usuń</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.none">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:139,142</note>
+      </notes>
+      <segment>
+        <source>The registry has no servers.</source>
+        <target>Rejestr nie ma serwerów.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.formAdd">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:148,150</note>
+      </notes>
+      <segment>
+        <source>Add server</source>
+        <target>Dodaj serwer</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.formEdit">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:150,152</note>
+      </notes>
+      <segment>
+        <source>Edit server</source>
+        <target>Edytuj serwer</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.system">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:155,156</note>
+      </notes>
+      <segment>
+        <source>System</source>
+        <target>System</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.serverIdIs">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:174,175</note>
+      </notes>
+      <segment>
+        <source>Server identifier:</source>
+        <target>Identyfikator serwera:</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.url">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:188,190</note>
+      </notes>
+      <segment>
+        <source>Internal address of the MCP endpoint</source>
+        <target>Wewnętrzny adres punktu końcowego MCP</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.pinned">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:192,194</note>
+      </notes>
+      <segment>
+        <source>The gateway accepts only a certificate for</source>
+        <target>Gateway przyjmie tylko certyfikat dla</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.accepted">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:210,211</note>
+      </notes>
+      <segment>
+        <source>Accepted credential types</source>
+        <target>Przyjmowane typy poświadczeń</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.typeInUse">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:229,231</note>
+      </notes>
+      <segment>
+        <source>Type in use</source>
+        <target>Używany typ</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.options">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:246,247</note>
+      </notes>
+      <segment>
+        <source>Options</source>
+        <target>Opcje</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.required">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:254,256</note>
+      </notes>
+      <segment>
+        <source>The server needs a credential of the user</source>
+        <target>Serwer wymaga poświadczenia użytkownika</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.enabledLabel">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:263,265</note>
+      </notes>
+      <segment>
+        <source>Enabled</source>
+        <target>Włączony</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.adapterLabel">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:274,276</note>
+      </notes>
+      <segment>
+        <source>Served through an adapter (cannot be changed later)</source>
+        <target>Obsługiwany przez adapter (nie można tego później zmienić)</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.adapterFixed">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:278,281</note>
+      </notes>
+      <segment>
+        <source>Served through an adapter.</source>
+        <target>Obsługiwany przez adapter.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.mfaHint">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:282,285</note>
+      </notes>
+      <segment>
+        <source> Saving needs a fresh MFA, except for disabling a server. If it is needed, you go to the identity provider and come back to this form. </source>
+        <target> Zapis wymaga świeżego MFA, poza wyłączeniem serwera. Jeśli jest potrzebne, przechodzisz do dostawcy tożsamości i wracasz do tego formularza. </target>
+      </segment>
+    </unit>
+    <unit id="adminServers.save">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:287,289</note>
+      </notes>
+      <segment>
+        <source> Save </source>
+        <target> Zapisz </target>
+      </segment>
+    </unit>
+    <unit id="adminServers.cancel">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:296,298</note>
+      </notes>
+      <segment>
+        <source> Cancel </source>
+        <target> Anuluj </target>
+      </segment>
+    </unit>
+    <unit id="adminServers.errSystem">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:156</note>
+      </notes>
+      <segment>
+        <source>Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.</source>
+        <target>Użyj od 2 do 31 małych liter i cyfr, zaczynając od litery. Identyfikatory gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal i ci są zarezerwowane.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.errUrl">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:160</note>
+      </notes>
+      <segment>
+        <source>Enter an https address, for example https://mcp-notes.internal:8443/mcp.</source>
+        <target>Wpisz adres https, na przykład https://mcp-notes.internal:8443/mcp.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.errAccepted">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:164</note>
+      </notes>
+      <segment>
+        <source>Choose at least one credential type.</source>
+        <target>Wybierz co najmniej jeden typ poświadczenia.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.errType">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:167</note>
+      </notes>
+      <segment>
+        <source>The type in use has to be one of the accepted types.</source>
+        <target>Używany typ musi być jednym z przyjmowanych.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.errMixed">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:173</note>
+      </notes>
+      <segment>
+        <source>A service account cannot be combined with a user credential type.</source>
+        <target>Konta serwisowego nie można łączyć z typem poświadczenia użytkownika.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.added">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:348</note>
+      </notes>
+      <segment>
+        <source>Added the server <ph id="0" equiv="server" disp="body.serverId"/>. It has no tools until its manifest is approved.</source>
+        <target>Dodano serwer <ph id="0" equiv="server" disp="body.serverId"/>. Nie ma narzędzi, dopóki jego manifest nie zostanie zatwierdzony.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.noChange">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:353</note>
+      </notes>
+      <segment>
+        <source>Nothing changed.</source>
+        <target>Nic się nie zmieniło.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.saved">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:365</note>
+      </notes>
+      <segment>
+        <source>Saved the settings of <ph id="0" equiv="server" disp="current.original.serverId"/>.</source>
+        <target>Zapisano ustawienia serwera <ph id="0" equiv="server" disp="current.original.serverId"/>.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.disabledDone">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:408</note>
+      </notes>
+      <segment>
+        <source>Disabled the server <ph id="0" equiv="server" disp="id"/>. Its tools are out of service.</source>
+        <target>Wyłączono serwer <ph id="0" equiv="server" disp="id"/>. Jego narzędzia są wyłączone z użycia.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.removeTitle">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:434</note>
+      </notes>
+      <segment>
+        <source>Remove the server <ph id="0" equiv="server" disp="id"/>?</source>
+        <target>Usunąć serwer <ph id="0" equiv="server" disp="id"/>?</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.removeMessage">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:435</note>
+      </notes>
+      <segment>
+        <source>Its tools disappear from the catalog and tools/list, calls to it are refused, and the scope mapping entries of its resource types are removed. The system and the users&apos; connections stay. Removing needs a fresh MFA.</source>
+        <target>Jego narzędzia znikną z katalogu i z tools/list, wywołania do niego będą odrzucane, a wpisy mapowania zakresów jego typów zasobów zostaną usunięte. System i połączenia użytkowników zostają. Usunięcie wymaga świeżego MFA.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.removeConfirm">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:436</note>
+      </notes>
+      <segment>
+        <source>Remove server</source>
+        <target>Usuń serwer</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.removed">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:449</note>
+      </notes>
+      <segment>
+        <source>Removed the server <ph id="0" equiv="server" disp="id"/>.</source>
+        <target>Usunięto serwer <ph id="0" equiv="server" disp="id"/>.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.title">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:1,5</note>
+      </notes>
+      <segment>
+        <source>Systems</source>
+        <target>Systemy</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:11,13</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form, enter the client secret again and save.</source>
+        <target>Tożsamość potwierdzona. Sprawdź formularz, wpisz ponownie sekret klienta i zapisz.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:17,20</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.lead">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:32,36</note>
+      </notes>
+      <segment>
+        <source> The systems that users connect to and that the servers reach through the credential broker. The client secret of a system is stored in the broker&apos;s secret store and is never shown again. </source>
+        <target> Systemy, z którymi łączą się użytkownicy i do których serwery docierają przez broker poświadczeń. Sekret klienta systemu jest przechowywany w magazynie sekretów brokera i nigdy nie jest pokazywany ponownie. </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.add">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:44,48</note>
+      </notes>
+      <segment>
+        <source> Add system </source>
+        <target> Dodaj system </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.caption">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:51,53</note>
+      </notes>
+      <segment>
+        <source> Systems of the credential broker </source>
+        <target> Systemy brokera poświadczeń </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.colSystem">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:55,56</note>
+        <note category="location">src/app/features/admin/systems-page.html:72</note>
+      </notes>
+      <segment>
+        <source>System</source>
+        <target>System</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.colAddress">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:56,57</note>
+        <note category="location">src/app/features/admin/systems-page.html:80,81</note>
+      </notes>
+      <segment>
+        <source>Base address</source>
+        <target>Adres bazowy</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.colAdapter">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:57,58</note>
+        <note category="location">src/app/features/admin/systems-page.html:85</note>
+      </notes>
+      <segment>
+        <source>Adapter</source>
+        <target>Adapter</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.colTypes">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:58,59</note>
+        <note category="location">src/app/features/admin/systems-page.html:91</note>
+      </notes>
+      <segment>
+        <source>Credential types</source>
+        <target>Typy poświadczeń</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.colActions">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:60,63</note>
+      </notes>
+      <segment>
+        <source>Actions</source>
+        <target>Akcje</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.default">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:94,95</note>
+      </notes>
+      <segment>
+        <source>default</source>
+        <target>domyślny</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.edit">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:109,110</note>
+      </notes>
+      <segment>
+        <source>Edit</source>
+        <target>Edytuj</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.remove">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:119,120</note>
+      </notes>
+      <segment>
+        <source>Remove</source>
+        <target>Usuń</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.none">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:128,131</note>
+      </notes>
+      <segment>
+        <source>The broker has no systems.</source>
+        <target>Broker nie ma systemów.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.formAdd">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:137,139</note>
+      </notes>
+      <segment>
+        <source>Add system</source>
+        <target>Dodaj system</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.formEdit">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:139,141</note>
+      </notes>
+      <segment>
+        <source>Edit system</source>
+        <target>Edytuj system</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.invalidates">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:145,148</note>
+      </notes>
+      <segment>
+        <source>A change of the base address, the authorization or token address, the client identifier or the revoke address deletes the connections of all users to this system when you save. They are asked to connect again; nothing is sent to the system. Changed now:</source>
+        <target>Zmiana adresu bazowego, adresu autoryzacji lub tokenu, identyfikatora klienta albo adresu unieważniania usuwa przy zapisie połączenia wszystkich użytkowników z tym systemem. Zostaną poproszeni o ponowne połączenie; do systemu nic nie jest wysyłane. Zmieniono teraz:</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.id">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:155,156</note>
+      </notes>
+      <segment>
+        <source>System identifier</source>
+        <target>Identyfikator systemu</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.adapter">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:176,178</note>
+      </notes>
+      <segment>
+        <source>Adapter</source>
+        <target>Adapter</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.base">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:189,191</note>
+      </notes>
+      <segment>
+        <source>Base address</source>
+        <target>Adres bazowy</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.product">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:205,207</note>
+      </notes>
+      <segment>
+        <source>Product</source>
+        <target>Produkt</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.productPlaceholder">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:213,214</note>
+      </notes>
+      <segment>
+        <source>Choose a product</source>
+        <target>Wybierz produkt</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.types">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:223,224</note>
+      </notes>
+      <segment>
+        <source>Supported credential types</source>
+        <target>Obsługiwane typy poświadczeń</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.defaultType">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:242,244</note>
+      </notes>
+      <segment>
+        <source>Default type</source>
+        <target>Typ domyślny</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.secretScheme">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:260,263</note>
+      </notes>
+      <segment>
+        <source>Scheme of the secret handed to the gateway</source>
+        <target>Schemat sekretu przekazywanego gatewayowi</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.userScheme">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:276,278</note>
+      </notes>
+      <segment>
+        <source>Scheme of the user&apos;s token</source>
+        <target>Schemat tokenu użytkownika</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.userSchemeDefault">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:284,285</note>
+      </notes>
+      <segment>
+        <source>As the scheme above</source>
+        <target>Jak schemat powyżej</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.userSchemeHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:290,292</note>
+      </notes>
+      <segment>
+        <source> Basic makes the connection form ask for a login next to the token. </source>
+        <target> Basic sprawia, że formularz połączenia prosi o login obok tokenu. </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.audience">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:297,299</note>
+      </notes>
+      <segment>
+        <source>Audience of the exchanged token</source>
+        <target>Odbiorca (audience) wymienianego tokenu</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.revoke">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:314,316</note>
+      </notes>
+      <segment>
+        <source>Revoke address (optional)</source>
+        <target>Adres unieważniania (opcjonalny)</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.timeout">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:329,331</note>
+      </notes>
+      <segment>
+        <source>Timeout of calls (optional)</source>
+        <target>Limit czasu wywołań (opcjonalny)</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.oauth">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:345,346</note>
+      </notes>
+      <segment>
+        <source>OAuth client</source>
+        <target>Klient OAuth</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.clientId">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:347,349</note>
+      </notes>
+      <segment>
+        <source>Client identifier</source>
+        <target>Identyfikator klienta</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.clientSecret">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:362,364</note>
+      </notes>
+      <segment>
+        <source>Client secret</source>
+        <target>Sekret klienta</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.secretNeeded">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:377,379</note>
+      </notes>
+      <segment>
+        <source>Required now. The secret is stored in the broker and never shown again.</source>
+        <target>Wymagany teraz. Sekret trafia do brokera i nigdy nie jest pokazywany ponownie.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.secretKept">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:382,384</note>
+      </notes>
+      <segment>
+        <source>A secret is stored. Leave this empty to keep it.</source>
+        <target>Sekret jest zapisany. Zostaw puste, żeby go zachować.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.authorize">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:393,395</note>
+      </notes>
+      <segment>
+        <source>Authorization address</source>
+        <target>Adres autoryzacji</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.tokenUrl">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:411,413</note>
+      </notes>
+      <segment>
+        <source>Token address</source>
+        <target>Adres tokenu</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.scopes">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:428,430</note>
+      </notes>
+      <segment>
+        <source>OAuth scopes (separated by spaces)</source>
+        <target>Zakresy OAuth (oddzielone spacjami)</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.mfaHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:445,448</note>
+      </notes>
+      <segment>
+        <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this form; the client secret is not kept on the way, so you enter it again. </source>
+        <target> Zapis wymaga świeżego MFA. Jeśli jest potrzebne, przechodzisz do dostawcy tożsamości i wracasz do tego formularza; sekret klienta nie jest po drodze zachowywany, więc wpisujesz go ponownie. </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.save">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:450,452</note>
+      </notes>
+      <segment>
+        <source> Save </source>
+        <target> Zapisz </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.cancel">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:459,461</note>
+      </notes>
+      <segment>
+        <source> Cancel </source>
+        <target> Anuluj </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errUrl">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:234</note>
+      </notes>
+      <segment>
+        <source>Enter an https address.</source>
+        <target>Wpisz adres https.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errSystem">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:237</note>
+      </notes>
+      <segment>
+        <source>Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.</source>
+        <target>Użyj od 2 do 31 małych liter i cyfr, zaczynając od litery. Identyfikatory gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal i ci są zarezerwowane.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errProduct">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:246</note>
+      </notes>
+      <segment>
+        <source>Choose Jira or Confluence.</source>
+        <target>Wybierz Jira albo Confluence.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errTimeout">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:250</note>
+      </notes>
+      <segment>
+        <source>Use an ISO 8601 duration of at most 10 minutes, for example PT30S.</source>
+        <target>Użyj czasu trwania ISO 8601 do 10 minut, na przykład PT30S.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errTypes">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:254</note>
+      </notes>
+      <segment>
+        <source>Choose at least one credential type.</source>
+        <target>Wybierz co najmniej jeden typ poświadczenia.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errDefault">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:257</note>
+      </notes>
+      <segment>
+        <source>The default type has to be one of the supported types.</source>
+        <target>Typ domyślny musi być jednym z obsługiwanych typów.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errMixed">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:263</note>
+      </notes>
+      <segment>
+        <source>A service account cannot be combined with a user credential type.</source>
+        <target>Konta serwisowego nie można łączyć z typem poświadczenia użytkownika.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errAudience">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:267</note>
+      </notes>
+      <segment>
+        <source>A token exchange system needs the audience of the token.</source>
+        <target>System z wymianą tokenu wymaga odbiorcy (audience) tokenu.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errClientId">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:271</note>
+      </notes>
+      <segment>
+        <source>Enter the client identifier.</source>
+        <target>Wpisz identyfikator klienta.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errSecretAgain">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:275</note>
+      </notes>
+      <segment>
+        <source>Enter the client secret again: an address or the client identifier changed.</source>
+        <target>Wpisz sekret klienta ponownie: zmienił się adres albo identyfikator klienta.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errSecret">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:276</note>
+      </notes>
+      <segment>
+        <source>Enter the client secret.</source>
+        <target>Wpisz sekret klienta.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errScopes">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:289</note>
+      </notes>
+      <segment>
+        <source>A scope cannot contain spaces.</source>
+        <target>Zakres nie może zawierać spacji.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.secretSet">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:305</note>
+      </notes>
+      <segment>
+        <source>Client secret stored</source>
+        <target>Sekret klienta zapisany</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.secretMissing">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:306</note>
+      </notes>
+      <segment>
+        <source>No client secret</source>
+        <target>Brak sekretu klienta</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.savedInvalidated">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:476</note>
+      </notes>
+      <segment>
+        <source>Saved the system <ph id="0" equiv="system" disp="id"/>. The connections of its users were deleted; they connect again.</source>
+        <target>Zapisano system <ph id="0" equiv="system" disp="id"/>. Połączenia jego użytkowników usunięto; łączą się ponownie.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.saved">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:477</note>
+      </notes>
+      <segment>
+        <source>Saved the system <ph id="0" equiv="system" disp="id"/>.</source>
+        <target>Zapisano system <ph id="0" equiv="system" disp="id"/>.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.added">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:478</note>
+      </notes>
+      <segment>
+        <source>Added the system <ph id="0" equiv="system" disp="id"/>.</source>
+        <target>Dodano system <ph id="0" equiv="system" disp="id"/>.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.removeTitle">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:516</note>
+      </notes>
+      <segment>
+        <source>Remove the system <ph id="0" equiv="system" disp="id"/>?</source>
+        <target>Usunąć system <ph id="0" equiv="system" disp="id"/>?</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.removeMessage">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:517</note>
+      </notes>
+      <segment>
+        <source>The broker deletes the settings, the client secret and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.</source>
+        <target>Broker usuwa ustawienia, sekret klienta i połączenia wszystkich użytkowników z tym systemem. Do samego systemu nic nie jest wysyłane. Usunięcie wymaga świeżego MFA.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.removeConfirm">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:518</note>
+      </notes>
+      <segment>
+        <source>Remove system</source>
+        <target>Usuń system</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.removed">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:532</note>
+      </notes>
+      <segment>
+        <source>Removed the system <ph id="0" equiv="system" disp="id"/>.</source>
+        <target>Usunięto system <ph id="0" equiv="system" disp="id"/>.</target>
       </segment>
     </unit>
     <unit id="admin.resumeRefused">
@@ -3094,121 +5311,31 @@
         <target> Sprawdź i zapisz </target>
       </segment>
     </unit>
-    <unit id="token.jira.1">
+    <unit id="token.generic.1">
+      <notes>
+        <note category="location">src/app/features/connect/token-instructions.ts:7</note>
+      </notes>
+      <segment>
+        <source>In <ph id="0" equiv="system" disp="systemName"/>, open your profile or account settings and find personal access tokens (or API tokens).</source>
+        <target>W systemie <ph id="0" equiv="system" disp="systemName"/> otwórz ustawienia profilu lub konta i znajdź osobiste tokeny dostępu (albo tokeny API).</target>
+      </segment>
+    </unit>
+    <unit id="token.generic.2">
+      <notes>
+        <note category="location">src/app/features/connect/token-instructions.ts:8</note>
+      </notes>
+      <segment>
+        <source>Create a token with a name that points to the MCP portal and an expiry date. Grant only the permissions the tools need, read access first.</source>
+        <target>Utwórz token z nazwą wskazującą na portal MCP i datą wygaśnięcia. Nadaj tylko uprawnienia potrzebne narzędziom, najpierw odczyt.</target>
+      </segment>
+    </unit>
+    <unit id="token.generic.3">
       <notes>
         <note category="location">src/app/features/connect/token-instructions.ts:9</note>
       </notes>
       <segment>
-        <source>In Jira, open the profile menu and choose Profile, then Personal Access Tokens.</source>
-        <target>W Jirze otwórz menu profilu i wybierz Profil, a potem Tokeny dostępu osobistego.</target>
-      </segment>
-    </unit>
-    <unit id="token.jira.2">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:10</note>
-      </notes>
-      <segment>
-        <source>Choose Create token, give it a name that points to the MCP portal and enable automatic expiry.</source>
-        <target>Wybierz Utwórz token, nadaj mu nazwę wskazującą na Portal MCP i zaznacz automatyczne wygasanie.</target>
-      </segment>
-    </unit>
-    <unit id="token.jira.3">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:11</note>
-      </notes>
-      <segment>
-        <source>Set the shortest expiry that works for you. The token acts with your permissions in Jira; the portal does not extend them.</source>
-        <target>Ustaw najkrótszy termin ważności, który Ci wystarczy. Token działa z Twoimi uprawnieniami w Jirze, portal ich nie rozszerza.</target>
-      </segment>
-    </unit>
-    <unit id="token.confluence.1">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:14</note>
-      </notes>
-      <segment>
-        <source>In Confluence, open the profile menu and choose Settings, then Personal Access Tokens.</source>
-        <target>W Confluence otwórz menu profilu i wybierz Ustawienia, a potem Tokeny dostępu osobistego.</target>
-      </segment>
-    </unit>
-    <unit id="token.confluence.2">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:15</note>
-      </notes>
-      <segment>
-        <source>Choose Create token, give it a name that points to the MCP portal and enable automatic expiry.</source>
-        <target>Wybierz Utwórz token, nadaj mu nazwę wskazującą na Portal MCP i zaznacz automatyczne wygasanie.</target>
-      </segment>
-    </unit>
-    <unit id="token.confluence.3">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:16</note>
-      </notes>
-      <segment>
-        <source>Set the shortest expiry that works for you. The token acts with your permissions in Confluence.</source>
-        <target>Ustaw najkrótszy termin ważności, który Ci wystarczy. Token działa z Twoimi uprawnieniami w Confluence.</target>
-      </segment>
-    </unit>
-    <unit id="token.gitlab.1">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:19</note>
-      </notes>
-      <segment>
-        <source>In GitLab, open User preferences, then Access tokens.</source>
-        <target>W GitLabie otwórz Preferencje użytkownika, a potem Tokeny dostępu.</target>
-      </segment>
-    </unit>
-    <unit id="token.gitlab.2">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:20</note>
-      </notes>
-      <segment>
-        <source>Add a new token with an expiry date. Select only the read_api scope, unless you need tools that change data; then use api.</source>
-        <target>Dodaj nowy token z datą wygaśnięcia. Zaznacz tylko zakres read_api, chyba że potrzebujesz narzędzi zmieniających dane; wtedy api.</target>
-      </segment>
-    </unit>
-    <unit id="token.gitlab.3">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:21</note>
-      </notes>
-      <segment>
-        <source>Do not select the sudo, admin_mode or write_repository scopes: MCP tools do not use them.</source>
-        <target>Nie zaznaczaj zakresów sudo, admin_mode ani write_repository: narzędzia MCP ich nie używają.</target>
-      </segment>
-    </unit>
-    <unit id="token.servicedesk.1">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:24</note>
-      </notes>
-      <segment>
-        <source>In the service desk, create a personal API token in your profile settings.</source>
-        <target>W service desku utwórz osobisty token API w ustawieniach swojego profilu.</target>
-      </segment>
-    </unit>
-    <unit id="token.servicedesk.2">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:25</note>
-      </notes>
-      <segment>
-        <source>If the system lets you choose token permissions, limit them to the tickets you work with and set an expiry date.</source>
-        <target>Jeśli system pozwala wybrać uprawnienia tokenu, ogranicz je do zgłoszeń, z którymi pracujesz, i ustaw datę wygaśnięcia.</target>
-      </segment>
-    </unit>
-    <unit id="token.opensearch.1">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:28</note>
-      </notes>
-      <segment>
-        <source>In OpenSearch Dashboards, create an API token tied to your account.</source>
-        <target>W OpenSearch Dashboards utwórz token API powiązany ze swoim kontem.</target>
-      </segment>
-    </unit>
-    <unit id="token.opensearch.2">
-      <notes>
-        <note category="location">src/app/features/connect/token-instructions.ts:29</note>
-      </notes>
-      <segment>
-        <source>Limit it to read access to the indexes you need and set an expiry date.</source>
-        <target>Ogranicz go do odczytu potrzebnych indeksów i ustaw datę wygaśnięcia.</target>
+        <source>Set the shortest expiry that works for you. The token acts with your permissions in <ph id="0" equiv="system" disp="systemName"/>; the portal does not extend them.</source>
+        <target>Ustaw najkrótszy termin ważności, który Ci odpowiada. Token działa z Twoimi uprawnieniami w systemie <ph id="0" equiv="system" disp="systemName"/>; portal ich nie rozszerza.</target>
       </segment>
     </unit>
     <unit id="connections.title">
@@ -3220,9 +5347,18 @@
         <target>Połączenia z systemami</target>
       </segment>
     </unit>
+    <unit id="connections.invalidated">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.html:17,19</note>
+      </notes>
+      <segment>
+        <source>An administrator changed the settings of the system, so the stored connection was deleted. Connect the account again: <ph id="0" equiv="INTERPOLATION" disp="{{ names }}"/>.</source>
+        <target>Administrator zmienił ustawienia systemu, więc zapisane połączenie usunięto. Połącz konto ponownie: <ph id="0" equiv="INTERPOLATION" disp="{{ names }}"/>.</target>
+      </segment>
+    </unit>
     <unit id="connections.caption">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:22,24</note>
+        <note category="location">src/app/features/connections/connections-page.html:31,33</note>
       </notes>
       <segment>
         <source> System connections </source>
@@ -3231,8 +5367,8 @@
     </unit>
     <unit id="connections.colSystem">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:26,27</note>
-        <note category="location">src/app/features/connections/connections-page.html:43</note>
+        <note category="location">src/app/features/connections/connections-page.html:35,36</note>
+        <note category="location">src/app/features/connections/connections-page.html:52</note>
       </notes>
       <segment>
         <source>System</source>
@@ -3241,8 +5377,8 @@
     </unit>
     <unit id="connections.colType">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:27,28</note>
-        <note category="location">src/app/features/connections/connections-page.html:47</note>
+        <note category="location">src/app/features/connections/connections-page.html:36,37</note>
+        <note category="location">src/app/features/connections/connections-page.html:56</note>
       </notes>
       <segment>
         <source>Type</source>
@@ -3251,8 +5387,8 @@
     </unit>
     <unit id="connections.colAccount">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:28,29</note>
-        <note category="location">src/app/features/connections/connections-page.html:53,54</note>
+        <note category="location">src/app/features/connections/connections-page.html:37,38</note>
+        <note category="location">src/app/features/connections/connections-page.html:62,63</note>
       </notes>
       <segment>
         <source>Account in system</source>
@@ -3261,8 +5397,8 @@
     </unit>
     <unit id="connections.colExpires">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:29,30</note>
-        <note category="location">src/app/features/connections/connections-page.html:65,66</note>
+        <note category="location">src/app/features/connections/connections-page.html:38,39</note>
+        <note category="location">src/app/features/connections/connections-page.html:74,75</note>
       </notes>
       <segment>
         <source>Valid until</source>
@@ -3271,8 +5407,8 @@
     </unit>
     <unit id="connections.colLastUsed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:30,31</note>
-        <note category="location">src/app/features/connections/connections-page.html:82,83</note>
+        <note category="location">src/app/features/connections/connections-page.html:39,40</note>
+        <note category="location">src/app/features/connections/connections-page.html:91,92</note>
       </notes>
       <segment>
         <source>Last used</source>
@@ -3281,7 +5417,7 @@
     </unit>
     <unit id="connections.colActions">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:32,35</note>
+        <note category="location">src/app/features/connections/connections-page.html:41,44</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -3290,7 +5426,7 @@
     </unit>
     <unit id="connections.today">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:87,88</note>
+        <note category="location">src/app/features/connections/connections-page.html:96,97</note>
       </notes>
       <segment>
         <source>today</source>
@@ -3299,7 +5435,7 @@
     </unit>
     <unit id="connections.emptyTitle">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:116,117</note>
+        <note category="location">src/app/features/connections/connections-page.html:125,126</note>
       </notes>
       <segment>
         <source>You have no connections yet</source>
@@ -3308,7 +5444,7 @@
     </unit>
     <unit id="connections.emptyText">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:118,123</note>
+        <note category="location">src/app/features/connections/connections-page.html:127,132</note>
       </notes>
       <segment>
         <source> Systems will appear here once you get access to an MCP server. </source>
@@ -3317,16 +5453,25 @@
     </unit>
     <unit id="conn.brokenReconnect">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:62</note>
+        <note category="location">src/app/features/connections/connections-page.ts:61</note>
       </notes>
       <segment>
         <source>stopped working, reconnect the account</source>
         <target>przestało działać, połącz konto ponownie</target>
       </segment>
     </unit>
-    <unit id="conn.reconnectNeeded">
+    <unit id="conn.invalidated">
       <notes>
         <note category="location">src/app/features/connections/connections-page.ts:63</note>
+      </notes>
+      <segment>
+        <source>the administrator changed the system settings, connect the account again</source>
+        <target>administrator zmienił ustawienia systemu, połącz konto ponownie</target>
+      </segment>
+    </unit>
+    <unit id="conn.reconnectNeeded">
+      <notes>
+        <note category="location">src/app/features/connections/connections-page.ts:64</note>
       </notes>
       <segment>
         <source>needs reconnecting</source>
@@ -3335,7 +5480,7 @@
     </unit>
     <unit id="conn.pending">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:68</note>
+        <note category="location">src/app/features/connections/connections-page.ts:69</note>
       </notes>
       <segment>
         <source>request pending</source>
@@ -3344,7 +5489,7 @@
     </unit>
     <unit id="conn.noAccess">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:70</note>
+        <note category="location">src/app/features/connections/connections-page.ts:71</note>
       </notes>
       <segment>
         <source>no entitlement</source>
@@ -3353,7 +5498,7 @@
     </unit>
     <unit id="conn.autoRefreshed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:87</note>
+        <note category="location">src/app/features/connections/connections-page.ts:88</note>
       </notes>
       <segment>
         <source>refreshed automatically</source>
@@ -3362,7 +5507,7 @@
     </unit>
     <unit id="conn.noExpiry">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:88</note>
+        <note category="location">src/app/features/connections/connections-page.ts:89</note>
       </notes>
       <segment>
         <source>no expiry</source>
@@ -3371,7 +5516,7 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:294</note>
+        <note category="location">src/app/features/connections/connections-page.ts:302</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. You can check its status in the Requests tab.</source>
@@ -4472,7 +6617,7 @@
     </unit>
     <unit id="entitlement.read">
       <notes>
-        <note category="location">src/app/features/requests/entitlement-labels.ts:5</note>
+        <note category="location">src/app/features/requests/entitlement-labels.ts:4</note>
       </notes>
       <segment>
         <source>read</source>
@@ -4481,7 +6626,7 @@
     </unit>
     <unit id="entitlement.write">
       <notes>
-        <note category="location">src/app/features/requests/entitlement-labels.ts:6</note>
+        <note category="location">src/app/features/requests/entitlement-labels.ts:5</note>
       </notes>
       <segment>
         <source>write</source>
@@ -4490,7 +6635,7 @@
     </unit>
     <unit id="entitlement.destructive">
       <notes>
-        <note category="location">src/app/features/requests/entitlement-labels.ts:7</note>
+        <note category="location">src/app/features/requests/entitlement-labels.ts:6</note>
       </notes>
       <segment>
         <source>irreversible operations</source>
@@ -4791,7 +6936,7 @@
     </unit>
     <unit id="common.requestRef">
       <notes>
-        <note category="location">src/app/shared/error-notice.ts:16,17</note>
+        <note category="location">src/app/shared/error-notice.ts:20,21</note>
       </notes>
       <segment>
         <source>Reference for support:</source>
@@ -4800,25 +6945,16 @@
     </unit>
     <unit id="common.retry">
       <notes>
-        <note category="location">src/app/shared/error-notice.ts:22,23</note>
+        <note category="location">src/app/shared/error-notice.ts:26,27</note>
       </notes>
       <segment>
         <source> Try again </source>
         <target> Spróbuj ponownie </target>
       </segment>
     </unit>
-    <unit id="system.servicedesk">
-      <notes>
-        <note category="location">src/app/shared/labels.ts:15</note>
-      </notes>
-      <segment>
-        <source>Service Desk</source>
-        <target>Service Desk</target>
-      </segment>
-    </unit>
     <unit id="catalogStatus.connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:30</note>
+        <note category="location">src/app/shared/labels.ts:27</note>
       </notes>
       <segment>
         <source>Connected</source>
@@ -4827,7 +6963,7 @@
     </unit>
     <unit id="catalogStatus.expiring">
       <notes>
-        <note category="location">src/app/shared/labels.ts:31</note>
+        <note category="location">src/app/shared/labels.ts:28</note>
       </notes>
       <segment>
         <source>Expires soon</source>
@@ -4836,7 +6972,7 @@
     </unit>
     <unit id="catalogStatus.reconnect_required">
       <notes>
-        <note category="location">src/app/shared/labels.ts:32</note>
+        <note category="location">src/app/shared/labels.ts:29</note>
       </notes>
       <segment>
         <source>Needs reconnecting</source>
@@ -4845,7 +6981,7 @@
     </unit>
     <unit id="catalogStatus.not_connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:33</note>
+        <note category="location">src/app/shared/labels.ts:30</note>
       </notes>
       <segment>
         <source>Not connected</source>
@@ -4854,7 +6990,7 @@
     </unit>
     <unit id="catalogStatus.request_pending">
       <notes>
-        <note category="location">src/app/shared/labels.ts:34</note>
+        <note category="location">src/app/shared/labels.ts:31</note>
       </notes>
       <segment>
         <source>Request pending</source>
@@ -4863,7 +6999,7 @@
     </unit>
     <unit id="catalogStatus.no_access">
       <notes>
-        <note category="location">src/app/shared/labels.ts:35</note>
+        <note category="location">src/app/shared/labels.ts:32</note>
       </notes>
       <segment>
         <source>No entitlement</source>
@@ -4872,7 +7008,7 @@
     </unit>
     <unit id="days.today">
       <notes>
-        <note category="location">src/app/shared/labels.ts:52</note>
+        <note category="location">src/app/shared/labels.ts:49</note>
       </notes>
       <segment>
         <source>today</source>
@@ -4881,7 +7017,7 @@
     </unit>
     <unit id="days.one">
       <notes>
-        <note category="location">src/app/shared/labels.ts:55</note>
+        <note category="location">src/app/shared/labels.ts:52</note>
       </notes>
       <segment>
         <source>in 1 day</source>
@@ -4890,7 +7026,7 @@
     </unit>
     <unit id="days.many">
       <notes>
-        <note category="location">src/app/shared/labels.ts:56</note>
+        <note category="location">src/app/shared/labels.ts:53</note>
       </notes>
       <segment>
         <source>in <ph id="0" equiv="days" disp="days"/> days</source>
@@ -4899,7 +7035,7 @@
     </unit>
     <unit id="catalogStatus.tokenExpiresIn">
       <notes>
-        <note category="location">src/app/shared/labels.ts:70</note>
+        <note category="location">src/app/shared/labels.ts:67</note>
       </notes>
       <segment>
         <source>Token expires <ph id="0" equiv="when" disp="when"/></source>
@@ -4908,7 +7044,7 @@
     </unit>
     <unit id="catalogStatus.connectionExpiresIn">
       <notes>
-        <note category="location">src/app/shared/labels.ts:71</note>
+        <note category="location">src/app/shared/labels.ts:68</note>
       </notes>
       <segment>
         <source>Connection expires <ph id="0" equiv="when" disp="when"/></source>
@@ -4917,16 +7053,25 @@
     </unit>
     <unit id="catalogStatus.connectionBroken">
       <notes>
-        <note category="location">src/app/shared/labels.ts:77</note>
+        <note category="location">src/app/shared/labels.ts:74</note>
       </notes>
       <segment>
         <source>Connection stopped working, connect the account again</source>
         <target>Połączenie przestało działać, połącz konto ponownie</target>
       </segment>
     </unit>
+    <unit id="catalogStatus.connectionInvalidated">
+      <notes>
+        <note category="location">src/app/shared/labels.ts:78</note>
+      </notes>
+      <segment>
+        <source>The system settings changed, connect the account again</source>
+        <target>Ustawienia systemu się zmieniły, połącz konto ponownie</target>
+      </segment>
+    </unit>
     <unit id="action.copy_link">
       <notes>
-        <note category="location">src/app/shared/labels.ts:83</note>
+        <note category="location">src/app/shared/labels.ts:84</note>
       </notes>
       <segment>
         <source>Copy link</source>
@@ -4935,7 +7080,7 @@
     </unit>
     <unit id="action.connect_oauth">
       <notes>
-        <note category="location">src/app/shared/labels.ts:84</note>
+        <note category="location">src/app/shared/labels.ts:85</note>
       </notes>
       <segment>
         <source>Connect with OAuth</source>
@@ -4944,7 +7089,7 @@
     </unit>
     <unit id="action.add_secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:85</note>
+        <note category="location">src/app/shared/labels.ts:86</note>
       </notes>
       <segment>
         <source>Add token</source>
@@ -4953,7 +7098,7 @@
     </unit>
     <unit id="action.reconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:86</note>
+        <note category="location">src/app/shared/labels.ts:87</note>
       </notes>
       <segment>
         <source>Renew</source>
@@ -4962,7 +7107,7 @@
     </unit>
     <unit id="action.request_access">
       <notes>
-        <note category="location">src/app/shared/labels.ts:87</note>
+        <note category="location">src/app/shared/labels.ts:88</note>
       </notes>
       <segment>
         <source>Submit request</source>
@@ -4971,7 +7116,7 @@
     </unit>
     <unit id="action.view_request">
       <notes>
-        <note category="location">src/app/shared/labels.ts:88</note>
+        <note category="location">src/app/shared/labels.ts:89</note>
       </notes>
       <segment>
         <source>View request</source>
@@ -4980,7 +7125,7 @@
     </unit>
     <unit id="action.disconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:89</note>
+        <note category="location">src/app/shared/labels.ts:90</note>
       </notes>
       <segment>
         <source>Disconnect</source>
@@ -4989,7 +7134,7 @@
     </unit>
     <unit id="action.reconnectOAuth">
       <notes>
-        <note category="location">src/app/shared/labels.ts:94</note>
+        <note category="location">src/app/shared/labels.ts:95</note>
       </notes>
       <segment>
         <source>Connect</source>
@@ -4998,7 +7143,7 @@
     </unit>
     <unit id="action.renewSecret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:98</note>
+        <note category="location">src/app/shared/labels.ts:99</note>
       </notes>
       <segment>
         <source>Renew</source>
@@ -5007,7 +7152,7 @@
     </unit>
     <unit id="risk.READ_ONLY">
       <notes>
-        <note category="location">src/app/shared/labels.ts:104</note>
+        <note category="location">src/app/shared/labels.ts:105</note>
       </notes>
       <segment>
         <source>Read</source>
@@ -5016,7 +7161,7 @@
     </unit>
     <unit id="risk.UPDATE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:105</note>
+        <note category="location">src/app/shared/labels.ts:106</note>
       </notes>
       <segment>
         <source>Write</source>
@@ -5025,7 +7170,7 @@
     </unit>
     <unit id="risk.DESTRUCTIVE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:106</note>
+        <note category="location">src/app/shared/labels.ts:107</note>
       </notes>
       <segment>
         <source>Delete</source>
@@ -5034,7 +7179,7 @@
     </unit>
     <unit id="risk.unclassified">
       <notes>
-        <note category="location">src/app/shared/labels.ts:115</note>
+        <note category="location">src/app/shared/labels.ts:116</note>
       </notes>
       <segment>
         <source>To classify</source>
@@ -5043,7 +7188,7 @@
     </unit>
     <unit id="credentialType.user-secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:120</note>
+        <note category="location">src/app/shared/labels.ts:121</note>
       </notes>
       <segment>
         <source>PAT token</source>
@@ -5052,7 +7197,7 @@
     </unit>
     <unit id="credentialType.token-exchange">
       <notes>
-        <note category="location">src/app/shared/labels.ts:121</note>
+        <note category="location">src/app/shared/labels.ts:122</note>
       </notes>
       <segment>
         <source>Token exchange</source>
@@ -5061,7 +7206,7 @@
     </unit>
     <unit id="credentialType.service-account">
       <notes>
-        <note category="location">src/app/shared/labels.ts:122</note>
+        <note category="location">src/app/shared/labels.ts:123</note>
       </notes>
       <segment>
         <source>Service account</source>
@@ -5070,7 +7215,7 @@
     </unit>
     <unit id="connectionStatus.connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:130</note>
+        <note category="location">src/app/shared/labels.ts:131</note>
       </notes>
       <segment>
         <source>Active</source>
@@ -5079,7 +7224,7 @@
     </unit>
     <unit id="connectionStatus.expiring">
       <notes>
-        <note category="location">src/app/shared/labels.ts:131</note>
+        <note category="location">src/app/shared/labels.ts:132</note>
       </notes>
       <segment>
         <source>Expires soon</source>
@@ -5088,7 +7233,7 @@
     </unit>
     <unit id="connectionStatus.expired">
       <notes>
-        <note category="location">src/app/shared/labels.ts:132</note>
+        <note category="location">src/app/shared/labels.ts:133</note>
       </notes>
       <segment>
         <source>Expired</source>
@@ -5097,7 +7242,7 @@
     </unit>
     <unit id="connectionStatus.revoked">
       <notes>
-        <note category="location">src/app/shared/labels.ts:133</note>
+        <note category="location">src/app/shared/labels.ts:134</note>
       </notes>
       <segment>
         <source>Revoked</source>
@@ -5106,11 +7251,20 @@
     </unit>
     <unit id="connectionStatus.error">
       <notes>
-        <note category="location">src/app/shared/labels.ts:134</note>
+        <note category="location">src/app/shared/labels.ts:135</note>
       </notes>
       <segment>
         <source>Stopped working</source>
         <target>Przestało działać</target>
+      </segment>
+    </unit>
+    <unit id="connectionStatus.needs_reconnect">
+      <notes>
+        <note category="location">src/app/shared/labels.ts:136</note>
+      </notes>
+      <segment>
+        <source>Connect again</source>
+        <target>Połącz ponownie</target>
       </segment>
     </unit>
     <unit id="loadError.forbidden">

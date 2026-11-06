@@ -1,0 +1,28 @@
+.rows {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  gap: 8px 16px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius);
+  background: var(--pm-surface);
+}
+
+.row textarea {
+  min-height: 72px;
+}
+
+@media (max-width: 719px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

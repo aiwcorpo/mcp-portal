@@ -1,8 +1,6 @@
 <h1 class="visually-hidden" i18n="@@killSwitches.title">Emergency switches</h1>
 
-<p class="back">
-  <a routerLink="/admin" i18n="@@killSwitches.back">Server registry</a>
-</p>
+<app-admin-nav />
 
 @if (done(); as text) {
   <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
@@ -34,8 +32,8 @@
 } @else {
   <p class="lead" i18n="@@killSwitches.lead">
     A switch cuts off a server or one tool for everyone: within 5 seconds at the latest on every
-    gateway instance. Approving a definition does not lift it, and neither does a restart.
-    Switching off needs no identity confirmation; lifting does.
+    gateway instance. Approving a definition does not lift it, and neither does a restart. Switching
+    off needs no identity confirmation; lifting does.
   </p>
 
   <section aria-labelledby="active-title">
@@ -110,9 +108,7 @@
         </tbody>
       </table>
     } @else {
-      <p class="muted" role="status" i18n="@@killSwitches.none">
-        No switch is on.
-      </p>
+      <p class="muted" role="status" i18n="@@killSwitches.none">No switch is on.</p>
     }
   </section>
 

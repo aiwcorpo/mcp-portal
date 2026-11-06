@@ -1,0 +1,302 @@
+<h1 class="visually-hidden" i18n="@@adminServers.title">Servers</h1>
+
+<app-admin-nav />
+
+@if (done(); as text) {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
+}
+@if (mfaNote() === 'draft') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@adminServers.mfaDraft"
+      >Identity confirmed. Check the form and save again.</ng-container
+    >
+  </app-notice>
+} @else if (mfaNote() === 'repeat') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@adminServers.mfaRepeat"
+      >Identity confirmed. Repeat the operation.</ng-container
+    >
+  </app-notice>
+}
+@if (failure(); as problem) {
+  <app-error-notice [failure]="problem" />
+}
+
+@let current = state();
+@if (current.status === 'loading') {
+  <app-loading />
+} @else if (current.status === 'error') {
+  <app-load-error [failure]="current.failure" (retry)="load()" />
+} @else {
+  <p class="lead" i18n="@@adminServers.lead">
+    The servers the gateway routes to. A server added here has no tools until its manifest is
+    approved on the Approvals screen; removing one takes its tools away and refuses its calls. No
+    restart is needed for either.
+  </p>
+
+  <div class="toolbar">
+    <button
+      mat-flat-button
+      type="button"
+      [disabled]="busy()"
+      (click)="openCreate()"
+      i18n="@@adminServers.add"
+    >
+      Add server
+    </button>
+  </div>
+
+  @if (rows().length) {
+    <table class="table" role="table">
+      <caption class="visually-hidden" i18n="@@adminServers.caption">
+        Servers of the gateway
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader" i18n="@@adminServers.colServer">Server</th>
+          <th scope="col" role="columnheader" i18n="@@adminServers.colAddress">Address</th>
+          <th scope="col" role="columnheader" i18n="@@adminServers.colCredential">Credential</th>
+          <th scope="col" role="columnheader" i18n="@@adminServers.colState">State</th>
+          <th scope="col" role="columnheader">
+            <span class="visually-hidden" i18n="@@adminServers.colActions">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        @for (row of rows(); track row.server.serverId) {
+          <tr role="row">
+            <th
+              scope="row"
+              role="rowheader"
+              class="name"
+              data-label="Server"
+              i18n-data-label="@@adminServers.colServer"
+            >
+              {{ systemName(row.server.system) }}
+              <code class="muted block">{{ row.server.serverId | safeText }}</code>
+            </th>
+            <td
+              role="cell"
+              class="wrap"
+              data-label="Address"
+              i18n-data-label="@@adminServers.colAddress"
+            >
+              <code>{{ row.server.internalUrl | safeText }}</code>
+            </td>
+            <td role="cell" data-label="Credential" i18n-data-label="@@adminServers.colCredential">
+              {{ row.typeInUse }}
+              <span class="muted block">{{ row.types }}</span>
+            </td>
+            <td role="cell" data-label="State" i18n-data-label="@@adminServers.colState">
+              @if (row.server.enabled) {
+                <span class="state-ok" i18n="@@adminServers.enabled">Enabled</span>
+              } @else {
+                <span class="state-danger" i18n="@@adminServers.disabled">Disabled</span>
+              }
+              @if (row.server.adapter) {
+                <span class="muted block" i18n="@@adminServers.adapter">Adapter</span>
+              }
+            </td>
+            <td role="cell" class="c-actions">
+              <button
+                mat-flat-button
+                type="button"
+                class="quiet"
+                [disabled]="busy()"
+                (click)="openEdit(row.server)"
+              >
+                <ng-container i18n="@@adminServers.edit">Edit</ng-container
+                ><span class="visually-hidden"> ({{ row.server.serverId }})</span>
+              </button>
+              @if (row.server.enabled) {
+                <button
+                  mat-flat-button
+                  type="button"
+                  class="quiet"
+                  [disabled]="busy()"
+                  (click)="disable(row.server)"
+                >
+                  <ng-container i18n="@@adminServers.disable">Disable</ng-container
+                  ><span class="visually-hidden"> ({{ row.server.serverId }})</span>
+                </button>
+              }
+              <button
+                mat-flat-button
+                type="button"
+                class="quiet"
+                [disabled]="busy()"
+                (click)="remove(row.server)"
+              >
+                <ng-container i18n="@@adminServers.remove">Remove</ng-container
+                ><span class="visually-hidden"> ({{ row.server.serverId }})</span>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p class="muted" role="status" i18n="@@adminServers.none">The registry has no servers.</p>
+  }
+
+  @if (form(); as f) {
+    @let errs = errors();
+    @let show = touched();
+    <section class="editor" aria-labelledby="server-form-title">
+      <h2 id="server-form-title">
+        @if (f.mode === 'create') {
+          <ng-container i18n="@@adminServers.formAdd">Add server</ng-container>
+        } @else {
+          <ng-container i18n="@@adminServers.formEdit">Edit server</ng-container>
+        }
+      </h2>
+      <form class="form" (ngSubmit)="save()" novalidate>
+        <div class="field">
+          <label for="srv-system" i18n="@@adminServers.system">System</label>
+          @if (f.mode === 'create') {
+            <input
+              id="srv-system"
+              name="system"
+              type="text"
+              autocomplete="off"
+              list="srv-systems"
+              [attr.aria-invalid]="show && errs['system'] ? 'true' : null"
+              [attr.aria-describedby]="'srv-system-hint'"
+              [ngModel]="f.system"
+              (ngModelChange)="change({ system: $event })"
+            />
+            <datalist id="srv-systems">
+              @for (name of systems(); track name) {
+                <option [value]="name"></option>
+              }
+            </datalist>
+            <p id="srv-system-hint" class="muted hint">
+              <ng-container i18n="@@adminServers.serverIdIs">Server identifier:</ng-container>
+              <code>{{ serverId() }}</code>
+            </p>
+            @if (show && errs['system']) {
+              <p class="problem">{{ errs['system'] }}</p>
+            }
+          } @else {
+            <p>
+              <code>{{ f.system | safeText }}</code>
+            </p>
+          }
+        </div>
+        <div class="field wide">
+          <label for="srv-url" i18n="@@adminServers.url"
+            >Internal address of the MCP endpoint</label
+          >
+          <p class="muted hint">
+            <ng-container i18n="@@adminServers.pinned"
+              >The gateway accepts only a certificate for</ng-container
+            >
+            <code>{{ f.mode === 'create' ? serverId() : 'mcp-' + f.system }}.internal</code>
+          </p>
+          <input
+            id="srv-url"
+            name="internalUrl"
+            type="text"
+            autocomplete="off"
+            [attr.aria-invalid]="show && errs['internalUrl'] ? 'true' : null"
+            [ngModel]="f.internalUrl"
+            (ngModelChange)="change({ internalUrl: $event })"
+          />
+          @if (show && errs['internalUrl']) {
+            <p class="problem">{{ errs['internalUrl'] }}</p>
+          }
+        </div>
+        <fieldset class="field wide">
+          <legend i18n="@@adminServers.accepted">Accepted credential types</legend>
+          @for (type of allTypes; track type) {
+            <label class="choice">
+              <input
+                type="checkbox"
+                [name]="'accepted-' + type"
+                [checked]="f.acceptedTypes.includes(type)"
+                (change)="toggleType(type, $any($event.target).checked)"
+              />
+              <span
+                >{{ typeLabel(type) }} <code class="muted">{{ type }}</code></span
+              >
+            </label>
+          }
+          @if (show && errs['acceptedTypes']) {
+            <p class="problem">{{ errs['acceptedTypes'] }}</p>
+          }
+        </fieldset>
+        <div class="field">
+          <label for="srv-type" i18n="@@adminServers.typeInUse">Type in use</label>
+          <select
+            id="srv-type"
+            name="type"
+            [attr.aria-invalid]="show && errs['type'] ? 'true' : null"
+            [ngModel]="f.type"
+            (ngModelChange)="change({ type: $event })"
+          >
+            @for (type of f.acceptedTypes; track type) {
+              <option [value]="type">{{ typeLabel(type) }}</option>
+            }
+          </select>
+          @if (show && errs['type']) {
+            <p class="problem">{{ errs['type'] }}</p>
+          }
+        </div>
+        <fieldset class="field">
+          <legend i18n="@@adminServers.options">Options</legend>
+          <label class="choice">
+            <input
+              type="checkbox"
+              name="required"
+              [checked]="f.required"
+              (change)="change({ required: $any($event.target).checked })"
+            />
+            <span i18n="@@adminServers.required">The server needs a credential of the user</span>
+          </label>
+          <label class="choice">
+            <input
+              type="checkbox"
+              name="enabled"
+              [checked]="f.enabled"
+              (change)="change({ enabled: $any($event.target).checked })"
+            />
+            <span i18n="@@adminServers.enabledLabel">Enabled</span>
+          </label>
+          @if (f.mode === 'create') {
+            <label class="choice">
+              <input
+                type="checkbox"
+                name="adapter"
+                [checked]="f.adapter"
+                (change)="change({ adapter: $any($event.target).checked })"
+              />
+              <span i18n="@@adminServers.adapterLabel"
+                >Served through an adapter (cannot be changed later)</span
+              >
+            </label>
+          } @else if (f.adapter) {
+            <p class="muted hint" i18n="@@adminServers.adapterFixed">Served through an adapter.</p>
+          }
+        </fieldset>
+        <p class="muted hint wide" i18n="@@adminServers.mfaHint">
+          Saving needs a fresh MFA, except for disabling a server. If it is needed, you go to the
+          identity provider and come back to this form.
+        </p>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()" i18n="@@adminServers.save">
+            Save
+          </button>
+          <button
+            mat-flat-button
+            type="button"
+            class="quiet"
+            (click)="cancel()"
+            i18n="@@adminServers.cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+}

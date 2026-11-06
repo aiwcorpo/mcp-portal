@@ -6,6 +6,8 @@ import { Risk, ToolAction } from '../api/generated';
  * What the user asked for just before the browser left for the fresh MFA (step_up_required). After the return the
  * portal carries it out once, so the user does not click the same button twice (U12). The parameters are
  * identifiers only: never a token, a key or a password, which is why a form with a secret is not resumable.
+ * `admin-draft` keeps the fields of an administration form (no secret among them) so that the edit is not lost on the
+ * way to the IdP; the page fills the form again and the administrator saves with one more click.
  */
 export type ResumeIntent =
   | {
@@ -18,6 +20,7 @@ export type ResumeIntent =
       classification?: { risk: Risk; action: ToolAction };
     }
   | { kind: 'lift-kill-switch'; serverId: string; tool: string | null; setAt: string }
+  | { kind: 'admin-draft'; page: string; draft: string }
   | { kind: 'enroll-authenticator' }
   | { kind: 'remove-authenticator'; registeredAt: string };
 
@@ -30,6 +33,9 @@ export const RESUME_TTL_MS = 5 * 60_000;
 
 const IDENTIFIER = /^[A-Za-z0-9._:-]{1,128}$/;
 const TIMESTAMP = /^[0-9TZ:.+-]{1,40}$/;
+const ADMIN_PAGE = /^\/admin(?:\/[a-z-]{1,40})?$/;
+/** An edit form of the administration without secrets; a bigger one is not kept and the user types it again. */
+export const DRAFT_MAX = 16_000;
 const HASH = /^[A-Za-z0-9+/=_:-]{1,200}$/;
 const RISKS: readonly unknown[] = ['READ_ONLY', 'UPDATE', 'DESTRUCTIVE'];
 const ACTIONS: readonly unknown[] = ['read', 'update', 'delete', 'admin'];
@@ -62,6 +68,13 @@ function valid(intent: unknown): intent is ResumeIntent {
   switch (candidate['kind']) {
     case 'enroll-authenticator':
       return true;
+    case 'admin-draft':
+      return (
+        typeof candidate['page'] === 'string' &&
+        ADMIN_PAGE.test(candidate['page']) &&
+        typeof candidate['draft'] === 'string' &&
+        candidate['draft'].length <= DRAFT_MAX
+      );
     case 'remove-authenticator':
       return (
         typeof candidate['registeredAt'] === 'string' && TIMESTAMP.test(candidate['registeredAt'])
@@ -140,6 +153,38 @@ export class ResumeIntentStore {
         stored.intent.kind === kind
       ) {
         return stored.intent as ResumeOf<K>;
+      }
+    } catch {
+      // Damaged slot: treated as empty.
+    }
+    return null;
+  }
+
+  /**
+   * Reads and removes the slot whatever it holds, for a page that resumes more than one kind of action; the same checks
+   * as {@link take} apply (user, age, shape).
+   */
+  takeAny(user: string, now: number = Date.now()): ResumeIntent | null {
+    let raw: string | null;
+    try {
+      raw = this.storage?.getItem(STORAGE_KEY) ?? null;
+      this.storage?.removeItem(STORAGE_KEY);
+    } catch {
+      return null;
+    }
+    if (raw === null) {
+      return null;
+    }
+    try {
+      const stored = JSON.parse(raw) as Partial<Stored>;
+      if (
+        typeof stored.expiresAt === 'number' &&
+        user !== '' &&
+        stored.user === user &&
+        stored.expiresAt >= now &&
+        valid(stored.intent)
+      ) {
+        return stored.intent;
       }
     } catch {
       // Damaged slot: treated as empty.

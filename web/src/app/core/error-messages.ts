@@ -2,7 +2,8 @@ import { ApiFailure, PortalErrorCode } from './api-error';
 
 const MESSAGES: Record<PortalErrorCode, () => string> = {
   unauthenticated: () => $localize`:@@error.unauthenticated:Session expired. Sign in again.`,
-  access_denied: () => $localize`:@@error.access_denied:You are not allowed to perform this operation.`,
+  access_denied: () =>
+    $localize`:@@error.access_denied:You are not allowed to perform this operation.`,
   tool_disabled: () =>
     $localize`:@@error.tool_disabled:The tool has been switched off by an administrator.`,
   confirmation_required: () =>
@@ -32,8 +33,7 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
     $localize`:@@error.upstream_unavailable:The service is temporarily unavailable.`,
   internal_error: () =>
     $localize`:@@error.internal_error:An unexpected error occurred. Try again later.`,
-  invalid_request: () =>
-    $localize`:@@error.invalid_request:The request was rejected as invalid.`,
+  invalid_request: () => $localize`:@@error.invalid_request:The request was rejected as invalid.`,
   csrf_invalid: () =>
     $localize`:@@error.csrf_invalid:The form has expired. Refresh the page and try again.`,
   secret_invalid: () => $localize`:@@error.secret_invalid:Token is invalid or expired.`,
@@ -43,6 +43,20 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
     $localize`:@@error.not_requestable:The entitlement system does not accept requests from the portal. Submit the request directly in the entitlement system.`,
   manifest_rejected: () =>
     $localize`:@@error.manifest_rejected:The definition was rejected and cannot be approved.`,
+  server_rejected: () =>
+    $localize`:@@error.server_rejected:The gateway did not accept the server settings.`,
+  scope_mapping_rejected: () =>
+    $localize`:@@error.scope_mapping_rejected:The gateway did not accept the scope mapping. Nothing was saved.`,
+  override_rejected: () =>
+    $localize`:@@error.override_rejected:The gateway did not accept the override.`,
+  system_rejected: () =>
+    $localize`:@@error.system_rejected:The credential broker did not accept the system settings.`,
+  server_exists: () =>
+    $localize`:@@error.server_exists:A server with this identifier already exists.`,
+  precondition_failed: () =>
+    $localize`:@@error.precondition_failed:Someone changed this in the meantime. Reload the data and make your change again.`,
+  precondition_required: () =>
+    $localize`:@@error.precondition_required:The data has to be loaded before it can be changed. Reload the page.`,
   flow_invalid: () =>
     $localize`:@@error.flow_invalid:The connection link expired or was already used. Start again.`,
   provider_error: () =>
@@ -75,7 +89,93 @@ function manifestRejectedMessage(reason: string | undefined): string {
   }
 }
 
+function serverRejectedMessage(reason: string | undefined): string {
+  switch (reason) {
+    case 'server_id_mismatch':
+      return $localize`:@@error.server_id_mismatch:The server identifier must be mcp- followed by the system identifier.`;
+    case 'system_reserved':
+      return $localize`:@@error.system_reserved:This system identifier is reserved for a component of the platform.`;
+    case 'credential_types_mixed':
+      return $localize`:@@error.credential_types_mixed:A service account cannot be combined with a user credential type.`;
+    case 'credential_type_not_accepted':
+      return $localize`:@@error.credential_type_not_accepted:The credential type in use has to be one of the accepted types.`;
+    default:
+      return errorMessage('server_rejected');
+  }
+}
+
+function scopeMappingRejectedMessage(reason: string | undefined): string {
+  switch (reason) {
+    case 'unknown_resource_type':
+      return $localize`:@@error.unknown_resource_type:No registered server declares the resource type of one of the scopes. Nothing was saved.`;
+    case 'scope_not_grantable':
+      return $localize`:@@error.scope_not_grantable:The server declares no scope pattern for the type of one of the scopes, so it cannot be granted. Nothing was saved.`;
+    case 'scope_invalid':
+      return $localize`:@@error.scope_invalid:The part after the slash does not match the scope pattern of its type. Nothing was saved.`;
+    case 'group_duplicate':
+      return $localize`:@@error.group_duplicate:A group appears twice. Nothing was saved.`;
+    default:
+      return errorMessage('scope_mapping_rejected');
+  }
+}
+
+function overrideRejectedMessage(reason: string | undefined): string {
+  switch (reason) {
+    case 'not_forbid':
+      return $localize`:@@error.not_forbid:An override can only forbid. Use a forbid policy.`;
+    case 'not_one_policy':
+      return $localize`:@@error.not_one_policy:The text has to hold exactly one policy.`;
+    case 'id_invalid':
+      return $localize`:@@error.id_invalid:The identifier has to look like override- followed by a name.`;
+    case 'target_mismatch':
+      return $localize`:@@error.target_mismatch:The policy does not fit the target: for the gateway it has to decide the call action on a tool, for a server it must not mention the tool or the call action.`;
+    case 'invalid_policy':
+      return $localize`:@@error.invalid_policy:The policy does not parse or does not validate against the schema of its target.`;
+    case 'id_mismatch':
+      return $localize`:@@error.id_mismatch:The @id annotation in the text has to equal the identifier of the override.`;
+    case 'target_unknown':
+      return $localize`:@@error.target_unknown:There is no server with this identifier in the registry.`;
+    default:
+      return errorMessage('override_rejected');
+  }
+}
+
+function systemRejectedMessage(reason: string | undefined): string {
+  switch (reason) {
+    case 'client_secret_required':
+      return $localize`:@@error.client_secret_required:The client secret has to be entered again when the base address, the authorization or token address or the client identifier changes.`;
+    case 'token_url_not_settable':
+      return $localize`:@@error.token_url_not_settable:A token exchange system takes no token address: the broker uses the one of its identity provider.`;
+    case 'product_required':
+      return $localize`:@@error.product_required:This adapter needs the product (Jira or Confluence).`;
+    case 'exchange_audience_required':
+      return $localize`:@@error.exchange_audience_required:A token exchange system needs the audience of the token.`;
+    case 'system_reserved':
+      return $localize`:@@error.system_reserved_system:This system identifier is reserved for a component of the platform.`;
+    case 'default_type_not_supported':
+      return $localize`:@@error.default_type_not_supported:The default credential type has to be one of the supported types.`;
+    case 'credential_types_mixed':
+      return $localize`:@@error.credential_types_mixed_system:A service account cannot be combined with a user credential type.`;
+    case 'oauth_required':
+      return $localize`:@@error.oauth_required:OAuth needs the client settings: identifier, secret and the authorization and token addresses.`;
+    default:
+      return errorMessage('system_rejected');
+  }
+}
+
 export function failureMessage(failure: ApiFailure): string {
+  if (failure.code === 'server_rejected') {
+    return serverRejectedMessage(failure.reason);
+  }
+  if (failure.code === 'scope_mapping_rejected') {
+    return scopeMappingRejectedMessage(failure.reason);
+  }
+  if (failure.code === 'override_rejected') {
+    return overrideRejectedMessage(failure.reason);
+  }
+  if (failure.code === 'system_rejected') {
+    return systemRejectedMessage(failure.reason);
+  }
   if (failure.code === 'manifest_rejected') {
     return manifestRejectedMessage(failure.reason);
   }

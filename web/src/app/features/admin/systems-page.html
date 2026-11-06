@@ -1,0 +1,465 @@
+<h1 class="visually-hidden" i18n="@@adminSystems.title">Systems</h1>
+
+<app-admin-nav />
+
+@if (done(); as text) {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
+}
+@if (mfaNote() === 'draft') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@adminSystems.mfaDraft"
+      >Identity confirmed. Check the form, enter the client secret again and save.</ng-container
+    >
+  </app-notice>
+} @else if (mfaNote() === 'repeat') {
+  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
+    <ng-container i18n="@@adminSystems.mfaRepeat"
+      >Identity confirmed. Repeat the operation.</ng-container
+    >
+  </app-notice>
+}
+@if (failure(); as problem) {
+  <app-error-notice [failure]="problem" />
+}
+
+@let current = state();
+@if (current.status === 'loading') {
+  <app-loading />
+} @else if (current.status === 'error') {
+  <app-load-error [failure]="current.failure" (retry)="load()" />
+} @else {
+  <p class="lead" i18n="@@adminSystems.lead">
+    The systems that users connect to and that the servers reach through the credential broker. The
+    client secret of a system is stored in the broker's secret store and is never shown again.
+  </p>
+
+  <div class="toolbar">
+    <button
+      mat-flat-button
+      type="button"
+      [disabled]="busy()"
+      (click)="openCreate()"
+      i18n="@@adminSystems.add"
+    >
+      Add system
+    </button>
+  </div>
+
+  @if (rows().length) {
+    <table class="table" role="table">
+      <caption class="visually-hidden" i18n="@@adminSystems.caption">
+        Systems of the credential broker
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader" i18n="@@adminSystems.colSystem">System</th>
+          <th scope="col" role="columnheader" i18n="@@adminSystems.colAddress">Base address</th>
+          <th scope="col" role="columnheader" i18n="@@adminSystems.colAdapter">Adapter</th>
+          <th scope="col" role="columnheader" i18n="@@adminSystems.colTypes">Credential types</th>
+          <th scope="col" role="columnheader">
+            <span class="visually-hidden" i18n="@@adminSystems.colActions">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        @for (row of rows(); track row.system.system) {
+          <tr role="row">
+            <th
+              scope="row"
+              role="rowheader"
+              class="name"
+              data-label="System"
+              i18n-data-label="@@adminSystems.colSystem"
+            >
+              {{ systemName(row.system.system) }}
+              <code class="muted block">{{ row.system.system | safeText }}</code>
+            </th>
+            <td
+              role="cell"
+              class="wrap"
+              data-label="Base address"
+              i18n-data-label="@@adminSystems.colAddress"
+            >
+              <code>{{ row.system.baseUrl | safeText }}</code>
+            </td>
+            <td role="cell" data-label="Adapter" i18n-data-label="@@adminSystems.colAdapter">
+              {{ row.system.adapter }}
+              @if (row.system.product) {
+                <span class="muted block">{{ row.system.product }}</span>
+              }
+            </td>
+            <td role="cell" data-label="Credential types" i18n-data-label="@@adminSystems.colTypes">
+              {{ row.types }}
+              <span class="muted block"
+                ><ng-container i18n="@@adminSystems.default">default</ng-container>
+                {{ row.defaultType }}</span
+              >
+              @if (row.secret) {
+                <span class="muted block">{{ row.secret }}</span>
+              }
+            </td>
+            <td role="cell" class="c-actions">
+              <button
+                mat-flat-button
+                type="button"
+                class="quiet"
+                [disabled]="busy()"
+                (click)="openEdit(row.system)"
+              >
+                <ng-container i18n="@@adminSystems.edit">Edit</ng-container
+                ><span class="visually-hidden"> ({{ row.system.system }})</span>
+              </button>
+              <button
+                mat-flat-button
+                type="button"
+                class="quiet"
+                [disabled]="busy()"
+                (click)="remove(row.system)"
+              >
+                <ng-container i18n="@@adminSystems.remove">Remove</ng-container
+                ><span class="visually-hidden"> ({{ row.system.system }})</span>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p class="muted" role="status" i18n="@@adminSystems.none">The broker has no systems.</p>
+  }
+
+  @if (form(); as f) {
+    @let errs = errors();
+    @let show = touched();
+    <section class="editor" aria-labelledby="system-form-title">
+      <h2 id="system-form-title">
+        @if (f.mode === 'create') {
+          <ng-container i18n="@@adminSystems.formAdd">Add system</ng-container>
+        } @else {
+          <ng-container i18n="@@adminSystems.formEdit">Edit system</ng-container>
+        }
+      </h2>
+      @if (changed().length) {
+        <app-notice kind="warning">
+          <ng-container i18n="@@adminSystems.invalidates"
+            >A change of the base address, the authorization or token address, the client identifier
+            or the revoke address deletes the connections of all users to this system when you save.
+            They are asked to connect again; nothing is sent to the system. Changed
+            now:</ng-container
+          >
+          {{ changed().join(', ') }}.
+        </app-notice>
+      }
+      <form class="form" (ngSubmit)="save()" novalidate>
+        <div class="field">
+          <label for="sys-id" i18n="@@adminSystems.id">System identifier</label>
+          @if (f.mode === 'create') {
+            <input
+              id="sys-id"
+              name="system"
+              type="text"
+              autocomplete="off"
+              [attr.aria-invalid]="show && errs['system'] ? 'true' : null"
+              [ngModel]="f.system"
+              (ngModelChange)="change({ system: $event })"
+            />
+            @if (show && errs['system']) {
+              <p class="problem">{{ errs['system'] }}</p>
+            }
+          } @else {
+            <p>
+              <code>{{ f.system | safeText }}</code>
+            </p>
+          }
+        </div>
+        <div class="field">
+          <label for="sys-adapter" i18n="@@adminSystems.adapter">Adapter</label>
+          <select
+            id="sys-adapter"
+            name="adapter"
+            [ngModel]="f.adapter"
+            (ngModelChange)="change({ adapter: $event })"
+          >
+            @for (adapter of adapters; track adapter) {
+              <option [value]="adapter">{{ adapter }}</option>
+            }
+          </select>
+        </div>
+        <div class="field wide">
+          <label for="sys-base" i18n="@@adminSystems.base">Base address</label>
+          <input
+            id="sys-base"
+            name="baseUrl"
+            type="text"
+            autocomplete="off"
+            [attr.aria-invalid]="show && errs['baseUrl'] ? 'true' : null"
+            [ngModel]="f.baseUrl"
+            (ngModelChange)="change({ baseUrl: $event })"
+          />
+          @if (show && errs['baseUrl']) {
+            <p class="problem">{{ errs['baseUrl'] }}</p>
+          }
+        </div>
+        @if (f.adapter === 'atlassian-dc') {
+          <div class="field">
+            <label for="sys-product" i18n="@@adminSystems.product">Product</label>
+            <select
+              id="sys-product"
+              name="product"
+              [attr.aria-invalid]="show && errs['product'] ? 'true' : null"
+              [ngModel]="f.product"
+              (ngModelChange)="change({ product: $event })"
+            >
+              <option value="" i18n="@@adminSystems.productPlaceholder">Choose a product</option>
+              <option value="jira">Jira</option>
+              <option value="confluence">Confluence</option>
+            </select>
+            @if (show && errs['product']) {
+              <p class="problem">{{ errs['product'] }}</p>
+            }
+          </div>
+        }
+        <fieldset class="field wide">
+          <legend i18n="@@adminSystems.types">Supported credential types</legend>
+          @for (type of allTypes; track type) {
+            <label class="choice">
+              <input
+                type="checkbox"
+                [name]="'type-' + type"
+                [checked]="f.supportedTypes.includes(type)"
+                (change)="toggleType(type, $any($event.target).checked)"
+              />
+              <span
+                >{{ typeLabel(type) }} <code class="muted">{{ type }}</code></span
+              >
+            </label>
+          }
+          @if (show && errs['supportedTypes']) {
+            <p class="problem">{{ errs['supportedTypes'] }}</p>
+          }
+        </fieldset>
+        <div class="field">
+          <label for="sys-default" i18n="@@adminSystems.defaultType">Default type</label>
+          <select
+            id="sys-default"
+            name="defaultType"
+            [attr.aria-invalid]="show && errs['defaultType'] ? 'true' : null"
+            [ngModel]="f.defaultType"
+            (ngModelChange)="change({ defaultType: $event })"
+          >
+            @for (type of f.supportedTypes; track type) {
+              <option [value]="type">{{ typeLabel(type) }}</option>
+            }
+          </select>
+          @if (show && errs['defaultType']) {
+            <p class="problem">{{ errs['defaultType'] }}</p>
+          }
+        </div>
+        <div class="field">
+          <label for="sys-scheme" i18n="@@adminSystems.secretScheme"
+            >Scheme of the secret handed to the gateway</label
+          >
+          <select
+            id="sys-scheme"
+            name="secretScheme"
+            [ngModel]="f.secretScheme"
+            (ngModelChange)="change({ secretScheme: $event })"
+          >
+            @for (scheme of secretSchemes; track scheme) {
+              <option [value]="scheme">{{ scheme }}</option>
+            }
+          </select>
+        </div>
+        @if (f.supportedTypes.includes('user-secret')) {
+          <div class="field">
+            <label for="sys-user-scheme" i18n="@@adminSystems.userScheme"
+              >Scheme of the user's token</label
+            >
+            <select
+              id="sys-user-scheme"
+              name="userSecretScheme"
+              [ngModel]="f.userSecretScheme"
+              (ngModelChange)="change({ userSecretScheme: $event })"
+            >
+              <option value="" i18n="@@adminSystems.userSchemeDefault">As the scheme above</option>
+              @for (scheme of userSchemes; track scheme) {
+                <option [value]="scheme">{{ scheme }}</option>
+              }
+            </select>
+            <p class="muted hint" i18n="@@adminSystems.userSchemeHint">
+              Basic makes the connection form ask for a login next to the token.
+            </p>
+          </div>
+        }
+        @if (f.supportedTypes.includes('token-exchange')) {
+          <div class="field wide">
+            <label for="sys-audience" i18n="@@adminSystems.audience"
+              >Audience of the exchanged token</label
+            >
+            <input
+              id="sys-audience"
+              name="exchangeAudience"
+              type="text"
+              autocomplete="off"
+              [attr.aria-invalid]="show && errs['exchangeAudience'] ? 'true' : null"
+              [ngModel]="f.exchangeAudience"
+              (ngModelChange)="change({ exchangeAudience: $event })"
+            />
+            @if (show && errs['exchangeAudience']) {
+              <p class="problem">{{ errs['exchangeAudience'] }}</p>
+            }
+          </div>
+        }
+        <div class="field">
+          <label for="sys-revoke" i18n="@@adminSystems.revoke">Revoke address (optional)</label>
+          <input
+            id="sys-revoke"
+            name="revokeUrl"
+            type="text"
+            autocomplete="off"
+            [attr.aria-invalid]="show && errs['revokeUrl'] ? 'true' : null"
+            [ngModel]="f.revokeUrl"
+            (ngModelChange)="change({ revokeUrl: $event })"
+          />
+          @if (show && errs['revokeUrl']) {
+            <p class="problem">{{ errs['revokeUrl'] }}</p>
+          }
+        </div>
+        <div class="field">
+          <label for="sys-timeout" i18n="@@adminSystems.timeout">Timeout of calls (optional)</label>
+          <input
+            id="sys-timeout"
+            name="timeout"
+            type="text"
+            autocomplete="off"
+            [attr.aria-invalid]="show && errs['timeout'] ? 'true' : null"
+            [ngModel]="f.timeout"
+            (ngModelChange)="change({ timeout: $event })"
+          />
+          @if (show && errs['timeout']) {
+            <p class="problem">{{ errs['timeout'] }}</p>
+          }
+        </div>
+
+        @if (oauth()) {
+          <h3 class="wide section" i18n="@@adminSystems.oauth">OAuth client</h3>
+          <div class="field">
+            <label for="sys-client-id" i18n="@@adminSystems.clientId">Client identifier</label>
+            <input
+              id="sys-client-id"
+              name="clientId"
+              type="text"
+              autocomplete="off"
+              [attr.aria-invalid]="show && errs['clientId'] ? 'true' : null"
+              [ngModel]="f.clientId"
+              (ngModelChange)="change({ clientId: $event })"
+            />
+            @if (show && errs['clientId']) {
+              <p class="problem">{{ errs['clientId'] }}</p>
+            }
+          </div>
+          <div class="field">
+            <label for="sys-client-secret" i18n="@@adminSystems.clientSecret">Client secret</label>
+            <input
+              id="sys-client-secret"
+              name="clientSecret"
+              type="password"
+              autocomplete="new-password"
+              [attr.aria-invalid]="show && errs['clientSecret'] ? 'true' : null"
+              [attr.aria-describedby]="'sys-secret-hint'"
+              [required]="secretRequired()"
+              [ngModel]="f.clientSecret"
+              (ngModelChange)="change({ clientSecret: $event })"
+            />
+            <p id="sys-secret-hint" class="muted hint">
+              @if (secretRequired()) {
+                <ng-container i18n="@@adminSystems.secretNeeded"
+                  >Required now. The secret is stored in the broker and never shown
+                  again.</ng-container
+                >
+              } @else {
+                <ng-container i18n="@@adminSystems.secretKept"
+                  >A secret is stored. Leave this empty to keep it.</ng-container
+                >
+              }
+            </p>
+            @if (show && errs['clientSecret']) {
+              <p class="problem">{{ errs['clientSecret'] }}</p>
+            }
+          </div>
+          @if (f.supportedTypes.includes('user-oauth')) {
+            <div class="field wide">
+              <label for="sys-authorize" i18n="@@adminSystems.authorize"
+                >Authorization address</label
+              >
+              <input
+                id="sys-authorize"
+                name="authorizeUrl"
+                type="text"
+                autocomplete="off"
+                [attr.aria-invalid]="show && errs['authorizeUrl'] ? 'true' : null"
+                [ngModel]="f.authorizeUrl"
+                (ngModelChange)="change({ authorizeUrl: $event })"
+              />
+              @if (show && errs['authorizeUrl']) {
+                <p class="problem">{{ errs['authorizeUrl'] }}</p>
+              }
+            </div>
+          }
+          @if (!f.supportedTypes.includes('token-exchange')) {
+            <div class="field wide">
+              <label for="sys-token" i18n="@@adminSystems.tokenUrl">Token address</label>
+              <input
+                id="sys-token"
+                name="tokenUrl"
+                type="text"
+                autocomplete="off"
+                [attr.aria-invalid]="show && errs['tokenUrl'] ? 'true' : null"
+                [ngModel]="f.tokenUrl"
+                (ngModelChange)="change({ tokenUrl: $event })"
+              />
+              @if (show && errs['tokenUrl']) {
+                <p class="problem">{{ errs['tokenUrl'] }}</p>
+              }
+            </div>
+          }
+          <div class="field wide">
+            <label for="sys-scopes" i18n="@@adminSystems.scopes"
+              >OAuth scopes (separated by spaces)</label
+            >
+            <input
+              id="sys-scopes"
+              name="scopes"
+              type="text"
+              autocomplete="off"
+              [attr.aria-invalid]="show && errs['scopes'] ? 'true' : null"
+              [ngModel]="f.scopes"
+              (ngModelChange)="change({ scopes: $event })"
+            />
+            @if (show && errs['scopes']) {
+              <p class="problem">{{ errs['scopes'] }}</p>
+            }
+          </div>
+        }
+        <p class="muted hint wide" i18n="@@adminSystems.mfaHint">
+          Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back
+          to this form; the client secret is not kept on the way, so you enter it again.
+        </p>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()" i18n="@@adminSystems.save">
+            Save
+          </button>
+          <button
+            mat-flat-button
+            type="button"
+            class="quiet"
+            (click)="cancel()"
+            i18n="@@adminSystems.cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+}

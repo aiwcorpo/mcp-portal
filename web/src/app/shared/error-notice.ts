@@ -3,14 +3,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { ApiFailure } from '../core/api-error';
 import { failureMessage } from '../core/error-messages';
 import { Notice } from './notice';
+import { neutraliseText } from './untrusted-text';
 
-/** Renders an API failure through its code only; backend `message` text is never shown. */
+/** Renders an API failure through its code; the only backend text shown is the `message` of a rejected administrator write, neutralised. */
 @Component({
   selector: 'app-error-notice',
   imports: [Notice, MatButtonModule],
   template: `
     <app-notice kind="error">
       <p class="message">{{ message() }}</p>
+      @if (detail(); as text) {
+        <p class="detail">{{ text }}</p>
+      }
       @if (requestRef(); as ref) {
         <p class="request-ref">
           <ng-container i18n="@@common.requestRef">Reference for support:</ng-container>
@@ -27,6 +31,12 @@ import { Notice } from './notice';
   styles: `
     .message {
       margin: 0;
+    }
+    .detail {
+      margin: 6px 0 0;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      unicode-bidi: isolate;
     }
     .request-ref {
       margin-top: 6px;
@@ -47,6 +57,11 @@ export class ErrorNotice {
   readonly retryable = input(false);
   readonly retry = output();
   protected readonly message = computed(() => failureMessage(this.failure()));
+  /** The gateway's own words for a rejected administrator write, as inert text; the page's own text stays above it. */
+  protected readonly detail = computed(() => {
+    const message = this.failure().message;
+    return message ? neutraliseText(message).text : null;
+  });
   protected readonly requestRef = computed(() => requestReference(this.failure()));
 }
 

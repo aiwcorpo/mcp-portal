@@ -11,6 +11,7 @@ import type {
   ToolEntry,
 } from '../app/api/generated';
 import type { MockContext } from './m3-mock';
+import { POLICY_FIXTURES } from './dynamic-mock';
 import type { MockStore } from './portal-mock';
 
 /** Mock layer for contracts 4.0.0: registry view, pending definitions and approval (C12 admin, C5 behind it). */
@@ -27,6 +28,10 @@ export interface AdminState {
   classified: Record<string, { risk: Risk; action: ToolAction; at: string }>;
   /** Emergency switches that are on (CC-194). */
   killSwitches: KillSwitch[];
+  /** The policies of Jira (changed) and of a new Notes server wait for approval (7.0.0). */
+  policies: boolean;
+  /** Servers whose pending policies the administrator approved in the mock. */
+  policiesApproved: string[];
 }
 
 export function initialAdminState(): AdminState {
@@ -37,6 +42,8 @@ export function initialAdminState(): AdminState {
     adapter: false,
     classified: {},
     killSwitches: [],
+    policies: false,
+    policiesApproved: [],
   };
 }
 
@@ -552,7 +559,60 @@ function resolveTool(state: Readonly<AdminState>, seed: SeedServer, tool: SeedTo
   return { seed, tool, approved: tool.approved ?? null, pending };
 }
 
+/** Policy fields of a registry entry: absent unless the scenario has policies waiting for approval. */
+function policyFields(state: Readonly<AdminState>, serverId: string): Partial<RegistryServer> {
+  const fixture = POLICY_FIXTURES[serverId];
+  if (!state.policies || !fixture) {
+    return {};
+  }
+  return state.policiesApproved.includes(serverId)
+    ? { policiesStatus: 'approved', policiesHash: fixture.hash }
+    : {
+        policiesStatus: 'pending_approval',
+        pendingPoliciesHash: fixture.hash,
+        ...(fixture.approved
+          ? {
+              policiesHash:
+                'sha256:0f3a9c5b7d1e4a6c8b0d2f4e6a8c0b1d3f5a7c9e1b3d5f7a9c0e2b4d6f8a1c3e',
+            }
+          : {}),
+      };
+}
+
 export function mockRegistry(state: Readonly<AdminState>): RegistryServer[] {
+  const servers = mockSeedRegistry(state);
+  if (!state.policies) {
+    return servers;
+  }
+  const notes: RegistryServer = {
+    serverId: 'mcp-notes',
+    system: 'notes',
+    version: '0.1.0',
+    tools: [
+      {
+        ...entry(
+          'list_notes',
+          'List notes',
+          'Lists the notes of a folder.',
+          'READ_ONLY',
+          'read',
+          { folder: { type: 'string', maxLength: 41 } },
+          ['folder'],
+        ),
+        status: 'pending_approval',
+        change: 'new',
+        source: 'server',
+        approvedInVersion: null,
+      },
+    ],
+  };
+  return [...servers, notes].map((server) => ({
+    ...server,
+    ...policyFields(state, server.serverId),
+  }));
+}
+
+function mockSeedRegistry(state: Readonly<AdminState>): RegistryServer[] {
   return seedOf(state).map((seed) => {
     const tools = seed.tools.map((tool): RegistryTool => {
       const resolved = resolveTool(state, seed, tool);
@@ -734,14 +794,6 @@ export function createAdminHandlers(store: MockStore, ctx: MockContext): HttpHan
   ];
 }
 
-const SERVER_IDS: readonly string[] = [
-  'mcp-confluence',
-  'mcp-jira',
-  'mcp-gitlab',
-  'mcp-servicedesk',
-  'mcp-opensearch',
-];
-
 /**
  * Emergency switch (CC-194): switching off needs no fresh MFA, lifting does, like the gateway's own rule behind the BFF.
  * A server or tool the registry does not know is 404; lifting a switch that is not on is a 204.
@@ -754,9 +806,11 @@ function killSwitchHandlers(
   const { at } = ctx;
   const headers = { 'X-Request-Id': ctx.requestId };
   const active = (): KillSwitch[] => store.state.killSwitches;
+  const knownServer = (serverId: string): boolean =>
+    mockRegistry(store.state).some((server) => server.serverId === serverId);
   const knownTool = (serverId: string, tool: string): boolean =>
-    seedOf(store.state)
-      .find((seed) => seed.serverId === serverId)
+    mockRegistry(store.state)
+      .find((server) => server.serverId === serverId)
       ?.tools.some((candidate) => candidate.name === tool) === true;
   const stepUp = (): Response =>
     HttpResponse.json(
@@ -783,7 +837,7 @@ function killSwitchHandlers(
     if (denied) {
       return denied;
     }
-    if (!SERVER_IDS.includes(serverId) || (tool !== null && !knownTool(serverId, tool))) {
+    if (!knownServer(serverId) || (tool !== null && !knownTool(serverId, tool))) {
       return ctx.failure('not_found_or_denied', 404);
     }
     const body = (await request.json().catch(() => null)) as { reason?: unknown } | null;
@@ -817,7 +871,7 @@ function killSwitchHandlers(
     if (denied) {
       return denied;
     }
-    if (!SERVER_IDS.includes(serverId)) {
+    if (!knownServer(serverId)) {
       return ctx.failure('not_found_or_denied', 404);
     }
     if (!store.state.mfaFresh) {

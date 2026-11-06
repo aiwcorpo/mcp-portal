@@ -7,10 +7,16 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
-import { AdminService, KillSwitch, RegistryServer, RegistryTool } from '../../api/generated';
+import {
+  AdminService,
+  ApprovePoliciesResult,
+  KillSwitch,
+  RegistryServer,
+  RegistryTool,
+} from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { SessionService } from '../../core/session.service';
@@ -21,6 +27,8 @@ import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
+import { AdminNav } from './admin-nav';
+import { PolicyApprovalIntent, PolicyDiffView } from './policy-diff-view';
 import { ToolDiff } from './tool-diff';
 
 interface ToolRow {
@@ -38,6 +46,8 @@ interface ServerRow {
   server: RegistryServer;
   name: string;
   pendingCount: number;
+  /** The policies and resource types of the server wait for approval; its tools are blocked until then. */
+  policiesPending: boolean;
   changes: string;
   state: string;
   tone: Tone;
@@ -89,7 +99,16 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
  */
 @Component({
   selector: 'app-admin-page',
-  imports: [SafeTextPipe, MatButtonModule, RouterLink, LoadError, Loading, Notice, ToolDiff],
+  imports: [
+    SafeTextPipe,
+    MatButtonModule,
+    AdminNav,
+    LoadError,
+    Loading,
+    Notice,
+    PolicyDiffView,
+    ToolDiff,
+  ],
   templateUrl: './admin-page.html',
   styleUrl: './admin-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,6 +135,10 @@ export class AdminPage implements OnInit {
   protected readonly opened = signal<ReadonlySet<string>>(new Set());
   protected readonly closedByUser = signal<ReadonlySet<string>>(new Set());
   protected readonly diffOpen = signal<ReadonlySet<string>>(new Set());
+  protected readonly policiesOpen = signal<ReadonlySet<string>>(new Set());
+  /** The policy approval confirmed before the MFA; carried out by the diff of that server when its hash is unchanged. */
+  protected readonly resumePolicies = signal<PolicyApprovalIntent | null>(null);
+  protected readonly ignoredEntries = signal<ApprovePoliciesResult['ignoredMappingEntries']>([]);
 
   protected readonly rows = computed<ServerRow[]>(() => {
     const state = this.registry();
@@ -143,25 +166,31 @@ export class AdminPage implements OnInit {
       const pendingTools = server.tools.filter((tool) => tool.status === 'pending_approval');
       const created = pendingTools.filter((tool) => tool.change === 'new').length;
       const enabled = server.enabled !== false;
+      const policiesPending = server.policiesStatus === 'pending_approval';
       return {
         server,
         name: systemName(server.system),
         pendingCount: pendingTools.length,
+        policiesPending,
         changes: changesText(created, pendingTools.length - created),
         state: serverOff
           ? $localize`:@@admin.serverSwitchedOff:Switched off`
           : !enabled
             ? $localize`:@@admin.serverDisabled:Disabled`
-            : pendingTools.length
+            : pendingTools.length || policiesPending
               ? $localize`:@@admin.serverPending:Pending approval`
               : $localize`:@@admin.serverActive:Active`,
-        tone: serverOff || !enabled ? 'error' : pendingTools.length ? 'warn' : 'ok',
+        tone:
+          serverOff || !enabled ? 'error' : pendingTools.length || policiesPending ? 'warn' : 'ok',
         tools,
       };
     });
   });
   protected readonly totalPending = computed(() =>
     this.rows().reduce((sum, row) => sum + row.pendingCount, 0),
+  );
+  protected readonly policiesPendingTotal = computed(
+    () => this.rows().filter((row) => row.policiesPending).length,
   );
 
   constructor() {
@@ -171,15 +200,58 @@ export class AdminPage implements OnInit {
   ngOnInit(): void {
     if (this.mfa() === 'ok') {
       this.mfaReturned.set(true);
-      const intent = this.resumeStore.take('approve-tool', this.session.username());
+      const kept = this.resumeStore.takeAny(this.session.username());
+      const intent = kept?.kind === 'approve-tool' ? kept : null;
       if (intent) {
         this.resumeApproval.set(intent);
         this.resumedFromMfa.set(true);
         this.diffOpen.update((set) => addTo(set, `${intent.serverId}/${intent.tool}`));
         this.opened.update((set) => addTo(set, intent.serverId));
       }
+      const draft = this.draftOf(kept);
+      if (draft?.op === 'approve-policies' && typeof draft.serverId === 'string') {
+        this.resumePolicies.set(draft);
+        this.resumedFromMfa.set(true);
+        this.policiesOpen.update((set) => addTo(set, draft.serverId));
+      }
       void this.router.navigate([], { queryParams: { mfa: null }, replaceUrl: true });
     }
+  }
+
+  /** The approval of policies kept before the MFA: an `admin-draft` of this page with the server and the hash. */
+  private draftOf(kept: ReturnType<ResumeIntentStore['takeAny']>): PolicyApprovalIntent | null {
+    if (kept?.kind !== 'admin-draft' || kept.page !== '/admin') {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(kept.draft) as PolicyApprovalIntent;
+      return parsed.op === 'approve-policies' && /^[A-Za-z0-9._:-]{1,128}$/.test(parsed.serverId)
+        ? parsed
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  protected togglePolicies(serverId: string): void {
+    this.policiesOpen.update((set) =>
+      set.has(serverId) ? removeFrom(set, serverId) : addTo(set, serverId),
+    );
+  }
+
+  protected onPoliciesResumeHandled(): void {
+    this.resumePolicies.set(null);
+    this.resumedFromMfa.set(false);
+  }
+
+  protected async onPoliciesApproved(row: ServerRow, result: ApprovePoliciesResult): Promise<void> {
+    this.policiesOpen.update((set) => removeFrom(set, row.server.serverId));
+    this.mfaReturned.set(false);
+    this.resumedFromMfa.set(false);
+    this.ignoredEntries.set(result.ignoredMappingEntries);
+    const name = row.name;
+    this.done.set($localize`:@@admin.policiesApproved:Approved the policies of ${name}:server:.`);
+    await this.read();
   }
 
   protected async load(): Promise<void> {

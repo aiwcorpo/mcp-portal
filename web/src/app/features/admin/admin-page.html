@@ -19,6 +19,20 @@
   </app-notice>
 }
 
+@if (ignoredEntries().length) {
+  <app-notice kind="warning" [dismissible]="true" (dismiss)="ignoredEntries.set([])">
+    <ng-container i18n="@@admin.ignoredEntries"
+      >The approval made these scope mapping entries invalid, and evaluation ignores them until you
+      correct the mapping:</ng-container
+    >
+    @for (entry of ignoredEntries(); track $index) {
+      <code class="ignored"
+        >{{ entry.group | safeText }} &rarr; {{ entry.scope | safeText }} ({{ entry.reason }})</code
+      >
+    }
+  </app-notice>
+}
+
 @let state = registry();
 @if (state.status === 'loading') {
   <app-loading />
@@ -27,22 +41,23 @@
 } @else {
   <p class="lead" i18n="@@admin.lead">
     New and changed tools are not made available to agents until you approve them. The CI pipeline
-    approves only read tools on its own; write and delete tools wait here.
+    approves only read tools on its own; write and delete tools wait here. The policies and resource
+    type declarations of a server are approved here too, and its tools stay blocked until then.
   </p>
-  <p class="switches">
-    <a routerLink="/admin/kill-switches" i18n="@@admin.killSwitchesLink">Emergency switches</a>
-    @if (switches().length) {
-      <span class="state-error"
-        >&middot;
-        <ng-container i18n="@@admin.killSwitchesOn"
-          >on: {{ switches().length }}</ng-container
-        ></span
-      >
-    }
-  </p>
+  <app-admin-nav />
+  @if (switches().length) {
+    <p class="switches state-danger">
+      <ng-container i18n="@@admin.killSwitchesOn">on: {{ switches().length }}</ng-container>
+    </p>
+  }
   @if (totalPending() > 0) {
     <p class="summary" role="status" i18n="@@admin.pendingTotal">
       Pending approval: {{ totalPending() }}
+    </p>
+  }
+  @if (policiesPendingTotal() > 0) {
+    <p class="summary" role="status" i18n="@@admin.policiesPendingTotal">
+      Servers with policies pending approval: {{ policiesPendingTotal() }}
     </p>
   }
   @if (rows().length) {
@@ -114,6 +129,52 @@
               {{ row.state }}
             </td>
           </tr>
+          @if (row.policiesPending) {
+            <tr role="row" class="tool policies">
+              <td role="cell" class="c-toggle"></td>
+              <td role="cell" class="c-tool" colspan="3">
+                <span i18n="@@admin.policiesWaiting"
+                  >Policies and resource types waiting for approval</span
+                >
+                <span class="note muted" i18n="@@admin.policiesBlocked"
+                  >The tools of this server are blocked until you approve them.</span
+                >
+              </td>
+              <td role="cell" class="c-actions">
+                <button
+                  mat-flat-button
+                  type="button"
+                  class="quiet"
+                  [attr.aria-expanded]="policiesOpen().has(row.server.serverId)"
+                  [attr.aria-controls]="'policies-' + row.server.serverId"
+                  (click)="togglePolicies(row.server.serverId)"
+                >
+                  @if (policiesOpen().has(row.server.serverId)) {
+                    <ng-container i18n="@@admin.hidePolicies">Hide differences</ng-container>
+                  } @else {
+                    <ng-container i18n="@@admin.showPolicies">Show differences</ng-container>
+                  }
+                  <span class="visually-hidden">
+                    ({{ row.name }},
+                    <ng-container i18n="@@admin.policiesWord">policies</ng-container>)</span
+                  >
+                </button>
+              </td>
+            </tr>
+            @if (policiesOpen().has(row.server.serverId)) {
+              <tr role="row" class="diff-row">
+                <td role="cell" colspan="5" [id]="'policies-' + row.server.serverId">
+                  <app-policy-diff
+                    [serverId]="row.server.serverId"
+                    [serverName]="row.name"
+                    [resume]="resumePolicies()"
+                    (resumeHandled)="onPoliciesResumeHandled()"
+                    (approved)="onPoliciesApproved(row, $event)"
+                  />
+                </td>
+              </tr>
+            }
+          }
           @if (open) {
             @for (item of row.tools; track item.key; let first = $first) {
               <tr role="row" class="tool" [id]="first ? 'tools-' + row.server.serverId : null">

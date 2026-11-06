@@ -60,8 +60,8 @@ describe('AdminPage', () => {
     expect(text(serverRow('Confluence'))).toContain('new: 1, changed: 1');
     expect(text(serverRow('Confluence'))).toContain('Pending approval');
     expect(text(serverRow('Jira'))).toContain('changed: 2');
-    expect(text(serverRow('Service Desk'))).toContain('Active');
-    expect(text(serverRow('OpenSearch'))).toContain('Disabled');
+    expect(text(serverRow('Servicedesk'))).toContain('Active');
+    expect(text(serverRow('Opensearch'))).toContain('Disabled');
     expect(text()).toContain('Pending approval: 4');
 
     expect(text(toolRow('confluence__add_label'))).toContain('New · Write');
@@ -99,16 +99,14 @@ describe('AdminPage', () => {
     expect(
       document.querySelector<HTMLAnchorElement>('a[href="/admin/kill-switches"]'),
     ).toBeTruthy();
-    expect(text(serverRow('Service Desk'))).toContain('Switched off');
+    expect(text(serverRow('Servicedesk'))).toContain('Switched off');
     expect(text(serverRow('Jira'))).not.toContain('Switched off');
-    labelled('Show tools (Service Desk)').click();
+    labelled('Show tools (Servicedesk)').click();
     await until(() =>
       expect(text(toolRow('servicedesk__get_ticket'))).toContain('Switched off · Read'),
     );
     // Jira has a waiting definition, so it is open from the start.
-    await until(() =>
-      expect(text(toolRow('jira__get_issue'))).toContain('Switched off · Read'),
-    );
+    await until(() => expect(text(toolRow('jira__get_issue'))).toContain('Switched off · Read'));
     expect(text(toolRow('jira__update_issue'))).not.toContain('Switched off');
   });
 
@@ -148,10 +146,10 @@ describe('AdminPage', () => {
     expect(text()).toContain('Source: CI pipeline (reviewed commit), version 1.5.0.');
     button('Approve definition (confluence__add_label)').click();
 
-    await until(() => expect(text()).toContain('Approved the definition of confluence__add_label.'));
     await until(() =>
-      expect(text(toolRow('confluence__add_label'))).toContain('Approved · Write'),
+      expect(text()).toContain('Approved the definition of confluence__add_label.'),
     );
+    await until(() => expect(text(toolRow('confluence__add_label'))).toContain('Approved · Write'));
     expect(text(serverRow('Confluence'))).toContain('changed: 1');
     expect(store.state.registryApproved).toEqual(['mcp-confluence/add_label']);
   });
@@ -168,7 +166,9 @@ describe('AdminPage', () => {
     expect(store.state.registryApproved).toEqual([]);
 
     button('Approve definition (confluence__update_page)').click();
-    await until(() => expect(text()).toContain('Approved the definition of confluence__update_page.'));
+    await until(() =>
+      expect(text()).toContain('Approved the definition of confluence__update_page.'),
+    );
     expect(store.state.registryApproved).toEqual(['mcp-confluence/update_page']);
   });
 
@@ -500,9 +500,7 @@ describe('AdminPage', () => {
 
     button('Show differences (confluence__add_label)').click();
 
-    await until(() =>
-      expect(text(toolRow('confluence__add_label'))).toContain('Approved · Write'),
-    );
+    await until(() => expect(text(toolRow('confluence__add_label'))).toContain('Approved · Write'));
   });
 
   it('shows a page error with a retry when the gateway does not answer, and the forbidden page for a non-admin API answer', async () => {

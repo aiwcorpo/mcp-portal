@@ -11,9 +11,9 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AdminService, KillSwitch, RegistryServer, ServerId } from '../../api/generated';
+import { AdminService, KillSwitch, RegistryServer } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
@@ -28,6 +28,7 @@ import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
+import { AdminNav } from './admin-nav';
 import { KILL_SWITCHES_PATH } from './admin-path';
 
 /** The longest reason the contract takes (KillSwitchRequest.reason). */
@@ -61,7 +62,7 @@ const keyOf = (serverId: string, tool: string | null | undefined): string =>
     DatePipe,
     FormsModule,
     MatButtonModule,
-    RouterLink,
+    AdminNav,
     ErrorNotice,
     LoadError,
     Loading,
@@ -94,7 +95,7 @@ export class KillSwitchesPage implements OnInit {
   /** The switch changed while the administrator was at the IdP; nothing was lifted. */
   protected readonly resumeRefused = signal(false);
 
-  protected readonly serverId = signal<ServerId | ''>('');
+  protected readonly serverId = signal('');
   protected readonly tool = signal('');
   protected readonly reason = signal('');
 
@@ -167,7 +168,7 @@ export class KillSwitchesPage implements OnInit {
   }
 
   protected onServer(value: string): void {
-    this.serverId.set(value as ServerId | '');
+    this.serverId.set(value);
     this.tool.set('');
   }
 
@@ -224,7 +225,7 @@ export class KillSwitchesPage implements OnInit {
   }
 
   private async performLift(
-    serverId: ServerId,
+    serverId: string,
     tool: string | null,
     target: string,
     setAt: string,

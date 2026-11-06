@@ -105,7 +105,7 @@ for (const lang of ['en', 'pl'] as const) {
       await shot(page, '01-sign-in');
 
       await page.goto('/catalog?mockSession=in');
-      await expect(page.getByRole('rowheader', { name: 'GitLab' })).toBeVisible();
+      await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
       await page.getByRole('button', { name: `${t('Show tools')} (Jira)` }).click();
       await shot(page, '02-mcp-servers');
 
@@ -277,6 +277,40 @@ for (const lang of ['en', 'pl'] as const) {
         ),
       ).toBeVisible();
       await shot(page, '17c-requests-not-accepted');
+    });
+
+    test('servers, systems, scope mapping, overrides and policies', async ({ page }) => {
+      await page.goto('/admin/servers?mockAdmin=in');
+      await expect(page.getByRole('rowheader', { name: /mcp-jira/ })).toBeVisible();
+      await shot(page, '21-servers');
+
+      await page.goto('/admin/systems?mockAdmin=in');
+      await page.getByRole('button', { name: `${t('Edit')} (jira)` }).click();
+      await page.getByLabel(t('Base address'), { exact: true }).fill('https://jira-new.internal');
+      await expect(page.getByLabel(t('Client secret'))).toBeVisible();
+      await shot(page, '22-system-address-changed');
+
+      await page.goto('/admin/scope-mapping?mockAdmin=in');
+      await page.getByRole('button', { name: t('Add group') }).click();
+      await expect(page.getByLabel(t('Group'), { exact: true })).toHaveCount(3);
+      await page.getByLabel(t('Group'), { exact: true }).last().fill('mcp-team-docs');
+      await page.getByLabel(t('Scopes (one per line)')).last().fill('Mystery::Place/x');
+      await page.getByRole('button', { name: t('Save mapping') }).click();
+      await expect(page.getByRole('alert').first()).toBeVisible();
+      await shot(page, '23-scope-mapping-errors');
+
+      await page.goto('/admin/overrides?mockAdmin=in');
+      await expect(
+        page.getByRole('rowheader', { name: /override-block-drop-table/ }),
+      ).toBeVisible();
+      await shot(page, '24-overrides');
+
+      await page.goto('/admin?mockAdmin=in&mockPolicies=in');
+      await page
+        .getByRole('button', { name: `${t('Show differences')} (Jira, ${t('policies')})` })
+        .click();
+      await expect(page.getByText(t('Policies and schema'))).toBeVisible();
+      await shot(page, '25-policies-pending', true);
     });
 
     test('administration approval dialogs and the step-up return', async ({ page }) => {
