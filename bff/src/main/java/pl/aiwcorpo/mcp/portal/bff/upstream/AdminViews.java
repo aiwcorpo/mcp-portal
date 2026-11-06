@@ -27,7 +27,7 @@ public final class AdminViews {
     private static final Set<String> RESOURCE_TYPE_FIELDS = Set.of("type", "attributes", "parent", "parentAttribute",
             "idPattern", "scopePattern", "earlyScopeCheck", "classification");
     private static final Set<String> SYSTEM_FIELDS = Set.of("system", "displayName", "baseUrl", "adapter", "product", "revokeUrl",
-            "timeout", "exchangeAudience", "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth");
+            "timeout", "exchangeAudience", "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth", "whoami");
     private static final Set<String> OAUTH_VIEW_FIELDS = Set.of("clientId", "authorizeUrl", "tokenUrl", "scopes",
             "clientSecretSet");
     private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic");
@@ -238,7 +238,10 @@ public final class AdminViews {
                 && credentialTypes(node.get("supportedTypes"))
                 && BrokerData.CREDENTIAL_TYPES.contains(RegistryData.text(node.get("defaultType")))
                 && CREDENTIAL_SCHEMES.contains(RegistryData.text(node.get("secretScheme")))
-                && (!node.has("oauth") || oauthView(node.get("oauth")));
+                && (!node.has("oauth") || oauthView(node.get("oauth")))
+                // Only a generic-rest system has one: the other adapters have their own check of a user secret (CC-247).
+                && (!node.has("whoami") || "generic-rest".equals(RegistryData.text(node.get("adapter")))
+                        && ContractValues.isWhoami(node.get("whoami")));
         return fits ? RegistryData.neutralized(node) : null;
     }
 

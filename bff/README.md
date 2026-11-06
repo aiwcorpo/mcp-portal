@@ -344,6 +344,17 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
   travels in the `PUT` body to the broker and is in no answer, log or audit event; a broker answer with a `clientSecret` field is
   refused by the closed schema. The broker asks for it again when an address changes (`422 system_rejected`, reason
   `client_secret_required`).
+- `whoami` (CC-247): a system of the adapter `generic-rest` may have one, `{path, usernameField}`, which the broker calls to check
+  a user secret when it is stored. The BFF checks it with the patterns of the contract (`path` starts with one `/`, no scheme or host,
+  no `..`, no query, at most 512 characters; `usernameField` is a field name or an RFC 6901 pointer), as a closed object, and refuses
+  it with `400` for any other adapter; the view carries it back. A `generic-rest` system takes `user-secret` or `service-account` and
+  never `user-oauth`: the broker's `422 system_rejected` with the reason `credential_type_not_supported_by_adapter` is passed on like every
+  other reason (any `reason` of the pattern `^[a-z][a-z0-9_]*$` is, there is no list in the BFF to keep in step).
+- Connections (CC-247): `verified` is required in a connection, in the answer to `PUT .../secret` and in the OAuth completion. A secret stored
+  without a check has `verified: false` and `backendUser: null`; the BFF passes both on (a connection without `verified` breaks the
+  contract and is left out; a secret answer without it is a `503`), the catalog status comes from the status of the connection alone, and
+  the audit event of such a write has no `backendUser`. The BFF reads `userSecretVerified` of `GET /v1/systems` but does not pass it
+  on: `CatalogCredential` of C12 has no field for it.
 - Audit: the gateway and the broker record every change. The portal writes `admin_change` only for an attempt that changed nothing
   (reasons such as `not_admin`, `step_up_required`, `precondition_failed`, the `reason` of an upstream rejection); override
   attempts carry `overrideId`, `overrideTarget` and `textSha256`, never the text.

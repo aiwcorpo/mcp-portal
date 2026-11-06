@@ -59,6 +59,14 @@ Testy: `AdminRefreshTokensTest` (10). README: sekcja "Fresh MFA for the administ
 - Cache tokenow po wymianie jest czyszczony przez kazde logowanie (`LoginSuccessHandler` zostawia tylko kontekst i klientow OAuth), wiec po step-upie
   wymiana daje token z nowym `auth_time`; mapper IdP musi kopiowac ten claim (C4 i C5 liczą go same, brak = nieswiezy).
 
+## M7: CC-247, `whoami` i `verified` (2026-11-06)
+
+- `whoami` systemu `generic-rest` (zamkniety obiekt, wzorce kontraktu, inny adapter to `400`), w widoku sprawdzany tak samo; powod `credential_type_not_supported_by_adapter`
+  przechodzi jak kazdy inny (`reason` wg wzorca, bez listy w BFF).
+- `verified` wymagane w `Connection`, odpowiedzi `PUT secret` i zakonczeniu OAuth; `backendUser` moze byc null (polaczenie bez `verified` jest pomijane, odpowiedz sekretu
+  bez niego to `503`); status katalogu nie zalezy od `backendUser`; audyt bez `backendUser`, gdy null. `SystemInfo.userSecretVerified` czytane, nie oddawane (C12 `CatalogCredential` go nie ma).
+- Testy: `ConnectionVerifiedTest` (8), `AdminMirrorsTest` o whoami, system generic-rest z `user-secret`, powod adaptera.
+
 ## M6: stan (2026-11-03)
 
 `clean verify`: 503 testy, 0 błędów (`bff/ci/run.sh`). Opis: sekcja "M6" w README.

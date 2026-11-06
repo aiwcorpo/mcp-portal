@@ -54,6 +54,17 @@ class AdminMirrorsTest extends PortalHarness {
     private static final String OVERRIDE_BODY = C12.requestExample("PUT", OVERRIDE, "block_drop_table").toString();
     private static final String APPROVE_BODY = "{\"policiesHash\":\"" + HASH + "\"}";
     private static final String SYSTEM_BODY = C12.requestExample("PUT", SYSTEM, "notes").toString();
+    /** A system with an OAuth client, so the client secret rules are exercised on an adapter that has one (not generic-rest). */
+    private static final String OAUTH_SYSTEM_BODY = "{\"baseUrl\":\"https://git.internal\",\"adapter\":\"gitlab\","
+            + "\"supportedTypes\":[\"user-oauth\"],\"defaultType\":\"user-oauth\",\"secretScheme\":\"Bearer\","
+            + "\"oauth\":{\"clientId\":\"mcp-broker-gitlab\",\"clientSecret\":\"test-only-client-secret-0000000000\","
+            + "\"authorizeUrl\":\"https://git.internal/oauth/authorize\",\"tokenUrl\":\"https://git.internal/oauth/token\","
+            + "\"scopes\":[\"read_api\"]}}";
+    private static final String OAUTH_SYSTEM_VIEW = "{\"system\":\"notes\",\"displayName\":\"Notes\","
+            + "\"baseUrl\":\"https://git.internal\",\"adapter\":\"gitlab\",\"supportedTypes\":[\"user-oauth\"],"
+            + "\"defaultType\":\"user-oauth\",\"secretScheme\":\"Bearer\",\"oauth\":{\"clientId\":\"mcp-broker-gitlab\","
+            + "\"authorizeUrl\":\"https://git.internal/oauth/authorize\",\"tokenUrl\":\"https://git.internal/oauth/token\","
+            + "\"scopes\":[\"read_api\"],\"clientSecretSet\":true}}";
 
     private static final String ADMIN_GATEWAY_PATHS = "/admin/v1/(servers.*|policy/.*|registry/servers/[^/]+/policies/.*)";
     private static final String ADMIN_BROKER_PATHS = "/v1/admin/systems.*";
@@ -728,9 +739,22 @@ class AdminMirrorsTest extends PortalHarness {
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("generic-rest", "ftp")},
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"Bearer\"", "\"Digest\"")},
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"adapter\"", "\"userSecretScheme\":\"Token\",\"adapter\"")},
-                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"clientId\"", "\"password\":\"x\",\"clientId\"")},
-                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"scopes\":[\"notes.read\",\"notes.write\"]", "\"scopes\":[\"a b\"]")},
-                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("[\"user-oauth\"]", "[\"user-oauth\",\"user-oauth\"]")});
+                new String[] {"PUT", "/api/v1/admin/systems/notes", OAUTH_SYSTEM_BODY.replace("\"clientId\"", "\"password\":\"x\",\"clientId\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", OAUTH_SYSTEM_BODY.replace("\"scopes\":[\"read_api\"]", "\"scopes\":[\"a b\"]")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", OAUTH_SYSTEM_BODY.replace("[\"user-oauth\"]", "[\"user-oauth\",\"user-oauth\"]")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("generic-rest", "gitlab")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"path\":\"/api/me\"", "\"path\":\"api/me\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"path\":\"/api/me\"", "\"path\":\"//evil.test/me\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"path\":\"/api/me\"", "\"path\":\"/api/../me\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"path\":\"/api/me\"", "\"path\":\"/api/me?x=1\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"path\":\"/api/me\"", "\"path\":\"https://evil.test/me\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"path\":\"/api/me\"", "\"path\":\"/" + "a".repeat(512) + "\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"usernameField\":\"username\"", "\"usernameField\":\"a b\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"usernameField\":\"username\"", "\"usernameField\":\"/a//b\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"usernameField\":\"username\"", "\"usernameField\":\"\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"usernameField\":\"username\"", "\"usernameField\":\"u\",\"extra\":1")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"whoami\":{\"path\":\"/api/me\",\"usernameField\":\"username\"}", "\"whoami\":{\"path\":\"/api/me\"}")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"whoami\":{\"path\":\"/api/me\",\"usernameField\":\"username\"}", "\"whoami\":\"/api/me\"")});
         for (String[] request : bad) {
             Map<String, String> headers = switch (request[0]) {
                 case "PATCH", "PUT" -> request[1].contains("/overrides/") || request[1].contains("/systems/")
@@ -778,13 +802,69 @@ class AdminMirrorsTest extends PortalHarness {
     }
 
     @Test
-    void aClientSecretGoesToTheBrokerAndNeverBackOrIntoTheLogs() {
-        SECRETS.add(CLIENT_SECRET);
+    void aGenericRestSystemWithUserSecretsAndAWhoamiGoesThroughTheMirrorsBothWays() {
         TestBrowser admin = admin();
         String view = C12.responseExample("PUT", SYSTEM, 200, "notes").toString();
         stub(BROKER, "PUT", "/v1/admin/systems/notes", 200, view, "ETag", ETAG);
+        stub(BROKER, "GET", "/v1/admin/systems/notes", 200, view, "ETag", ETAG);
 
-        HttpResponse<String> response = admin.request("PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY, true,
+        HttpResponse<String> put = admin.request("PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY, true,
+                Map.of("If-None-Match", "*"));
+        C12.assertResponse("PUT", SYSTEM, put);
+        assertThat(put.statusCode()).isEqualTo(200);
+        assertThat(JSON.readTree(brokerAdminRequests().getLast().getBodyAsString()).get("whoami"))
+                .isEqualTo(JSON.readTree(SYSTEM_BODY).get("whoami"));
+        assertThat(JSON.readTree(put.body()).get("whoami").get("path").asString()).isEqualTo("/api/me");
+
+        HttpResponse<String> get = admin.get("/api/v1/admin/systems/notes");
+        C12.assertResponse("GET", SYSTEM, get);
+        assertThat(JSON.readTree(get.body()).get("whoami").get("usernameField").asString()).isEqualTo("username");
+
+        String pointer = SYSTEM_BODY.replace("\"usernameField\":\"username\"", "\"usernameField\":\"/data/user/login\"");
+        assertThat(admin.request("PUT", "/api/v1/admin/systems/notes", pointer, true, Map.of("If-None-Match", "*"))
+                .statusCode()).isEqualTo(200);
+        String noWhoami = SYSTEM_BODY.replaceAll(",\"whoami\":\\{[^}]*\\}", "");
+        assertThat(noWhoami).doesNotContain("whoami");
+        assertThat(admin.request("PUT", "/api/v1/admin/systems/notes", noWhoami, true, Map.of("If-None-Match", "*"))
+                .statusCode()).isEqualTo(200);
+
+        for (String broken : List.of(view.replace("generic-rest", "gitlab"),
+                view.replace("\"path\":\"/api/me\"", "\"path\":\"//evil.test\""),
+                view.replace("\"usernameField\":\"username\"", "\"usernameField\":\"a b\""),
+                view.replace("}}", "},\"whoami2\":1}"))) {
+            stub(BROKER, "GET", "/v1/admin/systems/notes", 200, broken);
+            assertThat(admin.get("/api/v1/admin/systems/notes").statusCode()).as(broken).isEqualTo(503);
+        }
+    }
+
+    @Test
+    void aGenericRestSystemWithAUserOauthTypeIsTheBrokersRefusalAndItsReasonIsPassedOn() {
+        TestBrowser admin = admin();
+        stub(BROKER, "PUT", "/v1/admin/systems/notes", 422, "{\"error\":\"system_rejected\","
+                + "\"reason\":\"credential_type_not_supported_by_adapter\",\"message\":\"generic-rest takes no user-oauth\"}");
+        String body = SYSTEM_BODY.replace("[\"user-secret\"]", "[\"user-oauth\"]").replace("\"defaultType\":\"user-secret\"",
+                "\"defaultType\":\"user-oauth\"");
+
+        HttpResponse<String> response = admin.request("PUT", "/api/v1/admin/systems/notes", body, true,
+                Map.of("If-None-Match", "*"));
+
+        C12.assertResponse("PUT", SYSTEM, response);
+        assertThat(response.statusCode()).isEqualTo(422);
+        JsonNode answer = JSON.readTree(response.body());
+        assertThat(answer.get("error").asString()).isEqualTo("system_rejected");
+        assertThat(answer.get("reason").asString()).isEqualTo("credential_type_not_supported_by_adapter");
+        ContractSchemas.assertValid(AUDIT, lastAuditEvent());
+        assertThat(lastAuditEvent().get("reason").asString()).isEqualTo("credential_type_not_supported_by_adapter");
+    }
+
+    @Test
+    void aClientSecretGoesToTheBrokerAndNeverBackOrIntoTheLogs() {
+        SECRETS.add(CLIENT_SECRET);
+        TestBrowser admin = admin();
+        String view = OAUTH_SYSTEM_VIEW;
+        stub(BROKER, "PUT", "/v1/admin/systems/notes", 200, view, "ETag", ETAG);
+
+        HttpResponse<String> response = admin.request("PUT", "/api/v1/admin/systems/notes", OAUTH_SYSTEM_BODY, true,
                 Map.of("If-None-Match", "*"));
 
         assertThat(response.statusCode()).isEqualTo(200);
@@ -799,7 +879,7 @@ class AdminMirrorsTest extends PortalHarness {
 
         stub(BROKER, "PUT", "/v1/admin/systems/notes", 422, "{\"error\":\"system_rejected\",\"reason\":\"client_secret_required\","
                 + "\"message\":\"clientSecret is required\"}");
-        HttpResponse<String> needsSecret = admin.request("PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY, true,
+        HttpResponse<String> needsSecret = admin.request("PUT", "/api/v1/admin/systems/notes", OAUTH_SYSTEM_BODY, true,
                 Map.of("If-Match", ETAG));
         C12.assertResponse("PUT", SYSTEM, needsSecret);
         assertThat(JSON.readTree(needsSecret.body()).get("reason").asString()).isEqualTo("client_secret_required");

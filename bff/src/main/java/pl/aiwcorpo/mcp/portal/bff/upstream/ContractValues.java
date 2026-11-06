@@ -40,6 +40,12 @@ public final class ContractValues {
     public static final java.util.Set<String> SYSTEM_PRODUCTS = java.util.Set.of("jira", "confluence");
     /** {@code SystemTimeout}: ISO 8601, at most 10 minutes. */
     public static final Pattern SYSTEM_TIMEOUT = Pattern.compile("^PT(?:[1-9][0-9]{0,2}S|[1-9]M(?:[0-5]?[0-9]S)?|10M)$");
+    /** {@code SystemWhoami.path} (CC-247): relative to the base URL, no scheme or host, no {@code ..}, no query. */
+    public static final Pattern WHOAMI_PATH = Pattern
+            .compile("^/(?!/)(?!.*\\.\\.)[A-Za-z0-9._~!$&'()*+,;=:@%/-]{0,511}$");
+    /** {@code SystemWhoami.usernameField}: a top-level field name or an RFC 6901 pointer of at most eight steps. */
+    public static final Pattern WHOAMI_USERNAME_FIELD = Pattern
+            .compile("^(?:[A-Za-z_][A-Za-z0-9_-]{0,63}|(?:/[A-Za-z0-9_~-]{1,64}){1,8})$");
     /** {@code DefinitionHash} and {@code policiesHash}. */
     public static final Pattern HASH = Pattern.compile("^sha256:[0-9a-f]{64}$");
 
@@ -53,6 +59,15 @@ public final class ContractValues {
     /** A display name the BFF accepts or passes on: the contract pattern, and no character that {@link TextHygiene} hides. */
     public static boolean isDisplayName(String value) {
         return value != null && SYSTEM_DISPLAY_NAME.matcher(value).matches() && TextHygiene.isClean(value, false);
+    }
+
+    /** A {@code whoami} object of the contract: both fields, nothing else, each by its pattern. */
+    public static boolean isWhoami(tools.jackson.databind.JsonNode node) {
+        return node != null && node.isObject() && node.size() == 2 && node.has("path") && node.has("usernameField")
+                && node.get("path").isString() && node.get("usernameField").isString()
+                && node.get("path").asString().length() <= 512
+                && WHOAMI_PATH.matcher(node.get("path").asString()).matches()
+                && WHOAMI_USERNAME_FIELD.matcher(node.get("usernameField").asString()).matches();
     }
 
     public static boolean isServerId(String value) {

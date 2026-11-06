@@ -153,7 +153,7 @@ final class AdminInput {
     static JsonNode systemRequest(byte[] raw) {
         ObjectNode in = object(raw);
         if (in == null || !only(in, "displayName", "baseUrl", "adapter", "product", "revokeUrl", "timeout", "exchangeAudience",
-                "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth")
+                "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth", "whoami")
                 || !in.has("baseUrl") || !in.has("adapter") || !in.has("supportedTypes") || !in.has("defaultType")
                 || !in.has("secretScheme")) {
             return null;
@@ -165,6 +165,9 @@ final class AdminInput {
         if (!isUrl(string(in, "baseUrl")) || !ContractValues.SYSTEM_ADAPTERS.contains(adapter)
                 || !typeList(in.get("supportedTypes")) || !CREDENTIAL_TYPES.contains(string(in, "defaultType"))
                 || !CREDENTIAL_SCHEMES.contains(string(in, "secretScheme"))) {
+            return null;
+        }
+        if (in.has("whoami") && (!"generic-rest".equals(adapter) || !ContractValues.isWhoami(in.get("whoami")))) {
             return null;
         }
         boolean atlassian = "atlassian-dc".equals(adapter);
