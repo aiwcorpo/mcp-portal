@@ -28,10 +28,16 @@ public final class BrokerModel {
             String defaultType,
             List<String> oauthScopes,
             String userSecretScheme,
-            String deployment) {
+            String deployment,
+            String displayName) {
 
         public SystemInfo(String system, List<String> supportedTypes, String defaultType, List<String> oauthScopes) {
-            this(system, supportedTypes, defaultType, oauthScopes, null, null);
+            this(system, supportedTypes, defaultType, oauthScopes, null, null, null);
+        }
+
+        public SystemInfo(String system, List<String> supportedTypes, String defaultType, List<String> oauthScopes,
+                          String userSecretScheme, String deployment) {
+            this(system, supportedTypes, defaultType, oauthScopes, userSecretScheme, deployment, null);
         }
     }
 

@@ -21,6 +21,12 @@ public final class ContractValues {
     public static final Pattern SYSTEM_ID = Pattern.compile("^(?!(?:" + RESERVED + ")$)[a-z][a-z0-9]{1,30}$");
     /** {@code ServerId}: always {@code mcp-<system>}. */
     public static final Pattern SERVER_ID = Pattern.compile("^mcp-(?!(?:" + RESERVED + ")$)[a-z][a-z0-9]{1,30}$");
+    /** {@code OverrideTarget}: the gateway, every server, or one server by the same pattern as {@code ServerId} (CC-244). */
+    public static final Pattern OVERRIDE_TARGET = Pattern
+            .compile("^(gateway|all-servers|mcp-(?!(?:" + RESERVED + ")$)[a-z][a-z0-9]{1,30})$");
+    /** {@code SystemDisplayName} (CC-243): a short label without control, format or separator characters. */
+    public static final Pattern SYSTEM_DISPLAY_NAME = Pattern
+            .compile("^[^\\p{Cc}\\p{Cf}\\p{Cs}\\u2028\\u2029]{1,64}$");
     /** {@code QualifiedToolName}: {@code <system>__<tool>}. */
     public static final Pattern QUALIFIED_TOOL = Pattern.compile(
             "^(?!(?:" + RESERVED + ")__)[a-z][a-z0-9]{1,30}__[a-z][a-z0-9]*(_[a-z0-9]+)*$");
@@ -42,6 +48,11 @@ public final class ContractValues {
 
     public static boolean isSystemId(String value) {
         return value != null && SYSTEM_ID.matcher(value).matches();
+    }
+
+    /** A display name the BFF accepts or passes on: the contract pattern, and no character that {@link TextHygiene} hides. */
+    public static boolean isDisplayName(String value) {
+        return value != null && SYSTEM_DISPLAY_NAME.matcher(value).matches() && TextHygiene.isClean(value, false);
     }
 
     public static boolean isServerId(String value) {

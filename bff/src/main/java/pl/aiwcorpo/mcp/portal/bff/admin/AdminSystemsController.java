@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.admin.AdminOperations.Op;
@@ -52,14 +51,10 @@ class AdminSystemsController {
     }
 
     @PutMapping("/api/v1/admin/systems/{system}")
-    ResponseEntity<Object> put(@PathVariable String system, @RequestBody(required = false) byte[] rawBody,
-                               Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
+    ResponseEntity<Object> put(@PathVariable String system, Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
         return operations.write(null, authentication, request, response, () -> {
-            // C12 has a 400 and no 404 for this operation: an id that cannot be a system id is a malformed request.
-            if (!ContractValues.isSystemId(system)) {
-                throw ApiException.badRequest();
-            }
-            JsonNode body = AdminInput.systemRequest(rawBody);
+            requireSystemId(system);
+            JsonNode body = AdminInput.systemRequest(AdminBody.read(request));
             if (body == null) {
                 throw ApiException.badRequest();
             }
@@ -74,13 +69,14 @@ class AdminSystemsController {
         return operations.write(null, authentication, request, response, () -> {
             requireSystemId(system);
             return new Op(Upstream.BROKER, HttpMethod.DELETE, "/v1/admin/systems/{system}", new Object[] {system}, null,
-                    AdminOperations.ifMatchRequired(request, true), true, false, null, null, null);
+                    AdminOperations.ifMatchRequired(request), true, false, null, null, null);
         });
     }
 
+    /** An id that does not fit the pattern is a malformed request, never a missing resource (CC-243). */
     private static void requireSystemId(String system) {
         if (!ContractValues.isSystemId(system)) {
-            throw AdminTargets.notFound();
+            throw ApiException.badRequest();
         }
     }
 }

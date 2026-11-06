@@ -187,6 +187,15 @@ public final class TestBrowser {
         return send(builder, headers);
     }
 
+    /** A request with any body publisher, for bodies of unknown length (chunked) that {@link #request} cannot make. */
+    public HttpResponse<String> requestWith(String method, String path, HttpRequest.BodyPublisher body, boolean withCsrf,
+                                            Map<String, String> extraHeaders) {
+        HttpRequest.Builder builder = request(path).method(method, body).header("Content-Type", "application/json");
+        Map<String, String> headers = new LinkedHashMap<>(csrf(withCsrf));
+        headers.putAll(extraHeaders);
+        return send(builder, headers);
+    }
+
     public HttpResponse<String> send(HttpRequest.Builder builder, Map<String, String> headers) {
         headers.forEach(builder::header);
         if (!cookies.isEmpty()) {

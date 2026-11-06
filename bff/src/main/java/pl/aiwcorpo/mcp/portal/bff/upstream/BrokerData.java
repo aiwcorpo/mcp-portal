@@ -61,7 +61,9 @@ public final class BrokerData {
             result.add(new BrokerModel.SystemInfo(s.system(), supported, s.defaultType(),
                     s.oauthScopes() == null ? List.of() : s.oauthScopes(),
                     s.userSecretScheme() != null && SCHEMES.contains(s.userSecretScheme()) ? s.userSecretScheme() : null,
-                    s.deployment() != null && DEPLOYMENTS.contains(s.deployment()) ? s.deployment() : null));
+                    s.deployment() != null && DEPLOYMENTS.contains(s.deployment()) ? s.deployment() : null,
+                    // The label is optional in C4 and the catalog of C12 has no field for it, so a bad one is simply dropped.
+                    ContractValues.isDisplayName(s.displayName()) ? s.displayName() : null));
         }
         return result;
     }

@@ -136,4 +136,35 @@ class DynamicSystemsTest {
             assertThat(RegistryData.validRegistry(List.of(serverWithTool(broken)))).as(broken).isNull();
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"gateway", "all-servers", "mcp-notes", "mcp-jira"})
+    void anOverrideTargetIsTheGatewayEveryServerOrOneServer(String target) {
+        assertThat(ContractValues.OVERRIDE_TARGET.matcher(target).matches()).isTrue();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"mcp-gateway", "mcp-admin", "mcp-ci", "mcp-", "Gateway", "all servers", "notes", "mcp-Notes"})
+    void aReservedOrMalformedOverrideTargetIsRefused(String target) {
+        assertThat(ContractValues.OVERRIDE_TARGET.matcher(target).matches()).isFalse();
+    }
+
+    @Test
+    void aDisplayNameIsAShortLabelWithoutHiddenCharacters() {
+        assertThat(ContractValues.isDisplayName("Notes")).isTrue();
+        assertThat(ContractValues.isDisplayName("x".repeat(64))).isTrue();
+        assertThat(ContractValues.isDisplayName("Zespol B (test)")).isTrue();
+        for (String bad : new String[] {null, "", "x".repeat(65), "a\u0000b", "a\u200Bb", "a\u202Eb", "a\u2028b", "a\nb"}) {
+            assertThat(ContractValues.isDisplayName(bad)).as(String.valueOf(bad)).isFalse();
+        }
+    }
+
+    @Test
+    void theDisplayNameOfASystemInfoIsKeptWhenValidAndDroppedOtherwise() {
+        List<BrokerModel.SystemInfo> systems = BrokerData.validSystems(List.of(
+                new BrokerModel.SystemInfo("notes", List.of("user-oauth"), "user-oauth", List.of(), null, null, "Notes"),
+                new BrokerModel.SystemInfo("wiki", List.of("user-oauth"), "user-oauth", List.of(), null, null, "a\u202Eb")));
+
+        assertThat(systems).extracting(BrokerModel.SystemInfo::displayName).containsExactly("Notes", null);
+    }
 }

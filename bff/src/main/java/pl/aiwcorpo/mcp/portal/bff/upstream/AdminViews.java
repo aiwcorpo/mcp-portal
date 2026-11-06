@@ -26,7 +26,7 @@ public final class AdminViews {
     private static final Set<String> POLICIES_FIELDS = Set.of("namespace", "schema", "files");
     private static final Set<String> RESOURCE_TYPE_FIELDS = Set.of("type", "attributes", "parent", "parentAttribute",
             "idPattern", "scopePattern", "earlyScopeCheck", "classification");
-    private static final Set<String> SYSTEM_FIELDS = Set.of("system", "baseUrl", "adapter", "product", "revokeUrl",
+    private static final Set<String> SYSTEM_FIELDS = Set.of("system", "displayName", "baseUrl", "adapter", "product", "revokeUrl",
             "timeout", "exchangeAudience", "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth");
     private static final Set<String> OAUTH_VIEW_FIELDS = Set.of("clientId", "authorizeUrl", "tokenUrl", "scopes",
             "clientSecretSet");
@@ -34,7 +34,6 @@ public final class AdminViews {
     private static final Set<String> CREDENTIAL_SCHEMES = Set.of("Bearer", "Basic", "Token", "ApiKey");
     private static final Pattern HTTPS = Pattern.compile("^https://\\S{1,247}$");
     private static final Pattern OVERRIDE_ID = Pattern.compile("^override-[a-z0-9][a-z0-9-]{0,54}$");
-    private static final Pattern OVERRIDE_TARGET = Pattern.compile("^(gateway|all-servers|mcp-[a-z][a-z0-9]{1,30})$");
     private static final Pattern NAMESPACE = Pattern.compile("^[A-Z][A-Za-z0-9]{0,30}$");
     private static final Pattern FILE_NAME = Pattern.compile("^[a-z0-9][a-z0-9._-]{0,63}\\.cedar$");
     private static final Pattern ATTRIBUTE = Pattern.compile("^[a-z][A-Za-z0-9]*$");
@@ -119,7 +118,7 @@ public final class AdminViews {
         boolean fits = node != null && node.isObject() && RegistryData.onlyFields(node, OVERRIDE_FIELDS)
                 && OVERRIDE_FIELDS.stream().allMatch(node::has)
                 && OVERRIDE_ID.matcher(RegistryData.text(node.get("id"))).matches()
-                && OVERRIDE_TARGET.matcher(RegistryData.text(node.get("target"))).matches()
+                && ContractValues.OVERRIDE_TARGET.matcher(RegistryData.text(node.get("target"))).matches()
                 && boundedText(node.get("text"), 8000) && boundedText(node.get("setBy"), 255)
                 && ContractValues.isTimestamp(RegistryData.text(node.get("setAt")));
         return fits ? RegistryData.neutralized(node) : null;
@@ -188,6 +187,19 @@ public final class AdminViews {
         return true;
     }
 
+    /** {@code ApprovedPolicies}: all three are null while nothing is approved. */
+    public static JsonNode approvedPolicies(JsonNode node) {
+        if (node == null || !node.isObject()
+                || !RegistryData.onlyFields(node, Set.of("approvedHash", "approvedPolicies", "approvedResourceTypes"))
+                || !node.has("approvedHash") || !node.has("approvedPolicies") || !node.has("approvedResourceTypes")) {
+            return null;
+        }
+        boolean fits = (node.get("approvedHash").isNull() || RegistryData.hash(node.get("approvedHash")))
+                && (node.get("approvedPolicies").isNull() || policies(node.get("approvedPolicies")))
+                && (node.get("approvedResourceTypes").isNull() || resourceTypes(node.get("approvedResourceTypes")));
+        return fits ? RegistryData.neutralized(node) : null;
+    }
+
     /** {@code ApprovePoliciesResult}: the mapping entries that the approval makes invalid. */
     public static JsonNode approveResult(JsonNode node) {
         if (node == null || !node.isObject() || !RegistryData.onlyFields(node, Set.of("ignoredMappingEntries"))
@@ -213,6 +225,7 @@ public final class AdminViews {
     public static JsonNode system(JsonNode node) {
         boolean fits = node != null && node.isObject() && RegistryData.onlyFields(node, SYSTEM_FIELDS)
                 && ContractValues.isSystemId(RegistryData.text(node.get("system")))
+                && displayName(node.get("displayName"))
                 && urlOrAbsent(node, "baseUrl", true)
                 && ContractValues.SYSTEM_ADAPTERS.contains(RegistryData.text(node.get("adapter")))
                 && (!node.has("product") || ContractValues.SYSTEM_PRODUCTS.contains(RegistryData.text(node.get("product"))))
@@ -227,6 +240,15 @@ public final class AdminViews {
                 && CREDENTIAL_SCHEMES.contains(RegistryData.text(node.get("secretScheme")))
                 && (!node.has("oauth") || oauthView(node.get("oauth")));
         return fits ? RegistryData.neutralized(node) : null;
+    }
+
+    /**
+     * Always present in the view (the system id when the administrator gave none). A name with hidden characters is not
+     * refused: it is shown with them written out, like every other text of the view, but it must still fit the length.
+     */
+    private static boolean displayName(JsonNode node) {
+        String text = RegistryData.text(node);
+        return !text.isEmpty() && text.codePointCount(0, text.length()) <= 64;
     }
 
     private static boolean urlOrAbsent(JsonNode node, String field, boolean required) {

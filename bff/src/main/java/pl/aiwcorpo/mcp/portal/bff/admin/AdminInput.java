@@ -29,7 +29,6 @@ final class AdminInput {
     private static final Set<String> CREDENTIAL_SCHEMES = Set.of("Bearer", "Basic", "Token", "ApiKey");
     private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic");
     private static final Pattern INTERNAL_URL = Pattern.compile("^https://[!-~]{1,247}$");
-    private static final Pattern OVERRIDE_TARGET = Pattern.compile("^(gateway|all-servers|mcp-[a-z][a-z0-9]{1,30})$");
     private static final Pattern SCOPE_CHARS = Pattern.compile("^[!#-\\[\\]-~]{1,128}$");
     private static final JsonMapper MAPPER = JsonMapper.builder()
             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
@@ -130,7 +129,7 @@ final class AdminInput {
     /** {@code OverrideRequest}: the text is one Cedar policy, shown to administrators, so no hidden characters. */
     static JsonNode override(byte[] raw) {
         ObjectNode in = object(raw);
-        if (in == null || !only(in, "target", "text") || !OVERRIDE_TARGET.matcher(string(in, "target")).matches()) {
+        if (in == null || !only(in, "target", "text") || !ContractValues.OVERRIDE_TARGET.matcher(string(in, "target")).matches()) {
             return null;
         }
         String text = string(in, "text");
@@ -153,10 +152,13 @@ final class AdminInput {
      */
     static JsonNode systemRequest(byte[] raw) {
         ObjectNode in = object(raw);
-        if (in == null || !only(in, "baseUrl", "adapter", "product", "revokeUrl", "timeout", "exchangeAudience",
+        if (in == null || !only(in, "displayName", "baseUrl", "adapter", "product", "revokeUrl", "timeout", "exchangeAudience",
                 "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth")
                 || !in.has("baseUrl") || !in.has("adapter") || !in.has("supportedTypes") || !in.has("defaultType")
                 || !in.has("secretScheme")) {
+            return null;
+        }
+        if (in.has("displayName") && !ContractValues.isDisplayName(string(in, "displayName"))) {
             return null;
         }
         String adapter = string(in, "adapter");

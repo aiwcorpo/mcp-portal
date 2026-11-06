@@ -30,7 +30,7 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 
 ## M7: wersja 2.0.0, serwery i systemy jako dane (2026-11-06)
 
-`mvn test`: 578 testow (526 z 1.0.0, `AdminMirrorsTest` 23, `DynamicSystemsTest` 28), 0 bledow. Jary 7.0.0 z `~/.m2` (po CC-240). Opis: sekcja "2.0.0" w README.
+`mvn test`: 598 testow (526 z 1.0.0, `AdminMirrorsTest` 29, `DynamicSystemsTest` 43), 0 bledow. Jary 7.0.0 z `~/.m2` (po CC-240). Opis: sekcja "2.0.0" w README.
 
 - Usuniete: `AdminTargets.SERVER_IDS`, `RegistryData.SERVER_IDS`, `BrokerData.SYSTEMS`, `GatewayData.RESOURCE_TYPES`, wzorzec nazw narzedzi z piecioma
   systemami. Zastapily je wzorce kontraktu w `ContractValues` (z listą zarezerwowanych id, CC-237). Port C13 ma `systems()` (klucze katalogu IGA).
@@ -38,13 +38,17 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 - Odbicia C12: `AdminOperations` (jedna sciezka: grupa, MFA, wywolanie z tokenem, `If-Match`/`If-None-Match`/`ETag` bez zmian, sprawdzenie odpowiedzi,
   mapowanie odmow), `AdminInput` (ciala zamkniete), `AdminViews` (odpowiedzi zamkniete, znaki ukryte zapisane), trzy kontrolery. `UpstreamCalls.admin`
   czyta odpowiedz do 8 MiB. Zasady MFA: patrz tabela w README; `PATCH` serwera bez MFA tylko dla ciala `{"enabled":false}` (CC-240).
-- Decyzje wlasne: (1) `DELETE servers/{serverId}` wymaga MFA (CC-239: gateway wymaga, a C12 pokazuje zwykle `401`); (2) zly `If-Match` to `400`, a przy
-  dwoch `DELETE` (C12 nie ma tam `400`) `412`; (3) zla sciezka `PUT overrides/{id}` i `PUT systems/{system}` to `400` (C12 nie ma tam `404`), przy
-  pozostalych operacjach `404`; (4) `409` i `422` przechodza tylko z kodem, ktory operacja wymienia, reszta to `503`; (5) zatwierdzenie polityk wymaga
+- Decyzje wlasne: (1) `409` i `422` przechodza tylko z kodem, ktory operacja wymienia, reszta to `503`; (2) zatwierdzenie polityk wymaga
   `Sec-Fetch-Site: same-origin` jak zatwierdzenie narzedzia.
+- CC-243 i CC-244: zastapienie nadpisania (`PUT` z `If-Match`) wymaga MFA, utworzenie nie; `DELETE` serwera i `PUT` nadpisania maja `401` ze step-upem w C12;
+  zly wzorzec id w sciezce albo zly `If-Match` i `If-None-Match` to zawsze `400` (nigdy `404` ani `412`; poprawne id bez zasobu `404`, `DELETE` systemu bez systemu `204`);
+  nowe lustro `GET .../registry/servers/{serverId}/policies` (`ApprovedPolicies`, null gdy nic nie zatwierdzono); `displayName` systemu (1..64, bez znakow sterujacych
+  i formatujacych; w widoku zawsze, katalog C12 go nie ma, wiec `SystemInfo` go czyta i nie oddaje); cel nadpisania wg `ServerId` (bez zarezerwowanych id);
+  `audience_not_allowed` z brokera przechodzi jako `system_rejected` z powodem.
+- Ciala zadan administracji: kontrola grupy przed odczytem ciala (kontrolery czytaja strumien sami, bez `@RequestBody`), limit 64 KiB: `AdminBodyLimitFilter`
+  odpowiada `400` po `Content-Length` przed odczytem (C12 nie ma `413`), a ciag bez dlugosci jest przerywany przy czytaniu. Limit na proxy opisany w README.
 - Cache tokenow po wymianie jest czyszczony przez kazde logowanie (`LoginSuccessHandler` zostawia tylko kontekst i klientow OAuth), wiec po step-upie
   wymiana daje token z nowym `auth_time`; mapper IdP musi kopiowac ten claim (C4 i C5 liczą go same, brak = nieswiezy).
-- Luki w kontrakcie: patrz raport (`deleteAdminServer` bez `StepUpOrUnauthenticated`, brak `400` przy `If-Match` w dwoch `DELETE`, brak `404` w `putAdminOverride` i `putAdminSystem`).
 
 ## M6: stan (2026-11-03)
 

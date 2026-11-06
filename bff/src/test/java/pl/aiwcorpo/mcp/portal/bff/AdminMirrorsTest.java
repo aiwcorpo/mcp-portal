@@ -42,6 +42,7 @@ class AdminMirrorsTest extends PortalHarness {
     private static final String MAPPING = "/api/v1/admin/policy/scope-mapping";
     private static final String OVERRIDES = "/api/v1/admin/policy/overrides";
     private static final String OVERRIDE = "/api/v1/admin/policy/overrides/{id}";
+    private static final String POLICIES = "/api/v1/admin/registry/servers/{serverId}/policies";
     private static final String PENDING = "/api/v1/admin/registry/servers/{serverId}/policies/pending";
     private static final String APPROVE = "/api/v1/admin/registry/servers/{serverId}/policies/approve";
     private static final String SYSTEMS = "/api/v1/admin/systems";
@@ -88,7 +89,7 @@ class AdminMirrorsTest extends PortalHarness {
                         OVERRIDE_BODY, create, false, GATEWAY, "/admin/v1/policy/overrides/override-block-drop-table", 200,
                         override, "override_rejected"),
                 new Write("putOverrideReplace", "PUT", "/api/v1/admin/policy/overrides/override-block-drop-table", OVERRIDE,
-                        OVERRIDE_BODY, ifMatch(), false, GATEWAY, "/admin/v1/policy/overrides/override-block-drop-table", 200,
+                        OVERRIDE_BODY, ifMatch(), true, GATEWAY, "/admin/v1/policy/overrides/override-block-drop-table", 200,
                         override, "override_rejected"),
                 new Write("deleteOverride", "DELETE", "/api/v1/admin/policy/overrides/override-block-drop-table", OVERRIDE,
                         null, ifMatch(), true, GATEWAY, "/admin/v1/policy/overrides/override-block-drop-table", 204, "", null),
@@ -164,6 +165,7 @@ class AdminMirrorsTest extends PortalHarness {
                 new String[] {MAPPING, MAPPING}, new String[] {OVERRIDES, OVERRIDES},
                 new String[] {"/api/v1/admin/policy/overrides/override-block-drop-table", OVERRIDE},
                 new String[] {"/api/v1/admin/registry/servers/mcp-notes/policies/pending", PENDING},
+                new String[] {"/api/v1/admin/registry/servers/mcp-notes/policies", POLICIES},
                 new String[] {SYSTEMS, SYSTEMS}, new String[] {"/api/v1/admin/systems/notes", SYSTEM});
     }
 
@@ -278,10 +280,7 @@ class AdminMirrorsTest extends PortalHarness {
 
             HttpResponse<String> response = callFrom(stale, write, "/admin/servers");
 
-            // C12 shows a plain 401 for deleteAdminServer although the gateway needs a fresh MFA for it (CC-239).
-            if (!"deleteServer".equals(write.name())) {
-                C12.assertResponse(write.method(), write.template(), response);
-            }
+            C12.assertResponse(write.method(), write.template(), response);
             if (write.stepUp()) {
                 assertThat(response.statusCode()).as(write.name()).isEqualTo(401);
                 JsonNode body = JSON.readTree(response.body());
@@ -376,9 +375,7 @@ class AdminMirrorsTest extends PortalHarness {
 
             HttpResponse<String> response = callFrom(admin, write, "/admin/systems");
 
-            if (!"deleteServer".equals(write.name())) {
-                C12.assertResponse(write.method(), write.template(), response);
-            }
+            C12.assertResponse(write.method(), write.template(), response);
             assertThat(response.statusCode()).as(write.name()).isEqualTo(401);
             JsonNode body = JSON.readTree(response.body());
             assertThat(body.get("error").asString()).isEqualTo("step_up_required");
@@ -411,8 +408,7 @@ class AdminMirrorsTest extends PortalHarness {
             assertThat(JSON.readTree(missing.body()).get("error").asString()).isEqualTo("precondition_required");
             HttpResponse<String> malformed = call(admin, write, Map.of("If-Match", "W/\"weak\""));
             C12.assertResponse(write.method(), write.template(), malformed);
-            assertThat(malformed.statusCode()).as(write.name())
-                    .isEqualTo("DELETE".equals(write.method()) ? 412 : 400);
+            assertThat(malformed.statusCode()).as(write.name()).isEqualTo(400);
             assertThat(upstreamRequests(write)).as(write.name()).isEmpty();
         }
         TestBrowser browser = admin;
@@ -444,15 +440,15 @@ class AdminMirrorsTest extends PortalHarness {
             assertThat(forbidden.statusCode()).as(write.name()).isEqualTo(403);
 
             stub(write.upstream(), write.method(), write.upstreamPath(), 503,
-                    "{\"error\":\"upstream_unavailable\",\"message\":\"database host db-7 refused\"}", "Retry-After", "10");
+                    "{\"error\":\"upstream_unavailable\",\"message\":\"database host pg-marker.internal refused\"}", "Retry-After", "10");
             HttpResponse<String> down = call(admin, write, write.headers());
             C12.assertResponse(write.method(), write.template(), down);
             assertThat(down.statusCode()).as(write.name()).isEqualTo(503);
-            assertThat(down.body()).doesNotContain("db-7");
+            assertThat(down.body()).doesNotContain("pg-marker");
 
             for (JsonNode event : auditEvents().subList(events, auditEvents().size())) {
                 ContractSchemas.assertValid(AUDIT, event);
-                assertThat(event.toString()).doesNotContain("db-7").doesNotContain(CLIENT_SECRET);
+                assertThat(event.toString()).doesNotContain("pg-marker").doesNotContain(CLIENT_SECRET);
             }
         }
     }
@@ -506,33 +502,194 @@ class AdminMirrorsTest extends PortalHarness {
     }
 
     @Test
-    void anUnknownResourceIsNotFoundAndAnUpstream404IsTheSameAnswer() {
+    void aWellFormedIdWithoutAResourceIsNotFoundAndAMalformedOneIsABadRequestNeverANotFound() {
         TestBrowser admin = admin();
         stub(GATEWAY, "GET", "/admin/v1/servers/mcp-notes", 404, "{\"error\":\"not_found_or_denied\"}");
         HttpResponse<String> missing = admin.get("/api/v1/admin/servers/mcp-notes");
         C12.assertResponse("GET", SERVER, missing);
         assertThat(missing.statusCode()).isEqualTo(404);
         assertThat(JSON.readTree(missing.body()).get("error").asString()).isEqualTo("not_found_or_denied");
+        stub(BROKER, "GET", "/v1/admin/systems/notes", 404, "{\"error\":\"not_found_or_denied\"}");
+        assertThat(admin.get("/api/v1/admin/systems/notes").statusCode()).isEqualTo(404);
+        int upstream = gatewayAdminRequests().size();
 
-        for (String path : List.of("/api/v1/admin/servers/notes", "/api/v1/admin/servers/mcp-gateway",
+        List<String> malformed = List.of("/api/v1/admin/servers/notes", "/api/v1/admin/servers/mcp-gateway",
                 "/api/v1/admin/servers/mcp-Notes", "/api/v1/admin/policy/overrides/block",
                 "/api/v1/admin/policy/overrides/override-", "/api/v1/admin/systems/Notes", "/api/v1/admin/systems/gateway",
-                "/api/v1/admin/registry/servers/mcp-admin/policies/pending")) {
-            assertThat(admin.get(path).statusCode()).as(path).isEqualTo(404);
+                "/api/v1/admin/registry/servers/mcp-admin/policies/pending", "/api/v1/admin/registry/servers/mcp-admin/policies");
+        for (String path : malformed) {
+            HttpResponse<String> read = admin.get(path);
+            assertThat(read.statusCode()).as(path).isEqualTo(400);
+            assertThat(JSON.readTree(read.body()).get("error").asString()).isEqualTo("invalid_request");
         }
         for (String path : List.of("/api/v1/admin/servers/mcp-gateway", "/api/v1/admin/policy/overrides/block",
                 "/api/v1/admin/systems/gateway")) {
-            HttpResponse<String> delete = admin.request("DELETE", path, null, true, ifMatch());
-            assertThat(delete.statusCode()).as(path).isEqualTo(404);
+            for (Map<String, String> headers : List.of(ifMatch(), Map.<String, String>of())) {
+                HttpResponse<String> delete = admin.request("DELETE", path, null, true, headers);
+                assertThat(delete.statusCode()).as(path).isEqualTo(400);
+            }
         }
-        HttpResponse<String> badOverrideId = admin.request("PUT", "/api/v1/admin/policy/overrides/block", OVERRIDE_BODY, true,
-                Map.of("If-None-Match", "*"));
-        assertThat(badOverrideId.statusCode()).isEqualTo(400);
-        HttpResponse<String> badSystemId = admin.request("PUT", "/api/v1/admin/systems/Notes", SYSTEM_BODY, true,
-                Map.of("If-None-Match", "*"));
-        assertThat(badSystemId.statusCode()).isEqualTo(400);
-        assertThat(gatewayAdminRequests()).hasSize(1);
+        for (String path : List.of("/api/v1/admin/policy/overrides/block", "/api/v1/admin/systems/Notes")) {
+            HttpResponse<String> put = admin.request("PUT", path, path.contains("override") ? OVERRIDE_BODY : SYSTEM_BODY,
+                    true, Map.of("If-None-Match", "*"));
+            assertThat(put.statusCode()).as(path).isEqualTo(400);
+        }
+        HttpResponse<String> approve = admin.request("POST", "/api/v1/admin/registry/servers/mcp-gateway/policies/approve",
+                APPROVE_BODY, true, SAME_ORIGIN);
+        assertThat(approve.statusCode()).isEqualTo(400);
+        assertThat(gatewayAdminRequests()).hasSize(upstream);
+        assertThat(brokerAdminRequests()).hasSize(1);
+    }
+
+    @Test
+    void removingASystemThatDoesNotExistIsAnUpstream204AndAStaleTagIs412() {
+        TestBrowser admin = admin();
+        stub(BROKER, "DELETE", "/v1/admin/systems/notes", 204, "");
+        HttpResponse<String> gone = admin.request("DELETE", "/api/v1/admin/systems/notes", null, true, ifMatch());
+        C12.assertResponse("DELETE", SYSTEM, gone);
+        assertThat(gone.statusCode()).isEqualTo(204);
+        stub(BROKER, "DELETE", "/v1/admin/systems/notes", 412, "{\"error\":\"precondition_failed\"}");
+        HttpResponse<String> stale = admin.request("DELETE", "/api/v1/admin/systems/notes", null, true, ifMatch());
+        C12.assertResponse("DELETE", SYSTEM, stale);
+        assertThat(stale.statusCode()).isEqualTo(412);
+    }
+
+    @Test
+    void replacingAnOverrideNeedsAFreshMfaButCreatingOneDoesNot() {
+        TestBrowser stale = adminWithStaleLogin();
+        String override = C12.responseExample("PUT", OVERRIDE, 200, "block_drop_table").toString();
+        stub(GATEWAY, "PUT", "/admin/v1/policy/overrides/override-block-drop-table", 200, override, "ETag", ETAG);
+        String path = "/api/v1/admin/policy/overrides/override-block-drop-table";
+
+        HttpResponse<String> create = stale.request("PUT", path, OVERRIDE_BODY, true, Map.of("If-None-Match", "*"));
+        C12.assertResponse("PUT", OVERRIDE, create);
+        assertThat(create.statusCode()).isEqualTo(200);
+
+        HttpResponse<String> replace = stale.request("PUT", path, OVERRIDE_BODY, true,
+                Map.of("If-Match", ETAG, "Referer", "https://mcp-gateway.internal/admin/overrides"));
+        C12.assertResponse("PUT", OVERRIDE, replace);
+        assertThat(replace.statusCode()).isEqualTo(401);
+        JsonNode body = JSON.readTree(replace.body());
+        assertThat(body.get("error").asString()).isEqualTo("step_up_required");
+        assertThat(body.get("stepUpUrl").asString()).isEqualTo("/api/v1/auth/login?stepUp=true&returnPath=/admin/overrides");
+        assertThat(GATEWAY.findAll(anyRequestedFor(urlPathEqualTo("/admin/v1/policy/overrides/override-block-drop-table"))))
+                .hasSize(1);
+
+        TestBrowser fresh = admin();
+        assertThat(fresh.request("PUT", path, OVERRIDE_BODY, true, Map.of("If-Match", ETAG)).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void theApprovedPoliciesOfAServerAreShownWithNullsWhileNothingIsApproved() {
+        TestBrowser admin = admin();
+        String path = "/api/v1/admin/registry/servers/mcp-notes/policies";
+        JsonNode nothing = C12.responseExample("GET", POLICIES, 200, "nothing_approved");
+        stub(GATEWAY, "GET", "/admin/v1/registry/servers/mcp-notes/policies", 200, nothing.toString());
+
+        HttpResponse<String> response = admin.get(path);
+
+        C12.assertResponse("GET", POLICIES, response);
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(JSON.readTree(response.body())).isEqualTo(nothing);
+
+        String approved = "{\"approvedHash\":\"" + HASH + "\",\"approvedPolicies\":{\"namespace\":\"Notes\","
+                + "\"schema\":\"namespace Notes {}\",\"files\":[{\"name\":\"read.cedar\",\"text\":\"a\\u202Eb\"}]},"
+                + "\"approvedResourceTypes\":[{\"type\":\"Notes::Folder\",\"attributes\":[\"name\"],"
+                + "\"idPattern\":\"^[a-z]+$\",\"scopePattern\":\"^[a-z]+$\",\"earlyScopeCheck\":true}]}";
+        stub(GATEWAY, "GET", "/admin/v1/registry/servers/mcp-notes/policies", 200, approved);
+        HttpResponse<String> shown = admin.get(path);
+        C12.assertResponse("GET", POLICIES, shown);
+        assertThat(shown.body()).contains("a<U+202E>b").contains(HASH);
+
+        stub(GATEWAY, "GET", "/admin/v1/registry/servers/mcp-notes/policies", 404, "{\"error\":\"not_found_or_denied\"}");
+        HttpResponse<String> unknown = admin.get(path);
+        C12.assertResponse("GET", POLICIES, unknown);
+        assertThat(unknown.statusCode()).isEqualTo(404);
+
+        for (String broken : List.of("{}", "{\"approvedHash\":null,\"approvedPolicies\":null}",
+                "{\"approvedHash\":\"sha256:abc\",\"approvedPolicies\":null,\"approvedResourceTypes\":null}",
+                "{\"approvedHash\":null,\"approvedPolicies\":null,\"approvedResourceTypes\":null,\"x\":1}",
+                "{\"approvedHash\":null,\"approvedPolicies\":null,\"approvedResourceTypes\":[{\"type\":\"x\"}]}")) {
+            stub(GATEWAY, "GET", "/admin/v1/registry/servers/mcp-notes/policies", 200, broken);
+            assertThat(admin.get(path).statusCode()).as(broken).isEqualTo(503);
+        }
+        stub(GATEWAY, "GET", "/admin/v1/registry/servers/mcp-notes/policies", 503, "{\"error\":\"upstream_unavailable\"}");
+        assertThat(admin.get(path).statusCode()).isEqualTo(503);
+    }
+
+    @Test
+    void aDisplayNameOfASystemIsCheckedGoingInAndNeutralizedComingOut() {
+        TestBrowser admin = admin();
+        String view = C12.responseExample("PUT", SYSTEM, 200, "notes").toString();
+        stub(BROKER, "PUT", "/v1/admin/systems/notes", 200, view);
+        String plain = SYSTEM_BODY.replaceAll("\"displayName\":\"[^\"]*\",?", "");
+        String named = "{\"displayName\":\"Notes\"," + plain.substring(1);
+        assertThat(admin.request("PUT", "/api/v1/admin/systems/notes", named, true, Map.of("If-None-Match", "*"))
+                .statusCode()).isEqualTo(200);
+        assertThat(admin.request("PUT", "/api/v1/admin/systems/notes", plain, true, Map.of("If-None-Match", "*"))
+                .statusCode()).isEqualTo(200);
+        int sent = brokerAdminRequests().size();
+
+        for (String name : List.of("\"\"", "\"" + "x".repeat(65) + "\"", "\"a\\u0000b\"", "\"a\\u200Bb\"", "\"a\\u202Eb\"",
+                "\"a\\u2028b\"", "\"a\\nb\"", "5", "null")) {
+            String body = "{\"displayName\":" + name + "," + plain.substring(1);
+            HttpResponse<String> response = admin.request("PUT", "/api/v1/admin/systems/notes", body, true,
+                    Map.of("If-None-Match", "*"));
+            assertThat(response.statusCode()).as(name).isEqualTo(400);
+        }
+        assertThat(brokerAdminRequests()).hasSize(sent);
+        assertThat(admin.request("PUT", "/api/v1/admin/systems/notes",
+                "{\"displayName\":\"" + "x".repeat(64) + "\"," + plain.substring(1), true,
+                Map.of("If-None-Match", "*")).statusCode()).isEqualTo(200);
+
+        stub(BROKER, "GET", "/v1/admin/systems/notes", 200, view.replace("\"displayName\":\"Notes\"", "\"displayName\":\"No\\u202Etes\""));
+        HttpResponse<String> shown = admin.get("/api/v1/admin/systems/notes");
+        C12.assertResponse("GET", SYSTEM, shown);
+        assertThat(JSON.readTree(shown.body()).get("displayName").asString()).isEqualTo("No<U+202E>tes");
+        stub(BROKER, "GET", "/v1/admin/systems/notes", 200, view.replace("\"displayName\":\"Notes\",", ""));
+        assertThat(admin.get("/api/v1/admin/systems/notes").statusCode()).as("always present in the view").isEqualTo(503);
+    }
+
+    @Test
+    void anAdministrationBodyOverTheLimitIsRefusedByItsLengthBeforeItIsReadAndNeverReachesAnUpstream() {
+        TestBrowser admin = admin();
+        String large = "{\"scopeMapping\":[],\"pad\":\"" + "x".repeat(70_000) + "\"}";
+
+        for (Write write : writes()) {
+            if (write.body() == null) {
+                continue;
+            }
+            HttpResponse<String> response = admin.request(write.method(), write.path(), large, true, write.headers());
+            assertThat(response.statusCode()).as(write.name()).isEqualTo(400);
+            assertThat(JSON.readTree(response.body()).get("error").asString()).isEqualTo("invalid_request");
+            assertThat(response.headers().firstValue("X-Request-Id")).isPresent();
+        }
+        assertThat(gatewayAdminRequests()).isEmpty();
         assertThat(brokerAdminRequests()).isEmpty();
+    }
+
+    @Test
+    void aBodyOfUnknownLengthIsCutWhileItIsReadAndAUserWithoutTheGroupIsNotAnswered400ForItsSize() {
+        TestBrowser admin = admin();
+        java.util.function.Supplier<java.io.InputStream> endless = () -> new java.io.InputStream() {
+            private long sent;
+
+            @Override
+            public int read() {
+                return sent++ < 200_000 ? '"' : -1;
+            }
+        };
+        HttpResponse<String> chunked = admin.requestWith("PUT", MAPPING,
+                java.net.http.HttpRequest.BodyPublishers.ofInputStream(endless), true, ifMatch());
+        assertThat(chunked.statusCode()).isEqualTo(400);
+
+        TestBrowser alice = login(ALICE, Instant.now());
+        alice.get("/api/v1/me");
+        String large = "{\"scopeMapping\":[],\"pad\":\"" + "x".repeat(70_000) + "\"}";
+        assertThat(alice.request("PUT", MAPPING, large, true, ifMatch()).statusCode()).isEqualTo(403);
+        assertThat(alice.requestWith("PUT", MAPPING, java.net.http.HttpRequest.BodyPublishers.ofInputStream(endless), true,
+                ifMatch()).statusCode()).isEqualTo(403);
+        assertThat(gatewayAdminRequests()).isEmpty();
     }
 
     @Test

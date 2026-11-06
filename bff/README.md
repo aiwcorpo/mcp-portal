@@ -314,19 +314,30 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
 | --- | --- | --- |
 | `GET`, `POST /api/v1/admin/servers`, `GET`, `PATCH`, `DELETE .../servers/{serverId}` | C5 `/admin/v1/servers` | create, delete and every `PATCH` except a body that only sets `enabled: false` |
 | `GET`, `PUT /api/v1/admin/policy/scope-mapping` | C5 | `PUT` |
-| `GET .../policy/overrides`, `GET`, `PUT`, `DELETE .../overrides/{id}` | C5 | `DELETE` only (an override can only forbid) |
-| `GET .../registry/servers/{serverId}/policies/pending`, `POST .../policies/approve` | C5 | approve (also needs `Sec-Fetch-Site: same-origin`) |
+| `GET .../policy/overrides`, `GET`, `PUT`, `DELETE .../overrides/{id}` | C5 | `DELETE` and a `PUT` that replaces (`If-Match`); a create (`If-None-Match: *`) needs none, since an override can only forbid (CC-243) |
+| `GET .../registry/servers/{serverId}/policies` (approved), `GET .../policies/pending`, `POST .../policies/approve` | C5 | approve (also needs `Sec-Fetch-Site: same-origin`) |
 | `GET /api/v1/admin/systems`, `GET`, `PUT`, `DELETE .../systems/{system}` | C4 `/v1/admin/systems` | `PUT` and `DELETE` |
 
 - Fresh MFA is `StepUpPolicy.requireFresh`, the mechanism and window of lifting a kill switch, with `returnPath` from the page that sent
   the request. An upstream `401 step_up_required` (C4 and C5 check `auth_time` of the exchanged token within 300 s on their own) becomes
   the same `401 step_up_required` with `stepUpUrl`, in every mirror. The token exchange cache of the session is dropped by every login,
   so a token exchanged after a step-up carries the new `auth_time`; the IdP mapper has to copy that claim into the exchanged token.
-- `DELETE .../servers/{serverId}` asks for fresh MFA although C12 shows a plain `401` for it: the gateway needs it (CC-239).
 - Preconditions: `If-Match` is required (`428` without it, no call) by `PATCH`, the scope mapping `PUT`, `DELETE` of an override and
-  of a system; `PUT` of an override and of a system takes `If-Match` (replace) or `If-None-Match: *` (create), not both. A malformed
-  tag is `400`, and `412` for the two `DELETE`s, where C12 lists no `400`.
-- Request bodies are closed (no field the schema does not know, no repeated key, at most 64 KiB, types not coerced). A server has no
+  of a system; `PUT` of an override and of a system takes `If-Match` (replace) or `If-None-Match: *` (create), not both. One rule
+  for malformed input (CC-243): a tag or an id in the path that does not fit its pattern is `400 invalid_request`, never `404` or
+  `412`; a well-formed id without a resource is `404` (`DELETE` of a system that is not there is `204`), a well-formed tag that is no
+  longer current is `412`.
+- Request bodies are closed (no field the schema does not know, no repeated key, types not coerced). The administrator
+  check comes before the body is read: a user without the group gets `403` and not a byte is read. A body is at most 64 KiB:
+  `AdminBodyLimitFilter` answers `400 invalid_request` to an administrator whose `Content-Length` is above that before anything is read
+  (the C12 operations list no `413`), and a body without a length (chunked) is cut at the limit while it is read. The reverse proxy
+  should enforce the same for `/api/` (nginx: `client_max_body_size 64k;` in the `location /api/` block), so the BFF is not the first
+  place that sees a large body.
+- A system has an optional `displayName` (1 to 64 characters, no control, format or separator characters; `400` otherwise), always
+  present in the answer (the id when none was given) and written out like every other text. The catalog of C12 has no field for it, so the
+  BFF reads it from `GET /v1/systems` and drops it. `exchangeAudience` of a `token-exchange` system must be on the allowlist of the
+  broker: otherwise `422 system_rejected` with the reason `audience_not_allowed`, passed on like any other reason (CC-244). An
+  override target is `gateway`, `all-servers` or a `ServerId` (a reserved id is no target). A server has no
   `tlsName` (the gateway pins `<serverId>.internal`) and `adapter` is set only on create (CC-240). The client secret of a system
   travels in the `PUT` body to the broker and is in no answer, log or audit event; a broker answer with a `clientSecret` field is
   refused by the closed schema. The broker asks for it again when an address changes (`422 system_rejected`, reason

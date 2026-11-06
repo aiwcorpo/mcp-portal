@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.admin.AdminOperations.AuditRef;
@@ -26,8 +25,8 @@ import tools.jackson.databind.JsonNode;
 /**
  * The scope mapping (which group grants which resource scopes) and the emergency overrides (C12 over C5, CC-234,
  * CC-237 A11): both are data of the administrator that servers read, so a change takes effect on every server within
- * seconds. The mapping and the removal of an override need a fresh MFA; writing an override does not, because an
- * override can only forbid and an incident must not wait for a second factor.
+ * seconds. The mapping, the removal of an override and the replacement of one need a fresh MFA (a weaker text widens
+ * access); creating an override does not, because it can only forbid and an incident must not wait for a second factor.
  */
 @RestController
 class AdminPolicyController {
@@ -48,10 +47,10 @@ class AdminPolicyController {
     }
 
     @PutMapping("/api/v1/admin/policy/scope-mapping")
-    ResponseEntity<Object> putScopeMapping(@RequestBody(required = false) byte[] rawBody, Authentication authentication,
-                                           HttpServletRequest request, HttpServletResponse response) {
+    ResponseEntity<Object> putScopeMapping(Authentication authentication, HttpServletRequest request,
+                                           HttpServletResponse response) {
         return operations.write(null, authentication, request, response, () -> {
-            JsonNode body = AdminInput.scopeMapping(rawBody);
+            JsonNode body = AdminInput.scopeMapping(AdminBody.read(request));
             if (body == null) {
                 throw ApiException.badRequest();
             }
@@ -77,20 +76,18 @@ class AdminPolicyController {
     }
 
     @PutMapping("/api/v1/admin/policy/overrides/{id}")
-    ResponseEntity<Object> putOverride(@PathVariable String id, @RequestBody(required = false) byte[] rawBody,
-                                       Authentication authentication, HttpServletRequest request,
+    ResponseEntity<Object> putOverride(@PathVariable String id, Authentication authentication, HttpServletRequest request,
                                        HttpServletResponse response) {
         return operations.write(null, validOrNull(id), authentication, request, response, () -> {
-            // C12 has a 400 and no 404 for this operation: an id that cannot be an override id is a malformed request.
-            if (!OVERRIDE_ID.matcher(id).matches()) {
-                throw ApiException.badRequest();
-            }
-            JsonNode body = AdminInput.override(rawBody);
+            requireOverrideId(id);
+            JsonNode body = AdminInput.override(AdminBody.read(request));
             if (body == null) {
                 throw ApiException.badRequest();
             }
+            AdminPreconditions preconditions = AdminOperations.createOrReplace(request);
+            // A replace can weaken a text that forbids something, which widens access like a removal (CC-243); a create cannot.
             return new Op(Upstream.GATEWAY, HttpMethod.PUT, "/admin/v1/policy/overrides/{id}", new Object[] {id}, body,
-                    AdminOperations.createOrReplace(request), false, false, AdminViews::override, "override_rejected", null,
+                    preconditions, preconditions.ifMatch() != null, false, AdminViews::override, "override_rejected", null,
                     new AuditRef(id, body.get("target").asString(), sha256(body.get("text").asString())));
         });
     }
@@ -101,7 +98,7 @@ class AdminPolicyController {
         return operations.write(null, validOrNull(id), authentication, request, response, () -> {
             requireOverrideId(id);
             return new Op(Upstream.GATEWAY, HttpMethod.DELETE, "/admin/v1/policy/overrides/{id}", new Object[] {id}, null,
-                    AdminOperations.ifMatchRequired(request, true), true, false, null, null, null);
+                    AdminOperations.ifMatchRequired(request), true, false, null, null, null);
         });
     }
 
@@ -119,9 +116,10 @@ class AdminPolicyController {
         }
     }
 
+    /** An id that does not fit the pattern is a malformed request, never a missing resource (CC-243). */
     private static void requireOverrideId(String id) {
         if (!OVERRIDE_ID.matcher(id).matches()) {
-            throw AdminTargets.notFound();
+            throw ApiException.badRequest();
         }
     }
 }

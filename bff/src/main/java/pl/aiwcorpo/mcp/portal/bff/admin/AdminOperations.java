@@ -260,24 +260,18 @@ class AdminOperations {
     }
 
     /**
-     * {@code If-Match} of an operation that needs it: missing is {@code 428}. A malformed one is {@code 400} where C12 lists
-     * that, and where it does not (the two removals) {@code 412}: a tag of that shape can never match the stored document.
+     * {@code If-Match} of an operation that needs it: missing is {@code 428}, malformed is {@code 400} (CC-243: input that
+     * is not shaped right is never a 404 or a 412; {@code 412} is a well-formed tag that is no longer current).
      */
-    static AdminPreconditions ifMatchRequired(HttpServletRequest request, boolean malformedIsPreconditionFailed) {
+    static AdminPreconditions ifMatchRequired(HttpServletRequest request) {
         String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);
         if (ifMatch == null) {
             throw new ApiException(HttpStatus.PRECONDITION_REQUIRED, ApiError.of("precondition_required"));
         }
         if (!AdminInput.wellFormedEtag(ifMatch)) {
-            throw malformedIsPreconditionFailed
-                    ? new ApiException(HttpStatus.PRECONDITION_FAILED, ApiError.of("precondition_failed"))
-                    : ApiException.badRequest();
+            throw ApiException.badRequest();
         }
         return new AdminPreconditions(ifMatch, false);
-    }
-
-    static AdminPreconditions ifMatchRequired(HttpServletRequest request) {
-        return ifMatchRequired(request, false);
     }
 
     /** A create sends {@code If-None-Match: *}, a replace {@code If-Match}; both or neither is refused. */
