@@ -10,16 +10,27 @@ public final class BrokerModel {
     private BrokerModel() {
     }
 
-    /** {@code Connection}; all fields always present, {@code expiresAt}/{@code lastUsedAt} may be null (CC-013). */
+    /**
+     * {@code Connection}; all fields always present, {@code expiresAt}/{@code lastUsedAt} may be null (CC-013). {@code
+     * backendUser} is null exactly when the secret was stored without a check ({@code verified} false, CC-247); nothing
+     * about the status of the connection depends on it.
+     */
     @JsonInclude(JsonInclude.Include.ALWAYS)
     public record Connection(
             String system,
             String type,
             String status,
             String backendUser,
+            Boolean verified,
             String expiresAt,
             String connectedAt,
             String lastUsedAt) {
+
+        /** A connection that was checked, as every connection was before a system could store a secret unverified. */
+        public Connection(String system, String type, String status, String backendUser, String expiresAt,
+                          String connectedAt, String lastUsedAt) {
+            this(system, type, status, backendUser, Boolean.TRUE, expiresAt, connectedAt, lastUsedAt);
+        }
     }
 
     public record SystemInfo(
@@ -29,15 +40,21 @@ public final class BrokerModel {
             List<String> oauthScopes,
             String userSecretScheme,
             String deployment,
-            String displayName) {
+            String displayName,
+            Boolean userSecretVerified) {
 
         public SystemInfo(String system, List<String> supportedTypes, String defaultType, List<String> oauthScopes) {
-            this(system, supportedTypes, defaultType, oauthScopes, null, null, null);
+            this(system, supportedTypes, defaultType, oauthScopes, null, null, null, null);
         }
 
         public SystemInfo(String system, List<String> supportedTypes, String defaultType, List<String> oauthScopes,
                           String userSecretScheme, String deployment) {
-            this(system, supportedTypes, defaultType, oauthScopes, userSecretScheme, deployment, null);
+            this(system, supportedTypes, defaultType, oauthScopes, userSecretScheme, deployment, null, null);
+        }
+
+        public SystemInfo(String system, List<String> supportedTypes, String defaultType, List<String> oauthScopes,
+                          String userSecretScheme, String deployment, String displayName) {
+            this(system, supportedTypes, defaultType, oauthScopes, userSecretScheme, deployment, displayName, null);
         }
     }
 
@@ -53,7 +70,7 @@ public final class BrokerModel {
     }
 
     @JsonInclude(JsonInclude.Include.ALWAYS)
-    public record PutSecretResponse(String status, String backendUser, String expiresAt) {
+    public record PutSecretResponse(String status, String backendUser, Boolean verified, String expiresAt) {
     }
 
     public record OAuthStartRequest(String returnPath) {
@@ -76,7 +93,7 @@ public final class BrokerModel {
         }
     }
 
-    public record OAuthCompleteResponse(String status, String backendUser) {
+    public record OAuthCompleteResponse(String status, String backendUser, Boolean verified) {
     }
 
     /** {@code AuthenticatorStatus}; timestamps and the disabled reason pass through after {@link BrokerData} checked them. */

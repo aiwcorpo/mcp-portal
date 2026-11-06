@@ -28,18 +28,27 @@ public final class BrokerData {
     private BrokerData() {
     }
 
+    /**
+     * The answer to a secret write, or null when it breaks the schema ({@code verified} is required; {@code backendUser}
+     * is null for a secret stored without a check).
+     */
+    public static BrokerModel.PutSecretResponse validPutSecretResponse(BrokerModel.PutSecretResponse stored) {
+        return stored != null && stored.verified() != null && CONNECTION_STATUSES.contains(stored.status())
+                && (stored.expiresAt() == null || ContractValues.isTimestamp(stored.expiresAt())) ? stored : null;
+    }
+
     /** Connections with known system and type; an unknown status becomes {@code error} (reconnect needed). */
     public static List<BrokerModel.Connection> validConnections(List<BrokerModel.Connection> connections) {
         List<BrokerModel.Connection> result = new ArrayList<>();
         for (BrokerModel.Connection c : connections == null ? List.<BrokerModel.Connection>of() : connections) {
             if (c == null || !ContractValues.isSystemId(c.system()) || !CREDENTIAL_TYPES.contains(c.type())
-                    || c.backendUser() == null || c.connectedAt() == null) {
+                    || c.verified() == null || c.connectedAt() == null) {
                 log.warn("Dropping a C4 connection outside the contract");
                 continue;
             }
             String status = CONNECTION_STATUSES.contains(c.status()) ? c.status() : "error";
-            result.add(new BrokerModel.Connection(c.system(), c.type(), status, c.backendUser(), c.expiresAt(),
-                    c.connectedAt(), c.lastUsedAt()));
+            result.add(new BrokerModel.Connection(c.system(), c.type(), status, c.backendUser(), c.verified(),
+                    c.expiresAt(), c.connectedAt(), c.lastUsedAt()));
         }
         return result;
     }
@@ -63,7 +72,9 @@ public final class BrokerData {
                     s.userSecretScheme() != null && SCHEMES.contains(s.userSecretScheme()) ? s.userSecretScheme() : null,
                     s.deployment() != null && DEPLOYMENTS.contains(s.deployment()) ? s.deployment() : null,
                     // The label is optional in C4 and the catalog of C12 has no field for it, so a bad one is simply dropped.
-                    ContractValues.isDisplayName(s.displayName()) ? s.displayName() : null));
+                    ContractValues.isDisplayName(s.displayName()) ? s.displayName() : null,
+                    // C12 CatalogCredential has no field for it; read so a later contract version can show "not verified".
+                    s.userSecretVerified()));
         }
         return result;
     }

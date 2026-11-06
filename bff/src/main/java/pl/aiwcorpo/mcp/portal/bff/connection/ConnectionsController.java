@@ -106,8 +106,13 @@ class ConnectionsController {
         }
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
-            BrokerModel.PutSecretResponse stored = broker.putSecret(token, requestId, system, body);
-            audit.connectionChange(requestId, user, system, stored == null ? null : stored.backendUser(),
+            BrokerModel.PutSecretResponse stored = BrokerData.validPutSecretResponse(
+                    broker.putSecret(token, requestId, system, body));
+            if (stored == null) {
+                throw new UpstreamException("credential broker", 502, null);
+            }
+            // backendUser is null for a secret stored without a check; the audit event then has none.
+            audit.connectionChange(requestId, user, system, stored.backendUser(),
                     AuditLog.Outcome.ok(), clock.millis() - started);
             return ResponseEntity.ok(stored);
         } catch (UpstreamException e) {
