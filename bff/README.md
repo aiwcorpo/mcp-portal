@@ -102,6 +102,8 @@ Everything is set through environment variables (`application.yml`):
 | `PORTAL_PUBLIC_TLS_PRIVATE_KEY_PASSWORD` | password of an encrypted PEM key; empty for an unencrypted key | empty |
 | `PORTAL_STEP_UP_MAX_AGE` | maximum age of the last login for step-up operations | `5m` |
 | `PORTAL_STEP_UP_ACR_VALUES` | `acr` values accepted as MFA; empty = `auth_time` only, allowed in profile `dev` only | empty (the realm has no `acr` levels) |
+| `PORTAL_STEP_UP_ADMIN_TOKENS` | tokens of the admin calls after a step-up: `refresh` (admin audience scopes in the step-up login, one narrowed refresh grant per audience) or `exchange` | `refresh` |
+| `PORTAL_STEP_UP_ADMIN_TOKEN_TTL` | longest time a narrowed admin token is kept in the session | `2m` |
 
 C4 and C5 are reachable only over https with a client certificate and a dedicated truststore (internal CA); http, or a missing
 keystore or truststore, is a startup error. Exception: `portal.tls.insecure-plain-http-for-tests=true` in profile `dev` (tests on
@@ -365,18 +367,39 @@ does and what the identity provider has to do:
   authentication flow, for example `mfa`), and that level has to be one of the `acr` values the gateway and the broker accept.
   Where the provider reports methods instead of levels (Entra ID), leave it empty and set `PORTAL_STEP_UP_AMR_VALUES`.
   Without either list the BFF accepts `auth_time` alone, which is allowed in the `dev` profile only, and the upstreams would still refuse.
-- **Token exchange (BFF).** The BFF forwards the access token of the session as `subject_token`, with `audience` `mcp-gateway-admin` or
-  `mcp-credential-broker`, and uses the exchanged token as it is: it removes and adds no claim. After a step-up login the session
-  holds the access token of that login and the cache of exchanged tokens is empty, so the next exchange carries the new `auth_time`.
-- **Token exchange (identity provider).** The exchanged token must contain `auth_time`, `acr` and `amr` copied from the subject token.
-  In Keycloak the exchange builds the token from the client scopes of the target audience, so the scopes that the portal client uses
-  for `mcp-gateway-admin` and `mcp-credential-broker` (by default `mcp-gateway-admin-audience` and `mcp-credential-broker-audience`, the
-  properties `portal.token-exchange.gateway-admin-scope` and `portal.token-exchange.broker-scope`) need mappers for: `auth_time` ("Auth Time"
-  session note mapper, "Add to access token"), `acr` ("Authentication Context Class Reference", "Add to access token") and `amr`
-  (a user session note or script mapper that copies the methods of the login, "Add to access token"). A token that lacks one of them
-  is not fresh as far as the upstreams are concerned, whatever the BFF thinks.
-- **Check.** Decode an exchanged token of an administrator right after a step-up login: `auth_time` within the last minutes, and `acr`
-  or `amr` as configured. The BFF logs no token, so use the exchange against the token endpoint with the same client for the check.
+- **Admin tokens (BFF).** For the administration calls the BFF does not use the token exchange when it can avoid it, because an
+  IdP may re-derive the level of the login on an exchange: Keycloak 26.8.1 answers an exchange with `acr: "password"` whatever
+  the subject token had (measured; `auth_time` survives, there is no `amr` mapper), so an exchanged token never proves MFA.
+  Instead, the step-up login of an administrator (`GET /api/v1/auth/login?stepUp=true` from a session of a user in
+  `mcp-platform-admin`) also asks for the admin audience scopes (`portal.token-exchange.gateway-admin-scope` and `broker-scope`,
+  by default `mcp-gateway-admin-audience` and `mcp-credential-broker-audience`). Each admin call then takes one refresh grant
+  narrowed to the scope of its audience (RFC 6749 section 6: a refresh may only narrow what was granted) and uses that
+  access token: it has a single audience, and `acr` and `auth_time` of the step-up login (Keycloak, measured: `acr: "mfa"`,
+  `aud: "mcp-gateway-admin"` or `"mcp-credential-broker"`). The tokens are cached in the memory of the session per audience for
+  `portal.step-up.admin-token-ttl` (default 2 minutes) at most, and are dropped with the rest of the old session at the next
+  login. The access token of the login itself carries both audiences, so it is never sent anywhere; it stays the subject of
+  the exchanges of the other flows. If the IdP rotates refresh tokens, the new one replaces the old one in the session. Without
+  the scopes in the login (an ordinary login, or a user who is no administrator), or when the IdP refuses the narrowing, the
+  admin calls use the ordinary exchange, which is enough for reads and for writes that need no fresh MFA; the upstreams then
+  ask for the step-up where they need it. `PORTAL_STEP_UP_ADMIN_TOKENS=exchange` turns the refresh path off (an IdP whose
+  exchange keeps `acr` and `amr`).
+- **Token exchange (BFF).** All other flows (catalog, connections, secrets, confirmations, activity) forward the access token of
+  the session as `subject_token`, with `audience` `mcp-gateway-admin` or `mcp-credential-broker`, and use the exchanged token as it
+  is: the BFF removes and adds no claim. After a login the cache of exchanged tokens is empty.
+- **Identity provider (Keycloak).** The client `mcp-portal-bff` has to list `mcp-gateway-admin-audience` and
+  `mcp-credential-broker-audience` among its optional client scopes, so that the step-up login may request them (the scopes carry
+  the audience mappers for `mcp-gateway-admin` and `mcp-credential-broker`), and its token endpoint has to accept a refresh grant with a
+  `scope` that is a subset of the granted ones (the default). The realm has to put `auth_time` and `acr` into access tokens (the
+  step-up flow of the realm gives `acr` the level `mfa` after the second factor), and that level has to be one of the values the
+  gateway and the broker accept (`MCP_ADMIN_MFA_ACR_VALUES`, `BROKER_BFFTOKEN_MFAACRVALUES`). There is no `amr` mapper in Keycloak
+  26.8.1, so the `acr` list is the proof. For an IdP that does report `amr` (Entra ID) leave `PORTAL_STEP_UP_ACR_VALUES`
+  empty and set `PORTAL_STEP_UP_AMR_VALUES`; whether such an IdP keeps `amr` in a narrowed refresh or an exchange is its own
+  matter, and `PORTAL_STEP_UP_ADMIN_TOKENS` chooses the path.
+- **Check.** Decode the token of one admin call after a step-up login (a refresh grant with `scope=openid mcp-gateway-admin-audience`
+  and the refresh token of that login, from a script that logs in like the BFF does): `auth_time` within the last minutes, `acr` or
+  `amr` as configured, a single `aud`. The BFF logs no token. On the dev stack (`mcp-platform-dev`), `make admin-token` shows the claims
+  of the token its setup uses, and the same login through the portal was used to add and remove a test override, a test server and a
+  test system after a step-up.
 
 ## Structure
 

@@ -28,6 +28,10 @@ Dynamic servers: no list of systems, servers or resource types is left in the po
   types and scope patterns of the registered servers (new read of the approved policies of a server) and warns before the
   gateway refuses a scope; the OAuth return banner names a system only when it is in the catalog; the web `SystemId` pattern
   has the reserved ids; a kept policy approval is checked before it is resumed.
+- Admin tokens after a step-up: the step-up login of an administrator asks for the admin audience scopes and the admin calls use one
+  refresh grant narrowed to each audience instead of a token exchange. Keycloak 26.8.1 reports `acr: "password"` on every exchange, so an
+  exchanged token never proved MFA; the narrowed refresh keeps `acr` and `auth_time`. The tokens stay in session memory for two minutes,
+  other flows keep the exchange, and the exchange remains the fallback (`PORTAL_STEP_UP_ADMIN_TOKENS`, `PORTAL_STEP_UP_ADMIN_TOKEN_TTL`).
 - Operation: after the upgrade the identity provider has to put `auth_time`, `acr` and `amr` into the tokens exchanged for the
   gateway and the broker, or every widening administration operation ends in `step_up_required` (see
   [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings)).

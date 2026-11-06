@@ -4,7 +4,7 @@ M7 (portal 2.0.0, "dynamic servers"): osiągnięty (2026-11-06) - kontrakty 7.0.
 
 ## Wydanie 2.0.0: serwery i systemy jako dane (2026-11-06)
 
-`npm test` 38 plików, 629 testów; e2e 238 przeszło, 32 pominięte (zrzuty); `ci/run.sh` (style, lint, i18n, unit, build) `ci: OK`; `bff make ci` 598 testów. Bez obrazów (nic nie zbudowano ani nie wdrożono).
+`npm test` 38 plików, 629 testów; e2e 238 przeszło, 32 pominięte (zrzuty); `ci/run.sh` (style, lint, i18n, unit, build) `ci: OK`; `bff make ci` 608 testów. Bez obrazów (nic nie zbudowano ani nie wdrożono).
 - Kontrakty 7.0.0: paczka z `npm pack` w checkoucie `mcp-contracts` (po CC-241; nie ma jeszcze pliku wydania ani publikacji w npmjs, więc
   `CONTRACTS_TARBALL_SHA256` w workflowach GitHub zostaje dla 6.3.2 i trzeba go ustawić po wydaniu), klient wygenerowany ponownie.
   `SystemId`, `ServerId`, `ResourceType` to zwykłe napisy; `ConnectionStatus` ma `needs_reconnect`; filtr `/mcp` przyjmuje 20 systemów.

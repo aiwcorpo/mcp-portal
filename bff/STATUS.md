@@ -28,9 +28,18 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M6.4 | opcjonalny TLS na porcie BFF (`PORTAL_PUBLIC_TLS_*`, PEM, pakiet SSL Spring Boota), `ServerTlsTest`, README | zrobione; obraz w raporcie |
 | M7 (2.0.0) | kontrakty 7.0.0 (CC-229..CC-240): bez list systemow, serwerow i typow zasobow; odbicia C12 serwerow, mapowania zakresow, nadpisan, zatwierdzenia polityk i systemow brokera; `needs_reconnect` | zrobione |
 
+## Tokeny administracji po step-upie (2026-11-06)
+
+Keycloak 26.8.1 zwraca `acr: "password"` przy każdej wymianie tokenu, więc wymieniony token administratora nigdy nie dowodził MFA i zapis ze świeżym
+MFA kończył się `step_up_required` po step-upie. Step-up administratora prosi teraz o zakresy `mcp-gateway-admin-audience` i
+`mcp-credential-broker-audience`, a wywołania administracji biorą po jednym grancie refresh zawężonym do zakresu audiencji (zachowuje `acr` i `auth_time`);
+tokeny żyją w pamięci sesji do 2 minut, inne przepływy zostają na wymianie, wymiana jest też rozwiązaniem zastępczym. Sprawdzone na żywym stosie `mcp-dyn`
+(użytkownik `setupadmin`): przed step-upem zapis daje 401, po nim override, serwer (gateway) i system (broker) da się dodać i usunąć przez portal.
+Testy: `AdminRefreshTokensTest` (10). README: sekcja "Fresh MFA for the administration operations".
+
 ## M7: wersja 2.0.0, serwery i systemy jako dane (2026-11-06)
 
-`mvn test`: 598 testow (526 z 1.0.0, `AdminMirrorsTest` 29, `DynamicSystemsTest` 43), 0 bledow. Jary 7.0.0 z `~/.m2` (po CC-240). Opis: sekcja "2.0.0" w README.
+`mvn test`: 608 testow (526 z 1.0.0, `AdminMirrorsTest` 29, `DynamicSystemsTest` 43), 0 bledow. Jary 7.0.0 z `~/.m2` (po CC-240). Opis: sekcja "2.0.0" w README.
 
 - Usuniete: `AdminTargets.SERVER_IDS`, `RegistryData.SERVER_IDS`, `BrokerData.SYSTEMS`, `GatewayData.RESOURCE_TYPES`, wzorzec nazw narzedzi z piecioma
   systemami. Zastapily je wzorce kontraktu w `ContractValues` (z listą zarezerwowanych id, CC-237). Port C13 ma `systems()` (klucze katalogu IGA).
