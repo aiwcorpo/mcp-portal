@@ -39,6 +39,8 @@ import {
   DISPLAY_NAME,
   DURATION,
   OAUTH_SCOPE,
+  WHOAMI_FIELD,
+  WHOAMI_PATH,
   SYSTEM_ID,
   isHttpsUrl,
   splitList,
@@ -57,6 +59,9 @@ export interface SystemForm {
   product: '' | 'jira' | 'confluence';
   revokeUrl: string;
   timeout: string;
+  /** How a generic-rest system checks a user secret (CC-247); both empty means no check. */
+  whoamiPath: string;
+  whoamiField: string;
   exchangeAudience: string;
   userSecretScheme: '' | SystemUserSecretScheme;
   supportedTypes: CredentialType[];
@@ -85,10 +90,12 @@ const EMPTY_FORM: SystemForm = {
   product: '',
   revokeUrl: '',
   timeout: '',
+  whoamiPath: '',
+  whoamiField: '',
   exchangeAudience: '',
   userSecretScheme: '',
-  supportedTypes: ['user-oauth'],
-  defaultType: 'user-oauth',
+  supportedTypes: ['user-secret'],
+  defaultType: 'user-secret',
   secretScheme: 'Bearer',
   clientId: '',
   clientSecret: '',
@@ -96,6 +103,15 @@ const EMPTY_FORM: SystemForm = {
   tokenUrl: '',
   scopes: '',
 };
+
+/** Only a generic-rest system that takes user secrets can check them (CC-247). */
+export function hasWhoami(form: SystemForm): boolean {
+  return (
+    form.adapter === 'generic-rest' &&
+    form.supportedTypes.includes('user-secret') &&
+    (form.whoamiPath.trim() !== '' || form.whoamiField.trim() !== '')
+  );
+}
 
 /** Whether the system needs an OAuth client of its own: user OAuth and token exchange both do (C4 SystemAdminRequest). */
 export function needsOauth(types: readonly CredentialType[]): boolean {
@@ -131,6 +147,9 @@ export function systemRequest(form: SystemForm): SystemAdminRequest {
   const oauth = needsOauth(form.supportedTypes);
   const tokenExchange = form.supportedTypes.includes('token-exchange');
   const scopes = splitList(form.scopes);
+  const whoami = hasWhoami(form)
+    ? { path: form.whoamiPath.trim(), usernameField: form.whoamiField.trim() }
+    : null;
   return {
     baseUrl: form.baseUrl.trim(),
     ...(form.displayName.trim() ? { displayName: form.displayName.trim() } : {}),
@@ -141,6 +160,7 @@ export function systemRequest(form: SystemForm): SystemAdminRequest {
     ...(form.adapter === 'atlassian-dc' && form.product ? { product: form.product } : {}),
     ...(form.revokeUrl.trim() ? { revokeUrl: form.revokeUrl.trim() } : {}),
     ...(form.timeout.trim() ? { timeout: form.timeout.trim() } : {}),
+    ...(whoami ? { whoami } : {}),
     ...(tokenExchange ? { exchangeAudience: form.exchangeAudience.trim() } : {}),
     ...(form.userSecretScheme ? { userSecretScheme: form.userSecretScheme } : {}),
     ...(oauth
@@ -217,6 +237,7 @@ export class SystemsPage implements OnInit {
     'Token',
     'ApiKey',
   ];
+  protected readonly genericTypes: readonly CredentialType[] = ['user-secret', 'service-account'];
   protected readonly userSchemes: readonly SystemUserSecretScheme[] = ['Bearer', 'Basic'];
   protected readonly typeLabel = credentialTypeLabel;
 
@@ -257,6 +278,16 @@ export class SystemsPage implements OnInit {
     }
     if (form.revokeUrl.trim() && !isHttpsUrl(form.revokeUrl.trim())) {
       found['revokeUrl'] = url;
+    }
+    if (hasWhoami(form)) {
+      if (!WHOAMI_PATH.test(form.whoamiPath.trim())) {
+        found['whoamiPath'] =
+          $localize`:@@adminSystems.errWhoamiPath:Enter a path that starts with a single slash, without a host, a query or "..", for example /api/me.`;
+      }
+      if (!WHOAMI_FIELD.test(form.whoamiField.trim())) {
+        found['whoamiField'] =
+          $localize`:@@adminSystems.errWhoamiField:Enter the field of the answer that holds the user name, or a JSON pointer such as /user/login.`;
+      }
     }
     if (form.adapter === 'atlassian-dc' && !form.product) {
       found['product'] = $localize`:@@adminSystems.errProduct:Choose Jira or Confluence.`;
@@ -406,6 +437,8 @@ export class SystemsPage implements OnInit {
           product: current.product ?? '',
           revokeUrl: current.revokeUrl ?? '',
           timeout: current.timeout ?? '',
+          whoamiPath: current.whoami?.path ?? '',
+          whoamiField: current.whoami?.usernameField ?? '',
           exchangeAudience: current.exchangeAudience ?? '',
           userSecretScheme: current.userSecretScheme ?? '',
           supportedTypes: [...current.supportedTypes],
@@ -444,6 +477,29 @@ export class SystemsPage implements OnInit {
     this.editing.update((current) =>
       current ? { ...current, form: { ...current.form, ...change } } : current,
     );
+  }
+
+  /**
+   * A generic-rest system takes user secrets or a service account, never both and never OAuth (CC-247, the broker answers
+   * `credential_type_not_supported_by_adapter` otherwise), so the form offers a choice of one and drops the rest.
+   */
+  protected chooseAdapter(adapter: SystemAdapter): void {
+    const form = this.form();
+    if (!form) {
+      return;
+    }
+    if (adapter !== 'generic-rest') {
+      this.change({ adapter });
+      return;
+    }
+    const type: CredentialType = form.supportedTypes.includes('service-account')
+      ? 'service-account'
+      : 'user-secret';
+    this.change({ adapter, supportedTypes: [type], defaultType: type });
+  }
+
+  protected chooseGenericType(type: CredentialType): void {
+    this.change({ supportedTypes: [type], defaultType: type });
   }
 
   protected toggleType(type: CredentialType, on: boolean): void {

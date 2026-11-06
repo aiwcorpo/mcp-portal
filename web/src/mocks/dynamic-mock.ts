@@ -901,6 +901,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
       const request_ = body as unknown as {
         displayName?: string;
         baseUrl: string;
+        whoami?: { path: string; usernameField: string };
         adapter: string;
         product?: string;
         supportedTypes: string[];
@@ -919,6 +920,24 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         (typeof request_.displayName !== 'string' || !DISPLAY_NAME.test(request_.displayName))
       ) {
         return ctx.failure('invalid_request', 400);
+      }
+      if (request_.whoami !== undefined && request_.adapter !== 'generic-rest') {
+        return ctx.failure('invalid_request', 400);
+      }
+      if (request_.adapter === 'generic-rest') {
+        const types = request_.supportedTypes;
+        // A generic-rest system takes user-secret or service-account, never both and never OAuth (CC-247).
+        if (
+          types.includes('user-oauth') ||
+          types.includes('token-exchange') ||
+          types.length !== 1
+        ) {
+          return reject(
+            'system_rejected',
+            'credential_type_not_supported_by_adapter',
+            'generic-rest takes user-secret or service-account',
+          );
+        }
       }
       if (request_.adapter === 'atlassian-dc' && !request_.product) {
         return reject('system_rejected', 'product_required', 'atlassian-dc needs product');

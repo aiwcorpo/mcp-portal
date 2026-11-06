@@ -12,7 +12,14 @@ import { ConnectionStatus } from './connectionStatus';
 
 export interface PutSecretResponse { 
     status: ConnectionStatus;
-    backendUser: string;
+    /**
+     * The user name read by whoami; null when the secret was stored without verification.
+     */
+    backendUser: string | null;
+    /**
+     * False when the system has no whoami and the secret was stored unverified (7.0.0).
+     */
+    verified: boolean;
     /**
      * ISO 8601 date-time in UTC (suffix Z).
      */

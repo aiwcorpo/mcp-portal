@@ -9,18 +9,18 @@ test('a new system and server are added and removed at runtime, with a fresh MFA
   await page.getByRole('button', { name: 'Add system' }).click();
   await page.getByLabel('System identifier').fill('notes');
   await page.getByLabel('Base address').fill('https://notes.internal/api');
-  await page.getByLabel('Authorization address').fill('https://notes.internal/oauth/authorize');
-  await page.getByLabel('Token address').fill('https://notes.internal/oauth/token');
-  await page.getByLabel('Client identifier').fill('mcp-broker-notes');
-  await page.getByLabel('Client secret').fill('a-secret-typed-by-the-administrator');
-  // The mock IdP gives the MFA on the way; the form and the secret are lost on purpose, the form comes back without the secret.
+  // A generic REST system takes user secrets or a service account: no OAuth client, and an optional check of the token.
+  await expect(page.getByLabel('Client secret')).toHaveCount(0);
+  await expect(page.getByText('Without it the token is stored without a check')).toBeVisible();
+  await page.getByLabel('Check path (optional)').fill('/api/me');
+  await page.getByLabel('User name field of the answer').fill('login');
+  // The mock IdP gives the MFA on the way; the form comes back after it.
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(
     page.getByText('Identity confirmed. Check the form, enter the client secret again'),
   ).toBeVisible();
   await expect(page.getByLabel('System identifier')).toHaveValue('notes');
-  await expect(page.getByLabel('Client secret')).toHaveValue('');
-  await page.getByLabel('Client secret').fill('a-secret-typed-by-the-administrator');
+  await expect(page.getByLabel('Check path (optional)')).toHaveValue('/api/me');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByText('Added the system notes.')).toBeVisible();
   await expect(page.getByRole('row', { name: /notes/ })).toContainText('generic-rest');
@@ -190,4 +190,18 @@ test('a user who is not an administrator does not reach the new screens', async 
     await page.goto(`/admin/${path}`);
     await expect(page.getByRole('navigation', { name: 'Administration sections' })).toHaveCount(0);
   }
+});
+
+test('a token that the system does not verify is stored without an account and shown as not verified', async ({
+  page,
+}) => {
+  await page.goto('/connect/notes?mockUnverified=in');
+  await page.getByLabel('PAT token', { exact: true }).fill('notes-token-typed-by-the-user');
+  await page.getByRole('button', { name: 'Check and save' }).click();
+  await expect(page.getByText('Token stored for Notes.')).toBeVisible();
+  await expect(page.getByText('(not verified)')).toBeVisible();
+
+  await page.goto('/connections');
+  await expect(page.getByRole('row', { name: /Notes/ })).toContainText('Not verified');
+  await expect(page.getByRole('row', { name: /Notes/ })).not.toContainText('jkowalski');
 });

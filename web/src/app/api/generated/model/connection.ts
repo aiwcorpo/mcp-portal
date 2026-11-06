@@ -19,9 +19,13 @@ export interface Connection {
     type: CredentialType;
     status: ConnectionStatus;
     /**
-     * User name in the target system read by whoami (C4.1, CC-101). Not compared with the SSO identity; the portal shows it as \"Connected as <backendUser>\".
+     * User name in the target system read by whoami (C4.1, CC-101); null when the secret was stored without verification (`verified` false). Not compared with the SSO identity; the portal shows it as \"Connected as <backendUser>\", or \"not verified\" when null.
      */
-    backendUser: string;
+    backendUser: string | null;
+    /**
+     * True when the secret was checked with the whoami of the system when it was stored; false for a system without whoami (a `generic-rest` system with no `whoami`), where the secret is stored unverified and there is no backend user (7.0.0).
+     */
+    verified: boolean;
     /**
      * ISO 8601 date-time in UTC (suffix Z).
      */

@@ -58,6 +58,7 @@
         <app-secret-form
           [system]="sys"
           [scheme]="state.value.server.credential?.userSecretScheme"
+          [unverified]="state.value.server.connection?.verified === false"
         />
       </section>
     }

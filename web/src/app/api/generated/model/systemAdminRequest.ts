@@ -13,11 +13,9 @@ import { CredentialType } from './credentialType';
 import { SystemAdapter } from './systemAdapter';
 import { SystemOauthClient } from './systemOauthClient';
 import { SystemProduct } from './systemProduct';
+import { SystemWhoami } from './systemWhoami';
 
 
-/**
- * Configuration of a system. `oauth` is required when `supportedTypes` has `user-oauth` or `token-exchange`; every URL is https (a production broker never accepts http).
- */
 export interface SystemAdminRequest { 
     /**
      * Name that the portal shows for the system (a short label, no control or format characters); the system id when the administrator gives none.
@@ -35,10 +33,11 @@ export interface SystemAdminRequest {
      */
     timeout?: string;
     /**
-     * Audience of the token the broker asks the identity provider for; token-exchange only, and required there.
+     * Audience of the token the broker asks the identity provider for; token-exchange only, and required there. It must be allowed by the configuration of the broker (audience_not_allowed otherwise).
      */
     exchangeAudience?: string;
     userSecretScheme?: SystemUserSecretScheme;
+    whoami?: SystemWhoami;
     supportedTypes: Array<CredentialType>;
     defaultType: CredentialType;
     /**

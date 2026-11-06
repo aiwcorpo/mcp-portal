@@ -193,7 +193,7 @@
             id="sys-adapter"
             name="adapter"
             [ngModel]="f.adapter"
-            (ngModelChange)="change({ adapter: $event })"
+            (ngModelChange)="chooseAdapter($event)"
           >
             @for (adapter of adapters; track adapter) {
               <option [value]="adapter">{{ adapter }}</option>
@@ -234,25 +234,91 @@
             }
           </div>
         }
-        <fieldset class="field wide">
-          <legend i18n="@@adminSystems.types">Supported credential types</legend>
-          @for (type of allTypes; track type) {
-            <label class="choice">
-              <input
-                type="checkbox"
-                [name]="'type-' + type"
-                [checked]="f.supportedTypes.includes(type)"
-                (change)="toggleType(type, $any($event.target).checked)"
-              />
-              <span
-                >{{ typeLabel(type) }} <code class="muted">{{ type }}</code></span
+        @if (f.adapter === 'generic-rest') {
+          <fieldset class="field wide">
+            <legend i18n="@@adminSystems.genericTypes">Credential type of this system</legend>
+            @for (type of genericTypes; track type) {
+              <label class="choice">
+                <input
+                  type="radio"
+                  name="generic-type"
+                  [checked]="f.supportedTypes.includes(type)"
+                  (change)="chooseGenericType(type)"
+                />
+                <span
+                  >{{ typeLabel(type) }} <code class="muted">{{ type }}</code></span
+                >
+              </label>
+            }
+            <p class="muted hint" i18n="@@adminSystems.genericHint">
+              A generic REST system takes either the tokens of its users or one service account, not
+              both, and no OAuth.
+            </p>
+          </fieldset>
+          @if (f.supportedTypes.includes('user-secret')) {
+            <div class="field">
+              <label for="sys-whoami-path" i18n="@@adminSystems.whoamiPath"
+                >Check path (optional)</label
               >
-            </label>
+              <input
+                id="sys-whoami-path"
+                name="whoamiPath"
+                type="text"
+                autocomplete="off"
+                [attr.aria-invalid]="show && errs['whoamiPath'] ? 'true' : null"
+                [attr.aria-describedby]="'sys-whoami-hint'"
+                [ngModel]="f.whoamiPath"
+                (ngModelChange)="change({ whoamiPath: $event })"
+              />
+              @if (show && errs['whoamiPath']) {
+                <p class="problem">{{ errs['whoamiPath'] }}</p>
+              }
+            </div>
+            <div class="field">
+              <label for="sys-whoami-field" i18n="@@adminSystems.whoamiField"
+                >User name field of the answer</label
+              >
+              <input
+                id="sys-whoami-field"
+                name="whoamiField"
+                type="text"
+                autocomplete="off"
+                [attr.aria-invalid]="show && errs['whoamiField'] ? 'true' : null"
+                [attr.aria-describedby]="'sys-whoami-hint'"
+                [ngModel]="f.whoamiField"
+                (ngModelChange)="change({ whoamiField: $event })"
+              />
+              @if (show && errs['whoamiField']) {
+                <p class="problem">{{ errs['whoamiField'] }}</p>
+              }
+            </div>
+            <p id="sys-whoami-hint" class="muted hint wide" i18n="@@adminSystems.whoamiHint">
+              The broker calls this path on the base address with the token a user enters and reads
+              the user name from the answer. Without it the token is stored without a check, and the
+              connection shows no account.
+            </p>
           }
-          @if (show && errs['supportedTypes']) {
-            <p class="problem">{{ errs['supportedTypes'] }}</p>
-          }
-        </fieldset>
+        } @else {
+          <fieldset class="field wide">
+            <legend i18n="@@adminSystems.types">Supported credential types</legend>
+            @for (type of allTypes; track type) {
+              <label class="choice">
+                <input
+                  type="checkbox"
+                  [name]="'type-' + type"
+                  [checked]="f.supportedTypes.includes(type)"
+                  (change)="toggleType(type, $any($event.target).checked)"
+                />
+                <span
+                  >{{ typeLabel(type) }} <code class="muted">{{ type }}</code></span
+                >
+              </label>
+            }
+            @if (show && errs['supportedTypes']) {
+              <p class="problem">{{ errs['supportedTypes'] }}</p>
+            }
+          </fieldset>
+        }
         <div class="field">
           <label for="sys-default" i18n="@@adminSystems.defaultType">Default type</label>
           <select

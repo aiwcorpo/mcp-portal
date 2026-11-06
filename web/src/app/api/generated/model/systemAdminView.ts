@@ -13,6 +13,7 @@ import { SystemUserSecretScheme } from './systemUserSecretScheme';
 import { CredentialType } from './credentialType';
 import { SystemAdapter } from './systemAdapter';
 import { SystemProduct } from './systemProduct';
+import { SystemWhoami } from './systemWhoami';
 
 
 export interface SystemAdminView { 
@@ -34,6 +35,7 @@ export interface SystemAdminView {
     timeout?: string;
     exchangeAudience?: string;
     userSecretScheme?: SystemUserSecretScheme;
+    whoami?: SystemWhoami;
     supportedTypes: Array<CredentialType>;
     defaultType: CredentialType;
     secretScheme: CredentialScheme;

@@ -86,6 +86,7 @@ export * from './systemOauthClientView';
 export * from './systemProduct';
 export * from './systemRejected';
 export * from './systemUserSecretScheme';
+export * from './systemWhoami';
 export * from './toolAction';
 export * from './toolEntry';
 export * from './toolEntryFields';

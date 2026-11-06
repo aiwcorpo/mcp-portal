@@ -46,6 +46,8 @@ interface ConnectionRow {
   name: string;
   type: string;
   account: string | null;
+  /** The broker stored the token without a check (no whoami in the system): no account to show, and no reason to worry. */
+  unverified: boolean;
   validity: { text: string; date: string | null; tone: Tone };
   lastUsed: string | null;
   actions: CatalogAction[];
@@ -185,6 +187,7 @@ export class ConnectionsPage implements OnInit {
         name: systemName(server.system),
         type: type ? credentialTypeLabel(type) : '',
         account: server.connection?.backendUser ?? null,
+        unverified: server.connection?.verified === false,
         validity: validityOf(server),
         lastUsed: server.connection?.lastUsedAt ?? this.lastCalls()[server.system] ?? null,
         actions: connectionRowActions(server),

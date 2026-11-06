@@ -32,6 +32,12 @@ Dynamic servers: no list of systems, servers or resource types is left in the po
   refresh grant narrowed to each audience instead of a token exchange. Keycloak 26.8.1 reports `acr: "password"` on every exchange, so an
   exchanged token never proved MFA; the narrowed refresh keeps `acr` and `auth_time`. The tokens stay in session memory for two minutes,
   other flows keep the exchange, and the exchange remains the fallback (`PORTAL_STEP_UP_ADMIN_TOKENS`, `PORTAL_STEP_UP_ADMIN_TOKEN_TTL`).
+- Generic REST systems with user secrets (CC-247): the Systems form offers a generic REST system user secrets or a service account (one of
+  them, no OAuth) and an optional check of the token (`whoami`: a path on the base address and the field of the answer that holds the user
+  name; both validated, with the hint that without it the token is stored without a check). A connection carries `verified`; the
+  connections page shows "Not verified" (no account name, no warning colour), and the token form warns before a token is stored again for
+  a connection that was not verified and says after the store that the system does not check tokens. `backendUser` may be null. The
+  C12 catalog has no `userSecretVerified`, so the warning before the first token of such a system cannot be shown.
 - Operation: after the upgrade the identity provider has to put `auth_time`, `acr` and `amr` into the tokens exchanged for the
   gateway and the broker, or every widening administration operation ends in `step_up_required` (see
   [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings)).

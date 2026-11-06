@@ -15,7 +15,7 @@ export interface Override {
      */
     id: string;
     /**
-     * gateway (the decision on call), all-servers (every server evaluates it) or the serverId of one server.
+     * gateway (the decision on call), all-servers (every server evaluates it) or the serverId of one server (the same pattern as `ServerId`, so a reserved id is no target).
      */
     target: string;
     text: string;

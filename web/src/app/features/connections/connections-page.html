@@ -64,6 +64,8 @@
           >
             @if (row.account) {
               {{ row.account }}
+            } @else if (row.unverified) {
+              <span class="muted" i18n="@@connections.notVerified">Not verified</span>
             } @else {
               <span class="muted">&mdash;</span>
             }

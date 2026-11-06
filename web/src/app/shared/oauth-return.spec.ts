@@ -9,6 +9,7 @@ describe('oauthReturnMessage', () => {
       type: 'user-oauth',
       status: 'connected',
       backendUser: 'jkowalski',
+      verified: true,
       expiresAt: null,
       connectedAt: '2026-10-01T08:00:00Z',
       lastUsedAt: null,

@@ -70,6 +70,8 @@ export class SecretForm {
   readonly system = input.required<string>();
   /** `CatalogCredential.userSecretScheme`: with `Basic` the form asks for the login next to the secret (CC-222). */
   readonly scheme = input<CatalogCredential['userSecretScheme']>();
+  /** The connection that is being renewed was stored without a check (`Connection.verified` false): say so before storing again. */
+  readonly unverified = input(false);
   readonly connected = output<PutSecretResponse>();
 
   protected readonly maxLength = SECRET_MAX_LENGTH;

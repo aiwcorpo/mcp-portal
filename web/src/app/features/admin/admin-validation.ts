@@ -12,6 +12,10 @@ export const GROUP_NAME = /^mcp-[A-Za-z0-9][A-Za-z0-9._-]*$/;
 export const RESOURCE_SCOPE_ID = /^[A-Z][A-Za-z0-9]{0,30}::[A-Z][A-Za-z0-9]{0,30}\/[!-~]{1,1024}$/;
 /** `displayName` of a system: 1 to 64 characters, none of them a control or format character (CC-243). */
 export const DISPLAY_NAME = /^(?!.*[\p{Cc}\p{Cf}]).{1,64}$/su;
+/** `SystemWhoami.path` (CC-247): relative to the base address, no `//`, no `..`, no query, at most 512 characters. */
+export const WHOAMI_PATH = /^\/(?!\/)(?!.*\.\.)[A-Za-z0-9._~!$&'()*+,;=:@%/-]{0,511}$/;
+/** `SystemWhoami.usernameField`: a top-level field of the JSON answer or an RFC 6901 pointer to one. */
+export const WHOAMI_FIELD = /^(?:[A-Za-z_][A-Za-z0-9_-]{0,63}|(?:\/[A-Za-z0-9_~-]{1,64}){1,8})$/;
 export const OVERRIDE_NAME = /^[a-z0-9][a-z0-9-]{0,54}$/;
 export const OVERRIDE_TEXT_MAX = 8000;
 export const TLS_NAME = /^[A-Za-z0-9.-]{1,253}$/;

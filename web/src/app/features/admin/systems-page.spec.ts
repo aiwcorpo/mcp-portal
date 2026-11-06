@@ -74,9 +74,6 @@ describe('SystemsPage', () => {
     await open();
     button('Add system').click();
     await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
-    toggle('type-user-oauth');
-    toggle('type-user-secret');
-    await until(() => expect(document.getElementById('sys-default')).toBeTruthy());
     fill('sys-id', 'notes');
     fill('sys-base', 'https://notes.internal/api');
     button('Save').click();
@@ -148,17 +145,12 @@ describe('SystemsPage', () => {
     expect(text()).toContain('enter the secret again');
   });
 
-  it('adds a system with If-None-Match, and the needed OAuth fields follow the supported types', async () => {
+  it('adds a generic REST system with user secrets and no check, with If-None-Match', async () => {
     store.update({ mfaFresh: true });
     await open();
     button('Add system').click();
     await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
-    expect(document.getElementById('sys-client-secret')).toBeTruthy();
-
-    toggle('type-user-oauth');
-    await until(() => expect(document.getElementById('sys-client-secret')).toBeNull());
-    toggle('type-user-secret');
-    await until(() => expect(document.getElementById('sys-default')).toBeTruthy());
+    expect(document.getElementById('sys-client-secret')).toBeNull();
     fill('sys-id', 'notes');
     fill('sys-base', 'https://notes.internal/api');
     button('Save').click();
@@ -175,6 +167,121 @@ describe('SystemsPage', () => {
       secretScheme: 'Bearer',
     });
     await until(() => expect(text(row('notes'))).toContain('generic-rest'));
+  });
+
+  it('offers a generic REST system user secrets or a service account, never both and never OAuth', async () => {
+    await open();
+    button('Add system').click();
+    await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
+
+    const radios = Array.from(
+      document.querySelectorAll<HTMLInputElement>('input[name="generic-type"]'),
+    );
+    expect(radios.length).toBe(2);
+    expect(document.querySelector('input[name="type-user-oauth"]')).toBeNull();
+    expect(text()).toContain('either the tokens of its users or one service account');
+
+    radios[1].click();
+    await until(() => expect(document.getElementById('sys-whoami-path')).toBeNull());
+    radios[0].click();
+    await until(() => expect(document.getElementById('sys-whoami-path')).toBeTruthy());
+  });
+
+  it('drops OAuth and mixing when the adapter becomes generic REST, and shows the types again for another adapter', async () => {
+    await open();
+    button('Add system').click();
+    await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
+    fill('sys-adapter', 'gitlab');
+    await until(() => expect(document.querySelector('input[name="type-user-oauth"]')).toBeTruthy());
+    toggle('type-user-oauth');
+    toggle('type-service-account');
+    await until(() => expect(document.getElementById('sys-client-secret')).toBeTruthy());
+
+    fill('sys-adapter', 'generic-rest');
+    await until(() => expect(document.getElementById('sys-client-secret')).toBeNull());
+    expect(document.querySelectorAll('input[name="generic-type"]').length).toBe(2);
+    expect(
+      Array.from(document.querySelectorAll<HTMLInputElement>('input[name="generic-type"]')).filter(
+        (radio) => radio.checked,
+      ).length,
+    ).toBe(1);
+  });
+
+  it('sends the whoami that is typed, checks both fields first and says what happens without it', async () => {
+    store.update({ mfaFresh: true });
+    await open();
+    button('Add system').click();
+    await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
+    expect(text()).toContain('Without it the token is stored without a check');
+    fill('sys-id', 'notes');
+    fill('sys-base', 'https://notes.internal/api');
+
+    fill('sys-whoami-path', '//evil.example/x');
+    button('Save').click();
+    await until(() => expect(text()).toContain('starts with a single slash'));
+    expect(text()).toContain('Enter the field of the answer that holds the user name');
+    expect(writes).toEqual([]);
+
+    fill('sys-whoami-path', '/api/me');
+    fill('sys-whoami-field', '/user/login');
+    button('Save').click();
+
+    await until(() => expect(text()).toContain('Added the system notes.'));
+    expect(writes[0].body).toMatchObject({
+      adapter: 'generic-rest',
+      supportedTypes: ['user-secret'],
+      whoami: { path: '/api/me', usernameField: '/user/login' },
+    });
+    await until(() => expect(button('Edit (notes)')).toBeTruthy());
+    button('Edit (notes)').click();
+    await until(() => expect(field('sys-whoami-path').value).toBe('/api/me'));
+    expect(field('sys-whoami-field').value).toBe('/user/login');
+  });
+
+  it('refuses a path with .. or a query, and a field that is neither a name nor a pointer', async () => {
+    await open();
+    button('Add system').click();
+    await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
+    fill('sys-id', 'notes');
+    fill('sys-base', 'https://notes.internal/api');
+    for (const [path, name] of [
+      ['/a/../b', 'login'],
+      ['/api/me?x=1', 'login'],
+      ['api/me', 'login'],
+      ['/api/me', 'a b'],
+      ['/api/me', '/'],
+    ]) {
+      fill('sys-whoami-path', path);
+      fill('sys-whoami-field', name);
+      button('Save').click();
+      await until(() => expect(document.querySelectorAll('.problem').length).toBeGreaterThan(0));
+      expect(writes, `${path} ${name}`).toEqual([]);
+    }
+  });
+
+  it('shows the reason when the broker refuses a type the adapter cannot take', async () => {
+    server.use(
+      http.put('/api/v1/admin/systems/notes', () =>
+        HttpResponse.json(
+          {
+            error: 'system_rejected',
+            reason: 'credential_type_not_supported_by_adapter',
+            message: 'no',
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+    await open();
+    button('Add system').click();
+    await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
+    fill('sys-id', 'notes');
+    fill('sys-base', 'https://notes.internal/api');
+    button('Save').click();
+
+    await until(() =>
+      expect(text()).toContain('A generic REST system takes user secrets or a service account'),
+    );
   });
 
   it('needs the product for the Atlassian adapter and an audience for token exchange', async () => {

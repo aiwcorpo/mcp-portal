@@ -46,6 +46,8 @@ export interface MockConnection {
   type: Connection['type'];
   status: Connection['status'];
   expiresAt: string | null;
+  /** False for a secret stored in a system that has no whoami (generic-rest without `whoami`): no backend user. */
+  verified?: boolean;
 }
 
 export interface MockRequest {
@@ -67,6 +69,8 @@ export interface MockState extends M3State, AdminState {
   iga: MockIga;
   /** Jira asks for a login next to the token (userSecretScheme Basic, CC-222). */
   basicLogin: boolean;
+  /** A generic-rest system `notes` with user-secret and no whoami is in the catalog (CC-247). */
+  unverified: boolean;
   pendingOAuth: { system: string; returnPath: string } | null;
 }
 
@@ -94,6 +98,7 @@ export function initialMockState(): MockState {
     requests: null,
     iga: 'direct',
     basicLogin: false,
+    unverified: false,
     pendingOAuth: null,
     ...initialM3State(),
     ...initialAdminState(),
@@ -158,6 +163,7 @@ function baseCatalog(
   scenario: MockScenario,
   now: number,
   basicLogin = false,
+  unverified = false,
 ): PortalCatalogServer[] {
   const source = scenario === 'mixed' ? 'mixed' : 'states';
   const servers = exampleBody<PortalCatalog>('getPortalCatalog', source).servers;
@@ -172,6 +178,20 @@ function baseCatalog(
     return servers;
   }
   const jira = servers.find((server) => server.system === 'jira');
+  if (unverified) {
+    // A system added from the template with user secrets and no whoami: the broker stores the token without a check.
+    servers.push({
+      serverId: 'mcp-notes',
+      system: 'notes',
+      version: '0.1.0',
+      url: 'https://localhost/s/mcp-notes/mcp',
+      status: 'not_connected',
+      actions: ['add_secret'],
+      credential: { supportedTypes: ['user-secret'], defaultType: 'user-secret' },
+      connection: null,
+      tools: [tool('notes', 'list_notes', 'List notes', { entitlement: 'mcp-notes-read' })],
+    });
+  }
   if (jira && basicLogin) {
     // Jira Data Center: the login of the account and a password or token (CC-222).
     jira.credential = {
@@ -252,7 +272,8 @@ function connectionOf(
     system,
     type: mock.type,
     status: mock.status,
-    backendUser: base?.backendUser ?? MOCK_BACKEND_USER,
+    backendUser: mock.verified === false ? null : (base?.backendUser ?? MOCK_BACKEND_USER),
+    verified: mock.verified ?? base?.verified ?? true,
     expiresAt: mock.expiresAt,
     connectedAt: base?.connectedAt ?? iso(now),
     lastUsedAt: base?.lastUsedAt ?? null,
@@ -335,7 +356,7 @@ export function mockCatalog(state: MockState, now: number = Date.now()): PortalC
       .filter((request) => request.status === 'pending')
       .map((request) => request.entitlement),
   );
-  const servers = baseCatalog(state.scenario, now, state.basicLogin).map(
+  const servers = baseCatalog(state.scenario, now, state.basicLogin, state.unverified).map(
     (server): PortalCatalogServer => {
       const override = state.connections[server.system];
       const connection =
@@ -518,9 +539,12 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       const system = params['system'] as string;
       // Basic needs the login and a single token must not carry one (CC-222): the broker answers 400 either way.
       const basic =
-        baseCatalog(store.state.scenario, Date.now(), store.state.basicLogin).find(
-          (server) => server.system === system,
-        )?.credential?.userSecretScheme === 'Basic';
+        baseCatalog(
+          store.state.scenario,
+          Date.now(),
+          store.state.basicLogin,
+          store.state.unverified,
+        ).find((server) => server.system === system)?.credential?.userSecretScheme === 'Basic';
       if (basic !== (body.username !== undefined)) {
         return failure('invalid_request', 400);
       }
@@ -528,14 +552,16 @@ export function createMockHandlers(store: MockStore, baseUrl = ''): HttpHandler[
       const soon =
         expiresAt !== null && Date.parse(expiresAt) - Date.now() < EXPIRING_WITHIN_DAYS * DAY_MS;
       const status: Connection['status'] = soon ? 'expiring' : 'connected';
+      // A system without whoami stores the token as it is: no backend user, `verified` false (CC-247).
+      const verified = !(store.state.unverified && system === 'notes');
       store.update({
         connections: {
           ...store.state.connections,
-          [system]: { type: 'user-secret', status, expiresAt },
+          [system]: { type: 'user-secret', status, expiresAt, verified },
         },
       });
       return HttpResponse.json(
-        { status, backendUser: MOCK_BACKEND_USER, expiresAt },
+        { status, backendUser: verified ? MOCK_BACKEND_USER : null, verified, expiresAt },
         { headers: { 'X-Request-Id': MOCK_REQUEST_ID } },
       );
     }),

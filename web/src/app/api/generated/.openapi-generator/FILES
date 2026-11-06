@@ -107,6 +107,7 @@ model/systemOauthClientView.ts
 model/systemProduct.ts
 model/systemRejected.ts
 model/systemUserSecretScheme.ts
+model/systemWhoami.ts
 model/toolAction.ts
 model/toolEntry.ts
 model/toolEntryFields.ts
