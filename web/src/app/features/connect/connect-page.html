@@ -19,7 +19,8 @@
     />
   } @else if (!state.value || !sys) {
     <app-notice kind="info" i18n="@@connect.nothing">
-      This system does not need connecting, or you do not have access to it. You can see its status in the catalog.
+      This system does not need connecting, or you do not have access to it. You can see its status
+      in the catalog.
     </app-notice>
   } @else {
     @if (state.value.options.oauth) {
@@ -58,7 +59,8 @@
         <app-secret-form
           [system]="sys"
           [scheme]="state.value.server.credential?.userSecretScheme"
-          [unverified]="state.value.server.connection?.verified === false"
+          [systemName]="name()"
+          [unverified]="unverified()"
         />
       </section>
     }

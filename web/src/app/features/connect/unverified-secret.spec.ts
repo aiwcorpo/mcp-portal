@@ -18,24 +18,25 @@ describe('a token that the system does not verify', () => {
 
   beforeEach(() => store.update({ unverified: true }));
 
-  it('is stored, said so without a name of an account, and shown as not verified', async () => {
+  it('is warned about before the first token, stored, said so without an account name, and shown as not verified', async () => {
     configureTestApp();
     const harness = await openRoute('/connect/notes');
     await until(() => expect(tokenInput()).toBeTruthy());
-    expect(text()).not.toContain('does not check tokens');
+    // The catalog says before the very first token that the system does not check it (CC-248).
+    expect(text()).toContain('This system does not check tokens when they are stored.');
 
     type(tokenInput(), 'notes-token-test-value-0001');
     button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Token stored for Notes.'));
+    await until(() => expect(text()).toContain('Token stored for Team notes.'));
     expect(text()).toContain('(not verified)');
-    expect(text()).not.toContain('Connected to Notes as');
+    expect(text()).not.toContain('Connected to Team notes as');
     expect(store.state.connections['notes']?.verified).toBe(false);
 
     await harness.navigateByUrl('/connections');
-    await until(() => expect(text()).toContain('Notes'));
+    await until(() => expect(text()).toContain('Team notes'));
     const row = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
-      text(tr).includes('Notes'),
+      text(tr).includes('Team notes'),
     )!;
     expect(text(row)).toContain('Not verified');
     expect(row.querySelector('.state-danger, .state-error')).toBeNull();

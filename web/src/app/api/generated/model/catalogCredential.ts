@@ -24,6 +24,14 @@ export interface CatalogCredential {
      * Kind of installation (C4 `SystemInfo.deployment`, CC-222), information only; it does not decide about the field of the login.
      */
     deployment?: CatalogCredential.DeploymentEnum;
+    /**
+     * Name of the system for user pages (C4 `SystemInfo.displayName`, CC-243); absent means the portal shows the system id.
+     */
+    displayName?: string;
+    /**
+     * Whether a user secret of the system is checked with a whoami when it is stored (C4 `SystemInfo.userSecretVerified`, CC-247). False means the secret is stored unverified and the connection will have `verified` false, so the portal warns before the first token; absent means the broker does not tell (treated as verified).
+     */
+    userSecretVerified?: boolean;
 }
 export namespace CatalogCredential {
     export const UserSecretSchemeEnum = {

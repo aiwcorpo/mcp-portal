@@ -4,7 +4,7 @@ M7 (portal 2.0.0, "dynamic servers"): osiągnięty (2026-11-06) - kontrakty 7.0.
 
 ## Wydanie 2.0.0: serwery i systemy jako dane (2026-11-06)
 
-`npm test` 39 plików, 637 testów; e2e 240 przeszło, 32 pominięte (zrzuty); `ci/run.sh` (style, lint, i18n, unit, build) `ci: OK`; `bff make ci` 618 testów. Bez obrazów (nic nie zbudowano ani nie wdrożono).
+`npm test` 40 plików, 642 testy; e2e 240 przeszło, 32 pominięte (zrzuty); `ci/run.sh` (style, lint, i18n, unit, build) `ci: OK`; `bff make ci` 621 testów. Bez obrazów (nic nie zbudowano ani nie wdrożono).
 - Kontrakty 7.0.0: paczka z `npm pack` w checkoucie `mcp-contracts` (po CC-241; nie ma jeszcze pliku wydania ani publikacji w npmjs, więc
   `CONTRACTS_TARBALL_SHA256` w workflowach GitHub zostaje dla 6.3.2 i trzeba go ustawić po wydaniu), klient wygenerowany ponownie.
   `SystemId`, `ServerId`, `ResourceType` to zwykłe napisy; `ConnectionStatus` ma `needs_reconnect`; filtr `/mcp` przyjmuje 20 systemów.
@@ -25,7 +25,7 @@ M7 (portal 2.0.0, "dynamic servers"): osiągnięty (2026-11-06) - kontrakty 7.0.
   baner powrotu z OAuth nazywa tylko system z katalogu, zachowane zatwierdzenie polityk jest sprawdzane (kształt skrótu), powód `audience_not_allowed`.
 - CC-247: system ogólny REST w formularzu Systemy (sekrety użytkowników albo konto serwisowe, bez OAuth; opcjonalne `whoami` ze sprawdzaniem pól),
   `verified` w połączeniu ("Niezweryfikowane" na stronie połączeń, ostrzeżenie w formularzu tokenu przy ponownym zapisie, komunikat po zapisie bez
-  nazwy konta), `backendUser` może być null. Katalog C12 nie ma `userSecretVerified`, więc ostrzeżenia przed pierwszym tokenem nie da się pokazać.
+  nazwy konta), `backendUser` może być null. CC-248: katalog C12 niesie `displayName` i `userSecretVerified`: strony użytkownika pokazują nazwę z brokera, a formularz tokenu ostrzega przed pierwszym tokenem systemu bez weryfikacji.
 - Zrzuty 21 do 25 w `docs/screenshots/en` i `pl`.
 
 M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, dialog klasyfikacji narzędzi adaptera, stan `error` połączenia, wznawianie po MFA dla wyłącznika i klasyfikacji. Obraz `mcp-portal-web:m6-e72ccbf` (bez wdrażania). Szczegóły w sekcji "M6: stan".

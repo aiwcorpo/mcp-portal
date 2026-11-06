@@ -194,7 +194,7 @@
     </unit>
     <unit id="disconnect.title">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:101</note>
+        <note category="location">src/app/core/connection-actions.service.ts:104</note>
       </notes>
       <segment>
         <source>Disconnect account <ph id="0" equiv="system" disp="name"/>?</source>
@@ -203,7 +203,7 @@
     </unit>
     <unit id="disconnect.message">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:102</note>
+        <note category="location">src/app/core/connection-actions.service.ts:105</note>
       </notes>
       <segment>
         <source>The portal will delete the stored credential. Tools of this system will stop working until you connect the account again.</source>
@@ -212,7 +212,7 @@
     </unit>
     <unit id="disconnect.confirm">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:103</note>
+        <note category="location">src/app/core/connection-actions.service.ts:106</note>
       </notes>
       <segment>
         <source>Disconnect</source>
@@ -221,10 +221,10 @@
     </unit>
     <unit id="disconnect.done">
       <notes>
-        <note category="location">src/app/core/connection-actions.service.ts:122</note>
+        <note category="location">src/app/core/connection-actions.service.ts:125</note>
       </notes>
       <segment>
-        <source>Disconnected account <ph id="0" equiv="system" disp="systemName(system)"/>.</source>
+        <source>Disconnected account <ph id="0" equiv="system" disp="name ?? systemName(system)"/>.</source>
         <target>Rozłączono konto <ph id="0" equiv="system" disp="systemName(system)"/>.</target>
       </segment>
     </unit>
@@ -4856,7 +4856,7 @@
         <note category="location">src/app/features/catalog/catalog-page.ts:116</note>
       </notes>
       <segment>
-        <source>Copied the address of the <ph id="0" equiv="system" disp="systemName(server.system)"/> server.</source>
+        <source>Copied the address of the <ph id="0" equiv="system" disp="catalogSystemName(server)"/> server.</source>
         <target>Skopiowano adres serwera <ph id="0" equiv="system" disp="systemName(server.system)"/>.</target>
       </segment>
     </unit>
@@ -4871,7 +4871,7 @@
     </unit>
     <unit id="catalog.requestCreated">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:159</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:162</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. Check its status in the Requests tab.</source>
@@ -5258,7 +5258,7 @@
     </unit>
     <unit id="connect.nothing">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:22,24</note>
+        <note category="location">src/app/features/connect/connect-page.html:22,25</note>
       </notes>
       <segment>
         <source> This system does not need connecting, or you do not have access to it. You can see its status in the catalog. </source>
@@ -5267,7 +5267,7 @@
     </unit>
     <unit id="connect.oauthHeading">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:27,28</note>
+        <note category="location">src/app/features/connect/connect-page.html:28,29</note>
       </notes>
       <segment>
         <source>Connect with OAuth</source>
@@ -5276,7 +5276,7 @@
     </unit>
     <unit id="connect.oauthText">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:29,31</note>
+        <note category="location">src/app/features/connect/connect-page.html:30,32</note>
       </notes>
       <segment>
         <source> You will go to the <ph id="0" equiv="INTERPOLATION" disp="{{ name() }}"/> sign-in page and return to the portal after approving access. The portal never sees your password. </source>
@@ -5285,7 +5285,7 @@
     </unit>
     <unit id="connect.oauthButton">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:42,44</note>
+        <note category="location">src/app/features/connect/connect-page.html:43,45</note>
       </notes>
       <segment>
         <source> Go to the system sign-in </source>
@@ -5294,7 +5294,7 @@
     </unit>
     <unit id="connect.tokenHeading">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:49,50</note>
+        <note category="location">src/app/features/connect/connect-page.html:50,51</note>
       </notes>
       <segment>
         <source>Add token</source>
@@ -5303,7 +5303,7 @@
     </unit>
     <unit id="connect.howTo">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:51,52</note>
+        <note category="location">src/app/features/connect/connect-page.html:52,53</note>
       </notes>
       <segment>
         <source>How to create the narrowest possible token</source>
@@ -5705,7 +5705,7 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:305</note>
+        <note category="location">src/app/features/connections/connections-page.ts:308</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. You can check its status in the Requests tab.</source>
@@ -7071,7 +7071,7 @@
     </unit>
     <unit id="request.status.pending">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:19</note>
+        <note category="location">src/app/features/requests/requests-page.ts:24</note>
       </notes>
       <segment>
         <source>Pending</source>
@@ -7080,7 +7080,7 @@
     </unit>
     <unit id="request.status.approved">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:20</note>
+        <note category="location">src/app/features/requests/requests-page.ts:25</note>
       </notes>
       <segment>
         <source>Approved</source>
@@ -7089,7 +7089,7 @@
     </unit>
     <unit id="request.status.rejected">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:21</note>
+        <note category="location">src/app/features/requests/requests-page.ts:26</note>
       </notes>
       <segment>
         <source>Rejected</source>
@@ -7098,7 +7098,7 @@
     </unit>
     <unit id="request.status.cancelled">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:22</note>
+        <note category="location">src/app/features/requests/requests-page.ts:27</note>
       </notes>
       <segment>
         <source>Cancelled</source>
@@ -7107,7 +7107,7 @@
     </unit>
     <unit id="requests.created">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:89</note>
+        <note category="location">src/app/features/requests/requests-page.ts:108</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. You can check its status here.</source>
@@ -7143,7 +7143,7 @@
     </unit>
     <unit id="catalogStatus.connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:32</note>
+        <note category="location">src/app/shared/labels.ts:50</note>
       </notes>
       <segment>
         <source>Connected</source>
@@ -7152,7 +7152,7 @@
     </unit>
     <unit id="catalogStatus.expiring">
       <notes>
-        <note category="location">src/app/shared/labels.ts:33</note>
+        <note category="location">src/app/shared/labels.ts:51</note>
       </notes>
       <segment>
         <source>Expires soon</source>
@@ -7161,7 +7161,7 @@
     </unit>
     <unit id="catalogStatus.reconnect_required">
       <notes>
-        <note category="location">src/app/shared/labels.ts:34</note>
+        <note category="location">src/app/shared/labels.ts:52</note>
       </notes>
       <segment>
         <source>Needs reconnecting</source>
@@ -7170,7 +7170,7 @@
     </unit>
     <unit id="catalogStatus.not_connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:35</note>
+        <note category="location">src/app/shared/labels.ts:53</note>
       </notes>
       <segment>
         <source>Not connected</source>
@@ -7179,7 +7179,7 @@
     </unit>
     <unit id="catalogStatus.request_pending">
       <notes>
-        <note category="location">src/app/shared/labels.ts:36</note>
+        <note category="location">src/app/shared/labels.ts:54</note>
       </notes>
       <segment>
         <source>Request pending</source>
@@ -7188,7 +7188,7 @@
     </unit>
     <unit id="catalogStatus.no_access">
       <notes>
-        <note category="location">src/app/shared/labels.ts:37</note>
+        <note category="location">src/app/shared/labels.ts:55</note>
       </notes>
       <segment>
         <source>No entitlement</source>
@@ -7197,7 +7197,7 @@
     </unit>
     <unit id="days.today">
       <notes>
-        <note category="location">src/app/shared/labels.ts:54</note>
+        <note category="location">src/app/shared/labels.ts:72</note>
       </notes>
       <segment>
         <source>today</source>
@@ -7206,7 +7206,7 @@
     </unit>
     <unit id="days.one">
       <notes>
-        <note category="location">src/app/shared/labels.ts:57</note>
+        <note category="location">src/app/shared/labels.ts:75</note>
       </notes>
       <segment>
         <source>in 1 day</source>
@@ -7215,7 +7215,7 @@
     </unit>
     <unit id="days.many">
       <notes>
-        <note category="location">src/app/shared/labels.ts:58</note>
+        <note category="location">src/app/shared/labels.ts:76</note>
       </notes>
       <segment>
         <source>in <ph id="0" equiv="days" disp="days"/> days</source>
@@ -7224,7 +7224,7 @@
     </unit>
     <unit id="catalogStatus.tokenExpiresIn">
       <notes>
-        <note category="location">src/app/shared/labels.ts:72</note>
+        <note category="location">src/app/shared/labels.ts:90</note>
       </notes>
       <segment>
         <source>Token expires <ph id="0" equiv="when" disp="when"/></source>
@@ -7233,7 +7233,7 @@
     </unit>
     <unit id="catalogStatus.connectionExpiresIn">
       <notes>
-        <note category="location">src/app/shared/labels.ts:73</note>
+        <note category="location">src/app/shared/labels.ts:91</note>
       </notes>
       <segment>
         <source>Connection expires <ph id="0" equiv="when" disp="when"/></source>
@@ -7242,7 +7242,7 @@
     </unit>
     <unit id="catalogStatus.connectionBroken">
       <notes>
-        <note category="location">src/app/shared/labels.ts:79</note>
+        <note category="location">src/app/shared/labels.ts:97</note>
       </notes>
       <segment>
         <source>Connection stopped working, connect the account again</source>
@@ -7251,7 +7251,7 @@
     </unit>
     <unit id="catalogStatus.connectionInvalidated">
       <notes>
-        <note category="location">src/app/shared/labels.ts:83</note>
+        <note category="location">src/app/shared/labels.ts:101</note>
       </notes>
       <segment>
         <source>The system settings changed, connect the account again</source>
@@ -7260,7 +7260,7 @@
     </unit>
     <unit id="action.copy_link">
       <notes>
-        <note category="location">src/app/shared/labels.ts:89</note>
+        <note category="location">src/app/shared/labels.ts:107</note>
       </notes>
       <segment>
         <source>Copy link</source>
@@ -7269,7 +7269,7 @@
     </unit>
     <unit id="action.connect_oauth">
       <notes>
-        <note category="location">src/app/shared/labels.ts:90</note>
+        <note category="location">src/app/shared/labels.ts:108</note>
       </notes>
       <segment>
         <source>Connect with OAuth</source>
@@ -7278,7 +7278,7 @@
     </unit>
     <unit id="action.add_secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:91</note>
+        <note category="location">src/app/shared/labels.ts:109</note>
       </notes>
       <segment>
         <source>Add token</source>
@@ -7287,7 +7287,7 @@
     </unit>
     <unit id="action.reconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:92</note>
+        <note category="location">src/app/shared/labels.ts:110</note>
       </notes>
       <segment>
         <source>Renew</source>
@@ -7296,7 +7296,7 @@
     </unit>
     <unit id="action.request_access">
       <notes>
-        <note category="location">src/app/shared/labels.ts:93</note>
+        <note category="location">src/app/shared/labels.ts:111</note>
       </notes>
       <segment>
         <source>Submit request</source>
@@ -7305,7 +7305,7 @@
     </unit>
     <unit id="action.view_request">
       <notes>
-        <note category="location">src/app/shared/labels.ts:94</note>
+        <note category="location">src/app/shared/labels.ts:112</note>
       </notes>
       <segment>
         <source>View request</source>
@@ -7314,7 +7314,7 @@
     </unit>
     <unit id="action.disconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:95</note>
+        <note category="location">src/app/shared/labels.ts:113</note>
       </notes>
       <segment>
         <source>Disconnect</source>
@@ -7323,7 +7323,7 @@
     </unit>
     <unit id="action.reconnectOAuth">
       <notes>
-        <note category="location">src/app/shared/labels.ts:100</note>
+        <note category="location">src/app/shared/labels.ts:118</note>
       </notes>
       <segment>
         <source>Connect</source>
@@ -7332,7 +7332,7 @@
     </unit>
     <unit id="action.renewSecret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:104</note>
+        <note category="location">src/app/shared/labels.ts:122</note>
       </notes>
       <segment>
         <source>Renew</source>
@@ -7341,7 +7341,7 @@
     </unit>
     <unit id="risk.READ_ONLY">
       <notes>
-        <note category="location">src/app/shared/labels.ts:110</note>
+        <note category="location">src/app/shared/labels.ts:128</note>
       </notes>
       <segment>
         <source>Read</source>
@@ -7350,7 +7350,7 @@
     </unit>
     <unit id="risk.UPDATE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:111</note>
+        <note category="location">src/app/shared/labels.ts:129</note>
       </notes>
       <segment>
         <source>Write</source>
@@ -7359,7 +7359,7 @@
     </unit>
     <unit id="risk.DESTRUCTIVE">
       <notes>
-        <note category="location">src/app/shared/labels.ts:112</note>
+        <note category="location">src/app/shared/labels.ts:130</note>
       </notes>
       <segment>
         <source>Delete</source>
@@ -7368,7 +7368,7 @@
     </unit>
     <unit id="risk.unclassified">
       <notes>
-        <note category="location">src/app/shared/labels.ts:121</note>
+        <note category="location">src/app/shared/labels.ts:139</note>
       </notes>
       <segment>
         <source>To classify</source>
@@ -7377,7 +7377,7 @@
     </unit>
     <unit id="credentialType.user-secret">
       <notes>
-        <note category="location">src/app/shared/labels.ts:126</note>
+        <note category="location">src/app/shared/labels.ts:144</note>
       </notes>
       <segment>
         <source>PAT token</source>
@@ -7386,7 +7386,7 @@
     </unit>
     <unit id="credentialType.token-exchange">
       <notes>
-        <note category="location">src/app/shared/labels.ts:127</note>
+        <note category="location">src/app/shared/labels.ts:145</note>
       </notes>
       <segment>
         <source>Token exchange</source>
@@ -7395,7 +7395,7 @@
     </unit>
     <unit id="credentialType.service-account">
       <notes>
-        <note category="location">src/app/shared/labels.ts:128</note>
+        <note category="location">src/app/shared/labels.ts:146</note>
       </notes>
       <segment>
         <source>Service account</source>
@@ -7404,7 +7404,7 @@
     </unit>
     <unit id="connectionStatus.connected">
       <notes>
-        <note category="location">src/app/shared/labels.ts:136</note>
+        <note category="location">src/app/shared/labels.ts:154</note>
       </notes>
       <segment>
         <source>Active</source>
@@ -7413,7 +7413,7 @@
     </unit>
     <unit id="connectionStatus.expiring">
       <notes>
-        <note category="location">src/app/shared/labels.ts:137</note>
+        <note category="location">src/app/shared/labels.ts:155</note>
       </notes>
       <segment>
         <source>Expires soon</source>
@@ -7422,7 +7422,7 @@
     </unit>
     <unit id="connectionStatus.expired">
       <notes>
-        <note category="location">src/app/shared/labels.ts:138</note>
+        <note category="location">src/app/shared/labels.ts:156</note>
       </notes>
       <segment>
         <source>Expired</source>
@@ -7431,7 +7431,7 @@
     </unit>
     <unit id="connectionStatus.revoked">
       <notes>
-        <note category="location">src/app/shared/labels.ts:139</note>
+        <note category="location">src/app/shared/labels.ts:157</note>
       </notes>
       <segment>
         <source>Revoked</source>
@@ -7440,7 +7440,7 @@
     </unit>
     <unit id="connectionStatus.error">
       <notes>
-        <note category="location">src/app/shared/labels.ts:140</note>
+        <note category="location">src/app/shared/labels.ts:158</note>
       </notes>
       <segment>
         <source>Stopped working</source>
@@ -7449,7 +7449,7 @@
     </unit>
     <unit id="connectionStatus.needs_reconnect">
       <notes>
-        <note category="location">src/app/shared/labels.ts:141</note>
+        <note category="location">src/app/shared/labels.ts:159</note>
       </notes>
       <segment>
         <source>Connect again</source>

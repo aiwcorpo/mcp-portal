@@ -7,7 +7,7 @@ import {
   catalogStatusTone,
   credentialTypeLabel,
   riskLabel,
-  systemName,
+  catalogSystemName,
 } from '../../shared/labels';
 import { canRequestTool, catalogRowActions, isEmphasised } from './catalog-actions';
 
@@ -28,7 +28,7 @@ export function matchesServer(server: PortalCatalogServer, query: string): boole
     return true;
   }
   return (
-    systemName(server.system).toLowerCase().includes(needle) ||
+    catalogSystemName(server).toLowerCase().includes(needle) ||
     server.serverId.toLowerCase().includes(needle) ||
     server.tools.some((tool) => toolMatches(tool, needle))
   );
@@ -63,7 +63,7 @@ export class CatalogTable {
   protected readonly rows = computed(() =>
     this.servers().map((server) => ({
       server,
-      name: systemName(server.system),
+      name: catalogSystemName(server),
       login: this.loginLabel(server),
       status: catalogStatusText(server.status, server.connection),
       tone: catalogStatusTone(server.status),
@@ -83,7 +83,7 @@ export class CatalogTable {
     const query = this.query().trim().toLowerCase();
     const matchedByTool =
       query !== '' &&
-      !systemName(server.system).toLowerCase().includes(query) &&
+      !catalogSystemName(server).toLowerCase().includes(query) &&
       server.tools.some((tool) => toolMatches(tool, query));
     return matchedByTool || this.opened().has(server.serverId);
   }

@@ -79,11 +79,14 @@ export class ConnectionActions {
    * entitlement, so the dialog lets the user pick one of those the IGA offers (CC-154). Null when the
    * dialog was dismissed.
    */
-  async requestWithChoice(system: string | null): Promise<AccessRequestResult | null> {
+  async requestWithChoice(
+    system: string | null,
+    name?: string,
+  ): Promise<AccessRequestResult | null> {
     const result = await firstValueFrom(
       this.dialog
         .open<RequestDialog, RequestDialogData, AccessRequestResult>(RequestDialog, {
-          data: { system },
+          data: { system, name },
           width: '480px',
           maxWidth: '95vw',
         })
@@ -92,8 +95,8 @@ export class ConnectionActions {
     return result ?? null;
   }
 
-  async confirmAndDisconnect(system: string): Promise<DisconnectResult> {
-    const name = systemName(system);
+  async confirmAndDisconnect(system: string, shownName?: string): Promise<DisconnectResult> {
+    const name = shownName ?? systemName(system);
     const confirmed = await firstValueFrom(
       this.dialog
         .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
@@ -118,6 +121,6 @@ export class ConnectionActions {
   }
 }
 
-export function disconnectedMessage(system: string): string {
-  return $localize`:@@disconnect.done:Disconnected account ${systemName(system)}:system:.`;
+export function disconnectedMessage(system: string, name?: string): string {
+  return $localize`:@@disconnect.done:Disconnected account ${name ?? systemName(system)}:system:.`;
 }

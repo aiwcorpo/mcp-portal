@@ -37,7 +37,11 @@ Dynamic servers: no list of systems, servers or resource types is left in the po
   name; both validated, with the hint that without it the token is stored without a check). A connection carries `verified`; the
   connections page shows "Not verified" (no account name, no warning colour), and the token form warns before a token is stored again for
   a connection that was not verified and says after the store that the system does not check tokens. `backendUser` may be null. The
-  C12 catalog has no `userSecretVerified`, so the warning before the first token of such a system cannot be shown.
+  C12 catalog now carries `userSecretVerified` (CC-248), so the token form warns before the first token too.
+- Catalog names and the first token (CC-248): the catalog credential carries `displayName` and `userSecretVerified` from the broker. The
+  pages for users (catalog, connections, requests, the request dialog, the MCP address, the disconnect dialog, the OAuth return banner for
+  systems of the catalog) show the display name instead of the capitalised identifier, as inert text, and the token form warns before the
+  very first token of a system that does not check tokens.
 - Operation: after the upgrade the identity provider has to put `auth_time`, `acr` and `amr` into the tokens exchanged for the
   gateway and the broker, or every widening administration operation ends in `step_up_required` (see
   [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings)).

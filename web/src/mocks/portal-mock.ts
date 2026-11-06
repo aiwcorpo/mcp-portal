@@ -187,7 +187,12 @@ function baseCatalog(
       url: 'https://localhost/s/mcp-notes/mcp',
       status: 'not_connected',
       actions: ['add_secret'],
-      credential: { supportedTypes: ['user-secret'], defaultType: 'user-secret' },
+      credential: {
+        supportedTypes: ['user-secret'],
+        defaultType: 'user-secret',
+        displayName: 'Team notes',
+        userSecretVerified: false,
+      },
       connection: null,
       tools: [tool('notes', 'list_notes', 'List notes', { entitlement: 'mcp-notes-read' })],
     });

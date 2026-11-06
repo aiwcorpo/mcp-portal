@@ -15,7 +15,7 @@ import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
-import { isSystemId, systemName } from '../../shared/labels';
+import { catalogSystemName, isSystemId, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -70,13 +70,33 @@ export class ConnectPage {
     const system = this.system();
     return isSystemId(system) ? system : null;
   });
+  /** The name the broker gave the system, once the catalog row is there; before that the identifier with a capital. */
   protected readonly name = computed(() => {
     const system = this.validSystem();
-    return system ? systemName(system) : '';
+    const state = this.data();
+    if (!system) {
+      return '';
+    }
+    return state.status === 'ready' && state.value
+      ? catalogSystemName(state.value.server)
+      : systemName(system);
   });
   protected readonly instructions = computed(() => {
     const system = this.validSystem();
-    return system ? tokenInstructions(systemName(system)) : [];
+    return system ? tokenInstructions(this.name()) : [];
+  });
+  /**
+   * Whether to warn before a token is stored: the system does not check tokens (`userSecretVerified` false in the
+   * catalog, CC-248) or the connection that is being renewed was stored without a check.
+   */
+  protected readonly unverified = computed(() => {
+    const state = this.data();
+    return (
+      state.status === 'ready' &&
+      !!state.value &&
+      (state.value.server.credential?.userSecretVerified === false ||
+        state.value.server.connection?.verified === false)
+    );
   });
 
   protected readonly data = signal<LoadState<PageData | null>>(LOADING);

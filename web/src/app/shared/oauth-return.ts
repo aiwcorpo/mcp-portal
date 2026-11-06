@@ -10,7 +10,7 @@ import {
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { PortalCatalogServer } from '../api/generated';
 import { ReturnErrorCode, isConnectErrorCode } from '../core/api-error';
-import { isSystemId, systemName } from './labels';
+import { catalogSystemName, isSystemId } from './labels';
 import { Notice } from './notice';
 
 type OAuthReturn =
@@ -53,8 +53,8 @@ export function oauthReturnMessage(
 ): string | null {
   // The name of a system from the URL is shown only when the catalog the user got contains that system: a link that
   // anyone can send must not put words of its own into the page.
-  const inCatalog = !!result.system && !!servers?.some((server) => server.system === result.system);
-  const named = result.system && inCatalog ? systemName(result.system) : null;
+  const listed = servers?.find((server) => server.system === result.system);
+  const named = result.system && listed ? catalogSystemName(listed) : null;
   if (result.kind === 'connected') {
     const row = servers?.find((server) => server.system === result.system);
     const backendUser = row?.connection?.backendUser;

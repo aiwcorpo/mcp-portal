@@ -4,8 +4,10 @@ import {
   Connection,
   ConnectionStatus,
   CredentialType,
+  PortalCatalogServer,
   Risk,
 } from '../api/generated';
+import { neutraliseText } from './untrusted-text';
 
 /**
  * `SystemId` of common.schema.json: the systems are runtime data of the broker and the gateway, not a list here. The
@@ -26,6 +28,22 @@ export function isSystemId(value: unknown): value is string {
 export function systemName(system: string): string {
   const id = system.startsWith('mcp-') ? system.slice(4) : system;
   return id.charAt(0).toUpperCase() + id.slice(1);
+}
+
+/**
+ * Name of a system on the pages for users: the `displayName` that the broker reports in the catalog (an administrator's
+ * text, so hidden characters are written out), or the identifier with a capital letter when there is none (CC-248).
+ */
+export function catalogSystemName(
+  server: Pick<PortalCatalogServer, 'system' | 'credential'>,
+): string {
+  const given = server.credential?.displayName;
+  return given ? neutraliseText(given).text : systemName(server.system);
+}
+
+/** Names of the systems of a catalog by system id, for texts that know only the identifier (an entitlement, a request). */
+export function catalogNames(servers: readonly PortalCatalogServer[]): ReadonlyMap<string, string> {
+  return new Map(servers.map((server) => [server.system, catalogSystemName(server)]));
 }
 
 const STATUS_LABELS: Record<CatalogStatus, string> = {

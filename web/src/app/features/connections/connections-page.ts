@@ -31,7 +31,7 @@ import {
   credentialTypeLabel,
   daysText,
   daysUntil,
-  systemName,
+  catalogSystemName,
   Tone,
 } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
@@ -176,7 +176,7 @@ export class ConnectionsPage implements OnInit {
   protected readonly invalidated = computed(() =>
     (this.servers() ?? [])
       .filter((server) => server.connection?.status === 'needs_reconnect')
-      .map((server) => systemName(server.system))
+      .map((server) => catalogSystemName(server))
       .join(', '),
   );
   protected readonly rows = computed<ConnectionRow[]>(() =>
@@ -184,7 +184,7 @@ export class ConnectionsPage implements OnInit {
       const type = server.connection?.type ?? server.credential?.defaultType;
       return {
         server,
-        name: systemName(server.system),
+        name: catalogSystemName(server),
         type: type ? credentialTypeLabel(type) : '',
         account: server.connection?.backendUser ?? null,
         unverified: server.connection?.verified === false,
@@ -299,7 +299,10 @@ export class ConnectionsPage implements OnInit {
           );
           return;
         case 'request_access': {
-          const result = await this.connectionActions.requestWithChoice(server.system);
+          const result = await this.connectionActions.requestWithChoice(
+            server.system,
+            catalogSystemName(server),
+          );
           if (result?.kind === 'created') {
             this.actionDone.set(
               $localize`:@@conn.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. You can check its status in the Requests tab.`,
@@ -312,9 +315,12 @@ export class ConnectionsPage implements OnInit {
           await this.router.navigate(['/requests']);
           return;
         case 'disconnect': {
-          const result = await this.connectionActions.confirmAndDisconnect(server.system);
+          const result = await this.connectionActions.confirmAndDisconnect(
+            server.system,
+            catalogSystemName(server),
+          );
           if (result.kind === 'done') {
-            this.actionDone.set(disconnectedMessage(server.system));
+            this.actionDone.set(disconnectedMessage(server.system, catalogSystemName(server)));
             await this.load();
           } else if (result.kind === 'failed') {
             this.actionFailure.set(result.failure);

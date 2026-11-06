@@ -14,7 +14,7 @@ import { AccessRequestFlow, AccessRequestResult } from '../../core/access-reques
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
-import { isSystemId, systemName } from '../../shared/labels';
+import { catalogNames, isSystemId, systemName } from '../../shared/labels';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { entitlementTitle } from './entitlement-labels';
@@ -22,6 +22,8 @@ import { entitlementTitle } from './entitlement-labels';
 export interface RequestDialogData {
   /** Preselected system (a server row); null lets the user choose it (the requests page). */
   system: string | null;
+  /** The name of that system as the page showed it (the display name of the broker); the identifier with a capital without it. */
+  name?: string;
 }
 
 /**
@@ -46,7 +48,10 @@ export class RequestDialog {
 
   /** The systems of the catalog the user sees: runtime data of the gateway, read only when the dialog lets the user choose. */
   protected readonly systems = signal<readonly string[]>([]);
-  protected readonly systemName = systemName;
+  private readonly names = signal<ReadonlyMap<string, string>>(
+    new Map(this.data.system && this.data.name ? [[this.data.system, this.data.name]] : []),
+  );
+  protected readonly systemName = (id: string): string => this.names().get(id) ?? systemName(id);
   protected readonly systemChoice = this.data.system === null;
   protected readonly system = signal<string | null>(this.data.system);
   protected readonly entitlements = signal<LoadState<RequestableEntitlement[]> | null>(null);
@@ -59,7 +64,7 @@ export class RequestDialog {
     return state?.status === 'ready'
       ? state.value.map((item) => ({
           entitlement: item.entitlement,
-          title: entitlementTitle(item.entitlement),
+          title: entitlementTitle(item.entitlement, this.names()),
         }))
       : [];
   });
@@ -91,6 +96,7 @@ export class RequestDialog {
   private async loadSystems(): Promise<void> {
     try {
       const catalog = await firstValueFrom(this.catalogApi.getPortalCatalog());
+      this.names.set(catalogNames(catalog.servers));
       this.systems.set([...new Set(catalog.servers.map((server) => server.system))].sort());
     } catch (error) {
       this.failure.set(toApiFailure(error));

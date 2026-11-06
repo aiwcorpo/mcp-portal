@@ -28,7 +28,7 @@ import {
 } from '../../core/mcp-filter';
 import { TOOLS_LIST_PAGE_SIZE, TOOL_LIST_WARNING_THRESHOLD } from '../../core/tool-list-warning';
 import { ErrorNotice } from '../../shared/error-notice';
-import { riskLabel, systemName } from '../../shared/labels';
+import { catalogSystemName, riskLabel } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -132,7 +132,7 @@ export class EndpointPage {
   protected readonly systemOptions = computed<SystemOption[]>(() =>
     this.servers().map((server) => ({
       system: server.system,
-      name: systemName(server.system),
+      name: catalogSystemName(server),
       count: server.tools.filter((tool) => toolBlock(server, tool) === null).length,
     })),
   );
@@ -148,7 +148,7 @@ export class EndpointPage {
     return this.inScope()
       .map((server) => ({
         server,
-        name: systemName(server.system),
+        name: catalogSystemName(server),
         rows: server.tools
           .filter(
             (tool) =>

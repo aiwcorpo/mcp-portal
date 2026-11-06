@@ -10,7 +10,7 @@ import { neutraliseText } from '../../shared/untrusted-text';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
-import { systemName } from '../../shared/labels';
+import { catalogSystemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -113,7 +113,7 @@ export class CatalogPage {
     const copied = this.clipboard.copy(server.url);
     this.snackBar.open(
       copied
-        ? $localize`:@@catalog.linkCopied:Copied the address of the ${systemName(server.system)}:system: server.`
+        ? $localize`:@@catalog.linkCopied:Copied the address of the ${catalogSystemName(server)}:system: server.`
         : $localize`:@@catalog.linkCopyFailed:Could not copy the address. Address: ${server.url}:url:`,
       undefined,
       { duration: 5000 },
@@ -144,7 +144,10 @@ export class CatalogPage {
 
   private async requestAccess(server: PortalCatalogServer): Promise<void> {
     this.busyServer.set(server.serverId);
-    const result = await this.connectionActions.requestWithChoice(server.system);
+    const result = await this.connectionActions.requestWithChoice(
+      server.system,
+      catalogSystemName(server),
+    );
     this.busyServer.set(null);
     if (result) {
       await this.showRequestResult(result);
@@ -174,10 +177,16 @@ export class CatalogPage {
   private async disconnect(server: PortalCatalogServer): Promise<void> {
     const system: string = server.system;
     this.busyServer.set(server.serverId);
-    const result = await this.connectionActions.confirmAndDisconnect(system);
+    const result = await this.connectionActions.confirmAndDisconnect(
+      system,
+      catalogSystemName(server),
+    );
     this.busyServer.set(null);
     if (result.kind === 'done') {
-      this.banner.set({ kind: 'success', text: disconnectedMessage(system) });
+      this.banner.set({
+        kind: 'success',
+        text: disconnectedMessage(system, catalogSystemName(server)),
+      });
       await this.load();
     } else if (result.kind === 'failed') {
       this.banner.set({ kind: 'error', failure: result.failure });

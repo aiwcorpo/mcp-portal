@@ -196,12 +196,16 @@ test('a token that the system does not verify is stored without an account and s
   page,
 }) => {
   await page.goto('/connect/notes?mockUnverified=in');
+  // The catalog says before the very first token that this system does not check it (CC-248).
+  await expect(
+    page.getByText('This system does not check tokens when they are stored.'),
+  ).toBeVisible();
   await page.getByLabel('PAT token', { exact: true }).fill('notes-token-typed-by-the-user');
   await page.getByRole('button', { name: 'Check and save' }).click();
-  await expect(page.getByText('Token stored for Notes.')).toBeVisible();
+  await expect(page.getByText('Token stored for Team notes.')).toBeVisible();
   await expect(page.getByText('(not verified)')).toBeVisible();
 
   await page.goto('/connections');
-  await expect(page.getByRole('row', { name: /Notes/ })).toContainText('Not verified');
-  await expect(page.getByRole('row', { name: /Notes/ })).not.toContainText('jkowalski');
+  await expect(page.getByRole('row', { name: /Team notes/ })).toContainText('Not verified');
+  await expect(page.getByRole('row', { name: /Team notes/ })).not.toContainText('jkowalski');
 });

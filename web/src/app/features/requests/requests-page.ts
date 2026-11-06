@@ -2,12 +2,17 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
-import { AccessRequest, AccessRequestStatus, AccessRequestsService } from '../../api/generated';
+import {
+  AccessRequest,
+  AccessRequestStatus,
+  AccessRequestsService,
+  CatalogService,
+} from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
 import { isAllowedRedirect } from '../../core/auth-urls';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
-import { Tone } from '../../shared/labels';
+import { Tone, catalogNames } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -46,6 +51,9 @@ interface RequestRow {
 export class RequestsPage {
   private readonly api = inject(AccessRequestsService);
   private readonly actions = inject(ConnectionActions);
+  private readonly catalogApi = inject(CatalogService);
+  /** Names of the systems from the catalog, read after the list; without them the identifiers are shown. */
+  private readonly names = signal<ReadonlyMap<string, string>>(new Map());
 
   protected readonly requests = signal<LoadState<AccessRequest[]>>(LOADING);
   protected readonly done = signal<string | null>(null);
@@ -59,7 +67,7 @@ export class RequestsPage {
       .sort((first, second) => Date.parse(second.createdAt) - Date.parse(first.createdAt))
       .map((request) => ({
         request,
-        title: entitlementTitle(request.entitlement),
+        title: entitlementTitle(request.entitlement, this.names()),
         status: requestStatusLabel(request.status),
         tone: STATUS[request.status].tone,
         openUrl:
@@ -69,6 +77,17 @@ export class RequestsPage {
 
   constructor() {
     void this.load();
+    void this.loadNames();
+  }
+
+  private async loadNames(): Promise<void> {
+    try {
+      this.names.set(
+        catalogNames((await firstValueFrom(this.catalogApi.getPortalCatalog())).servers),
+      );
+    } catch {
+      // The names are an addition; the page shows the identifiers without them.
+    }
   }
 
   protected async load(): Promise<void> {

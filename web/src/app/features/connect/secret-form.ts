@@ -68,9 +68,11 @@ export class SecretForm {
   private readonly connectionsApi = inject(ConnectionsService);
 
   readonly system = input.required<string>();
+  /** Name of the system as shown on the page (the display name of the broker, CC-248). */
+  readonly systemName = input<string>();
   /** `CatalogCredential.userSecretScheme`: with `Basic` the form asks for the login next to the secret (CC-222). */
   readonly scheme = input<CatalogCredential['userSecretScheme']>();
-  /** The connection that is being renewed was stored without a check (`Connection.verified` false): say so before storing again. */
+  /** The system does not check tokens, or the connection being renewed was stored without a check: say so before storing. */
   readonly unverified = input(false);
   readonly connected = output<PutSecretResponse>();
 
@@ -78,7 +80,7 @@ export class SecretForm {
   protected readonly usernameMaxLength = USERNAME_MAX_LENGTH;
   protected readonly basic = computed(() => this.scheme() === 'Basic');
   protected readonly phase = signal<Phase>({ kind: 'idle' });
-  protected readonly systemLabel = computed(() => systemName(this.system()));
+  protected readonly systemLabel = computed(() => this.systemName() ?? systemName(this.system()));
   protected readonly saving = computed(() => this.phase().kind === 'saving');
   protected readonly fieldError = computed(() => {
     const state = this.phase();
