@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
@@ -86,32 +85,32 @@ class KillSwitchController {
     }
 
     @PutMapping("/api/v1/admin/registry/servers/{serverId}/kill-switch")
-    ResponseEntity<Void> switchOffServer(@PathVariable String serverId, @RequestBody(required = false) byte[] rawBody,
+    ResponseEntity<Void> switchOffServer(@PathVariable String serverId,
                                          Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
-        return change(serverId, null, rawBody, false, authentication, request, response);
+        return change(serverId, null, false, authentication, request, response);
     }
 
     @DeleteMapping("/api/v1/admin/registry/servers/{serverId}/kill-switch")
     ResponseEntity<Void> switchOnServer(@PathVariable String serverId, Authentication authentication,
                                         HttpServletRequest request, HttpServletResponse response) {
-        return change(serverId, null, null, true, authentication, request, response);
+        return change(serverId, null, true, authentication, request, response);
     }
 
     @PutMapping("/api/v1/admin/registry/servers/{serverId}/tools/{tool}/kill-switch")
     ResponseEntity<Void> switchOffTool(@PathVariable String serverId, @PathVariable String tool,
-                                       @RequestBody(required = false) byte[] rawBody, Authentication authentication,
+                                       Authentication authentication,
                                        HttpServletRequest request, HttpServletResponse response) {
-        return change(serverId, tool, rawBody, false, authentication, request, response);
+        return change(serverId, tool, false, authentication, request, response);
     }
 
     @DeleteMapping("/api/v1/admin/registry/servers/{serverId}/tools/{tool}/kill-switch")
     ResponseEntity<Void> switchOnTool(@PathVariable String serverId, @PathVariable String tool, Authentication authentication,
                                       HttpServletRequest request, HttpServletResponse response) {
-        return change(serverId, tool, null, true, authentication, request, response);
+        return change(serverId, tool, true, authentication, request, response);
     }
 
     /** {@code tool} is null for the switch of a whole server; {@code lift} is the DELETE, which needs the fresh MFA. */
-    private ResponseEntity<Void> change(String serverId, String tool, byte[] rawBody, boolean lift,
+    private ResponseEntity<Void> change(String serverId, String tool, boolean lift,
                                         Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
         PortalUser user = PortalUser.from(authentication);
         String requestId = RequestIds.of(request);
@@ -135,7 +134,7 @@ class KillSwitchController {
         }
         String reason = null;
         if (!lift) {
-            reason = reasonOf(rawBody);
+            reason = reasonOf(AdminBody.read(request));
             if (reason == null) {
                 refused.accept(AuditLog.Outcome.rejected("invalid_request"));
                 throw ApiException.badRequest();

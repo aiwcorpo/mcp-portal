@@ -14,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.audit.AuditLog;
@@ -111,7 +110,7 @@ class RegistryAdminController {
     /** The body is parsed here, so that the attempt is audited whatever is wrong with it. */
     @PostMapping("/api/v1/admin/registry/servers/{serverId}/tools/{tool}/approve")
     ResponseEntity<Object> approve(@PathVariable String serverId, @PathVariable String tool,
-                                   @RequestBody(required = false) byte[] rawBody, Authentication authentication,
+                                   Authentication authentication,
                                    HttpServletRequest request, HttpServletResponse response) {
         PortalUser user = PortalUser.from(authentication);
         String requestId = RequestIds.of(request);
@@ -133,7 +132,7 @@ class RegistryAdminController {
                     clock.millis() - started);
             throw AdminTargets.notFound();
         }
-        ApproveBody body = parse(rawBody);
+        ApproveBody body = parse(AdminBody.read(request));
         if (body == null) {
             audit.definitionApprovalFailed(requestId, user, target, tool, null, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
                     clock.millis() - started);
