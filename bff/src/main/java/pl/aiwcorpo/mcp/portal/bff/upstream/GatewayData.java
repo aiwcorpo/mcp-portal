@@ -22,9 +22,6 @@ public final class GatewayData {
 
     private static final Logger log = LoggerFactory.getLogger(GatewayData.class);
 
-    private static final Set<String> RESOURCE_TYPES = Set.of("Jira::Project", "Jira::Issue", "Confluence::Space",
-            "Confluence::Page", "GitLab::Group", "GitLab::Project", "OpenSearch::Index", "ServiceDesk::Queue",
-            "ServiceDesk::Ticket");
     private static final Set<String> ERROR_CODES = Set.of("unauthenticated", "access_denied", "tool_disabled",
             "confirmation_required", "confirmation_failed", "confirmation_superseded", "confirmation_cancelled",
             "confirmation_blocked", "credential_required", "not_found_or_denied", "invalid_argument", "rate_limited",
@@ -65,7 +62,7 @@ public final class GatewayData {
     /** The preview of {@code expectedId}, or null when the gateway's answer is not that call or breaks the schema. */
     public static GatewayModel.ConfirmationView validConfirmation(GatewayModel.ConfirmationView view, String expectedId) {
         if (view == null || !expectedId.equals(view.confirmationId()) || !validTool(view.tool())
-                || !BrokerData.SYSTEMS.contains(view.system()) || !ContractValues.isTimestamp(view.expiresAt())
+                || !ContractValues.isSystemId(view.system()) || !ContractValues.isTimestamp(view.expiresAt())
                 || view.arguments() == null || view.arguments().size() > MAX_ARGUMENTS || !(view.resource() == null || validResource(view.resource()))) {
             return null;
         }
@@ -146,7 +143,7 @@ public final class GatewayData {
     }
 
     private static boolean validResource(GatewayModel.Resource resource) {
-        return RESOURCE_TYPES.contains(resource.type())
+        return resource.type() != null && ContractValues.RESOURCE_TYPE.matcher(resource.type()).matches()
                 && resource.id() != null && RESOURCE_ID.matcher(resource.id()).matches()
                 && TextHygiene.isClean(resource.id(), false)
                 && (resource.parent() == null

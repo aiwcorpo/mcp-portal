@@ -28,6 +28,11 @@ public class KeycloakGroupsAccessGovernance implements AccessGovernance {
     }
 
     @Override
+    public java.util.Set<String> systems() {
+        return catalog.keySet();
+    }
+
+    @Override
     public List<Entitlement> catalog(String system) {
         return catalog.getOrDefault(system, List.of());
     }

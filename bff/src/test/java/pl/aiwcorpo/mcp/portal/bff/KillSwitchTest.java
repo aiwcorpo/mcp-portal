@@ -109,7 +109,7 @@ class KillSwitchTest extends PortalHarness {
         for (String broken : List.of(
                 "{\"scope\":\"server\",\"serverId\":\"mcp-jira\",\"tool\":\"update_issue\",\"setBy\":\"s\",\"setAt\":\"2026-11-03T09:12:44Z\",\"reason\":\"r\"}",
                 "{\"scope\":\"tool\",\"serverId\":\"mcp-jira\",\"setBy\":\"s\",\"setAt\":\"2026-11-03T09:12:44Z\",\"reason\":\"r\"}",
-                "{\"scope\":\"tool\",\"serverId\":\"mcp-other\",\"tool\":\"update_issue\",\"setBy\":\"s\",\"setAt\":\"2026-11-03T09:12:44Z\",\"reason\":\"r\"}",
+                "{\"scope\":\"tool\",\"serverId\":\"mcp-gateway\",\"tool\":\"update_issue\",\"setBy\":\"s\",\"setAt\":\"2026-11-03T09:12:44Z\",\"reason\":\"r\"}",
                 "{\"scope\":\"server\",\"serverId\":\"mcp-jira\",\"setBy\":\"s\",\"setAt\":\"soon\",\"reason\":\"r\"}",
                 "{\"scope\":\"server\",\"serverId\":\"mcp-jira\",\"setBy\":\"s\",\"setAt\":\"2026-11-03T09:12:44Z\",\"reason\":\"\"}",
                 "{\"scope\":\"server\",\"serverId\":\"mcp-jira\",\"setBy\":\"s\",\"setAt\":\"2026-11-03T09:12:44Z\",\"reason\":\"r\",\"extra\":1}")) {
@@ -227,7 +227,7 @@ class KillSwitchTest extends PortalHarness {
     @Test
     void anUnknownServerOrToolIsNotFoundAndNothingIsSent() {
         TestBrowser browser = admin();
-        for (String path : List.of("/api/v1/admin/registry/servers/mcp-other/kill-switch",
+        for (String path : List.of("/api/v1/admin/registry/servers/mcp-gateway/kill-switch",
                 "/api/v1/admin/registry/servers/mcp-jira/tools/Update-Issue/kill-switch",
                 "/api/v1/admin/registry/servers/mcp-jira/tools/a__b/kill-switch")) {
             HttpResponse<String> put = browser.put(path, REASON, true);

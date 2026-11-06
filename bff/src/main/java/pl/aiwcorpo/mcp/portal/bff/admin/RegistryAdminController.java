@@ -24,6 +24,7 @@ import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.security.StepUpPolicy;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
+import pl.aiwcorpo.mcp.portal.bff.upstream.ContractValues;
 import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayAdminClient;
 import pl.aiwcorpo.mcp.portal.bff.upstream.GatewayModel;
 import pl.aiwcorpo.mcp.portal.bff.upstream.RegistryData;
@@ -115,7 +116,7 @@ class RegistryAdminController {
         PortalUser user = PortalUser.from(authentication);
         String requestId = RequestIds.of(request);
         long started = clock.millis();
-        String target = AdminTargets.SERVER_IDS.contains(serverId) ? serverId : null;
+        String target = ContractValues.isServerId(serverId) ? serverId : null;
         if (!user.isAdmin()) {
             audit.definitionApprovalFailed(requestId, user, target, AdminTargets.validTool(tool), null, AuditLog.Outcome.accessDenied(),
                     clock.millis() - started);

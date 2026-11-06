@@ -132,7 +132,7 @@ class AccessRequestsTest extends PortalHarness {
     @Test
     void requestableEntitlementsNeedOneKnownSystem() {
         TestBrowser browser = as(ALICE);
-        for (String query : List.of("", "?system=", "?system=nope", "?system=jira&system=gitlab", "?system=JIRA")) {
+        for (String query : List.of("", "?system=", "?system=Nope", "?system=gateway", "?system=jira&system=gitlab", "?system=JIRA")) {
             HttpResponse<String> response = browser.get(ENTITLEMENTS + query);
             C12.assertResponse("GET", ENTITLEMENTS, response);
             assertThat(response.statusCode()).as(query).isEqualTo(400);

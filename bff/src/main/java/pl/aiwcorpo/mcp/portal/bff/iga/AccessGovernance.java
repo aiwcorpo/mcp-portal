@@ -17,6 +17,9 @@ public interface AccessGovernance {
         return true;
     }
 
+    /** Systems the IGA catalog has entitlements for: the portal does not know the systems of the platform in advance. */
+    java.util.Set<String> systems();
+
     /** Entitlements (C9 group names) of a system, as the IGA catalog lists them. */
     List<Entitlement> catalog(String system);
 

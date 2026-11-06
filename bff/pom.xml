@@ -13,7 +13,7 @@
 
     <groupId>pl.aiwcorpo.mcp</groupId>
     <artifactId>mcp-portal-bff</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <name>MCP Portal BFF</name>
     <description>Backend for the MCP portal frontend: OIDC session, C12 API, aggregation of C4, C5 and C13.</description>
     <url>https://github.com/aiwcorpo/mcp-portal</url>
@@ -29,7 +29,7 @@
         <java.version>25</java.version>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mcp-contracts.version>6.3.2</mcp-contracts.version>
+        <mcp-contracts.version>7.0.0</mcp-contracts.version>
         <wiremock.version>3.13.2</wiremock.version>
         <json-schema-validator.version>3.0.4</json-schema-validator.version>
     </properties>

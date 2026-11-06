@@ -26,6 +26,7 @@ import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerClient;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerData;
+import pl.aiwcorpo.mcp.portal.bff.upstream.ContractValues;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerModel;
 import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
@@ -149,7 +150,7 @@ class ConnectionsController {
     }
 
     private void requireSystem(String system, PortalUser user, String requestId, long started) {
-        if (!BrokerData.SYSTEMS.contains(system)) {
+        if (!ContractValues.isSystemId(system)) {
             audit.connectionChange(requestId, user, null, AuditLog.Outcome.rejected(ApiError.INVALID_REQUEST),
                     clock.millis() - started);
             throw ApiException.badRequest();

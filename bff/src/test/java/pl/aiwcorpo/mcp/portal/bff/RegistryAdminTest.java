@@ -407,7 +407,7 @@ class RegistryAdminTest extends PortalHarness {
             HttpResponse<String> response = approve(browser, APPROVE, body, true);
             assertThat(response.statusCode()).as(body).isEqualTo(400);
         }
-        for (String path : List.of("/api/v1/admin/registry/servers/mcp-other/tools/update_issue/approve",
+        for (String path : List.of("/api/v1/admin/registry/servers/mcp-gateway/tools/update_issue/approve",
                 "/api/v1/admin/registry/servers/mcp-jira/tools/Update-Issue/approve",
                 "/api/v1/admin/registry/servers/mcp-jira/tools/a__b/approve")) {
             HttpResponse<String> response = approve(browser, path, BODY, true);

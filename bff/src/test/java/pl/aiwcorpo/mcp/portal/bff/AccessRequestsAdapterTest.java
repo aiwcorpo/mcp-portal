@@ -45,6 +45,11 @@ class AccessRequestsAdapterTest extends PortalHarness {
                 }
 
                 @Override
+                public java.util.Set<String> systems() {
+                    return java.util.Set.of("jira", "confluence");
+                }
+
+                @Override
                 public List<Entitlement> catalog(String system) {
                     if (mode == Mode.UNAVAILABLE) {
                         throw new IgaUnavailableException("scripted");

@@ -75,7 +75,7 @@ class NegativeSecurityTest extends PortalHarness {
         responses.add(browser.post("/api/v1/me", null, true));
         responses.add(browser.put("/api/v1/connections/jira/secret", "garbage", true));
         responses.add(browser.put("/api/v1/connections/jira/secret", "{\"secret\":\"x\"}", false));
-        responses.add(browser.delete("/api/v1/connections/sharepoint", true));
+        responses.add(browser.delete("/api/v1/connections/Sharepoint", true));
         responses.add(browser.get("/api/v1/auth/login?returnPath=//evil.test"));
         responses.add(browser.get("/api/v1/auth/login?returnPath=/catalog"));
         responses.add(browser.get("/api/v1/oauth/callback?state=x"));
@@ -213,7 +213,7 @@ class NegativeSecurityTest extends PortalHarness {
         responses.add(browser.put("/api/v1/connections/jira/secret", "{\"secret\":\"" + secrets.get(3) + "\"}", true));
         responses.add(browser.put("/api/v1/connections/jira/secret", "{\"secret\":\"" + secrets.get(4) + "\",\"extra\":1}", true));
         responses.add(browser.put("/api/v1/connections/jira/secret", "{\"secret\":\"" + secrets.get(5) + "\"", true));
-        responses.add(browser.put("/api/v1/connections/sharepoint/secret", "{\"secret\":\"" + secrets.get(0) + "\"}", true));
+        responses.add(browser.put("/api/v1/connections/Sharepoint/secret", "{\"secret\":\"" + secrets.get(0) + "\"}", true));
         responses.add(browser.put("/api/v1/connections/jira/secret", "{\"secret\":\"" + secrets.get(1) + "\"}", false));
 
         for (HttpResponse<String> response : responses) {

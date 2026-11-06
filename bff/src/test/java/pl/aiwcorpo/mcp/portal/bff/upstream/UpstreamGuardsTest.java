@@ -45,7 +45,7 @@ class UpstreamGuardsTest {
     void dataOutsideTheContractIsDroppedOrNormalized() {
         List<BrokerModel.Connection> connections = BrokerData.validConnections(List.of(
                 new BrokerModel.Connection("jira", "user-secret", "suspended", "alice", null, "2026-10-01T08:00:00Z", null),
-                new BrokerModel.Connection("sharepoint", "user-secret", "connected", "alice", null, "2026-10-01T08:00:00Z", null),
+                new BrokerModel.Connection("Sharepoint", "user-secret", "connected", "alice", null, "2026-10-01T08:00:00Z", null),
                 new BrokerModel.Connection("gitlab", "magic", "connected", "alice", null, "2026-10-01T08:00:00Z", null)));
         assertThat(connections).singleElement().satisfies(c -> {
             assertThat(c.system()).isEqualTo("jira");
@@ -57,7 +57,7 @@ class UpstreamGuardsTest {
                 new GatewayModel.CatalogServer("mcp-gitlab", "gitlab", "1.0.0", List.of(
                         new GatewayModel.CatalogTool("gitlab__a", null, "READ_ONLY", "read", "maybe", null, "", false, null, null),
                         new GatewayModel.CatalogTool("gitlab__b", "b", "HARMLESS", "read", "granted", List.of(), null, null, null, null))),
-                new GatewayModel.CatalogServer("mcp-x", "sharepoint", "1.0.0", List.of()))));
+                new GatewayModel.CatalogServer("mcp-x", "Sharepoint", "1.0.0", List.of()))));
         assertThat(catalog.servers()).extracting(GatewayModel.CatalogServer::system).containsExactly("jira", "gitlab");
         assertThat(catalog.servers().getFirst().tools()).isEmpty();
         assertThat(catalog.servers().get(1).tools()).singleElement().satisfies(tool -> {

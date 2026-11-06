@@ -19,13 +19,12 @@ import tools.jackson.databind.node.ObjectNode;
  */
 public final class RegistryData {
 
-    private static final Set<String> SERVER_IDS = Set.of("mcp-jira", "mcp-confluence", "mcp-gitlab", "mcp-servicedesk",
-            "mcp-opensearch");
     public static final Pattern TOOL_NAME = Pattern.compile("^[a-z][a-z0-9]*(_[a-z0-9]+)*$");
     public static final Pattern DEFINITION_HASH = Pattern.compile("^sha256:[0-9a-f]{64}$");
     private static final Pattern SEMVER = Pattern
             .compile("^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$");
-    private static final Set<String> SERVER_FIELDS = Set.of("serverId", "system", "version", "enabled", "tools");
+    private static final Set<String> SERVER_FIELDS = Set.of("serverId", "system", "version", "enabled", "tools",
+            "policiesStatus", "policiesHash", "pendingPoliciesHash");
     private static final Set<String> TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
             "definitionHash");
     private static final Set<String> REGISTRY_TOOL_FIELDS = Set.of("name", "risk", "action", "resourceRefs", "definition",
@@ -84,11 +83,12 @@ public final class RegistryData {
 
     private static boolean validServer(JsonNode server) {
         if (server == null || !server.isObject() || !onlyFields(server, SERVER_FIELDS)
-                || !SERVER_IDS.contains(text(server.get("serverId")))
-                || !BrokerData.SYSTEMS.contains(text(server.get("system")))
+                || !ContractValues.isServerId(text(server.get("serverId")))
+                || !ContractValues.isSystemId(text(server.get("system")))
                 || !("mcp-" + server.get("system").asString()).equals(server.get("serverId").asString())
                 || !semver(server.get("version"))
                 || server.has("enabled") && !server.get("enabled").isBoolean()
+                || !validPolicyState(server)
                 || server.get("tools") == null || !server.get("tools").isArray()) {
             return false;
         }
@@ -98,6 +98,22 @@ public final class RegistryData {
             }
         }
         return true;
+    }
+
+    /**
+     * {@code policiesStatus} is absent for an adapter; {@code pendingPoliciesHash} is there exactly with
+     * {@code pending_approval} and {@code policiesHash} (the approved one) only when something was approved.
+     */
+    private static boolean validPolicyState(JsonNode server) {
+        boolean status = server.has("policiesStatus");
+        if (!status) {
+            return !server.has("pendingPoliciesHash");
+        }
+        String value = text(server.get("policiesStatus"));
+        return ("approved".equals(value) || "pending_approval".equals(value))
+                && (!server.has("policiesHash") || hash(server.get("policiesHash")))
+                && "pending_approval".equals(value) == server.has("pendingPoliciesHash")
+                && (!server.has("pendingPoliciesHash") || hash(server.get("pendingPoliciesHash")));
     }
 
     /** How the entry is classified: {@code ToolEntry} has risk and action, {@code AdapterToolEntry} must not have them. */
@@ -179,7 +195,7 @@ public final class RegistryData {
 
     private static boolean validKillSwitch(JsonNode entry) {
         if (entry == null || !entry.isObject() || !onlyFields(entry, KILL_SWITCH_FIELDS)
-                || !SERVER_IDS.contains(text(entry.get("serverId")))
+                || !ContractValues.isServerId(text(entry.get("serverId")))
                 || text(entry.get("setBy")).isEmpty() || text(entry.get("setBy")).length() > 255
                 || !ContractValues.isTimestamp(text(entry.get("setAt")))
                 || text(entry.get("reason")).isEmpty() || text(entry.get("reason")).length() > 200) {
@@ -193,20 +209,20 @@ public final class RegistryData {
         };
     }
 
-    private static boolean onlyFields(JsonNode node, Set<String> allowed) {
+    static boolean onlyFields(JsonNode node, Set<String> allowed) {
         return node.propertyNames().stream().allMatch(allowed::contains);
     }
 
     /** The text of a string node, or the empty string, which no pattern above accepts. */
-    private static String text(JsonNode node) {
+    static String text(JsonNode node) {
         return node != null && node.isString() ? node.asString() : "";
     }
 
-    private static boolean hash(JsonNode node) {
+    static boolean hash(JsonNode node) {
         return DEFINITION_HASH.matcher(text(node)).matches();
     }
 
-    private static boolean semver(JsonNode node) {
+    static boolean semver(JsonNode node) {
         return SEMVER.matcher(text(node)).matches();
     }
 

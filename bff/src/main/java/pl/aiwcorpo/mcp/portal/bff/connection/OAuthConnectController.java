@@ -28,7 +28,7 @@ import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import pl.aiwcorpo.mcp.portal.bff.token.UserTokens;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerClient;
-import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerData;
+import pl.aiwcorpo.mcp.portal.bff.upstream.ContractValues;
 import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerModel;
 import pl.aiwcorpo.mcp.portal.bff.upstream.UpstreamException;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
@@ -89,7 +89,7 @@ class OAuthConnectController {
                                Authentication authentication, HttpServletRequest request,
                                HttpServletResponse response) {
         PortalUser.from(authentication);
-        if (!BrokerData.SYSTEMS.contains(system)) {
+        if (!ContractValues.isSystemId(system)) {
             throw ApiException.badRequest();
         }
         String returnPath = returnPath(rawBody);

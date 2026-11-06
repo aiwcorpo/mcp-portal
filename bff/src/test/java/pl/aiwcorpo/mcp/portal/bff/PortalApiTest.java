@@ -359,7 +359,7 @@ class PortalApiTest extends PortalHarness {
             C12.assertResponse("PUT", "/api/v1/connections/{system}/secret", response);
             assertThat(response.statusCode()).as(body).isEqualTo(400);
         }
-        HttpResponse<String> unknownSystem = browser.put("/api/v1/connections/sharepoint/secret", "{\"secret\":\"x\"}", true);
+        HttpResponse<String> unknownSystem = browser.put("/api/v1/connections/Sharepoint/secret", "{\"secret\":\"x\"}", true);
         assertThat(unknownSystem.statusCode()).isEqualTo(400);
         assertThat(BROKER.findAll(anyRequestedFor(anyUrl()))).hasSize(before);
     }
@@ -520,7 +520,7 @@ class PortalApiTest extends PortalHarness {
         browser.get("/api/v1/me");
         int before = auditEvents().size();
 
-        browser.put("/api/v1/connections/sharepoint/secret", "{\"secret\":\"x\"}", true);
+        browser.put("/api/v1/connections/Sharepoint/secret", "{\"secret\":\"x\"}", true);
         browser.put("/api/v1/connections/jira/secret", "not json", true);
 
         List<JsonNode> events = auditEvents().subList(before, auditEvents().size());

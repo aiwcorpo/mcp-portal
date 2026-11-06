@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
-import pl.aiwcorpo.mcp.portal.bff.upstream.BrokerData;
+import pl.aiwcorpo.mcp.portal.bff.upstream.ContractValues;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import pl.aiwcorpo.mcp.portal.bff.web.StrictJson;
@@ -57,7 +57,7 @@ class AccessRequestsController {
     List<RequestableEntitlement> requestable(Authentication authentication, HttpServletRequest request) {
         PortalUser user = PortalUser.from(authentication);
         String[] systems = request.getParameterValues("system");
-        if (systems == null || systems.length != 1 || !BrokerData.SYSTEMS.contains(systems[0])) {
+        if (systems == null || systems.length != 1 || !ContractValues.isSystemId(systems[0])) {
             throw ApiException.badRequest();
         }
         if (!iga.supportsRequests()) {
@@ -101,7 +101,7 @@ class AccessRequestsController {
         if (held.contains(entitlement) || !iga.supportsRequests()) {
             return false;
         }
-        for (String system : BrokerData.SYSTEMS) {
+        for (String system : iga.systems()) {
             for (AccessGovernance.Entitlement listed : iga.catalog(system)) {
                 if (listed != null && IgaData.belongsTo(system, entitlement) && entitlement.equals(listed.name())) {
                     return true;

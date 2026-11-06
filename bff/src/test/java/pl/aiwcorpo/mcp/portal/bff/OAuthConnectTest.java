@@ -135,7 +135,7 @@ class OAuthConnectTest extends PortalHarness {
             C12.assertResponse("POST", "/api/v1/connections/{system}/oauth", response);
             assertThat(response.statusCode()).as(body).isEqualTo(400);
         }
-        HttpResponse<String> unknownSystem = browser.post("/api/v1/connections/sharepoint/oauth", "{}", true);
+        HttpResponse<String> unknownSystem = browser.post("/api/v1/connections/Sharepoint/oauth", "{}", true);
         assertThat(unknownSystem.statusCode()).isEqualTo(400);
         assertThat(BROKER.findAll(anyRequestedFor(anyUrl()))).hasSize(before);
     }

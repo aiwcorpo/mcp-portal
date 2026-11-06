@@ -1,20 +1,16 @@
 package pl.aiwcorpo.mcp.portal.bff.admin;
 
-import java.util.Set;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import pl.aiwcorpo.mcp.portal.bff.security.PortalUser;
+import pl.aiwcorpo.mcp.portal.bff.upstream.ContractValues;
 import pl.aiwcorpo.mcp.portal.bff.upstream.RegistryData;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiError;
 import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 
-/** What the registry and kill switch controllers agree on: who is an admin, which servers and tools can exist, which answers a miss gets. */
+/** What the registry and kill switch controllers agree on: who is an admin, which server ids and tool names can exist (by pattern: the registry itself is the gateway's), which answers a miss gets. */
 final class AdminTargets {
-
-    static final Set<String> SERVER_IDS = Set.of("mcp-jira", "mcp-confluence", "mcp-gitlab", "mcp-servicedesk",
-            "mcp-opensearch");
 
     private AdminTargets() {
     }
@@ -27,7 +23,7 @@ final class AdminTargets {
 
     /** A server or tool that cannot exist is a resource that is not there (the contract has no 400 for these paths). */
     static void requireTarget(String serverId, String tool) {
-        if (!SERVER_IDS.contains(serverId) || validTool(tool).isEmpty()) {
+        if (!ContractValues.isServerId(serverId) || validTool(tool).isEmpty()) {
             throw notFound();
         }
     }

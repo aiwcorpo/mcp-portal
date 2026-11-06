@@ -14,10 +14,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class BrokerData {
 
-    public static final Set<String> SYSTEMS = Set.of("jira", "confluence", "gitlab", "servicedesk", "opensearch");
-
     static final Set<String> CREDENTIAL_TYPES = Set.of("user-oauth", "user-secret", "token-exchange", "service-account");
-    static final Set<String> CONNECTION_STATUSES = Set.of("connected", "expiring", "expired", "revoked", "error");
+    static final Set<String> CONNECTION_STATUSES = Set.of("connected", "expiring", "expired", "revoked", "error",
+            "needs_reconnect");
     static final Set<String> SCHEMES = Set.of("Bearer", "Basic");
     static final Set<String> DEPLOYMENTS = Set.of("dc", "cloud");
     static final Set<String> RISKS = Set.of("READ_ONLY", "UPDATE", "DESTRUCTIVE");
@@ -33,7 +32,7 @@ public final class BrokerData {
     public static List<BrokerModel.Connection> validConnections(List<BrokerModel.Connection> connections) {
         List<BrokerModel.Connection> result = new ArrayList<>();
         for (BrokerModel.Connection c : connections == null ? List.<BrokerModel.Connection>of() : connections) {
-            if (c == null || !SYSTEMS.contains(c.system()) || !CREDENTIAL_TYPES.contains(c.type())
+            if (c == null || !ContractValues.isSystemId(c.system()) || !CREDENTIAL_TYPES.contains(c.type())
                     || c.backendUser() == null || c.connectedAt() == null) {
                 log.warn("Dropping a C4 connection outside the contract");
                 continue;
@@ -48,7 +47,7 @@ public final class BrokerData {
     public static List<BrokerModel.SystemInfo> validSystems(List<BrokerModel.SystemInfo> systems) {
         List<BrokerModel.SystemInfo> result = new ArrayList<>();
         for (BrokerModel.SystemInfo s : systems == null ? List.<BrokerModel.SystemInfo>of() : systems) {
-            if (s == null || !SYSTEMS.contains(s.system())) {
+            if (s == null || !ContractValues.isSystemId(s.system())) {
                 continue;
             }
             List<String> supported = s.supportedTypes() == null ? List.of()
@@ -72,7 +71,8 @@ public final class BrokerData {
         List<GatewayModel.CatalogServer> servers = new ArrayList<>();
         if (catalog != null && catalog.servers() != null) {
             for (GatewayModel.CatalogServer server : catalog.servers()) {
-                if (server == null || !SYSTEMS.contains(server.system()) || server.serverId() == null
+                if (server == null || !ContractValues.isSystemId(server.system()) || !ContractValues.isServerId(server.serverId())
+                        || !("mcp-" + server.system()).equals(server.serverId())
                         || server.version() == null) {
                     log.warn("Dropping a C5 catalog server outside the contract");
                     continue;
