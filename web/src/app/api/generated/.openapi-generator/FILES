@@ -33,6 +33,7 @@ model/approvePoliciesRequest.ts
 model/approvePoliciesResult.ts
 model/approvePoliciesResultIgnoredMappingEntriesInner.ts
 model/approveRequest.ts
+model/approvedPolicies.ts
 model/auditEvent.ts
 model/auditEventErrorCode.ts
 model/auditEventResource.ts

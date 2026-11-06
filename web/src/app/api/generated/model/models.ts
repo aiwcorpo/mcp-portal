@@ -13,6 +13,7 @@ export * from './approvePoliciesRequest';
 export * from './approvePoliciesResult';
 export * from './approvePoliciesResultIgnoredMappingEntriesInner';
 export * from './approveRequest';
+export * from './approvedPolicies';
 export * from './auditEvent';
 export * from './auditEventErrorCode';
 export * from './auditEventResource';

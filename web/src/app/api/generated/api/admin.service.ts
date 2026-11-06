@@ -25,6 +25,8 @@ import { ApprovePoliciesResult } from '../model/approvePoliciesResult';
 // @ts-ignore
 import { ApproveRequest } from '../model/approveRequest';
 // @ts-ignore
+import { ApprovedPolicies } from '../model/approvedPolicies';
+// @ts-ignore
 import { KillSwitchList } from '../model/killSwitchList';
 // @ts-ignore
 import { KillSwitchRequest } from '../model/killSwitchRequest';
@@ -373,6 +375,7 @@ export class AdminService extends BaseService {
 
     /**
      * Remove a server from the registry (proxy to C5); its tools disappear and its calls are refused.
+     * Needs a fresh MFA (&#x60;step_up_required&#x60; otherwise); the gateway checks it too. 
      * @endpoint delete /api/v1/admin/servers/{serverId}
      * @param serverId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -974,6 +977,65 @@ export class AdminService extends BaseService {
     }
 
     /**
+     * The approved policies and resource type declarations of a server (proxy to C5).
+     * Nothing approved yet is null values, not &#x60;404&#x60;; &#x60;404&#x60; is only for an unknown &#x60;serverId&#x60;. 
+     * @endpoint get /api/v1/admin/registry/servers/{serverId}/policies
+     * @param serverId 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public getAdminServerPolicies(serverId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ApprovedPolicies>;
+    public getAdminServerPolicies(serverId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ApprovedPolicies>>;
+    public getAdminServerPolicies(serverId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ApprovedPolicies>>;
+    public getAdminServerPolicies(serverId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling getAdminServerPolicies.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/policies`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ApprovedPolicies>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * One system of the credential broker with its ETag, without secrets (proxy to C4).
      * @endpoint get /api/v1/admin/systems/{system}
      * @param system 
@@ -1249,6 +1311,7 @@ export class AdminService extends BaseService {
 
     /**
      * Create or replace a forbid-only emergency override (proxy to C5).
+     * A replace (&#x60;If-Match&#x60;) needs a fresh MFA, because a weaker text widens access like a delete (&#x60;step_up_required&#x60; otherwise); a create (&#x60;If-None-Match: *&#x60;) does not. The gateway checks it too. 
      * @endpoint put /api/v1/admin/policy/overrides/{id}
      * @param id 
      * @param overrideRequest 

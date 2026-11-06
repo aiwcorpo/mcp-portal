@@ -19,6 +19,10 @@ import { SystemProduct } from './systemProduct';
  * Configuration of a system. `oauth` is required when `supportedTypes` has `user-oauth` or `token-exchange`; every URL is https (a production broker never accepts http).
  */
 export interface SystemAdminRequest { 
+    /**
+     * Name that the portal shows for the system (a short label, no control or format characters); the system id when the administrator gives none.
+     */
+    displayName?: string;
     baseUrl: string;
     adapter: SystemAdapter;
     product?: SystemProduct;
