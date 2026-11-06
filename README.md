@@ -1,9 +1,11 @@
 # mcp-portal
 
 The portal of the MCP platform: the page where a user sees the MCP servers available to them, connects accounts in the
-systems (Jira, Confluence, GitLab, Service Desk, OpenSearch), submits requests for entitlements and builds the `/mcp` address
-with a filter, and where an administrator approves tool definitions, classifies the tools of foreign servers and, in an
-incident, switches a server or a tool off. Two components in one repository:
+systems, submits requests for entitlements and builds the `/mcp` address with a filter, and where an administrator manages the
+servers and systems of the platform at runtime, approves tool definitions and server policies, classifies the tools of foreign
+servers, edits the scope mapping and the emergency overrides and, in an incident, switches a server or a tool off. The portal
+holds no list of systems, servers or resource types: they come from the gateway (servers, catalog) and the credential broker
+(systems). Two components in one repository:
 
 | Directory | What it is | Description |
 | --- | --- | --- |
@@ -12,7 +14,7 @@ incident, switches a server or a tool off. Two components in one repository:
 
 Who it is for: operators and users of the platform. It is deployed as container images, it is not a library. Installation
 and everyday operation of the whole platform: the `mcp-docs` repository (in preparation); this file covers what is needed to set
-up and maintain the portal itself. Contracts: `mcp-contracts` 6.3.2. Licence: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
+up and maintain the portal itself. Contracts: `mcp-contracts` 7.0.0. Licence: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
 reporting vulnerabilities: [SECURITY.md](SECURITY.md); changes: [CHANGELOG.md](CHANGELOG.md); working on the code:
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -46,7 +48,11 @@ interface (same file names) in `docs/screenshots/pl/`. To take them again: `cd w
 | ![Administration](docs/screenshots/en/18a-risk-lowering-list.png) Administration: a tool marked "Risk lowering" with the definition differences. | ![The "Approve risk lowering?" dialog](docs/screenshots/en/18b-risk-lowering-dialog.png) The "Approve risk lowering?" dialog. |
 | ![The "Approve a definition reported by the server?" dialog (source](docs/screenshots/en/19-server-definition-dialog.png) The "Approve a definition reported by the server?" dialog (source: server, not CI). | ![Return after confirming identity](docs/screenshots/en/20-step-up-return.png) Return after confirming identity: "Identity confirmed. Lifting the switch..." |
 
-Pictures 10 to 20 correspond to items 1 to 11 of the list in `mcp-docs/docs/screenshots-needed.md` (10 = item 1, 11 = item 2,
+| ![Servers of the gateway](docs/screenshots/en/21-servers.png) Servers of the gateway: add, edit, disable and remove. | ![A system whose address changed](docs/screenshots/en/22-system-address-changed.png) A system whose address changed: the form asks for the client secret again and warns that the user connections are deleted. |
+| ![Scope mapping with errors](docs/screenshots/en/23-scope-mapping-errors.png) Scope mapping: errors of the form and the reason given by the gateway. | ![Emergency overrides](docs/screenshots/en/24-overrides.png) Emergency overrides. |
+| ![Policies waiting for approval](docs/screenshots/en/25-policies-pending.png) Approvals: policies and resource types of a server next to the tool approvals. | |
+
+Pictures 21 to 25 show the 2.0.0 administration screens. Pictures 10 to 20 correspond to items 1 to 11 of the list in `mcp-docs/docs/screenshots-needed.md` (10 = item 1, 11 = item 2,
 12a-12c = item 3, 13 = item 4, 14a-14b = item 5, 15 = item 6, 16 = item 7, 17a-17c = item 8, 18a-18b = item 9, 19 = item 10,
 20 = item 11). Screenshots of client applications and the architecture drawing (items 12 to 15) are not taken from the portal.
 
@@ -92,14 +98,14 @@ or `PORTAL_TRUSTED_PROXIES` (a regular expression of addresses), otherwise `X-Fo
 ### From source
 
 Linux and macOS with bash 3.2 or newer; Windows only through WSL2. Needed: git, docker, JDK 25 (the scripts find it;
-`JAVA_HOME` wins), Node 24 and the `mcp-contracts` 6.3.2 artifacts.
+`JAVA_HOME` wins), Node 24 and the `mcp-contracts` 7.0.0 artifacts.
 
 The contract artifacts come in two ways, and neither needs a file in the git of this repository:
 
 - The BFF reads the `mcp-contracts` and `mcp-manifest` jars from `~/.m2` or from Maven Central.
 - The web part reads the npm package from `web/.contracts/` (outside git), which `web/scripts/contracts.sh` fills: from a
   file (`CONTRACTS_TARBALL`; the release file is in `mcp-contracts/release/`), from an address (`CONTRACTS_TARBALL_URL`,
-  `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v6.3.2`
+  `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v7.0.0`
   (`CONTRACTS_SOURCE_DIR`, runs `npm pack`). After the release to npmjs, moving to the registry is one change in
   `web/package.json`, described in [web/README.md](web/README.md#contracts-package).
 
@@ -127,7 +133,8 @@ in the commit, not what lies in the working directory. It pushes nothing to a re
 - **Logs.** Stdout in text format; the C8 audit events (`component: portal`) go to a separate logger,
   `pl.aiwcorpo.mcp.audit`, one JSON line per event. The text of a switch (`reason`) and secret values never get there.
 - **New version.** Change the image tag and restart the container. Image versions are immutable; a rollback is the previous tag.
-  The emergency switch and the classification need a gateway on contracts 6.3.2; deploy the gateway first, then the portal.
+  The portal 2.0.0 needs a gateway 2.0.0 and a credential broker 2.0.0 (contracts 7.0.0): deploy the broker and the gateway first,
+  then the portal. A 1.x gateway or broker does not know the administration operations and the new identifiers.
 - **OIDC client secret.** Rotation: a new secret in the IdP, `PORTAL_OIDC_CLIENT_SECRET` in the container, restart.
 - **Client certificate (mTLS).** Replacing the keystore needs a restart. The name in the server certificate (`*_TLS_NAME`) is
   checked independently of the host in the URL.
@@ -135,6 +142,26 @@ in the commit, not what lies in the working directory. It pushes nothing to a re
   confirm. The effect on every gateway instance comes within 5 s at the latest; calls already accepted are not interrupted.
   Switching off needs no MFA, lifting needs a fresh MFA (after the return from the IdP the lift carries itself out). The switch
   survives a restart and the approval of definitions; only the lift operation removes it.
+- **Servers and systems at runtime (2.0.0).** Administration, "Servers" and "Systems": a new MCP server made from the template is
+  added by adding its system in the broker and the server in the gateway; neither needs a restart of anything. A server has no
+  tools until its manifest is approved, and a server whose policies or resource type declarations changed goes back to
+  "Pending approval" (its tools are blocked) until an administrator approves them in "Approvals", where the differences of the
+  policies and of the declarations are shown next to the tool approvals. Removing a server takes its tools out of the catalog and
+  refuses its calls. The client secret of a system is write only; it has to be entered again when the base address, the
+  authorization or token address, the client identifier or the revoke address changes, and such a change also deletes every
+  user's connection to the system (the row in "System connections" then says to connect the account again).
+- **Scope mapping and overrides (2.0.0).** "Scope mapping" replaces the whole document that maps groups to resource scopes, with
+  the ETag it was read with (`If-Match`); the gateway refuses scopes of undeclared types or ids that do not fit the scope pattern
+  and the page shows its reason. "Overrides" are single `forbid` Cedar policies for the gateway's decision, for every server or
+  for one server; adding one needs no second factor.
+- **Fresh MFA (2.0.0).** The same step-up as for lifting a kill switch is required for adding, changing (except a body that only
+  disables the server) and removing a server, saving the scope mapping, removing an override, approving policies, and saving or
+  removing a system. The form is kept through the trip to the identity provider (never the client secret) and the approval of
+  policies carries itself out afterwards. The gateway and the broker check `auth_time` and the proof of MFA (`acr` or `amr`) of
+  the token again; what the identity provider has to put into the exchanged tokens is in
+  [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings).
+- **Display names.** The contracts carry no display name of a system, so the pages show the system identifier with a capital
+  letter ("gitlab" is "Gitlab").
 - **Tools of foreign servers.** A tool from an adapter waits with no risk and no action, and agents do not see it. In
   Administration, "Classify and approve": the adapter is read only, so only Read (`read`) can be assigned; a tool that
   writes or deletes data will not pass through the adapter. Hints from the server are text to read, nothing more. A change

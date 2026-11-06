@@ -1,5 +1,28 @@
 # STATUS: mcp-portal/web (ws-08)
 
+M7 (portal 2.0.0, "dynamic servers"): osiągnięty (2026-11-06) - kontrakty 7.0.0, bez list systemów, serwerów i typów zasobów; ekrany Serwery, Systemy, Mapowanie zakresów, Nadpisania i zatwierdzanie polityk. Szczegóły w sekcji "Wydanie 2.0.0".
+
+## Wydanie 2.0.0: serwery i systemy jako dane (2026-11-06)
+
+`npm test` 36 plików, 615 testów; e2e 238 przeszło, 32 pominięte (zrzuty); `ci/run.sh` (style, lint, i18n, unit, build) `ci: OK`; `bff make ci` 577 testów. Bez obrazów (nic nie zbudowano ani nie wdrożono).
+- Kontrakty 7.0.0: paczka z `npm pack` w checkoucie `mcp-contracts` (po CC-241; nie ma jeszcze pliku wydania ani publikacji w npmjs, więc
+  `CONTRACTS_TARBALL_SHA256` w workflowach GitHub zostaje dla 6.3.2 i trzeba go ustawić po wydaniu), klient wygenerowany ponownie.
+  `SystemId`, `ServerId`, `ResourceType` to zwykłe napisy; `ConnectionStatus` ma `needs_reconnect`; filtr `/mcp` przyjmuje 20 systemów.
+- Usunięte listy: `SYSTEM_IDS`, nazwy pięciu systemów w `labels.ts` (nazwa to identyfikator z wielką literą, bo kontrakty nie mają nazwy
+  wyświetlanej), instrukcje tokenu per system (jeden tekst ogólny), lista systemów w oknie wniosku (z katalogu), lista uprawnień IGA
+  w atrapie (konwencja `mcp-<system>-<poziom>`), `SERVER_IDS` w atrapie wyłączników.
+- Ekrany administracji (`features/admin/`): Serwery (dodaj, edytuj, wyłącz bez MFA, usuń z potwierdzeniem; bez `tlsName`, `adapter` tylko przy
+  dodawaniu), Systemy (sekret klienta tylko do zapisu, wymagany ponownie po zmianie adresów, ostrzeżenie o unieważnieniu połączeń),
+  Mapowanie zakresów (cały dokument, `If-Match`, błędy pól i powody z gatewaya), Nadpisania (dodaj, edytuj, usuń; cel gateway, wszystkie
+  serwery, jeden serwer), Zatwierdzenia z politykami i deklaracjami typów obok narzędzi. Nawigacja `AdminNav`.
+- Świeże MFA: `AdminStepUp` zapisuje formularz (bez sekretu) jako `admin-draft` w `ResumeIntentStore`, wraca na `?mfa=ok`, formularz wraca;
+  zatwierdzenie polityk wykonuje się po powrocie samo (U12). Drugie żądanie MFA zaraz po powrocie to błąd, nie pętla.
+- Połączenia: `needs_reconnect` jako baner na stronie połączeń, wiersz z wyjaśnieniem i akcją "Connect"/"Renew" jak przy `error`.
+- Atrapa: `mocks/dynamic-mock.ts` (serwery, systemy, mapowanie, nadpisania w `sessionStorage`; `?mockPolicies=in`), `MockStore.onReset`.
+- Brak w kontraktach: żadna operacja C12 nie zwraca zatwierdzonych typów zasobów serwera, który niczego nie oczekuje, więc strona mapowania
+  nie podpowiada typów, a błędy zakresów pokazuje dopiero odpowiedź gatewaya (422).
+- Zrzuty 21 do 25 w `docs/screenshots/en` i `pl`.
+
 M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, dialog klasyfikacji narzędzi adaptera, stan `error` połączenia, wznawianie po MFA dla wyłącznika i klasyfikacji. Obraz `mcp-portal-web:m6-e72ccbf` (bez wdrażania). Szczegóły w sekcji "M6: stan".
 
 M5: osiągnięty (2026-10-31) - kontrakty 5.1.0, adres `/mcp` z kreatorem bez zapisu, kolumna filtra w aktywności, wznawianie akcji po MFA (U12), `ci/run.sh`. Dowód: `ci/run.sh --container` w obrazie Playwright 1.64.1 (lokalny Docker) `ci: OK`; przebieg na runnerze systemu CI (nakładki ws-07 w korzeniu) jeszcze nie wykonany.

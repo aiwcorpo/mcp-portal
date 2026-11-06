@@ -2,6 +2,30 @@
 
 Versions follow SemVer, newest first. Test images built before the first release are tagged `m<milestone>-<sha>`.
 
+## 2.0.0
+
+Dynamic servers: no list of systems, servers or resource types is left in the portal. It needs `mcp-contracts` 7.0.0, a gateway
+2.0.0 and a credential broker 2.0.0; it does not work with 1.x of either.
+
+- Breaking: contracts 7.0.0. System, server, tool and resource type identifiers are patterns, not enumerations (the reserved
+  system ids are refused); `needs_reconnect` is a new connection status, shown as `reconnect_required` in the catalog; the
+  `/mcp` filter takes up to 20 systems.
+- BFF: C12 administration of the gateway and the broker, with `ETag`, `If-Match` and `If-None-Match` passed through: servers
+  (list, add, change, remove), the scope mapping, the emergency overrides, the pending policies and resource types of a server
+  and their approval, and the systems of the broker (list, add, replace, remove; the client secret is write only and never
+  returned or logged). A fresh MFA is required exactly where the contracts require it; an upstream `step_up_required` becomes the
+  portal's own step-up. The BFF takes the registered servers and systems from the gateway and the broker instead of a built-in
+  list, and the broker's `needs_reconnect` reaches the catalog.
+- Web: administration screens for servers, systems, scope mapping and overrides, and the approval of policies and resource types
+  next to the tool approvals; the user's connection page says plainly that an administrator's change deleted a connection. The
+  names of systems come from the identifier, the generic instructions for a personal token replace the per-system texts, and the
+  request dialog takes the systems from the catalog.
+- Mock build and tests: the MSW mock keeps servers, systems, mapping and overrides as data (`?mockPolicies=in` puts policies up
+  for approval); new unit and end-to-end tests for every screen; screenshots 21 to 25.
+- Operation: after the upgrade the identity provider has to put `auth_time`, `acr` and `amr` into the tokens exchanged for the
+  gateway and the broker, or every widening administration operation ends in `step_up_required` (see
+  [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings)).
+
 ## 1.0.0
 
 First release. It needs `mcp-contracts` 6.3.2 and a gateway on the same contracts.
