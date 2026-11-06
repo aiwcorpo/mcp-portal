@@ -132,6 +132,10 @@ export function describeEntry(entry: EntryLike): string[] {
           $localize`:@@admin.diff.action:action: ${quoted(entry.action)}:action:`,
         ]
       : [$localize`:@@admin.diff.unclassified:risk and action: to be assigned by an administrator`]),
+    // A group that only narrows access (CC-242) is part of the hash, so the administrator sees a change of it.
+    ...(entry.additionalGroup
+      ? [$localize`:@@admin.diff.additionalGroup:additional group: ${quoted(entry.additionalGroup)}:group:`]
+      : []),
   ];
   for (const ref of entry.resourceRefs) {
     lines.push(

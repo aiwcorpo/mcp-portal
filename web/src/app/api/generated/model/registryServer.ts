@@ -21,7 +21,7 @@ export interface RegistryServer {
     system: string;
     version: string;
     /**
-     * False when the server is disabled in gateway configuration or by an overrides policy, or when its held manifest fails the checks at start (CC-159). All tools of a disabled server report disabled=true in the catalog (CC-081, CC-088). Read only here; the emergency switch of a server is a separate resource (CC-194).
+     * False when the server is disabled in the registry of servers (enabled false) or by an overrides policy, or when its held manifest fails the checks at start (CC-159). All tools of a disabled server report disabled=true in the catalog (CC-081, CC-088). Read only here; the emergency switch of a server is a separate resource (CC-194).
      */
     enabled?: boolean;
     /**

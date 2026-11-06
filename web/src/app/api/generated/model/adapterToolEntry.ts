@@ -23,6 +23,10 @@ export interface AdapterToolEntry {
     name: string;
     risk?: Risk;
     action?: ToolAction;
+    /**
+     * Optional group (C9) that a user needs in addition to the group the risk derives: mcp-<system>-<suffix> with the system of this server and a suffix other than read, write and destructive (checked by the rule additional-group-valid), for example mcp-opensearch-ops for an ops-only tool. It can only narrow access (platform-call-additional-group); the risk-derived group is still needed. Part of definitionHash, so a change needs approval. Not allowed in an adapter manifest.
+     */
+    additionalGroup?: string;
     resourceRefs: Array<ResourceRef>;
     definition: McpToolDefinition;
     /**

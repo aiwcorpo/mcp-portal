@@ -1333,9 +1333,17 @@
         <source>risk and action: to be assigned by an administrator</source>
       </segment>
     </unit>
+    <unit id="admin.diff.additionalGroup">
+      <notes>
+        <note category="location">src/app/features/admin/definition-diff.ts:137</note>
+      </notes>
+      <segment>
+        <source>additional group: <ph id="0" equiv="group" disp="quoted(entry.additionalGroup)"/></source>
+      </segment>
+    </unit>
     <unit id="admin.diff.resource">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:138</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:142</note>
       </notes>
       <segment>
         <source>resource: argument <ph id="0" equiv="argument" disp="quoted(ref.argument)"/> (<ph id="1" equiv="type" disp="quoted(ref.type)"/>)</source>
@@ -1343,7 +1351,7 @@
     </unit>
     <unit id="admin.diff.schema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:143</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:147</note>
       </notes>
       <segment>
         <source>schema.<ph id="0" equiv="line" disp="line"/></source>
@@ -1351,7 +1359,7 @@
     </unit>
     <unit id="admin.diff.outputSchema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:148</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:152</note>
       </notes>
       <segment>
         <source>output schema.<ph id="0" equiv="line" disp="line"/></source>
@@ -1359,7 +1367,7 @@
     </unit>
     <unit id="admin.diff.annotations">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:155</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:159</note>
       </notes>
       <segment>
         <source>hints.<ph id="0" equiv="line" disp="line"/></source>
@@ -1367,7 +1375,7 @@
     </unit>
     <unit id="admin.riskRaised">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:239</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:243</note>
       </notes>
       <segment>
         <source>Risk goes up: <ph id="0" equiv="from" disp="from"/> to <ph id="1" equiv="to" disp="to"/>.</source>
@@ -1375,7 +1383,7 @@
     </unit>
     <unit id="admin.riskLowered">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:240</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:244</note>
       </notes>
       <segment>
         <source>Risk goes down: <ph id="0" equiv="from" disp="from"/> to <ph id="1" equiv="to" disp="to"/>. The gateway does not approve risk lowering.</source>

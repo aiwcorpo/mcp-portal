@@ -32,6 +32,17 @@ function entry(overrides: Partial<ToolEntry> = {}, description = 'Updates a page
 }
 
 describe('describeEntry', () => {
+  it('shows the additional group of a tool, and a change of it as a difference', () => {
+    expect(describeEntry(entry())).not.toContain('additional group: "mcp-notes-ops"');
+    expect(describeEntry(entry({ additionalGroup: 'mcp-notes-ops' }))).toContain(
+      'additional group: "mcp-notes-ops"',
+    );
+    const diff = diffDefinitions(entry(), entry({ additionalGroup: 'mcp-notes-ops' }));
+    expect(diff.after.filter((line) => line.mark === 'added').map((line) => line.text)).toEqual([
+      'additional group: "mcp-notes-ops"',
+    ]);
+  });
+
   it('lists description, risk, resources, every schema leaf and the hints', () => {
     const lines = describeEntry(entry());
     expect(lines).toContain('description: "Updates a page."');
@@ -131,9 +142,7 @@ describe('hostile text', () => {
   it('keeps line breaks, CR and tabs of a value inside one quoted line', () => {
     const lines = describeEntry(entry({}, forged));
     expect(lines.every((line) => !/[\n\r\t]/.test(line))).toBe(true);
-    expect(lines.filter((line) => line.startsWith('risk:'))).toEqual([
-      'risk: Write ("UPDATE")',
-    ]);
+    expect(lines.filter((line) => line.startsWith('risk:'))).toEqual(['risk: Write ("UPDATE")']);
     expect(lines[3]).toBe(
       'description: "ok[U+000A]risk: Read (\\"READ_ONLY\\")[U+000D][U+000A][U+0009]schema.additionalProperties: false"',
     );

@@ -10,7 +10,7 @@
 
 
 /**
- * Why a tool or server is disabled, present only when disabled is true (CC-194). kill_switch is an emergency switch of an administrator, approval a definition waiting for approval or classification, configuration the gateway configuration or an overrides policy. When more than one applies the first of the list is shown.
+ * Why a tool or server is disabled, present only when disabled is true (CC-194). kill_switch is an emergency switch of an administrator, approval a definition waiting for approval or classification, configuration the server in the registry or an overrides policy. When more than one applies the first of the list is shown.
  */
 export const DisabledBy = {
     KillSwitch: 'kill_switch',
