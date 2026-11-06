@@ -8,11 +8,9 @@
  * Do not edit the class manually.
  */
 import { CatalogTool } from './catalogTool';
-import { ServerId } from './serverId';
 import { CatalogCredential } from './catalogCredential';
 import { Connection } from './connection';
 import { CatalogAction } from './catalogAction';
-import { SystemId } from './systemId';
 import { CatalogStatus } from './catalogStatus';
 
 
@@ -22,8 +20,14 @@ export interface PortalCatalogServer {
      * The current user\'s connection to the system (C4 GET /v1/connections). null when there is none or when nothing is to be connected (service-account, token-exchange). Never contains a secret value (CC-080).
      */
     connection?: Connection | null;
-    serverId: ServerId;
-    system: SystemId;
+    /**
+     * MCP server id; always mcp-<system>, one server per system (C5).
+     */
+    serverId: string;
+    /**
+     * Target system identifier, lower case: the id of a system that the credential broker and the gateway registry know at runtime (a row, not a list in the contracts). The ids gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved: mcp-<system> is also the CN of a server certificate, and mcp-gateway, mcp-offboarding and the like are the CNs of platform components.
+     */
+    system: string;
     version: string;
     /**
      * Public MCP endpoint <publicBaseUrl>/s/<serverId>/mcp, used by copy_link (CC-021, CC-089).

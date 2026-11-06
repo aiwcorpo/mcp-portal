@@ -15,7 +15,7 @@ import { Risk } from './risk';
 
 export interface CatalogTool { 
     /**
-     * Tool name as seen by MCP clients, in C5 and C12: <system>__<tool>.
+     * Tool name as seen by MCP clients, in C5 and C12: <system>__<tool>, with the system pattern of SystemId.
      */
     name: string;
     /**

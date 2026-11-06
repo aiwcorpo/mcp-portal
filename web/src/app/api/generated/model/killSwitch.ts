@@ -7,12 +7,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ServerId } from './serverId';
 
 
 export interface KillSwitch { 
     scope: KillSwitch.ScopeEnum;
-    serverId: ServerId;
+    /**
+     * MCP server id; always mcp-<system>, one server per system (C5).
+     */
+    serverId: string;
     /**
      * Present exactly when scope is tool.
      */

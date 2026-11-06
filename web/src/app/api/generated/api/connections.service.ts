@@ -28,8 +28,6 @@ import { PutSecretError } from '../model/putSecretError';
 import { PutSecretRequest } from '../model/putSecretRequest';
 // @ts-ignore
 import { PutSecretResponse } from '../model/putSecretResponse';
-// @ts-ignore
-import { SystemId } from '../model/systemId';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -56,10 +54,10 @@ export class ConnectionsService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public disconnect(system: SystemId, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public disconnect(system: SystemId, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public disconnect(system: SystemId, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public disconnect(system: SystemId, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public disconnect(system: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public disconnect(system: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public disconnect(system: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public disconnect(system: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (system === null || system === undefined) {
             throw new Error('Required parameter system was null or undefined when calling disconnect.');
         }
@@ -94,7 +92,7 @@ export class ConnectionsService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/connections/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "SystemId", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/connections/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -257,10 +255,10 @@ export class ConnectionsService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public putMySecret(system: SystemId, putSecretRequest: PutSecretRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PutSecretResponse>;
-    public putMySecret(system: SystemId, putSecretRequest: PutSecretRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PutSecretResponse>>;
-    public putMySecret(system: SystemId, putSecretRequest: PutSecretRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PutSecretResponse>>;
-    public putMySecret(system: SystemId, putSecretRequest: PutSecretRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public putMySecret(system: string, putSecretRequest: PutSecretRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PutSecretResponse>;
+    public putMySecret(system: string, putSecretRequest: PutSecretRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PutSecretResponse>>;
+    public putMySecret(system: string, putSecretRequest: PutSecretRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PutSecretResponse>>;
+    public putMySecret(system: string, putSecretRequest: PutSecretRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (system === null || system === undefined) {
             throw new Error('Required parameter system was null or undefined when calling putMySecret.');
         }
@@ -307,7 +305,7 @@ export class ConnectionsService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/connections/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "SystemId", dataFormat: undefined})}/secret`;
+        let localVarPath = `/api/v1/connections/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/secret`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<PutSecretResponse>('put', `${basePath}${localVarPath}`,
             {
@@ -333,10 +331,10 @@ export class ConnectionsService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public startConnectOAuth(system: SystemId, connectOAuthRequest?: ConnectOAuthRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ConnectOAuthResponse>;
-    public startConnectOAuth(system: SystemId, connectOAuthRequest?: ConnectOAuthRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ConnectOAuthResponse>>;
-    public startConnectOAuth(system: SystemId, connectOAuthRequest?: ConnectOAuthRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ConnectOAuthResponse>>;
-    public startConnectOAuth(system: SystemId, connectOAuthRequest?: ConnectOAuthRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public startConnectOAuth(system: string, connectOAuthRequest?: ConnectOAuthRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ConnectOAuthResponse>;
+    public startConnectOAuth(system: string, connectOAuthRequest?: ConnectOAuthRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ConnectOAuthResponse>>;
+    public startConnectOAuth(system: string, connectOAuthRequest?: ConnectOAuthRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ConnectOAuthResponse>>;
+    public startConnectOAuth(system: string, connectOAuthRequest?: ConnectOAuthRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (system === null || system === undefined) {
             throw new Error('Required parameter system was null or undefined when calling startConnectOAuth.');
         }
@@ -380,7 +378,7 @@ export class ConnectionsService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/connections/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "SystemId", dataFormat: undefined})}/oauth`;
+        let localVarPath = `/api/v1/connections/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/oauth`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ConnectOAuthResponse>('post', `${basePath}${localVarPath}`,
             {

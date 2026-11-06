@@ -7,22 +7,43 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ServerId } from './serverId';
 import { RegistryTool } from './registryTool';
-import { SystemId } from './systemId';
 
 
 export interface RegistryServer { 
-    serverId: ServerId;
-    system: SystemId;
+    /**
+     * MCP server id; always mcp-<system>, one server per system (C5).
+     */
+    serverId: string;
+    /**
+     * Target system identifier, lower case: the id of a system that the credential broker and the gateway registry know at runtime (a row, not a list in the contracts). The ids gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved: mcp-<system> is also the CN of a server certificate, and mcp-gateway, mcp-offboarding and the like are the CNs of platform components.
+     */
+    system: string;
     version: string;
     /**
      * False when the server is disabled in gateway configuration or by an overrides policy, or when its held manifest fails the checks at start (CC-159). All tools of a disabled server report disabled=true in the catalog (CC-081, CC-088). Read only here; the emergency switch of a server is a separate resource (CC-194).
      */
     enabled?: boolean;
+    /**
+     * approved when the policies of the manifest are the approved ones; pending_approval when they changed or were never approved, and the tools of the server are blocked (7.0.0). Absent for an adapter, which has no policies.
+     */
+    policiesStatus?: RegistryServer.PoliciesStatusEnum;
+    /**
+     * policiesHash of the approved policies; absent until the first approval.
+     */
+    policiesHash?: string;
+    /**
+     * policiesHash waiting for approval; present exactly with policiesStatus pending_approval.
+     */
+    pendingPoliciesHash?: string;
     tools: Array<RegistryTool>;
 }
 export namespace RegistryServer {
+    export const PoliciesStatusEnum = {
+        Approved: 'approved',
+        PendingApproval: 'pending_approval',
+    } as const;
+    export type PoliciesStatusEnum = typeof PoliciesStatusEnum[keyof typeof PoliciesStatusEnum];
 }
 
 

@@ -8,7 +8,6 @@
  * Do not edit the class manually.
  */
 import { Resource } from './resource';
-import { SystemId } from './systemId';
 import { ConfirmationArgument } from './confirmationArgument';
 
 
@@ -18,13 +17,13 @@ export interface ConfirmationView {
      */
     confirmationId: string;
     /**
-     * Tool name as seen by MCP clients, in C5 and C12: <system>__<tool>.
+     * Tool name as seen by MCP clients, in C5 and C12: <system>__<tool>, with the system pattern of SystemId.
      */
     tool: string;
     /**
      * System the tool acts on; the portal shows it next to the tool (CC-077). Read by the gateway from its own record of the pending call, never from the client.
      */
-    system: SystemId;
+    system: string;
     /**
      * Main resource of the call from resourceRefs (type, id, parent), computed by the gateway, the same value that goes to the audit event (CC-098); absent when the tool takes no resource identifier. Same limits as in C8, including the exclusion of control and bidirectional characters in id.
      */
@@ -38,7 +37,4 @@ export interface ConfirmationView {
      */
     expiresAt: string;
 }
-export namespace ConfirmationView {
-}
-
 

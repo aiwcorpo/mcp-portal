@@ -19,6 +19,10 @@ import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 // @ts-ignore
 import { ApproveAdminTool401Response } from '../model/approveAdminTool401Response';
 // @ts-ignore
+import { ApprovePoliciesRequest } from '../model/approvePoliciesRequest';
+// @ts-ignore
+import { ApprovePoliciesResult } from '../model/approvePoliciesResult';
+// @ts-ignore
 import { ApproveRequest } from '../model/approveRequest';
 // @ts-ignore
 import { KillSwitchList } from '../model/killSwitchList';
@@ -27,11 +31,35 @@ import { KillSwitchRequest } from '../model/killSwitchRequest';
 // @ts-ignore
 import { ManifestRejected } from '../model/manifestRejected';
 // @ts-ignore
+import { Override } from '../model/override';
+// @ts-ignore
+import { OverrideRejected } from '../model/overrideRejected';
+// @ts-ignore
+import { OverrideRequest } from '../model/overrideRequest';
+// @ts-ignore
+import { PendingPolicies } from '../model/pendingPolicies';
+// @ts-ignore
 import { PendingTool } from '../model/pendingTool';
 // @ts-ignore
 import { RegistryServer } from '../model/registryServer';
 // @ts-ignore
-import { ServerId } from '../model/serverId';
+import { ScopeMappingDocument } from '../model/scopeMappingDocument';
+// @ts-ignore
+import { ScopeMappingRejected } from '../model/scopeMappingRejected';
+// @ts-ignore
+import { ServerConfig } from '../model/serverConfig';
+// @ts-ignore
+import { ServerConfigCreate } from '../model/serverConfigCreate';
+// @ts-ignore
+import { ServerConfigPatch } from '../model/serverConfigPatch';
+// @ts-ignore
+import { ServerRejected } from '../model/serverRejected';
+// @ts-ignore
+import { SystemAdminRequest } from '../model/systemAdminRequest';
+// @ts-ignore
+import { SystemAdminView } from '../model/systemAdminView';
+// @ts-ignore
+import { SystemRejected } from '../model/systemRejected';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -50,6 +78,81 @@ export class AdminService extends BaseService {
     }
 
     /**
+     * Approve the pending policies of a server (proxy to C5).
+     * @endpoint post /api/v1/admin/registry/servers/{serverId}/policies/approve
+     * @param serverId 
+     * @param approvePoliciesRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public approveAdminServerPolicies(serverId: string, approvePoliciesRequest: ApprovePoliciesRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ApprovePoliciesResult>;
+    public approveAdminServerPolicies(serverId: string, approvePoliciesRequest: ApprovePoliciesRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ApprovePoliciesResult>>;
+    public approveAdminServerPolicies(serverId: string, approvePoliciesRequest: ApprovePoliciesRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ApprovePoliciesResult>>;
+    public approveAdminServerPolicies(serverId: string, approvePoliciesRequest: ApprovePoliciesRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling approveAdminServerPolicies.');
+        }
+        if (approvePoliciesRequest === null || approvePoliciesRequest === undefined) {
+            throw new Error('Required parameter approvePoliciesRequest was null or undefined when calling approveAdminServerPolicies.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/policies/approve`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ApprovePoliciesResult>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: approvePoliciesRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Approve a pending tool definition (proxy to C5). The manual way to accept a change made outside a deployment (CC-133).
      * Plain approve is unchanged. An entry of an adapter (source adapter, CC-193) is approved together with its classification: the body then carries &#x60;risk&#x60; and &#x60;action&#x60; (required for such an entry, forbidden for any other: 422 &#x60;classification_required&#x60; or &#x60;classification_not_allowed&#x60;; an adapter is read only since 6.3.0, so &#x60;risk&#x60; other than &#x60;READ_ONLY&#x60; is also 422 &#x60;classification_not_allowed&#x60;, CC-227), and the same fresh MFA is required when the classification lowers one given earlier. With acceptRiskLowering true (an entry with riskLowered true, CC-167) the BFF requires a fresh MFA of the administrator, the same mechanism and window as the registration of the Authenticator: without it &#x60;401 step_up_required&#x60; with &#x60;stepUpUrl&#x60;. The BFF sends the field only when it is true, so that an older gateway keeps accepting the request. 
      * @endpoint post /api/v1/admin/registry/servers/{serverId}/tools/{tool}/approve
@@ -60,10 +163,10 @@ export class AdminService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public approveAdminTool(serverId: ServerId, tool: string, approveRequest: ApproveRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public approveAdminTool(serverId: ServerId, tool: string, approveRequest: ApproveRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public approveAdminTool(serverId: ServerId, tool: string, approveRequest: ApproveRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public approveAdminTool(serverId: ServerId, tool: string, approveRequest: ApproveRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public approveAdminTool(serverId: string, tool: string, approveRequest: ApproveRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public approveAdminTool(serverId: string, tool: string, approveRequest: ApproveRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public approveAdminTool(serverId: string, tool: string, approveRequest: ApproveRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public approveAdminTool(serverId: string, tool: string, approveRequest: ApproveRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (serverId === null || serverId === undefined) {
             throw new Error('Required parameter serverId was null or undefined when calling approveAdminTool.');
         }
@@ -113,12 +216,212 @@ export class AdminService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/approve`;
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/approve`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: approveRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Add a server to the registry (proxy to C5): no restart, no tools until its manifest is approved.
+     * @endpoint post /api/v1/admin/servers
+     * @param serverConfigCreate 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServerConfig>;
+    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServerConfig>>;
+    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServerConfig>>;
+    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverConfigCreate === null || serverConfigCreate === undefined) {
+            throw new Error('Required parameter serverConfigCreate was null or undefined when calling createAdminServer.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/servers`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ServerConfig>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: serverConfigCreate,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Remove an emergency override (proxy to C5).
+     * @endpoint delete /api/v1/admin/policy/overrides/{id}
+     * @param ifMatch The ETag of the document the change is based on.
+     * @param id 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public deleteAdminOverride(ifMatch: string, id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminOverride(ifMatch: string, id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminOverride(ifMatch: string, id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminOverride(ifMatch: string, id: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (ifMatch === null || ifMatch === undefined) {
+            throw new Error('Required parameter ifMatch was null or undefined when calling deleteAdminOverride.');
+        }
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling deleteAdminOverride.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+        if (ifMatch !== undefined && ifMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+        }
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/policy/overrides/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Remove a server from the registry (proxy to C5); its tools disappear and its calls are refused.
+     * @endpoint delete /api/v1/admin/servers/{serverId}
+     * @param serverId 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public deleteAdminServer(serverId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminServer(serverId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminServer(serverId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminServer(serverId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling deleteAdminServer.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -138,10 +441,10 @@ export class AdminService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public deleteAdminServerKillSwitch(serverId: ServerId, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public deleteAdminServerKillSwitch(serverId: ServerId, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public deleteAdminServerKillSwitch(serverId: ServerId, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteAdminServerKillSwitch(serverId: ServerId, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteAdminServerKillSwitch(serverId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminServerKillSwitch(serverId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminServerKillSwitch(serverId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminServerKillSwitch(serverId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (serverId === null || serverId === undefined) {
             throw new Error('Required parameter serverId was null or undefined when calling deleteAdminServerKillSwitch.');
         }
@@ -176,7 +479,76 @@ export class AdminService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/kill-switch`;
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Remove a system from the credential broker (proxy to C4), with its connections.
+     * Needs &#x60;If-Match&#x60; (the ETag of the system that was edited) and a fresh MFA (&#x60;auth_time&#x60; within 300 s and &#x60;acr&#x60; or &#x60;amr&#x60; proving MFA; &#x60;step_up_required&#x60; otherwise); the broker checks the MFA freshness of the token itself as well. Deleting an id that has no system is &#x60;204&#x60; and deletes no secret. Nothing is sent to the backend. 
+     * @endpoint delete /api/v1/admin/systems/{system}
+     * @param ifMatch The ETag of the document the change is based on.
+     * @param system 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public deleteAdminSystem(ifMatch: string, system: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminSystem(ifMatch: string, system: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminSystem(ifMatch: string, system: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminSystem(ifMatch: string, system: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (ifMatch === null || ifMatch === undefined) {
+            throw new Error('Required parameter ifMatch was null or undefined when calling deleteAdminSystem.');
+        }
+        if (system === null || system === undefined) {
+            throw new Error('Required parameter system was null or undefined when calling deleteAdminSystem.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+        if (ifMatch !== undefined && ifMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+        }
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/systems/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -201,10 +573,10 @@ export class AdminService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteAdminToolKillSwitch(serverId: ServerId, tool: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteAdminToolKillSwitch(serverId: string, tool: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminToolKillSwitch(serverId: string, tool: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminToolKillSwitch(serverId: string, tool: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminToolKillSwitch(serverId: string, tool: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (serverId === null || serverId === undefined) {
             throw new Error('Required parameter serverId was null or undefined when calling deleteAdminToolKillSwitch.');
         }
@@ -242,9 +614,125 @@ export class AdminService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * One emergency override (proxy to C5).
+     * @endpoint get /api/v1/admin/policy/overrides/{id}
+     * @param id 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public getAdminOverride(id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Override>;
+    public getAdminOverride(id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Override>>;
+    public getAdminOverride(id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Override>>;
+    public getAdminOverride(id: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling getAdminOverride.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/policy/overrides/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Override>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Policies of a server waiting for approval, next to the approved ones (proxy to C5).
+     * @endpoint get /api/v1/admin/registry/servers/{serverId}/policies/pending
+     * @param serverId 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public getAdminPendingServerPolicies(serverId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PendingPolicies>;
+    public getAdminPendingServerPolicies(serverId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PendingPolicies>>;
+    public getAdminPendingServerPolicies(serverId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PendingPolicies>>;
+    public getAdminPendingServerPolicies(serverId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling getAdminPendingServerPolicies.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/policies/pending`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<PendingPolicies>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -266,10 +754,10 @@ export class AdminService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getAdminPendingTool(serverId: ServerId, tool: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PendingTool>;
-    public getAdminPendingTool(serverId: ServerId, tool: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PendingTool>>;
-    public getAdminPendingTool(serverId: ServerId, tool: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PendingTool>>;
-    public getAdminPendingTool(serverId: ServerId, tool: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAdminPendingTool(serverId: string, tool: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PendingTool>;
+    public getAdminPendingTool(serverId: string, tool: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PendingTool>>;
+    public getAdminPendingTool(serverId: string, tool: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PendingTool>>;
+    public getAdminPendingTool(serverId: string, tool: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (serverId === null || serverId === undefined) {
             throw new Error('Required parameter serverId was null or undefined when calling getAdminPendingTool.');
         }
@@ -304,7 +792,7 @@ export class AdminService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/pending`;
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/pending`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<PendingTool>('get', `${basePath}${localVarPath}`,
             {
@@ -374,6 +862,176 @@ export class AdminService extends BaseService {
     }
 
     /**
+     * Which group grants which resource scopes (proxy to C5).
+     * @endpoint get /api/v1/admin/policy/scope-mapping
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public getAdminScopeMapping(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ScopeMappingDocument>;
+    public getAdminScopeMapping(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ScopeMappingDocument>>;
+    public getAdminScopeMapping(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ScopeMappingDocument>>;
+    public getAdminScopeMapping(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/policy/scope-mapping`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ScopeMappingDocument>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * One server of the registry (proxy to C5).
+     * @endpoint get /api/v1/admin/servers/{serverId}
+     * @param serverId 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public getAdminServer(serverId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServerConfig>;
+    public getAdminServer(serverId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServerConfig>>;
+    public getAdminServer(serverId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServerConfig>>;
+    public getAdminServer(serverId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling getAdminServer.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ServerConfig>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * One system of the credential broker with its ETag, without secrets (proxy to C4).
+     * @endpoint get /api/v1/admin/systems/{system}
+     * @param system 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public getAdminSystem(system: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<SystemAdminView>;
+    public getAdminSystem(system: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<SystemAdminView>>;
+    public getAdminSystem(system: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<SystemAdminView>>;
+    public getAdminSystem(system: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (system === null || system === undefined) {
+            throw new Error('Required parameter system was null or undefined when calling getAdminSystem.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/systems/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<SystemAdminView>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Active emergency switches of servers and tools (proxy to C5, group mcp-platform-admin, CC-194).
      * @endpoint get /api/v1/admin/kill-switches
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -428,6 +1086,329 @@ export class AdminService extends BaseService {
     }
 
     /**
+     * Emergency overrides (proxy to C5).
+     * @endpoint get /api/v1/admin/policy/overrides
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public listAdminOverrides(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<Override>>;
+    public listAdminOverrides(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<Override>>>;
+    public listAdminOverrides(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<Override>>>;
+    public listAdminOverrides(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/policy/overrides`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Array<Override>>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Servers in the registry of the gateway (proxy to C5, group mcp-platform-admin).
+     * @endpoint get /api/v1/admin/servers
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public listAdminServers(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<ServerConfig>>;
+    public listAdminServers(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<ServerConfig>>>;
+    public listAdminServers(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<ServerConfig>>>;
+    public listAdminServers(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/servers`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Array<ServerConfig>>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Systems of the credential broker with their configuration, without secrets (proxy to C4).
+     * @endpoint get /api/v1/admin/systems
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public listAdminSystems(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<SystemAdminView>>;
+    public listAdminSystems(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<SystemAdminView>>>;
+    public listAdminSystems(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<SystemAdminView>>>;
+    public listAdminSystems(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/systems`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Array<SystemAdminView>>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Create or replace a forbid-only emergency override (proxy to C5).
+     * @endpoint put /api/v1/admin/policy/overrides/{id}
+     * @param id 
+     * @param overrideRequest 
+     * @param ifMatch The ETag of the resource the change is based on; needed to replace, not to create.
+     * @param ifNoneMatch &#x60;*&#x60; to create; the call fails when the resource exists.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public putAdminOverride(id: string, overrideRequest: OverrideRequest, ifMatch?: string, ifNoneMatch?: '*', observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Override>;
+    public putAdminOverride(id: string, overrideRequest: OverrideRequest, ifMatch?: string, ifNoneMatch?: '*', observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Override>>;
+    public putAdminOverride(id: string, overrideRequest: OverrideRequest, ifMatch?: string, ifNoneMatch?: '*', observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Override>>;
+    public putAdminOverride(id: string, overrideRequest: OverrideRequest, ifMatch?: string, ifNoneMatch?: '*', observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling putAdminOverride.');
+        }
+        if (overrideRequest === null || overrideRequest === undefined) {
+            throw new Error('Required parameter overrideRequest was null or undefined when calling putAdminOverride.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+        if (ifMatch !== undefined && ifMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+        }
+        if (ifNoneMatch !== undefined && ifNoneMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-None-Match', String(ifNoneMatch));
+        }
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/policy/overrides/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Override>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: overrideRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Replace the scope mapping (proxy to C5; If-Match is the ETag of the document that was edited).
+     * @endpoint put /api/v1/admin/policy/scope-mapping
+     * @param ifMatch The ETag of the document the change is based on.
+     * @param scopeMappingDocument 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public putAdminScopeMapping(ifMatch: string, scopeMappingDocument: ScopeMappingDocument, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ScopeMappingDocument>;
+    public putAdminScopeMapping(ifMatch: string, scopeMappingDocument: ScopeMappingDocument, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ScopeMappingDocument>>;
+    public putAdminScopeMapping(ifMatch: string, scopeMappingDocument: ScopeMappingDocument, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ScopeMappingDocument>>;
+    public putAdminScopeMapping(ifMatch: string, scopeMappingDocument: ScopeMappingDocument, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (ifMatch === null || ifMatch === undefined) {
+            throw new Error('Required parameter ifMatch was null or undefined when calling putAdminScopeMapping.');
+        }
+        if (scopeMappingDocument === null || scopeMappingDocument === undefined) {
+            throw new Error('Required parameter scopeMappingDocument was null or undefined when calling putAdminScopeMapping.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+        if (ifMatch !== undefined && ifMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+        }
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/policy/scope-mapping`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ScopeMappingDocument>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: scopeMappingDocument,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Switch off every tool of a server (proxy to C5, CC-194).
      * Emergency switch (A9): no fresh MFA is required, an incident must not wait for a second factor. Takes effect on every gateway instance within 5 seconds of the &#x60;204&#x60;. Lifted only by the &#x60;DELETE&#x60; below. 
      * @endpoint put /api/v1/admin/registry/servers/{serverId}/kill-switch
@@ -437,10 +1418,10 @@ export class AdminService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public putAdminServerKillSwitch(serverId: ServerId, killSwitchRequest: KillSwitchRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public putAdminServerKillSwitch(serverId: string, killSwitchRequest: KillSwitchRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public putAdminServerKillSwitch(serverId: string, killSwitchRequest: KillSwitchRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public putAdminServerKillSwitch(serverId: string, killSwitchRequest: KillSwitchRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public putAdminServerKillSwitch(serverId: string, killSwitchRequest: KillSwitchRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (serverId === null || serverId === undefined) {
             throw new Error('Required parameter serverId was null or undefined when calling putAdminServerKillSwitch.');
         }
@@ -487,12 +1468,96 @@ export class AdminService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/kill-switch`;
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: killSwitchRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Create or replace a system in the credential broker (proxy to C4); the client secret is write-only.
+     * Same rules as C4 &#x60;putAdminSystem&#x60;: every URL is https; &#x60;atlassian-dc&#x60; needs &#x60;product&#x60;; &#x60;token-exchange&#x60; needs &#x60;exchangeAudience&#x60; and takes no &#x60;oauth.tokenUrl&#x60;; the client secret must be given again when &#x60;baseUrl&#x60;, &#x60;authorizeUrl&#x60;, &#x60;tokenUrl&#x60;, &#x60;clientId&#x60; or &#x60;revokeUrl&#x60; changes. A change of any of those five invalidates every user connection of the system without sending anything to any endpoint (status &#x60;needs_reconnect&#x60;, shown as &#x60;reconnect_required&#x60; in the catalog). A create sends &#x60;If-None-Match: *&#x60;, a replace &#x60;If-Match&#x60;. A fresh MFA is required. 
+     * @endpoint put /api/v1/admin/systems/{system}
+     * @param system 
+     * @param systemAdminRequest 
+     * @param ifMatch The ETag of the resource the change is based on; needed to replace, not to create.
+     * @param ifNoneMatch &#x60;*&#x60; to create; the call fails when the resource exists.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public putAdminSystem(system: string, systemAdminRequest: SystemAdminRequest, ifMatch?: string, ifNoneMatch?: '*', observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<SystemAdminView>;
+    public putAdminSystem(system: string, systemAdminRequest: SystemAdminRequest, ifMatch?: string, ifNoneMatch?: '*', observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<SystemAdminView>>;
+    public putAdminSystem(system: string, systemAdminRequest: SystemAdminRequest, ifMatch?: string, ifNoneMatch?: '*', observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<SystemAdminView>>;
+    public putAdminSystem(system: string, systemAdminRequest: SystemAdminRequest, ifMatch?: string, ifNoneMatch?: '*', observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (system === null || system === undefined) {
+            throw new Error('Required parameter system was null or undefined when calling putAdminSystem.');
+        }
+        if (systemAdminRequest === null || systemAdminRequest === undefined) {
+            throw new Error('Required parameter systemAdminRequest was null or undefined when calling putAdminSystem.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+        if (ifMatch !== undefined && ifMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+        }
+        if (ifNoneMatch !== undefined && ifNoneMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-None-Match', String(ifNoneMatch));
+        }
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/systems/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<SystemAdminView>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: systemAdminRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -514,10 +1579,10 @@ export class AdminService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public putAdminToolKillSwitch(serverId: ServerId, tool: string, killSwitchRequest: KillSwitchRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public putAdminToolKillSwitch(serverId: string, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public putAdminToolKillSwitch(serverId: string, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public putAdminToolKillSwitch(serverId: string, tool: string, killSwitchRequest: KillSwitchRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public putAdminToolKillSwitch(serverId: string, tool: string, killSwitchRequest: KillSwitchRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (serverId === null || serverId === undefined) {
             throw new Error('Required parameter serverId was null or undefined when calling putAdminToolKillSwitch.');
         }
@@ -567,12 +1632,95 @@ export class AdminService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "ServerId", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
+        let localVarPath = `/api/v1/admin/registry/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/tools/${this.configuration.encodeParam({name: "tool", value: tool, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/kill-switch`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: killSwitchRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Change the connection settings of a server (proxy to C5; enabled false takes it out of service).
+     * Every change needs a fresh MFA (&#x60;auth_time&#x60; within 300 s and &#x60;acr&#x60; or &#x60;amr&#x60; proving MFA; &#x60;step_up_required&#x60; otherwise) except a body that only sets &#x60;enabled: false&#x60;; the gateway checks it too. &#x60;tlsName&#x60; and &#x60;adapter&#x60; cannot be changed. 
+     * @endpoint patch /api/v1/admin/servers/{serverId}
+     * @param ifMatch The ETag of the document the change is based on.
+     * @param serverId 
+     * @param serverConfigPatch 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public updateAdminServer(ifMatch: string, serverId: string, serverConfigPatch: ServerConfigPatch, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServerConfig>;
+    public updateAdminServer(ifMatch: string, serverId: string, serverConfigPatch: ServerConfigPatch, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServerConfig>>;
+    public updateAdminServer(ifMatch: string, serverId: string, serverConfigPatch: ServerConfigPatch, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServerConfig>>;
+    public updateAdminServer(ifMatch: string, serverId: string, serverConfigPatch: ServerConfigPatch, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (ifMatch === null || ifMatch === undefined) {
+            throw new Error('Required parameter ifMatch was null or undefined when calling updateAdminServer.');
+        }
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling updateAdminServer.');
+        }
+        if (serverConfigPatch === null || serverConfigPatch === undefined) {
+            throw new Error('Required parameter serverConfigPatch was null or undefined when calling updateAdminServer.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+        if (ifMatch !== undefined && ifMatch !== null) {
+            localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+        }
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ServerConfig>('patch', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: serverConfigPatch,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

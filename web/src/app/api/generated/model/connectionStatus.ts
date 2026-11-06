@@ -10,7 +10,7 @@
 
 
 /**
- * expiring = expires in less than 7 days; only for `user-secret` with a declared `expiresAt` (CC-103). A `user-oauth` connection has expiresAt null (the token is refreshed by the broker) and never becomes expiring. error also means that the secret of the connection is gone from the secret store (audit reason secret_missing, CC-205) or that a rotated refresh token could not be stored (refresh_token_lost, CC-196). The user then connects the system again, and connecting writes a new secret and sets connected. revoked only follows invalid_grant of the provider or a removal by the user.
+ * needs_reconnect = the connection was invalidated because the administrator changed where the system points (baseUrl, authorizeUrl, tokenUrl, clientId or revokeUrl) or dropped its credential type; the grant and the secret are deleted, the user connects again (7.0.0). expiring = expires in less than 7 days; only for `user-secret` with a declared `expiresAt` (CC-103). A `user-oauth` connection has expiresAt null (the token is refreshed by the broker) and never becomes expiring. error also means that the secret of the connection is gone from the secret store (audit reason secret_missing, CC-205) or that a rotated refresh token could not be stored (refresh_token_lost, CC-196). The user then connects the system again, and connecting writes a new secret and sets connected. revoked only follows invalid_grant of the provider or a removal by the user.
  */
 export const ConnectionStatus = {
     Connected: 'connected',
@@ -18,6 +18,7 @@ export const ConnectionStatus = {
     Expired: 'expired',
     Revoked: 'revoked',
     Error: 'error',
+    NeedsReconnect: 'needs_reconnect',
 } as const;
 export type ConnectionStatus = typeof ConnectionStatus[keyof typeof ConnectionStatus];
 

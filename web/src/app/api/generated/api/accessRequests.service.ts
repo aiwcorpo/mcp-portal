@@ -24,8 +24,6 @@ import { AccessRequestCreate } from '../model/accessRequestCreate';
 import { AccessRequestResult } from '../model/accessRequestResult';
 // @ts-ignore
 import { RequestableEntitlement } from '../model/requestableEntitlement';
-// @ts-ignore
-import { SystemId } from '../model/systemId';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -178,10 +176,10 @@ export class AccessRequestsService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public listRequestableEntitlements(system: SystemId, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<RequestableEntitlement>>;
-    public listRequestableEntitlements(system: SystemId, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<RequestableEntitlement>>>;
-    public listRequestableEntitlements(system: SystemId, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<RequestableEntitlement>>>;
-    public listRequestableEntitlements(system: SystemId, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listRequestableEntitlements(system: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<RequestableEntitlement>>;
+    public listRequestableEntitlements(system: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<RequestableEntitlement>>>;
+    public listRequestableEntitlements(system: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<RequestableEntitlement>>>;
+    public listRequestableEntitlements(system: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (system === null || system === undefined) {
             throw new Error('Required parameter system was null or undefined when calling listRequestableEntitlements.');
         }

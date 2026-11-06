@@ -26,7 +26,7 @@ function vectors(prefix: string): [string, Vector][] {
     .map((file) => [file, JSON.parse(readFileSync(join(VECTORS, file), 'utf8')) as Vector]);
 }
 
-describe('mcp filter against the contract vectors (5.1.0)', () => {
+describe('mcp filter against the contract vectors (7.0.0)', () => {
   const parse = vectors('parse-');
   const apply = vectors('apply-');
 
@@ -92,9 +92,9 @@ describe('composeFilter', () => {
     expect(composed.problem).toBe('query_too_long');
   });
 
-  it('refuses more than five systems', () => {
+  it('refuses more than twenty systems', () => {
     const composed = composeFilter({
-      systems: ['a', 'b', 'c', 'd', 'e', 'f'],
+      systems: Array.from({ length: 21 }, (_, index) => `s${String.fromCharCode(97 + index)}`),
       tools: [],
       access: null,
       exclude: [],

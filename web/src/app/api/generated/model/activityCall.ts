@@ -30,7 +30,7 @@ export interface ActivityCall {
      */
     filter?: string;
     /**
-     * Tool name as seen by MCP clients, in C5 and C12: <system>__<tool>.
+     * Tool name as seen by MCP clients, in C5 and C12: <system>__<tool>, with the system pattern of SystemId.
      */
     tool: string;
     risk?: Risk;

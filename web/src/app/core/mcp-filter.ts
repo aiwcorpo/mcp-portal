@@ -1,6 +1,6 @@
 /**
  * Filter in the query of the aggregate MCP endpoint (CC-170, CC-185). A port of
- * `scripts/lib/endpoint-filter.mjs` from mcp-contracts 5.1.0, pinned by `test-vectors/endpoint-filter/`.
+ * `scripts/lib/endpoint-filter.mjs` from mcp-contracts 7.0.0, pinned by `test-vectors/endpoint-filter/`.
  * The portal uses it to count the bytes of the query before it asks the BFF for an address (the BFF and the
  * gateway stay the authority), and the dev mock uses it to answer `getMcpEndpoint`.
  */
@@ -10,7 +10,7 @@ export type FilterParameter = (typeof FILTER_PARAMETERS)[number];
 
 /** The query is limited in bytes, not in entries: 16 names of 30 characters fit, not 100 (CC-185). */
 export const MAX_QUERY_BYTES = 512;
-export const MAX_SYSTEMS = 5;
+export const MAX_SYSTEMS = 20;
 export const MAX_TOOLS = 100;
 export const MAX_EXCLUDE = 100;
 

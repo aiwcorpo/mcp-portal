@@ -8,12 +8,14 @@
  * Do not edit the class manually.
  */
 import { CredentialType } from './credentialType';
-import { SystemId } from './systemId';
 import { ConnectionStatus } from './connectionStatus';
 
 
 export interface Connection { 
-    system: SystemId;
+    /**
+     * Target system identifier, lower case: the id of a system that the credential broker and the gateway registry know at runtime (a row, not a list in the contracts). The ids gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved: mcp-<system> is also the CN of a server certificate, and mcp-gateway, mcp-offboarding and the like are the CNs of platform components.
+     */
+    system: string;
     type: CredentialType;
     status: ConnectionStatus;
     /**

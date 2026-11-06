@@ -7,7 +7,6 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ResourceType } from './resourceType';
 
 
 export interface ResourceRef { 
@@ -15,9 +14,9 @@ export interface ResourceRef {
      * Name of a top-level argument of the tool\'s inputSchema whose value is a resource id (string or array of strings).
      */
     argument: string;
-    type: ResourceType;
+    /**
+     * Cedar entity type of a resource, declared by a server in the resourceTypes of its manifest (C6): <Namespace>::<Name>, where the namespace is the Cedar namespace of the server. No type is built in.
+     */
+    type: string;
 }
-export namespace ResourceRef {
-}
-
 

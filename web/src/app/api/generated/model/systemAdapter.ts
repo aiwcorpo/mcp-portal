@@ -10,14 +10,13 @@
 
 
 /**
- * Target system identifier, lower case (01-contracts conventions).
+ * How the broker talks to the backend of a system.
  */
-export const SystemId = {
-    Jira: 'jira',
-    Confluence: 'confluence',
+export const SystemAdapter = {
+    AtlassianDc: 'atlassian-dc',
     Gitlab: 'gitlab',
-    Servicedesk: 'servicedesk',
     Opensearch: 'opensearch',
+    GenericRest: 'generic-rest',
 } as const;
-export type SystemId = typeof SystemId[keyof typeof SystemId];
+export type SystemAdapter = typeof SystemAdapter[keyof typeof SystemAdapter];
 
