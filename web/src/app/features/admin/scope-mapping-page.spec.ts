@@ -67,6 +67,30 @@ describe('ScopeMappingPage', () => {
     expect(scopes.value).toBe('Jira::Project/PLAT\nConfluence::Space/PLATFORM');
   });
 
+  it('lists the approved declarations of the registered servers and explains a scope before it is sent', async () => {
+    await open();
+
+    await until(() =>
+      expect(text()).toContain('Resource types declared by the registered servers'),
+    );
+    expect(text()).toContain('Jira::Project');
+    expect(text()).toContain('Confluence::Space');
+    expect(text()).toContain('^[A-Z]{2,10}$');
+    expect(text()).toContain('cannot be granted');
+
+    const scopes = groupIds()[0].replace('group', 'scopes');
+    fill(scopes, 'Mystery::Place/x');
+    await until(() => expect(text()).toContain('No registered server declares Mystery::Place'));
+    fill(scopes, 'Jira::Issue/ABC-1');
+    await until(() => expect(text()).toContain('has no scope pattern, so it cannot be granted'));
+    fill(scopes, 'Jira::Project/abc');
+    await until(() =>
+      expect(text()).toContain('does not match the scope pattern of Jira::Project'),
+    );
+    fill(scopes, 'Jira::Project/ABC');
+    await until(() => expect(text()).not.toContain('does not match the scope pattern'));
+  });
+
   it('saves the whole document with the ETag it was read with', async () => {
     store.update({ mfaFresh: true });
     await open();

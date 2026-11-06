@@ -109,7 +109,8 @@ describe('OverridesPage', () => {
     expect(text()).toContain('an override is forbid only');
   });
 
-  it('replaces an override with the ETag of the one that was read', async () => {
+  it('replaces an override with the ETag of the one that was read, after a fresh MFA', async () => {
+    store.update({ mfaFresh: true });
     await open();
     button('Edit (override-block-drop-table)').click();
     await until(() => expect(document.getElementById('ov-text')).toBeTruthy());
@@ -121,6 +122,31 @@ describe('OverridesPage', () => {
     await until(() => expect(text()).toContain('Saved the override override-block-drop-table.'));
     expect(writes[0].headers).toEqual({ 'if-match': '"v1"' });
     expect(writes[0].method).toBe('PUT');
+  });
+
+  it('needs a fresh MFA to replace an override, because a weaker text widens access, and keeps the form (CC-243)', async () => {
+    const { navigation, harness } = await open();
+    button('Edit (override-block-drop-table)').click();
+    await until(() => expect(document.getElementById('ov-text')).toBeTruthy());
+    fill('ov-text', POLICY('override-block-drop-table').replace('drop_table', 'truncate_table'));
+    button('Save').click();
+
+    await until(() =>
+      expect(navigation.assign).toHaveBeenCalledWith(
+        '/api/v1/auth/login?stepUp=true&returnPath=%2Fadmin%2Foverrides%3Fmfa%3Dok',
+      ),
+    );
+    expect(store.state.mfaFresh).toBe(false);
+
+    store.update({ mfaFresh: true });
+    await harness.navigateByUrl('/catalog');
+    await harness.navigateByUrl('/admin/overrides?mfa=ok');
+    await until(() =>
+      expect(text()).toContain('Identity confirmed. Check the form and save again.'),
+    );
+    expect((field('ov-text') as HTMLTextAreaElement).value).toContain('truncate_table');
+    button('Save').click();
+    await until(() => expect(text()).toContain('Saved the override override-block-drop-table.'));
   });
 
   it('removes an override after a confirmation, the ETag and a fresh MFA', async () => {

@@ -10,6 +10,8 @@ export const SYSTEM_ID = new RegExp(`^(?!(?:${RESERVED})$)[a-z][a-z0-9]{1,30}$`)
 export const SERVER_ID = new RegExp(`^mcp-(?!(?:${RESERVED})$)[a-z][a-z0-9]{1,30}$`);
 export const GROUP_NAME = /^mcp-[A-Za-z0-9][A-Za-z0-9._-]*$/;
 export const RESOURCE_SCOPE_ID = /^[A-Z][A-Za-z0-9]{0,30}::[A-Z][A-Za-z0-9]{0,30}\/[!-~]{1,1024}$/;
+/** `displayName` of a system: 1 to 64 characters, none of them a control or format character (CC-243). */
+export const DISPLAY_NAME = /^(?!.*[\p{Cc}\p{Cf}]).{1,64}$/su;
 export const OVERRIDE_NAME = /^[a-z0-9][a-z0-9-]{0,54}$/;
 export const OVERRIDE_TEXT_MAX = 8000;
 export const TLS_NAME = /^[A-Za-z0-9.-]{1,253}$/;

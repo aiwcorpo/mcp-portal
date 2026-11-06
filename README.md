@@ -160,8 +160,12 @@ in the commit, not what lies in the working directory. It pushes nothing to a re
   policies carries itself out afterwards. The gateway and the broker check `auth_time` and the proof of MFA (`acr` or `amr`) of
   the token again; what the identity provider has to put into the exchanged tokens is in
   [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings).
-- **Display names.** The contracts carry no display name of a system, so the pages show the system identifier with a capital
-  letter ("gitlab" is "Gitlab").
+- **Display names.** An administrator can give a system a display name (1 to 64 characters, no control or invisible characters) in
+  "Systems"; the administration pages show it, as inert text. The C12 catalog carries no name, so the pages for users show the
+  system identifier with a capital letter ("gitlab" is "Gitlab").
+- **Request size.** The BFF refuses a body over 64 KB on `/api/v1/admin/**` before it reads it, and answers an administrator-only
+  check before the body is read at all. Set the same limit on the reverse proxy (`client_max_body_size 64k;` for `/api/`), see
+  [bff/README.md](bff/README.md).
 - **Tools of foreign servers.** A tool from an adapter waits with no risk and no action, and agents do not see it. In
   Administration, "Classify and approve": the adapter is read only, so only Read (`read`) can be assigned; a tool that
   writes or deletes data will not pass through the adapter. Hints from the server are text to read, nothing more. A change

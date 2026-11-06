@@ -50,6 +50,42 @@ describe('SystemsPage', () => {
     expect(document.querySelector('input[type="password"]')).toBeNull();
   });
 
+  it('shows the display name of a system and sends the one that is typed, never one with hidden characters', async () => {
+    store.update({ mfaFresh: true });
+    await edit('gitlab');
+    expect(text(row('gitlab'))).toContain('GitLab');
+    expect(field('sys-display').value).toBe('GitLab');
+
+    fill('sys-display', 'Code\u202Ehosting');
+    button('Save').click();
+    await until(() => expect(text()).toContain('control and invisible characters are not allowed'));
+    expect(writes).toEqual([]);
+
+    fill('sys-display', 'GitLab of the company');
+    fill('sys-scopes', 'gitlab.read');
+    button('Save').click();
+    await until(() => expect(text()).toContain('Saved the system gitlab.'));
+    expect(writes[0].body).toMatchObject({ displayName: 'GitLab of the company' });
+    await until(() => expect(text(row('gitlab'))).toContain('GitLab of the company'));
+  });
+
+  it('shows the identifier when no display name was given and leaves the field empty', async () => {
+    store.update({ mfaFresh: true });
+    await open();
+    button('Add system').click();
+    await until(() => expect(document.getElementById('sys-id')).toBeTruthy());
+    toggle('type-user-oauth');
+    toggle('type-user-secret');
+    await until(() => expect(document.getElementById('sys-default')).toBeTruthy());
+    fill('sys-id', 'notes');
+    fill('sys-base', 'https://notes.internal/api');
+    button('Save').click();
+
+    await until(() => expect(text()).toContain('Added the system notes.'));
+    expect(JSON.stringify(writes[0].body)).not.toContain('displayName');
+    await until(() => expect(text(row('notes'))).toContain('notes'));
+  });
+
   it('does not ask for the client secret while only a harmless setting changes, and leaves it out of the body', async () => {
     store.update({ mfaFresh: true });
     await edit('gitlab');

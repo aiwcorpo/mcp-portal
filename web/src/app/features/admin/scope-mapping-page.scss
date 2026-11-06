@@ -21,6 +21,30 @@
   min-height: 72px;
 }
 
+.warning {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pm-warn);
+}
+
+.types {
+  margin: 16px 0 0;
+  font-size: 13px;
+}
+
+.types summary {
+  cursor: pointer;
+}
+
+.types ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.types li {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 719px) {
   .row {
     grid-template-columns: minmax(0, 1fr);

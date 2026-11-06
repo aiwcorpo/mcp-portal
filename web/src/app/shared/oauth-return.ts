@@ -51,7 +51,10 @@ export function oauthReturnMessage(
   result: OAuthReturn,
   servers: readonly PortalCatalogServer[] | null,
 ): string | null {
-  const named = result.system ? systemName(result.system) : null;
+  // The name of a system from the URL is shown only when the catalog the user got contains that system: a link that
+  // anyone can send must not put words of its own into the page.
+  const inCatalog = !!result.system && !!servers?.some((server) => server.system === result.system);
+  const named = result.system && inCatalog ? systemName(result.system) : null;
   if (result.kind === 'connected') {
     const row = servers?.find((server) => server.system === result.system);
     const backendUser = row?.connection?.backendUser;

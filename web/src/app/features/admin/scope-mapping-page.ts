@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AdminService, ScopeMappingDocument } from '../../api/generated';
+import { AdminService, ResourceTypeDeclaration, ScopeMappingDocument } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
 import { etagOf } from '../../core/admin-etag';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
@@ -39,9 +39,16 @@ interface Loaded {
   etag: string | null;
 }
 
+export interface DeclaredType {
+  server: string;
+  declaration: ResourceTypeDeclaration;
+}
+
 export interface RowProblems {
   group?: string;
   scopes?: string;
+  /** Hints from the approved declarations of the registered servers; the gateway still decides on save. */
+  warning?: string;
 }
 
 /** The scope ids a row grants, without repeats. */
@@ -50,11 +57,16 @@ export function scopesOf(row: MappingRow): string[] {
 }
 
 /**
- * Checks a row the way the contract's patterns do. Whether the type is declared by a registered server and whether the
- * part after the slash fits its scope pattern is known only to the gateway (no C12 operation lists the declarations of
- * approved servers), so those errors come back as a rejection of the save.
+ * Checks a row the way the contract's patterns do, and every scope against the approved declarations of the registered
+ * servers when there are any: a type nobody declares or one without `scopePattern` cannot be granted, and the part after
+ * the slash has to match the pattern. These are warnings (the gateway decides, and a server may have been approved
+ * meanwhile); a pattern in the Java-only part of the syntax is skipped here.
  */
-export function checkRow(row: MappingRow, groupCounts: ReadonlyMap<string, number>): RowProblems {
+export function checkRow(
+  row: MappingRow,
+  groupCounts: ReadonlyMap<string, number>,
+  declared: readonly DeclaredType[] = [],
+): RowProblems {
   const problems: RowProblems = {};
   const group = row.group.trim();
   if (!GROUP_NAME.test(group) || group.length > 255) {
@@ -71,6 +83,29 @@ export function checkRow(row: MappingRow, groupCounts: ReadonlyMap<string, numbe
   if (bad) {
     problems.scopes = $localize`:@@scopeMapping.errScope:${bad}:scope: is not a scope id. Use <Namespace>::<Type>/<id>, ASCII only.`;
     return problems;
+  }
+  for (const scope of declared.length > 0 ? scopes : []) {
+    const slash = scope.indexOf('/');
+    const type = scope.slice(0, slash);
+    const local = scope.slice(slash + 1);
+    const match = declared.find((candidate) => candidate.declaration.type === type);
+    if (!match) {
+      problems.warning = $localize`:@@scopeMapping.warnType:No registered server declares ${type}:type:; the gateway will refuse ${scope}:scope:.`;
+      break;
+    }
+    const pattern = match.declaration.scopePattern;
+    if (!pattern) {
+      problems.warning = $localize`:@@scopeMapping.warnNotGrantable:${type}:type: has no scope pattern, so it cannot be granted; the gateway will refuse ${scope}:scope:.`;
+      break;
+    }
+    try {
+      if (!new RegExp(pattern).test(local)) {
+        problems.warning = $localize`:@@scopeMapping.warnPattern:${local}:id: does not match the scope pattern of ${type}:type: (${pattern}:pattern:).`;
+        break;
+      }
+    } catch {
+      // A pattern in the Java-only part of the syntax: only the gateway can judge it.
+    }
   }
   return problems;
 }
@@ -108,6 +143,7 @@ export class ScopeMappingPage implements OnInit {
   protected readonly state = signal<LoadState<Loaded>>(LOADING);
   protected readonly rows = signal<MappingRow[]>([]);
   protected readonly etag = signal<string | null>(null);
+  protected readonly declared = signal<readonly DeclaredType[]>([]);
   protected readonly busy = signal(false);
   protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly done = signal<string | null>(null);
@@ -124,7 +160,7 @@ export class ScopeMappingPage implements OnInit {
       const group = row.group.trim();
       counts.set(group, (counts.get(group) ?? 0) + 1);
     }
-    return new Map(rows.map((row) => [row.key, checkRow(row, counts)]));
+    return new Map(rows.map((row) => [row.key, checkRow(row, counts, this.declared())]));
   });
   protected readonly valid = computed(() =>
     [...this.problems().values()].every((problem) => !problem.group && !problem.scopes),
@@ -143,6 +179,7 @@ export class ScopeMappingPage implements OnInit {
 
   private async start(): Promise<void> {
     await this.load();
+    void this.loadDeclared();
     if (this.mfa() === 'ok') {
       this.returnedAt = Date.now();
       const draft = this.stepUp.takeDraft<{ rows: MappingRow[]; etag: string | null }>(PAGE);
@@ -186,6 +223,32 @@ export class ScopeMappingPage implements OnInit {
       this.state.set({ status: 'ready', value: loaded });
     } catch (error) {
       this.state.set({ status: 'error', failure: toApiFailure(error) });
+    }
+  }
+
+  /**
+   * The approved declarations of the registered servers (C12 getAdminServerPolicies), to explain a scope before the gateway
+   * refuses it. Best effort: a server that does not answer only means fewer hints.
+   */
+  private async loadDeclared(): Promise<void> {
+    try {
+      const servers = await firstValueFrom(this.adminApi.listAdminServers());
+      const answers = await Promise.allSettled(
+        servers.map(async (server) => ({
+          server: server.serverId,
+          approved: await firstValueFrom(this.adminApi.getAdminServerPolicies(server.serverId)),
+        })),
+      );
+      const found: DeclaredType[] = [];
+      for (const answer of answers) {
+        if (answer.status === 'fulfilled') {
+          const types = answer.value.approved.approvedResourceTypes ?? [];
+          found.push(...types.map((declaration) => ({ server: answer.value.server, declaration })));
+        }
+      }
+      this.declared.set(found);
+    } catch {
+      this.declared.set([]);
     }
   }
 

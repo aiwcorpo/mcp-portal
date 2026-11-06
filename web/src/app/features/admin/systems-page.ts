@@ -26,7 +26,7 @@ import { AdminStepUp } from '../../core/admin-step-up';
 import { etagOf } from '../../core/admin-etag';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
-import { credentialTypeLabel, systemName } from '../../shared/labels';
+import { credentialTypeLabel } from '../../shared/labels';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
@@ -34,7 +34,15 @@ import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
-import { DURATION, OAUTH_SCOPE, SYSTEM_ID, isHttpsUrl, splitList } from './admin-validation';
+import { AdminSystemNames } from './system-names';
+import {
+  DISPLAY_NAME,
+  DURATION,
+  OAUTH_SCOPE,
+  SYSTEM_ID,
+  isHttpsUrl,
+  splitList,
+} from './admin-validation';
 
 const PAGE = '/admin/systems';
 const USER_TYPES: readonly CredentialType[] = ['user-oauth', 'user-secret'];
@@ -42,6 +50,8 @@ const USER_TYPES: readonly CredentialType[] = ['user-oauth', 'user-secret'];
 export interface SystemForm {
   mode: 'create' | 'edit';
   system: string;
+  /** Optional; empty means the broker uses the identifier. */
+  displayName: string;
   baseUrl: string;
   adapter: SystemAdapter;
   product: '' | 'jira' | 'confluence';
@@ -69,6 +79,7 @@ interface Editing {
 const EMPTY_FORM: SystemForm = {
   mode: 'create',
   system: '',
+  displayName: '',
   baseUrl: '',
   adapter: 'generic-rest',
   product: '',
@@ -122,6 +133,7 @@ export function systemRequest(form: SystemForm): SystemAdminRequest {
   const scopes = splitList(form.scopes);
   return {
     baseUrl: form.baseUrl.trim(),
+    ...(form.displayName.trim() ? { displayName: form.displayName.trim() } : {}),
     adapter: form.adapter,
     supportedTypes: form.supportedTypes,
     defaultType: form.defaultType,
@@ -173,6 +185,7 @@ export class SystemsPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly stepUp = inject(AdminStepUp);
+  protected readonly names = inject(AdminSystemNames);
 
   readonly mfa = input<string | undefined>();
 
@@ -206,7 +219,6 @@ export class SystemsPage implements OnInit {
   ];
   protected readonly userSchemes: readonly SystemUserSecretScheme[] = ['Bearer', 'Basic'];
   protected readonly typeLabel = credentialTypeLabel;
-  protected readonly systemName = systemName;
 
   protected readonly form = computed(() => this.editing()?.form ?? null);
   protected readonly oauth = computed(() => {
@@ -235,6 +247,10 @@ export class SystemsPage implements OnInit {
     if (form.mode === 'create' && !SYSTEM_ID.test(form.system.trim())) {
       found['system'] =
         $localize`:@@adminSystems.errSystem:Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.`;
+    }
+    if (form.displayName.trim() && !DISPLAY_NAME.test(form.displayName.trim())) {
+      found['displayName'] =
+        $localize`:@@adminSystems.errDisplayName:Use 1 to 64 characters; control and invisible characters are not allowed.`;
     }
     if (!isHttpsUrl(form.baseUrl.trim())) {
       found['baseUrl'] = url;
@@ -384,6 +400,7 @@ export class SystemsPage implements OnInit {
         form: {
           mode: 'edit',
           system: current.system,
+          displayName: current.displayName === current.system ? '' : current.displayName,
           baseUrl: current.baseUrl,
           adapter: current.adapter,
           product: current.product ?? '',

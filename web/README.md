@@ -86,7 +86,8 @@ navigation (`AdminNav`) leads to `/admin/servers`, `/admin/systems`, `/admin/sco
 `/admin/kill-switches`. The code is in `src/app/features/admin/`.
 
 - No list of systems, servers or resource types is in the code. `systemName` writes the identifier with a capital letter
-  (the contracts have no display name), `SYSTEM_ID_PATTERN` and the patterns in `admin-validation.ts` follow `common.schema.json`,
+  (the user pages: the C12 catalog has no display name; the administration pages use the `displayName` of the broker through
+  `AdminSystemNames`), `SYSTEM_ID_PATTERN` and the patterns in `admin-validation.ts` follow `common.schema.json`,
   and the systems of the request dialog, the servers of the override target and the datalist of the server form come from the
   catalog, the registry and the broker.
 - Writes carry the ETag they were read with (`If-Match`; a create sends `If-None-Match: *`). `401 step_up_required` goes through

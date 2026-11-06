@@ -60,8 +60,8 @@ describe('AdminPage', () => {
     expect(text(serverRow('Confluence'))).toContain('new: 1, changed: 1');
     expect(text(serverRow('Confluence'))).toContain('Pending approval');
     expect(text(serverRow('Jira'))).toContain('changed: 2');
-    expect(text(serverRow('Servicedesk'))).toContain('Active');
-    expect(text(serverRow('Opensearch'))).toContain('Disabled');
+    expect(text(serverRow('Service Desk'))).toContain('Active');
+    expect(text(serverRow('OpenSearch'))).toContain('Disabled');
     expect(text()).toContain('Pending approval: 4');
 
     expect(text(toolRow('confluence__add_label'))).toContain('New · Write');
@@ -99,9 +99,9 @@ describe('AdminPage', () => {
     expect(
       document.querySelector<HTMLAnchorElement>('a[href="/admin/kill-switches"]'),
     ).toBeTruthy();
-    expect(text(serverRow('Servicedesk'))).toContain('Switched off');
+    expect(text(serverRow('Service Desk'))).toContain('Switched off');
     expect(text(serverRow('Jira'))).not.toContain('Switched off');
-    labelled('Show tools (Servicedesk)').click();
+    labelled('Show tools (Service Desk)').click();
     await until(() =>
       expect(text(toolRow('servicedesk__get_ticket'))).toContain('Switched off · Read'),
     );

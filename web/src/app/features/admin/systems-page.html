@@ -71,7 +71,7 @@
               data-label="System"
               i18n-data-label="@@adminSystems.colSystem"
             >
-              {{ systemName(row.system.system) }}
+              {{ row.system.displayName | safeText }}
               <code class="muted block">{{ row.system.system | safeText }}</code>
             </th>
             <td
@@ -170,6 +170,21 @@
             <p>
               <code>{{ f.system | safeText }}</code>
             </p>
+          }
+        </div>
+        <div class="field">
+          <label for="sys-display" i18n="@@adminSystems.displayName">Display name (optional)</label>
+          <input
+            id="sys-display"
+            name="displayName"
+            type="text"
+            autocomplete="off"
+            [attr.aria-invalid]="show && errs['displayName'] ? 'true' : null"
+            [ngModel]="f.displayName"
+            (ngModelChange)="change({ displayName: $event })"
+          />
+          @if (show && errs['displayName']) {
+            <p class="problem">{{ errs['displayName'] }}</p>
           }
         </div>
         <div class="field">

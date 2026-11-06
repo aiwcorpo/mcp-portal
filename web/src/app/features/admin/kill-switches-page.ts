@@ -22,13 +22,13 @@ import { ResumeIntentStore } from '../../core/resume-intent';
 import { SessionService } from '../../core/session.service';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
-import { systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { AdminNav } from './admin-nav';
+import { AdminSystemNames } from './system-names';
 import { KILL_SWITCHES_PATH } from './admin-path';
 
 /** The longest reason the contract takes (KillSwitchRequest.reason). */
@@ -79,6 +79,7 @@ export class KillSwitchesPage implements OnInit {
   private readonly navigation = inject(BrowserNavigation);
   private readonly resumeStore = inject(ResumeIntentStore);
   private readonly session = inject(SessionService);
+  private readonly systemNames = inject(AdminSystemNames);
   private readonly router = inject(Router);
 
   /** `mfa=ok` in the URL after the IdP returned from the fresh MFA that lifting a switch needs. */
@@ -107,7 +108,7 @@ export class KillSwitchesPage implements OnInit {
           const server = state.value.servers.find(
             (candidate) => candidate.serverId === entry.serverId,
           );
-          const serverName = server ? systemName(server.system) : entry.serverId;
+          const serverName = server ? this.systemNames.name(server.system) : entry.serverId;
           return {
             entry,
             key: keyOf(entry.serverId, entry.tool),
@@ -130,7 +131,7 @@ export class KillSwitchesPage implements OnInit {
     return state.status === 'ready'
       ? state.value.servers.map((server) => ({
           id: server.serverId,
-          name: systemName(server.system),
+          name: this.systemNames.name(server.system),
         }))
       : [];
   });
@@ -147,6 +148,7 @@ export class KillSwitchesPage implements OnInit {
   );
 
   ngOnInit(): void {
+    void this.systemNames.load();
     void this.load().then(() => this.resumeLift());
   }
 
@@ -297,7 +299,7 @@ export class KillSwitchesPage implements OnInit {
     const state = this.state();
     const server =
       state.status === 'ready' ? state.value.servers.find((s) => s.serverId === id) : null;
-    return server ? systemName(server.system) : id;
+    return server ? this.systemNames.name(server.system) : id;
   }
 
   private async confirm(data: ConfirmDialogData): Promise<boolean> {

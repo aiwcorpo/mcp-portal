@@ -181,7 +181,7 @@
             >
               <option value="" i18n="@@overrides.serverPlaceholder">Choose a server</option>
               @for (id of servers(); track id) {
-                <option [value]="id">{{ systemName(id) }} ({{ id }})</option>
+                <option [value]="id">{{ names.name(id) }} ({{ id }})</option>
               }
             </select>
             @if (show && errs['server']) {

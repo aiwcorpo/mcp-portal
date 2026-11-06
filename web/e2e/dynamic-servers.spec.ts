@@ -59,6 +59,8 @@ test('the scope mapping shows the gateway reasons, keeps edits through the MFA a
 }) => {
   await page.goto('/admin/scope-mapping?mockAdmin=in&mockPolicies=in');
   await expect(page.getByLabel('Group', { exact: true }).first()).toHaveValue('mcp-jira-proj-ABC');
+  await page.getByText('Resource types declared by the registered servers').click();
+  await expect(page.getByText('Confluence::Space')).toBeVisible();
 
   await page.getByRole('button', { name: 'Add group' }).click();
   await expect(page.getByLabel('Group', { exact: true })).toHaveCount(3);
@@ -111,6 +113,9 @@ test('overrides: add one for a server, see it, replace it, remove it after a fre
 
   await page.getByRole('button', { name: 'Edit (override-jira-quiet)' }).click();
   await page.getByLabel('Target').selectOption('all-servers');
+  // Replacing an override widens access like a removal, so it needs a fresh MFA; the form comes back after the IdP.
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Identity confirmed. Check the form and save again.')).toBeVisible();
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByText('Saved the override override-jira-quiet.')).toBeVisible();
   await expect(page.getByRole('row', { name: /override-jira-quiet/ })).toContainText('All servers');

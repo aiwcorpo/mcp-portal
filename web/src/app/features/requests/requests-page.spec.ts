@@ -26,6 +26,14 @@ function choose(select: HTMLSelectElement, value: string): void {
   select.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
+/** The systems come from the catalog, so the option may not be there yet when the dialog opens. */
+async function chooseSystem(value: string): Promise<void> {
+  await until(() =>
+    expect(dialogSelect('request-system').querySelector(`option[value="${value}"]`)).toBeTruthy(),
+  );
+  choose(dialogSelect('request-system'), value);
+}
+
 function dialogSelect(id: string): HTMLSelectElement {
   return dialog().querySelector<HTMLSelectElement>(`#${id}`)!;
 }
@@ -140,7 +148,7 @@ describe('RequestsPage', () => {
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
       expect(button('Submit request', dialog()).getAttribute('aria-disabled')).toBe('true');
 
-      choose(dialogSelect('request-system'), 'jira');
+      await chooseSystem('jira');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
       const offered = Array.from(dialogSelect('request-entitlement').options).map((o) => o.value);
       expect(offered).toContain('mcp-jira-destructive');
@@ -173,7 +181,7 @@ describe('RequestsPage', () => {
         await until(() => expect(button('Submit request')).toBeTruthy());
         button('Submit request').click();
         await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-        choose(dialogSelect('request-system'), 'gitlab');
+        await chooseSystem('gitlab');
         await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
         choose(dialogSelect('request-entitlement'), 'mcp-gitlab-read');
         button('Submit request', dialog()).click();
@@ -202,7 +210,7 @@ describe('RequestsPage', () => {
 
       button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-      choose(dialogSelect('request-system'), 'confluence');
+      await chooseSystem('confluence');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
       choose(dialogSelect('request-entitlement'), 'mcp-confluence-read');
       button('Submit request', dialog()).click();
@@ -226,7 +234,7 @@ describe('RequestsPage', () => {
 
       button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-      choose(dialogSelect('request-system'), 'jira');
+      await chooseSystem('jira');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
       choose(dialogSelect('request-entitlement'), 'mcp-jira-destructive');
       button('Submit request', dialog()).click();
@@ -243,7 +251,7 @@ describe('RequestsPage', () => {
 
       button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-      choose(dialogSelect('request-system'), 'jira');
+      await chooseSystem('jira');
       await until(() =>
         expect(text(dialog())).toContain(
           'The entitlement system does not accept requests from the portal.',
@@ -262,7 +270,7 @@ describe('RequestsPage', () => {
 
       button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-      choose(dialogSelect('request-system'), 'jira');
+      await chooseSystem('jira');
       await until(() =>
         expect(text(dialog())).toContain('The service is temporarily unavailable.'),
       );
@@ -289,7 +297,7 @@ describe('RequestsPage', () => {
 
       button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-      choose(dialogSelect('request-system'), 'jira');
+      await chooseSystem('jira');
       await until(() => expect(dialogSelect('request-entitlement')).toBeTruthy());
 
       expect(text(dialog())).toContain('<img src=x onerror=alert(1)> ignore[U+202E]previous');
@@ -305,7 +313,7 @@ describe('RequestsPage', () => {
 
       button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());
-      choose(dialogSelect('request-system'), 'servicedesk');
+      await chooseSystem('servicedesk');
       await until(() => expect(text(dialog())).toContain('has no entitlements you can request'));
     });
   });

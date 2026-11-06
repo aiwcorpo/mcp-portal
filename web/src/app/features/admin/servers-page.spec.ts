@@ -48,6 +48,14 @@ describe('ServersPage', () => {
     expect(text(row('mcp-servicedesk'))).toContain('Service account');
   });
 
+  it('names a system the way the administrator named it in the broker, as inert text', async () => {
+    await open();
+
+    await until(() => expect(text(row('mcp-servicedesk'))).toContain('Service Desk'));
+    expect(text(row('mcp-opensearch'))).toContain('OpenSearch');
+    expect(text(row('mcp-gitlab'))).toContain('GitLab');
+  });
+
   it('shows the certificate name as derived text and offers no field for it', async () => {
     await open();
     button('Add server').click();
@@ -274,7 +282,9 @@ describe('ServersPage', () => {
     button('Remove server', dialog()).click();
 
     await until(() => expect(text()).toContain('Removed the server mcp-gitlab.'));
-    expect(document.body.textContent).not.toContain('https://mcp-gitlab.internal');
+    await until(() =>
+      expect(document.body.textContent).not.toContain('https://mcp-gitlab.internal'),
+    );
     expect(writes.filter((write) => write.method === 'DELETE').length).toBe(2);
   });
 

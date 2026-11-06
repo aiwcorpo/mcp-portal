@@ -4,7 +4,7 @@ M7 (portal 2.0.0, "dynamic servers"): osiągnięty (2026-11-06) - kontrakty 7.0.
 
 ## Wydanie 2.0.0: serwery i systemy jako dane (2026-11-06)
 
-`npm test` 36 plików, 616 testów; e2e 238 przeszło, 32 pominięte (zrzuty); `ci/run.sh` (style, lint, i18n, unit, build) `ci: OK`; `bff make ci` 578 testów. Bez obrazów (nic nie zbudowano ani nie wdrożono).
+`npm test` 38 plików, 629 testów; e2e 238 przeszło, 32 pominięte (zrzuty); `ci/run.sh` (style, lint, i18n, unit, build) `ci: OK`; `bff make ci` 598 testów. Bez obrazów (nic nie zbudowano ani nie wdrożono).
 - Kontrakty 7.0.0: paczka z `npm pack` w checkoucie `mcp-contracts` (po CC-241; nie ma jeszcze pliku wydania ani publikacji w npmjs, więc
   `CONTRACTS_TARBALL_SHA256` w workflowach GitHub zostaje dla 6.3.2 i trzeba go ustawić po wydaniu), klient wygenerowany ponownie.
   `SystemId`, `ServerId`, `ResourceType` to zwykłe napisy; `ConnectionStatus` ma `needs_reconnect`; filtr `/mcp` przyjmuje 20 systemów.
@@ -19,8 +19,10 @@ M7 (portal 2.0.0, "dynamic servers"): osiągnięty (2026-11-06) - kontrakty 7.0.
   zatwierdzenie polityk wykonuje się po powrocie samo (U12). Drugie żądanie MFA zaraz po powrocie to błąd, nie pętla.
 - Połączenia: `needs_reconnect` jako baner na stronie połączeń, wiersz z wyjaśnieniem i akcją "Connect"/"Renew" jak przy `error`.
 - Atrapa: `mocks/dynamic-mock.ts` (serwery, systemy, mapowanie, nadpisania w `sessionStorage`; `?mockPolicies=in`), `MockStore.onReset`.
-- Brak w kontraktach: żadna operacja C12 nie zwraca zatwierdzonych typów zasobów serwera, który niczego nie oczekuje, więc strona mapowania
-  nie podpowiada typów, a błędy zakresów pokazuje dopiero odpowiedź gatewaya (422).
+- Poprawki po przeglądzie (CC-243, CC-244): nazwa wyświetlana systemu (tylko strony administracji, `AdminSystemNames`; katalog C12 jej nie niesie),
+  odczyt zatwierdzonych polityk serwera (`getAdminServerPolicies`) na stronie mapowania zakresów (typy i wzorce zakresów, ostrzeżenia przed zapisem),
+  zastąpienie nadpisania wymaga świeżego MFA, błędne identyfikatory i `If-Match` to 400 w atrapie, `SYSTEM_ID_PATTERN` z zarezerwowanymi id,
+  baner powrotu z OAuth nazywa tylko system z katalogu, zachowane zatwierdzenie polityk jest sprawdzane (kształt skrótu), powód `audience_not_allowed`.
 - Zrzuty 21 do 25 w `docs/screenshots/en` i `pl`.
 
 M6 (etap 3): osiągnięty (2026-11-03) - kontrakty 6.2.0, wyłącznik awaryjny, dialog klasyfikacji narzędzi adaptera, stan `error` połączenia, wznawianie po MFA dla wyłącznika i klasyfikacji. Obraz `mcp-portal-web:m6-e72ccbf` (bez wdrażania). Szczegóły w sekcji "M6: stan".

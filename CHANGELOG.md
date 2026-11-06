@@ -22,6 +22,12 @@ Dynamic servers: no list of systems, servers or resource types is left in the po
   request dialog takes the systems from the catalog.
 - Mock build and tests: the MSW mock keeps servers, systems, mapping and overrides as data (`?mockPolicies=in` puts policies up
   for approval); new unit and end-to-end tests for every screen; screenshots 21 to 25.
+- Review fixes: replacing an override needs a fresh MFA (creating one does not); a malformed path identifier or `If-Match` is
+  `400 invalid_request`, never 404; request bodies over 64 KB on `/api/v1/admin/**` are refused before they are read and the
+  admin check comes first; system display names (administration pages only); the scope mapping page lists the approved resource
+  types and scope patterns of the registered servers (new read of the approved policies of a server) and warns before the
+  gateway refuses a scope; the OAuth return banner names a system only when it is in the catalog; the web `SystemId` pattern
+  has the reserved ids; a kept policy approval is checked before it is resumed.
 - Operation: after the upgrade the identity provider has to put `auth_time`, `acr` and `amr` into the tokens exchanged for the
   gateway and the broker, or every widening administration operation ends in `step_up_required` (see
   [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings)).

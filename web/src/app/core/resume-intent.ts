@@ -36,7 +36,7 @@ const TIMESTAMP = /^[0-9TZ:.+-]{1,40}$/;
 const ADMIN_PAGE = /^\/admin(?:\/[a-z-]{1,40})?$/;
 /** An edit form of the administration without secrets; a bigger one is not kept and the user types it again. */
 export const DRAFT_MAX = 16_000;
-const HASH = /^[A-Za-z0-9+/=_:-]{1,200}$/;
+export const HASH = /^[A-Za-z0-9+/=_:-]{1,200}$/;
 const RISKS: readonly unknown[] = ['READ_ONLY', 'UPDATE', 'DESTRUCTIVE'];
 const ACTIONS: readonly unknown[] = ['read', 'update', 'delete', 'admin'];
 

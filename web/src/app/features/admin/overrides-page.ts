@@ -19,7 +19,6 @@ import { AdminStepUp } from '../../core/admin-step-up';
 import { etagOf } from '../../core/admin-etag';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
-import { systemName } from '../../shared/labels';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
@@ -27,6 +26,7 @@ import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
+import { AdminSystemNames } from './system-names';
 import { OVERRIDE_NAME, OVERRIDE_TEXT_MAX, SERVER_ID, overrideTemplate } from './admin-validation';
 
 const PAGE = '/admin/overrides';
@@ -91,6 +91,7 @@ export class OverridesPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly stepUp = inject(AdminStepUp);
+  protected readonly names = inject(AdminSystemNames);
 
   readonly mfa = input<string | undefined>();
 
@@ -106,7 +107,6 @@ export class OverridesPage implements OnInit {
   protected readonly touched = signal(false);
   /** The page was opened by the return from the IdP; a repeated step-up request is then an error, not a loop. */
   private returnedAt = 0;
-  protected readonly systemName = systemName;
 
   protected readonly form = computed(() => this.editing()?.form ?? null);
   protected readonly errors = computed(() => {
@@ -160,6 +160,7 @@ export class OverridesPage implements OnInit {
   private async start(): Promise<void> {
     await this.load();
     void this.loadServers();
+    void this.names.load();
     if (this.mfa() === 'ok') {
       this.returnedAt = Date.now();
       const draft = this.stepUp.takeDraft<OverrideForm & { etag: string | null }>(PAGE);

@@ -134,6 +134,7 @@ describe('toApiFailure of the administrator writes', () => {
       system_rejected: [
         'client_secret_required',
         'token_url_not_settable',
+        'audience_not_allowed',
         'product_required',
         'exchange_audience_required',
         'system_reserved',

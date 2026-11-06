@@ -57,7 +57,10 @@ describe('diffPolicies', () => {
     pending.pendingPolicies = {
       ...pending.pendingPolicies,
       files: [
-        { name: 'read.cedar', text: 'permit (principal, action, resource);\u200b\r\nfile: evil.cedar' },
+        {
+          name: 'read.cedar',
+          text: 'permit (principal, action, resource);\u200b\r\nfile: evil.cedar',
+        },
       ],
     };
 
@@ -178,6 +181,33 @@ describe('AdminPage: approval of policies', () => {
     expect(store.state.policiesApproved).toEqual(['mcp-jira']);
     expect(writes.filter((write) => write.method === 'POST').length).toBe(2);
     expect(writes[1].body).toEqual({ policiesHash: POLICY_FIXTURES['mcp-jira'].hash });
+  });
+
+  it('ignores a kept approval whose hash or server has a wrong shape', async () => {
+    for (const draft of [
+      { op: 'approve-policies', serverId: 'mcp-notes', hash: 'not a hash <script>' },
+      { op: 'approve-policies', serverId: 'mcp notes', hash: POLICY_FIXTURES['mcp-notes'].hash },
+      { op: 'approve-policies', serverId: 'mcp-notes' },
+    ]) {
+      sessionStorage.clear();
+      store.update({ mfaFresh: true });
+      configureTestApp();
+      await TestBed.inject(SessionService).load();
+      sessionStorage.setItem(
+        'mcp-portal-resume',
+        JSON.stringify({
+          user: TestBed.inject(SessionService).username(),
+          intent: { kind: 'admin-draft', page: '/admin', draft: JSON.stringify(draft) },
+          expiresAt: Date.now() + 60_000,
+        }),
+      );
+      await openRoute('/admin?mfa=ok');
+      await until(() => expect(text()).toContain('MCP server registry'));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(store.state.policiesApproved).toEqual([]);
+      expect(writes).toEqual([]);
+      TestBed.resetTestingModule();
+    }
   });
 
   it('lists the mapping entries that the approval makes invalid', async () => {

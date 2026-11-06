@@ -19,13 +19,12 @@ import {
   ServerConfig,
   ServerConfigCreate,
   ServerConfigPatch,
-  SystemAdminView,
 } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
 import { etagOf } from '../../core/admin-etag';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
-import { credentialTypeLabel, systemName } from '../../shared/labels';
+import { credentialTypeLabel } from '../../shared/labels';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
@@ -33,6 +32,7 @@ import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
+import { AdminSystemNames } from './system-names';
 import { SYSTEM_ID, isHttpsUrl } from './admin-validation';
 
 const PAGE = '/admin/servers';
@@ -116,12 +116,13 @@ export class ServersPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly stepUp = inject(AdminStepUp);
+  protected readonly names = inject(AdminSystemNames);
 
   /** `mfa=ok` in the URL after the IdP returned from the fresh MFA. */
   readonly mfa = input<string | undefined>();
 
   protected readonly state = signal<LoadState<ServerConfig[]>>(LOADING);
-  protected readonly systems = signal<readonly string[]>([]);
+  protected readonly systems = this.names.known;
   protected readonly editing = signal<Editing | null>(null);
   protected readonly busy = signal(false);
   protected readonly failure = signal<ApiFailure | null>(null);
@@ -138,7 +139,6 @@ export class ServersPage implements OnInit {
     'service-account',
   ];
   protected readonly typeLabel = credentialTypeLabel;
-  protected readonly systemName = systemName;
 
   protected readonly form = computed(() => this.editing()?.form ?? null);
   protected readonly serverId = computed(() => {
@@ -225,14 +225,9 @@ export class ServersPage implements OnInit {
     }
   }
 
-  /** The systems the broker knows, only to suggest them while typing; the field accepts any valid identifier. */
-  private async loadSystems(): Promise<void> {
-    try {
-      const list: SystemAdminView[] = await firstValueFrom(this.adminApi.listAdminSystems());
-      this.systems.set(list.map((system) => system.system));
-    } catch {
-      this.systems.set([]);
-    }
+  /** The systems the broker knows and their names, only to suggest and to label; the field accepts any valid identifier. */
+  private loadSystems(): Promise<void> {
+    return this.names.load();
   }
 
   protected rows = computed(() => {

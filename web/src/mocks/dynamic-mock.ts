@@ -91,6 +91,7 @@ function seedData(): Data {
       [
         {
           system: 'confluence',
+          displayName: 'Confluence',
           baseUrl: 'https://confluence.internal',
           adapter: 'atlassian-dc',
           product: 'confluence',
@@ -101,6 +102,7 @@ function seedData(): Data {
         },
         {
           system: 'jira',
+          displayName: 'Jira',
           baseUrl: 'https://jira.internal',
           adapter: 'atlassian-dc',
           product: 'jira',
@@ -111,6 +113,7 @@ function seedData(): Data {
         },
         {
           system: 'gitlab',
+          displayName: 'GitLab',
           baseUrl: 'https://gitlab.internal',
           adapter: 'gitlab',
           supportedTypes: ['user-oauth', 'user-secret'],
@@ -120,6 +123,7 @@ function seedData(): Data {
         },
         {
           system: 'servicedesk',
+          displayName: 'Service Desk',
           baseUrl: 'https://servicedesk.internal/api',
           adapter: 'generic-rest',
           supportedTypes: ['service-account'],
@@ -128,6 +132,7 @@ function seedData(): Data {
         },
         {
           system: 'opensearch',
+          displayName: 'OpenSearch',
           baseUrl: 'https://opensearch.internal',
           adapter: 'opensearch',
           supportedTypes: ['token-exchange'],
@@ -288,22 +293,60 @@ export const POLICY_FIXTURES: Record<string, PolicyFixture> = {
   },
 };
 
+/** What the registered servers of the mock have declared and had approved before this scenario's pending policies. */
+const BASE_APPROVED: Record<string, ResourceTypeDeclaration[]> = {
+  'mcp-jira': POLICY_FIXTURES['mcp-jira'].approvedTypes ?? [],
+  'mcp-confluence': [
+    {
+      type: 'Confluence::Space',
+      attributes: ['key'],
+      idPattern: '^[A-Z][A-Z0-9]{1,9}$',
+      scopePattern: '^[A-Z][A-Z0-9]{1,9}$',
+    },
+  ],
+  'mcp-gitlab': [
+    {
+      type: 'GitLab::Project',
+      attributes: ['path'],
+      idPattern: '^[a-z0-9][a-z0-9._/-]{0,200}$',
+      scopePattern: '^[a-z0-9][a-z0-9._/-]{0,200}$',
+    },
+  ],
+};
+
+/** The approved declarations of a server, or null while nothing is approved (CC-243 getAdminServerPolicies). */
+function approvedTypesOf(
+  serverId: string,
+  approvedPolicies: readonly string[],
+): ResourceTypeDeclaration[] | null {
+  const fixture = POLICY_FIXTURES[serverId];
+  if (fixture && approvedPolicies.includes(serverId)) {
+    return fixture.pendingTypes;
+  }
+  return BASE_APPROVED[serverId] ?? null;
+}
+
 /** What the gateway has registered as grantable, by type, for the validation of the scope mapping. */
 function grantable(approvedPolicies: readonly string[]): Map<string, string | null> {
-  const types = new Map<string, string | null>([
-    [
-      'Jira::Project',
-      approvedPolicies.includes('mcp-jira') ? PENDING_JIRA_SCOPE : APPROVED_JIRA_SCOPE,
-    ],
-    ['Jira::Issue', null],
-    ['Confluence::Space', '^[A-Z][A-Z0-9]{1,9}$'],
-    ['GitLab::Project', '^[a-z0-9][a-z0-9._/-]{0,200}$'],
-  ]);
-  if (approvedPolicies.includes('mcp-notes')) {
-    types.set('Notes::Folder', '^[a-z][a-z0-9-]{0,40}$');
+  const types = new Map<string, string | null>();
+  for (const serverId of new Set([
+    ...Object.keys(BASE_APPROVED),
+    ...Object.keys(POLICY_FIXTURES),
+  ])) {
+    for (const declaration of approvedTypesOf(serverId, approvedPolicies) ?? []) {
+      types.set(declaration.type, declaration.scopePattern ?? null);
+    }
   }
   return types;
 }
+
+const SERVER_PATTERN =
+  /^mcp-(?!(?:gateway|offboarding|portal|broker|prometheus|platform|admin|registry|adapter|internal|ci)$)[a-z][a-z0-9]{1,30}$/;
+const SYSTEM_PATTERN =
+  /^(?!(?:gateway|offboarding|portal|broker|prometheus|platform|admin|registry|adapter|internal|ci)$)[a-z][a-z0-9]{1,30}$/;
+const OVERRIDE_PATTERN = /^override-[a-z0-9][a-z0-9-]{0,54}$/;
+/** `displayName` of a system: 1 to 64 characters without control or format characters (CC-243). */
+const DISPLAY_NAME = /^(?!.*[\p{Cc}\p{Cf}]).{1,64}$/su;
 
 const etagOf = (version: number): string => `"v${version}"`;
 
@@ -363,7 +406,28 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
     if (!header) {
       return ctx.failure('precondition_required', 428);
     }
+    // A header that is no entity tag is a malformed request, not a stale one (CC-243).
+    if (!/^(?:W\/)?"[^"]*"$/.test(header)) {
+      return ctx.failure('invalid_request', 400);
+    }
     return header === etagOf(version) ? undefined : ctx.failure('precondition_failed', 412);
+  };
+  /** A path identifier that does not fit its pattern is 400 invalid_request, never 404 (CC-243). */
+  const invalidPathId = (request: Request): Response | undefined => {
+    const path = new URL(request.url).pathname;
+    const checks: [RegExp, RegExp][] = [
+      [/\/admin\/servers\/([^/]+)$/, SERVER_PATTERN],
+      [/\/admin\/systems\/([^/]+)$/, SYSTEM_PATTERN],
+      [/\/admin\/policy\/overrides\/([^/]+)$/, OVERRIDE_PATTERN],
+      [/\/admin\/registry\/servers\/([^/]+)\/policies(?:\/pending|\/approve)?$/, SERVER_PATTERN],
+    ];
+    for (const [route, pattern] of checks) {
+      const id = route.exec(path)?.[1];
+      if (id !== undefined && !pattern.test(decodeURIComponent(id))) {
+        return ctx.failure('invalid_request', 400);
+      }
+    }
+    return undefined;
   };
   const guard = (
     request: Request,
@@ -376,7 +440,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         { status: 403, headers: baseHeaders },
       );
     }
-    return refused() ?? unavailable();
+    return refused() ?? invalidPathId(request) ?? unavailable();
   };
 
   const serverOf = (id: string) => data.servers.find((entry) => entry.value.serverId === id);
@@ -611,9 +675,6 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
       if (!body || typeof body.target !== 'string' || typeof body.text !== 'string') {
         return ctx.failure('invalid_request', 400);
       }
-      if (!/^override-[a-z0-9][a-z0-9-]{0,54}$/.test(id)) {
-        return reject('override_rejected', 'id_invalid', 'the id must be override-<name>');
-      }
       const existing = overrideOf(id);
       if (existing) {
         const missing = precondition(request, existing.version);
@@ -642,6 +703,13 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
           'target_mismatch',
           'a gateway override decides the call action on Tool',
         );
+      }
+      // A weaker text widens access like a removal: replacing needs a fresh MFA, creating does not (CC-243).
+      if (existing) {
+        const mfa = needsMfa('/admin/overrides');
+        if (mfa) {
+          return mfa;
+        }
       }
       const value: Override = {
         id,
@@ -681,6 +749,45 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
       return new HttpResponse(null, { status: 204, headers: baseHeaders });
     }),
 
+    http.get(
+      at('/api/v1/admin/registry/servers/:serverId/policies'),
+      ({ request, cookies, params }) => {
+        const denied = guard(request, cookies, false);
+        if (denied) {
+          return denied;
+        }
+        const id = String(params['serverId']);
+        const known =
+          data.servers.some((entry) => entry.value.serverId === id) || id in POLICY_FIXTURES;
+        if (!known) {
+          return ctx.failure('not_found_or_denied', 404);
+        }
+        const types = approvedTypesOf(id, store.state.policiesApproved);
+        const fixture = POLICY_FIXTURES[id];
+        const namespace = types?.[0]?.type.split('::')[0];
+        const policies: PendingPolicies['approvedPolicies'] =
+          types === null
+            ? null
+            : fixture && store.state.policiesApproved.includes(id)
+              ? fixture.pending
+              : (fixture?.approved ?? {
+                  namespace: namespace ?? 'Notes',
+                  schema: `namespace ${namespace ?? 'Notes'} {}`,
+                  files: [],
+                });
+        return json(
+          {
+            approvedHash:
+              types === null
+                ? null
+                : 'sha256:0f3a9c5b7d1e4a6c8b0d2f4e6a8c0b1d3f5a7c9e1b3d5f7a9c0e2b4d6f8a1c3e',
+            approvedPolicies: policies,
+            approvedResourceTypes: types,
+          },
+          200,
+        );
+      },
+    ),
     http.get(
       at('/api/v1/admin/registry/servers/:serverId/policies/pending'),
       ({ request, cookies, params }) => {
@@ -792,6 +899,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         return ctx.failure('precondition_required', 428);
       }
       const request_ = body as unknown as {
+        displayName?: string;
         baseUrl: string;
         adapter: string;
         product?: string;
@@ -806,6 +914,12 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         };
         revokeUrl?: string;
       };
+      if (
+        request_.displayName !== undefined &&
+        (typeof request_.displayName !== 'string' || !DISPLAY_NAME.test(request_.displayName))
+      ) {
+        return ctx.failure('invalid_request', 400);
+      }
       if (request_.adapter === 'atlassian-dc' && !request_.product) {
         return reject('system_rejected', 'product_required', 'atlassian-dc needs product');
       }
@@ -841,6 +955,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
       const value = {
         ...(body as object),
         system: id,
+        displayName: request_.displayName ?? id,
         ...(request_.oauth
           ? {
               oauth: {

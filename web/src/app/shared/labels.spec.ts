@@ -78,6 +78,8 @@ describe('systems are runtime data', () => {
   it('knows a system id by the pattern of the contract, not by a list', () => {
     expect(isSystemId('notes')).toBe(true);
     expect(isSystemId('a1')).toBe(true);
+    expect(isSystemId('gateway')).toBe(false);
+    expect(isSystemId('ci')).toBe(false);
     expect(isSystemId('Notes')).toBe(false);
     expect(isSystemId('n')).toBe(false);
     expect(isSystemId('a'.repeat(32))).toBe(false);

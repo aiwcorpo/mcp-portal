@@ -80,6 +80,9 @@
               @if (found?.scopes && (show || row.scopes.length > 0)) {
                 <p class="problem" [id]="'sm-scopes-err-' + row.key">{{ found?.scopes }}</p>
               }
+              @if (found?.warning) {
+                <p class="warning">{{ found?.warning }}</p>
+              }
             </div>
             <div class="remove">
               <button mat-flat-button type="button" class="quiet" (click)="removeRow(row.key)">
@@ -123,4 +126,26 @@
       your edits.
     </p>
   </form>
+
+  @if (declared().length) {
+    <details class="types">
+      <summary i18n="@@scopeMapping.declared">
+        Resource types declared by the registered servers
+      </summary>
+      <ul>
+        @for (item of declared(); track item.server + item.declaration.type) {
+          <li>
+            <code>{{ item.declaration.type | safeText }}</code>
+            <span class="muted"> ({{ item.server | safeText }})</span>
+            @if (item.declaration.scopePattern) {
+              <ng-container i18n="@@scopeMapping.scopePattern">scope pattern</ng-container>
+              <code>{{ item.declaration.scopePattern | safeText }}</code>
+            } @else {
+              <span class="muted" i18n="@@scopeMapping.notGrantable">cannot be granted</span>
+            }
+          </li>
+        }
+      </ul>
+    </details>
+  }
 }

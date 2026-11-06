@@ -303,6 +303,8 @@ test('no horizontal scroll at 360 px and no cut-off tab names', async ({ page })
 });
 
 test('320 px: no WCAG 2.1 AA violations and no horizontal scroll', async ({ page }) => {
+  // One test walks every page of the list, and the list now has the administration screens too.
+  test.setTimeout(90_000);
   await page.setViewportSize({ width: 320, height: 640 });
   for (const { path, ready } of PAGES) {
     await page.goto(path);

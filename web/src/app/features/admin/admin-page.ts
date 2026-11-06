@@ -20,14 +20,15 @@ import {
 import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { SessionService } from '../../core/session.service';
-import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
-import { Tone, riskOrUnclassified, systemName } from '../../shared/labels';
+import { HASH, ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
+import { Tone, riskOrUnclassified } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
+import { AdminSystemNames } from './system-names';
 import { PolicyApprovalIntent, PolicyDiffView } from './policy-diff-view';
 import { ToolDiff } from './tool-diff';
 
@@ -122,6 +123,7 @@ export class AdminPage implements OnInit {
   protected readonly resumeApproval = signal<ResumeOf<'approve-tool'> | null>(null);
   protected readonly resumedFromMfa = signal(false);
   private readonly resumeStore = inject(ResumeIntentStore);
+  private readonly systemNames = inject(AdminSystemNames);
   private readonly session = inject(SessionService);
 
   private readonly adminApi = inject(AdminService);
@@ -169,7 +171,7 @@ export class AdminPage implements OnInit {
       const policiesPending = server.policiesStatus === 'pending_approval';
       return {
         server,
-        name: systemName(server.system),
+        name: this.systemNames.name(server.system),
         pendingCount: pendingTools.length,
         policiesPending,
         changes: changesText(created, pendingTools.length - created),
@@ -194,6 +196,7 @@ export class AdminPage implements OnInit {
   );
 
   constructor() {
+    void this.systemNames.load();
     void this.load();
   }
 
@@ -225,7 +228,12 @@ export class AdminPage implements OnInit {
     }
     try {
       const parsed = JSON.parse(kept.draft) as PolicyApprovalIntent;
-      return parsed.op === 'approve-policies' && /^[A-Za-z0-9._:-]{1,128}$/.test(parsed.serverId)
+      // Same shapes as the approval of a tool (resume-intent): the draft is read back from sessionStorage, so it is checked.
+      return parsed.op === 'approve-policies' &&
+        typeof parsed.serverId === 'string' &&
+        /^[A-Za-z0-9._:-]{1,128}$/.test(parsed.serverId) &&
+        typeof parsed.hash === 'string' &&
+        HASH.test(parsed.hash)
         ? parsed
         : null;
     } catch {

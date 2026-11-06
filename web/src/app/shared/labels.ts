@@ -7,8 +7,13 @@ import {
   Risk,
 } from '../api/generated';
 
-/** `SystemId` of common.schema.json: the systems are runtime data of the broker and the gateway, not a list here. */
-export const SYSTEM_ID_PATTERN = /^[a-z][a-z0-9]{1,30}$/;
+/**
+ * `SystemId` of common.schema.json: the systems are runtime data of the broker and the gateway, not a list here. The
+ * reserved ids are the names of platform components (CC-237), which no system can have.
+ */
+const RESERVED_SYSTEM_IDS =
+  'gateway|offboarding|portal|broker|prometheus|platform|admin|registry|adapter|internal|ci';
+export const SYSTEM_ID_PATTERN = new RegExp(`^(?!(?:${RESERVED_SYSTEM_IDS})$)[a-z][a-z0-9]{1,30}$`);
 
 export function isSystemId(value: unknown): value is string {
   return typeof value === 'string' && SYSTEM_ID_PATTERN.test(value);

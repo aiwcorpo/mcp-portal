@@ -146,6 +146,8 @@ function systemRejectedMessage(reason: string | undefined): string {
       return $localize`:@@error.client_secret_required:The client secret has to be entered again when the base address, the authorization or token address or the client identifier changes.`;
     case 'token_url_not_settable':
       return $localize`:@@error.token_url_not_settable:A token exchange system takes no token address: the broker uses the one of its identity provider.`;
+    case 'audience_not_allowed':
+      return $localize`:@@error.audience_not_allowed:This audience is not on the list of audiences that the operator allowed in the broker configuration.`;
     case 'product_required':
       return $localize`:@@error.product_required:This adapter needs the product (Jira or Confluence).`;
     case 'exchange_audience_required':

@@ -72,7 +72,7 @@
               data-label="Server"
               i18n-data-label="@@adminServers.colServer"
             >
-              {{ systemName(row.server.system) }}
+              {{ names.name(row.server.system) }}
               <code class="muted block">{{ row.server.serverId | safeText }}</code>
             </th>
             <td
