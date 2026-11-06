@@ -27,7 +27,7 @@ final class AdminInput {
 
     private static final Set<String> CREDENTIAL_TYPES = Set.of("user-oauth", "user-secret", "token-exchange", "service-account");
     private static final Set<String> CREDENTIAL_SCHEMES = Set.of("Bearer", "Basic", "Token", "ApiKey");
-    private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic", "Token");
+    private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic");
     private static final Pattern INTERNAL_URL = Pattern.compile("^https://[!-~]{1,247}$");
     private static final Pattern OVERRIDE_TARGET = Pattern.compile("^(gateway|all-servers|mcp-[a-z][a-z0-9]{1,30})$");
     private static final Pattern SCOPE_CHARS = Pattern.compile("^[!#-\\[\\]-~]{1,128}$");

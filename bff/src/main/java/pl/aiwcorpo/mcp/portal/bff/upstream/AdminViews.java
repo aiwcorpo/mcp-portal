@@ -30,7 +30,7 @@ public final class AdminViews {
             "timeout", "exchangeAudience", "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth");
     private static final Set<String> OAUTH_VIEW_FIELDS = Set.of("clientId", "authorizeUrl", "tokenUrl", "scopes",
             "clientSecretSet");
-    private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic", "Token");
+    private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic");
     private static final Set<String> CREDENTIAL_SCHEMES = Set.of("Bearer", "Basic", "Token", "ApiKey");
     private static final Pattern HTTPS = Pattern.compile("^https://\\S{1,247}$");
     private static final Pattern OVERRIDE_ID = Pattern.compile("^override-[a-z0-9][a-z0-9-]{0,54}$");

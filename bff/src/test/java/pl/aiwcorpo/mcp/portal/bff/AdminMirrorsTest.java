@@ -570,6 +570,7 @@ class AdminMirrorsTest extends PortalHarness {
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"adapter\"", "\"exchangeAudience\":\"x\",\"adapter\"")},
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("generic-rest", "ftp")},
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"Bearer\"", "\"Digest\"")},
+                new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"adapter\"", "\"userSecretScheme\":\"Token\",\"adapter\"")},
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"clientId\"", "\"password\":\"x\",\"clientId\"")},
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("\"scopes\":[\"notes.read\",\"notes.write\"]", "\"scopes\":[\"a b\"]")},
                 new String[] {"PUT", "/api/v1/admin/systems/notes", SYSTEM_BODY.replace("[\"user-oauth\"]", "[\"user-oauth\",\"user-oauth\"]")});
