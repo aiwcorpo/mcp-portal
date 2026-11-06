@@ -2,10 +2,12 @@ package pl.aiwcorpo.mcp.portal.bff.upstream;
 
 import java.util.List;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 /** C4 operations open to {@code CN=mcp-portal-bff}. Every call carries the user's token exchanged for the broker. */
 public class BrokerClient {
@@ -80,5 +82,11 @@ public class BrokerClient {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .body(body), token, requestId),
                 response -> calls.read(response, BrokerModel.AuthenticatorStatus.class));
+    }
+
+    /** The system administration of C4 ({@code /v1/admin/systems}); the body may carry a client secret and is never printed. */
+    public AdminReply admin(HttpMethod method, String uri, Object[] variables, BearerToken token, String requestId,
+                            AdminPreconditions preconditions, JsonNode body) {
+        return calls.admin(method, uri, variables, token, requestId, preconditions, body);
     }
 }

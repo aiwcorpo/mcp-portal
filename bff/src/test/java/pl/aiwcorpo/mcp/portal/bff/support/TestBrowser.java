@@ -173,6 +173,20 @@ public final class TestBrowser {
         return send(request(path).DELETE(), csrf(withCsrf));
     }
 
+    /** Any method with a JSON body (null for none) and extra headers, for the operations that carry preconditions. */
+    public HttpResponse<String> request(String method, String path, String json, boolean withCsrf,
+                                        Map<String, String> extraHeaders) {
+        HttpRequest.Builder builder = request(path);
+        if (json == null) {
+            builder.method(method, HttpRequest.BodyPublishers.noBody());
+        } else {
+            builder.method(method, HttpRequest.BodyPublishers.ofString(json)).header("Content-Type", "application/json");
+        }
+        Map<String, String> headers = new LinkedHashMap<>(csrf(withCsrf));
+        headers.putAll(extraHeaders);
+        return send(builder, headers);
+    }
+
     public HttpResponse<String> send(HttpRequest.Builder builder, Map<String, String> headers) {
         headers.forEach(builder::header);
         if (!cookies.isEmpty()) {

@@ -99,6 +99,47 @@ public class AuditLog {
     }
 
     /**
+     * {@code admin_change} for an administration call of the portal (servers, scope mapping, overrides, policy approval,
+     * broker systems) that did not change anything: refused, step-up missing, a failed precondition, rejected by the
+     * upstream or unavailable. A change is recorded by the gateway or the broker ({@code server_created},
+     * {@code scope_mapping_changed}, {@code system_updated} and the like), so the portal writes no success. {@code server}
+     * is the {@code serverId} the call named, or null when it names none or not a valid one; bodies, secrets and texts
+     * of administrators have no field here.
+     */
+    public void adminChangeFailed(String requestId, PortalUser user, String serverId, Outcome outcome, long latencyMs) {
+        adminChangeFailed(requestId, user, serverId, null, null, null, outcome, latencyMs);
+    }
+
+    /**
+     * As above for an emergency override: its id, its target and the SHA-256 of its text, never the text. Each is null
+     * when the request did not get far enough to have a valid one.
+     */
+    public void adminChangeFailed(String requestId, PortalUser user, String serverId, String overrideId,
+                                  String overrideTarget, String textSha256, Outcome outcome, long latencyMs) {
+        write(new AuditEvent(
+                clock.instant().truncatedTo(ChronoUnit.MILLIS).toString(),
+                requestId,
+                "portal",
+                componentId,
+                "admin_change",
+                user.sub(),
+                user.username(),
+                serverId,
+                null,
+                outcome.decision(),
+                outcome.reason(),
+                null,
+                null,
+                outcome.outcome(),
+                outcome.errorCode(),
+                latencyMs,
+                null,
+                overrideId,
+                overrideTarget,
+                textSha256));
+    }
+
+    /**
      * A write on a confirmation that the portal itself refused (the gateway audits the ones it accepts): a sign of a
      * request that did not come from the preview page of the user.
      */
@@ -196,6 +237,11 @@ public class AuditLog {
         /** Refused, with the C8 reason and the C10 code (null when the contract has none for it). */
         public static Outcome denied(String reason, String errorCode) {
             return new Outcome("deny", reason, "denied", errorCode);
+        }
+
+        /** The caller is not in the administrator group (C8 reason {@code not_admin}). */
+        public static Outcome notAdmin() {
+            return new Outcome("deny", "not_admin", "denied", "access_denied");
         }
 
         public static Outcome stepUpRequired() {

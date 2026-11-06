@@ -6,6 +6,8 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -64,6 +66,44 @@ final class UpstreamCalls {
             }
             throw new UpstreamException(name, e);
         }
+    }
+
+    private static final int MAX_ADMIN_BODY = 8 * 1024 * 1024;
+    private static final Pattern ETAG = Pattern.compile("^\"[A-Za-z0-9_-]{8,128}\"$");
+
+    /**
+     * An admin operation with its preconditions. The body (a validated tree, may carry a client secret) is serialized
+     * by the client and never printed; the answer is read whole up to a limit.
+     */
+    AdminReply admin(HttpMethod method, String uri, Object[] variables, BearerToken token, String requestId,
+                     AdminPreconditions preconditions, JsonNode body) {
+        RestClient.RequestBodySpec spec = http.method(method).uri(uri, variables);
+        if (preconditions.ifMatch() != null) {
+            spec.header(HttpHeaders.IF_MATCH, preconditions.ifMatch());
+        }
+        if (preconditions.ifNoneMatchStar()) {
+            spec.header(HttpHeaders.IF_NONE_MATCH, "*");
+        }
+        if (body != null) {
+            spec.contentType(MediaType.APPLICATION_JSON).body(body);
+        }
+        return call(authorize(spec, token, requestId), response -> {
+            String etag = response.getHeaders().getETag();
+            try (InputStream in = response.getBody()) {
+                byte[] bytes = in.readNBytes(MAX_ADMIN_BODY + 1);
+                if (bytes.length > MAX_ADMIN_BODY) {
+                    throw new UpstreamException(name, 502, null);
+                }
+                JsonNode parsed = bytes.length == 0 ? null : MAPPER.readTree(bytes);
+                return new AdminReply(response.getStatusCode().value(), parsed,
+                        etag != null && ETAG.matcher(etag).matches() ? etag : null);
+            } catch (IOException | RuntimeException e) {
+                if (e instanceof UpstreamException upstream) {
+                    throw upstream;
+                }
+                throw new UpstreamException(name, 502, null);
+            }
+        });
     }
 
     <T> T read(ClientHttpResponse response, Class<T> type) {

@@ -24,7 +24,19 @@ public record AuditEvent(
         String outcome,
         String errorCode,
         Long latencyMs,
-        String definitionHash) {
+        String definitionHash,
+        String overrideId,
+        String overrideTarget,
+        String textSha256) {
+
+    /** Events without the fields of an emergency override (every event but a failed override operation). */
+    public AuditEvent(String ts, String requestId, String component, String componentId, String event, String sub,
+                      String username, String server, String tool, String decision, String reason,
+                      String credentialType, String backendUser, String outcome, String errorCode, Long latencyMs,
+                      String definitionHash) {
+        this(ts, requestId, component, componentId, event, sub, username, server, tool, decision, reason,
+                credentialType, backendUser, outcome, errorCode, latencyMs, definitionHash, null, null, null);
+    }
 
     /** Events that carry neither a tool nor a definition hash (everything but registry approvals). */
     public AuditEvent(String ts, String requestId, String component, String componentId, String event, String sub,

@@ -59,8 +59,16 @@ public class StepUpPolicy {
      */
     public void requireFresh(PortalUser user, String returnPath) {
         if (!isFresh(user)) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, new StepUpRequired(stepUpUrl(returnPath)));
+            throw required(returnPath);
         }
+    }
+
+    /**
+     * The same answer for an upstream that found the exchanged token not fresh enough (C4 and C5 check {@code auth_time}
+     * themselves and never rely on the portal having asked), so the browser takes the way it already knows.
+     */
+    public ApiException required(String returnPath) {
+        return new ApiException(HttpStatus.UNAUTHORIZED, new StepUpRequired(stepUpUrl(returnPath)));
     }
 
     /** Body of {@code 401 step_up_required}; no {@code requestId} field, the schema is closed. */

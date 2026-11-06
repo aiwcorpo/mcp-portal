@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
 import pl.aiwcorpo.mcp.portal.bff.token.BearerToken;
@@ -100,5 +101,11 @@ public class GatewayAdminClient {
                 response -> new GatewayModel.ActivityCallsPage(
                         calls.read(response, new TypeReference<List<JsonNode>>() { }),
                         response.getHeaders().getFirst("X-Next-Cursor")));
+    }
+
+    /** One of the registry, policy and server operations of C5 that the portal mirrors (C12 {@code /admin/...}). */
+    public AdminReply admin(HttpMethod method, String uri, Object[] variables, BearerToken token, String requestId,
+                            AdminPreconditions preconditions, JsonNode body) {
+        return calls.admin(method, uri, variables, token, requestId, preconditions, body);
     }
 }
