@@ -4,12 +4,12 @@ Backend of the MCP portal (workstream ws-07): OIDC login and server-side session
 and aggregation of C5 (gateway admin), C4 (credential broker) and C13 (IGA). The browser never receives tokens or
 secrets. The BFF also serves the built Angular frontend (`../web`) from the same origin.
 
-Stack: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Contracts: `mcp-contracts` 6.3.2 (the `mcp-contracts`, `mcp-manifest` and `test-vectors` jars, from `~/.m2` or from Maven Central).
+Stack: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Contracts: `mcp-contracts` 7.0.0 (the `mcp-contracts`, `mcp-manifest` and `test-vectors` jars, from `~/.m2` or from Maven Central).
 Image: `Dockerfile` in the repository root (targets `bff`, `web`, `portal`), `scripts/build-images.sh`; described in [../README.md](../README.md).
 
 ## Running locally
 
-Requires JDK 25 (`scripts/select-jdk.sh` finds it; `JAVA_HOME` takes precedence) and `mcp-contracts` 6.3.2 in `~/.m2` or in the registry. Two modes.
+Requires JDK 25 (`scripts/select-jdk.sh` finds it; `JAVA_HOME` takes precedence) and `mcp-contracts` 7.0.0 in `~/.m2` or in the registry. Two modes.
 
 With mocks (no dev stack; C4/C5 data comes from the WireMock mocks in the contracts jar):
 
@@ -294,6 +294,79 @@ Contracts 4.0.0 (the M4 state; M5 is described below). Decision details are in `
 | `KillSwitchTest` | admin only, list checked against the schema, enabling without MFA, clearing with MFA and `stepUpUrl` from the page, request body, mapping of gateway responses, audit of attempts without effect, no reason in the audit |
 | `RegistryAdminTest` (added) | classification passed to the gateway, unknown values, `422` refusals with `reason`, lowering with MFA, adapter entry without `risk` and `action`, `classifiedBy` |
 
+## 2.0.0: dynamic servers and systems (contracts 7.0.0)
+
+The BFF has no list of systems, servers or resource types. A system id, a server id, a qualified tool name, a resource type
+and a scope id are checked by the patterns of `common.schema.json` (`ContractValues`, with the reserved ids of CC-237); which
+systems and servers exist comes from the broker (`GET /v1/systems`) and the gateway (catalog, registry). The IGA port lists the
+systems of its catalog (`AccessGovernance.systems()`) instead of a built-in list. A connection that the broker marks
+`needs_reconnect` (the administrator changed where the system points, CC-238) is kept as such and the catalog shows the server as
+`reconnect_required` with `reconnect` or `add_secret` and `disconnect`.
+
+Administration mirrors (group `mcp-platform-admin`, checked in the BFF and again by the gateway and the broker on the exchanged
+token). Every one goes through `AdminOperations`: the exchanged token for `mcp-gateway-admin` or `mcp-credential-broker`, the
+browser's `If-Match` or `If-None-Match: *` sent on unchanged, the `ETag` of the answer returned unchanged, the answer checked
+against the closed schema of the contract (`AdminViews`; an answer that does not fit is a `503`, never partly shown) with hidden
+characters written out, and the refusals of the upstream mapped to the C12 answers (`400`, `403`, `404`, `409` only for the code the
+operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; anything else is a `503`).
+
+| Operation | Upstream | Fresh MFA |
+| --- | --- | --- |
+| `GET`, `POST /api/v1/admin/servers`, `GET`, `PATCH`, `DELETE .../servers/{serverId}` | C5 `/admin/v1/servers` | create, delete and every `PATCH` except a body that only sets `enabled: false` |
+| `GET`, `PUT /api/v1/admin/policy/scope-mapping` | C5 | `PUT` |
+| `GET .../policy/overrides`, `GET`, `PUT`, `DELETE .../overrides/{id}` | C5 | `DELETE` only (an override can only forbid) |
+| `GET .../registry/servers/{serverId}/policies/pending`, `POST .../policies/approve` | C5 | approve (also needs `Sec-Fetch-Site: same-origin`) |
+| `GET /api/v1/admin/systems`, `GET`, `PUT`, `DELETE .../systems/{system}` | C4 `/v1/admin/systems` | `PUT` and `DELETE` |
+
+- Fresh MFA is `StepUpPolicy.requireFresh`, the mechanism and window of lifting a kill switch, with `returnPath` from the page that sent
+  the request. An upstream `401 step_up_required` (C4 and C5 check `auth_time` of the exchanged token within 300 s on their own) becomes
+  the same `401 step_up_required` with `stepUpUrl`, in every mirror. The token exchange cache of the session is dropped by every login,
+  so a token exchanged after a step-up carries the new `auth_time`; the IdP mapper has to copy that claim into the exchanged token.
+- `DELETE .../servers/{serverId}` asks for fresh MFA although C12 shows a plain `401` for it: the gateway needs it (CC-239).
+- Preconditions: `If-Match` is required (`428` without it, no call) by `PATCH`, the scope mapping `PUT`, `DELETE` of an override and
+  of a system; `PUT` of an override and of a system takes `If-Match` (replace) or `If-None-Match: *` (create), not both. A malformed
+  tag is `400`, and `412` for the two `DELETE`s, where C12 lists no `400`.
+- Request bodies are closed (no field the schema does not know, no repeated key, at most 64 KiB, types not coerced). A server has no
+  `tlsName` (the gateway pins `<serverId>.internal`) and `adapter` is set only on create (CC-240). The client secret of a system
+  travels in the `PUT` body to the broker and is in no answer, log or audit event; a broker answer with a `clientSecret` field is
+  refused by the closed schema. The broker asks for it again when an address changes (`422 system_rejected`, reason
+  `client_secret_required`).
+- Audit: the gateway and the broker record every change. The portal writes `admin_change` only for an attempt that changed nothing
+  (reasons such as `not_admin`, `step_up_required`, `precondition_failed`, the `reason` of an upstream rejection); override
+  attempts carry `overrideId`, `overrideTarget` and `textSha256`, never the text.
+
+| Test | What it checks |
+| --- | --- |
+| `AdminMirrorsTest` | every operation above: admin only (no upstream call, audited `not_admin`), unauthenticated, fresh MFA exactly where listed (and the disable-only `PATCH`), an upstream `step_up_required`, `If-Match` and `If-None-Match` passed on, `428` and `400`/`412` for bad tags, `ETag` back, `404`, `409`, `412`, `422` with reason, `503`, closed request bodies, closed answers (a leaked `clientSecret`, wrong ids, hidden characters), no secret in responses or logs, audit of refused override writes |
+| `DynamicSystemsTest` | system, server, tool, resource type and scope patterns and the reserved ids, a system and a resource type the BFF was never told about, `needs_reconnect` to `reconnect_required`, `policiesStatus` of the registry |
+
+## Fresh MFA for the administration operations (identity provider settings)
+
+The gateway and the broker do not trust the portal to have asked for a second factor. On the widening operations of the table above
+they accept the exchanged administrator token as fresh MFA only when `auth_time` is at most 300 s old and the token proves MFA: its `acr`
+is one of the values configured in the gateway and in the broker, or its `amr` contains `mfa`, `otp`, `hwk` or `totp`. A token without
+`auth_time`, or with neither proof, is answered `401 step_up_required`, which the BFF turns into the step-up login. What the BFF
+does and what the identity provider has to do:
+
+- **Step-up login (BFF).** `GET /api/v1/auth/login?stepUp=true` sends `max_age=0` (a new authentication even with a live SSO session)
+  and, when `PORTAL_STEP_UP_ACR_VALUES` is set, `acr_values` with the same list. `PORTAL_STEP_UP_ACR_VALUES` has to name the
+  `acr` level that the realm gives only to a login that included the second factor (Keycloak: the level of conditions of the
+  authentication flow, for example `mfa`), and that level has to be one of the `acr` values the gateway and the broker accept.
+  Where the provider reports methods instead of levels (Entra ID), leave it empty and set `PORTAL_STEP_UP_AMR_VALUES`.
+  Without either list the BFF accepts `auth_time` alone, which is allowed in the `dev` profile only, and the upstreams would still refuse.
+- **Token exchange (BFF).** The BFF forwards the access token of the session as `subject_token`, with `audience` `mcp-gateway-admin` or
+  `mcp-credential-broker`, and uses the exchanged token as it is: it removes and adds no claim. After a step-up login the session
+  holds the access token of that login and the cache of exchanged tokens is empty, so the next exchange carries the new `auth_time`.
+- **Token exchange (identity provider).** The exchanged token must contain `auth_time`, `acr` and `amr` copied from the subject token.
+  In Keycloak the exchange builds the token from the client scopes of the target audience, so the scopes that the portal client uses
+  for `mcp-gateway-admin` and `mcp-credential-broker` (by default `mcp-gateway-admin-audience` and `mcp-credential-broker-audience`, the
+  properties `portal.token-exchange.gateway-admin-scope` and `portal.token-exchange.broker-scope`) need mappers for: `auth_time` ("Auth Time"
+  session note mapper, "Add to access token"), `acr` ("Authentication Context Class Reference", "Add to access token") and `amr`
+  (a user session note or script mapper that copies the methods of the login, "Add to access token"). A token that lacks one of them
+  is not fresh as far as the upstreams are concerned, whatever the BFF thinks.
+- **Check.** Decode an exchanged token of an administrator right after a step-up login: `auth_time` within the last minutes, and `acr`
+  or `amr` as configured. The BFF logs no token, so use the exchange against the token endpoint with the same client for the check.
+
 ## Structure
 
 ```
@@ -308,7 +381,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   confirmation/ preview, viewed, cancel
   authenticator/ Authenticator (TOTP) enrollment
   activity/    GET /api/v1/activity/calls
-  admin/       registry: view, definition diff, approval (group mcp-platform-admin)
+  admin/       registry: view, definition diff, approval; servers, scope mapping, overrides, policy approval, broker systems (group mcp-platform-admin)
   limits/      per-session limits (429 with Retry-After)
   iga/         C13 port, mock (data: dev/iga-mock.yaml, profile dev only) and keycloak-groups adapters, access requests
   audit/       C8 events

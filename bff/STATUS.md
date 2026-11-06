@@ -26,6 +26,25 @@ Brief ws-07 nie ma kamieni milowych. Podział ustalony z koordynatorem 2026-10-2
 | M6.2 | wyłącznik awaryjny (A9): `GET /admin/kill-switches`, `PUT` i `DELETE` serwera i narzędzia, zdjęcie ze step-up; `approve` z `risk` i `action`, widoki rejestru dla wpisu adaptera, `disabledBy` w katalogu | zrobione |
 | M6.3 | porządki do wydania: wyszukiwanie JDK 25, LICENSE, NOTICE, SECURITY, CONTRIBUTING, CHANGELOG, `Dockerfile` w korzeniu repozytorium, `scripts/build-images.sh`, workflow wydania (nie uruchomiony), README ze zrzutami; obraz `m6-ea6d179` bez wdrażania | zrobione |
 | M6.4 | opcjonalny TLS na porcie BFF (`PORTAL_PUBLIC_TLS_*`, PEM, pakiet SSL Spring Boota), `ServerTlsTest`, README | zrobione; obraz w raporcie |
+| M7 (2.0.0) | kontrakty 7.0.0 (CC-229..CC-240): bez list systemow, serwerow i typow zasobow; odbicia C12 serwerow, mapowania zakresow, nadpisan, zatwierdzenia polityk i systemow brokera; `needs_reconnect` | zrobione |
+
+## M7: wersja 2.0.0, serwery i systemy jako dane (2026-11-06)
+
+`mvn test`: 577 testow (526 z 1.0.0, `AdminMirrorsTest` 23, `DynamicSystemsTest` 28), 0 bledow. Jary 7.0.0 z `~/.m2` (po CC-240). Opis: sekcja "2.0.0" w README.
+
+- Usuniete: `AdminTargets.SERVER_IDS`, `RegistryData.SERVER_IDS`, `BrokerData.SYSTEMS`, `GatewayData.RESOURCE_TYPES`, wzorzec nazw narzedzi z piecioma
+  systemami. Zastapily je wzorce kontraktu w `ContractValues` (z listą zarezerwowanych id, CC-237). Port C13 ma `systems()` (klucze katalogu IGA).
+  Atrapa IGA (`dev/iga-mock.yaml`) to dane tego adaptera, nie lista w kodzie; zostaje.
+- Odbicia C12: `AdminOperations` (jedna sciezka: grupa, MFA, wywolanie z tokenem, `If-Match`/`If-None-Match`/`ETag` bez zmian, sprawdzenie odpowiedzi,
+  mapowanie odmow), `AdminInput` (ciala zamkniete), `AdminViews` (odpowiedzi zamkniete, znaki ukryte zapisane), trzy kontrolery. `UpstreamCalls.admin`
+  czyta odpowiedz do 8 MiB. Zasady MFA: patrz tabela w README; `PATCH` serwera bez MFA tylko dla ciala `{"enabled":false}` (CC-240).
+- Decyzje wlasne: (1) `DELETE servers/{serverId}` wymaga MFA (CC-239: gateway wymaga, a C12 pokazuje zwykle `401`); (2) zly `If-Match` to `400`, a przy
+  dwoch `DELETE` (C12 nie ma tam `400`) `412`; (3) zla sciezka `PUT overrides/{id}` i `PUT systems/{system}` to `400` (C12 nie ma tam `404`), przy
+  pozostalych operacjach `404`; (4) `409` i `422` przechodza tylko z kodem, ktory operacja wymienia, reszta to `503`; (5) zatwierdzenie polityk wymaga
+  `Sec-Fetch-Site: same-origin` jak zatwierdzenie narzedzia.
+- Cache tokenow po wymianie jest czyszczony przez kazde logowanie (`LoginSuccessHandler` zostawia tylko kontekst i klientow OAuth), wiec po step-upie
+  wymiana daje token z nowym `auth_time`; mapper IdP musi kopiowac ten claim (C4 i C5 liczą go same, brak = nieswiezy).
+- Luki w kontrakcie: patrz raport (`deleteAdminServer` bez `StepUpOrUnauthenticated`, brak `400` przy `If-Match` w dwoch `DELETE`, brak `404` w `putAdminOverride` i `putAdminSystem`).
 
 ## M6: stan (2026-11-03)
 
