@@ -73,13 +73,20 @@ public record PortalProperties(
      *                  checked, dev profile only
      * @param authenticatorReturnPath portal page of the registration, where a step-up for it comes back to
      * @param adminReturnPath         portal page of the registry administration, where a step-up for lowering a risk comes back to
+     * @param adminTokens   where the administration calls get their tokens: {@code refresh} (default) asks for the admin
+     *                      audience scopes in the step-up login of an administrator and narrows one refresh grant per
+     *                      audience, which keeps {@code acr} and {@code auth_time} of the login; {@code exchange} uses the
+     *                      token exchange only, which an IdP that re-derives {@code acr} on exchange (Keycloak) cannot satisfy
+     * @param adminTokenTtl longest time an admin token narrowed by a refresh is kept in the session (memory only)
      */
     public record StepUp(
             @DefaultValue("5m") Duration maxAge,
             @DefaultValue List<String> acrValues,
             @DefaultValue List<String> amrValues,
             @DefaultValue("/authenticator") String authenticatorReturnPath,
-            @DefaultValue("/admin") String adminReturnPath) {
+            @DefaultValue("/admin") String adminReturnPath,
+            @DefaultValue("refresh") AdminTokens adminTokens,
+            @DefaultValue("2m") Duration adminTokenTtl) {
 
         public StepUp {
             if (!ReturnPaths.isValid(authenticatorReturnPath)) {
@@ -90,6 +97,8 @@ public record PortalProperties(
             }
         }
     }
+
+    public enum AdminTokens { REFRESH, EXCHANGE }
 
     /**
      * Explicit IdP addresses, used instead of discovery when {@code tokenUri} is set. For a container that reaches the

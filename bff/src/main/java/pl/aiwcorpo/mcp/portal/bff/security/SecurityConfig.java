@@ -143,7 +143,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    LoginResolvers loginResolvers(ClientRegistrationRepository registrations, StepUpPolicy stepUp) {
+    LoginResolvers loginResolvers(ClientRegistrationRepository registrations, StepUpPolicy stepUp, PortalProperties properties) {
         DefaultOAuth2AuthorizationRequestResolver standard = new DefaultOAuth2AuthorizationRequestResolver(
                 registrations, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
         standard.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
@@ -159,10 +159,31 @@ public class SecurityConfig {
                         parameters.put("acr_values", acrValues);
                     }
                 })));
-        return new LoginResolvers(standard, stepUpResolver);
+        // The step-up of an administrator also asks for the admin audience scopes: the refresh grants narrowed to one of
+        // them give the admin calls tokens that keep the level of this login (UserTokens#adminTokenFor).
+        DefaultOAuth2AuthorizationRequestResolver stepUpAdminResolver = new DefaultOAuth2AuthorizationRequestResolver(
+                registrations, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
+        stepUpAdminResolver.setAuthorizationRequestCustomizer(builder -> {
+            OAuth2AuthorizationRequestCustomizers.withPkce().accept(builder);
+            builder.additionalParameters(parameters -> {
+                parameters.put("max_age", "0");
+                if (acrValues != null) {
+                    parameters.put("acr_values", acrValues);
+                }
+            });
+            if (properties.stepUp().adminTokens() == PortalProperties.AdminTokens.REFRESH) {
+                java.util.Set<String> scopes = new java.util.LinkedHashSet<>(
+                        registrations.findByRegistrationId(properties.registrationId()).getScopes());
+                scopes.add(properties.tokenExchange().gatewayAdminScope());
+                scopes.add(properties.tokenExchange().brokerScope());
+                builder.scopes(scopes);
+            }
+        });
+        return new LoginResolvers(standard, stepUpResolver, stepUpAdminResolver);
     }
 
     record LoginResolvers(DefaultOAuth2AuthorizationRequestResolver standard,
-                          DefaultOAuth2AuthorizationRequestResolver stepUp) {
+                          DefaultOAuth2AuthorizationRequestResolver stepUp,
+                          DefaultOAuth2AuthorizationRequestResolver stepUpAdmin) {
     }
 }

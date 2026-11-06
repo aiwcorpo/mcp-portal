@@ -1,6 +1,7 @@
 package pl.aiwcorpo.mcp.portal.bff.token;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,12 +42,44 @@ class TokenExchangeClient {
         if (scope != null && !scope.isBlank()) {
             form.add("scope", scope);
         }
+        Instant requestedAt = clock.instant();
+        TokenResponse response = post(registration, form, "token exchange for " + audience);
+        long lifetime = response.expiresIn() == null ? 60 : response.expiresIn();
+        return new BearerToken(response.accessToken(), requestedAt.plusSeconds(lifetime));
+    }
+
+    /** What a narrowed refresh gives: the token for one audience and, when the IdP rotates them, the next refresh token. */
+    record Refreshed(BearerToken token, String refreshToken) {
+
+        @Override
+        public String toString() {
+            return "Refreshed[token=" + token + "]";
+        }
+    }
+
+    /**
+     * Refresh grant narrowed to the scope of one audience (RFC 6749 section 6: a scope may only be narrowed). Unlike an
+     * exchange, the IdP keeps the level of the login in the new token ({@code acr}, {@code auth_time}), which is what the
+     * gateway and the broker ask for on a write that needs fresh MFA.
+     */
+    Refreshed refresh(ClientRegistration registration, String refreshToken, String scope, Duration maxLifetime) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("grant_type", "refresh_token");
+        form.add("refresh_token", refreshToken);
+        form.add("scope", "openid " + scope);
+        Instant requestedAt = clock.instant();
+        TokenResponse response = post(registration, form, "refresh for " + scope);
+        long lifetime = Math.min(response.expiresIn() == null ? 60 : response.expiresIn(), maxLifetime.toSeconds());
+        return new Refreshed(new BearerToken(response.accessToken(), requestedAt.plusSeconds(lifetime)),
+                response.refreshToken());
+    }
+
+    private TokenResponse post(ClientRegistration registration, MultiValueMap<String, String> form, String what) {
         boolean basic = !ClientAuthenticationMethod.CLIENT_SECRET_POST.equals(registration.getClientAuthenticationMethod());
         if (!basic) {
             form.add("client_id", registration.getClientId());
             form.add("client_secret", registration.getClientSecret());
         }
-        Instant requestedAt = clock.instant();
         TokenResponse response;
         try {
             response = http.post()
@@ -63,17 +96,17 @@ class TokenExchangeClient {
                     .retrieve()
                     .body(TokenResponse.class);
         } catch (RestClientException e) {
-            throw new TokenUnavailableException("token exchange for " + audience + " failed: " + e.getClass().getSimpleName());
+            throw new TokenUnavailableException(what + " failed: " + e.getClass().getSimpleName());
         }
         if (response == null || response.accessToken() == null || response.accessToken().isBlank()) {
-            throw new TokenUnavailableException("token exchange for " + audience + " returned no access token");
+            throw new TokenUnavailableException(what + " returned no access token");
         }
-        long lifetime = response.expiresIn() == null ? 60 : response.expiresIn();
-        return new BearerToken(response.accessToken(), requestedAt.plusSeconds(lifetime));
+        return response;
     }
 
     record TokenResponse(@JsonProperty("access_token") String accessToken,
-                         @JsonProperty("expires_in") Long expiresIn) {
+                         @JsonProperty("expires_in") Long expiresIn,
+                         @JsonProperty("refresh_token") String refreshToken) {
 
         @Override
         public String toString() {

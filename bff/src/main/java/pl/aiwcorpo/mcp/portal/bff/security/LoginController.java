@@ -43,8 +43,10 @@ class LoginController {
         if (!ReturnPaths.isValid(target)) {
             throw ApiException.badRequest();
         }
-        OAuth2AuthorizationRequest authorization = (stepUp ? resolvers.stepUp() : resolvers.standard())
-                .resolve(request, registrationId);
+        boolean administrator = stepUp && authentication != null && authentication.getPrincipal() instanceof OidcUser
+                && PortalUser.from(authentication).isAdmin();
+        OAuth2AuthorizationRequest authorization = (administrator ? resolvers.stepUpAdmin()
+                : stepUp ? resolvers.stepUp() : resolvers.standard()).resolve(request, registrationId);
         if (authorization == null) {
             throw new IllegalStateException("Unknown client registration " + registrationId);
         }

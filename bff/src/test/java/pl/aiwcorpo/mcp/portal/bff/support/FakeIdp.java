@@ -62,7 +62,41 @@ public final class FakeIdp implements AutoCloseable {
     public record User(String sub, String username, String name, List<String> groups) {
     }
 
-    private record Grant(User user, String nonce, String codeChallenge, Instant authTime, String acr, String audience) {
+    private record Grant(User user, String nonce, String codeChallenge, Instant authTime, String acr, String audience,
+                         Set<String> scopes) {
+    }
+
+    private volatile boolean rotateRefreshTokens;
+    private volatile boolean refuseNarrowedRefresh;
+
+    /** An IdP that does not narrow a refresh to one audience (invalid_grant), so the BFF has to fall back. */
+    public void refuseNarrowedRefresh(boolean refuse) {
+        this.refuseNarrowedRefresh = refuse;
+    }
+
+    /** Keycloak can be set to revoke a refresh token when it is used; a narrowed refresh then returns the next one. */
+    public void rotateRefreshTokens(boolean rotate) {
+        this.rotateRefreshTokens = rotate;
+    }
+
+    private String rotate(String used, Grant grant) {
+        refreshTokens.remove(used);
+        String next = random("rt");
+        refreshTokens.put(next, grant);
+        issued.add(next);
+        return next;
+    }
+
+    private static Set<String> scopesOf(String scope) {
+        Set<String> scopes = new java.util.LinkedHashSet<>();
+        if (scope != null) {
+            for (String part : scope.trim().split("[ +]+")) {
+                if (!part.isEmpty()) {
+                    scopes.add(java.net.URLDecoder.decode(part, StandardCharsets.UTF_8));
+                }
+            }
+        }
+        return scopes;
     }
 
     public FakeIdp() {
@@ -113,7 +147,8 @@ public final class FakeIdp implements AutoCloseable {
             throw new IllegalArgumentException("not an authorization request of this IdP: " + authorizationRequest);
         }
         String code = random("code");
-        codes.put(code, new Grant(user, query.get("nonce"), query.get("code_challenge"), authTime, acr, null));
+        codes.put(code, new Grant(user, query.get("nonce"), query.get("code_challenge"), authTime, acr, null,
+                scopesOf(query.get("scope"))));
         return URI.create(query.get("redirect_uri") + "?code=" + code + "&state="
                 + URLEncoder.encode(query.get("state"), StandardCharsets.UTF_8));
     }
@@ -171,6 +206,33 @@ public final class FakeIdp implements AutoCloseable {
                     json(exchange, 400, Map.of("error", "invalid_grant"));
                     return;
                 }
+                if (form.containsKey("scope")) {
+                    // A refresh may only narrow what the login was granted (RFC 6749 section 6), like Keycloak.
+                    Set<String> asked = scopesOf(form.get("scope"));
+                    if (refuseNarrowedRefresh) {
+                        json(exchange, 400, Map.of("error", "invalid_grant"));
+                        return;
+                    }
+                    if (!grant.scopes().containsAll(asked)) {
+                        json(exchange, 400, Map.of("error", "invalid_scope"));
+                        return;
+                    }
+                    String audience = asked.stream().filter(scope -> scope.endsWith("-audience")).findFirst()
+                            .map(scope -> scope.substring(0, scope.length() - "-audience".length())).orElse(null);
+                    String narrowed = random("na-" + audience);
+                    accessTokens.put(narrowed, new Grant(grant.user(), null, null, grant.authTime(), grant.acr(), audience, asked));
+                    issued.add(narrowed);
+                    Map<String, Object> body = new LinkedHashMap<>();
+                    body.put("access_token", narrowed);
+                    body.put("token_type", "Bearer");
+                    body.put("expires_in", 300);
+                    body.put("scope", String.join(" ", asked));
+                    if (rotateRefreshTokens) {
+                        body.put("refresh_token", rotate(form.get("refresh_token"), grant));
+                    }
+                    json(exchange, 200, body);
+                    return;
+                }
                 json(exchange, 200, tokens(grant, false));
             }
             case "urn:ietf:params:oauth:grant-type:token-exchange" -> {
@@ -181,7 +243,7 @@ public final class FakeIdp implements AutoCloseable {
                     return;
                 }
                 String token = random("xt-" + audience);
-                accessTokens.put(token, new Grant(subject.user(), null, null, subject.authTime(), subject.acr(), audience));
+                accessTokens.put(token, new Grant(subject.user(), null, null, subject.authTime(), subject.acr(), audience, Set.of()));
                 issued.add(token);
                 json(exchange, 200, Map.of("access_token", token, "token_type", "Bearer", "expires_in", 300,
                         "issued_token_type", "urn:ietf:params:oauth:token-type:access_token"));
@@ -202,7 +264,7 @@ public final class FakeIdp implements AutoCloseable {
         body.put("token_type", "Bearer");
         body.put("expires_in", 300);
         body.put("refresh_token", refreshToken);
-        body.put("scope", "openid profile email");
+        body.put("scope", grant.scopes().isEmpty() ? "openid profile email" : String.join(" ", grant.scopes()));
         if (withIdToken) {
             String idToken = idToken(grant);
             issued.add(idToken);

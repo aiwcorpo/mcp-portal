@@ -177,10 +177,10 @@ class AdminOperations {
         String requestId = RequestIds.of(request);
         AdminReply reply = switch (op.upstream()) {
             case GATEWAY -> gateway.admin(op.method(), op.uri(), op.variables(),
-                    tokens.tokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response), requestId,
+                    tokens.adminTokenFor(UserTokens.Audience.GATEWAY_ADMIN, authentication, request, response), requestId,
                     op.preconditions(), op.body());
             case BROKER -> broker.admin(op.method(), op.uri(), op.variables(),
-                    tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response), requestId,
+                    tokens.adminTokenFor(UserTokens.Audience.BROKER, authentication, request, response), requestId,
                     op.preconditions(), op.body());
         };
         JsonNode shown = null;
