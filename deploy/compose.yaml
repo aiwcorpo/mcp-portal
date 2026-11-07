@@ -1,0 +1,46 @@
+# The portal: the BFF with the single-page application inside, one container. It has no database and no Redis: sessions are in
+# memory, so a restart signs everybody out. Configuration: portal.env, iga-catalog.yaml and the files in certs/.
+# The init service runs first on every start: it checks the configuration and the connections (the identity provider must answer);
+# the portal starts only after it succeeds. See README.md.
+#
+# Closed network: MCP_REGISTRY in a .env file next to this one points the image to your registry.
+
+x-portal: &portal
+  image: ${MCP_REGISTRY:-ghcr.io/aiwcorpo}/mcp-portal:${MCP_PORTAL_VERSION:-2.0.0}
+  pull_policy: ${PULL_POLICY:-missing}
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: ["/tmp"]
+  env_file: portal.env
+  environment:
+    PORTAL_PORT: "8080"
+    PORTAL_TLS_KEYSTORE: /certs/keystore.p12
+    PORTAL_TLS_TRUSTSTORE: /certs/truststore.p12
+    PORTAL_IGA_ADAPTER: keycloak-groups
+    PORTAL_IGA_CATALOG_FILE: /config/iga-catalog.yaml
+  volumes:
+    - ./certs:/certs:ro
+    - ./iga-catalog.yaml:/config/iga-catalog.yaml:ro
+
+services:
+  init:
+    <<: *portal
+    command: ["init"]
+    restart: "no"
+
+  portal:
+    <<: *portal
+    restart: unless-stopped
+    mem_limit: ${PORTAL_MEM_LIMIT:-1g}
+    # 8080: plain HTTP for your TLS reverse proxy, which also routes /api, /s/, /v/ and /mcp to the gateway (README.md).
+    ports:
+      - ${PORTAL_HTTP_BIND:-127.0.0.1}:${PORTAL_HTTP_PORT:-8080}:8080
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+      start_period: 15s
+    depends_on:
+      init: {condition: service_completed_successfully}
