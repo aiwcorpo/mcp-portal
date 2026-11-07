@@ -1,4 +1,4 @@
-# Profile for the dev stack only (scripts/run-dev.sh). Settings here are refused without this profile.
+# Profile for local runs (LocalPortalApplication) and the dev stack only. Settings here are refused without this profile.
 portal:
   iga:
     adapter: ${PORTAL_IGA_ADAPTER:mock}

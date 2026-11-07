@@ -27,7 +27,7 @@ first available source: a file already in place (checked against `CONTRACTS_TARB
 `CONTRACTS_TARBALL=<file>`, `CONTRACTS_TARBALL_URL=<url>`, `CONTRACTS_SOURCE_DIR=<mcp-contracts checkout at tag v7.0.0>`
 (runs `npm pack` there; a package from the same tag has the same bytes) or `CONTRACTS_FROM_NPMJS=1` (`npm pack` of the published
 package from npmjs, no token; set `CONTRACTS_TARBALL_SHA256` to pin the bytes, as the GitHub workflows do). A release file from `mcp-contracts/release/`
-also works as `CONTRACTS_TARBALL`. `ci/run.sh` calls the script itself before `npm ci`.
+also works as `CONTRACTS_TARBALL`.
 
 Once `mcp-contracts` is published on npmjs, change the entry in `package.json` to `"@aiwcorpo/mcp-contracts": "7.0.0"` and run
 `npm install`, which updates `package-lock.json` (registry URL and checksum instead of a file). No token or `.npmrc` is
@@ -35,7 +35,7 @@ needed. With such a dependency `scripts/contracts.sh` does nothing.
 
 ## Running locally
 
-On mocks (no BFF), MSW in the browser:
+On mocks (no BFF), MSW in the browser (WebStorm: run configuration `WebMocks` in `.run/`):
 
 ```bash
 npm run start:mocks          # http://localhost:18730
@@ -69,7 +69,7 @@ for classification, one was classified and then changed: lowering needs MFA), `m
 `error`), `mockBasic=in` (Jira token form with a login field, `userSecretScheme: Basic`). The mock keeps kill switches in its state
 (`/admin/kill-switches`); lifting one needs "fresh MFA", like approval with a risk reduction.
 
-With the real BFF (ws-01, port 18090):
+With the real BFF (the portal of the dev stack on port 18090; run configuration `WebDev`):
 
 ```bash
 npm start                    # http://localhost:18730, proxy /api -> http://localhost:18090 (proxy.conf.json)
@@ -170,15 +170,12 @@ File names start with the mockup number, e.g. `01-serwery-mcp-rozwiniete-desktop
 
 ## CI
 
-One entry point: `ci/run.sh` (called by `make ci`). Steps: `style` (hidden and typographic characters, forbidden phrases),
-`lint`, `i18n`, `unit`, `build`, `e2e`; a subset through `CI_STEPS=style,unit ci/run.sh`.
-`ci/run.sh --container` does the same in the image from `ci/Dockerfile` (Node 24 and Chromium from the Playwright 1.64.1
-image). It mounts only `web/` (with the contracts package in `.contracts/`), read-only, and copies the sources without `node_modules`.
-Contracts package: `scripts/contracts.sh` (file in `web/.contracts/`, `CONTRACTS_TARBALL`, `CONTRACTS_TARBALL_URL` with
-`CONTRACTS_TARBALL_SHA256`, `CONTRACTS_SOURCE_DIR`, or `CONTRACTS_FROM_NPMJS=1` for the public npm registry); paths given on the host are
-brought in before mounting. Pull requests need only `CI_STEPS=style` (no npm, no package); the full run happens on the main
-branch. `PW_WORKERS` (default 4 in the container) limits the number of browsers. `.gitlab-ci.yml`, `Jenkinsfile` and GitHub
-Actions workflows may only call this script.
+`.gitlab-ci.yml`, `Jenkinsfile` and `.github/workflows/ci.yml` run, in `web/`: `scripts/contracts.sh`, `npm ci`, `npm run lint`,
+`npm run i18n:check`, `npm test`, `npm run build` and `npm run e2e` (Playwright 1.64.1 with Chromium; GitLab and Jenkins use the
+`mcr.microsoft.com/playwright:v1.64.1-noble` image, GitHub installs the browser with `npx playwright install --with-deps chromium`).
+`CI=1` makes Playwright fail on a stray `test.only` and retry a failing test once; `PW_WORKERS` limits the number of browsers.
+The contracts package comes from `scripts/contracts.sh` (file in `web/.contracts/`, `CONTRACTS_TARBALL`, `CONTRACTS_TARBALL_URL` with
+`CONTRACTS_TARBALL_SHA256`, `CONTRACTS_SOURCE_DIR`, or `CONTRACTS_FROM_NPMJS=1` for the public npm registry).
 
 ## MCP address and the list size warning
 

@@ -9,8 +9,8 @@
 #   5. CONTRACTS_FROM_NPMJS=1               `npm pack` of the published package from the public registry (npmjs), no token;
 #                                           CONTRACTS_TARBALL_SHA256 should be set, since it pins the bytes
 #
-# After mcp-contracts is published to npmjs, the dependency in package.json becomes a registry version and
-# there is nothing to prepare. When it is a registry version ("6.3.2" instead of a file: path) there is nothing to prepare.
+# After mcp-contracts is published to npmjs, the dependency in package.json becomes a registry version ("7.0.0" instead of a
+# file: path) and there is nothing to prepare.
 set -euo pipefail
 
 web_dir="$(cd "$(dirname "$0")/.." && pwd)"

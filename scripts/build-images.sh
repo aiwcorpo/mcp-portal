@@ -10,7 +10,7 @@
 #
 # NGINX_IMAGE overrides the nginx base image of the web target.
 #
-# Needs git, docker, JDK 25 (bff/scripts/select-jdk.sh finds it), Node 24 and the mcp-contracts artifacts: Maven jars in
+# Needs git, docker, JDK 25 (JAVA_HOME), Node 24 and the mcp-contracts artifacts: Maven jars in
 # ~/.m2 or on Maven Central, the npm tarball through web/scripts/contracts.sh
 # (CONTRACTS_TARBALL, CONTRACTS_TARBALL_URL or CONTRACTS_SOURCE_DIR; a tarball already in
 # web/.contracts/ of this checkout is used as it is).
@@ -23,9 +23,7 @@ registry="${IMAGE_REGISTRY:+${IMAGE_REGISTRY%/}/}"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
-# shellcheck source=../bff/scripts/select-jdk.sh
-source "$repo_root/bff/scripts/select-jdk.sh"
-select_jdk || exit 1
+"${JAVA_HOME:?set JAVA_HOME to a JDK 25}/bin/java" -version 2>&1 | grep -q 'version "25' || { echo "JAVA_HOME is not a JDK 25" >&2; exit 1; }
 
 short="$(git -C "$repo_root" rev-parse --short "$ref")"
 tag="${IMAGE_TAG:-${prefix}-${short}}"

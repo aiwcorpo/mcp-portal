@@ -9,37 +9,26 @@ Image: `Dockerfile` in the repository root (targets `bff`, `web`, `portal`), `sc
 
 ## Running locally
 
-Requires JDK 25 (`scripts/select-jdk.sh` finds it; `JAVA_HOME` takes precedence) and `mcp-contracts` 7.0.0 in `~/.m2` or in the registry. Two modes.
-
-With mocks (no dev stack; C4/C5 data comes from the WireMock mocks in the contracts jar):
-
-```bash
-./mvnw -q test-compile                  # once: downloads the WireMock and contracts jars to ~/.m2
-./scripts/run-mocks.sh start            # C4 :18721, C5 :18722, discovery OIDC :18723
-PORTAL_MOCKS=1 ./scripts/run-dev.sh     # BFF on http://localhost:18720
-./scripts/run-mocks.sh stop
-```
-
-Without the dev stack there is no Keycloak: the BFF starts (stub discovery on :18723), `/api/v1/me` returns 401 and
-login does not work. You can pass the values explicitly with `PORTAL_OIDC_ISSUER_URI` and `PORTAL_OIDC_CLIENT_SECRET` (for
-example for your own Keycloak). When a dev stack directory exists (next to the repository, or `MCP_PLATFORM_DEV_DIR`),
-the script takes the issuer and client secret from it, so login works after `make up` there.
-
-With the local dev stack (not public yet; the Compose install in `mcp-docs`, `examples/compose`, runs the platform for everybody) (`make up`: Keycloak :18080, C4 and C5 stubs with mTLS):
+Requires JDK 25 and `mcp-contracts` 7.0.0 in `~/.m2` or in the registry. Open `bff/` in IntelliJ as a Maven project and start
+the shared run configuration `LocalPortal` (`bff/.run/`): the BFF on http://localhost:18720 with profile `dev`. It runs
+`LocalPortalApplication` from the test sources, which also starts the WireMock stubs of C4 (credential broker, :18721) and C5
+(gateway admin, :18722) from the `mcp-contracts` jar and a stub on :18723 that serves only the OIDC discovery document. From the
+command line, in `bff/`:
 
 ```bash
-./scripts/run-dev.sh            # BFF on http://localhost:18720 (ws-07 port)
+./mvnw spring-boot:test-run -Dspring-boot.run.mainClass=pl.aiwcorpo.mcp.portal.bff.LocalPortalApplication
 ```
 
-This mode needs the directory `../../mcp-platform-dev`, a checkout of the dev stack that is not public yet (another one: `MCP_PLATFORM_DEV_DIR=...`); a missing directory or
-a missing key in `.env` / `.secrets/dev.env` ends with a readable message. On every start the script reads the
-`mcp-portal-bff` client secret, the keystore password and the ports; nothing is copied into this repository. Any value can
-be overridden with a `PORTAL_*` variable (table below). To use the real broker instead of the stub:
-`PORTAL_BROKER_URL=https://localhost:18100 ./scripts/run-dev.sh`.
+There is no Keycloak in this mode: the BFF starts, `/api/v1/me` returns 401 and login does not work. To log in, set
+`PORTAL_OIDC_ISSUER_URI` and `PORTAL_OIDC_CLIENT_SECRET` (for example for your own Keycloak) in the run configuration. Replacing
+the stubs with real services means changing two addresses (`PORTAL_BROKER_URL`, `PORTAL_GATEWAY_ADMIN_URL`), which also need
+the `PORTAL_*_TLS_NAME` and `PORTAL_TLS_*` values from the table below. Login through Keycloak needs the redirect URI
+`<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback` in the `corp` realm.
 
-The script locates JDK 25 (`scripts/select-jdk.sh`, with a readable message when missing) and enables the Spring profile
-`dev`. Replacing the mocks with real services means changing two addresses (`PORTAL_BROKER_URL`, `PORTAL_GATEWAY_ADMIN_URL`).
-Login through Keycloak needs the redirect URI `<PORTAL_PUBLIC_BASE_URL>/api/v1/auth/callback` in the `corp` realm.
+The dev stack (`mcp-platform-dev`, not public yet; the Compose install in `mcp-docs`, `examples/compose`, runs the platform for
+everybody) starts the portal in its own container with Keycloak and the mTLS stubs. To run the BFF from the IDE against that stack
+instead, copy `LocalPortal`, start it with `PortalBffApplication` as the main class and the profile `dev`, and give it the
+`PORTAL_*` values of the table below from the stack's `.env` and `.secrets/dev.env`.
 
 Frontend: `cd ../web && npx ng build`, output in `../web/dist/portal` (the default `PORTAL_WEB_DIST`). Without a
 build the API works and SPA routes return 404.
@@ -48,7 +37,7 @@ Quick check:
 
 ```bash
 curl -i http://localhost:18720/api/v1/me                         # 401 {"error":"unauthenticated"}
-open 'http://localhost:18720/api/v1/auth/login?returnPath=/'     # log in as alice (password: make users)
+open 'http://localhost:18720/api/v1/auth/login?returnPath=/'     # with a real Keycloak: log in as alice (password: make users in the dev stack)
 ```
 
 ## Tests
@@ -62,7 +51,7 @@ open 'http://localhost:18720/api/v1/auth/login?returnPath=/'     # log in as ali
 | --- | --- |
 | `PortalApiTest` | every API response validated against the C12 schema (`portal-bff.v1.bundled.yaml` from the contracts jar; a status outside the contract is an error); login with PKCE and nonce; `__Host-session` and `__Host-XSRF-TOKEN` cookies; CSRF for PUT/DELETE/POST; step-up (`step_up_required` + `stepUpUrl`, `max_age=0`, return); token exchange for the broker and gateway admin `aud`; C8 audit validated against `audit-event.schema.json`; SPA with fallback, CSP with nonce, HSTS; `/api/**` never HTML; finally, no response or log line contains an IdP token or a secret |
 | `ServerTlsTest` | TLS on the BFF port enabled with `PORTAL_PUBLIC_TLS_*` (PEM from a test CA made with keytool): a client trusting the CA gets `/actuator/health`, a client without the CA and plain HTTP do not; session cookie `Secure`/`HttpOnly`/`__Host-`; missing PEM files are a startup error; key readable by others: refused outside the `dev` profile (`ServerTlsStartTest`, `PublicTlsEnvironmentTest`: spellings `yes`/`on`/`1`/`TRUE`, key 0600 without the `dev` profile). With TLS off, all other tests run over HTTP |
-| `RunDevConfigurationTest` | startup with the same configuration as `run-dev.sh` (profile `dev`, `PORTAL_*` as environment variables with relaxed binding) and the IGA mock data in the directory |
+| `DevProfileStartTest` | startup in profile `dev` with `PORTAL_*` as environment variables (relaxed binding) and the IGA mock data in the directory |
 | `FrontendBuildTest` | the real ws-08 build from `../web/dist/portal` (skipped when not built; `-Dportal.test.require-web-dist=true` makes that an error): SPA routes, nonce in styles, JS/CSS files; return after login to `PORTAL_WEB_LOGIN_RETURN_ORIGIN` |
 | `CatalogAssemblerTest` | catalog status and action rules (CC-021); rebuilding the C12 `mixed` example from C5/C4/C13 data |
 | `ReturnPathsTest` | `test-vectors/return-paths` vectors (CC-032) |
@@ -87,7 +76,7 @@ Everything is set through environment variables (`application.yml`):
 | `PORTAL_TLS_TRUSTSTORE`, `PORTAL_TLS_TRUSTSTORE_PASSWORD` | internal CA | `certs/ca/truststore.p12` |
 | `PORTAL_WEB_DIST` | directory with the built frontend's `index.html` | `../web/dist/portal` |
 | `PORTAL_WEB_LOGIN_RETURN_ORIGIN` | dev only: origin of the `ng serve` frontend the BFF returns to after login (`scheme://host:port`, from configuration, never from the request) | empty; with `npm start` in `web/`: `http://localhost:4200` |
-| `SPRING_PROFILES_ACTIVE` | `dev` only for the dev stack; without it the BFF will not start with the `mock` IGA adapter, step-up without `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` or `portal.tls.insecure-plain-http-for-tests` | `dev` (set by `run-dev.sh`) |
+| `SPRING_PROFILES_ACTIVE` | `dev` only for the dev stack; without it the BFF will not start with the `mock` IGA adapter, step-up without `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` or `portal.tls.insecure-plain-http-for-tests` | `dev` (set by `LocalPortalApplication`) |
 | `PORTAL_LIMIT_SECRET_WRITE_MAX`, `PORTAL_LIMIT_SECRET_WRITE_WINDOW` | token write (`PUT .../secret`): at most this many requests per session in the window, then `429` with `Retry-After` (CC-156) | `10`, `1m` |
 | `PORTAL_LIMIT_AUTHENTICATOR_MAX`, `PORTAL_LIMIT_AUTHENTICATOR_WINDOW` | Authenticator writes (start, removal, confirmation) per session | `10`, `10m` |
 | `PORTAL_IGA_ADAPTER` | C13 adapter: `keycloak-groups` or `mock` (`dev` only); unset is a startup error | `mock` (profile `dev`) |
@@ -468,15 +457,10 @@ goes to the audit. Details:
 
 ## CI
 
-`make ci` (that is, `ci/run.sh`) is the only entry point: it checks JDK 25, style (characters, phrases), runs `./mvnw verify` and
-prints the test count. It works locally without any CI system. In a container, `ci/run.sh --container` builds an image from
-`ci/Dockerfile` and runs the same script in it (repository and `~/.m2` as volumes). The files `.gitlab-ci.yml`, `Jenkinsfile`
-and `.github/workflows/ci.yml` in the `mcp-portal` root are thin wrappers that call `bff/ci/run.sh` and `web/ci/run.sh`.
-No job needs a registry secret: the `mcp-contracts` artifacts come from public registries.
-The Docker socket (job `web`) is available only on the main branch and a dedicated agent.
-Isolation does not come from the wrapper files alone (a branch can change them) but from the CI system's settings. GitHub: no registry secrets and no token (`permissions: contents: read`). Jenkins: the label
-`ci-style` is a pool without the Docker socket for the `style` step; the `docker` node accepts only `main` jobs; for pull requests the Jenkinsfile comes from a trusted branch
-(a plugin with a trusted Jenkinsfile source), not from the PR branch. `ci/run.sh` fails on an unknown or
-empty `CI_STEPS`, on a failed `mvnw` and on zero tests.
+`.gitlab-ci.yml`, `Jenkinsfile` and `.github/workflows/ci.yml` in the `mcp-portal` root run `./mvnw -B verify` in `bff/` (JDK 25,
+the tests need no Docker) and the npm steps of `web/`. No job needs a registry secret: the `mcp-contracts` artifacts come from public
+registries. Isolation does not come from the pipeline files alone (a branch can change them) but from the CI system's settings.
+GitHub: no registry secrets and no token (`permissions: contents: read`). Jenkins: the jobs run on `main` only, and for pull requests
+the Jenkinsfile comes from a trusted branch (a plugin with a trusted Jenkinsfile source), not from the PR branch.
 
 Status of the work and the split into milestones: [STATUS.md](STATUS.md).

@@ -97,8 +97,8 @@ or `PORTAL_TRUSTED_PROXIES` (a regular expression of addresses), otherwise `X-Fo
 
 ### From source
 
-Linux and macOS with bash 3.2 or newer; Windows only through WSL2. Needed: git, docker, JDK 25 (the scripts find it;
-`JAVA_HOME` wins), Node 24 and the `mcp-contracts` 7.0.0 artifacts.
+Linux and macOS with bash 3.2 or newer; Windows only through WSL2. Needed: git, docker, JDK 25 (`JAVA_HOME`
+for `scripts/build-images.sh`), Node 24 and the `mcp-contracts` 7.0.0 artifacts.
 
 The contract artifacts come in two ways, and neither needs a file in the git of this repository:
 
@@ -110,8 +110,8 @@ The contract artifacts come in two ways, and neither needs a file in the git of 
   `web/package.json`, described in [web/README.md](web/README.md#contracts-package).
 
 ```bash
-bff/ci/run.sh                 # style, mvn clean verify (BFF tests)
-web/ci/run.sh                 # style, lint, i18n, unit tests, build, Playwright
+(cd bff && ./mvnw -B verify)                                   # BFF tests
+(cd web && scripts/contracts.sh && npm ci && npm run lint && npm run i18n:check && npm test && npm run build && npm run e2e)
 scripts/build-images.sh       # images mcp-portal-bff:m6-<sha>, mcp-portal-web:m6-<sha>, mcp-portal:m6-<sha> from git (HEAD or a given ref)
 ```
 
@@ -187,7 +187,7 @@ in the commit, not what lies in the working directory. It pushes nothing to a re
 ```
 Dockerfile              targets bff, web, portal
 scripts/build-images.sh images from git, nothing is pushed
-bff/                    Spring Boot BFF (ci/, scripts/, docker/, dev/)
-web/                    Angular (ci/, scripts/, e2e/, src/)
+bff/                    Spring Boot BFF (docker/, dev/, .run/)
+web/                    Angular (scripts/, e2e/, src/, .run/)
 docs/screenshots/       en/ and pl/: pictures for this README
 ```

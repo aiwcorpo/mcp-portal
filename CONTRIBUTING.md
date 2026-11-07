@@ -7,18 +7,16 @@ before it is implemented here. The web client is generated from `portal-bff.v1.b
 
 ## Setup
 
-Linux and macOS with bash 3.2 or newer; Windows only through WSL2. The BFF needs JDK 25 (found by
-`bff/scripts/select-jdk.sh`), the web part Node 24 and npm 11. The `mcp-contracts` artifacts must be reachable: Maven
+Linux and macOS with bash 3.2 or newer; Windows only through WSL2. The BFF needs JDK 25, the web part Node 24 and npm 11. The `mcp-contracts` artifacts must be reachable: Maven
 jars from `~/.m2` or Maven Central, the npm tarball in `web/.contracts/`
-(`web/scripts/contracts.sh`). See the README, "Instalacja z źródeł".
+(`web/scripts/contracts.sh`). See the README, "From source". The BFF starts from IntelliJ with the run configuration `LocalPortal` (`bff/.run/`).
 
 ```bash
-bff/ci/run.sh        # text checks, then clean verify
-web/ci/run.sh        # text checks, lint, i18n, unit tests, build and the Playwright suite
+(cd bff && ./mvnw -B verify)
+cd web && scripts/contracts.sh && npm ci && npm run lint && npm run i18n:check && npm test && npm run build && npm run e2e
 ```
 
-Both must pass before a merge. `CI_STEPS=style` runs only the text checks (no non-ASCII quotes or spaces, no tool
-traces in sources).
+Both must pass before a merge; the pipeline files run the same commands.
 
 ## Commits
 

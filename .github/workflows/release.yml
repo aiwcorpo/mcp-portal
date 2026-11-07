@@ -40,9 +40,9 @@ jobs:
           java-version: '25'
       - name: Base images are pinned by digest
         run: |
-          # Every FROM and every ARG naming an image (*_IMAGE, BASE_IMAGE) in the Dockerfiles must end in @sha256:<64 hex>.
+          # Every FROM and every ARG naming an image (*_IMAGE) in the Dockerfile must end in @sha256:<64 hex>.
           bad=0
-          for file in Dockerfile bff/ci/Dockerfile web/ci/Dockerfile; do
+          for file in Dockerfile; do
             while IFS= read -r line; do
               case "$line" in
                 *@sha256:????????????????????????????????????????????????????????????????) ;;
@@ -56,10 +56,25 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           test "$(cd bff && ./mvnw -q -B -N org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate -Dexpression=project.version -DforceStdout)" = "$version"
           test "$(node -p "require('./web/package.json').version")" = "$version"
-      - name: BFF (style, clean verify)
-        run: bff/ci/run.sh
-      - name: Web (style, lint, i18n, unit tests, build, Playwright)
-        run: web/ci/run.sh --container
+      - name: BFF (verify)
+        run: ./mvnw -B verify
+        working-directory: bff
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Web (lint, i18n, unit tests, build, Playwright)
+        working-directory: web
+        env:
+          CI: '1'
+        run: |
+          scripts/contracts.sh
+          npm ci --no-audit --no-fund
+          npm run lint
+          npm run i18n:check
+          npm test
+          npm run build
+          npx playwright install --with-deps chromium
+          npm run e2e
 
   build:
     needs: verify

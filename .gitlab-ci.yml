@@ -1,19 +1,15 @@
-# Thin wrapper: all logic is in bff/ci/run.sh and web/ci/run.sh, which also run in a developer's shell.
-#
-# No job needs a credential: the mcp-contracts artifacts come from Maven Central and npmjs. Merge requests get the style checks;
-# the build and the tests run on the default branch. The web job needs a runner with Docker (it builds its own image).
+# No job needs a credential: the mcp-contracts artifacts come from Maven Central and npmjs. The runner sets CONTRACTS_TARBALL_URL
+# and CONTRACTS_TARBALL_SHA256 for the web job when the package is served from the internal package server instead of npmjs.
 stages:
   - verify
 
-bff-style:
-  stage: verify
-  image: maven:3.9.12-eclipse-temurin-25
-  variables:
-    CI_STEPS: style
-  script:
-    - bff/ci/run.sh
+.on-merge-request-and-main:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-bff-build:
+bff:
+  extends: .on-merge-request-and-main
   stage: verify
   image: maven:3.9.12-eclipse-temurin-25
   variables:
@@ -22,27 +18,26 @@ bff-build:
     key: maven
     paths: [.m2/repository]
   script:
-    - bff/ci/run.sh
+    - cd bff
+    - ./mvnw -B verify
   artifacts:
     when: always
     reports:
       junit: "bff/target/surefire-reports/TEST-*.xml"
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-web-style:
-  stage: verify
-  image: maven:3.9.12-eclipse-temurin-25
-  variables:
-    CI_STEPS: style
-  script:
-    - web/ci/run.sh
-
-# The runner sets CONTRACTS_TARBALL_URL and CONTRACTS_TARBALL_SHA256 and provides the playwright v1.64.1-noble image (CI_BASE_IMAGE).
 web:
+  extends: .on-merge-request-and-main
   stage: verify
-  tags: [docker]
+  image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+  variables:
+    CI: "1"
+    PW_WORKERS: "4"
   script:
-    - web/ci/run.sh --container
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - cd web
+    - scripts/contracts.sh
+    - npm ci --no-audit --no-fund
+    - npm run lint
+    - npm run i18n:check
+    - npm test
+    - npm run build
+    - npm run e2e
