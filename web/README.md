@@ -4,8 +4,6 @@ Frontend of the MCP platform portal (workstream ws-08): Angular 22.2 (standalone
 Material 22.2, texts through `$localize`. It talks only to the BFF through the C12 API (`/api/v1`, contract
 `portal-bff.v1.yaml` from `mcp-contracts` 7.0.0). The BFF (`../bff`, ws-07) serves the built files from the same origin.
 
-Scope of the current version and the split into milestones: [STATUS.md](STATUS.md).
-
 ## Requirements
 
 - Node 24, npm 11.

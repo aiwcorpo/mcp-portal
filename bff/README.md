@@ -153,8 +153,7 @@ by `state` in the current user's session (one use, 15 min, at most 8 at a time),
 Keycloak in the dev stack does not allow dynamic client registration, so without both flags Authenticate in Claude Code does
 not work; profile `dev` sets `claude-code` and `33418` (the `claude-code` client in the realm needs the redirect URI
 `http://localhost:33418/callback`). Production with Entra ID may need a different client or none, so the flags are off by
-default. Copilot and Codex get only the address: there is no confirmed field for a client id in their configuration (see
-STATUS.md). The `connection_change` event carries the connected account's `backendUser` (CC-117; absent when the broker did not return it).
+default. Copilot and Codex get only the address: there is no confirmed field for a client id in their configuration. The `connection_change` event carries the connected account's `backendUser` (CC-117; absent when the broker did not return it).
 
 | Test | What it checks |
 | --- | --- |
@@ -232,7 +231,7 @@ ends only the BFF session (the SSO session at the IdP stays), and the BFF logs a
 
 ## M4: requests, registry administration, limits
 
-Contracts 4.0.0 (the M4 state; M5 is described below). Decision details are in `STATUS.md` (M4.1 ... M4.4).
+Contracts 4.0.0 (the M4 state; M5 is described below).
 
 - Access requests (C13 port): `GET/POST /api/v1/access-requests`, `GET /api/v1/access-requests/entitlements?system=`. Adapters:
   `keycloak-groups` (catalog from a file, no requests: `POST` gives `422 not_requestable`) and `mock` (profile `dev`). A `POST` for an
@@ -462,5 +461,3 @@ the tests need no Docker) and the npm steps of `web/`. No job needs a registry s
 registries. Isolation does not come from the pipeline files alone (a branch can change them) but from the CI system's settings.
 GitHub: no registry secrets and no token (`permissions: contents: read`). Jenkins: the jobs run on `main` only, and for pull requests
 the Jenkinsfile comes from a trusted branch (a plugin with a trusted Jenkinsfile source), not from the PR branch.
-
-Status of the work and the split into milestones: [STATUS.md](STATUS.md).
