@@ -18,14 +18,14 @@ import javax.net.ssl.X509TrustManager;
  * to switch name checks off, and any certificate of the internal CA (for example an MCP server's) could pose as
  * the broker and receive PATs.
  */
-final class PinnedNameTrustManager extends X509ExtendedTrustManager {
+public final class PinnedNameTrustManager extends X509ExtendedTrustManager {
 
     private static final int SAN_DNS = 2;
 
     private final X509TrustManager chainValidator;
     private final String expectedName;
 
-    PinnedNameTrustManager(X509TrustManager chainValidator, String expectedName) {
+    public PinnedNameTrustManager(X509TrustManager chainValidator, String expectedName) {
         this.chainValidator = chainValidator;
         this.expectedName = expectedName.toLowerCase(Locale.ROOT);
     }
