@@ -647,7 +647,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
       }
       const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
       const address = typeof body?.['internalUrl'] === 'string' ? body['internalUrl'] : '';
-      const allowed = ['internalUrl', 'allowPlainHttp', 'credential'];
+      const allowed = ['internalUrl', 'allowPlainHttp', 'credential', 'expectedSystem'];
       if (
         !body ||
         Object.keys(body).some((key) => !allowed.includes(key)) ||
@@ -662,6 +662,14 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
       const probe = probeOf(url, body['allowPlainHttp'] === true);
       if ('refused' in probe) {
         return reject('server_rejected', probe.refused, probe.message, probe.manifestReason);
+      }
+      const expected = body['expectedSystem'];
+      if (typeof expected === 'string' && expected !== probe.system) {
+        return reject(
+          'server_rejected',
+          'system_mismatch',
+          `the manifest claims ${probe.system}, not ${expected}`,
+        );
       }
       if (serverOf(probe.serverId)) {
         return ctx.failure('server_exists', 409);

@@ -507,7 +507,7 @@ class AdminMirrorsTest extends PortalHarness {
         TestBrowser admin = admin();
         Write create = writes().getFirst();
         for (String example : List.of("address_refused", "plain_http_not_allowed", "tls_handshake_failed",
-                "manifest_unreachable", "manifest_invalid", "system_reserved", "namespace_conflict")) {
+                "manifest_unreachable", "manifest_invalid", "system_mismatch", "system_reserved", "namespace_conflict")) {
             String upstream = C12.responseExample("POST", SERVERS, 422, example).toString();
             stub(GATEWAY, "POST", "/admin/v1/servers", 422, upstream);
 
@@ -517,6 +517,25 @@ class AdminMirrorsTest extends PortalHarness {
             assertThat(response.statusCode()).as(example).isEqualTo(422);
             assertThat(JSON.readTree(response.body())).as(example).isEqualTo(JSON.readTree(upstream));
         }
+    }
+
+    @Test
+    void theSystemTheAdministratorExpectsIsPassedToTheGatewayAndAMismatchIsA422WithItsReason() {
+        TestBrowser admin = admin();
+        String withSystem = SERVER_BODY.replace("}", ",\"expectedSystem\":\"notes\"}");
+        stub(GATEWAY, "POST", "/admin/v1/servers", 201, C12.responseExample("POST", SERVERS, 201, "notes").toString());
+        assertThat(admin.request("POST", SERVERS, withSystem, true, Map.of()).statusCode()).isEqualTo(201);
+        assertThat(gatewayAdminRequests()).anySatisfy(request -> {
+            assertThat(request.getMethod().getName()).isEqualTo("POST");
+            assertThat(JSON.readTree(request.getBodyAsString()).get("expectedSystem").asString()).isEqualTo("notes");
+        });
+
+        String upstream = C12.responseExample("POST", SERVERS, 422, "system_mismatch").toString();
+        stub(GATEWAY, "POST", "/admin/v1/servers", 422, upstream);
+        HttpResponse<String> response = admin.request("POST", SERVERS, withSystem, true, Map.of());
+        C12.assertResponse("POST", SERVERS, response);
+        assertThat(response.statusCode()).isEqualTo(422);
+        assertThat(JSON.readTree(response.body()).get("reason").asString()).isEqualTo("system_mismatch");
     }
 
     @Test
@@ -822,6 +841,9 @@ class AdminMirrorsTest extends PortalHarness {
                 new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"extra\":1}")},
                 new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"serverId\":\"mcp-notes\"}")},
                 new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"allowPlainHttp\":\"yes\"}")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"expectedSystem\":\"Notes\"}")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"expectedSystem\":\"gateway\"}")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"expectedSystem\":5}")},
                 new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"credential\":{\"required\":true,\"acceptedTypes\":[],\"type\":\"user-oauth\"}}")},
                 new String[] {"POST", SERVERS, "{\"internalUrl\":\"https://" + "h".repeat(250) + "\"}"},
                 new String[] {"POST", SERVERS, "not json"},

@@ -98,6 +98,9 @@ describe('AdminPage: approval of a connection', () => {
     expect(shown).toContain(`CN=${HOST}`);
     expect(shown).toContain('CN=Corp Issuing CA 2');
     expect(shown).toContain('wiki');
+    expect(card().querySelector('.system code')?.textContent).toBe('wiki');
+    expect(card().querySelector('.system')?.textContent).toContain('System claimed by the server');
+    expect(shown).toContain('Approve only if this is the system you meant to add');
     expect(shown).toContain('01.03.2027');
     expect(shown).toContain('Yes, for the host of the address');
     expect(shown).toContain('First connection to this server.');

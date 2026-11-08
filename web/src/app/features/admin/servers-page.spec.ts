@@ -78,11 +78,15 @@ describe('ServersPage', () => {
     expect(text(row('mcp-gitlab'))).toContain('GitLab');
   });
 
-  it('asks for an address and the plain HTTP option only, and warns next to the option', async () => {
+  it('asks for an address, an optional system and the plain HTTP option, and warns next to the option', async () => {
     await open();
     await openAdd();
 
-    expect(document.getElementById('srv-system')).toBeNull();
+    const system = field('srv-system') as HTMLInputElement;
+    expect(system.value).toBe('');
+    expect(text(document.getElementById(system.getAttribute('aria-describedby')!)!)).toContain(
+      'If you fill it in, the gateway refuses a server that claims another system.',
+    );
     expect(document.querySelector('input[name="adapter"]')).toBeNull();
     expect(document.querySelector('input[name="acceptedTypes"]')).toBeNull();
     const checkbox = field('srv-plain') as HTMLInputElement;
@@ -110,6 +114,49 @@ describe('ServersPage', () => {
       },
     ]);
     await until(() => expect(text(row('mcp-newapp'))).toContain('Pending approval'));
+  });
+
+  it('sends the expected system only when it is filled in', async () => {
+    store.update({ mfaFresh: true });
+    await open();
+    await openAdd();
+
+    fill('srv-url', 'https://mcp-newapp.corp.local:8443/mcp');
+    fill('srv-system', ' newapp ');
+    button('Save').click();
+
+    await until(() => expect(text()).toContain('Added the server mcp-newapp.'));
+    expect(writes[0].body).toEqual({
+      internalUrl: 'https://mcp-newapp.corp.local:8443/mcp',
+      allowPlainHttp: false,
+      expectedSystem: 'newapp',
+    });
+  });
+
+  it('checks the expected system before it sends anything', async () => {
+    await open();
+    await openAdd();
+
+    fill('srv-url', 'https://mcp-newapp.corp.local:8443/mcp');
+    fill('srv-system', 'Not A System');
+    button('Save').click();
+
+    await until(() => expect(text()).toContain('Enter a system identifier'));
+    expect(writes).toEqual([]);
+  });
+
+  it('says that the server claims another system than the one entered and keeps the form', async () => {
+    store.update({ mfaFresh: true });
+    await open();
+    await openAdd();
+
+    fill('srv-url', 'https://mcp-newapp.corp.local:8443/mcp');
+    fill('srv-system', 'jira');
+    button('Save').click();
+
+    await until(() => expect(text()).toContain('claims another system than the one you entered'));
+    expect(field('srv-system').value).toBe('jira');
+    expect(field('srv-url').value).toBe('https://mcp-newapp.corp.local:8443/mcp');
   });
 
   it('sends the plain HTTP option when it is ticked', async () => {

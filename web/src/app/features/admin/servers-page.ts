@@ -43,7 +43,7 @@ import {
   usesPlainHttp,
 } from './server-connection';
 import { AdminSystemNames } from './system-names';
-import { isHttpUrl } from './admin-validation';
+import { SYSTEM_ID, isHttpUrl } from './admin-validation';
 
 const PAGE = '/admin/servers';
 const USER_TYPES: readonly CredentialType[] = ['user-oauth', 'user-secret'];
@@ -54,6 +54,8 @@ export interface ServerForm {
   internalUrl: string;
   /** Only when adding: the address cannot be changed afterwards (CC-249). */
   allowPlainHttp: boolean;
+  /** Only when adding: the system the administrator expects; the gateway refuses a manifest that claims another one. */
+  expectedSystem: string;
   required: boolean;
   acceptedTypes: CredentialType[];
   type: CredentialType;
@@ -72,6 +74,7 @@ const EMPTY_FORM: ServerForm = {
   system: '',
   internalUrl: '',
   allowPlainHttp: false,
+  expectedSystem: '',
   required: true,
   acceptedTypes: ['user-oauth'],
   type: 'user-oauth',
@@ -172,6 +175,11 @@ export class ServersPage implements OnInit {
       } else if (url.toLowerCase().startsWith('http://') && !form.allowPlainHttp) {
         found['internalUrl'] =
           $localize`:@@adminServers.errPlain:An http address needs the "Allow plain HTTP" option.`;
+      }
+      const expected = form.expectedSystem.trim();
+      if (expected !== '' && !SYSTEM_ID.test(expected)) {
+        found['expectedSystem'] =
+          $localize`:@@adminServers.errExpectedSystem:Enter a system identifier: lower-case letters and digits, starting with a letter, 2 to 31 characters (for example jira).`;
       }
       return found;
     }
@@ -330,6 +338,7 @@ export class ServersPage implements OnInit {
           system: current.system,
           internalUrl: current.internalUrl,
           allowPlainHttp: current.allowPlainHttp,
+          expectedSystem: '',
           required: current.credential.required,
           acceptedTypes: [...current.credential.acceptedTypes],
           type: current.credential.type,
@@ -391,9 +400,11 @@ export class ServersPage implements OnInit {
     this.failure.set(null);
     try {
       if (form.mode === 'create') {
+        const expectedSystem = form.expectedSystem.trim();
         const body: ServerAddRequest = {
           internalUrl: form.internalUrl.trim(),
           allowPlainHttp: form.allowPlainHttp,
+          ...(expectedSystem !== '' && { expectedSystem }),
         };
         const added = await firstValueFrom(this.adminApi.createAdminServer(body));
         const id = added.serverId;

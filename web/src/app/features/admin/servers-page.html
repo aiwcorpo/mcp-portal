@@ -279,6 +279,25 @@
               <p class="problem">{{ errs['internalUrl'] }}</p>
             }
           </div>
+          <div class="field">
+            <label for="srv-system" i18n="@@adminServers.expectedSystem">System (optional)</label>
+            <input
+              id="srv-system"
+              name="expectedSystem"
+              type="text"
+              autocomplete="off"
+              aria-describedby="srv-system-hint"
+              [attr.aria-invalid]="show && errs['expectedSystem'] ? 'true' : null"
+              [ngModel]="f.expectedSystem"
+              (ngModelChange)="change({ expectedSystem: $event })"
+            />
+            <p id="srv-system-hint" class="muted hint" i18n="@@adminServers.expectedSystemHint">
+              If you fill it in, the gateway refuses a server that claims another system.
+            </p>
+            @if (show && errs['expectedSystem']) {
+              <p class="problem">{{ errs['expectedSystem'] }}</p>
+            }
+          </div>
           <div class="field wide">
             <label class="choice">
               <input

@@ -23,5 +23,9 @@ export interface ServerAddRequest {
      * Optional. When absent it is derived from the manifest.
      */
     credential?: ServerCredentialConfig;
+    /**
+     * Optional. The system the administrator expects the server to serve. When given and the manifest names another system, the add is refused (`422 server_rejected`, reason `system_mismatch`) and nothing is created. Without it the manifest decides, which lets a server claim a system whose users already hold credentials; the portal offers the field for that reason.
+     */
+    expectedSystem?: string;
 }
 

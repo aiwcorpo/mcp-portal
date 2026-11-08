@@ -128,6 +128,8 @@ function serverRejectedMessage(reason: string | undefined, manifestReason?: stri
       return $localize`:@@error.namespace_conflict:Another server already owns the policy namespace of this server.`;
     case 'tls_mode_not_allowed':
       return $localize`:@@error.tls_mode_not_allowed:The certificate does not allow this trust mode. Choose pinned, or fix the certificate for the host.`;
+    case 'system_mismatch':
+      return $localize`:@@error.system_mismatch:The server claims another system than the one you entered, so it was not added. Check the address, or clear the System field.`;
     case 'system_reserved':
       return $localize`:@@error.system_reserved:This system identifier is reserved for a component of the platform.`;
     case 'credential_types_mixed':

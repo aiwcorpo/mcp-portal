@@ -732,9 +732,18 @@
         <target>Certyfikat nie pozwala na ten tryb zaufania. Wybierz przypięcie albo napraw certyfikat dla hosta.</target>
       </segment>
     </unit>
-    <unit id="error.system_reserved">
+    <unit id="error.system_mismatch">
       <notes>
         <note category="location">src/app/core/error-messages.ts:132</note>
+      </notes>
+      <segment>
+        <source>The server claims another system than the one you entered, so it was not added. Check the address, or clear the System field.</source>
+        <target>Serwer podaje inny system niż ten, który wpisano, więc nie został dodany. Sprawdź adres albo wyczyść pole System.</target>
+      </segment>
+    </unit>
+    <unit id="error.system_reserved">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:134</note>
       </notes>
       <segment>
         <source>This system identifier is reserved for a component of the platform.</source>
@@ -743,7 +752,7 @@
     </unit>
     <unit id="error.credential_types_mixed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:134</note>
+        <note category="location">src/app/core/error-messages.ts:136</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -752,7 +761,7 @@
     </unit>
     <unit id="error.credential_type_not_accepted">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:136</note>
+        <note category="location">src/app/core/error-messages.ts:138</note>
       </notes>
       <segment>
         <source>The credential type in use has to be one of the accepted types.</source>
@@ -761,7 +770,7 @@
     </unit>
     <unit id="error.unknown_resource_type">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:145</note>
+        <note category="location">src/app/core/error-messages.ts:147</note>
       </notes>
       <segment>
         <source>No registered server declares the resource type of one of the scopes. Nothing was saved.</source>
@@ -770,7 +779,7 @@
     </unit>
     <unit id="error.scope_not_grantable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:147</note>
+        <note category="location">src/app/core/error-messages.ts:149</note>
       </notes>
       <segment>
         <source>The server declares no scope pattern for the type of one of the scopes, so it cannot be granted. Nothing was saved.</source>
@@ -779,7 +788,7 @@
     </unit>
     <unit id="error.scope_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:149</note>
+        <note category="location">src/app/core/error-messages.ts:151</note>
       </notes>
       <segment>
         <source>The part after the slash does not match the scope pattern of its type. Nothing was saved.</source>
@@ -788,7 +797,7 @@
     </unit>
     <unit id="error.group_duplicate">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:151</note>
+        <note category="location">src/app/core/error-messages.ts:153</note>
       </notes>
       <segment>
         <source>A group appears twice. Nothing was saved.</source>
@@ -797,7 +806,7 @@
     </unit>
     <unit id="error.not_forbid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:160</note>
+        <note category="location">src/app/core/error-messages.ts:162</note>
       </notes>
       <segment>
         <source>An override can only forbid. Use a forbid policy.</source>
@@ -806,7 +815,7 @@
     </unit>
     <unit id="error.not_one_policy">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:162</note>
+        <note category="location">src/app/core/error-messages.ts:164</note>
       </notes>
       <segment>
         <source>The text has to hold exactly one policy.</source>
@@ -815,7 +824,7 @@
     </unit>
     <unit id="error.id_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:164</note>
+        <note category="location">src/app/core/error-messages.ts:166</note>
       </notes>
       <segment>
         <source>The identifier has to look like override- followed by a name.</source>
@@ -824,7 +833,7 @@
     </unit>
     <unit id="error.target_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:166</note>
+        <note category="location">src/app/core/error-messages.ts:168</note>
       </notes>
       <segment>
         <source>The policy does not fit the target: for the gateway it has to decide the call action on a tool, for a server it must not mention the tool or the call action.</source>
@@ -833,7 +842,7 @@
     </unit>
     <unit id="error.invalid_policy">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:168</note>
+        <note category="location">src/app/core/error-messages.ts:170</note>
       </notes>
       <segment>
         <source>The policy does not parse or does not validate against the schema of its target.</source>
@@ -842,7 +851,7 @@
     </unit>
     <unit id="error.id_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:170</note>
+        <note category="location">src/app/core/error-messages.ts:172</note>
       </notes>
       <segment>
         <source>The @id annotation in the text has to equal the identifier of the override.</source>
@@ -851,7 +860,7 @@
     </unit>
     <unit id="error.target_unknown">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:172</note>
+        <note category="location">src/app/core/error-messages.ts:174</note>
       </notes>
       <segment>
         <source>There is no server with this identifier in the registry.</source>
@@ -860,7 +869,7 @@
     </unit>
     <unit id="error.client_secret_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:181</note>
+        <note category="location">src/app/core/error-messages.ts:183</note>
       </notes>
       <segment>
         <source>The client secret has to be entered again when the base address, the authorization or token address or the client identifier changes.</source>
@@ -869,7 +878,7 @@
     </unit>
     <unit id="error.token_url_not_settable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:183</note>
+        <note category="location">src/app/core/error-messages.ts:185</note>
       </notes>
       <segment>
         <source>A token exchange system takes no token address: the broker uses the one of its identity provider.</source>
@@ -878,7 +887,7 @@
     </unit>
     <unit id="error.credential_type_not_supported_by_adapter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:185</note>
+        <note category="location">src/app/core/error-messages.ts:187</note>
       </notes>
       <segment>
         <source>A generic REST system takes user secrets or a service account, not both, and no OAuth.</source>
@@ -887,7 +896,7 @@
     </unit>
     <unit id="error.audience_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:187</note>
+        <note category="location">src/app/core/error-messages.ts:189</note>
       </notes>
       <segment>
         <source>This audience is not on the list of audiences that the operator allowed in the broker configuration.</source>
@@ -896,7 +905,7 @@
     </unit>
     <unit id="error.product_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:189</note>
+        <note category="location">src/app/core/error-messages.ts:191</note>
       </notes>
       <segment>
         <source>This adapter needs the product (Jira or Confluence).</source>
@@ -905,7 +914,7 @@
     </unit>
     <unit id="error.exchange_audience_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:191</note>
+        <note category="location">src/app/core/error-messages.ts:193</note>
       </notes>
       <segment>
         <source>A token exchange system needs the audience of the token.</source>
@@ -914,7 +923,7 @@
     </unit>
     <unit id="error.system_reserved_system">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:193</note>
+        <note category="location">src/app/core/error-messages.ts:195</note>
       </notes>
       <segment>
         <source>This system identifier is reserved for a component of the platform.</source>
@@ -923,7 +932,7 @@
     </unit>
     <unit id="error.default_type_not_supported">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:195</note>
+        <note category="location">src/app/core/error-messages.ts:197</note>
       </notes>
       <segment>
         <source>The default credential type has to be one of the supported types.</source>
@@ -932,7 +941,7 @@
     </unit>
     <unit id="error.credential_types_mixed_system">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:197</note>
+        <note category="location">src/app/core/error-messages.ts:199</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -941,7 +950,7 @@
     </unit>
     <unit id="error.oauth_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:199</note>
+        <note category="location">src/app/core/error-messages.ts:201</note>
       </notes>
       <segment>
         <source>OAuth needs the client settings: identifier, secret and the authorization and token addresses.</source>
@@ -950,7 +959,7 @@
     </unit>
     <unit id="error.invalid_filter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:222</note>
+        <note category="location">src/app/core/error-messages.ts:224</note>
       </notes>
       <segment>
         <source>This filter cannot be saved in the address. Change the selection.</source>
@@ -959,7 +968,7 @@
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:225</note>
+        <note category="location">src/app/core/error-messages.ts:227</note>
       </notes>
       <segment>
         <source>Too many requests. Try again in <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -1626,9 +1635,27 @@
         <target>Połączenie zmieniło się, gdy potwierdzałeś tożsamość. Sprawdź je jeszcze raz i zatwierdź.</target>
       </segment>
     </unit>
+    <unit id="connectionApproval.system">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:28,30</note>
+      </notes>
+      <segment>
+        <source>System claimed by the server</source>
+        <target>System podany przez serwer</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.systemHint">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:34,37</note>
+      </notes>
+      <segment>
+        <source> The server names its own system in its manifest. Approve only if this is the system you meant to add: the gateway sends the users&apos; credentials for that system to this server. </source>
+        <target> Serwer sam podaje swój system w manifeście. Zatwierdź tylko wtedy, gdy to jest system, który chciano dodać: gateway wysyła temu serwerowi poświadczenia użytkowników do tego systemu. </target>
+      </segment>
+    </unit>
     <unit id="connectionApproval.address">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:29,30</note>
+        <note category="location">src/app/features/admin/connection-approval.html:39,40</note>
       </notes>
       <segment>
         <source>Address</source>
@@ -1637,7 +1664,7 @@
     </unit>
     <unit id="connectionApproval.previous">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:37,38</note>
+        <note category="location">src/app/features/admin/connection-approval.html:47,48</note>
       </notes>
       <segment>
         <source>Approved so far:</source>
@@ -1646,7 +1673,7 @@
     </unit>
     <unit id="connectionApproval.mode">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:47,48</note>
+        <note category="location">src/app/features/admin/connection-approval.html:57,58</note>
       </notes>
       <segment>
         <source>How the gateway should trust this server</source>
@@ -1655,7 +1682,7 @@
     </unit>
     <unit id="connectionApproval.modeHint">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:62,67</note>
+        <note category="location">src/app/features/admin/connection-approval.html:72,77</note>
       </notes>
       <segment>
         <source> With a trusted CA a renewed certificate needs no approval. Pinning accepts only this exact certificate, and a new one has to be approved here again. </source>
@@ -1664,7 +1691,7 @@
     </unit>
     <unit id="connectionApproval.scope">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:72,75</note>
+        <note category="location">src/app/features/admin/connection-approval.html:82,85</note>
       </notes>
       <segment>
         <source> Approving the connection approves neither the policies nor the tools of the server: they wait below. It needs a fresh MFA. </source>
@@ -1673,7 +1700,7 @@
     </unit>
     <unit id="connectionApproval.approve">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:77,78</note>
+        <note category="location">src/app/features/admin/connection-approval.html:87,88</note>
       </notes>
       <segment>
         <source>Approve connection</source>
@@ -3618,9 +3645,27 @@
         <target>Dowolny host z dowolnym certyfikatem HTTPS. Gateway odczytuje certyfikat i manifest spod tego adresu, a identyfikator serwera i system bierze z manifestu.</target>
       </segment>
     </unit>
+    <unit id="adminServers.expectedSystem">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:283,285</note>
+      </notes>
+      <segment>
+        <source>System (optional)</source>
+        <target>System (opcjonalnie)</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.expectedSystemHint">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:295,297</note>
+      </notes>
+      <segment>
+        <source> If you fill it in, the gateway refuses a server that claims another system. </source>
+        <target> Jeśli to pole zostanie wypełnione, gateway odmówi dodania serwera, który podaje inny system. </target>
+      </segment>
+    </unit>
     <unit id="adminServers.allowPlain">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:292,294</note>
+        <note category="location">src/app/features/admin/servers-page.html:311,313</note>
       </notes>
       <segment>
         <source>Allow plain HTTP</source>
@@ -3629,7 +3674,7 @@
     </unit>
     <unit id="adminServers.system">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:298,300</note>
+        <note category="location">src/app/features/admin/servers-page.html:317,319</note>
       </notes>
       <segment>
         <source>System</source>
@@ -3638,7 +3683,7 @@
     </unit>
     <unit id="adminServers.addressFixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:304,306</note>
+        <note category="location">src/app/features/admin/servers-page.html:323,325</note>
       </notes>
       <segment>
         <source>Address</source>
@@ -3647,7 +3692,7 @@
     </unit>
     <unit id="adminServers.addressFixedHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:309,311</note>
+        <note category="location">src/app/features/admin/servers-page.html:328,330</note>
       </notes>
       <segment>
         <source> The address cannot be changed. Remove the server and add it again to use another one; a new certificate under the same address is approved on the Approvals screen. </source>
@@ -3656,7 +3701,7 @@
     </unit>
     <unit id="adminServers.accepted">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:316,317</note>
+        <note category="location">src/app/features/admin/servers-page.html:335,336</note>
       </notes>
       <segment>
         <source>Accepted credential types</source>
@@ -3665,7 +3710,7 @@
     </unit>
     <unit id="adminServers.typeInUse">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:335,337</note>
+        <note category="location">src/app/features/admin/servers-page.html:354,356</note>
       </notes>
       <segment>
         <source>Type in use</source>
@@ -3674,7 +3719,7 @@
     </unit>
     <unit id="adminServers.options">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:352,353</note>
+        <note category="location">src/app/features/admin/servers-page.html:371,372</note>
       </notes>
       <segment>
         <source>Options</source>
@@ -3683,7 +3728,7 @@
     </unit>
     <unit id="adminServers.required">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:360,362</note>
+        <note category="location">src/app/features/admin/servers-page.html:379,381</note>
       </notes>
       <segment>
         <source>The server needs a credential of the user</source>
@@ -3692,7 +3737,7 @@
     </unit>
     <unit id="adminServers.enabledLabel">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:369,371</note>
+        <note category="location">src/app/features/admin/servers-page.html:388,390</note>
       </notes>
       <segment>
         <source>Enabled</source>
@@ -3701,7 +3746,7 @@
     </unit>
     <unit id="adminServers.adapterFixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:373,375</note>
+        <note category="location">src/app/features/admin/servers-page.html:392,394</note>
       </notes>
       <segment>
         <source> Served through an adapter. </source>
@@ -3710,7 +3755,7 @@
     </unit>
     <unit id="adminServers.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:379,382</note>
+        <note category="location">src/app/features/admin/servers-page.html:398,401</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA, except for disabling a server. If it is needed, you go to the identity provider and come back to this form. </source>
@@ -3719,7 +3764,7 @@
     </unit>
     <unit id="adminServers.save">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:384,386</note>
+        <note category="location">src/app/features/admin/servers-page.html:403,405</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -3728,7 +3773,7 @@
     </unit>
     <unit id="adminServers.cancel">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:393,395</note>
+        <note category="location">src/app/features/admin/servers-page.html:412,414</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -3737,7 +3782,7 @@
     </unit>
     <unit id="adminServers.errUrl">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:171</note>
+        <note category="location">src/app/features/admin/servers-page.ts:174</note>
       </notes>
       <segment>
         <source>Enter an address that starts with https:// or http://, for example https://mcp-notes.corp.local:8443/mcp.</source>
@@ -3746,16 +3791,25 @@
     </unit>
     <unit id="adminServers.errPlain">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:174</note>
+        <note category="location">src/app/features/admin/servers-page.ts:177</note>
       </notes>
       <segment>
         <source>An http address needs the &quot;Allow plain HTTP&quot; option.</source>
         <target>Adres http wymaga opcji &quot;Zezwól na zwykły HTTP&quot;.</target>
       </segment>
     </unit>
+    <unit id="adminServers.errExpectedSystem">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:182</note>
+      </notes>
+      <segment>
+        <source>Enter a system identifier: lower-case letters and digits, starting with a letter, 2 to 31 characters (for example jira).</source>
+        <target>Podaj identyfikator systemu: małe litery i cyfry, zaczynający się od litery, od 2 do 31 znaków (na przykład jira).</target>
+      </segment>
+    </unit>
     <unit id="adminServers.errAccepted">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:180</note>
+        <note category="location">src/app/features/admin/servers-page.ts:188</note>
       </notes>
       <segment>
         <source>Choose at least one credential type.</source>
@@ -3764,7 +3818,7 @@
     </unit>
     <unit id="adminServers.errType">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:183</note>
+        <note category="location">src/app/features/admin/servers-page.ts:191</note>
       </notes>
       <segment>
         <source>The type in use has to be one of the accepted types.</source>
@@ -3773,7 +3827,7 @@
     </unit>
     <unit id="adminServers.errMixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:189</note>
+        <note category="location">src/app/features/admin/servers-page.ts:197</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -3782,7 +3836,7 @@
     </unit>
     <unit id="adminServers.added">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:401</note>
+        <note category="location">src/app/features/admin/servers-page.ts:412</note>
       </notes>
       <segment>
         <source>Added the server <ph id="0" equiv="server" disp="id"/>. It has no tools until you approve its connection, policies and tools on the Approvals screen.</source>
@@ -3791,7 +3845,7 @@
     </unit>
     <unit id="adminServers.noChange">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:406</note>
+        <note category="location">src/app/features/admin/servers-page.ts:417</note>
       </notes>
       <segment>
         <source>Nothing changed.</source>
@@ -3800,7 +3854,7 @@
     </unit>
     <unit id="adminServers.saved">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:418</note>
+        <note category="location">src/app/features/admin/servers-page.ts:429</note>
       </notes>
       <segment>
         <source>Saved the settings of <ph id="0" equiv="server" disp="current.original.serverId"/>.</source>
@@ -3809,7 +3863,7 @@
     </unit>
     <unit id="adminServers.disabledDone">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:461</note>
+        <note category="location">src/app/features/admin/servers-page.ts:472</note>
       </notes>
       <segment>
         <source>Disabled the server <ph id="0" equiv="server" disp="id"/>. Its tools are out of service.</source>
@@ -3818,7 +3872,7 @@
     </unit>
     <unit id="adminServers.removeTitle">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:487</note>
+        <note category="location">src/app/features/admin/servers-page.ts:498</note>
       </notes>
       <segment>
         <source>Remove the server <ph id="0" equiv="server" disp="id"/>?</source>
@@ -3827,7 +3881,7 @@
     </unit>
     <unit id="adminServers.removeMessage">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:488</note>
+        <note category="location">src/app/features/admin/servers-page.ts:499</note>
       </notes>
       <segment>
         <source>Its tools disappear from the catalog and tools/list, calls to it are refused, and the scope mapping entries of its resource types are removed. The system and the users&apos; connections stay. Removing needs a fresh MFA.</source>
@@ -3836,7 +3890,7 @@
     </unit>
     <unit id="adminServers.removeConfirm">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:489</note>
+        <note category="location">src/app/features/admin/servers-page.ts:500</note>
       </notes>
       <segment>
         <source>Remove server</source>
@@ -3845,7 +3899,7 @@
     </unit>
     <unit id="adminServers.removed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:502</note>
+        <note category="location">src/app/features/admin/servers-page.ts:513</note>
       </notes>
       <segment>
         <source>Removed the server <ph id="0" equiv="server" disp="id"/>.</source>

@@ -28,6 +28,9 @@ Dynamic servers: no list of systems, servers or resource types is left in the po
   passed on in `server_rejected`, `409 connection_changed` and `no_pending_connection`, pending source `manifest` instead of `ci`.
   Web: add form with "Allow plain HTTP", status and badges per server, connection approval card, server details with Refresh;
   screenshots 26 to 28.
+- Security review of CC-249: the add form has an optional "System" field (`expectedSystem` in `ServerAddRequest`): the gateway
+  refuses a server whose manifest claims another system (`422 system_mismatch`), because the system comes from a manifest that
+  the server writes. The connection approval card shows the system the server claims.
 - Review fixes: replacing an override needs a fresh MFA (creating one does not); a malformed path identifier or `If-Match` is
   `400 invalid_request`, never 404; request bodies over 64 KB on `/api/v1/admin/**` are refused before they are read and the
   admin check comes first; system display names (administration pages only); the scope mapping page lists the approved resource

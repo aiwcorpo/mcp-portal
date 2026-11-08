@@ -154,6 +154,7 @@ describe('toApiFailure of the administrator writes', () => {
         'manifest_invalid',
         'namespace_conflict',
         'tls_mode_not_allowed',
+        'system_mismatch',
         'system_reserved',
         'credential_types_mixed',
         'credential_type_not_accepted',

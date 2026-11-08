@@ -24,6 +24,16 @@
       </app-notice>
     }
 
+    <p class="system">
+      <span class="label" i18n="@@connectionApproval.system">System claimed by the server</span>
+      <strong
+        ><code>{{ s.system | safeText }}</code></strong
+      >
+    </p>
+    <p class="muted hint" i18n="@@connectionApproval.systemHint">
+      The server names its own system in its manifest. Approve only if this is the system you meant
+      to add: the gateway sends the users' credentials for that system to this server.
+    </p>
     <p class="reason">{{ reasonText() }}</p>
     <p class="address">
       <span class="label" i18n="@@connectionApproval.address">Address</span>

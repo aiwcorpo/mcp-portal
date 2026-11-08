@@ -56,12 +56,16 @@ final class AdminInput {
         return value != null && IF_MATCH.matcher(value).matches();
     }
 
-    /** {@code ServerAddRequest}: the address, and optionally the plain-http flag and the credential declaration. */
+    /**
+     * {@code ServerAddRequest}: the address, and optionally the plain-http flag, the credential declaration and the system the
+     * administrator expects (the gateway refuses a manifest that claims another one).
+     */
     static JsonNode serverAdd(byte[] raw) {
         ObjectNode in = object(raw);
-        if (in == null || !only(in, "internalUrl", "allowPlainHttp", "credential") || !in.has("internalUrl")
+        if (in == null || !only(in, "internalUrl", "allowPlainHttp", "credential", "expectedSystem") || !in.has("internalUrl")
                 || !SERVER_URL.matcher(string(in, "internalUrl")).matches() || string(in, "internalUrl").length() > 255
                 || in.has("allowPlainHttp") && !in.get("allowPlainHttp").isBoolean()
+                || in.has("expectedSystem") && !ContractValues.SYSTEM_ID.matcher(string(in, "expectedSystem")).matches()
                 || in.has("credential") && !credential(in.get("credential"))) {
             return null;
         }
