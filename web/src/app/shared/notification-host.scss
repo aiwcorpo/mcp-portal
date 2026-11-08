@@ -1,0 +1,109 @@
+:host {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+
+/* On a phone the stack spans the bottom edge with a 16 px margin (mockup 41). */
+@media (max-width: 640px) {
+  :host {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+  }
+}
+
+.toast {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--pm-border);
+  border-radius: 8px;
+  background: var(--pm-surface-raised);
+  box-shadow: 0 16px 40px -8px light-dark(#16181b40, #000000cc);
+  color: var(--pm-text);
+  pointer-events: auto;
+}
+
+.icon {
+  padding-top: 3px;
+  color: var(--pm-ok);
+}
+
+.error .icon {
+  color: var(--pm-danger);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.text,
+.detail,
+.request-ref {
+  margin: 0;
+}
+
+.detail {
+  margin-top: 6px;
+  white-space: pre-wrap;
+  unicode-bidi: isolate;
+}
+
+.request-ref {
+  margin-top: 6px;
+  color: var(--pm-muted);
+  font-size: 12px;
+}
+
+.request-ref code {
+  margin-left: 0.4em;
+}
+
+.action {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pm-link);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.action:hover {
+  text-decoration: underline;
+}
+
+.close {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: -2px -4px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--pm-radius);
+  background: transparent;
+  color: var(--pm-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--pm-text);
+}

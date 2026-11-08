@@ -41,6 +41,7 @@ html {
   --pm-bg: light-dark(#fbfbfa, #0b0c0e);
   --pm-surface: light-dark(#ffffff, #141619);
   --pm-surface-2: light-dark(#eff0f2, #1a1d21);
+  --pm-surface-raised: light-dark(#ffffff, #22262b);
   --pm-border: light-dark(#d8dade, #2a2e34);
   --pm-border-strong: light-dark(#7d838d, #596069);
   --pm-text: light-dark(#16181b, #edeef0);
@@ -147,6 +148,7 @@ html.theme-dark {
 
 body {
   margin: 0;
+  padding-bottom: var(--pm-toast-space, 0);
   background: var(--pm-bg);
   color: var(--pm-text);
   font:
