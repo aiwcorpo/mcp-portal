@@ -29,13 +29,11 @@ async function expectNoViolations(page: Page): Promise<void> {
   ).toEqual([]);
 }
 
-/** The portal is dark by default (mockups); light is an opt-in through the header button. */
+/** The portal is dark by default (mockups); both themes are buttons in the header. */
 async function useScheme(page: Page, scheme: 'light' | 'dark'): Promise<void> {
-  const toggle = page.getByRole('button', { name: 'Dark mode' });
-  const isDark = (await toggle.getAttribute('aria-pressed')) === 'true';
-  if ((scheme === 'dark') !== isDark) {
-    await toggle.click();
-  }
+  await page
+    .getByRole('button', { name: scheme === 'dark' ? 'Dark' : 'Light', exact: true })
+    .click();
 }
 
 const PAGES = [

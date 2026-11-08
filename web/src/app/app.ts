@@ -21,6 +21,7 @@ import { ErrorNotice } from './shared/error-notice';
 import { LoadError } from './shared/load-error';
 import { LocaleSwitch } from './shared/locale-switch';
 import { Loading } from './shared/loading';
+import { ThemeSwitch } from './shared/theme-switch';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +35,7 @@ import { Loading } from './shared/loading';
     Loading,
     LoadError,
     LocaleSwitch,
+    ThemeSwitch,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -41,7 +43,6 @@ import { Loading } from './shared/loading';
 })
 export class App {
   protected readonly session = inject(SessionService);
-  protected readonly theme = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
 
   protected readonly appName = APP_NAME;
@@ -56,6 +57,8 @@ export class App {
   );
 
   constructor() {
+    // The switch is only in the signed-in header; the service has to start for the login screen too.
+    inject(ThemeService);
     void this.session.load();
     // After an in-app navigation, focus moves to the new content instead of staying on a link that
     // may no longer exist; the first navigation is the page load and keeps the browser default.

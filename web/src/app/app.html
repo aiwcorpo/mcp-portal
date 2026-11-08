@@ -12,16 +12,7 @@
           >{{ me.displayName }}</span
         >
         <app-locale-switch />
-        <button
-          mat-button
-          type="button"
-          class="head-button"
-          [attr.aria-pressed]="theme.mode() === 'dark'"
-          (click)="theme.toggle()"
-          i18n="@@shell.darkMode"
-        >
-          Dark mode
-        </button>
+        <app-theme-switch />
         <button
           mat-button
           type="button"

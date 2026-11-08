@@ -18,17 +18,9 @@
         <source>Signed in as </source>
       </segment>
     </unit>
-    <unit id="shell.darkMode">
-      <notes>
-        <note category="location">src/app/app.html:23,25</note>
-      </notes>
-      <segment>
-        <source> Dark mode </source>
-      </segment>
-    </unit>
     <unit id="shell.logout">
       <notes>
-        <note category="location">src/app/app.html:32,33</note>
+        <note category="location">src/app/app.html:23,24</note>
       </notes>
       <segment>
         <source> Sign out </source>
@@ -36,7 +28,7 @@
     </unit>
     <unit id="shell.navLabel">
       <notes>
-        <note category="location">src/app/app.html:37,39</note>
+        <note category="location">src/app/app.html:28,30</note>
       </notes>
       <segment>
         <source>Main navigation</source>
@@ -44,7 +36,7 @@
     </unit>
     <unit id="nav.catalog">
       <notes>
-        <note category="location">src/app/app.html:43,46</note>
+        <note category="location">src/app/app.html:34,37</note>
       </notes>
       <segment>
         <source>MCP servers</source>
@@ -52,7 +44,7 @@
     </unit>
     <unit id="nav.connections">
       <notes>
-        <note category="location">src/app/app.html:50,53</note>
+        <note category="location">src/app/app.html:41,44</note>
       </notes>
       <segment>
         <source>System connections</source>
@@ -60,7 +52,7 @@
     </unit>
     <unit id="nav.endpoint">
       <notes>
-        <note category="location">src/app/app.html:57,60</note>
+        <note category="location">src/app/app.html:48,51</note>
       </notes>
       <segment>
         <source>MCP address</source>
@@ -68,7 +60,7 @@
     </unit>
     <unit id="nav.requests">
       <notes>
-        <note category="location">src/app/app.html:64,67</note>
+        <note category="location">src/app/app.html:55,58</note>
       </notes>
       <segment>
         <source>Requests</source>
@@ -76,7 +68,7 @@
     </unit>
     <unit id="nav.logs">
       <notes>
-        <note category="location">src/app/app.html:71,73</note>
+        <note category="location">src/app/app.html:62,64</note>
       </notes>
       <segment>
         <source>Audit logs</source>
@@ -84,7 +76,7 @@
     </unit>
     <unit id="nav.admin">
       <notes>
-        <note category="location">src/app/app.html:79,81</note>
+        <note category="location">src/app/app.html:70,72</note>
       </notes>
       <segment>
         <source>Administration</source>
@@ -7417,6 +7409,30 @@
       </notes>
       <segment>
         <source>The system did not respond correctly. Try again in a moment.</source>
+      </segment>
+    </unit>
+    <unit id="shell.theme">
+      <notes>
+        <note category="location">src/app/shared/theme-switch.ts:14,15</note>
+      </notes>
+      <segment>
+        <source>Theme</source>
+      </segment>
+    </unit>
+    <unit id="shell.themeLight">
+      <notes>
+        <note category="location">src/app/shared/theme-switch.ts:22,24</note>
+      </notes>
+      <segment>
+        <source> Light </source>
+      </segment>
+    </unit>
+    <unit id="shell.themeDark">
+      <notes>
+        <note category="location">src/app/shared/theme-switch.ts:32,34</note>
+      </notes>
+      <segment>
+        <source> Dark </source>
       </segment>
     </unit>
   </file>

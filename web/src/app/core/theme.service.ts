@@ -22,8 +22,7 @@ export class ThemeService {
     });
   }
 
-  toggle(): void {
-    const next: ThemeMode = this.mode() === 'dark' ? 'light' : 'dark';
+  select(next: ThemeMode): void {
     this.chosen.set(next);
     try {
       this.document.defaultView?.localStorage.setItem(STORAGE_KEY, next);
