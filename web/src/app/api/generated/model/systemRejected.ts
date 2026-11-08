@@ -10,7 +10,7 @@
 
 
 /**
- * 422 of a write of a system. Known reasons are credential_type_not_supported_by_adapter (user-oauth or a mix on a generic-rest system), client_secret_required (baseUrl, authorizeUrl, tokenUrl, clientId or revokeUrl changed without a new clientSecret), token_url_not_settable (tokenUrl for a token-exchange system), audience_not_allowed (exchangeAudience is not on the allowlist in the configuration of the broker), product_required, exchange_audience_required, system_reserved (the system id is reserved, see SystemId), default_type_not_supported (defaultType is not in supportedTypes), credential_types_mixed (service-account next to a user type, CC-168) and oauth_required (user-oauth without an oauth client).
+ * 422 of a write of a system. Known reasons are credential_type_not_supported_by_adapter (user-oauth or a mix on a generic-rest system), whoami_not_applicable (whoami on a generic-rest system without user-secret), client_secret_required (baseUrl, authorizeUrl, tokenUrl, clientId or revokeUrl changed without a new clientSecret), token_url_not_settable (tokenUrl for a token-exchange system), audience_not_allowed (exchangeAudience is not on the allowlist in the configuration of the broker), product_required, exchange_audience_required, system_reserved (the system id is reserved, see SystemId), default_type_not_supported (defaultType is not in supportedTypes), credential_types_mixed (service-account next to a user type, CC-168) and oauth_required (user-oauth without an oauth client).
  */
 export interface SystemRejected { 
     error: any | null;

@@ -52,6 +52,7 @@ model/connectErrorCode.ts
 model/connectOAuthRequest.ts
 model/connectOAuthResponse.ts
 model/connection.ts
+model/connectionApproveRequest.ts
 model/connectionStatus.ts
 model/credentialScheme.ts
 model/credentialType.ts
@@ -71,6 +72,7 @@ model/models.ts
 model/override.ts
 model/overrideRejected.ts
 model/overrideRequest.ts
+model/pendingConnection.ts
 model/pendingPolicies.ts
 model/pendingTool.ts
 model/pendingToolPendingEntry.ts
@@ -93,11 +95,13 @@ model/risk.ts
 model/scopeMappingDocument.ts
 model/scopeMappingEntry.ts
 model/scopeMappingRejected.ts
+model/serverAddRequest.ts
 model/serverConfig.ts
-model/serverConfigCreate.ts
 model/serverConfigPatch.ts
+model/serverConnection.ts
 model/serverCredentialConfig.ts
 model/serverRejected.ts
+model/serverStatus.ts
 model/stepUpRequired.ts
 model/systemAdapter.ts
 model/systemAdminRequest.ts
@@ -108,6 +112,7 @@ model/systemProduct.ts
 model/systemRejected.ts
 model/systemUserSecretScheme.ts
 model/systemWhoami.ts
+model/tlsMode.ts
 model/toolAction.ts
 model/toolEntry.ts
 model/toolEntryFields.ts

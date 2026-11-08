@@ -25,7 +25,7 @@ export interface PendingTool {
      */
     riskLowered?: boolean;
     /**
-     * Where the pending entry comes from (CC-162, CC-193). ci is an entry left by a PUT of the pipeline (the reviewed commit); server is a definition that the running server presented; adapter is an entry that an adapter (the sidecar of a foreign MCP server) presented at startup, never approved automatically and without risk and action until an administrator classifies it. A server entry never replaces a ci entry, see the README, \"Rejestr i przypinanie definicji\".
+     * Where the pending entry comes from (CC-162, CC-193, CC-249). manifest is an entry from a manifest that the gateway pulled (add, refresh, runtime loop); server is a definition that the running server presented in tools/list; adapter is an entry from the manifest of an adapter (the sidecar of a foreign MCP server), never approved automatically and without risk and action until an administrator classifies it. A server entry never replaces a manifest entry, see the README, \"Rejestr i przypinanie definicji\".
      */
     source: PendingTool.SourceEnum;
     /**
@@ -40,7 +40,7 @@ export interface PendingTool {
 }
 export namespace PendingTool {
     export const SourceEnum = {
-        Ci: 'ci',
+        Manifest: 'manifest',
         Server: 'server',
         Adapter: 'adapter',
     } as const;

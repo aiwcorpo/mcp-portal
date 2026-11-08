@@ -27,6 +27,8 @@ import { ApproveRequest } from '../model/approveRequest';
 // @ts-ignore
 import { ApprovedPolicies } from '../model/approvedPolicies';
 // @ts-ignore
+import { ConnectionApproveRequest } from '../model/connectionApproveRequest';
+// @ts-ignore
 import { KillSwitchList } from '../model/killSwitchList';
 // @ts-ignore
 import { KillSwitchRequest } from '../model/killSwitchRequest';
@@ -49,9 +51,9 @@ import { ScopeMappingDocument } from '../model/scopeMappingDocument';
 // @ts-ignore
 import { ScopeMappingRejected } from '../model/scopeMappingRejected';
 // @ts-ignore
-import { ServerConfig } from '../model/serverConfig';
+import { ServerAddRequest } from '../model/serverAddRequest';
 // @ts-ignore
-import { ServerConfigCreate } from '../model/serverConfigCreate';
+import { ServerConfig } from '../model/serverConfig';
 // @ts-ignore
 import { ServerConfigPatch } from '../model/serverConfigPatch';
 // @ts-ignore
@@ -77,6 +79,82 @@ export class AdminService extends BaseService {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);
+    }
+
+    /**
+     * Approve how the gateway trusts a server (proxy to C5): the first connection or a changed certificate.
+     * The portal sends the &#x60;fingerprint&#x60; of the pending connection that the administrator saw on the card and the &#x60;tlsMode&#x60; the administrator chose (the proposed one, or &#x60;pinned&#x60; instead of a proposed &#x60;ca&#x60;). Needs a fresh MFA (&#x60;step_up_required&#x60; with &#x60;stepUpUrl&#x60; otherwise); the gateway checks it too. &#x60;409 connection_changed&#x60; means the pending connection is no longer the one that was shown (reload the card); &#x60;409 no_pending_connection&#x60; means nothing waits. Approving the connection approves neither the policies nor the tools. 
+     * @endpoint post /api/v1/admin/servers/{serverId}/connection/approve
+     * @param serverId 
+     * @param connectionApproveRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public approveAdminServerConnection(serverId: string, connectionApproveRequest: ConnectionApproveRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServerConfig>;
+    public approveAdminServerConnection(serverId: string, connectionApproveRequest: ConnectionApproveRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServerConfig>>;
+    public approveAdminServerConnection(serverId: string, connectionApproveRequest: ConnectionApproveRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServerConfig>>;
+    public approveAdminServerConnection(serverId: string, connectionApproveRequest: ConnectionApproveRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling approveAdminServerConnection.');
+        }
+        if (connectionApproveRequest === null || connectionApproveRequest === undefined) {
+            throw new Error('Required parameter connectionApproveRequest was null or undefined when calling approveAdminServerConnection.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/connection/approve`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ServerConfig>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: connectionApproveRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
     }
 
     /**
@@ -235,19 +313,20 @@ export class AdminService extends BaseService {
     }
 
     /**
-     * Add a server to the registry (proxy to C5): no restart, no tools until its manifest is approved.
+     * Add a server by its address (proxy to C5): the gateway probes it and pulls its manifest; no tools until connection, policies and tools are approved.
+     * The body is the address (&#x60;internalUrl&#x60;) and, optionally, &#x60;allowPlainHttp&#x60; and &#x60;credential&#x60;; nothing else, because the gateway reads the rest from the server (CC-249). Needs a fresh MFA (&#x60;step_up_required&#x60; otherwise); the gateway checks it too. The answer is the server in &#x60;status: pending_approval&#x60; with a &#x60;pendingConnection&#x60; that the portal shows on the card (tls mode proposed, fingerprint, subject, issuer, SANs, expiry; a warning for &#x60;plain&#x60;). The refusals are &#x60;422&#x60; with the reasons &#x60;address_refused&#x60;, &#x60;plain_http_not_allowed&#x60;, &#x60;tls_handshake_failed&#x60;, &#x60;manifest_unreachable&#x60;, &#x60;manifest_invalid&#x60;, &#x60;system_reserved&#x60; and &#x60;namespace_conflict&#x60;, and &#x60;409 server_exists&#x60;. 
      * @endpoint post /api/v1/admin/servers
-     * @param serverConfigCreate 
+     * @param serverAddRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServerConfig>;
-    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServerConfig>>;
-    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServerConfig>>;
-    public createAdminServer(serverConfigCreate: ServerConfigCreate, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
-        if (serverConfigCreate === null || serverConfigCreate === undefined) {
-            throw new Error('Required parameter serverConfigCreate was null or undefined when calling createAdminServer.');
+    public createAdminServer(serverAddRequest: ServerAddRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServerConfig>;
+    public createAdminServer(serverAddRequest: ServerAddRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServerConfig>>;
+    public createAdminServer(serverAddRequest: ServerAddRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServerConfig>>;
+    public createAdminServer(serverAddRequest: ServerAddRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverAddRequest === null || serverAddRequest === undefined) {
+            throw new Error('Required parameter serverAddRequest was null or undefined when calling createAdminServer.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -294,7 +373,7 @@ export class AdminService extends BaseService {
         return this.httpClient.request<ServerConfig>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: serverConfigCreate,
+                body: serverAddRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -1712,8 +1791,70 @@ export class AdminService extends BaseService {
     }
 
     /**
+     * Probe a server again and pull its manifest now (proxy to C5).
+     * The \&quot;Refresh\&quot; button of the card. A failure to reach the server is not an HTTP error: the answer is &#x60;200&#x60; with &#x60;status&#x60; &#x60;unreachable&#x60;, &#x60;certificate_changed&#x60; or &#x60;manifest_invalid&#x60; and &#x60;lastError&#x60;. Needs no fresh MFA because it approves nothing. 
+     * @endpoint post /api/v1/admin/servers/{serverId}/refresh
+     * @param serverId 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public refreshAdminServer(serverId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServerConfig>;
+    public refreshAdminServer(serverId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServerConfig>>;
+    public refreshAdminServer(serverId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServerConfig>>;
+    public refreshAdminServer(serverId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (serverId === null || serverId === undefined) {
+            throw new Error('Required parameter serverId was null or undefined when calling refreshAdminServer.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/servers/${this.configuration.encodeParam({name: "serverId", value: serverId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/refresh`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ServerConfig>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Change the connection settings of a server (proxy to C5; enabled false takes it out of service).
-     * Every change needs a fresh MFA (&#x60;auth_time&#x60; within 300 s and &#x60;acr&#x60; or &#x60;amr&#x60; proving MFA; &#x60;step_up_required&#x60; otherwise) except a body that only sets &#x60;enabled: false&#x60;; the gateway checks it too. &#x60;tlsName&#x60; and &#x60;adapter&#x60; cannot be changed. 
+     * Every change needs a fresh MFA (&#x60;auth_time&#x60; within 300 s and &#x60;acr&#x60; or &#x60;amr&#x60; proving MFA; &#x60;step_up_required&#x60; otherwise) except a body that only sets &#x60;enabled: false&#x60;; the gateway checks it too. &#x60;internalUrl&#x60;, &#x60;allowPlainHttp&#x60; and &#x60;adapter&#x60; cannot be changed; a new certificate at the same address is approved with &#x60;approveAdminServerConnection&#x60;. 
      * @endpoint patch /api/v1/admin/servers/{serverId}
      * @param ifMatch The ETag of the document the change is based on.
      * @param serverId 

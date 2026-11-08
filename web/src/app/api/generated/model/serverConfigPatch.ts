@@ -11,7 +11,6 @@ import { ServerCredentialConfig } from './serverCredentialConfig';
 
 
 export interface ServerConfigPatch { 
-    internalUrl?: string;
     credential?: ServerCredentialConfig;
     enabled?: boolean;
 }

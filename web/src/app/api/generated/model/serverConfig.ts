@@ -8,10 +8,13 @@
  * Do not edit the class manually.
  */
 import { ServerCredentialConfig } from './serverCredentialConfig';
+import { ServerStatus } from './serverStatus';
+import { ServerConnection } from './serverConnection';
+import { PendingConnection } from './pendingConnection';
 
 
 /**
- * A server in the registry of the gateway (7.0.0).
+ * A server in the registry of the gateway (7.0.0) with the state of its connection (CC-249).
  */
 export interface ServerConfig { 
     /**
@@ -22,12 +25,39 @@ export interface ServerConfig {
      * Target system identifier, lower case: the id of a system that the credential broker and the gateway registry know at runtime (a row, not a list in the contracts). The ids gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved: mcp-<system> is also the CN of a server certificate, and mcp-gateway, mcp-offboarding and the like are the CNs of platform components.
      */
     system: string;
+    /**
+     * The address of the MCP endpoint that the administrator gave; the well-known paths of C14 are at the origin of this address.
+     */
     internalUrl: string;
+    /**
+     * True when an administrator allowed `http` for this server when adding it.
+     */
+    allowPlainHttp: boolean;
     credential: ServerCredentialConfig;
     enabled: boolean;
     /**
-     * True when the server is served through an adapter (CC-206) and takes its manifest on the adapter channel.
+     * True when the server is served through an adapter (CC-206). It is the `source` of the first manifest and never changes.
      */
     adapter: boolean;
+    status: ServerStatus;
+    /**
+     * When the gateway last probed the server (add, refresh or runtime loop); null only if it never did.
+     */
+    lastCheckedAt: string | null;
+    /**
+     * Reason of the last failed check, null after a successful one. Known values are address_refused, tls_handshake_failed, certificate_changed, manifest_unreachable and manifest_invalid; show an unknown value as a generic message.
+     */
+    lastError: string | null;
+    /**
+     * The approved connection; null until the first approval.
+     */
+    connection: ServerConnection | null;
+    /**
+     * The connection that waits for approval; null when nothing waits.
+     */
+    pendingConnection: PendingConnection | null;
 }
+export namespace ServerConfig {
+}
+
 

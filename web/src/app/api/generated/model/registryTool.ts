@@ -67,7 +67,7 @@ export namespace RegistryTool {
     } as const;
     export type ChangeEnum = typeof ChangeEnum[keyof typeof ChangeEnum];
     export const SourceEnum = {
-        Ci: 'ci',
+        Manifest: 'manifest',
         Server: 'server',
         Adapter: 'adapter',
     } as const;

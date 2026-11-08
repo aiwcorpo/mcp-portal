@@ -38,13 +38,13 @@ export interface PendingPolicies {
      */
     pendingVersion: string;
     /**
-     * Where the pending policies come from, as for a pending tool (ci or server).
+     * Where the pending policies come from, as for a pending tool (manifest or server).
      */
     source: PendingPolicies.SourceEnum;
 }
 export namespace PendingPolicies {
     export const SourceEnum = {
-        Ci: 'ci',
+        Manifest: 'manifest',
         Server: 'server',
     } as const;
     export type SourceEnum = typeof SourceEnum[keyof typeof SourceEnum];

@@ -10,11 +10,15 @@
 
 
 /**
- * 422 of a change of a server. Known reasons are server_id_mismatch (serverId is not mcp-<system>), system_reserved (the system id is one of the reserved ids), credential_types_mixed (service-account next to a user type, CC-168) and credential_type_not_accepted (type is not in acceptedTypes).
+ * 422 of adding or changing a server, or of approving its connection. Known reasons: address_refused (the host resolves to a loopback, link-local, unspecified or multicast address), plain_http_not_allowed (`http` without allowPlainHttp), tls_handshake_failed (no TLS handshake could be completed with the address), manifest_unreachable (no `200` from `/.well-known/mcp-manifest`), manifest_invalid (the manifest fails the checks of Manifest intake; `manifestReason` is the cause), system_reserved (the system of the manifest is one of the reserved ids), namespace_conflict (another server owns the namespace of its policies), tls_mode_not_allowed (`approveServerConnection` chose a mode the pending connection does not allow), credential_types_mixed (service-account next to a user type, CC-168) and credential_type_not_accepted (type is not in acceptedTypes). A client must show an unknown value as a generic message. 
  */
 export interface ServerRejected { 
     error: any | null;
     reason?: string;
+    /**
+     * With reason manifest_invalid, why the manifest failed. Known values are environment_mismatch (CC-138), credential_type_mismatch (CC-159, CC-168), policies_invalid, resource_types_invalid, adapter_source_mismatch (a later manifest whose `source` differs from the first one) and hash_mismatch or absent for the other rules of the manifest.
+     */
+    manifestReason?: string;
     message?: string;
 }
 
