@@ -22,6 +22,12 @@ Dynamic servers: no list of systems, servers or resource types is left in the po
   request dialog takes the systems from the catalog.
 - Mock build and tests: the MSW mock keeps servers, systems, mapping and overrides as data (`?mockPolicies=in` puts policies up
   for approval); new unit and end-to-end tests for every screen; screenshots 21 to 25.
+- Servers are added by address (CC-249): the gateway probes the certificate and pulls the manifest, and the administrator approves
+  the connection (`ca`, `pinned` or `plain`) with a fresh MFA, then the policies and tools. BFF: `createAdminServer` takes
+  `ServerAddRequest`, new `approveAdminServerConnection` and `refreshAdminServer` (`429 refresh_too_frequent`), `manifestReason`
+  passed on in `server_rejected`, `409 connection_changed` and `no_pending_connection`, pending source `manifest` instead of `ci`.
+  Web: add form with "Allow plain HTTP", status and badges per server, connection approval card, server details with Refresh;
+  screenshots 26 to 28.
 - Review fixes: replacing an override needs a fresh MFA (creating one does not); a malformed path identifier or `If-Match` is
   `400 invalid_request`, never 404; request bodies over 64 KB on `/api/v1/admin/**` are refused before they are read and the
   admin check comes first; system display names (administration pages only); the scope mapping page lists the approved resource
