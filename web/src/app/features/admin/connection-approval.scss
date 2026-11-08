@@ -1,0 +1,77 @@
+.card {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 20px;
+  padding: 12px 16px 16px;
+  max-width: 760px;
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius);
+  background: var(--pm-surface);
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.server-id {
+  margin-left: 8px;
+  font-weight: 400;
+}
+
+.reason,
+.address,
+.previous,
+.hint {
+  margin: 0;
+}
+
+.hint {
+  font-size: 13px;
+}
+
+.muted {
+  color: var(--pm-muted);
+}
+
+.label {
+  margin-right: 8px;
+  color: var(--pm-muted);
+  font-size: 13px;
+}
+
+.address code,
+.previous code {
+  overflow-wrap: anywhere;
+}
+
+.choices {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choices legend {
+  font-weight: 500;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.choice input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--pm-text);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}

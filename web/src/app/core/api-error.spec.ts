@@ -108,10 +108,52 @@ describe('toApiFailure of the administrator writes', () => {
     expect(failure.message).toBeUndefined();
   });
 
+  it('keeps the manifestReason of a refused server and explains it', () => {
+    const failure = toApiFailure(
+      httpError(422, {
+        error: 'server_rejected',
+        reason: 'manifest_invalid',
+        manifestReason: 'environment_mismatch',
+        message: 'manifest of mcp-notes declares environment dev',
+      }),
+    );
+
+    expect(failure.manifestReason).toBe('environment_mismatch');
+    expect(failureMessage(failure)).toContain('different environment');
+    expect(failureMessage({ ...failure, manifestReason: 'something_new' })).toBe(
+      'The manifest of the server failed the checks of the gateway.',
+    );
+    expect(
+      toApiFailure(httpError(422, { error: 'scope_mapping_rejected', manifestReason: 'x' }))
+        .manifestReason,
+    ).toBeUndefined();
+  });
+
+  it('passes the retry wait of a refresh that came too soon and the two connection conflicts', () => {
+    const headers = new HttpHeaders({ 'Retry-After': '4' });
+    const refresh = toApiFailure(
+      new HttpErrorResponse({ status: 429, error: { error: 'refresh_too_frequent' }, headers }),
+    );
+
+    expect(refresh).toEqual({ code: 'refresh_too_frequent', status: 429, retryAfterSeconds: 4 });
+    expect(toApiFailure(httpError(409, { error: 'connection_changed' })).code).toBe(
+      'connection_changed',
+    );
+    expect(toApiFailure(httpError(409, { error: 'no_pending_connection' })).code).toBe(
+      'no_pending_connection',
+    );
+  });
+
   it('has its own text for every reason the contract lists', () => {
     const reasons = {
       server_rejected: [
-        'server_id_mismatch',
+        'address_refused',
+        'plain_http_not_allowed',
+        'tls_handshake_failed',
+        'manifest_unreachable',
+        'manifest_invalid',
+        'namespace_conflict',
+        'tls_mode_not_allowed',
         'system_reserved',
         'credential_types_mixed',
         'credential_type_not_accepted',

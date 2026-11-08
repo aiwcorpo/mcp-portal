@@ -23,6 +23,22 @@ export const OAUTH_SCOPE = /^[^\s]{1,200}$/;
 /** ISO 8601 duration of the calls of the broker, up to ten minutes (the broker checks the value). */
 export const DURATION = /^PT(?:(?:[0-9]{1,2})M)?(?:(?:[0-9]{1,3})S)?$/;
 
+/** The address of an MCP server: `https`, or `http` that the gateway accepts only with the plain-HTTP option (CC-249). */
+export function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      (url.protocol === 'https:' || url.protocol === 'http:') &&
+      url.hostname !== '' &&
+      !url.username &&
+      !url.password &&
+      value.length <= 255
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function isHttpsUrl(value: string): boolean {
   try {
     const url = new URL(value);

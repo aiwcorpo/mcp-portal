@@ -33,12 +33,16 @@ describe('ServersPage', () => {
     return found as HTMLElement;
   }
 
-  async function fillNotes(): Promise<void> {
-    fill('srv-system', 'notes');
-    fill('srv-url', 'https://mcp-notes.internal:8443/mcp');
+  async function openAdd(): Promise<void> {
+    button('Add server').click();
+    await until(() => expect(document.getElementById('srv-url')).toBeTruthy());
   }
 
-  it('lists the servers of the registry with their address, credential and state', async () => {
+  async function fillNewApp(): Promise<void> {
+    fill('srv-url', 'https://mcp-newapp.corp.local:8443/mcp');
+  }
+
+  it('lists the servers of the registry with their address, credential, state and connection', async () => {
     await open();
 
     expect(text(row('mcp-jira'))).toContain('Jira');
@@ -46,6 +50,24 @@ describe('ServersPage', () => {
     expect(text(row('mcp-jira'))).toContain('Enabled');
     expect(text(row('mcp-opensearch'))).toContain('Disabled');
     expect(text(row('mcp-servicedesk'))).toContain('Service account');
+  });
+
+  it('shows the status of each server and the badges for plain HTTP, a pinned and a changed certificate', async () => {
+    await open();
+
+    expect(text(row('mcp-confluence'))).toContain('Connected');
+    expect(text(row('mcp-confluence'))).not.toContain('Plain HTTP');
+    expect(text(row('mcp-confluence'))).not.toContain('Pinned certificate');
+    expect(text(row('mcp-jira'))).toContain('Pinned certificate');
+    expect(text(row('mcp-servicedesk'))).toContain('Unreachable');
+    expect(text(row('mcp-notes'))).toContain('Pending approval');
+
+    const plain = row('mcp-gitlab').querySelector('.tag-danger');
+    expect(plain?.textContent).toContain('Plain HTTP');
+    const changed = row('mcp-opensearch');
+    expect(text(changed)).toContain('Certificate changed');
+    expect(changed.querySelectorAll('.tag-danger').length).toBe(1);
+    expect(changed.querySelector('.tag-danger')?.textContent).toContain('Certificate changed');
   });
 
   it('names a system the way the administrator named it in the broker, as inert text', async () => {
@@ -56,71 +78,120 @@ describe('ServersPage', () => {
     expect(text(row('mcp-gitlab'))).toContain('GitLab');
   });
 
-  it('shows the certificate name as derived text and offers no field for it', async () => {
+  it('asks for an address and the plain HTTP option only, and warns next to the option', async () => {
     await open();
-    button('Add server').click();
-    await until(() => expect(document.getElementById('srv-url')).toBeTruthy());
+    await openAdd();
 
-    fill('srv-system', 'notes');
-    await until(() => expect(text()).toContain('mcp-notes.internal'));
-    expect(document.getElementById('srv-tls')).toBeNull();
+    expect(document.getElementById('srv-system')).toBeNull();
+    expect(document.querySelector('input[name="adapter"]')).toBeNull();
+    expect(document.querySelector('input[name="acceptedTypes"]')).toBeNull();
+    const checkbox = field('srv-plain') as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    const hint = document.getElementById(checkbox.getAttribute('aria-describedby')!)!;
+    expect(text(hint)).toContain("Plain HTTP sends users' credentials unencrypted.");
+    expect(text(hint)).toContain('same Docker network as the gateway');
   });
 
-  it('adds a server for any valid system, with the identifier derived and no certificate name', async () => {
+  it('adds a server by its address and shows it waiting for approval', async () => {
     store.update({ mfaFresh: true });
     await open();
-    button('Add server').click();
-    await until(() => expect(document.getElementById('srv-system')).toBeTruthy());
+    await openAdd();
 
-    await fillNotes();
-    await until(() => expect(text()).toContain('mcp-notes'));
+    await fillNewApp();
     button('Save').click();
 
-    await until(() => expect(text()).toContain('Added the server mcp-notes.'));
+    await until(() => expect(text()).toContain('Added the server mcp-newapp.'));
     expect(writes).toEqual([
       {
         method: 'POST',
         url: '/api/v1/admin/servers',
         headers: {},
-        body: {
-          serverId: 'mcp-notes',
-          system: 'notes',
-          internalUrl: 'https://mcp-notes.internal:8443/mcp',
-          credential: { required: true, acceptedTypes: ['user-oauth'], type: 'user-oauth' },
-          enabled: true,
-          adapter: false,
-        },
+        body: { internalUrl: 'https://mcp-newapp.corp.local:8443/mcp', allowPlainHttp: false },
       },
     ]);
-    await until(() => expect(text(row('mcp-notes'))).toContain('Notes'));
+    await until(() => expect(text(row('mcp-newapp'))).toContain('Pending approval'));
+  });
+
+  it('sends the plain HTTP option when it is ticked', async () => {
+    store.update({ mfaFresh: true });
+    await open();
+    await openAdd();
+
+    fill('srv-url', 'http://mcp-inner:8080/mcp');
+    toggle('allowPlainHttp');
+    button('Save').click();
+
+    await until(() => expect(text()).toContain('Added the server mcp-inner.'));
+    expect(writes[0].body).toEqual({
+      internalUrl: 'http://mcp-inner:8080/mcp',
+      allowPlainHttp: true,
+    });
+    await until(() => expect(row('mcp-inner').querySelector('.tag-danger')).toBeTruthy());
   });
 
   it('checks the form before it sends anything', async () => {
     await open();
-    button('Add server').click();
-    await until(() => expect(document.getElementById('srv-system')).toBeTruthy());
+    await openAdd();
 
-    fill('srv-system', 'gateway');
-    fill('srv-url', 'http://plain.internal/mcp');
+    fill('srv-url', 'ftp://plain.internal/mcp');
     button('Save').click();
+    await until(() =>
+      expect(text()).toContain('Enter an address that starts with https:// or http://'),
+    );
 
-    await until(() => expect(text()).toContain('are reserved'));
-    expect(text()).toContain('Enter an https address');
+    fill('srv-url', 'http://plain.internal/mcp');
+    await until(() =>
+      expect(text()).toContain('An http address needs the "Allow plain HTTP" option.'),
+    );
     expect(writes).toEqual([]);
   });
 
   it('shows the 409 of an existing server and keeps the form', async () => {
     store.update({ mfaFresh: true });
     await open();
-    button('Add server').click();
-    await until(() => expect(document.getElementById('srv-system')).toBeTruthy());
+    await openAdd();
 
-    fill('srv-system', 'jira');
     fill('srv-url', 'https://mcp-jira.internal:8443/mcp');
     button('Save').click();
 
     await until(() => expect(text()).toContain('A server with this identifier already exists.'));
-    expect(field('srv-system').value).toBe('jira');
+    expect(field('srv-url').value).toBe('https://mcp-jira.internal:8443/mcp');
+  });
+
+  it.each([
+    [
+      'https://127.0.0.1:8443/mcp',
+      'address_refused',
+      'The gateway does not connect to this address',
+    ],
+    [
+      'https://mcp-notls.corp.local/mcp',
+      'tls_handshake_failed',
+      'could not complete a TLS handshake',
+    ],
+    [
+      'https://mcp-nomanifest.corp.local/mcp',
+      'manifest_unreachable',
+      'could not read its manifest',
+    ],
+    [
+      'https://mcp-badmanifest.corp.local/mcp',
+      'manifest_invalid',
+      'meant for a different environment',
+    ],
+    ['https://mcp-wiki.corp.local/mcp', 'namespace_conflict', 'already owns the policy namespace'],
+    ['https://mcp-admin.corp.local/mcp', 'system_reserved', 'reserved for a component'],
+  ])('shows the refusal of %s as a readable message (%s)', async (address, _reason, message) => {
+    store.update({ mfaFresh: true });
+    await open();
+    await openAdd();
+
+    fill('srv-url', address);
+    button('Save').click();
+
+    await until(() => expect(text()).toContain(message));
+    expect(document.querySelector('.detail')).toBeTruthy();
+    expect(field('srv-url').value).toBe(address);
   });
 
   it('shows what the gateway rejects, in its own words', async () => {
@@ -137,9 +208,8 @@ describe('ServersPage', () => {
       ),
     );
     await open();
-    button('Add server').click();
-    await until(() => expect(document.getElementById('srv-system')).toBeTruthy());
-    await fillNotes();
+    await openAdd();
+    await fillNewApp();
     button('Save').click();
 
     await until(() => expect(text()).toContain('A service account cannot be combined'));
@@ -147,11 +217,11 @@ describe('ServersPage', () => {
   });
 
   describe('fresh MFA', () => {
-    it('keeps the form, goes to the IdP and gives the form back after the return (no certificate name, no secret)', async () => {
+    it('keeps the form, goes to the IdP and gives the form back after the return', async () => {
       const { navigation, harness } = await open();
       button('Add server').click();
-      await until(() => expect(document.getElementById('srv-system')).toBeTruthy());
-      await fillNotes();
+      await until(() => expect(document.getElementById('srv-url')).toBeTruthy());
+      await fillNewApp();
       button('Save').click();
 
       await until(() =>
@@ -162,7 +232,7 @@ describe('ServersPage', () => {
       const kept = JSON.parse(sessionStorage.getItem('mcp-portal-resume')!).intent;
       expect(kept.kind).toBe('admin-draft');
       expect(kept.page).toBe('/admin/servers');
-      expect(JSON.parse(kept.draft).system).toBe('notes');
+      expect(JSON.parse(kept.draft).internalUrl).toBe('https://mcp-newapp.corp.local:8443/mcp');
       expect(writes.length).toBe(1);
 
       store.update({ mfaFresh: true });
@@ -171,23 +241,25 @@ describe('ServersPage', () => {
       await until(() =>
         expect(text()).toContain('Identity confirmed. Check the form and save again.'),
       );
-      expect(field('srv-system').value).toBe('notes');
+      expect(field('srv-url').value).toBe('https://mcp-newapp.corp.local:8443/mcp');
 
       button('Save').click();
-      await until(() => expect(text()).toContain('Added the server mcp-notes.'));
+      await until(() => expect(text()).toContain('Added the server mcp-newapp.'));
     });
 
     it('shows an error instead of going round again when the return was no MFA', async () => {
       const { navigation, harness } = await open();
       button('Add server').click();
-      await until(() => expect(document.getElementById('srv-system')).toBeTruthy());
-      await fillNotes();
+      await until(() => expect(document.getElementById('srv-url')).toBeTruthy());
+      await fillNewApp();
       button('Save').click();
       await until(() => expect(navigation.assign).toHaveBeenCalledTimes(1));
 
       await harness.navigateByUrl('/catalog');
       await harness.navigateByUrl('/admin/servers?mfa=ok');
-      await until(() => expect(field('srv-system').value).toBe('notes'));
+      await until(() =>
+        expect(field('srv-url').value).toBe('https://mcp-newapp.corp.local:8443/mcp'),
+      );
       button('Save').click();
 
       await until(() => expect(text()).toContain('requires re-authentication'));
@@ -212,15 +284,25 @@ describe('ServersPage', () => {
     async function edit(serverId: string) {
       const opened = await open();
       button(`Edit (${serverId})`).click();
-      await until(() => expect(document.getElementById('srv-url')).toBeTruthy());
+      await until(() => expect(document.getElementById('srv-type')).toBeTruthy());
       return opened;
     }
 
-    it('sends only what changed, with the ETag that was read, and no adapter or certificate name', async () => {
+    it('shows the address as fixed text, with no field to change it', async () => {
+      await edit('mcp-jira');
+
+      expect(document.getElementById('srv-url')).toBeNull();
+      expect(text(document.querySelector('.editor')!)).toContain(
+        'https://mcp-jira.internal:8443/mcp',
+      );
+      expect(text(document.querySelector('.editor')!)).toContain('The address cannot be changed.');
+    });
+
+    it('sends only what changed, with the ETag that was read, and nothing about the address', async () => {
       store.update({ mfaFresh: true });
       await edit('mcp-jira');
 
-      fill('srv-url', 'https://mcp-jira.internal:9443/mcp');
+      toggle('required');
       button('Save').click();
 
       await until(() => expect(text()).toContain('Saved the settings of mcp-jira.'));
@@ -229,17 +311,23 @@ describe('ServersPage', () => {
           method: 'PATCH',
           url: '/api/v1/admin/servers/mcp-jira',
           headers: { 'if-match': '"v1"' },
-          body: { internalUrl: 'https://mcp-jira.internal:9443/mcp' },
+          body: {
+            credential: {
+              required: false,
+              acceptedTypes: ['user-oauth', 'user-secret'],
+              type: 'user-oauth',
+            },
+          },
         },
       ]);
     });
 
-    it('offers the adapter flag only when a server is added', async () => {
+    it('offers neither the adapter flag nor the address when a server is changed or added', async () => {
       await edit('mcp-jira');
       expect(document.querySelector('input[name="adapter"]')).toBeNull();
       button('Cancel').click();
-      button('Add server').click();
-      await until(() => expect(document.querySelector('input[name="adapter"]')).toBeTruthy());
+      await openAdd();
+      expect(document.querySelector('input[name="adapter"]')).toBeNull();
     });
 
     it('says so when someone changed the server in the meantime (412)', async () => {
@@ -249,7 +337,7 @@ describe('ServersPage', () => {
           HttpResponse.json({ error: 'precondition_failed' }, { status: 412 }),
         ),
       );
-      fill('srv-url', 'https://mcp-jira.internal:9443/mcp');
+      toggle('required');
       button('Save').click();
 
       await until(() => expect(text()).toContain('Someone changed this in the meantime'));
@@ -261,6 +349,73 @@ describe('ServersPage', () => {
       toggle('accepted-user-oauth');
       await until(() => expect(field('srv-type').querySelectorAll('option').length).toBe(1));
       expect(field('srv-type').value).toBe('user-secret');
+    });
+  });
+
+  describe('details', () => {
+    async function details(serverId: string) {
+      await open();
+      button(`Details (${serverId})`).click();
+      await until(() => expect(document.getElementById('server-details-title')).toBeTruthy());
+    }
+
+    it('warns about plain HTTP at the top and shows the connection the administrator approved', async () => {
+      await details('mcp-gitlab');
+
+      const panel = document.querySelector('.editor')!;
+      expect(text(panel.firstElementChild!)).toContain('mcp-gitlab');
+      expect(panel.querySelector('app-notice')?.textContent).toContain(
+        "Plain HTTP sends users' credentials unencrypted.",
+      );
+      expect(text(panel)).toContain('http://mcp-gitlab:8080/mcp');
+      expect(text(panel)).toContain('None: the connection is not encrypted.');
+      expect(text(panel)).toContain('Last check');
+    });
+
+    it('shows the fingerprint, subject, issuer and names of a certificate, and the last error', async () => {
+      await details('mcp-servicedesk');
+
+      const panel = document.querySelector('.editor')!;
+      expect(panel.querySelector('app-notice')).toBeNull();
+      expect(text(panel)).toContain('Trusted CA (chain and host name)');
+      expect(panel.querySelector('.fingerprint code')?.textContent).toMatch(
+        /^sha256:[0-9a-f]{64}$/,
+      );
+      expect(text(panel)).toContain('CN=mcp-servicedesk.internal');
+      expect(text(panel)).toContain('CN=Corp Issuing CA 2');
+      expect(text(panel)).toContain('Valid until');
+      expect(text(panel)).toContain('TLS handshake failed.');
+    });
+
+    it('points a server with a pending connection to the Approvals screen', async () => {
+      await details('mcp-opensearch');
+
+      const panel = document.querySelector('.editor')!;
+      expect(text(panel)).toContain('A connection waits for your approval.');
+      expect(panel.querySelector('a')?.getAttribute('href')).toBe('/admin');
+    });
+
+    it('refreshes without a second factor, shows the new check time and the wait after a second click', async () => {
+      await details('mcp-jira');
+      const before = text(document.querySelector('.editor')!);
+
+      button('Refresh').click();
+      await until(() =>
+        expect(writes.map((write) => write.url)).toEqual([
+          '/api/v1/admin/servers/mcp-jira/refresh',
+        ]),
+      );
+      await until(() => expect(text(document.querySelector('.editor')!)).not.toBe(before));
+      expect(text(document.querySelector('app-error-notice') ?? document.body)).not.toContain(
+        'requires re-authentication',
+      );
+
+      button('Refresh').click();
+      await until(() =>
+        expect(text()).toContain(
+          'The server was checked a moment ago. Wait a few seconds and try again.',
+        ),
+      );
     });
   });
 

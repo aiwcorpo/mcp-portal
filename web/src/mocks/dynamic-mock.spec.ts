@@ -1,3 +1,4 @@
+import type { ServerConfig } from '../app/api/generated';
 import { useMockApi } from '../testing/mock-api';
 
 describe('the mock of the administration registry (CC-243 rules)', () => {
@@ -18,6 +19,35 @@ describe('the mock of the administration registry (CC-243 rules)', () => {
     expect((await get('/api/v1/admin/registry/servers/jira/policies')).status).toBe(400);
     expect((await get('/api/v1/admin/servers/mcp-nothing')).status).toBe(404);
     expect((await get('/api/v1/admin/registry/servers/mcp-nothing/policies')).status).toBe(404);
+  });
+
+  it('keeps the connection fields of 7.0.0 in the shape of the contract', async () => {
+    const servers = (await (await get('/api/v1/admin/servers')).json()) as ServerConfig[];
+    const statuses = new Set(servers.map((entry) => entry.status));
+    expect(statuses).toEqual(
+      new Set(['connected', 'unreachable', 'certificate_changed', 'pending_approval']),
+    );
+    for (const entry of servers) {
+      for (const connection of [entry.connection, entry.pendingConnection]) {
+        if (!connection) {
+          continue;
+        }
+        if (connection.tlsMode === 'plain') {
+          expect([
+            connection.fingerprint,
+            connection.subject,
+            connection.issuer,
+            connection.notAfter,
+          ]).toEqual([null, null, null, null]);
+          expect(connection.sans).toEqual([]);
+        } else {
+          expect(connection.fingerprint).toMatch(/^sha256:[0-9a-f]{64}$/);
+        }
+      }
+      expect(entry.pendingConnection === null).toBe(
+        entry.status !== 'pending_approval' && entry.status !== 'certificate_changed',
+      );
+    }
   });
 
   it('answers the approved policies of a server, and nulls while nothing is approved', async () => {

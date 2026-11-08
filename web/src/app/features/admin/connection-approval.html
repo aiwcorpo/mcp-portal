@@ -1,0 +1,82 @@
+@if (pending(); as p) {
+  @let s = server();
+  <section class="card" [attr.aria-labelledby]="'connection-title-' + s.serverId">
+    <h2 class="title" [id]="'connection-title-' + s.serverId">
+      <ng-container i18n="@@connectionApproval.title"
+        >Connection of {{ serverName() }}</ng-container
+      >
+      <code class="muted server-id">{{ s.serverId | safeText }}</code>
+    </h2>
+
+    @if (plain()) {
+      <app-notice kind="warning">
+        <strong i18n="@@connectionApproval.plainTitle">Plain HTTP.</strong>&ngsp;{{
+          plainWarning()
+        }}
+      </app-notice>
+    }
+    @if (resumeRefused()) {
+      <app-notice kind="warning">
+        <ng-container i18n="@@connectionApproval.resumeRefused"
+          >The connection changed while you confirmed your identity. Check it again and
+          approve.</ng-container
+        >
+      </app-notice>
+    }
+
+    <p class="reason">{{ reasonText() }}</p>
+    <p class="address">
+      <span class="label" i18n="@@connectionApproval.address">Address</span>
+      <code>{{ s.internalUrl | safeText }}</code>
+    </p>
+
+    <app-connection-facts [facts]="p" [validatesAsCa]="plain() ? null : p.validatesAsCa" />
+
+    @if (s.connection; as current) {
+      <p class="muted previous">
+        <ng-container i18n="@@connectionApproval.previous">Approved so far:</ng-container>
+        {{ modeLabel(current.tlsMode) }}
+        @if (current.fingerprint) {
+          <code>{{ current.fingerprint | safeText }}</code>
+        }
+      </p>
+    }
+
+    @if (choices().length > 1) {
+      <fieldset class="choices">
+        <legend i18n="@@connectionApproval.mode">How the gateway should trust this server</legend>
+        @for (choice of choices(); track choice) {
+          <label class="choice">
+            <input
+              type="radio"
+              [name]="'mode-' + s.serverId"
+              [value]="choice"
+              [checked]="mode() === choice"
+              (change)="choose(choice)"
+            />
+            <span>{{ modeLabel(choice) }}</span>
+          </label>
+        }
+      </fieldset>
+      <p class="muted hint" i18n="@@connectionApproval.modeHint">
+        With a trusted CA a renewed certificate needs no approval. Pinning accepts only this exact
+        certificate, and a new one has to be approved here again.
+      </p>
+    }
+
+    @if (failure(); as problem) {
+      <app-error-notice [failure]="problem" />
+    }
+
+    <p class="muted hint" i18n="@@connectionApproval.scope">
+      Approving the connection approves neither the policies nor the tools of the server: they wait
+      below. It needs a fresh MFA.
+    </p>
+    <div class="actions">
+      <button mat-flat-button type="button" [disabled]="approving()" (click)="approve()">
+        <ng-container i18n="@@connectionApproval.approve">Approve connection</ng-container
+        ><span class="visually-hidden"> ({{ serverName() }})</span>
+      </button>
+    </div>
+  </section>
+}

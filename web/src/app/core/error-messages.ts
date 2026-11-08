@@ -53,6 +53,12 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
     $localize`:@@error.system_rejected:The credential broker did not accept the system settings.`,
   server_exists: () =>
     $localize`:@@error.server_exists:A server with this identifier already exists.`,
+  connection_changed: () =>
+    $localize`:@@error.connection_changed:The certificate presented by the server changed since you opened the card. Check the new one and approve again.`,
+  no_pending_connection: () =>
+    $localize`:@@error.no_pending_connection:No connection of this server is waiting for approval. Refresh the view.`,
+  refresh_too_frequent: () =>
+    $localize`:@@error.refresh_too_frequent:The server was checked a moment ago. Wait a few seconds and try again.`,
   precondition_failed: () =>
     $localize`:@@error.precondition_failed:Someone changed this in the meantime. Reload the data and make your change again.`,
   precondition_required: () =>
@@ -89,10 +95,39 @@ function manifestRejectedMessage(reason: string | undefined): string {
   }
 }
 
-function serverRejectedMessage(reason: string | undefined): string {
+function manifestInvalidMessage(manifestReason: string | undefined): string {
+  switch (manifestReason) {
+    case 'environment_mismatch':
+      return $localize`:@@error.manifest_invalid_environment:The manifest of the server is meant for a different environment and was rejected.`;
+    case 'credential_type_mismatch':
+      return $localize`:@@error.manifest_invalid_credential:The manifest does not match the credential type of the system and was rejected.`;
+    case 'policies_invalid':
+      return $localize`:@@error.manifest_invalid_policies:The policies in the manifest of the server are not valid.`;
+    case 'resource_types_invalid':
+      return $localize`:@@error.manifest_invalid_types:The resource type declarations in the manifest of the server are not valid.`;
+    case 'adapter_source_mismatch':
+      return $localize`:@@error.manifest_invalid_adapter:The manifest source differs from the one the server was added with.`;
+    default:
+      return $localize`:@@error.manifest_invalid:The manifest of the server failed the checks of the gateway.`;
+  }
+}
+
+function serverRejectedMessage(reason: string | undefined, manifestReason?: string): string {
   switch (reason) {
-    case 'server_id_mismatch':
-      return $localize`:@@error.server_id_mismatch:The server identifier must be mcp- followed by the system identifier.`;
+    case 'address_refused':
+      return $localize`:@@error.address_refused:The gateway does not connect to this address: it resolves to a loopback, link-local, unspecified or multicast address.`;
+    case 'plain_http_not_allowed':
+      return $localize`:@@error.plain_http_not_allowed:An http address needs the "Allow plain HTTP" option.`;
+    case 'tls_handshake_failed':
+      return $localize`:@@error.tls_handshake_failed:The gateway could not complete a TLS handshake with this address. Check the host, the port and that the server speaks HTTPS.`;
+    case 'manifest_unreachable':
+      return $localize`:@@error.manifest_unreachable:The gateway reached the server but could not read its manifest at /.well-known/mcp-manifest. Check that the server runs the current starter and trusts the gateway keys.`;
+    case 'manifest_invalid':
+      return manifestInvalidMessage(manifestReason);
+    case 'namespace_conflict':
+      return $localize`:@@error.namespace_conflict:Another server already owns the policy namespace of this server.`;
+    case 'tls_mode_not_allowed':
+      return $localize`:@@error.tls_mode_not_allowed:The certificate does not allow this trust mode. Choose pinned, or fix the certificate for the host.`;
     case 'system_reserved':
       return $localize`:@@error.system_reserved:This system identifier is reserved for a component of the platform.`;
     case 'credential_types_mixed':
@@ -169,7 +204,7 @@ function systemRejectedMessage(reason: string | undefined): string {
 
 export function failureMessage(failure: ApiFailure): string {
   if (failure.code === 'server_rejected') {
-    return serverRejectedMessage(failure.reason);
+    return serverRejectedMessage(failure.reason, failure.manifestReason);
   }
   if (failure.code === 'scope_mapping_rejected') {
     return scopeMappingRejectedMessage(failure.reason);

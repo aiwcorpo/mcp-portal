@@ -25,16 +25,16 @@
       <app-notice kind="warning">
         <strong i18n="@@policies.serverWarningTitle">Source: server.</strong>
         <ng-container i18n="@@policies.serverWarning">
-          A running server presented these policies, not the CI pipeline from a reviewed commit, and
-          the version ({{ v.value.pendingVersion | safeText }}) comes from the server. Read every
-          policy and every declaration before you approve.
+          A running server presented these policies, not the manifest the gateway pulled, and the
+          version ({{ v.value.pendingVersion | safeText }}) comes from the server. Read every policy
+          and every declaration before you approve.
         </ng-container>
       </app-notice>
     } @else {
       <p class="source muted">
-        <ng-container i18n="@@policies.ciSource"
-          >Source: CI pipeline (reviewed commit), version
-          {{ v.value.pendingVersion | safeText }}.</ng-container
+        <ng-container i18n="@@policies.manifestSource"
+          >Source: manifest pulled by the gateway, version {{ v.value.pendingVersion | safeText }}.
+          Pulling approves nothing.</ng-container
         >
       </p>
     }

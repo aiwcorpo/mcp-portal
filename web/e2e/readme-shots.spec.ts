@@ -279,6 +279,28 @@ for (const lang of ['en', 'pl'] as const) {
       await shot(page, '17c-requests-not-accepted');
     });
 
+    test('adding a server, approving its connection, its details', async ({ page }) => {
+      await page.goto('/admin/servers?mockAdmin=in');
+      await page.getByRole('button', { name: t('Add server') }).click();
+      await page.getByLabel(t('Address of the MCP endpoint')).fill('http://mcp-inner:8080/mcp');
+      await page.getByRole('button', { name: t('Save'), exact: true }).click();
+      await expect(
+        page.getByText(t('An http address needs the "Allow plain HTTP" option.')),
+      ).toBeVisible();
+      await shot(page, '26-add-server');
+
+      await page.goto('/admin?mockAdmin=in');
+      await expect(
+        page.locator('app-connection-approval', { hasText: /Notes/ }).first(),
+      ).toBeVisible();
+      await shot(page, '27-connection-approval', true);
+
+      await page.goto('/admin/servers?mockAdmin=in');
+      await page.getByRole('button', { name: `${t('Details')} (mcp-gitlab)` }).click();
+      await expect(page.getByRole('heading', { name: /mcp-gitlab/ })).toBeVisible();
+      await shot(page, '28-server-details-plain', true);
+    });
+
     test('servers, systems, scope mapping, overrides and policies', async ({ page }) => {
       await page.goto('/admin/servers?mockAdmin=in');
       await expect(page.getByRole('rowheader', { name: /mcp-jira/ })).toBeVisible();

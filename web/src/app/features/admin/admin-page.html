@@ -8,8 +8,7 @@
   <app-notice kind="success" [dismissible]="true" (dismiss)="mfaReturned.set(false)">
     @if (resumedFromMfa()) {
       <ng-container i18n="@@admin.mfaResumed"
-        >Identity confirmed. Approving the definition you picked before the
-        confirmation.</ng-container
+        >Identity confirmed. Approving what you picked before the confirmation.</ng-container
       >
     } @else {
       <ng-container i18n="@@admin.mfaDone"
@@ -40,9 +39,9 @@
   <app-load-error [failure]="state.failure" (retry)="load()" />
 } @else {
   <p class="lead" i18n="@@admin.lead">
-    New and changed tools are not made available to agents until you approve them. The CI pipeline
-    approves only read tools on its own; write and delete tools wait here. The policies and resource
-    type declarations of a server are approved here too, and its tools stay blocked until then.
+    New and changed tools are not made available to agents until you approve them, read tools
+    included: the gateway approves nothing it pulls. The connection of a server, its policies and
+    its resource type declarations are approved here too, and its tools stay blocked until then.
   </p>
   <app-admin-nav />
   @if (switches().length) {
@@ -54,6 +53,21 @@
     <p class="summary" role="status" i18n="@@admin.pendingTotal">
       Pending approval: {{ totalPending() }}
     </p>
+  }
+  @if (pendingConnections().length > 0) {
+    <p class="summary" role="status" i18n="@@admin.connectionsPendingTotal">
+      Connections waiting for approval: {{ pendingConnections().length }}
+    </p>
+    @for (card of pendingConnections(); track card.server.serverId) {
+      <app-connection-approval
+        [server]="card.server"
+        [serverName]="card.name"
+        [resume]="resumeConnection()"
+        (resumeHandled)="onConnectionResumeHandled()"
+        (approved)="onConnectionApproved(card)"
+        (stale)="reload()"
+      />
+    }
   }
   @if (policiesPendingTotal() > 0) {
     <p class="summary" role="status" i18n="@@admin.policiesPendingTotal">
@@ -194,7 +208,7 @@
                         >Source: adapter</span
                       >
                     } @else {
-                      <span class="source" i18n="@@admin.sourceCi">Source: CI</span>
+                      <span class="source" i18n="@@admin.sourceManifest">Source: manifest</span>
                     }
                   }
                 </td>

@@ -16,6 +16,7 @@ import {
   KillSwitch,
   RegistryServer,
   RegistryTool,
+  ServerConfig,
 } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
@@ -28,6 +29,7 @@ import { Notice } from '../../shared/notice';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
+import { ConnectionApproval, ConnectionApprovalIntent } from './connection-approval';
 import { AdminSystemNames } from './system-names';
 import { PolicyApprovalIntent, PolicyDiffView } from './policy-diff-view';
 import { ToolDiff } from './tool-diff';
@@ -104,6 +106,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
     SafeTextPipe,
     MatButtonModule,
     AdminNav,
+    ConnectionApproval,
     LoadError,
     Loading,
     Notice,
@@ -140,6 +143,10 @@ export class AdminPage implements OnInit {
   protected readonly policiesOpen = signal<ReadonlySet<string>>(new Set());
   /** The policy approval confirmed before the MFA; carried out by the diff of that server when its hash is unchanged. */
   protected readonly resumePolicies = signal<PolicyApprovalIntent | null>(null);
+  /** Servers of C5: the pending connections come from here, the tools and policies from the registry. */
+  protected readonly servers = signal<readonly ServerConfig[]>([]);
+  /** The connection approval started before the MFA; carried out by the card of that server. */
+  protected readonly resumeConnection = signal<ConnectionApprovalIntent | null>(null);
   protected readonly ignoredEntries = signal<ApprovePoliciesResult['ignoredMappingEntries']>([]);
 
   protected readonly rows = computed<ServerRow[]>(() => {
@@ -188,6 +195,11 @@ export class AdminPage implements OnInit {
       };
     });
   });
+  protected readonly pendingConnections = computed(() =>
+    this.servers()
+      .filter((server) => server.pendingConnection !== null)
+      .map((server) => ({ server, name: this.systemNames.name(server.system) })),
+  );
   protected readonly totalPending = computed(() =>
     this.rows().reduce((sum, row) => sum + row.pendingCount, 0),
   );
@@ -212,30 +224,49 @@ export class AdminPage implements OnInit {
         this.opened.update((set) => addTo(set, intent.serverId));
       }
       const draft = this.draftOf(kept);
-      if (draft?.op === 'approve-policies' && typeof draft.serverId === 'string') {
+      if (draft?.op === 'approve-policies') {
         this.resumePolicies.set(draft);
         this.resumedFromMfa.set(true);
         this.policiesOpen.update((set) => addTo(set, draft.serverId));
+      } else if (draft?.op === 'approve-connection') {
+        this.resumeConnection.set(draft);
+        this.resumedFromMfa.set(true);
       }
       void this.router.navigate([], { queryParams: { mfa: null }, replaceUrl: true });
     }
   }
 
-  /** The approval of policies kept before the MFA: an `admin-draft` of this page with the server and the hash. */
-  private draftOf(kept: ReturnType<ResumeIntentStore['takeAny']>): PolicyApprovalIntent | null {
+  /**
+   * The approval of policies or of a connection kept before the MFA: an `admin-draft` of this page with the server and
+   * the hash or fingerprint it was about.
+   */
+  private draftOf(
+    kept: ReturnType<ResumeIntentStore['takeAny']>,
+  ): PolicyApprovalIntent | ConnectionApprovalIntent | null {
     if (kept?.kind !== 'admin-draft' || kept.page !== '/admin') {
       return null;
     }
     try {
-      const parsed = JSON.parse(kept.draft) as PolicyApprovalIntent;
+      const parsed = JSON.parse(kept.draft) as PolicyApprovalIntent | ConnectionApprovalIntent;
       // Same shapes as the approval of a tool (resume-intent): the draft is read back from sessionStorage, so it is checked.
-      return parsed.op === 'approve-policies' &&
-        typeof parsed.serverId === 'string' &&
-        /^[A-Za-z0-9._:-]{1,128}$/.test(parsed.serverId) &&
-        typeof parsed.hash === 'string' &&
-        HASH.test(parsed.hash)
-        ? parsed
-        : null;
+      if (
+        typeof parsed.serverId !== 'string' ||
+        !/^[A-Za-z0-9._:-]{1,128}$/.test(parsed.serverId)
+      ) {
+        return null;
+      }
+      if (parsed.op === 'approve-policies') {
+        return typeof parsed.hash === 'string' && HASH.test(parsed.hash) ? parsed : null;
+      }
+      if (parsed.op === 'approve-connection') {
+        const modes: readonly unknown[] = ['ca', 'pinned', 'plain'];
+        return modes.includes(parsed.tlsMode) &&
+          (parsed.fingerprint === null ||
+            (typeof parsed.fingerprint === 'string' && HASH.test(parsed.fingerprint)))
+          ? parsed
+          : null;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -245,6 +276,24 @@ export class AdminPage implements OnInit {
     this.policiesOpen.update((set) =>
       set.has(serverId) ? removeFrom(set, serverId) : addTo(set, serverId),
     );
+  }
+
+  protected onConnectionResumeHandled(): void {
+    this.resumeConnection.set(null);
+    this.resumedFromMfa.set(false);
+  }
+
+  protected async onConnectionApproved(card: {
+    server: ServerConfig;
+    name: string;
+  }): Promise<void> {
+    this.mfaReturned.set(false);
+    this.resumedFromMfa.set(false);
+    const name = card.name;
+    this.done.set(
+      $localize`:@@admin.connectionApproved:Approved the connection of ${name}:server:. Its policies and tools still need approval.`,
+    );
+    await this.read();
   }
 
   protected onPoliciesResumeHandled(): void {
@@ -267,6 +316,10 @@ export class AdminPage implements OnInit {
     await this.read();
   }
 
+  protected reload(): Promise<void> {
+    return this.read();
+  }
+
   /** Reads the registry again without the loading state, so the page does not jump after an approval. */
   private async read(): Promise<void> {
     try {
@@ -276,6 +329,12 @@ export class AdminPage implements OnInit {
       });
     } catch (error) {
       this.registry.set({ status: 'error', failure: toApiFailure(error) });
+    }
+    try {
+      this.servers.set(await firstValueFrom(this.adminApi.listAdminServers()));
+    } catch {
+      // The registry above is the view; a failed read of the servers only leaves out the connection cards.
+      this.servers.set([]);
     }
     try {
       this.switches.set((await firstValueFrom(this.adminApi.listAdminKillSwitches())).switches);

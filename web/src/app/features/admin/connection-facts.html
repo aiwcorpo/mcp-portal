@@ -1,0 +1,76 @@
+<dl class="facts">
+  <div class="fact">
+    <dt i18n="@@connectionFacts.mode">Trust mode</dt>
+    <dd>{{ modeLabel(facts().tlsMode) }}</dd>
+  </div>
+  @if (facts().tlsMode === 'plain') {
+    <div class="fact">
+      <dt i18n="@@connectionFacts.certificate">Certificate</dt>
+      <dd class="muted" i18n="@@connectionFacts.none">None: the connection is not encrypted.</dd>
+    </div>
+  } @else {
+    <div class="fact">
+      <dt i18n="@@connectionFacts.fingerprint">SHA-256 fingerprint</dt>
+      <dd class="fingerprint">
+        <code>{{ facts().fingerprint | safeText }}</code>
+        <button
+          mat-flat-button
+          type="button"
+          class="quiet"
+          [attr.aria-label]="copyLabel"
+          (click)="copyFingerprint()"
+          i18n="@@connectionFacts.copy"
+        >
+          Copy
+        </button>
+        @if (copyState() === 'copied') {
+          <span role="status" class="muted" i18n="@@connectionFacts.copied">Copied.</span>
+        } @else if (copyState() === 'failed') {
+          <span role="status" class="state-danger" i18n="@@connectionFacts.copyFailed"
+            >Could not copy.</span
+          >
+        }
+      </dd>
+    </div>
+    <div class="fact">
+      <dt i18n="@@connectionFacts.subject">Subject</dt>
+      <dd class="wrap">{{ facts().subject | safeText }}</dd>
+    </div>
+    <div class="fact">
+      <dt i18n="@@connectionFacts.issuer">Issuer</dt>
+      <dd class="wrap">{{ facts().issuer | safeText }}</dd>
+    </div>
+    <div class="fact">
+      <dt i18n="@@connectionFacts.sans">Names (SAN)</dt>
+      <dd class="wrap">
+        @for (name of facts().sans; track $index) {
+          <code>{{ name | safeText }}</code>
+        } @empty {
+          <span class="muted">&mdash;</span>
+        }
+      </dd>
+    </div>
+    <div class="fact">
+      <dt i18n="@@connectionFacts.validUntil">Valid until</dt>
+      <dd>
+        @if (facts().notAfter; as end) {
+          {{ end | date: 'dd.MM.yyyy HH:mm' }}
+        } @else {
+          <span class="muted">&mdash;</span>
+        }
+      </dd>
+    </div>
+    @if (validatesAsCa() !== null) {
+      <div class="fact">
+        <dt i18n="@@connectionFacts.validatesAsCa">Validates as a trusted CA certificate</dt>
+        <dd>
+          @if (validatesAsCa()) {
+            <span i18n="@@connectionFacts.caYes">Yes, for the host of the address</span>
+          } @else {
+            <span class="state-warn" i18n="@@connectionFacts.caNo">No: it can only be pinned</span>
+          }
+        </dd>
+      </div>
+    }
+  }
+</dl>

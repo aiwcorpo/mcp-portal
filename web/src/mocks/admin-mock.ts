@@ -47,7 +47,7 @@ export function initialAdminState(): AdminState {
   };
 }
 
-type Source = 'ci' | 'server' | 'adapter';
+type Source = 'manifest' | 'server' | 'adapter';
 
 interface SeedTool {
   name: string;
@@ -142,7 +142,7 @@ const SEED: SeedServer[] = [
       {
         name: 'add_label',
         pending: {
-          source: 'ci',
+          source: 'manifest',
           version: '1.5.0',
           entry: entry(
             'add_label',
@@ -173,7 +173,7 @@ const SEED: SeedServer[] = [
           [{ argument: 'pageId', type: 'Confluence::Page' }],
         ),
         pending: {
-          source: 'ci',
+          source: 'manifest',
           version: '1.5.0',
           entry: entry(
             'update_page',
@@ -258,7 +258,7 @@ const SEED: SeedServer[] = [
           [{ argument: 'issueKey', type: 'Jira::Issue' }],
         ),
         pending: {
-          source: 'ci',
+          source: 'manifest',
           version: '1.4.0',
           entry: entry(
             'delete_issue',

@@ -27,24 +27,71 @@ test('a new system and server are added and removed at runtime, with a fresh MFA
 
   await page.getByRole('link', { name: 'Servers', exact: true }).click();
   await page.getByRole('button', { name: 'Add server' }).click();
-  await page.getByLabel('System', { exact: true }).fill('notes');
-  await expect(page.getByText('mcp-notes.internal')).toBeVisible();
   await page
-    .getByLabel('Internal address of the MCP endpoint')
-    .fill('https://mcp-notes.internal:8443/mcp');
+    .getByLabel('Address of the MCP endpoint')
+    .fill('https://mcp-newapp.corp.local:8443/mcp');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByText('Identity confirmed. Check the form and save again.')).toBeVisible();
   await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByText('Added the server mcp-notes.')).toBeVisible();
-  await expect(page.getByRole('row', { name: /mcp-notes/ })).toContainText('Enabled');
+  await expect(page.getByText('Added the server mcp-newapp.')).toBeVisible();
+  await expect(page.getByRole('row', { name: /mcp-newapp/ })).toContainText('Pending approval');
 
-  await page.getByRole('button', { name: 'Remove (mcp-notes)' }).click();
+  await page.getByRole('button', { name: 'Remove (mcp-newapp)' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Remove server' }).click();
   await expect(page.getByText('Identity confirmed. Repeat the operation.')).toBeVisible();
-  await page.getByRole('button', { name: 'Remove (mcp-notes)' }).click();
+  await page.getByRole('button', { name: 'Remove (mcp-newapp)' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Remove server' }).click();
-  await expect(page.getByText('Removed the server mcp-notes.')).toBeVisible();
-  await expect(page.getByRole('row', { name: /mcp-notes/ })).toHaveCount(0);
+  await expect(page.getByText('Removed the server mcp-newapp.')).toBeVisible();
+  await expect(page.getByRole('row', { name: /mcp-newapp/ })).toHaveCount(0);
+});
+
+test('plain HTTP needs the option, and a server added with it is flagged', async ({ page }) => {
+  await page.goto('/admin/servers?mockAdmin=in');
+  await page.getByRole('button', { name: 'Add server' }).click();
+  await page.getByLabel('Address of the MCP endpoint').fill('http://mcp-inner:8080/mcp');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(
+    page.getByText('An http address needs the "Allow plain HTTP" option.'),
+  ).toBeVisible();
+  await expect(page.getByText("Plain HTTP sends users' credentials unencrypted.")).toBeVisible();
+
+  await page.getByLabel('Allow plain HTTP').check();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Identity confirmed. Check the form and save again.')).toBeVisible();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Added the server mcp-inner.')).toBeVisible();
+  await expect(page.getByRole('row', { name: /mcp-inner/ })).toContainText('Plain HTTP');
+});
+
+test('a connection is approved with the fingerprint that was shown, after a fresh MFA', async ({
+  page,
+}) => {
+  await page.goto('/admin?mockAdmin=in');
+  const card = page.locator('app-connection-approval', { hasText: 'Connection of Notes' });
+  await expect(card).toContainText('No: it can only be pinned');
+  await expect(card.locator('.fingerprint code')).toContainText(/^sha256:[0-9a-f]{64}$/);
+
+  await card.getByRole('button', { name: 'Approve connection (Notes)' }).click();
+  await expect(page.getByText('Approved the connection of Notes.')).toBeVisible();
+  await expect(
+    page.locator('app-connection-approval', { hasText: 'Connection of Notes' }),
+  ).toHaveCount(0);
+
+  await page.getByRole('link', { name: 'Servers', exact: true }).click();
+  await expect(page.getByRole('row', { name: /mcp-notes/ })).toContainText('Connected');
+  await expect(page.getByRole('row', { name: /mcp-notes/ })).toContainText('Pinned certificate');
+});
+
+test('the details of a server show its connection and refresh it without a second factor', async ({
+  page,
+}) => {
+  await page.goto('/admin/servers?mockAdmin=in');
+  await page.getByRole('button', { name: 'Details (mcp-gitlab)' }).click();
+  await expect(page.getByText("Plain HTTP sends users' credentials unencrypted.")).toBeVisible();
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Refresh', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(page.getByText('The server was checked a moment ago.')).toBeVisible();
 });
 
 test('a server is disabled without a second factor', async ({ page }) => {

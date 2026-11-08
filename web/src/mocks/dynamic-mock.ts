@@ -1,11 +1,14 @@
 import { http, HttpResponse, type HttpHandler, type JsonBodyType } from 'msw';
 import type {
   Override,
+  PendingConnection,
   PendingPolicies,
   ResourceTypeDeclaration,
   ScopeMappingEntry,
   ServerConfig,
+  ServerConnection,
   SystemAdminView,
+  TlsMode,
 } from '../app/api/generated';
 import type { MockContext } from './m3-mock';
 import type { MockStore } from './portal-mock';
@@ -32,6 +35,8 @@ export const RESERVED_SYSTEMS = [
 ];
 
 const STORAGE_KEY = 'mcp-portal-mock-registry';
+/** The gateway probes a server at most once in 5 s (C5). */
+const REFRESH_INTERVAL_MS = 5000;
 const MOCK_ADMIN_SUB = '3c1d6b7e-5a43-4f49-9d4f-0a7b1a1f2c11';
 
 interface Versioned<T> {
@@ -46,15 +51,137 @@ interface Data {
   overrides: Versioned<Override>[];
 }
 
+/** A value of the right shape that differs per input, as the other mock hashes do; it is the hash of nothing. */
+export function mockFingerprint(seed: string): string {
+  let state = 0x811c9dc5;
+  let hex = '';
+  for (let round = 0; hex.length < 64; round += 1) {
+    for (const char of `${seed}/${round}`) {
+      state = Math.imul(state ^ char.charCodeAt(0), 0x01000193) >>> 0;
+    }
+    hex += state.toString(16).padStart(8, '0');
+  }
+  return `sha256:${hex.slice(0, 64)}`;
+}
+
+const MOCK_CHECKED_AT = '2026-11-08T09:30:00Z';
+
+function mockCertificate(host: string, ca: boolean) {
+  return {
+    fingerprint: mockFingerprint(host),
+    subject: `CN=${host}`,
+    issuer: ca ? 'CN=Corp Issuing CA 2' : `CN=${host}`,
+    sans: [host],
+    notAfter: ca ? '2027-03-01T12:00:00Z' : '2027-11-08T00:00:00Z',
+  };
+}
+
+function approvedConnection(tlsMode: TlsMode, host: string): ServerConnection {
+  return {
+    tlsMode,
+    ...(tlsMode === 'plain'
+      ? { fingerprint: null, subject: null, issuer: null, sans: [], notAfter: null }
+      : mockCertificate(host, tlsMode === 'ca')),
+    approvedBy: MOCK_ADMIN_SUB,
+    approvedAt: '2026-11-06T10:00:00Z',
+  };
+}
+
+function pendingConnectionOf(
+  tlsMode: TlsMode,
+  host: string,
+  reason: PendingConnection['reason'],
+  validatesAsCa: boolean,
+  seed = host,
+): PendingConnection {
+  return {
+    tlsMode,
+    ...(tlsMode === 'plain'
+      ? { fingerprint: null, subject: null, issuer: null, sans: [], notAfter: null }
+      : { ...mockCertificate(host, validatesAsCa), fingerprint: mockFingerprint(seed) }),
+    validatesAsCa,
+    reason,
+    detectedAt: MOCK_CHECKED_AT,
+  };
+}
+
+const iso = (time: number): string => new Date(time).toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+type Probe =
+  | { refused: string; message: string; manifestReason?: string }
+  | { serverId: string; system: string; pending: PendingConnection };
+
+/**
+ * What the gateway would find at an address, decided by the address alone so that every refusal can be tried: loopback and
+ * link-local hosts are refused, `http` needs the flag, a host with `notls`, `nomanifest` or `badmanifest` in its name fails
+ * the way the word says, a name under `.corp.local` has a certificate that validates as `ca`, and any other `https` host
+ * has one that can only be pinned. The system is the first label of the host without a leading `mcp-`.
+ */
+function probeOf(url: URL, allowPlainHttp: boolean): Probe {
+  const host = url.hostname.replace(/^\[|\]$/g, '');
+  if (/^(127\.|0\.0\.0\.0$|169\.254\.|::1$|fe80:|localhost$)/i.test(host)) {
+    return { refused: 'address_refused', message: `${host} is a loopback or link-local address` };
+  }
+  const plain = url.protocol === 'http:';
+  if (plain && !allowPlainHttp) {
+    return { refused: 'plain_http_not_allowed', message: 'http needs allowPlainHttp' };
+  }
+  if (!plain && host.includes('notls')) {
+    return {
+      refused: 'tls_handshake_failed',
+      message: 'the server does not speak TLS on this port',
+    };
+  }
+  if (host.includes('nomanifest')) {
+    return {
+      refused: 'manifest_unreachable',
+      message: 'GET /.well-known/mcp-manifest answered 404',
+    };
+  }
+  if (host.includes('badmanifest')) {
+    return {
+      refused: 'manifest_invalid',
+      manifestReason: 'environment_mismatch',
+      message: 'the manifest declares environment dev',
+    };
+  }
+  const label = (host.split('.')[0] ?? '').replace(/^mcp-/, '').replace(/[^a-z0-9]/g, '');
+  const system = /^[a-z][a-z0-9]{1,30}$/.test(label) ? label : 'newserver';
+  if (RESERVED_SYSTEMS.includes(system)) {
+    return { refused: 'system_reserved', message: `${system} is a reserved system id` };
+  }
+  if (system === 'wiki') {
+    return { refused: 'namespace_conflict', message: 'the namespace Wiki belongs to mcp-docs' };
+  }
+  const ca = !plain && host.endsWith('.corp.local');
+  return {
+    serverId: `mcp-${system}`,
+    system,
+    pending: pendingConnectionOf(
+      plain ? 'plain' : ca ? 'ca' : 'pinned',
+      host,
+      'first_connection',
+      ca,
+    ),
+  };
+}
+
 function seedServer(
   serverId: string,
   system: string,
   extra: Partial<ServerConfig> = {},
 ): ServerConfig {
+  const host = `${serverId}.internal`;
   return {
     serverId,
     system,
-    internalUrl: `https://${serverId}.internal:8443/mcp`,
+    internalUrl: `https://${host}:8443/mcp`,
+    allowPlainHttp: false,
+    status: 'connected',
+    lastCheckedAt: MOCK_CHECKED_AT,
+    lastError: null,
+    connection: approvedConnection('ca', host),
+    pendingConnection: null,
     credential: {
       required: true,
       acceptedTypes: ['user-oauth', 'user-secret'],
@@ -77,14 +204,38 @@ function seedData(): Data {
   return {
     servers: [
       seedServer('mcp-confluence', 'confluence'),
-      seedServer('mcp-jira', 'jira'),
-      seedServer('mcp-gitlab', 'gitlab'),
+      seedServer('mcp-jira', 'jira', {
+        connection: approvedConnection('pinned', 'mcp-jira.internal'),
+      }),
+      seedServer('mcp-gitlab', 'gitlab', {
+        internalUrl: 'http://mcp-gitlab:8080/mcp',
+        allowPlainHttp: true,
+        connection: approvedConnection('plain', 'mcp-gitlab'),
+      }),
       seedServer('mcp-servicedesk', 'servicedesk', {
         credential: { required: true, acceptedTypes: ['service-account'], type: 'service-account' },
+        status: 'unreachable',
+        lastError: 'tls_handshake_failed',
       }),
       seedServer('mcp-opensearch', 'opensearch', {
         credential: { required: true, acceptedTypes: ['token-exchange'], type: 'token-exchange' },
         enabled: false,
+        status: 'certificate_changed',
+        lastError: 'certificate_changed',
+        connection: approvedConnection('pinned', 'mcp-opensearch.internal'),
+        pendingConnection: pendingConnectionOf(
+          'pinned',
+          'mcp-opensearch.internal',
+          'certificate_changed',
+          false,
+          'mcp-opensearch.internal/renewed',
+        ),
+      }),
+      seedServer('mcp-notes', 'notes', {
+        internalUrl: 'https://10.20.0.15:9443/mcp',
+        status: 'pending_approval',
+        connection: null,
+        pendingConnection: pendingConnectionOf('pinned', 'mcp-notes', 'first_connection', false),
       }),
     ].map((value) => ({ value, version: 1 })),
     systems: (
@@ -197,7 +348,7 @@ export interface PolicyFixture {
   pendingTypes: ResourceTypeDeclaration[];
   hash: string;
   version: string;
-  source: 'ci' | 'server';
+  source: 'manifest' | 'server';
 }
 
 const JIRA_SCHEMA = (extra: string) => `namespace Jira {
@@ -261,7 +412,7 @@ export const POLICY_FIXTURES: Record<string, PolicyFixture> = {
     pendingTypes: JIRA_TYPES,
     hash: HASH_JIRA,
     version: '1.4.0',
-    source: 'ci',
+    source: 'manifest',
   },
   'mcp-notes': {
     approved: null,
@@ -375,8 +526,17 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
   };
   const unavailable = (): Response | undefined =>
     store.state.scenario === 'errors' ? ctx.failure('upstream_unavailable', 503) : undefined;
-  const reject = (error: string, reason: string, message: string): Response =>
-    HttpResponse.json({ error, reason, message }, { status: 422, headers: baseHeaders });
+  const reject = (
+    error: string,
+    reason: string,
+    message: string,
+    manifestReason?: string,
+  ): Response =>
+    HttpResponse.json(
+      { error, reason, ...(manifestReason ? { manifestReason } : {}), message },
+      { status: 422, headers: baseHeaders },
+    );
+  const lastRefresh = new Map<string, number>();
   const json = (body: JsonBodyType, status: number, version?: number): Response =>
     HttpResponse.json(body, {
       status,
@@ -416,7 +576,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
   const invalidPathId = (request: Request): Response | undefined => {
     const path = new URL(request.url).pathname;
     const checks: [RegExp, RegExp][] = [
-      [/\/admin\/servers\/([^/]+)$/, SERVER_PATTERN],
+      [/\/admin\/servers\/([^/]+)(?:\/connection\/approve|\/refresh)?$/, SERVER_PATTERN],
       [/\/admin\/systems\/([^/]+)$/, SYSTEM_PATTERN],
       [/\/admin\/policy\/overrides\/([^/]+)$/, OVERRIDE_PATTERN],
       [/\/admin\/registry\/servers\/([^/]+)\/policies(?:\/pending|\/approve)?$/, SERVER_PATTERN],
@@ -486,35 +646,139 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         return denied;
       }
       const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-      if (!body || 'tlsName' in body) {
+      const address = typeof body?.['internalUrl'] === 'string' ? body['internalUrl'] : '';
+      const allowed = ['internalUrl', 'allowPlainHttp', 'credential'];
+      if (
+        !body ||
+        Object.keys(body).some((key) => !allowed.includes(key)) ||
+        !/^https?:\/\//.test(address)
+      ) {
         return ctx.failure('invalid_request', 400);
       }
-      const created = body as unknown as ServerConfig;
-      if (created.serverId !== `mcp-${created.system}`) {
-        return reject('server_rejected', 'server_id_mismatch', 'serverId must be mcp-<system>');
+      const url = URL.canParse(address) ? new URL(address) : null;
+      if (!url) {
+        return ctx.failure('invalid_request', 400);
       }
-      if (RESERVED_SYSTEMS.includes(created.system)) {
-        return reject('server_rejected', 'system_reserved', `${created.system} is reserved`);
+      const probe = probeOf(url, body['allowPlainHttp'] === true);
+      if ('refused' in probe) {
+        return reject('server_rejected', probe.refused, probe.message, probe.manifestReason);
       }
-      const problem = credentialProblem(created.credential);
-      if (problem) {
-        return problem;
-      }
-      if (serverOf(created.serverId)) {
+      if (serverOf(probe.serverId)) {
         return ctx.failure('server_exists', 409);
       }
       const mfa = needsMfa('/admin/servers');
       if (mfa) {
         return mfa;
       }
-      const value: ServerConfig = {
-        ...created,
-        enabled: created.enabled ?? true,
-        adapter: created.adapter ?? false,
-      };
+      const value = seedServer(probe.serverId, probe.system, {
+        internalUrl: address,
+        allowPlainHttp: body['allowPlainHttp'] === true,
+        status: 'pending_approval',
+        lastCheckedAt: iso(Date.now()),
+        connection: null,
+        pendingConnection: probe.pending,
+        credential: (body['credential'] as ServerConfig['credential'] | undefined) ?? {
+          required: true,
+          acceptedTypes: ['user-oauth'],
+          type: 'user-oauth',
+        },
+      });
       data.servers.push({ value, version: 1 });
       commit();
       return json(value, 201, 1);
+    }),
+    http.post(
+      at('/api/v1/admin/servers/:serverId/connection/approve'),
+      async ({ request, cookies, params }) => {
+        const denied = guard(request, cookies, true);
+        if (denied) {
+          return denied;
+        }
+        const entry = serverOf(String(params['serverId']));
+        if (!entry) {
+          return ctx.failure('not_found_or_denied', 404);
+        }
+        const body = (await request.json().catch(() => null)) as {
+          tlsMode?: TlsMode;
+          fingerprint?: string | null;
+        } | null;
+        const modes = ['ca', 'pinned', 'plain'];
+        if (
+          !body ||
+          !modes.includes(String(body.tlsMode)) ||
+          !('fingerprint' in body) ||
+          (body.fingerprint !== null && !/^sha256:[0-9a-f]{64}$/.test(String(body.fingerprint)))
+        ) {
+          return ctx.failure('invalid_request', 400);
+        }
+        const pending = entry.value.pendingConnection;
+        if (!pending) {
+          return ctx.failure('no_pending_connection', 409);
+        }
+        if (body.fingerprint !== pending.fingerprint) {
+          return ctx.failure('connection_changed', 409);
+        }
+        const allowed =
+          body.tlsMode === pending.tlsMode ||
+          (body.tlsMode === 'pinned' && pending.tlsMode === 'ca');
+        if (!allowed) {
+          return reject(
+            'server_rejected',
+            'tls_mode_not_allowed',
+            'the certificate does not allow this mode',
+          );
+        }
+        const mfa = needsMfa('/admin');
+        if (mfa) {
+          return mfa;
+        }
+        const certificate = {
+          fingerprint: pending.fingerprint,
+          subject: pending.subject,
+          issuer: pending.issuer,
+          sans: pending.sans,
+          notAfter: pending.notAfter,
+        };
+        entry.value = {
+          ...entry.value,
+          status: 'connected',
+          lastError: null,
+          lastCheckedAt: iso(Date.now()),
+          connection: {
+            ...certificate,
+            tlsMode: body.tlsMode as TlsMode,
+            approvedBy: MOCK_ADMIN_SUB,
+            approvedAt: iso(Date.now()),
+          },
+          pendingConnection: null,
+        };
+        entry.version += 1;
+        commit();
+        return json(entry.value, 200, entry.version);
+      },
+    ),
+    http.post(at('/api/v1/admin/servers/:serverId/refresh'), ({ request, cookies, params }) => {
+      const denied = guard(request, cookies, true);
+      if (denied) {
+        return denied;
+      }
+      const id = String(params['serverId']);
+      const entry = serverOf(id);
+      if (!entry) {
+        return ctx.failure('not_found_or_denied', 404);
+      }
+      const now = Date.now();
+      if (now - (lastRefresh.get(id) ?? 0) < REFRESH_INTERVAL_MS) {
+        return HttpResponse.json(
+          { error: 'refresh_too_frequent', requestId: ctx.requestId },
+          { status: 429, headers: { ...baseHeaders, 'Retry-After': '5' } },
+        );
+      }
+      lastRefresh.set(id, now);
+      entry.value = { ...entry.value, lastCheckedAt: iso(now) };
+      entry.version += 1;
+      commit();
+      return json(entry.value, 200, entry.version);
     }),
     http.get(at('/api/v1/admin/servers/:serverId'), ({ request, cookies, params }) => {
       const denied = guard(request, cookies, false);
@@ -538,7 +802,10 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         return missing;
       }
       const patch = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-      if (!patch || 'tlsName' in patch || 'adapter' in patch) {
+      if (
+        !patch ||
+        ['tlsName', 'adapter', 'internalUrl', 'allowPlainHttp'].some((field) => field in patch)
+      ) {
         return ctx.failure('invalid_request', 400);
       }
       const onlyDisable = Object.keys(patch).length === 1 && patch['enabled'] === false;

@@ -489,9 +489,36 @@
         <target>Serwer o tym identyfikatorze już istnieje.</target>
       </segment>
     </unit>
-    <unit id="error.precondition_failed">
+    <unit id="error.connection_changed">
       <notes>
         <note category="location">src/app/core/error-messages.ts:57</note>
+      </notes>
+      <segment>
+        <source>The certificate presented by the server changed since you opened the card. Check the new one and approve again.</source>
+        <target>Certyfikat serwera zmienił się od otwarcia karty. Sprawdź nowy i zatwierdź ponownie.</target>
+      </segment>
+    </unit>
+    <unit id="error.no_pending_connection">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:59</note>
+      </notes>
+      <segment>
+        <source>No connection of this server is waiting for approval. Refresh the view.</source>
+        <target>Żadne połączenie tego serwera nie czeka na zatwierdzenie. Odśwież widok.</target>
+      </segment>
+    </unit>
+    <unit id="error.refresh_too_frequent">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:61</note>
+      </notes>
+      <segment>
+        <source>The server was checked a moment ago. Wait a few seconds and try again.</source>
+        <target>Serwer był sprawdzany przed chwilą. Odczekaj kilka sekund i spróbuj ponownie.</target>
+      </segment>
+    </unit>
+    <unit id="error.precondition_failed">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:63</note>
       </notes>
       <segment>
         <source>Someone changed this in the meantime. Reload the data and make your change again.</source>
@@ -500,7 +527,7 @@
     </unit>
     <unit id="error.precondition_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:59</note>
+        <note category="location">src/app/core/error-messages.ts:65</note>
       </notes>
       <segment>
         <source>The data has to be loaded before it can be changed. Reload the page.</source>
@@ -509,7 +536,7 @@
     </unit>
     <unit id="error.flow_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:61</note>
+        <note category="location">src/app/core/error-messages.ts:67</note>
       </notes>
       <segment>
         <source>The connection link expired or was already used. Start again.</source>
@@ -518,7 +545,7 @@
     </unit>
     <unit id="error.provider_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:63</note>
+        <note category="location">src/app/core/error-messages.ts:69</note>
       </notes>
       <segment>
         <source>The system did not respond correctly. Try again in a moment.</source>
@@ -527,7 +554,7 @@
     </unit>
     <unit id="error.cancelled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:64</note>
+        <note category="location">src/app/core/error-messages.ts:70</note>
       </notes>
       <segment>
         <source>Connection cancelled.</source>
@@ -536,7 +563,7 @@
     </unit>
     <unit id="error.risk_lowered">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:74</note>
+        <note category="location">src/app/core/error-messages.ts:80</note>
       </notes>
       <segment>
         <source>The new definition lowers the tool&apos;s risk level, so it will not be approved. Fix the risk in the manifest and redeploy the server.</source>
@@ -545,7 +572,7 @@
     </unit>
     <unit id="error.environment_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:76</note>
+        <note category="location">src/app/core/error-messages.ts:82</note>
       </notes>
       <segment>
         <source>The manifest is meant for a different environment and was rejected.</source>
@@ -554,7 +581,7 @@
     </unit>
     <unit id="error.credential_type_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:78</note>
+        <note category="location">src/app/core/error-messages.ts:84</note>
       </notes>
       <segment>
         <source>The manifest does not match the credential type configured for the system and was rejected.</source>
@@ -563,7 +590,7 @@
     </unit>
     <unit id="error.classification_inconsistent">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:80</note>
+        <note category="location">src/app/core/error-messages.ts:86</note>
       </notes>
       <segment>
         <source>Risk and action do not match. Read pairs with the read action, write with update or admin, delete with delete or admin.</source>
@@ -572,7 +599,7 @@
     </unit>
     <unit id="error.classification_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:82</note>
+        <note category="location">src/app/core/error-messages.ts:88</note>
       </notes>
       <segment>
         <source>This tool comes from an adapter and needs classification: choose a risk and an action.</source>
@@ -581,7 +608,7 @@
     </unit>
     <unit id="error.classification_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:84</note>
+        <note category="location">src/app/core/error-messages.ts:90</note>
       </notes>
       <segment>
         <source>The gateway does not accept this classification. The adapter is read-only: its tool can only be approved as Read (read), and definitions from other sources are not classified.</source>
@@ -590,25 +617,124 @@
     </unit>
     <unit id="error.adapter_mode_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:86</note>
+        <note category="location">src/app/core/error-messages.ts:92</note>
       </notes>
       <segment>
         <source>The server mode in the gateway does not match the manifest source. Check the adapter configuration.</source>
         <target>Tryb serwera w gatewayu nie zgadza się ze źródłem manifestu. Sprawdź konfigurację adaptera.</target>
       </segment>
     </unit>
-    <unit id="error.server_id_mismatch">
+    <unit id="error.manifest_invalid_environment">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:95</note>
+        <note category="location">src/app/core/error-messages.ts:101</note>
       </notes>
       <segment>
-        <source>The server identifier must be mcp- followed by the system identifier.</source>
-        <target>Identyfikator serwera musi mieć postać mcp- i identyfikator systemu.</target>
+        <source>The manifest of the server is meant for a different environment and was rejected.</source>
+        <target>Manifest serwera jest przeznaczony dla innego środowiska i został odrzucony.</target>
+      </segment>
+    </unit>
+    <unit id="error.manifest_invalid_credential">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:103</note>
+      </notes>
+      <segment>
+        <source>The manifest does not match the credential type of the system and was rejected.</source>
+        <target>Manifest nie zgadza się z typem poświadczenia systemu i został odrzucony.</target>
+      </segment>
+    </unit>
+    <unit id="error.manifest_invalid_policies">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:105</note>
+      </notes>
+      <segment>
+        <source>The policies in the manifest of the server are not valid.</source>
+        <target>Polityki w manifeście serwera są nieprawidłowe.</target>
+      </segment>
+    </unit>
+    <unit id="error.manifest_invalid_types">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:107</note>
+      </notes>
+      <segment>
+        <source>The resource type declarations in the manifest of the server are not valid.</source>
+        <target>Deklaracje typów zasobów w manifeście serwera są nieprawidłowe.</target>
+      </segment>
+    </unit>
+    <unit id="error.manifest_invalid_adapter">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:109</note>
+      </notes>
+      <segment>
+        <source>The manifest source differs from the one the server was added with.</source>
+        <target>Źródło manifestu różni się od tego, z którym dodano serwer.</target>
+      </segment>
+    </unit>
+    <unit id="error.manifest_invalid">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:111</note>
+      </notes>
+      <segment>
+        <source>The manifest of the server failed the checks of the gateway.</source>
+        <target>Manifest serwera nie przeszedł kontroli gatewaya.</target>
+      </segment>
+    </unit>
+    <unit id="error.address_refused">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:118</note>
+      </notes>
+      <segment>
+        <source>The gateway does not connect to this address: it resolves to a loopback, link-local, unspecified or multicast address.</source>
+        <target>Gateway nie łączy się z tym adresem: wskazuje on adres pętli zwrotnej, link-local, nieokreślony albo multicast.</target>
+      </segment>
+    </unit>
+    <unit id="error.plain_http_not_allowed">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:120</note>
+      </notes>
+      <segment>
+        <source>An http address needs the &quot;Allow plain HTTP&quot; option.</source>
+        <target>Adres http wymaga opcji &quot;Zezwól na zwykły HTTP&quot;.</target>
+      </segment>
+    </unit>
+    <unit id="error.tls_handshake_failed">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:122</note>
+      </notes>
+      <segment>
+        <source>The gateway could not complete a TLS handshake with this address. Check the host, the port and that the server speaks HTTPS.</source>
+        <target>Gateway nie mógł zakończyć uzgadniania TLS z tym adresem. Sprawdź host, port i to, czy serwer mówi po HTTPS.</target>
+      </segment>
+    </unit>
+    <unit id="error.manifest_unreachable">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:124</note>
+      </notes>
+      <segment>
+        <source>The gateway reached the server but could not read its manifest at /.well-known/mcp-manifest. Check that the server runs the current starter and trusts the gateway keys.</source>
+        <target>Gateway połączył się z serwerem, ale nie odczytał jego manifestu spod /.well-known/mcp-manifest. Sprawdź, czy serwer działa na aktualnym starterze i ufa kluczom gatewaya.</target>
+      </segment>
+    </unit>
+    <unit id="error.namespace_conflict">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:128</note>
+      </notes>
+      <segment>
+        <source>Another server already owns the policy namespace of this server.</source>
+        <target>Inny serwer jest już właścicielem przestrzeni nazw polityk tego serwera.</target>
+      </segment>
+    </unit>
+    <unit id="error.tls_mode_not_allowed">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:130</note>
+      </notes>
+      <segment>
+        <source>The certificate does not allow this trust mode. Choose pinned, or fix the certificate for the host.</source>
+        <target>Certyfikat nie pozwala na ten tryb zaufania. Wybierz przypięcie albo napraw certyfikat dla hosta.</target>
       </segment>
     </unit>
     <unit id="error.system_reserved">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:97</note>
+        <note category="location">src/app/core/error-messages.ts:132</note>
       </notes>
       <segment>
         <source>This system identifier is reserved for a component of the platform.</source>
@@ -617,7 +743,7 @@
     </unit>
     <unit id="error.credential_types_mixed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:99</note>
+        <note category="location">src/app/core/error-messages.ts:134</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -626,7 +752,7 @@
     </unit>
     <unit id="error.credential_type_not_accepted">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:101</note>
+        <note category="location">src/app/core/error-messages.ts:136</note>
       </notes>
       <segment>
         <source>The credential type in use has to be one of the accepted types.</source>
@@ -635,7 +761,7 @@
     </unit>
     <unit id="error.unknown_resource_type">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:110</note>
+        <note category="location">src/app/core/error-messages.ts:145</note>
       </notes>
       <segment>
         <source>No registered server declares the resource type of one of the scopes. Nothing was saved.</source>
@@ -644,7 +770,7 @@
     </unit>
     <unit id="error.scope_not_grantable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:112</note>
+        <note category="location">src/app/core/error-messages.ts:147</note>
       </notes>
       <segment>
         <source>The server declares no scope pattern for the type of one of the scopes, so it cannot be granted. Nothing was saved.</source>
@@ -653,7 +779,7 @@
     </unit>
     <unit id="error.scope_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:114</note>
+        <note category="location">src/app/core/error-messages.ts:149</note>
       </notes>
       <segment>
         <source>The part after the slash does not match the scope pattern of its type. Nothing was saved.</source>
@@ -662,7 +788,7 @@
     </unit>
     <unit id="error.group_duplicate">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:116</note>
+        <note category="location">src/app/core/error-messages.ts:151</note>
       </notes>
       <segment>
         <source>A group appears twice. Nothing was saved.</source>
@@ -671,7 +797,7 @@
     </unit>
     <unit id="error.not_forbid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:125</note>
+        <note category="location">src/app/core/error-messages.ts:160</note>
       </notes>
       <segment>
         <source>An override can only forbid. Use a forbid policy.</source>
@@ -680,7 +806,7 @@
     </unit>
     <unit id="error.not_one_policy">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:127</note>
+        <note category="location">src/app/core/error-messages.ts:162</note>
       </notes>
       <segment>
         <source>The text has to hold exactly one policy.</source>
@@ -689,7 +815,7 @@
     </unit>
     <unit id="error.id_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:129</note>
+        <note category="location">src/app/core/error-messages.ts:164</note>
       </notes>
       <segment>
         <source>The identifier has to look like override- followed by a name.</source>
@@ -698,7 +824,7 @@
     </unit>
     <unit id="error.target_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:131</note>
+        <note category="location">src/app/core/error-messages.ts:166</note>
       </notes>
       <segment>
         <source>The policy does not fit the target: for the gateway it has to decide the call action on a tool, for a server it must not mention the tool or the call action.</source>
@@ -707,7 +833,7 @@
     </unit>
     <unit id="error.invalid_policy">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:133</note>
+        <note category="location">src/app/core/error-messages.ts:168</note>
       </notes>
       <segment>
         <source>The policy does not parse or does not validate against the schema of its target.</source>
@@ -716,7 +842,7 @@
     </unit>
     <unit id="error.id_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:135</note>
+        <note category="location">src/app/core/error-messages.ts:170</note>
       </notes>
       <segment>
         <source>The @id annotation in the text has to equal the identifier of the override.</source>
@@ -725,7 +851,7 @@
     </unit>
     <unit id="error.target_unknown">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:137</note>
+        <note category="location">src/app/core/error-messages.ts:172</note>
       </notes>
       <segment>
         <source>There is no server with this identifier in the registry.</source>
@@ -734,7 +860,7 @@
     </unit>
     <unit id="error.client_secret_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:146</note>
+        <note category="location">src/app/core/error-messages.ts:181</note>
       </notes>
       <segment>
         <source>The client secret has to be entered again when the base address, the authorization or token address or the client identifier changes.</source>
@@ -743,7 +869,7 @@
     </unit>
     <unit id="error.token_url_not_settable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:148</note>
+        <note category="location">src/app/core/error-messages.ts:183</note>
       </notes>
       <segment>
         <source>A token exchange system takes no token address: the broker uses the one of its identity provider.</source>
@@ -752,7 +878,7 @@
     </unit>
     <unit id="error.credential_type_not_supported_by_adapter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:150</note>
+        <note category="location">src/app/core/error-messages.ts:185</note>
       </notes>
       <segment>
         <source>A generic REST system takes user secrets or a service account, not both, and no OAuth.</source>
@@ -761,7 +887,7 @@
     </unit>
     <unit id="error.audience_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:152</note>
+        <note category="location">src/app/core/error-messages.ts:187</note>
       </notes>
       <segment>
         <source>This audience is not on the list of audiences that the operator allowed in the broker configuration.</source>
@@ -770,7 +896,7 @@
     </unit>
     <unit id="error.product_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:154</note>
+        <note category="location">src/app/core/error-messages.ts:189</note>
       </notes>
       <segment>
         <source>This adapter needs the product (Jira or Confluence).</source>
@@ -779,7 +905,7 @@
     </unit>
     <unit id="error.exchange_audience_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:156</note>
+        <note category="location">src/app/core/error-messages.ts:191</note>
       </notes>
       <segment>
         <source>A token exchange system needs the audience of the token.</source>
@@ -788,7 +914,7 @@
     </unit>
     <unit id="error.system_reserved_system">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:158</note>
+        <note category="location">src/app/core/error-messages.ts:193</note>
       </notes>
       <segment>
         <source>This system identifier is reserved for a component of the platform.</source>
@@ -797,7 +923,7 @@
     </unit>
     <unit id="error.default_type_not_supported">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:160</note>
+        <note category="location">src/app/core/error-messages.ts:195</note>
       </notes>
       <segment>
         <source>The default credential type has to be one of the supported types.</source>
@@ -806,7 +932,7 @@
     </unit>
     <unit id="error.credential_types_mixed_system">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:162</note>
+        <note category="location">src/app/core/error-messages.ts:197</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -815,7 +941,7 @@
     </unit>
     <unit id="error.oauth_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:164</note>
+        <note category="location">src/app/core/error-messages.ts:199</note>
       </notes>
       <segment>
         <source>OAuth needs the client settings: identifier, secret and the authorization and token addresses.</source>
@@ -824,7 +950,7 @@
     </unit>
     <unit id="error.invalid_filter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:187</note>
+        <note category="location">src/app/core/error-messages.ts:222</note>
       </notes>
       <segment>
         <source>This filter cannot be saved in the address. Change the selection.</source>
@@ -833,7 +959,7 @@
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:190</note>
+        <note category="location">src/app/core/error-messages.ts:225</note>
       </notes>
       <segment>
         <source>Too many requests. Try again in <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -923,16 +1049,16 @@
     </unit>
     <unit id="admin.mfaResumed">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:11,14</note>
+        <note category="location">src/app/features/admin/admin-page.html:11,13</note>
       </notes>
       <segment>
-        <source>Identity confirmed. Approving the definition you picked before the confirmation.</source>
-        <target>Tożsamość potwierdzona. Zatwierdzam definicję, którą wybrano przed potwierdzeniem.</target>
+        <source>Identity confirmed. Approving what you picked before the confirmation.</source>
+        <target>Tożsamość potwierdzona. Zatwierdzam to, co wybrano przed potwierdzeniem.</target>
       </segment>
     </unit>
     <unit id="admin.mfaDone">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:16,18</note>
+        <note category="location">src/app/features/admin/admin-page.html:15,17</note>
       </notes>
       <segment>
         <source>Identity confirmed. Open the differences and approve again.</source>
@@ -941,7 +1067,7 @@
     </unit>
     <unit id="admin.ignoredEntries">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:25,28</note>
+        <note category="location">src/app/features/admin/admin-page.html:24,27</note>
       </notes>
       <segment>
         <source>The approval made these scope mapping entries invalid, and evaluation ignores them until you correct the mapping:</source>
@@ -950,16 +1076,16 @@
     </unit>
     <unit id="admin.lead">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:43,47</note>
+        <note category="location">src/app/features/admin/admin-page.html:42,46</note>
       </notes>
       <segment>
-        <source> New and changed tools are not made available to agents until you approve them. The CI pipeline approves only read tools on its own; write and delete tools wait here. The policies and resource type declarations of a server are approved here too, and its tools stay blocked until then. </source>
-        <target> Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz. Potok CI sam zatwierdza tylko narzędzia do odczytu; narzędzia zapisu i usuwania czekają tutaj. Polityki i deklaracje typów zasobów serwera też zatwierdza się tutaj, a jego narzędzia pozostają zablokowane do tego czasu. </target>
+        <source> New and changed tools are not made available to agents until you approve them, read tools included: the gateway approves nothing it pulls. The connection of a server, its policies and its resource type declarations are approved here too, and its tools stay blocked until then. </source>
+        <target>Nowe i zmienione narzędzia nie są udostępniane agentom, dopóki ich nie zatwierdzisz, także narzędzia do odczytu: gateway niczego, co pobierze, nie zatwierdza sam. Połączenie serwera, jego polityki i deklaracje typów zasobów zatwierdza się tutaj tak samo, a jego narzędzia pozostają zablokowane do tego czasu.</target>
       </segment>
     </unit>
     <unit id="admin.killSwitchesOn">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:50,51</note>
+        <note category="location">src/app/features/admin/admin-page.html:49,50</note>
       </notes>
       <segment>
         <source>on: <ph id="0" equiv="INTERPOLATION" disp="{{ switches().length }}"/></source>
@@ -968,16 +1094,25 @@
     </unit>
     <unit id="admin.pendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:55,58</note>
+        <note category="location">src/app/features/admin/admin-page.html:54,57</note>
       </notes>
       <segment>
         <source> Pending approval: <ph id="0" equiv="INTERPOLATION" disp="{{ totalPending() }}"/> </source>
         <target> Do zatwierdzenia: <ph id="0" equiv="INTERPOLATION" disp="{{ totalPending() }}"/> </target>
       </segment>
     </unit>
+    <unit id="admin.connectionsPendingTotal">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:59,61</note>
+      </notes>
+      <segment>
+        <source> Connections waiting for approval: <ph id="0" equiv="INTERPOLATION" disp="{{ pendingConnections().length }}"/> </source>
+        <target>Połączenia czekające na zatwierdzenie: <ph id="0" equiv="INTERPOLATION" disp="{{ pendingConnections().length }}"/></target>
+      </segment>
+    </unit>
     <unit id="admin.policiesPendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:60,63</note>
+        <note category="location">src/app/features/admin/admin-page.html:74,77</note>
       </notes>
       <segment>
         <source> Servers with policies pending approval: <ph id="0" equiv="INTERPOLATION" disp="{{ policiesPendingTotal() }}"/> </source>
@@ -986,7 +1121,7 @@
     </unit>
     <unit id="admin.caption">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:66,68</note>
+        <note category="location">src/app/features/admin/admin-page.html:80,82</note>
       </notes>
       <segment>
         <source> MCP server registry </source>
@@ -995,7 +1130,7 @@
     </unit>
     <unit id="admin.colToggle">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:71,73</note>
+        <note category="location">src/app/features/admin/admin-page.html:85,87</note>
       </notes>
       <segment>
         <source>Tools</source>
@@ -1004,7 +1139,7 @@
     </unit>
     <unit id="admin.colServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:73,74</note>
+        <note category="location">src/app/features/admin/admin-page.html:87,88</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -1013,8 +1148,8 @@
     </unit>
     <unit id="admin.colVersion">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:74,75</note>
-        <note category="location">src/app/features/admin/admin-page.html:112</note>
+        <note category="location">src/app/features/admin/admin-page.html:88,89</note>
+        <note category="location">src/app/features/admin/admin-page.html:126</note>
       </notes>
       <segment>
         <source>Version</source>
@@ -1023,8 +1158,8 @@
     </unit>
     <unit id="admin.colChanges">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:75,76</note>
-        <note category="location">src/app/features/admin/admin-page.html:116</note>
+        <note category="location">src/app/features/admin/admin-page.html:89,90</note>
+        <note category="location">src/app/features/admin/admin-page.html:130</note>
       </notes>
       <segment>
         <source>Changes</source>
@@ -1033,8 +1168,8 @@
     </unit>
     <unit id="admin.colState">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:76,78</note>
-        <note category="location">src/app/features/admin/admin-page.html:127</note>
+        <note category="location">src/app/features/admin/admin-page.html:90,92</note>
+        <note category="location">src/app/features/admin/admin-page.html:141</note>
       </notes>
       <segment>
         <source>State</source>
@@ -1043,7 +1178,7 @@
     </unit>
     <unit id="admin.policiesWaiting">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:137,139</note>
+        <note category="location">src/app/features/admin/admin-page.html:151,153</note>
       </notes>
       <segment>
         <source>Policies and resource types waiting for approval</source>
@@ -1052,7 +1187,7 @@
     </unit>
     <unit id="admin.policiesBlocked">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:140,142</note>
+        <note category="location">src/app/features/admin/admin-page.html:154,156</note>
       </notes>
       <segment>
         <source>The tools of this server are blocked until you approve them.</source>
@@ -1061,7 +1196,7 @@
     </unit>
     <unit id="admin.hidePolicies">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:153,154</note>
+        <note category="location">src/app/features/admin/admin-page.html:167,168</note>
       </notes>
       <segment>
         <source>Hide differences</source>
@@ -1070,7 +1205,7 @@
     </unit>
     <unit id="admin.showPolicies">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:155,156</note>
+        <note category="location">src/app/features/admin/admin-page.html:169,170</note>
       </notes>
       <segment>
         <source>Show differences</source>
@@ -1079,7 +1214,7 @@
     </unit>
     <unit id="admin.policiesWord">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:159,160</note>
+        <note category="location">src/app/features/admin/admin-page.html:173,174</note>
       </notes>
       <segment>
         <source>policies</source>
@@ -1088,7 +1223,7 @@
     </unit>
     <unit id="admin.sourceServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:190,192</note>
+        <note category="location">src/app/features/admin/admin-page.html:204,206</note>
       </notes>
       <segment>
         <source>Source: server</source>
@@ -1097,25 +1232,25 @@
     </unit>
     <unit id="admin.sourceAdapter">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:194,196</note>
+        <note category="location">src/app/features/admin/admin-page.html:208,210</note>
       </notes>
       <segment>
         <source>Source: adapter</source>
         <target>Źródło: adapter</target>
       </segment>
     </unit>
-    <unit id="admin.sourceCi">
+    <unit id="admin.sourceManifest">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:197,198</note>
+        <note category="location">src/app/features/admin/admin-page.html:211,213</note>
       </notes>
       <segment>
-        <source>Source: CI</source>
-        <target>Źródło: CI</target>
+        <source>Source: manifest</source>
+        <target>Źródło: manifest</target>
       </segment>
     </unit>
     <unit id="admin.hideDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:215,216</note>
+        <note category="location">src/app/features/admin/admin-page.html:229,230</note>
       </notes>
       <segment>
         <source>Hide differences</source>
@@ -1124,7 +1259,7 @@
     </unit>
     <unit id="admin.showDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:217,218</note>
+        <note category="location">src/app/features/admin/admin-page.html:231,232</note>
       </notes>
       <segment>
         <source>Show differences</source>
@@ -1133,7 +1268,7 @@
     </unit>
     <unit id="admin.noTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:245,246</note>
+        <note category="location">src/app/features/admin/admin-page.html:259,260</note>
       </notes>
       <segment>
         <source> The server has no registered tools. </source>
@@ -1142,7 +1277,7 @@
     </unit>
     <unit id="admin.empty">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:254,257</note>
+        <note category="location">src/app/features/admin/admin-page.html:268,271</note>
       </notes>
       <segment>
         <source>The registry has no servers.</source>
@@ -1151,7 +1286,7 @@
     </unit>
     <unit id="admin.newCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:64</note>
+        <note category="location">src/app/features/admin/admin-page.ts:66</note>
       </notes>
       <segment>
         <source>new: <ph id="0" equiv="count" disp="created"/></source>
@@ -1160,7 +1295,7 @@
     </unit>
     <unit id="admin.changedCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:67</note>
+        <note category="location">src/app/features/admin/admin-page.ts:69</note>
       </notes>
       <segment>
         <source>changed: <ph id="0" equiv="count" disp="changed"/></source>
@@ -1169,7 +1304,7 @@
     </unit>
     <unit id="admin.toolApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:76</note>
+        <note category="location">src/app/features/admin/admin-page.ts:78</note>
       </notes>
       <segment>
         <source>Approved · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1178,7 +1313,7 @@
     </unit>
     <unit id="admin.toolRiskLowered">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:78</note>
+        <note category="location">src/app/features/admin/admin-page.ts:80</note>
       </notes>
       <segment>
         <source>Risk lowering · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1187,7 +1322,7 @@
     </unit>
     <unit id="admin.toolNew">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:80</note>
+        <note category="location">src/app/features/admin/admin-page.ts:82</note>
       </notes>
       <segment>
         <source>New · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1196,7 +1331,7 @@
     </unit>
     <unit id="admin.toolChanged">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:81</note>
+        <note category="location">src/app/features/admin/admin-page.ts:83</note>
       </notes>
       <segment>
         <source>Changed · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1205,7 +1340,7 @@
     </unit>
     <unit id="admin.toolSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:84</note>
+        <note category="location">src/app/features/admin/admin-page.ts:86</note>
       </notes>
       <segment>
         <source>Switched off · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1214,7 +1349,7 @@
     </unit>
     <unit id="admin.showTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:131</note>
+        <note category="location">src/app/features/admin/admin-page.ts:134</note>
       </notes>
       <segment>
         <source>Show tools</source>
@@ -1223,7 +1358,7 @@
     </unit>
     <unit id="admin.hideTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:132</note>
+        <note category="location">src/app/features/admin/admin-page.ts:135</note>
       </notes>
       <segment>
         <source>Hide tools</source>
@@ -1232,7 +1367,7 @@
     </unit>
     <unit id="admin.serverSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:179</note>
+        <note category="location">src/app/features/admin/admin-page.ts:186</note>
       </notes>
       <segment>
         <source>Switched off</source>
@@ -1241,7 +1376,7 @@
     </unit>
     <unit id="admin.serverDisabled">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:181</note>
+        <note category="location">src/app/features/admin/admin-page.ts:188</note>
       </notes>
       <segment>
         <source>Disabled</source>
@@ -1250,7 +1385,7 @@
     </unit>
     <unit id="admin.serverPending">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:183</note>
+        <note category="location">src/app/features/admin/admin-page.ts:190</note>
       </notes>
       <segment>
         <source>Pending approval</source>
@@ -1259,16 +1394,25 @@
     </unit>
     <unit id="admin.serverActive">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:184</note>
+        <note category="location">src/app/features/admin/admin-page.ts:191</note>
       </notes>
       <segment>
         <source>Active</source>
         <target>Aktywny</target>
       </segment>
     </unit>
+    <unit id="admin.connectionApproved">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:294</note>
+      </notes>
+      <segment>
+        <source>Approved the connection of <ph id="0" equiv="server" disp="name"/>. Its policies and tools still need approval.</source>
+        <target>Zatwierdzono połączenie serwera <ph id="0" equiv="server" disp="name"/>. Jego polityki i narzędzia nadal wymagają zatwierdzenia.</target>
+      </segment>
+    </unit>
     <unit id="admin.policiesApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:261</note>
+        <note category="location">src/app/features/admin/admin-page.ts:310</note>
       </notes>
       <segment>
         <source>Approved the policies of <ph id="0" equiv="server" disp="name"/>.</source>
@@ -1277,7 +1421,7 @@
     </unit>
     <unit id="admin.approved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:318</note>
+        <note category="location">src/app/features/admin/admin-page.ts:377</note>
       </notes>
       <segment>
         <source>Approved the definition of <ph id="0" equiv="tool" disp="tool.name"/>.</source>
@@ -1453,6 +1597,222 @@
       <segment>
         <source>admin: administrative operation</source>
         <target>admin: operacja administracyjna</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.title">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:6,7</note>
+      </notes>
+      <segment>
+        <source>Connection of <ph id="0" equiv="INTERPOLATION" disp="{{ serverName() }}"/></source>
+        <target>Połączenie serwera <ph id="0" equiv="INTERPOLATION" disp="{{ serverName() }}"/></target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.plainTitle">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:13,15</note>
+      </notes>
+      <segment>
+        <source>Plain HTTP.</source>
+        <target>Zwykły HTTP.</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.resumeRefused">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:21,24</note>
+      </notes>
+      <segment>
+        <source>The connection changed while you confirmed your identity. Check it again and approve.</source>
+        <target>Połączenie zmieniło się, gdy potwierdzałeś tożsamość. Sprawdź je jeszcze raz i zatwierdź.</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.address">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:29,30</note>
+      </notes>
+      <segment>
+        <source>Address</source>
+        <target>Adres</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.previous">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:37,38</note>
+      </notes>
+      <segment>
+        <source>Approved so far:</source>
+        <target>Dotąd zatwierdzone:</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.mode">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:47,48</note>
+      </notes>
+      <segment>
+        <source>How the gateway should trust this server</source>
+        <target>Jak gateway ma ufać temu serwerowi</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.modeHint">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:62,67</note>
+      </notes>
+      <segment>
+        <source> With a trusted CA a renewed certificate needs no approval. Pinning accepts only this exact certificate, and a new one has to be approved here again. </source>
+        <target>Przy zaufanym CA odnowiony certyfikat nie wymaga zatwierdzenia. Przypięcie przyjmuje dokładnie ten certyfikat, a nowy trzeba zatwierdzić tutaj ponownie.</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.scope">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:72,75</note>
+      </notes>
+      <segment>
+        <source> Approving the connection approves neither the policies nor the tools of the server: they wait below. It needs a fresh MFA. </source>
+        <target>Zatwierdzenie połączenia nie zatwierdza ani polityk, ani narzędzi serwera: czekają poniżej. Wymaga świeżego MFA.</target>
+      </segment>
+    </unit>
+    <unit id="connectionApproval.approve">
+      <notes>
+        <note category="location">src/app/features/admin/connection-approval.html:77,78</note>
+      </notes>
+      <segment>
+        <source>Approve connection</source>
+        <target>Zatwierdź połączenie</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.mode">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:3,4</note>
+      </notes>
+      <segment>
+        <source>Trust mode</source>
+        <target>Tryb zaufania</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.certificate">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:8,9</note>
+      </notes>
+      <segment>
+        <source>Certificate</source>
+        <target>Certyfikat</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.none">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:9,12</note>
+      </notes>
+      <segment>
+        <source>None: the connection is not encrypted.</source>
+        <target>Brak: połączenie nie jest szyfrowane.</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.fingerprint">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:13,15</note>
+      </notes>
+      <segment>
+        <source>SHA-256 fingerprint</source>
+        <target>Odcisk SHA-256</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.copy">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:24,26</note>
+      </notes>
+      <segment>
+        <source> Copy </source>
+        <target>Kopiuj</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.copied">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:27,28</note>
+      </notes>
+      <segment>
+        <source>Copied.</source>
+        <target>Skopiowano.</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.copyFailed">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:30,34</note>
+      </notes>
+      <segment>
+        <source>Could not copy.</source>
+        <target>Nie udało się skopiować.</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.subject">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:36,37</note>
+      </notes>
+      <segment>
+        <source>Subject</source>
+        <target>Podmiot</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.issuer">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:40,41</note>
+      </notes>
+      <segment>
+        <source>Issuer</source>
+        <target>Wystawca</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.sans">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:44,46</note>
+      </notes>
+      <segment>
+        <source>Names (SAN)</source>
+        <target>Nazwy (SAN)</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.validUntil">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:54,56</note>
+      </notes>
+      <segment>
+        <source>Valid until</source>
+        <target>Ważny do</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.validatesAsCa">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:65,67</note>
+      </notes>
+      <segment>
+        <source>Validates as a trusted CA certificate</source>
+        <target>Waliduje się jako certyfikat zaufanego CA</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.caYes">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:68,70</note>
+      </notes>
+      <segment>
+        <source>Yes, for the host of the address</source>
+        <target>Tak, dla hosta z adresu</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.caNo">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.html:70,73</note>
+      </notes>
+      <segment>
+        <source>No: it can only be pinned</source>
+        <target>Nie: można go tylko przypiąć</target>
+      </segment>
+    </unit>
+    <unit id="connectionFacts.copyLabel">
+      <notes>
+        <note category="location">src/app/features/admin/connection-facts.ts:39</note>
+      </notes>
+      <segment>
+        <source>Copy the fingerprint</source>
+        <target>Kopiuj odcisk</target>
       </segment>
     </unit>
     <unit id="admin.diff.entryName">
@@ -2286,17 +2646,17 @@
         <note category="location">src/app/features/admin/policy-diff-view.html:28,31</note>
       </notes>
       <segment>
-        <source> A running server presented these policies, not the CI pipeline from a reviewed commit, and the version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. Read every policy and every declaration before you approve. </source>
-        <target> Te polityki przedstawił działający serwer, nie potok CI ze sprawdzonego commitu, a wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Przeczytaj każdą politykę i każdą deklarację przed zatwierdzeniem. </target>
+        <source> A running server presented these policies, not the manifest the gateway pulled, and the version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. Read every policy and every declaration before you approve. </source>
+        <target>Te polityki przedstawił działający serwer, nie manifest pobrany przez gateway, a wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Przeczytaj każdą politykę i każdą deklarację przed zatwierdzeniem.</target>
       </segment>
     </unit>
-    <unit id="policies.ciSource">
+    <unit id="policies.manifestSource">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:36,38</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:36,37</note>
       </notes>
       <segment>
-        <source>Source: CI pipeline (reviewed commit), version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</source>
-        <target>Źródło: potok CI (sprawdzony commit), wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</target>
+        <source>Source: manifest pulled by the gateway, version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>. Pulling approves nothing.</source>
+        <target>Źródło: manifest pobrany przez gateway, wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>. Samo pobranie niczego nie zatwierdza.</target>
       </segment>
     </unit>
     <unit id="policies.first">
@@ -2722,6 +3082,186 @@
         <target>Zapisano mapowanie zakresów. Serwery pobiorą je w ciągu kilku sekund.</target>
       </segment>
     </unit>
+    <unit id="serverConnection.modeCa">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:14</note>
+      </notes>
+      <segment>
+        <source>Trusted CA (chain and host name)</source>
+        <target>Zaufane CA (łańcuch i nazwa hosta)</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.modePinned">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:16</note>
+      </notes>
+      <segment>
+        <source>Pinned certificate</source>
+        <target>Przypięty certyfikat</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.modePlain">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:18</note>
+      </notes>
+      <segment>
+        <source>Plain HTTP, no encryption</source>
+        <target>Zwykły HTTP, bez szyfrowania</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.statusPending">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:25</note>
+      </notes>
+      <segment>
+        <source>Pending approval</source>
+        <target>Czeka na zatwierdzenie</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.statusConnected">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:27</note>
+      </notes>
+      <segment>
+        <source>Connected</source>
+        <target>Połączony</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.statusUnreachable">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:29</note>
+      </notes>
+      <segment>
+        <source>Unreachable</source>
+        <target>Niedostępny</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.statusCertificateChanged">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:31</note>
+      </notes>
+      <segment>
+        <source>Certificate changed</source>
+        <target>Certyfikat zmieniony</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.statusManifestInvalid">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:33</note>
+      </notes>
+      <segment>
+        <source>Manifest invalid</source>
+        <target>Manifest nieprawidłowy</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.tagPlain">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:67</note>
+      </notes>
+      <segment>
+        <source>Plain HTTP</source>
+        <target>HTTP bez szyfrowania</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.tagPinned">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:74</note>
+      </notes>
+      <segment>
+        <source>Pinned certificate</source>
+        <target>Przypięty certyfikat</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.tagChanged">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:81</note>
+      </notes>
+      <segment>
+        <source>Certificate changed</source>
+        <target>Certyfikat zmieniony</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.reasonFirst">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:92</note>
+      </notes>
+      <segment>
+        <source>First connection to this server.</source>
+        <target>Pierwsze połączenie z tym serwerem.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.reasonChanged">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:94</note>
+      </notes>
+      <segment>
+        <source>The server presents another certificate than the approved one. Calls are refused until you approve the new one.</source>
+        <target>Serwer przedstawia inny certyfikat niż zatwierdzony. Wywołania są odrzucane, dopóki nie zatwierdzisz nowego.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.reasonCa">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:96</note>
+      </notes>
+      <segment>
+        <source>The certificate no longer validates for this host as a trusted CA certificate.</source>
+        <target>Certyfikat nie waliduje się już dla tego hosta jako certyfikat zaufanego CA.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.errHandshake">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:104</note>
+      </notes>
+      <segment>
+        <source>TLS handshake failed.</source>
+        <target>Uzgadnianie TLS nie powiodło się.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.errCertificate">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:106</note>
+      </notes>
+      <segment>
+        <source>The server presents another certificate than the approved one.</source>
+        <target>Serwer przedstawia inny certyfikat niż zatwierdzony.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.errManifestUnreachable">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:108</note>
+      </notes>
+      <segment>
+        <source>The manifest could not be read.</source>
+        <target>Nie udało się odczytać manifestu.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.errManifestInvalid">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:110</note>
+      </notes>
+      <segment>
+        <source>The manifest failed the checks of the gateway; the registry keeps the previous one.</source>
+        <target>Manifest nie przeszedł kontroli gatewaya; rejestr zachowuje poprzedni.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.errAddress">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:112</note>
+      </notes>
+      <segment>
+        <source>The address resolves to a refused range.</source>
+        <target>Adres wskazuje zakres, który jest odrzucany.</target>
+      </segment>
+    </unit>
+    <unit id="serverConnection.plainWarning">
+      <notes>
+        <note category="location">src/app/features/admin/server-connection.ts:119</note>
+      </notes>
+      <segment>
+        <source>Plain HTTP sends users&apos; credentials unencrypted. Use it only for a server in the same Docker network as the gateway.</source>
+        <target>Zwykły HTTP wysyła poświadczenia użytkowników bez szyfrowania. Używaj go tylko dla serwera w tej samej sieci Dockera co gateway.</target>
+      </segment>
+    </unit>
     <unit id="adminServers.title">
       <notes>
         <note category="location">src/app/features/admin/servers-page.html:1,5</note>
@@ -2751,16 +3291,16 @@
     </unit>
     <unit id="adminServers.lead">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:32,37</note>
+        <note category="location">src/app/features/admin/servers-page.html:32,38</note>
       </notes>
       <segment>
-        <source> The servers the gateway routes to. A server added here has no tools until its manifest is approved on the Approvals screen; removing one takes its tools away and refuses its calls. No restart is needed for either. </source>
-        <target> Serwery, do których gateway kieruje ruch. Dodany tutaj serwer nie ma narzędzi, dopóki jego manifest nie zostanie zatwierdzony w widoku Zatwierdzenia; usunięcie zabiera mu narzędzia i odrzuca jego wywołania. Żadna z tych zmian nie wymaga restartu. </target>
+        <source> The servers the gateway routes to. Add a server by its address: the gateway checks the certificate and pulls the manifest, and the server has no tools until you approve its connection, policies and tools on the Approvals screen. Removing one takes its tools away and refuses its calls. No restart is needed for either. </source>
+        <target>Serwery, do których gateway kieruje ruch. Dodaj serwer przez jego adres: gateway sprawdza certyfikat i pobiera manifest, a serwer nie ma narzędzi, dopóki nie zatwierdzisz jego połączenia, polityk i narzędzi na ekranie Zatwierdzenia. Usunięcie serwera zabiera jego narzędzia i odrzuca wywołania. Do żadnego z tych kroków nie trzeba restartu.</target>
       </segment>
     </unit>
     <unit id="adminServers.add">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:45,49</note>
+        <note category="location">src/app/features/admin/servers-page.html:46,50</note>
       </notes>
       <segment>
         <source> Add server </source>
@@ -2769,7 +3309,7 @@
     </unit>
     <unit id="adminServers.caption">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:52,54</note>
+        <note category="location">src/app/features/admin/servers-page.html:53,55</note>
       </notes>
       <segment>
         <source> Servers of the gateway </source>
@@ -2778,8 +3318,8 @@
     </unit>
     <unit id="adminServers.colServer">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:56,57</note>
-        <note category="location">src/app/features/admin/servers-page.html:73</note>
+        <note category="location">src/app/features/admin/servers-page.html:57,58</note>
+        <note category="location">src/app/features/admin/servers-page.html:75</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -2788,8 +3328,8 @@
     </unit>
     <unit id="adminServers.colAddress">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:57,58</note>
-        <note category="location">src/app/features/admin/servers-page.html:82</note>
+        <note category="location">src/app/features/admin/servers-page.html:58,59</note>
+        <note category="location">src/app/features/admin/servers-page.html:84</note>
       </notes>
       <segment>
         <source>Address</source>
@@ -2798,18 +3338,28 @@
     </unit>
     <unit id="adminServers.colCredential">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:58,59</note>
-        <note category="location">src/app/features/admin/servers-page.html:86</note>
+        <note category="location">src/app/features/admin/servers-page.html:59,60</note>
+        <note category="location">src/app/features/admin/servers-page.html:88</note>
       </notes>
       <segment>
         <source>Credential</source>
         <target>Poświadczenie</target>
       </segment>
     </unit>
+    <unit id="adminServers.colConnection">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:60,61</note>
+        <note category="location">src/app/features/admin/servers-page.html:92</note>
+      </notes>
+      <segment>
+        <source>Connection</source>
+        <target>Połączenie</target>
+      </segment>
+    </unit>
     <unit id="adminServers.colState">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:59,60</note>
-        <note category="location">src/app/features/admin/servers-page.html:90</note>
+        <note category="location">src/app/features/admin/servers-page.html:61,62</note>
+        <note category="location">src/app/features/admin/servers-page.html:98</note>
       </notes>
       <segment>
         <source>State</source>
@@ -2818,7 +3368,7 @@
     </unit>
     <unit id="adminServers.colActions">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:61,64</note>
+        <note category="location">src/app/features/admin/servers-page.html:63,66</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -2827,7 +3377,7 @@
     </unit>
     <unit id="adminServers.enabled">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:92,94</note>
+        <note category="location">src/app/features/admin/servers-page.html:100,102</note>
       </notes>
       <segment>
         <source>Enabled</source>
@@ -2836,7 +3386,7 @@
     </unit>
     <unit id="adminServers.disabled">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:94,96</note>
+        <note category="location">src/app/features/admin/servers-page.html:102,104</note>
       </notes>
       <segment>
         <source>Disabled</source>
@@ -2845,16 +3395,25 @@
     </unit>
     <unit id="adminServers.adapter">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:97,99</note>
+        <note category="location">src/app/features/admin/servers-page.html:105,107</note>
       </notes>
       <segment>
         <source>Adapter</source>
         <target>Adapter</target>
       </segment>
     </unit>
+    <unit id="adminServers.details">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:116,117</note>
+      </notes>
+      <segment>
+        <source>Details</source>
+        <target>Szczegóły</target>
+      </segment>
+    </unit>
     <unit id="adminServers.edit">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:108,109</note>
+        <note category="location">src/app/features/admin/servers-page.html:126,127</note>
       </notes>
       <segment>
         <source>Edit</source>
@@ -2863,7 +3422,7 @@
     </unit>
     <unit id="adminServers.disable">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:119,120</note>
+        <note category="location">src/app/features/admin/servers-page.html:137,138</note>
       </notes>
       <segment>
         <source>Disable</source>
@@ -2872,7 +3431,7 @@
     </unit>
     <unit id="adminServers.remove">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:130,131</note>
+        <note category="location">src/app/features/admin/servers-page.html:148,149</note>
       </notes>
       <segment>
         <source>Remove</source>
@@ -2881,16 +3440,151 @@
     </unit>
     <unit id="adminServers.none">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:139,142</note>
+        <note category="location">src/app/features/admin/servers-page.html:157,160</note>
       </notes>
       <segment>
         <source>The registry has no servers.</source>
         <target>Rejestr nie ma serwerów.</target>
       </segment>
     </unit>
+    <unit id="adminServers.detailsTitle">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:163,164</note>
+      </notes>
+      <segment>
+        <source>Server <ph id="0" equiv="INTERPOLATION" disp="{{ d.name }}"/></source>
+        <target>Serwer <ph id="0" equiv="INTERPOLATION" disp="{{ d.name }}"/></target>
+      </segment>
+    </unit>
+    <unit id="adminServers.plainTitle">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:168,169</note>
+      </notes>
+      <segment>
+        <source>Plain HTTP.</source>
+        <target>Zwykły HTTP.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.factAddress">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:173,175</note>
+      </notes>
+      <segment>
+        <source>Address</source>
+        <target>Adres</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.factStatus">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:179,180</note>
+      </notes>
+      <segment>
+        <source>Status</source>
+        <target>Status</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.factChecked">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:183,185</note>
+      </notes>
+      <segment>
+        <source>Last check</source>
+        <target>Ostatnie sprawdzenie</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.neverChecked">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:188,191</note>
+      </notes>
+      <segment>
+        <source>Not checked yet</source>
+        <target>Jeszcze nie sprawdzano</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.factError">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:194,195</note>
+      </notes>
+      <segment>
+        <source>Last error</source>
+        <target>Ostatni błąd</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.connectionTitle">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:200,201</note>
+      </notes>
+      <segment>
+        <source>Approved connection</source>
+        <target>Zatwierdzone połączenie</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.approvedBy">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:203,204</note>
+      </notes>
+      <segment>
+        <source>Approved</source>
+        <target>Zatwierdzono</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.noConnection">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:208,211</note>
+      </notes>
+      <segment>
+        <source> The connection of this server was never approved. </source>
+        <target>Połączenie tego serwera nigdy nie zostało zatwierdzone.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.pendingNote">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:214,216</note>
+      </notes>
+      <segment>
+        <source>A connection waits for your approval.</source>
+        <target>Połączenie czeka na Twoje zatwierdzenie.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.pendingLink">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:217,220</note>
+      </notes>
+      <segment>
+        <source>Review it on the Approvals screen</source>
+        <target>Przejrzyj je na ekranie Zatwierdzenia</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.refresh">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:229,231</note>
+      </notes>
+      <segment>
+        <source> Refresh </source>
+        <target>Odśwież</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.closeDetails">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:238,240</note>
+      </notes>
+      <segment>
+        <source> Close </source>
+        <target>Zamknij</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.refreshHint">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:242,245</note>
+      </notes>
+      <segment>
+        <source> Refresh probes the server again and pulls its manifest. It approves nothing and needs no MFA. </source>
+        <target>Odświeżenie sprawdza serwer jeszcze raz i pobiera jego manifest. Niczego nie zatwierdza i nie wymaga MFA.</target>
+      </segment>
+    </unit>
     <unit id="adminServers.formAdd">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:148,150</note>
+        <note category="location">src/app/features/admin/servers-page.html:254,256</note>
       </notes>
       <segment>
         <source>Add server</source>
@@ -2899,52 +3593,70 @@
     </unit>
     <unit id="adminServers.formEdit">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:150,152</note>
+        <note category="location">src/app/features/admin/servers-page.html:256,258</note>
       </notes>
       <segment>
         <source>Edit server</source>
         <target>Edytuj serwer</target>
       </segment>
     </unit>
+    <unit id="adminServers.url">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:262,264</note>
+      </notes>
+      <segment>
+        <source>Address of the MCP endpoint</source>
+        <target>Adres punktu końcowego MCP</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.urlHint">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:274,276</note>
+      </notes>
+      <segment>
+        <source> Any host with any HTTPS certificate. The gateway reads the certificate and the manifest from this address and takes the server identifier and the system from the manifest. </source>
+        <target>Dowolny host z dowolnym certyfikatem HTTPS. Gateway odczytuje certyfikat i manifest spod tego adresu, a identyfikator serwera i system bierze z manifestu.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.allowPlain">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.html:292,294</note>
+      </notes>
+      <segment>
+        <source>Allow plain HTTP</source>
+        <target>Zezwól na zwykły HTTP</target>
+      </segment>
+    </unit>
     <unit id="adminServers.system">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:155,156</note>
+        <note category="location">src/app/features/admin/servers-page.html:298,300</note>
       </notes>
       <segment>
         <source>System</source>
         <target>System</target>
       </segment>
     </unit>
-    <unit id="adminServers.serverIdIs">
+    <unit id="adminServers.addressFixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:174,175</note>
+        <note category="location">src/app/features/admin/servers-page.html:304,306</note>
       </notes>
       <segment>
-        <source>Server identifier:</source>
-        <target>Identyfikator serwera:</target>
+        <source>Address</source>
+        <target>Adres</target>
       </segment>
     </unit>
-    <unit id="adminServers.url">
+    <unit id="adminServers.addressFixedHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:188,190</note>
+        <note category="location">src/app/features/admin/servers-page.html:309,311</note>
       </notes>
       <segment>
-        <source>Internal address of the MCP endpoint</source>
-        <target>Wewnętrzny adres punktu końcowego MCP</target>
-      </segment>
-    </unit>
-    <unit id="adminServers.pinned">
-      <notes>
-        <note category="location">src/app/features/admin/servers-page.html:192,194</note>
-      </notes>
-      <segment>
-        <source>The gateway accepts only a certificate for</source>
-        <target>Gateway przyjmie tylko certyfikat dla</target>
+        <source> The address cannot be changed. Remove the server and add it again to use another one; a new certificate under the same address is approved on the Approvals screen. </source>
+        <target>Adresu nie można zmienić. Usuń serwer i dodaj go ponownie, aby użyć innego; nowy certyfikat pod tym samym adresem zatwierdza się na ekranie Zatwierdzenia.</target>
       </segment>
     </unit>
     <unit id="adminServers.accepted">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:210,211</note>
+        <note category="location">src/app/features/admin/servers-page.html:316,317</note>
       </notes>
       <segment>
         <source>Accepted credential types</source>
@@ -2953,7 +3665,7 @@
     </unit>
     <unit id="adminServers.typeInUse">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:229,231</note>
+        <note category="location">src/app/features/admin/servers-page.html:335,337</note>
       </notes>
       <segment>
         <source>Type in use</source>
@@ -2962,7 +3674,7 @@
     </unit>
     <unit id="adminServers.options">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:246,247</note>
+        <note category="location">src/app/features/admin/servers-page.html:352,353</note>
       </notes>
       <segment>
         <source>Options</source>
@@ -2971,7 +3683,7 @@
     </unit>
     <unit id="adminServers.required">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:254,256</note>
+        <note category="location">src/app/features/admin/servers-page.html:360,362</note>
       </notes>
       <segment>
         <source>The server needs a credential of the user</source>
@@ -2980,34 +3692,25 @@
     </unit>
     <unit id="adminServers.enabledLabel">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:263,265</note>
+        <note category="location">src/app/features/admin/servers-page.html:369,371</note>
       </notes>
       <segment>
         <source>Enabled</source>
         <target>Włączony</target>
       </segment>
     </unit>
-    <unit id="adminServers.adapterLabel">
-      <notes>
-        <note category="location">src/app/features/admin/servers-page.html:274,276</note>
-      </notes>
-      <segment>
-        <source>Served through an adapter (cannot be changed later)</source>
-        <target>Obsługiwany przez adapter (nie można tego później zmienić)</target>
-      </segment>
-    </unit>
     <unit id="adminServers.adapterFixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:278,281</note>
+        <note category="location">src/app/features/admin/servers-page.html:373,375</note>
       </notes>
       <segment>
-        <source>Served through an adapter.</source>
+        <source> Served through an adapter. </source>
         <target>Obsługiwany przez adapter.</target>
       </segment>
     </unit>
     <unit id="adminServers.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:282,285</note>
+        <note category="location">src/app/features/admin/servers-page.html:379,382</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA, except for disabling a server. If it is needed, you go to the identity provider and come back to this form. </source>
@@ -3016,7 +3719,7 @@
     </unit>
     <unit id="adminServers.save">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:287,289</note>
+        <note category="location">src/app/features/admin/servers-page.html:384,386</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -3025,34 +3728,34 @@
     </unit>
     <unit id="adminServers.cancel">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:296,298</note>
+        <note category="location">src/app/features/admin/servers-page.html:393,395</note>
       </notes>
       <segment>
         <source> Cancel </source>
         <target> Anuluj </target>
       </segment>
     </unit>
-    <unit id="adminServers.errSystem">
-      <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:156</note>
-      </notes>
-      <segment>
-        <source>Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.</source>
-        <target>Użyj od 2 do 31 małych liter i cyfr, zaczynając od litery. Identyfikatory gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal i ci są zarezerwowane.</target>
-      </segment>
-    </unit>
     <unit id="adminServers.errUrl">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:160</note>
+        <note category="location">src/app/features/admin/servers-page.ts:171</note>
       </notes>
       <segment>
-        <source>Enter an https address, for example https://mcp-notes.internal:8443/mcp.</source>
-        <target>Wpisz adres https, na przykład https://mcp-notes.internal:8443/mcp.</target>
+        <source>Enter an address that starts with https:// or http://, for example https://mcp-notes.corp.local:8443/mcp.</source>
+        <target>Podaj adres zaczynający się od https:// lub http://, na przykład https://mcp-notes.corp.local:8443/mcp.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.errPlain">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:174</note>
+      </notes>
+      <segment>
+        <source>An http address needs the &quot;Allow plain HTTP&quot; option.</source>
+        <target>Adres http wymaga opcji &quot;Zezwól na zwykły HTTP&quot;.</target>
       </segment>
     </unit>
     <unit id="adminServers.errAccepted">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:164</note>
+        <note category="location">src/app/features/admin/servers-page.ts:180</note>
       </notes>
       <segment>
         <source>Choose at least one credential type.</source>
@@ -3061,7 +3764,7 @@
     </unit>
     <unit id="adminServers.errType">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:167</note>
+        <note category="location">src/app/features/admin/servers-page.ts:183</note>
       </notes>
       <segment>
         <source>The type in use has to be one of the accepted types.</source>
@@ -3070,7 +3773,7 @@
     </unit>
     <unit id="adminServers.errMixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:173</note>
+        <note category="location">src/app/features/admin/servers-page.ts:189</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -3079,16 +3782,16 @@
     </unit>
     <unit id="adminServers.added">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:343</note>
+        <note category="location">src/app/features/admin/servers-page.ts:401</note>
       </notes>
       <segment>
-        <source>Added the server <ph id="0" equiv="server" disp="body.serverId"/>. It has no tools until its manifest is approved.</source>
-        <target>Dodano serwer <ph id="0" equiv="server" disp="body.serverId"/>. Nie ma narzędzi, dopóki jego manifest nie zostanie zatwierdzony.</target>
+        <source>Added the server <ph id="0" equiv="server" disp="id"/>. It has no tools until you approve its connection, policies and tools on the Approvals screen.</source>
+        <target>Dodano serwer <ph id="0" equiv="server" disp="id"/>. Nie ma narzędzi, dopóki nie zatwierdzisz jego połączenia, polityk i narzędzi na ekranie Zatwierdzenia.</target>
       </segment>
     </unit>
     <unit id="adminServers.noChange">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:348</note>
+        <note category="location">src/app/features/admin/servers-page.ts:406</note>
       </notes>
       <segment>
         <source>Nothing changed.</source>
@@ -3097,7 +3800,7 @@
     </unit>
     <unit id="adminServers.saved">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:360</note>
+        <note category="location">src/app/features/admin/servers-page.ts:418</note>
       </notes>
       <segment>
         <source>Saved the settings of <ph id="0" equiv="server" disp="current.original.serverId"/>.</source>
@@ -3106,7 +3809,7 @@
     </unit>
     <unit id="adminServers.disabledDone">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:403</note>
+        <note category="location">src/app/features/admin/servers-page.ts:461</note>
       </notes>
       <segment>
         <source>Disabled the server <ph id="0" equiv="server" disp="id"/>. Its tools are out of service.</source>
@@ -3115,7 +3818,7 @@
     </unit>
     <unit id="adminServers.removeTitle">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:429</note>
+        <note category="location">src/app/features/admin/servers-page.ts:487</note>
       </notes>
       <segment>
         <source>Remove the server <ph id="0" equiv="server" disp="id"/>?</source>
@@ -3124,7 +3827,7 @@
     </unit>
     <unit id="adminServers.removeMessage">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:430</note>
+        <note category="location">src/app/features/admin/servers-page.ts:488</note>
       </notes>
       <segment>
         <source>Its tools disappear from the catalog and tools/list, calls to it are refused, and the scope mapping entries of its resource types are removed. The system and the users&apos; connections stay. Removing needs a fresh MFA.</source>
@@ -3133,7 +3836,7 @@
     </unit>
     <unit id="adminServers.removeConfirm">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:431</note>
+        <note category="location">src/app/features/admin/servers-page.ts:489</note>
       </notes>
       <segment>
         <source>Remove server</source>
@@ -3142,7 +3845,7 @@
     </unit>
     <unit id="adminServers.removed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:444</note>
+        <note category="location">src/app/features/admin/servers-page.ts:502</note>
       </notes>
       <segment>
         <source>Removed the server <ph id="0" equiv="server" disp="id"/>.</source>
@@ -3842,8 +4545,8 @@
         <note category="location">src/app/features/admin/tool-diff.html:29,32</note>
       </notes>
       <segment>
-        <source> The adapter presented this definition, not the CI pipeline. Nobody reviewed it in code, and the version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. The tool has no risk or action: you assign them when approving, and until you do, agents cannot see it. </source>
-        <target> Tę definicję przedstawił adapter, a nie potok CI. Nikt jej nie przeglądał w kodzie, a wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Narzędzie nie ma ryzyka ani akcji: nadasz je przy zatwierdzaniu, a dopóki tego nie zrobisz, agenci go nie widzą. </target>
+        <source> The adapter presented this definition, not the manifest the gateway pulled. Nobody reviewed it in code, and the version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. The tool has no risk or action: you assign them when approving, and until you do, agents cannot see it. </source>
+        <target>Tę definicję przedstawił adapter, nie manifest pobrany przez gateway. Nikt jej nie przeglądał w kodzie, a wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Narzędzie nie ma ryzyka ani akcji: nadasz je przy zatwierdzaniu, a dopóki tego nie zrobisz, agenci go nie widzą.</target>
       </segment>
     </unit>
     <unit id="admin.serverWarningTitle">
@@ -3860,17 +4563,17 @@
         <note category="location">src/app/features/admin/tool-diff.html:39,42</note>
       </notes>
       <segment>
-        <source> A running server presented this definition, not the CI pipeline from a reviewed commit. Nobody reviewed it in code, and the given version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. Read the description and schema carefully before you approve. </source>
-        <target> Tę definicję przedstawił działający serwer, a nie potok CI z przeglądanego commitu. Nikt jej nie przeglądał w kodzie, a podana wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Przeczytaj opis i schemat uważnie, zanim zatwierdzisz. </target>
+        <source> A running server presented this definition, not the manifest the gateway pulled. Nobody reviewed it in code, and the given version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. Read the description and schema carefully before you approve. </source>
+        <target>Tę definicję przedstawił działający serwer, nie manifest pobrany przez gateway. Nikt jej nie przeglądał w kodzie, a podana wersja (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) pochodzi od serwera. Przeczytaj opis i schemat uważnie, zanim zatwierdzisz.</target>
       </segment>
     </unit>
-    <unit id="admin.ciSource">
+    <unit id="admin.manifestSource">
       <notes>
         <note category="location">src/app/features/admin/tool-diff.html:47,49</note>
       </notes>
       <segment>
-        <source>Source: CI pipeline (reviewed commit), version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</source>
-        <target>Źródło: potok CI (przeglądany commit), wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>.</target>
+        <source>Source: manifest pulled by the gateway, version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>. Pulling approves nothing.</source>
+        <target>Źródło: manifest pobrany przez gateway, wersja <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>. Samo pobranie niczego nie zatwierdza.</target>
       </segment>
     </unit>
     <unit id="admin.hiddenTitle">

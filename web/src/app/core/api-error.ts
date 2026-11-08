@@ -24,6 +24,9 @@ const C12_ERROR_CODES = [
   'override_rejected',
   'system_rejected',
   'server_exists',
+  'connection_changed',
+  'no_pending_connection',
+  'refresh_too_frequent',
   'precondition_failed',
   'precondition_required',
 ] as const;
@@ -57,6 +60,8 @@ export interface ApiFailure {
   requestId?: string;
   /** Closed-form `reason` of a manifest_rejected (CC-133) or invalid_request (invalid_filter, CC-175) answer; the UI maps it to its own text. */
   reason?: string;
+  /** `manifestReason` of a `server_rejected` with the reason `manifest_invalid` (CC-249), closed form like `reason`. */
+  manifestReason?: string;
   /**
    * `message` of a 422 of an administrator write (server, scope mapping, override, system): the BFF has already
    * neutralised and shortened it, and the page shows it once more through neutraliseText as a detail under its own text.
@@ -142,6 +147,13 @@ export function toApiFailure(error: unknown): ApiFailure {
     }
   }
   if (
+    code === 'server_rejected' &&
+    typeof body['manifestReason'] === 'string' &&
+    /^[a-z][a-z0-9_]*$/.test(body['manifestReason'])
+  ) {
+    failure.manifestReason = body['manifestReason'];
+  }
+  if (
     ADMIN_REJECTION_CODES.has(code) &&
     typeof body['message'] === 'string' &&
     body['message'].length > 0 &&
@@ -149,7 +161,7 @@ export function toApiFailure(error: unknown): ApiFailure {
   ) {
     failure.message = body['message'];
   }
-  if (code === 'rate_limited') {
+  if (code === 'rate_limited' || code === 'refresh_too_frequent') {
     const retryAfter = Number(body['retryAfterSeconds'] ?? error.headers.get('Retry-After'));
     if (Number.isFinite(retryAfter) && retryAfter > 0) {
       failure.retryAfterSeconds = retryAfter;

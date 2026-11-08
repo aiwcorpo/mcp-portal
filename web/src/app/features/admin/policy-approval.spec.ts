@@ -147,7 +147,7 @@ describe('AdminPage: approval of policies', () => {
     expect(text()).toContain('scopePattern: ^[A-Z]{2,10}$');
     expect(text()).toContain('scopePattern: ^[A-Z]{2,3}$');
     expect(text()).toContain('file: delete.cedar');
-    expect(text()).toContain('Source: CI pipeline (reviewed commit), version 1.4.0.');
+    expect(text()).toContain('Source: manifest pulled by the gateway, version 1.4.0.');
   });
 
   it('warns about the source of the policies of a running server and about a first registration', async () => {

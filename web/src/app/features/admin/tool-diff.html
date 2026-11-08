@@ -26,7 +26,7 @@
       <app-notice kind="warning">
         <strong i18n="@@admin.adapterWarningTitle">Source: foreign server adapter.</strong>
         <ng-container i18n="@@admin.adapterWarning">
-          The adapter presented this definition, not the CI pipeline. Nobody reviewed it in code,
+          The adapter presented this definition, not the manifest the gateway pulled. Nobody reviewed it in code,
           and the version ({{ v.value.pendingVersion | safeText }}) comes from the server. The tool
           has no risk or action: you assign them when approving, and until you do, agents cannot
           see it.
@@ -36,16 +36,16 @@
       <app-notice kind="warning">
         <strong i18n="@@admin.serverWarningTitle">Source: server.</strong>
         <ng-container i18n="@@admin.serverWarning">
-          A running server presented this definition, not the CI pipeline from a reviewed commit.
+          A running server presented this definition, not the manifest the gateway pulled.
           Nobody reviewed it in code, and the given version ({{ v.value.pendingVersion | safeText }})
           comes from the server. Read the description and schema carefully before you approve.
         </ng-container>
       </app-notice>
     } @else {
       <p class="source muted">
-        <ng-container i18n="@@admin.ciSource"
-          >Source: CI pipeline (reviewed commit), version
-          {{ v.value.pendingVersion | safeText }}.</ng-container
+        <ng-container i18n="@@admin.manifestSource"
+          >Source: manifest pulled by the gateway, version
+          {{ v.value.pendingVersion | safeText }}. Pulling approves nothing.</ng-container
         >
       </p>
     }

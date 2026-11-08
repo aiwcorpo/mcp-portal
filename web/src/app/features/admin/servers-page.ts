@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
@@ -11,13 +12,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
   AdminService,
   CredentialType,
+  ServerAddRequest,
   ServerConfig,
-  ServerConfigCreate,
   ServerConfigPatch,
 } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
@@ -32,8 +33,17 @@ import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
+import { ConnectionFacts } from './connection-facts';
+import {
+  PLAIN_HTTP_RISK,
+  lastErrorText,
+  serverTags,
+  statusLabel,
+  statusTone,
+  usesPlainHttp,
+} from './server-connection';
 import { AdminSystemNames } from './system-names';
-import { SYSTEM_ID, isHttpsUrl } from './admin-validation';
+import { isHttpUrl } from './admin-validation';
 
 const PAGE = '/admin/servers';
 const USER_TYPES: readonly CredentialType[] = ['user-oauth', 'user-secret'];
@@ -42,6 +52,8 @@ export interface ServerForm {
   mode: 'create' | 'edit';
   system: string;
   internalUrl: string;
+  /** Only when adding: the address cannot be changed afterwards (CC-249). */
+  allowPlainHttp: boolean;
   required: boolean;
   acceptedTypes: CredentialType[];
   type: CredentialType;
@@ -59,6 +71,7 @@ const EMPTY_FORM: ServerForm = {
   mode: 'create',
   system: '',
   internalUrl: '',
+  allowPlainHttp: false,
   required: true,
   acceptedTypes: ['user-oauth'],
   type: 'user-oauth',
@@ -69,9 +82,6 @@ const EMPTY_FORM: ServerForm = {
 /** What differs between the stored server and the form; the PATCH carries only that. */
 export function serverPatch(original: ServerConfig, form: ServerForm): ServerConfigPatch {
   const patch: ServerConfigPatch = {};
-  if (form.internalUrl.trim() !== original.internalUrl) {
-    patch.internalUrl = form.internalUrl.trim();
-  }
   const same =
     form.required === original.credential.required &&
     form.type === original.credential.type &&
@@ -91,16 +101,20 @@ export function serverPatch(original: ServerConfig, form: ServerForm): ServerCon
 }
 
 /**
- * "Servers" (C12 over C5, CC-234): the registry of the gateway as an administrator edits it. A server added here has
- * no tools until its manifest is approved on the Approvals screen; removing one takes its tools out of the catalog and
- * refuses its calls. Adding, changing and removing need a fresh MFA; the unsaved form survives the trip to the IdP.
+ * "Servers" (C12 over C5, CC-234, CC-249): the registry of the gateway as an administrator edits it. A server is added by
+ * its address: the gateway probes it and pulls its manifest, and it has no tools until its connection, policies and
+ * tools are approved on the Approvals screen. Removing one takes its tools out of the catalog and refuses its calls.
+ * Adding, changing and removing need a fresh MFA; the unsaved form survives the trip to the IdP. Probing again needs none.
  */
 @Component({
   selector: 'app-servers-page',
   imports: [
+    DatePipe,
     FormsModule,
     MatButtonModule,
+    RouterLink,
     AdminNav,
+    ConnectionFacts,
     ErrorNotice,
     LoadError,
     Loading,
@@ -122,8 +136,11 @@ export class ServersPage implements OnInit {
   readonly mfa = input<string | undefined>();
 
   protected readonly state = signal<LoadState<ServerConfig[]>>(LOADING);
-  protected readonly systems = this.names.known;
   protected readonly editing = signal<Editing | null>(null);
+  /** The server whose connection facts are open; kept as the answer of the last read or refresh. */
+  protected readonly detailsOf = signal<string | null>(null);
+  protected readonly refreshing = signal(false);
+  protected readonly plainWarning = PLAIN_HTTP_RISK;
   protected readonly busy = signal(false);
   protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly done = signal<string | null>(null);
@@ -141,23 +158,22 @@ export class ServersPage implements OnInit {
   protected readonly typeLabel = credentialTypeLabel;
 
   protected readonly form = computed(() => this.editing()?.form ?? null);
-  protected readonly serverId = computed(() => {
-    const form = this.form();
-    return form && form.mode === 'create' ? `mcp-${form.system.trim()}` : '';
-  });
   protected readonly errors = computed(() => {
     const form = this.form();
     const found: Record<string, string> = {};
     if (!form) {
       return found;
     }
-    if (form.mode === 'create' && !SYSTEM_ID.test(form.system.trim())) {
-      found['system'] =
-        $localize`:@@adminServers.errSystem:Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.`;
-    }
-    if (!isHttpsUrl(form.internalUrl.trim())) {
-      found['internalUrl'] =
-        $localize`:@@adminServers.errUrl:Enter an https address, for example https://mcp-notes.internal:8443/mcp.`;
+    if (form.mode === 'create') {
+      const url = form.internalUrl.trim();
+      if (!isHttpUrl(url)) {
+        found['internalUrl'] =
+          $localize`:@@adminServers.errUrl:Enter an address that starts with https:// or http://, for example https://mcp-notes.corp.local:8443/mcp.`;
+      } else if (url.toLowerCase().startsWith('http://') && !form.allowPlainHttp) {
+        found['internalUrl'] =
+          $localize`:@@adminServers.errPlain:An http address needs the "Allow plain HTTP" option.`;
+      }
+      return found;
     }
     if (form.acceptedTypes.length === 0) {
       found['acceptedTypes'] =
@@ -199,7 +215,7 @@ export class ServersPage implements OnInit {
         const state = this.state();
         const original =
           form.mode === 'edit' && state.status === 'ready'
-            ? (state.value.find((server) => server.serverId === `mcp-${form.system}`) ?? null)
+            ? (state.value.find((server) => server.system === form.system) ?? null)
             : null;
         this.editing.set({ form: { ...EMPTY_FORM, ...form }, original, etag: etag ?? null });
         this.mfaNote.set('draft');
@@ -225,7 +241,7 @@ export class ServersPage implements OnInit {
     }
   }
 
-  /** The systems the broker knows and their names, only to suggest and to label; the field accepts any valid identifier. */
+  /** The systems the broker knows and their names, only to label the rows. */
   private loadSystems(): Promise<void> {
     return this.names.load();
   }
@@ -239,8 +255,29 @@ export class ServersPage implements OnInit {
             .map((type) => credentialTypeLabel(type))
             .join(', '),
           typeInUse: credentialTypeLabel(server.credential.type),
+          status: statusLabel(server.status),
+          tone: statusTone(server.status),
+          tags: serverTags(server),
         }))
       : [];
+  });
+
+  /** The details panel shows the server of the last read, so a refresh or an approval is visible there at once. */
+  protected readonly details = computed(() => {
+    const id = this.detailsOf();
+    const state = this.state();
+    const server =
+      id && state.status === 'ready' ? state.value.find((entry) => entry.serverId === id) : null;
+    return server
+      ? {
+          server,
+          name: this.names.name(server.system),
+          status: statusLabel(server.status),
+          tone: statusTone(server.status),
+          plain: usesPlainHttp(server),
+          lastError: server.lastError ? lastErrorText(server.lastError) : null,
+        }
+      : null;
   });
 
   protected openCreate(): void {
@@ -250,6 +287,33 @@ export class ServersPage implements OnInit {
       original: null,
       etag: null,
     });
+  }
+
+  protected openDetails(server: ServerConfig): void {
+    this.reset();
+    this.detailsOf.set(server.serverId);
+  }
+
+  protected closeDetails(): void {
+    this.detailsOf.set(null);
+  }
+
+  /** Probes the server again and pulls its manifest; it approves nothing, so it needs no fresh MFA. */
+  protected async refresh(server: ServerConfig): Promise<void> {
+    if (this.refreshing()) {
+      return;
+    }
+    this.refreshing.set(true);
+    this.failure.set(null);
+    this.done.set(null);
+    try {
+      await firstValueFrom(this.adminApi.refreshAdminServer(server.serverId));
+      await this.read();
+    } catch (error) {
+      this.failure.set(toApiFailure(error));
+    } finally {
+      this.refreshing.set(false);
+    }
   }
 
   protected async openEdit(server: ServerConfig): Promise<void> {
@@ -265,6 +329,7 @@ export class ServersPage implements OnInit {
           mode: 'edit',
           system: current.system,
           internalUrl: current.internalUrl,
+          allowPlainHttp: current.allowPlainHttp,
           required: current.credential.required,
           acceptedTypes: [...current.credential.acceptedTypes],
           type: current.credential.type,
@@ -326,21 +391,14 @@ export class ServersPage implements OnInit {
     this.failure.set(null);
     try {
       if (form.mode === 'create') {
-        const body: ServerConfigCreate = {
-          serverId: this.serverId(),
-          system: form.system.trim(),
+        const body: ServerAddRequest = {
           internalUrl: form.internalUrl.trim(),
-          credential: {
-            required: form.required,
-            acceptedTypes: form.acceptedTypes,
-            type: form.type,
-          },
-          enabled: form.enabled,
-          adapter: form.adapter,
+          allowPlainHttp: form.allowPlainHttp,
         };
-        await firstValueFrom(this.adminApi.createAdminServer(body));
+        const added = await firstValueFrom(this.adminApi.createAdminServer(body));
+        const id = added.serverId;
         this.done.set(
-          $localize`:@@adminServers.added:Added the server ${body.serverId}:server:. It has no tools until its manifest is approved.`,
+          $localize`:@@adminServers.added:Added the server ${id}:server:. It has no tools until you approve its connection, policies and tools on the Approvals screen.`,
         );
       } else if (current.original) {
         const patch = serverPatch(current.original, form);

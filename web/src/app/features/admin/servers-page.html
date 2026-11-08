@@ -29,9 +29,10 @@
   <app-load-error [failure]="current.failure" (retry)="load()" />
 } @else {
   <p class="lead" i18n="@@adminServers.lead">
-    The servers the gateway routes to. A server added here has no tools until its manifest is
-    approved on the Approvals screen; removing one takes its tools away and refuses its calls. No
-    restart is needed for either.
+    The servers the gateway routes to. Add a server by its address: the gateway checks the
+    certificate and pulls the manifest, and the server has no tools until you approve its
+    connection, policies and tools on the Approvals screen. Removing one takes its tools away and
+    refuses its calls. No restart is needed for either.
   </p>
 
   <div class="toolbar">
@@ -56,6 +57,7 @@
           <th scope="col" role="columnheader" i18n="@@adminServers.colServer">Server</th>
           <th scope="col" role="columnheader" i18n="@@adminServers.colAddress">Address</th>
           <th scope="col" role="columnheader" i18n="@@adminServers.colCredential">Credential</th>
+          <th scope="col" role="columnheader" i18n="@@adminServers.colConnection">Connection</th>
           <th scope="col" role="columnheader" i18n="@@adminServers.colState">State</th>
           <th scope="col" role="columnheader">
             <span class="visually-hidden" i18n="@@adminServers.colActions">Actions</span>
@@ -87,6 +89,12 @@
               {{ row.typeInUse }}
               <span class="muted block">{{ row.types }}</span>
             </td>
+            <td role="cell" data-label="Connection" i18n-data-label="@@adminServers.colConnection">
+              <span class="block" [class]="'state-' + row.tone">{{ row.status }}</span>
+              @for (tag of row.tags; track tag.key) {
+                <span class="tag block-tag" [class]="'tag-' + tag.tone">{{ tag.label }}</span>
+              }
+            </td>
             <td role="cell" data-label="State" i18n-data-label="@@adminServers.colState">
               @if (row.server.enabled) {
                 <span class="state-ok" i18n="@@adminServers.enabled">Enabled</span>
@@ -98,6 +106,16 @@
               }
             </td>
             <td role="cell" class="c-actions">
+              <button
+                mat-flat-button
+                type="button"
+                class="quiet"
+                [disabled]="busy()"
+                (click)="openDetails(row.server)"
+              >
+                <ng-container i18n="@@adminServers.details">Details</ng-container
+                ><span class="visually-hidden"> ({{ row.server.serverId }})</span>
+              </button>
               <button
                 mat-flat-button
                 type="button"
@@ -139,6 +157,94 @@
     <p class="muted" role="status" i18n="@@adminServers.none">The registry has no servers.</p>
   }
 
+  @if (details(); as d) {
+    <section class="editor" aria-labelledby="server-details-title">
+      <h2 id="server-details-title">
+        <ng-container i18n="@@adminServers.detailsTitle">Server {{ d.name }}</ng-container>
+        <code class="muted">{{ d.server.serverId | safeText }}</code>
+      </h2>
+      @if (d.plain) {
+        <app-notice kind="warning">
+          <strong i18n="@@adminServers.plainTitle">Plain HTTP.</strong>&ngsp;{{ plainWarning() }}
+        </app-notice>
+      }
+      <dl class="facts-list">
+        <div class="fact-row">
+          <dt i18n="@@adminServers.factAddress">Address</dt>
+          <dd class="wrap">
+            <code>{{ d.server.internalUrl | safeText }}</code>
+          </dd>
+        </div>
+        <div class="fact-row">
+          <dt i18n="@@adminServers.factStatus">Status</dt>
+          <dd [class]="'state-' + d.tone">{{ d.status }}</dd>
+        </div>
+        <div class="fact-row">
+          <dt i18n="@@adminServers.factChecked">Last check</dt>
+          <dd>
+            @if (d.server.lastCheckedAt; as checked) {
+              {{ checked | date: 'dd.MM.yyyy HH:mm:ss' }}
+            } @else {
+              <span class="muted" i18n="@@adminServers.neverChecked">Not checked yet</span>
+            }
+          </dd>
+        </div>
+        @if (d.lastError; as problem) {
+          <div class="fact-row">
+            <dt i18n="@@adminServers.factError">Last error</dt>
+            <dd class="state-danger wrap">{{ problem | safeText }}</dd>
+          </div>
+        }
+      </dl>
+      @if (d.server.connection; as connection) {
+        <h3 class="subtitle" i18n="@@adminServers.connectionTitle">Approved connection</h3>
+        <app-connection-facts [facts]="connection" />
+        <p class="muted hint">
+          <ng-container i18n="@@adminServers.approvedBy">Approved</ng-container>
+          {{ connection.approvedAt | date: 'dd.MM.yyyy HH:mm' }}
+        </p>
+      } @else {
+        <p class="muted" i18n="@@adminServers.noConnection">
+          The connection of this server was never approved.
+        </p>
+      }
+      @if (d.server.pendingConnection) {
+        <app-notice kind="warning">
+          <ng-container i18n="@@adminServers.pendingNote"
+            >A connection waits for your approval.</ng-container
+          >&ngsp;
+          <a routerLink="/admin" i18n="@@adminServers.pendingLink"
+            >Review it on the Approvals screen</a
+          >.
+        </app-notice>
+      }
+      <div class="actions">
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="refreshing()"
+          (click)="refresh(d.server)"
+          i18n="@@adminServers.refresh"
+        >
+          Refresh
+        </button>
+        <button
+          mat-flat-button
+          type="button"
+          class="quiet"
+          (click)="closeDetails()"
+          i18n="@@adminServers.closeDetails"
+        >
+          Close
+        </button>
+      </div>
+      <p class="muted hint" i18n="@@adminServers.refreshHint">
+        Refresh probes the server again and pulls its manifest. It approves nothing and needs no
+        MFA.
+      </p>
+    </section>
+  }
+
   @if (form(); as f) {
     @let errs = errors();
     @let show = touched();
@@ -151,133 +257,124 @@
         }
       </h2>
       <form class="form" (ngSubmit)="save()" novalidate>
-        <div class="field">
-          <label for="srv-system" i18n="@@adminServers.system">System</label>
-          @if (f.mode === 'create') {
+        @if (f.mode === 'create') {
+          <div class="field wide">
+            <label for="srv-url" i18n="@@adminServers.url">Address of the MCP endpoint</label>
             <input
-              id="srv-system"
-              name="system"
+              id="srv-url"
+              name="internalUrl"
               type="text"
               autocomplete="off"
-              list="srv-systems"
-              [attr.aria-invalid]="show && errs['system'] ? 'true' : null"
-              [attr.aria-describedby]="'srv-system-hint'"
-              [ngModel]="f.system"
-              (ngModelChange)="change({ system: $event })"
+              aria-describedby="srv-url-hint"
+              [attr.aria-invalid]="show && errs['internalUrl'] ? 'true' : null"
+              [ngModel]="f.internalUrl"
+              (ngModelChange)="change({ internalUrl: $event })"
             />
-            <datalist id="srv-systems">
-              @for (name of systems(); track name) {
-                <option [value]="name"></option>
-              }
-            </datalist>
-            <p id="srv-system-hint" class="muted hint">
-              <ng-container i18n="@@adminServers.serverIdIs">Server identifier:</ng-container>
-              <code>{{ serverId() }}</code>
+            <p id="srv-url-hint" class="muted hint" i18n="@@adminServers.urlHint">
+              Any host with any HTTPS certificate. The gateway reads the certificate and the
+              manifest from this address and takes the server identifier and the system from the
+              manifest.
             </p>
-            @if (show && errs['system']) {
-              <p class="problem">{{ errs['system'] }}</p>
+            @if (show && errs['internalUrl']) {
+              <p class="problem">{{ errs['internalUrl'] }}</p>
             }
-          } @else {
+          </div>
+          <div class="field wide">
+            <label class="choice">
+              <input
+                id="srv-plain"
+                type="checkbox"
+                name="allowPlainHttp"
+                aria-describedby="srv-plain-hint"
+                [checked]="f.allowPlainHttp"
+                (change)="change({ allowPlainHttp: $any($event.target).checked })"
+              />
+              <span i18n="@@adminServers.allowPlain">Allow plain HTTP</span>
+            </label>
+            <p id="srv-plain-hint" class="hint plain-hint">{{ plainWarning() }}</p>
+          </div>
+        } @else {
+          <div class="field">
+            <span class="legend" i18n="@@adminServers.system">System</span>
             <p>
               <code>{{ f.system | safeText }}</code>
             </p>
-          }
-        </div>
-        <div class="field wide">
-          <label for="srv-url" i18n="@@adminServers.url"
-            >Internal address of the MCP endpoint</label
-          >
-          <p class="muted hint">
-            <ng-container i18n="@@adminServers.pinned"
-              >The gateway accepts only a certificate for</ng-container
-            >
-            <code>{{ f.mode === 'create' ? serverId() : 'mcp-' + f.system }}.internal</code>
-          </p>
-          <input
-            id="srv-url"
-            name="internalUrl"
-            type="text"
-            autocomplete="off"
-            [attr.aria-invalid]="show && errs['internalUrl'] ? 'true' : null"
-            [ngModel]="f.internalUrl"
-            (ngModelChange)="change({ internalUrl: $event })"
-          />
-          @if (show && errs['internalUrl']) {
-            <p class="problem">{{ errs['internalUrl'] }}</p>
-          }
-        </div>
-        <fieldset class="field wide">
-          <legend i18n="@@adminServers.accepted">Accepted credential types</legend>
-          @for (type of allTypes; track type) {
-            <label class="choice">
-              <input
-                type="checkbox"
-                [name]="'accepted-' + type"
-                [checked]="f.acceptedTypes.includes(type)"
-                (change)="toggleType(type, $any($event.target).checked)"
-              />
-              <span
-                >{{ typeLabel(type) }} <code class="muted">{{ type }}</code></span
-              >
-            </label>
-          }
-          @if (show && errs['acceptedTypes']) {
-            <p class="problem">{{ errs['acceptedTypes'] }}</p>
-          }
-        </fieldset>
-        <div class="field">
-          <label for="srv-type" i18n="@@adminServers.typeInUse">Type in use</label>
-          <select
-            id="srv-type"
-            name="type"
-            [attr.aria-invalid]="show && errs['type'] ? 'true' : null"
-            [ngModel]="f.type"
-            (ngModelChange)="change({ type: $event })"
-          >
-            @for (type of f.acceptedTypes; track type) {
-              <option [value]="type">{{ typeLabel(type) }}</option>
+          </div>
+          <div class="field wide">
+            <span class="legend" i18n="@@adminServers.addressFixed">Address</span>
+            <p class="wrap">
+              <code>{{ f.internalUrl | safeText }}</code>
+            </p>
+            <p class="muted hint" i18n="@@adminServers.addressFixedHint">
+              The address cannot be changed. Remove the server and add it again to use another one;
+              a new certificate under the same address is approved on the Approvals screen.
+            </p>
+          </div>
+        }
+        @if (f.mode === 'edit') {
+          <fieldset class="field wide">
+            <legend i18n="@@adminServers.accepted">Accepted credential types</legend>
+            @for (type of allTypes; track type) {
+              <label class="choice">
+                <input
+                  type="checkbox"
+                  [name]="'accepted-' + type"
+                  [checked]="f.acceptedTypes.includes(type)"
+                  (change)="toggleType(type, $any($event.target).checked)"
+                />
+                <span
+                  >{{ typeLabel(type) }} <code class="muted">{{ type }}</code></span
+                >
+              </label>
             }
-          </select>
-          @if (show && errs['type']) {
-            <p class="problem">{{ errs['type'] }}</p>
-          }
-        </div>
-        <fieldset class="field">
-          <legend i18n="@@adminServers.options">Options</legend>
-          <label class="choice">
-            <input
-              type="checkbox"
-              name="required"
-              [checked]="f.required"
-              (change)="change({ required: $any($event.target).checked })"
-            />
-            <span i18n="@@adminServers.required">The server needs a credential of the user</span>
-          </label>
-          <label class="choice">
-            <input
-              type="checkbox"
-              name="enabled"
-              [checked]="f.enabled"
-              (change)="change({ enabled: $any($event.target).checked })"
-            />
-            <span i18n="@@adminServers.enabledLabel">Enabled</span>
-          </label>
-          @if (f.mode === 'create') {
+            @if (show && errs['acceptedTypes']) {
+              <p class="problem">{{ errs['acceptedTypes'] }}</p>
+            }
+          </fieldset>
+          <div class="field">
+            <label for="srv-type" i18n="@@adminServers.typeInUse">Type in use</label>
+            <select
+              id="srv-type"
+              name="type"
+              [attr.aria-invalid]="show && errs['type'] ? 'true' : null"
+              [ngModel]="f.type"
+              (ngModelChange)="change({ type: $event })"
+            >
+              @for (type of f.acceptedTypes; track type) {
+                <option [value]="type">{{ typeLabel(type) }}</option>
+              }
+            </select>
+            @if (show && errs['type']) {
+              <p class="problem">{{ errs['type'] }}</p>
+            }
+          </div>
+          <fieldset class="field">
+            <legend i18n="@@adminServers.options">Options</legend>
             <label class="choice">
               <input
                 type="checkbox"
-                name="adapter"
-                [checked]="f.adapter"
-                (change)="change({ adapter: $any($event.target).checked })"
+                name="required"
+                [checked]="f.required"
+                (change)="change({ required: $any($event.target).checked })"
               />
-              <span i18n="@@adminServers.adapterLabel"
-                >Served through an adapter (cannot be changed later)</span
-              >
+              <span i18n="@@adminServers.required">The server needs a credential of the user</span>
             </label>
-          } @else if (f.adapter) {
-            <p class="muted hint" i18n="@@adminServers.adapterFixed">Served through an adapter.</p>
-          }
-        </fieldset>
+            <label class="choice">
+              <input
+                type="checkbox"
+                name="enabled"
+                [checked]="f.enabled"
+                (change)="change({ enabled: $any($event.target).checked })"
+              />
+              <span i18n="@@adminServers.enabledLabel">Enabled</span>
+            </label>
+            @if (f.adapter) {
+              <p class="muted hint" i18n="@@adminServers.adapterFixed">
+                Served through an adapter.
+              </p>
+            }
+          </fieldset>
+        }
         <p class="muted hint wide" i18n="@@adminServers.mfaHint">
           Saving needs a fresh MFA, except for disabling a server. If it is needed, you go to the
           identity provider and come back to this form.
