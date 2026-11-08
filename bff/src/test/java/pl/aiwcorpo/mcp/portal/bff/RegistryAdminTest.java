@@ -78,7 +78,7 @@ class RegistryAdminTest extends PortalHarness {
         }
         assertThat(pending).isNotNull();
         assertThat(pending.get("change").asString()).isIn("new", "changed");
-        assertThat(pending.get("source").asString()).isIn("ci", "server");
+        assertThat(pending.get("source").asString()).isIn("manifest", "server");
         LoggedRequest sent = gatewayRegistryRequests().getLast();
         assertThat(sent.getHeader("Authorization")).startsWith("Bearer xt-mcp-gateway-admin-");
     }
@@ -134,7 +134,7 @@ class RegistryAdminTest extends PortalHarness {
         C12.assertResponse("GET", PENDING_TEMPLATE, response);
         JsonNode pending = JSON.readTree(response.body());
         assertThat(pending.get("pendingVersion").asString()).isNotEmpty();
-        assertThat(pending.get("source").asString()).isIn("ci", "server");
+        assertThat(pending.get("source").asString()).isIn("manifest", "server");
         assertThat(pending.get("pendingHash").asString()).isEqualTo(pending.get("pendingEntry").get("definitionHash").asString());
     }
 
@@ -186,7 +186,7 @@ class RegistryAdminTest extends PortalHarness {
             assertThat(response.statusCode()).as(body).isEqualTo(503);
         }
         stubGet(GATEWAY_REGISTRY + "/mcp-jira/tools/update_issue/pending", 200,
-                "{\"approvedEntry\":null,\"pendingEntry\":{},\"pendingHash\":\"" + HASH + "\",\"pendingVersion\":\"1.0.0\",\"source\":\"ci\"}");
+                "{\"approvedEntry\":null,\"pendingEntry\":{},\"pendingHash\":\"" + HASH + "\",\"pendingVersion\":\"1.0.0\",\"source\":\"manifest\"}");
         assertThat(browser.get(PENDING).statusCode()).isEqualTo(503);
     }
 

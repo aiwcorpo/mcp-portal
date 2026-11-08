@@ -13,6 +13,7 @@ public class UpstreamException extends RuntimeException {
     private final String reason;
     private final String message;
     private final Integer retryAfterSeconds;
+    private final String manifestReason;
 
     public UpstreamException(String upstream, int status, String error) {
         this(upstream, status, error, null, null, null);
@@ -20,12 +21,18 @@ public class UpstreamException extends RuntimeException {
 
     public UpstreamException(String upstream, int status, String error, String reason, String message,
                              Integer retryAfterSeconds) {
+        this(upstream, status, error, reason, null, message, retryAfterSeconds);
+    }
+
+    public UpstreamException(String upstream, int status, String error, String reason, String manifestReason,
+                             String message, Integer retryAfterSeconds) {
         super(upstream + " answered " + status + (error == null ? "" : " " + error), null, false, false);
         this.status = status;
         this.error = error;
         this.reason = reason;
         this.message = message;
         this.retryAfterSeconds = retryAfterSeconds;
+        this.manifestReason = manifestReason;
     }
 
     /** No usable answer. Only exception types are kept: messages of I/O errors may quote the request. */
@@ -38,6 +45,7 @@ public class UpstreamException extends RuntimeException {
         this.reason = null;
         this.message = null;
         this.retryAfterSeconds = null;
+        this.manifestReason = null;
     }
 
     public int status() {
@@ -51,6 +59,11 @@ public class UpstreamException extends RuntimeException {
     /** {@code reason} of the upstream body (pattern {@code ^[a-z][a-z0-9_]{0,63}$}), or null. */
     public String reason() {
         return reason;
+    }
+
+    /** {@code manifestReason} of a {@code server_rejected} body (same pattern as {@code reason}), or null. */
+    public String manifestReason() {
+        return manifestReason;
     }
 
     /** {@code message} of the upstream body, at most 500 characters, hidden characters not yet neutralized; or null. */

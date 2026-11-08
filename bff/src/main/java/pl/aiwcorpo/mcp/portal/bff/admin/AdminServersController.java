@@ -22,9 +22,10 @@ import pl.aiwcorpo.mcp.portal.bff.web.ApiException;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Servers of the gateway registry and the approval of their policies (C12 over C5, CC-234, CC-237 A5, A11, CC-239):
- * adding a server, changing its connection, removing it, and approving the policies and resource type declarations
- * that its manifest brought. Everything that adds a server, moves traffic or widens access needs a fresh MFA, the
+ * Servers of the gateway registry and the approval of their connection and policies (C12 over C5, CC-234, CC-237 A5, A11,
+ * CC-239, CC-249): adding a server by its address, approving how the gateway trusts it, probing it again, changing its
+ * credential declaration, removing it, and approving the policies and resource type declarations that its manifest
+ * brought. Everything that adds a server, moves traffic or widens access needs a fresh MFA, the
  * gateway checks the same on the token.
  */
 @RestController
@@ -54,12 +55,42 @@ class AdminServersController {
     @PostMapping("/api/v1/admin/servers")
     ResponseEntity<Object> create(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
         return operations.write(null, authentication, request, response, () -> {
-            JsonNode body = AdminInput.serverCreate(AdminBody.read(request));
+            JsonNode body = AdminInput.serverAdd(AdminBody.read(request));
             if (body == null) {
                 throw ApiException.badRequest();
             }
             return new Op(Upstream.GATEWAY, HttpMethod.POST, "/admin/v1/servers", new Object[0], body,
                     AdminPreconditions.NONE, true, false, AdminViews::server, "server_rejected", "server_exists");
+        });
+    }
+
+    /**
+     * Pins how the gateway trusts the server (CC-249). It lets traffic reach the server, so it needs a fresh MFA and has to
+     * come from the portal page itself, as the approval of policies does. The body repeats what the administrator saw.
+     */
+    @PostMapping("/api/v1/admin/servers/{serverId}/connection/approve")
+    ResponseEntity<Object> approveConnection(@PathVariable String serverId, Authentication authentication,
+                                             HttpServletRequest request, HttpServletResponse response) {
+        return operations.write(validOrNull(serverId), authentication, request, response, () -> {
+            requireServerId(serverId);
+            JsonNode body = AdminInput.connectionApprove(AdminBody.read(request));
+            if (body == null) {
+                throw ApiException.badRequest();
+            }
+            return new Op(Upstream.GATEWAY, HttpMethod.POST, "/admin/v1/servers/{serverId}/connection/approve",
+                    new Object[] {serverId}, body, AdminPreconditions.NONE, true, true, AdminViews::server,
+                    "server_rejected", "connection_changed,no_pending_connection");
+        });
+    }
+
+    /** Probes the server and pulls its manifest again. It approves nothing, so no second factor (C5). */
+    @PostMapping("/api/v1/admin/servers/{serverId}/refresh")
+    ResponseEntity<Object> refresh(@PathVariable String serverId, Authentication authentication, HttpServletRequest request,
+                                   HttpServletResponse response) {
+        return operations.write(validOrNull(serverId), authentication, request, response, () -> {
+            requireServerId(serverId);
+            return new Op(Upstream.GATEWAY, HttpMethod.POST, "/admin/v1/servers/{serverId}/refresh", new Object[] {serverId},
+                    null, AdminPreconditions.NONE, false, false, AdminViews::server, null, null);
         });
     }
 

@@ -49,7 +49,11 @@ class AdminMirrorsTest extends PortalHarness {
     private static final String SYSTEM = "/api/v1/admin/systems/{system}";
 
     private static final String SERVER_BODY = C12.requestExample("POST", SERVERS, "notes").toString();
-    private static final String PATCH_BODY = "{\"internalUrl\":\"https://mcp-notes.internal:8443/mcp\"}";
+    private static final String CREDENTIAL_BODY = "{\"credential\":{\"required\":true,\"acceptedTypes\":[\"user-oauth\"],\"type\":\"user-oauth\"}}";
+    private static final String PATCH_BODY = CREDENTIAL_BODY;
+    private static final String CONNECTION = "/api/v1/admin/servers/{serverId}/connection/approve";
+    private static final String REFRESH = "/api/v1/admin/servers/{serverId}/refresh";
+    private static final String CONNECTION_BODY = C12.requestExample("POST", CONNECTION, "pin_self_signed").toString();
     private static final String MAPPING_BODY = C12.requestExample("PUT", MAPPING, "one_group").toString();
     private static final String OVERRIDE_BODY = C12.requestExample("PUT", OVERRIDE, "block_drop_table").toString();
     private static final String APPROVE_BODY = "{\"policiesHash\":\"" + HASH + "\"}";
@@ -112,7 +116,13 @@ class AdminMirrorsTest extends PortalHarness {
                 new Write("putSystemReplace", "PUT", "/api/v1/admin/systems/notes", SYSTEM, SYSTEM_BODY, ifMatch(), true,
                         BROKER, "/v1/admin/systems/notes", 200, system, "system_rejected"),
                 new Write("deleteSystem", "DELETE", "/api/v1/admin/systems/notes", SYSTEM, null, ifMatch(), true, BROKER,
-                        "/v1/admin/systems/notes", 204, "", null));
+                        "/v1/admin/systems/notes", 204, "", null),
+                new Write("approveServerConnection", "POST", "/api/v1/admin/servers/mcp-notes/connection/approve", CONNECTION,
+                        CONNECTION_BODY, SAME_ORIGIN, true, GATEWAY, "/admin/v1/servers/mcp-notes/connection/approve", 200,
+                        C12.responseExample("POST", CONNECTION, 200, "pinned").toString(), "server_rejected"),
+                new Write("refreshServer", "POST", "/api/v1/admin/servers/mcp-notes/refresh", REFRESH, null, Map.of(), false,
+                        GATEWAY, "/admin/v1/servers/mcp-notes/refresh", 200,
+                        C12.responseExample("POST", REFRESH, 200, "unreachable").toString(), null));
     }
 
     @AfterEach
@@ -317,7 +327,7 @@ class AdminMirrorsTest extends PortalHarness {
         C12.assertResponse("PATCH", SERVER, disable);
         assertThat(disable.statusCode()).isEqualTo(200);
 
-        for (String body : List.of("{\"enabled\":true}", "{\"enabled\":false,\"internalUrl\":\"https://mcp-notes.internal:8443/mcp\"}",
+        for (String body : List.of("{\"enabled\":true}", "{\"enabled\":false,\"credential\":{\"required\":true,\"acceptedTypes\":[\"user-oauth\"],\"type\":\"user-oauth\"}}",
                 "{\"credential\":{\"required\":true,\"acceptedTypes\":[\"user-oauth\"],\"type\":\"user-oauth\"}}")) {
             HttpResponse<String> response = stale.request("PATCH", path, body, true, ifMatch());
             assertThat(response.statusCode()).as(body).isEqualTo(401);
@@ -327,9 +337,10 @@ class AdminMirrorsTest extends PortalHarness {
     }
 
     @Test
-    void theCertificateNameAndTheAdapterFlagCannotBeChangedOrSet() {
+    void theAddressThePlainHttpFlagAndTheAdapterFlagCannotBeChangedOrSetAfterTheAdd() {
         TestBrowser admin = admin();
         for (String body : List.of("{\"tlsName\":\"mcp-notes.internal\"}", "{\"adapter\":true}",
+                "{\"internalUrl\":\"https://mcp-notes.internal:8443/mcp\"}", "{\"allowPlainHttp\":true}",
                 "{\"enabled\":false,\"adapter\":false}")) {
             HttpResponse<String> response = admin.request("PATCH", "/api/v1/admin/servers/mcp-notes", body, true, ifMatch());
             C12.assertResponse("PATCH", SERVER, response);
@@ -492,6 +503,93 @@ class AdminMirrorsTest extends PortalHarness {
     }
 
     @Test
+    void everyRefusalReasonOfAddingAServerReachesTheBrowserWithItsManifestReason() {
+        TestBrowser admin = admin();
+        Write create = writes().getFirst();
+        for (String example : List.of("address_refused", "plain_http_not_allowed", "tls_handshake_failed",
+                "manifest_unreachable", "manifest_invalid", "system_reserved", "namespace_conflict")) {
+            String upstream = C12.responseExample("POST", SERVERS, 422, example).toString();
+            stub(GATEWAY, "POST", "/admin/v1/servers", 422, upstream);
+
+            HttpResponse<String> response = call(admin, create, create.headers());
+
+            C12.assertResponse("POST", SERVERS, response);
+            assertThat(response.statusCode()).as(example).isEqualTo(422);
+            assertThat(JSON.readTree(response.body())).as(example).isEqualTo(JSON.readTree(upstream));
+        }
+    }
+
+    @Test
+    void aTlsModeTheCertificateDoesNotAllowIsA422WithItsReason() {
+        TestBrowser admin = admin();
+        Write connection = writes().get(11);
+        String upstream = C12.responseExample("POST", CONNECTION, 422, "tls_mode_not_allowed").toString();
+        stub(GATEWAY, "POST", connection.upstreamPath(), 422, upstream);
+
+        HttpResponse<String> response = call(admin, connection, connection.headers());
+
+        C12.assertResponse("POST", CONNECTION, response);
+        assertThat(response.statusCode()).isEqualTo(422);
+        assertThat(JSON.readTree(response.body()).get("reason").asString()).isEqualTo("tls_mode_not_allowed");
+    }
+
+    @Test
+    void approvingAConnectionNeedsTheRequestToComeFromThePortalPage() {
+        TestBrowser admin = admin();
+        Write connection = writes().get(11);
+
+        HttpResponse<String> response = call(admin, connection, Map.of());
+
+        assertThat(response.statusCode()).isEqualTo(403);
+        assertThat(JSON.readTree(response.body()).get("error").asString()).isEqualTo("csrf_invalid");
+        assertThat(gatewayAdminRequests()).isEmpty();
+    }
+
+    @Test
+    void aRefreshTheGatewayAnswersWith429IsPassedOnWithItsRetryAfter() {
+        TestBrowser admin = admin();
+        Write refresh = writes().get(12);
+        stub(GATEWAY, "POST", refresh.upstreamPath(), 429, "{\"error\":\"refresh_too_frequent\"}", "Retry-After", "4");
+
+        HttpResponse<String> limited = call(admin, refresh, refresh.headers());
+
+        C12.assertResponse("POST", REFRESH, limited);
+        assertThat(limited.statusCode()).isEqualTo(429);
+        assertThat(limited.headers().firstValue("Retry-After")).contains("4");
+        assertThat(JSON.readTree(limited.body()).get("error").asString()).isEqualTo("refresh_too_frequent");
+
+        stub(GATEWAY, "POST", refresh.upstreamPath(), 429, "{\"error\":\"refresh_too_frequent\"}");
+        assertThat(call(admin, refresh, refresh.headers()).headers().firstValue("Retry-After")).contains("5");
+
+        stub(GATEWAY, "POST", refresh.upstreamPath(), 429, "{\"error\":\"rate_limited\"}");
+        assertThat(call(admin, refresh, refresh.headers()).statusCode()).as("another 429 is an unavailable upstream")
+                .isEqualTo(503);
+    }
+
+    @Test
+    void aServerWithAChangedCertificateAndAPlainServerPassTheViewCheck() {
+        TestBrowser admin = admin();
+        String changed = C12.responseExample("GET", SERVERS, 200, "one_server").toString();
+        stub(GATEWAY, "GET", "/admin/v1/servers", 200, changed);
+        HttpResponse<String> list = admin.get(SERVERS);
+        C12.assertResponse("GET", SERVERS, list);
+        assertThat(list.statusCode()).isEqualTo(200);
+        assertThat(JSON.readTree(list.body()).get(0).get("status").asString()).isEqualTo("certificate_changed");
+
+        String plain = C12.responseExample("POST", SERVERS, 201, "notes").toString()
+                .replace("https://mcp-notes.corp.local:8443/mcp", "http://mcp-notes:8080/mcp")
+                .replace("\"allowPlainHttp\":false", "\"allowPlainHttp\":true")
+                .replace("\"tlsMode\":\"ca\"", "\"tlsMode\":\"plain\"")
+                .replaceAll("\"(fingerprint|subject|issuer|notAfter)\":\"[^\"]*\"", "\"$1\":null")
+                .replace("\"sans\":[\"mcp-notes.corp.local\"]", "\"sans\":[]")
+                .replace("\"validatesAsCa\":true", "\"validatesAsCa\":false");
+        stub(GATEWAY, "GET", "/admin/v1/servers/mcp-notes", 200, plain);
+        HttpResponse<String> one = admin.get("/api/v1/admin/servers/mcp-notes");
+        assertThat(one.statusCode()).isEqualTo(200);
+        assertThat(JSON.readTree(one.body()).get("pendingConnection").get("tlsMode").asString()).isEqualTo("plain");
+    }
+
+    @Test
     void conflictsAreOnlyThoseTheContractListsForTheOperation() {
         TestBrowser admin = admin();
         Write create = writes().getFirst();
@@ -500,6 +598,17 @@ class AdminMirrorsTest extends PortalHarness {
         C12.assertResponse("POST", SERVERS, exists);
         assertThat(exists.statusCode()).isEqualTo(409);
         assertThat(JSON.readTree(exists.body()).get("error").asString()).isEqualTo("server_exists");
+
+        Write connection = writes().get(11);
+        for (String error : List.of("connection_changed", "no_pending_connection")) {
+            stub(GATEWAY, "POST", connection.upstreamPath(), 409, "{\"error\":\"" + error + "\"}");
+            HttpResponse<String> refused = call(admin, connection, connection.headers());
+            C12.assertResponse("POST", CONNECTION, refused);
+            assertThat(refused.statusCode()).isEqualTo(409);
+            assertThat(JSON.readTree(refused.body()).get("error").asString()).isEqualTo(error);
+        }
+        stub(GATEWAY, "POST", connection.upstreamPath(), 409, "{\"error\":\"server_exists\"}");
+        assertThat(call(admin, connection, connection.headers()).statusCode()).isEqualTo(503);
 
         Write approve = writes().get(7);
         stub(GATEWAY, "POST", approve.upstreamPath(), 409, "{\"error\":\"hash_mismatch\"}");
@@ -708,13 +817,22 @@ class AdminMirrorsTest extends PortalHarness {
         TestBrowser admin = admin();
         List<String[]> bad = List.of(
                 new String[] {"POST", SERVERS, "{}"},
-                new String[] {"POST", SERVERS, SERVER_BODY.replace("https://", "http://")},
-                new String[] {"POST", SERVERS, SERVER_BODY.replace("mcp-notes", "mcp-gateway")},
-                new String[] {"POST", SERVERS, SERVER_BODY.replace("}}", "},\"extra\":1}")},
-                new String[] {"POST", SERVERS, SERVER_BODY.replace("\"acceptedTypes\":[\"user-oauth\"]", "\"acceptedTypes\":[]")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("https://", "ftp://")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("https://", "https://x y")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"extra\":1}")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"serverId\":\"mcp-notes\"}")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"allowPlainHttp\":\"yes\"}")},
+                new String[] {"POST", SERVERS, SERVER_BODY.replace("}", ",\"credential\":{\"required\":true,\"acceptedTypes\":[],\"type\":\"user-oauth\"}}")},
+                new String[] {"POST", SERVERS, "{\"internalUrl\":\"https://" + "h".repeat(250) + "\"}"},
                 new String[] {"POST", SERVERS, "not json"},
                 new String[] {"POST", SERVERS, "[]"},
-                new String[] {"POST", SERVERS, "{\"serverId\":\"mcp-notes\",\"serverId\":\"mcp-notes\"}"},
+                new String[] {"POST", SERVERS, "{\"internalUrl\":\"https://a.b\",\"internalUrl\":\"https://a.b\"}"},
+                new String[] {"POST", "/api/v1/admin/servers/mcp-notes/connection/approve", "{}"},
+                new String[] {"POST", "/api/v1/admin/servers/mcp-notes/connection/approve", "{\"tlsMode\":\"ca\"}"},
+                new String[] {"POST", "/api/v1/admin/servers/mcp-notes/connection/approve", CONNECTION_BODY.replace("pinned", "none")},
+                new String[] {"POST", "/api/v1/admin/servers/mcp-notes/connection/approve", CONNECTION_BODY.replace("sha256:", "sha1:")},
+                new String[] {"POST", "/api/v1/admin/servers/mcp-notes/connection/approve", CONNECTION_BODY.replace("}", ",\"x\":1}")},
+                new String[] {"POST", "/api/v1/admin/servers/mcp-gateway/connection/approve", CONNECTION_BODY},
                 new String[] {"PATCH", "/api/v1/admin/servers/mcp-notes", "{}"},
                 new String[] {"PATCH", "/api/v1/admin/servers/mcp-notes", "{\"serverId\":\"mcp-other\"}"},
                 new String[] {"PATCH", "/api/v1/admin/servers/mcp-notes", "{\"adapter\":true}"},
@@ -775,7 +893,12 @@ class AdminMirrorsTest extends PortalHarness {
         TestBrowser admin = admin();
         String server = C12.responseExample("GET", SERVER, 200, "notes").toString();
         for (String broken : List.of(server.replace("mcp-notes", "mcp-gateway"),
-                server.replace("https://mcp-notes.internal:8443/mcp", "http://mcp-notes.internal/mcp"),
+                server.replace("https://mcp-notes.corp.local:8443/mcp", "ftp://mcp-notes.corp.local/mcp"),
+                server.replace("\"status\":\"connected\"", "\"status\":\"fine\""),
+                server.replace("\"allowPlainHttp\":false,", ""),
+                server.replace("\"tlsMode\":\"ca\"", "\"tlsMode\":\"tls\""),
+                server.replace("sha256:3b556e5421d66b7508742a96b309dc4c404075d02797d8fe5b38d76d1c870d14", "sha256:ABC"),
+                server.replace("\"pendingConnection\":null", "\"pendingConnection\":{\"tlsMode\":\"ca\"}"),
                 server.replace("\"enabled\":true", "\"enabled\":\"yes\""),
                 server.replace("}", ",\"secret\":\"x\"}"))) {
             stub(GATEWAY, "GET", "/admin/v1/servers/mcp-notes", 200, broken);
@@ -792,7 +915,7 @@ class AdminMirrorsTest extends PortalHarness {
         assertThat(admin.get(OVERRIDES).statusCode()).isEqualTo(503);
 
         String pending = C12.responseExample("GET", PENDING, 200, "first_registration").toString();
-        for (String broken : List.of(pending.replace("\"source\":\"ci\"", "\"source\":\"adapter\""),
+        for (String broken : List.of(pending.replace("\"source\":\"manifest\"", "\"source\":\"adapter\""),
                 pending.replace(HASH, "sha256:abc"), pending.replace("\"pendingVersion\":\"1.4.0\"", "\"pendingVersion\":\"x\""),
                 pending.replace("Jira::Project", "jira::project"))) {
             stub(GATEWAY, "GET", "/admin/v1/registry/servers/mcp-notes/policies/pending", 200, broken);
@@ -907,6 +1030,17 @@ class AdminMirrorsTest extends PortalHarness {
     @Test
     void approvingPoliciesNeedsTheRequestToComeFromThePortalPage() {
         TestBrowser admin = admin();
+        Write connection = writes().get(11);
+        for (String error : List.of("connection_changed", "no_pending_connection")) {
+            stub(GATEWAY, "POST", connection.upstreamPath(), 409, "{\"error\":\"" + error + "\"}");
+            HttpResponse<String> refused = call(admin, connection, connection.headers());
+            C12.assertResponse("POST", CONNECTION, refused);
+            assertThat(refused.statusCode()).isEqualTo(409);
+            assertThat(JSON.readTree(refused.body()).get("error").asString()).isEqualTo(error);
+        }
+        stub(GATEWAY, "POST", connection.upstreamPath(), 409, "{\"error\":\"server_exists\"}");
+        assertThat(call(admin, connection, connection.headers()).statusCode()).isEqualTo(503);
+
         Write approve = writes().get(7);
         stub(GATEWAY, "POST", approve.upstreamPath(), 200, approve.okBody());
         for (Map<String, String> headers : List.of(Map.<String, String>of(), Map.of("Sec-Fetch-Site", "cross-site"),
@@ -923,6 +1057,17 @@ class AdminMirrorsTest extends PortalHarness {
     @Test
     void theIgnoredMappingEntriesOfAnApprovalAreShownToTheAdministrator() {
         TestBrowser admin = admin();
+        Write connection = writes().get(11);
+        for (String error : List.of("connection_changed", "no_pending_connection")) {
+            stub(GATEWAY, "POST", connection.upstreamPath(), 409, "{\"error\":\"" + error + "\"}");
+            HttpResponse<String> refused = call(admin, connection, connection.headers());
+            C12.assertResponse("POST", CONNECTION, refused);
+            assertThat(refused.statusCode()).isEqualTo(409);
+            assertThat(JSON.readTree(refused.body()).get("error").asString()).isEqualTo(error);
+        }
+        stub(GATEWAY, "POST", connection.upstreamPath(), 409, "{\"error\":\"server_exists\"}");
+        assertThat(call(admin, connection, connection.headers()).statusCode()).isEqualTo(503);
+
         Write approve = writes().get(7);
         String result = "{\"ignoredMappingEntries\":[{\"group\":\"mcp-team-platform\",\"scope\":\"Jira::Project/PLAT\","
                 + "\"reason\":\"undeclared_type\"}]}";

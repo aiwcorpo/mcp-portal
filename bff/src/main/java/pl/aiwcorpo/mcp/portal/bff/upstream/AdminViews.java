@@ -17,8 +17,17 @@ import tools.jackson.databind.node.JsonNodeFactory;
  */
 public final class AdminViews {
 
-    private static final Set<String> SERVER_FIELDS = Set.of("serverId", "system", "internalUrl", "credential", "enabled",
-            "adapter");
+    private static final Set<String> SERVER_FIELDS = Set.of("serverId", "system", "internalUrl", "allowPlainHttp", "credential",
+            "enabled", "adapter", "status", "lastCheckedAt", "lastError", "connection", "pendingConnection");
+    private static final Set<String> SERVER_STATUSES = Set.of("pending_approval", "connected", "unreachable",
+            "certificate_changed", "manifest_invalid");
+    private static final Set<String> TLS_MODES = Set.of("ca", "pinned", "plain");
+    private static final Set<String> CONNECTION_FIELDS = Set.of("tlsMode", "fingerprint", "subject", "issuer", "sans",
+            "notAfter", "approvedBy", "approvedAt");
+    private static final Set<String> PENDING_CONNECTION_FIELDS = Set.of("tlsMode", "fingerprint", "subject", "issuer", "sans",
+            "notAfter", "validatesAsCa", "reason", "detectedAt");
+    private static final Set<String> PENDING_CONNECTION_REASONS = Set.of("first_connection", "certificate_changed",
+            "ca_validation_failed");
     private static final Set<String> CREDENTIAL_FIELDS = Set.of("required", "acceptedTypes", "type");
     private static final Set<String> OVERRIDE_FIELDS = Set.of("id", "target", "text", "setBy", "setAt");
     private static final Set<String> PENDING_POLICIES_FIELDS = Set.of("approvedHash", "approvedPolicies",
@@ -32,7 +41,7 @@ public final class AdminViews {
             "clientSecretSet");
     private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic");
     private static final Set<String> CREDENTIAL_SCHEMES = Set.of("Bearer", "Basic", "Token", "ApiKey");
-    private static final Pattern HTTPS = Pattern.compile("^https://\\S{1,247}$");
+    private static final Pattern SERVER_URL = Pattern.compile("^https?://\\S{1,247}$");
     private static final Pattern OVERRIDE_ID = Pattern.compile("^override-[a-z0-9][a-z0-9-]{0,54}$");
     private static final Pattern NAMESPACE = Pattern.compile("^[A-Z][A-Za-z0-9]{0,30}$");
     private static final Pattern FILE_NAME = Pattern.compile("^[a-z0-9][a-z0-9._-]{0,63}\\.cedar$");
@@ -53,10 +62,48 @@ public final class AdminViews {
                 && SERVER_FIELDS.stream().allMatch(node::has)
                 && ContractValues.isServerId(RegistryData.text(node.get("serverId")))
                 && ContractValues.isSystemId(RegistryData.text(node.get("system")))
-                && HTTPS.matcher(RegistryData.text(node.get("internalUrl"))).matches()
+                && SERVER_URL.matcher(RegistryData.text(node.get("internalUrl"))).matches()
+                && node.get("allowPlainHttp").isBoolean()
                 && node.get("enabled").isBoolean() && node.get("adapter").isBoolean()
-                && serverCredential(node.get("credential"));
+                && serverCredential(node.get("credential"))
+                && SERVER_STATUSES.contains(RegistryData.text(node.get("status")))
+                && (node.get("lastCheckedAt").isNull() || ContractValues.isTimestamp(RegistryData.text(node.get("lastCheckedAt"))))
+                && (node.get("lastError").isNull() || REASON.matcher(RegistryData.text(node.get("lastError"))).matches()
+                        && RegistryData.text(node.get("lastError")).length() <= 64)
+                && (node.get("connection").isNull() || connection(node.get("connection"), false))
+                && (node.get("pendingConnection").isNull() || connection(node.get("pendingConnection"), true));
         return fits ? RegistryData.neutralized(node) : null;
+    }
+
+    /**
+     * {@code ServerConnection} or, with {@code pending}, {@code PendingConnection}. The certificate fields are null for
+     * {@code plain}; the fingerprint has the one form of CC-249.
+     */
+    private static boolean connection(JsonNode node, boolean pending) {
+        Set<String> fields = pending ? PENDING_CONNECTION_FIELDS : CONNECTION_FIELDS;
+        if (node == null || !node.isObject() || !RegistryData.onlyFields(node, fields) || !fields.stream().allMatch(node::has)
+                || !TLS_MODES.contains(RegistryData.text(node.get("tlsMode")))
+                || !(node.get("fingerprint").isNull() || ContractValues.HASH.matcher(RegistryData.text(node.get("fingerprint"))).matches())
+                || !certificateName(node.get("subject")) || !certificateName(node.get("issuer"))
+                || !(node.get("notAfter").isNull() || ContractValues.isTimestamp(RegistryData.text(node.get("notAfter"))))
+                || !sans(node.get("sans"))) {
+            return false;
+        }
+        if (pending) {
+            return node.get("validatesAsCa").isBoolean()
+                    && PENDING_CONNECTION_REASONS.contains(RegistryData.text(node.get("reason")))
+                    && ContractValues.isTimestamp(RegistryData.text(node.get("detectedAt")));
+        }
+        return boundedText(node.get("approvedBy"), 255) && ContractValues.isTimestamp(RegistryData.text(node.get("approvedAt")));
+    }
+
+    private static boolean certificateName(JsonNode node) {
+        return node != null && (node.isNull() || node.isString() && boundedText(node, 1024));
+    }
+
+    private static boolean sans(JsonNode node) {
+        return node != null && node.isArray() && node.size() <= 100
+                && node.valueStream().allMatch(v -> v.isString() && boundedText(v, 255));
     }
 
     private static boolean serverCredential(JsonNode node) {
@@ -143,7 +190,7 @@ public final class AdminViews {
                 && policies(node.get("pendingPolicies"))
                 && resourceTypes(node.get("pendingResourceTypes"))
                 && RegistryData.semver(node.get("pendingVersion"))
-                && Set.of("ci", "server").contains(RegistryData.text(node.get("source")));
+                && Set.of("manifest", "server").contains(RegistryData.text(node.get("source")));
         return fits ? RegistryData.neutralized(node) : null;
     }
 

@@ -28,6 +28,8 @@ final class AdminInput {
     private static final Set<String> CREDENTIAL_TYPES = Set.of("user-oauth", "user-secret", "token-exchange", "service-account");
     private static final Set<String> CREDENTIAL_SCHEMES = Set.of("Bearer", "Basic", "Token", "ApiKey");
     private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic");
+    private static final Set<String> TLS_MODES = Set.of("ca", "pinned", "plain");
+    private static final Pattern SERVER_URL = Pattern.compile("^https?://[!-~]+$");
     private static final Pattern INTERNAL_URL = Pattern.compile("^https://[!-~]{1,247}$");
     private static final Pattern SCOPE_CHARS = Pattern.compile("^[!#-\\[\\]-~]{1,128}$");
     private static final JsonMapper MAPPER = JsonMapper.builder()
@@ -54,34 +56,41 @@ final class AdminInput {
         return value != null && IF_MATCH.matcher(value).matches();
     }
 
-    /** {@code ServerConfigCreate}. */
-    static JsonNode serverCreate(byte[] raw) {
+    /** {@code ServerAddRequest}: the address, and optionally the plain-http flag and the credential declaration. */
+    static JsonNode serverAdd(byte[] raw) {
         ObjectNode in = object(raw);
-        if (in == null || !only(in, "serverId", "system", "internalUrl", "credential", "enabled", "adapter")
-                || !in.has("serverId") || !in.has("system") || !in.has("internalUrl") || !in.has("credential")) {
+        if (in == null || !only(in, "internalUrl", "allowPlainHttp", "credential") || !in.has("internalUrl")
+                || !SERVER_URL.matcher(string(in, "internalUrl")).matches() || string(in, "internalUrl").length() > 255
+                || in.has("allowPlainHttp") && !in.get("allowPlainHttp").isBoolean()
+                || in.has("credential") && !credential(in.get("credential"))) {
             return null;
         }
-        return serverFields(in, true) ? in : null;
+        return in;
     }
 
     /**
-     * {@code ServerConfigPatch}: at least one of the connection settings. The name in the certificate is not a setting
-     * (the gateway pins it to the serverId) and {@code adapter} is chosen when the server is added, so neither is accepted.
+     * {@code ServerConfigPatch}: at least one of the settings. The address and the plain-http flag are fixed when the
+     * server is added (CC-249), and {@code adapter} comes from the manifest, so none of them is accepted.
      */
     static JsonNode serverPatch(byte[] raw) {
         ObjectNode in = object(raw);
-        if (in == null || in.isEmpty() || !only(in, "internalUrl", "credential", "enabled")) {
+        if (in == null || in.isEmpty() || !only(in, "credential", "enabled")
+                || in.has("enabled") && !in.get("enabled").isBoolean()
+                || in.has("credential") && !credential(in.get("credential"))) {
             return null;
         }
-        return serverFields(in, false) ? in : null;
+        return in;
     }
 
-    private static boolean serverFields(ObjectNode in, boolean create) {
-        return (!create || ContractValues.isServerId(string(in, "serverId")) && ContractValues.isSystemId(string(in, "system")))
-                && (!in.has("internalUrl") || INTERNAL_URL.matcher(string(in, "internalUrl")).matches())
-                && (!in.has("enabled") || in.get("enabled").isBoolean())
-                && (!in.has("adapter") || in.get("adapter").isBoolean())
-                && (!in.has("credential") || credential(in.get("credential")));
+    /** {@code ConnectionApproveRequest}: the mode chosen and the fingerprint the administrator saw ({@code null} for plain). */
+    static JsonNode connectionApprove(byte[] raw) {
+        ObjectNode in = object(raw);
+        if (in == null || !only(in, "tlsMode", "fingerprint") || !in.has("tlsMode") || !in.has("fingerprint")
+                || !TLS_MODES.contains(string(in, "tlsMode"))) {
+            return null;
+        }
+        JsonNode fingerprint = in.get("fingerprint");
+        return fingerprint.isNull() || ContractValues.HASH.matcher(string(in, "fingerprint")).matches() ? in : null;
     }
 
     private static boolean credential(JsonNode node) {

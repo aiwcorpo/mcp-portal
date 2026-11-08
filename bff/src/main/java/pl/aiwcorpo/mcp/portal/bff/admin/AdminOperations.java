@@ -1,6 +1,8 @@
 package pl.aiwcorpo.mcp.portal.bff.admin;
 
 import java.time.Clock;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -50,11 +52,16 @@ class AdminOperations {
 
     enum Upstream { GATEWAY, BROKER }
 
+    private static final String REFRESH_TOO_FREQUENT = "refresh_too_frequent";
+    /** One probe per server per 5 s (C5), used when the gateway sends no usable {@code Retry-After}. */
+    private static final int REFRESH_RETRY_AFTER_SECONDS = 5;
+
     /**
      * One call.
      *
      * @param rejection   the {@code error} of the upstream's 422 that C12 passes on (for example {@code server_rejected})
-     * @param conflict    the {@code error} of its 409 that C12 passes on, or null when the operation has none
+     * @param conflict    the {@code error} of its 409 that C12 passes on (several separated by commas), or null when the
+     *                    operation has none
      * @param stepUp      the operation needs a fresh MFA of the administrator
      * @param sameOrigin  the call must come from the portal page itself (it widens access for everyone)
      * @param view        the check of the answer (null: no body expected)
@@ -216,8 +223,8 @@ class AdminOperations {
             case 404:
                 return AdminTargets.notFound();
             case 409:
-                if (op.conflict() != null && op.conflict().equals(e.error())) {
-                    return new ApiException(HttpStatus.CONFLICT, ApiError.of(op.conflict()));
+                if (op.conflict() != null && e.error() != null && List.of(op.conflict().split(",")).contains(e.error())) {
+                    return new ApiException(HttpStatus.CONFLICT, ApiError.of(e.error()));
                 }
                 return e;
             case 412:
@@ -229,6 +236,13 @@ class AdminOperations {
                 return e;
             case 428:
                 return new ApiException(HttpStatus.PRECONDITION_REQUIRED, ApiError.of("precondition_required"));
+            case 429:
+                if (REFRESH_TOO_FREQUENT.equals(e.error())) {
+                    return new ApiException(HttpStatus.TOO_MANY_REQUESTS, ApiError.of(REFRESH_TOO_FREQUENT),
+                            Map.of("Retry-After", Integer.toString(e.retryAfterSeconds() == null
+                                    ? REFRESH_RETRY_AFTER_SECONDS : e.retryAfterSeconds())));
+                }
+                return e;
             default:
                 return e;
         }
@@ -237,7 +251,7 @@ class AdminOperations {
     private static Rejected rejected(UpstreamException e) {
         String message = e.upstreamMessage() == null ? null
                 : TextHygiene.cutAtNotation(TextHygiene.neutralize(e.upstreamMessage()), 500);
-        return new Rejected(e.error(), e.reason(), message);
+        return new Rejected(e.error(), e.reason(), e.manifestReason(), message);
     }
 
     private static AuditLog.Outcome outcomeOf(ApiException e) {
@@ -253,6 +267,7 @@ class AdminOperations {
             case CONFLICT -> AuditLog.Outcome.rejected(((ApiError) e.body()).error());
             case PRECONDITION_FAILED -> AuditLog.Outcome.rejected("precondition_failed");
             case PRECONDITION_REQUIRED -> AuditLog.Outcome.rejected("precondition_required");
+            case TOO_MANY_REQUESTS -> AuditLog.Outcome.rejected(REFRESH_TOO_FREQUENT);
             case UNPROCESSABLE_ENTITY -> AuditLog.Outcome.rejected(cause != null && cause.reason() != null
                     ? cause.reason() : ((Rejected) e.body()).error());
             default -> AuditLog.Outcome.upstreamUnavailable();
@@ -299,6 +314,6 @@ class AdminOperations {
 
     /** {@code 422} body of C12: the code, the machine reason when the upstream gave a well-formed one, the safe message. */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    record Rejected(String error, String reason, String message) {
+    record Rejected(String error, String reason, String manifestReason, String message) {
     }
 }

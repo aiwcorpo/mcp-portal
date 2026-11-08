@@ -55,7 +55,7 @@ final class UpstreamCalls {
                     return onSuccess.apply(response);
                 }
                 ErrorBody body = errorBody(response);
-                throw new UpstreamException(name, status, body.error(), body.reason(), body.message(),
+                throw new UpstreamException(name, status, body.error(), body.reason(), body.manifestReason(), body.message(),
                         retryAfter(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)));
             });
         } catch (UpstreamException e) {
@@ -122,17 +122,18 @@ final class UpstreamCalls {
         }
     }
 
-    private record ErrorBody(String error, String reason, String message) {
+    private record ErrorBody(String error, String reason, String manifestReason, String message) {
     }
 
     private static ErrorBody errorBody(ClientHttpResponse response) {
         try (InputStream body = response.getBody()) {
             byte[] bytes = body.readNBytes(MAX_ERROR_BODY);
             JsonNode node = MAPPER.readTree(bytes);
-            return new ErrorBody(text(node, "error", ERROR_CODE), text(node, "reason", ERROR_CODE), message(node));
+            return new ErrorBody(text(node, "error", ERROR_CODE), text(node, "reason", ERROR_CODE),
+                    text(node, "manifestReason", ERROR_CODE), message(node));
         } catch (IOException | RuntimeException ignored) {
             // Body is not the C4/C5 Error JSON; the status alone decides.
-            return new ErrorBody(null, null, null);
+            return new ErrorBody(null, null, null, null);
         }
     }
 

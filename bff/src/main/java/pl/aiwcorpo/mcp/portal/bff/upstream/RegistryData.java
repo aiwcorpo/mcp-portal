@@ -37,7 +37,7 @@ public final class RegistryData {
             "pendingVersion", "source", "approvedInVersion", "riskLowered");
     private static final Set<String> ACTIONS = Set.of("read", "update", "delete", "admin");
     private static final String ADAPTER = "adapter";
-    private static final Set<String> SOURCES = Set.of("ci", "server", ADAPTER);
+    private static final Set<String> SOURCES = Set.of("manifest", "server", ADAPTER);
 
     private RegistryData() {
     }
