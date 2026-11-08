@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { ActivityCall, ActivityService } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ErrorNotice } from '../../shared/error-notice';
+import { NotificationService } from '../../core/notification.service';
 import { riskLabel } from '../../shared/labels';
 import { Notice } from '../../shared/notice';
 import { LoadError } from '../../shared/load-error';
@@ -76,13 +76,14 @@ function toRow(call: ActivityCall): Row {
  */
 @Component({
   selector: 'app-logs-page',
-  imports: [DatePipe, MatButtonModule, ErrorNotice, LoadError, Loading, Notice],
+  imports: [DatePipe, MatButtonModule, LoadError, Loading, Notice],
   templateUrl: './logs-page.html',
   styleUrl: './logs-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LogsPage {
   private readonly api = inject(ActivityService);
+  private readonly notifications = inject(NotificationService);
 
   protected readonly periods = PERIODS;
   protected readonly groups = RESULT_GROUPS;
@@ -200,7 +201,12 @@ export class LogsPage {
       }
     } catch (error) {
       if (mine === this.sequence) {
-        this.moreFailure.set(toApiFailure(error));
+        const failure = toApiFailure(error);
+        if (failure.code === 'invalid_request') {
+          this.moreFailure.set(failure);
+        } else {
+          this.notifications.failure(failure, () => void this.more());
+        }
       }
     } finally {
       this.moreBusy.set(false);

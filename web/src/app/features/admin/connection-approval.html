@@ -74,10 +74,6 @@
       </p>
     }
 
-    @if (failure(); as problem) {
-      <app-error-notice [failure]="problem" />
-    }
-
     <p class="muted hint" i18n="@@connectionApproval.scope">
       Approving the connection approves neither the policies nor the tools of the server: they wait
       below. It needs a fresh MFA.

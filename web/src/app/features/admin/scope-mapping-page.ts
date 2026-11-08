@@ -14,13 +14,12 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, ResourceTypeDeclaration, ScopeMappingDocument } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
+import { NotificationService } from '../../core/notification.service';
 import { etagOf } from '../../core/admin-etag';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
 import { GROUP_NAME, RESOURCE_SCOPE_ID, splitList } from './admin-validation';
@@ -119,22 +118,14 @@ let nextKey = 1;
  */
 @Component({
   selector: 'app-scope-mapping-page',
-  imports: [
-    FormsModule,
-    MatButtonModule,
-    AdminNav,
-    ErrorNotice,
-    LoadError,
-    Loading,
-    Notice,
-    SafeTextPipe,
-  ],
+  imports: [FormsModule, MatButtonModule, AdminNav, LoadError, Loading, SafeTextPipe],
   templateUrl: './scope-mapping-page.html',
   styleUrls: ['./admin-common.scss', './scope-mapping-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScopeMappingPage implements OnInit {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly stepUp = inject(AdminStepUp);
 
@@ -145,9 +136,8 @@ export class ScopeMappingPage implements OnInit {
   protected readonly etag = signal<string | null>(null);
   protected readonly declared = signal<readonly DeclaredType[]>([]);
   protected readonly busy = signal(false);
+  /** Kept besides the notification: after a conflict the page says that the shown mapping is the current one. */
   protected readonly failure = signal<ApiFailure | null>(null);
-  protected readonly done = signal<string | null>(null);
-  protected readonly mfaNote = signal<'draft' | 'repeat' | null>(null);
   protected readonly touched = signal(false);
   /** The page was opened by the return from the IdP; a repeated step-up request is then an error, not a loop. */
   private returnedAt = 0;
@@ -194,9 +184,13 @@ export class ScopeMappingPage implements OnInit {
         );
         this.etag.set(draft.etag ?? this.etag());
         this.dirty.set(true);
-        this.mfaNote.set('draft');
+        this.notifications.success(
+          $localize`:@@scopeMapping.mfaDraft:Identity confirmed. Your changes are back in the form; check them and save again.`,
+        );
       } else {
-        this.mfaNote.set('repeat');
+        this.notifications.success(
+          $localize`:@@scopeMapping.mfaRepeat:Identity confirmed. Repeat the operation.`,
+        );
       }
     }
   }
@@ -260,7 +254,6 @@ export class ScopeMappingPage implements OnInit {
   protected add(): void {
     this.rows.update((rows) => [...rows, { key: nextKey++, group: 'mcp-', scopes: '' }]);
     this.dirty.set(true);
-    this.done.set(null);
   }
 
   protected removeRow(key: number): void {
@@ -282,13 +275,12 @@ export class ScopeMappingPage implements OnInit {
     }
     const etag = this.etag();
     if (!etag) {
-      this.failure.set({ code: 'precondition_required', status: 428 });
+      this.notifications.failure({ code: 'precondition_required', status: 428 });
       return;
     }
     const rows = this.rows();
     this.busy.set(true);
     this.failure.set(null);
-    this.done.set(null);
     try {
       const body: ScopeMappingDocument = {
         scopeMapping: rows.map((row) => ({ group: row.group.trim(), scopes: scopesOf(row) })),
@@ -297,7 +289,7 @@ export class ScopeMappingPage implements OnInit {
         this.adminApi.putAdminScopeMapping(etag, body, 'response'),
       );
       this.etag.set(etagOf(response));
-      this.done.set(
+      this.notifications.success(
         $localize`:@@scopeMapping.saved:Saved the scope mapping. Servers pick it up within seconds.`,
       );
       this.touched.set(false);
@@ -308,6 +300,7 @@ export class ScopeMappingPage implements OnInit {
         return;
       }
       this.failure.set(failure);
+      this.notifications.failure(failure);
       if (failure.code === 'precondition_failed') {
         await this.read();
       }

@@ -1,16 +1,6 @@
 <h1 class="visually-hidden" i18n="@@catalog.title">MCP servers</h1>
 
-<app-oauth-return [servers]="loadedServers()" />
-
-@if (banner(); as b) {
-  @if (b.kind === 'success') {
-    <app-notice kind="success" [dismissible]="true" (dismiss)="banner.set(null)">{{
-      b.text
-    }}</app-notice>
-  } @else {
-    <app-error-notice [failure]="b.failure" />
-  }
-}
+<app-oauth-return [servers]="returnServers()" />
 
 @let state = catalog();
 @if (state.status === 'loading') {
@@ -47,7 +37,8 @@
   <section class="empty">
     <h2 i18n="@@catalog.emptyTitle">You do not have access to any MCP server yet</h2>
     <p class="muted" i18n="@@catalog.emptyText">
-      Access is granted by the entitlement system. Once a request is approved, the servers appear here.
+      Access is granted by the entitlement system. Once a request is approved, the servers appear
+      here.
     </p>
   </section>
 }

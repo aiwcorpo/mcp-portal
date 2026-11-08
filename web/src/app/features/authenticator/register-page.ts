@@ -22,9 +22,9 @@ import { AuthenticatorService } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
+import { NotificationService } from '../../core/notification.service';
 import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -57,22 +57,14 @@ const MFA_RETURN = 'ok';
  */
 @Component({
   selector: 'app-authenticator-register-page',
-  imports: [
-    ReactiveFormsModule,
-    MatButtonModule,
-    RouterLink,
-    ErrorNotice,
-    LoadError,
-    Loading,
-    Notice,
-    QrCode,
-  ],
+  imports: [ReactiveFormsModule, MatButtonModule, RouterLink, LoadError, Loading, Notice, QrCode],
   templateUrl: './register-page.html',
   styleUrl: './register-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthenticatorRegisterPage implements OnInit {
   private readonly api = inject(AuthenticatorService);
+  private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly navigation = inject(BrowserNavigation);
   private readonly resume = inject(ResumeIntentStore);
@@ -86,15 +78,15 @@ export class AuthenticatorRegisterPage implements OnInit {
 
   protected readonly steps = STEPS;
   protected readonly step = signal<Step>('checking');
+  /** The user came back from the identity provider: the first button says "Continue" instead of "Next". */
+  protected readonly mfaConfirmed = signal(false);
   protected readonly loadFailure = signal<ApiFailure | null>(null);
-  protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly seed = signal<Seed | null>(null);
   protected readonly copyState = signal<'idle' | 'copied' | 'failed'>('idle');
   protected readonly codeWrong = signal(false);
   protected readonly codeAttempted = signal(false);
   protected readonly busy = signal(false);
   /** The IdP returned from the fresh MFA; the user continues with one more click. */
-  protected readonly mfaConfirmed = signal(false);
   /** The key may still be in the clipboard and this page could not clear it. */
   protected readonly clipboardAdvice = signal(false);
 
@@ -190,6 +182,11 @@ export class AuthenticatorRegisterPage implements OnInit {
       return;
     }
     this.mfaConfirmed.set(this.returnedFromMfa);
+    if (this.returnedFromMfa) {
+      this.notifications.success(
+        $localize`:@@enroll.mfaDone:Identity confirmed. Continue the registration when you are ready.`,
+      );
+    }
     this.step.set('info');
     // "Next" was clicked before the MFA: the registration starts now, without a second click.
     if (this.returnedFromMfa && this.resume.take('enroll-authenticator', this.session.username())) {
@@ -208,7 +205,6 @@ export class AuthenticatorRegisterPage implements OnInit {
       return;
     }
     this.busy.set(true);
-    this.failure.set(null);
     this.step.set('starting');
     try {
       const started = await firstValueFrom(this.api.startMyAuthenticatorEnrollment());
@@ -240,7 +236,7 @@ export class AuthenticatorRegisterPage implements OnInit {
         ),
       );
     } else {
-      this.failure.set(failure);
+      this.notifications.failure(failure);
     }
     this.returnedFromMfa = false;
     this.mfaConfirmed.set(false);
@@ -283,7 +279,6 @@ export class AuthenticatorRegisterPage implements OnInit {
       return;
     }
     this.busy.set(true);
-    this.failure.set(null);
     this.codeWrong.set(false);
     try {
       await firstValueFrom(
@@ -299,7 +294,7 @@ export class AuthenticatorRegisterPage implements OnInit {
         this.discard();
         this.step.set('failed');
       } else {
-        this.failure.set(failure);
+        this.notifications.failure(failure);
       }
     } finally {
       this.busy.set(false);
@@ -307,7 +302,6 @@ export class AuthenticatorRegisterPage implements OnInit {
   }
 
   protected restart(): void {
-    this.failure.set(null);
     this.step.set('info');
   }
 

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  LOCALE_ID,
   computed,
   inject,
   input,
@@ -15,14 +16,14 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { formatDate } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CatalogCredential, ConnectionsService, PutSecretResponse } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { errorMessage } from '../../core/error-messages';
-import { ErrorNotice } from '../../shared/error-notice';
+import { NotificationService } from '../../core/notification.service';
 import { systemName } from '../../shared/labels';
 import { Notice } from '../../shared/notice';
 
@@ -51,7 +52,7 @@ type Phase =
 
 /**
  * Codes that belong to the token field itself (mockup 05); anything else (503, 429, ...) is not the
- * user's input and shows above the form.
+ * user's input and goes to the notifications.
  */
 function isFieldFailure(failure: ApiFailure): boolean {
   return failure.code === 'secret_invalid';
@@ -59,13 +60,15 @@ function isFieldFailure(failure: ApiFailure): boolean {
 
 @Component({
   selector: 'app-secret-form',
-  imports: [ReactiveFormsModule, MatButtonModule, RouterLink, DatePipe, Notice, ErrorNotice],
+  imports: [ReactiveFormsModule, MatButtonModule, RouterLink, Notice],
   templateUrl: './secret-form.html',
   styleUrl: './secret-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SecretForm {
   private readonly connectionsApi = inject(ConnectionsService);
+  private readonly notifications = inject(NotificationService);
+  private readonly locale = inject(LOCALE_ID);
 
   readonly system = input.required<string>();
   /** Name of the system as shown on the page (the display name of the broker, CC-248). */
@@ -87,10 +90,6 @@ export class SecretForm {
     return state.kind === 'failed' && isFieldFailure(state.failure)
       ? errorMessage(state.failure.code)
       : null;
-  });
-  protected readonly generalFailure = computed(() => {
-    const state = this.phase();
-    return state.kind === 'failed' && !isFieldFailure(state.failure) ? state.failure : null;
   });
 
   protected readonly form = new FormGroup({
@@ -149,9 +148,30 @@ export class SecretForm {
       );
       this.form.reset();
       this.phase.set({ kind: 'saved', result });
+      this.notifications.success(this.savedMessage(result));
       this.connected.emit(result);
     } catch (error) {
-      this.phase.set({ kind: 'failed', failure: toApiFailure(error) });
+      const failure = toApiFailure(error);
+      if (isFieldFailure(failure)) {
+        this.phase.set({ kind: 'failed', failure });
+      } else {
+        this.phase.set({ kind: 'idle' });
+        this.notifications.failure(failure);
+      }
     }
+  }
+
+  private savedMessage(result: PutSecretResponse): string {
+    const label = this.systemLabel();
+    const who = result.backendUser;
+    const stored =
+      result.verified && who
+        ? $localize`:@@secret.saved:Connected to ${label}:INTERPOLATION: as ${who}:INTERPOLATION_1:.`
+        : $localize`:@@secret.savedUnverified:Token stored for ${label}:INTERPOLATION:. This system does not check tokens when they are stored, so the portal does not know which account it belongs to (not verified).`;
+    if (!result.expiresAt) {
+      return stored;
+    }
+    const until = formatDate(result.expiresAt, 'dd.MM.yyyy', this.locale, 'UTC');
+    return `${stored} ${$localize`:@@secret.savedExpires:Token valid until ${until}:INTERPOLATION:.`}`;
   }
 }

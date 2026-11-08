@@ -16,14 +16,13 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, Override, OverrideRequest } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
+import { NotificationService } from '../../core/notification.service';
 import { etagOf } from '../../core/admin-etag';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
 import { AdminSystemNames } from './system-names';
@@ -71,23 +70,14 @@ export function kindOf(target: string): TargetKind {
  */
 @Component({
   selector: 'app-overrides-page',
-  imports: [
-    DatePipe,
-    FormsModule,
-    MatButtonModule,
-    AdminNav,
-    ErrorNotice,
-    LoadError,
-    Loading,
-    Notice,
-    SafeTextPipe,
-  ],
+  imports: [DatePipe, FormsModule, MatButtonModule, AdminNav, LoadError, Loading, SafeTextPipe],
   templateUrl: './overrides-page.html',
   styleUrls: ['./admin-common.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OverridesPage implements OnInit {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly stepUp = inject(AdminStepUp);
@@ -101,9 +91,6 @@ export class OverridesPage implements OnInit {
   protected readonly servers = signal<readonly string[]>([]);
   protected readonly editing = signal<Editing | null>(null);
   protected readonly busy = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
-  protected readonly done = signal<string | null>(null);
-  protected readonly mfaNote = signal<'draft' | 'repeat' | null>(null);
   protected readonly touched = signal(false);
   /** The page was opened by the return from the IdP; a repeated step-up request is then an error, not a loop. */
   private returnedAt = 0;
@@ -168,9 +155,13 @@ export class OverridesPage implements OnInit {
       if (draft && typeof draft === 'object' && typeof draft.text === 'string') {
         const { etag, ...form } = draft;
         this.editing.set({ form: { ...EMPTY_FORM, ...form }, etag: etag ?? null });
-        this.mfaNote.set('draft');
+        this.notifications.success(
+          $localize`:@@overrides.mfaDraft:Identity confirmed. Check the form and save again.`,
+        );
       } else {
-        this.mfaNote.set('repeat');
+        this.notifications.success(
+          $localize`:@@overrides.mfaRepeat:Identity confirmed. Repeat the operation.`,
+        );
       }
     }
   }
@@ -226,7 +217,7 @@ export class OverridesPage implements OnInit {
         etag: etagOf(response),
       });
     } catch (error) {
-      this.failure.set(toApiFailure(error));
+      this.notifications.failure(toApiFailure(error));
     } finally {
       this.busy.set(false);
     }
@@ -235,13 +226,9 @@ export class OverridesPage implements OnInit {
   protected cancel(): void {
     this.editing.set(null);
     this.touched.set(false);
-    this.failure.set(null);
   }
 
   private reset(): void {
-    this.failure.set(null);
-    this.done.set(null);
-    this.mfaNote.set(null);
     this.touched.set(false);
   }
 
@@ -270,12 +257,11 @@ export class OverridesPage implements OnInit {
     const form = current.form;
     const replacing = form.mode === 'edit';
     if (replacing && !current.etag) {
-      this.failure.set({ code: 'precondition_required', status: 428 });
+      this.notifications.failure({ code: 'precondition_required', status: 428 });
       return;
     }
     const id = `${PREFIX}${form.name.trim()}`;
     this.busy.set(true);
-    this.failure.set(null);
     try {
       const body: OverrideRequest = { target: targetOf(form), text: form.text };
       await firstValueFrom(
@@ -286,7 +272,7 @@ export class OverridesPage implements OnInit {
           replacing ? undefined : '*',
         ),
       );
-      this.done.set(
+      this.notifications.success(
         replacing
           ? $localize`:@@overrides.saved:Saved the override ${id}:id:.`
           : $localize`:@@overrides.added:Added the override ${id}:id:. It takes effect within seconds.`,
@@ -301,7 +287,7 @@ export class OverridesPage implements OnInit {
       ) {
         return;
       }
-      this.failure.set(failure);
+      this.notifications.failure(failure);
       if (failure.code === 'precondition_failed') {
         await this.read();
       }
@@ -337,16 +323,16 @@ export class OverridesPage implements OnInit {
         return;
       }
       if (!etag) {
-        this.failure.set({ code: 'precondition_required', status: 428 });
+        this.notifications.failure({ code: 'precondition_required', status: 428 });
         return;
       }
       await firstValueFrom(this.adminApi.deleteAdminOverride(etag, id));
-      this.done.set($localize`:@@overrides.removed:Removed the override ${id}:id:.`);
+      this.notifications.success($localize`:@@overrides.removed:Removed the override ${id}:id:.`);
       await this.read();
     } catch (error) {
       const failure = toApiFailure(error);
       if (!this.stepUp.redirectIfRequired(failure, PAGE, undefined, returned)) {
-        this.failure.set(failure);
+        this.notifications.failure(failure);
         if (failure.code === 'precondition_failed') {
           await this.read();
         }

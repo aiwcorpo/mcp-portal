@@ -76,9 +76,6 @@
 }
 
 <main id="main" tabindex="-1" class="main">
-  @if (logoutFailure(); as failure) {
-    <app-error-notice [failure]="failure" />
-  }
   @let state = session.state();
   @if (state.status === 'loading') {
     <app-loading />

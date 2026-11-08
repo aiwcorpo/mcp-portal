@@ -15,11 +15,11 @@ import {
   untracked,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ConfirmationArgument, ConfirmationsService, ConfirmationView } from '../../api/generated';
 import { ApiFailure, toApiFailure } from '../../core/api-error';
-import { ErrorNotice } from '../../shared/error-notice';
+import { NotificationService } from '../../core/notification.service';
 import { systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
@@ -61,13 +61,15 @@ export const CONFIRM_POLL_MS = new InjectionToken<number>('CONFIRM_POLL_MS', {
  */
 @Component({
   selector: 'app-confirm-page',
-  imports: [MatButtonModule, RouterLink, ErrorNotice, LoadError, Loading, Notice],
+  imports: [MatButtonModule, LoadError, Loading, Notice],
   templateUrl: './confirm-page.html',
   styleUrl: './confirm-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmPage implements OnInit {
   private readonly api = inject(ConfirmationsService);
+  private readonly notifications = inject(NotificationService);
+  private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
   private readonly pollMs = inject(CONFIRM_POLL_MS);
@@ -81,7 +83,6 @@ export class ConfirmPage implements OnInit {
   protected readonly viewedFailed = signal(false);
   protected readonly refreshFailed = signal(false);
   protected readonly busy = signal(false);
-  protected readonly cancelFailure = signal<ApiFailure | null>(null);
 
   private viewedRecorded = false;
   private viewedInFlight = false;
@@ -259,13 +260,25 @@ export class ConfirmPage implements OnInit {
       return;
     }
     this.busy.set(true);
-    this.cancelFailure.set(null);
     try {
       await firstValueFrom(this.api.cancelMyConfirmation(this.id()));
       this.phase.set({ kind: 'cancelled' });
       this.stop();
     } catch (error) {
-      this.cancelFailure.set(toApiFailure(error));
+      const failure = toApiFailure(error);
+      if (failure.code === 'not_found_or_denied') {
+        this.notifications.error(
+          $localize`:@@confirm.cancelNotFound:Could not cancel: the operation may have been completed or expired.`,
+          {
+            action: {
+              label: $localize`:@@confirm.toLogs:Check the activity logs`,
+              run: () => void this.router.navigate(['/logs']),
+            },
+          },
+        );
+      } else {
+        this.notifications.failure(failure);
+      }
     } finally {
       this.busy.set(false);
     }

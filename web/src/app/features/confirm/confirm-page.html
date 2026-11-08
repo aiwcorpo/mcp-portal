@@ -51,17 +51,6 @@
           Could not check whether the operation is still current. Wait a moment.
         </app-notice>
       }
-      @if (cancelFailure(); as failure) {
-        @if (failure.code === 'not_found_or_denied') {
-          <app-notice kind="error">
-            <ng-container i18n="@@confirm.cancelNotFound"
-              >Could not cancel: the operation may have been completed or expired.</ng-container
-            >&ngsp;<a routerLink="/logs" i18n="@@confirm.toLogs">Check the activity logs</a>
-          </app-notice>
-        } @else {
-          <app-error-notice [failure]="failure" />
-        }
-      }
       @if (anyNeutralised()) {
         <app-notice kind="warning" i18n="@@confirm.neutralised">
           Values contain control characters. They are shown as [U+XXXX] or &lt;U+XXXX&gt;.

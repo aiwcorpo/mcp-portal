@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../core/notification.service';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ClientConfigs } from '../../api/generated';
 
@@ -21,7 +21,7 @@ interface ConfigTab {
 })
 export class EndpointReady {
   private readonly clipboard = inject(Clipboard);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly notifications = inject(NotificationService);
 
   readonly url = input.required<string>();
   readonly clientConfigs = input.required<ClientConfigs>();
@@ -52,13 +52,13 @@ export class EndpointReady {
 
   protected copy(text: string, what: string): void {
     const copied = this.clipboard.copy(text);
-    this.snackBar.open(
-      copied
-        ? $localize`:@@ready.copied:Copied: ${what}:what:.`
-        : $localize`:@@ready.copyFailed:Could not copy. Select the text and copy it manually.`,
-      undefined,
-      { duration: 4000 },
-    );
+    if (copied) {
+      this.notifications.success($localize`:@@ready.copied:Copied: ${what}:what:.`);
+    } else {
+      this.notifications.error(
+        $localize`:@@ready.copyFailed:Could not copy. Select the text and copy it manually.`,
+      );
+    }
   }
 
   protected readonly urlLabel = $localize`:@@ready.urlCopied:MCP address`;

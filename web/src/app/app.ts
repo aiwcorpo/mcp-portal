@@ -12,12 +12,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { ApiFailure } from './core/api-error';
+import { NotificationService } from './core/notification.service';
 import { APP_NAME } from './core/page-title.strategy';
 import { SessionService } from './core/session.service';
 import { ThemeService } from './core/theme.service';
 import { LoginPanel } from './features/login/login-panel';
-import { ErrorNotice } from './shared/error-notice';
 import { LoadError } from './shared/load-error';
 import { LocaleSwitch } from './shared/locale-switch';
 import { Loading } from './shared/loading';
@@ -31,7 +30,6 @@ import { ThemeSwitch } from './shared/theme-switch';
     RouterLinkActive,
     MatButtonModule,
     LoginPanel,
-    ErrorNotice,
     Loading,
     LoadError,
     LocaleSwitch,
@@ -44,9 +42,9 @@ import { ThemeSwitch } from './shared/theme-switch';
 export class App {
   protected readonly session = inject(SessionService);
   private readonly document = inject(DOCUMENT);
+  private readonly notifications = inject(NotificationService);
 
   protected readonly appName = APP_NAME;
-  protected readonly logoutFailure = signal<ApiFailure | null>(null);
   private readonly router = inject(Router);
   private readonly path = signal(this.router.url.split(/[?#]/)[0]);
   /** The preview of a pending operation is a page of its own without the tabs (mockup 14). */
@@ -84,6 +82,9 @@ export class App {
   }
 
   protected async logout(): Promise<void> {
-    this.logoutFailure.set(await this.session.logout());
+    const failure = await this.session.logout();
+    if (failure) {
+      this.notifications.failure(failure);
+    }
   }
 }

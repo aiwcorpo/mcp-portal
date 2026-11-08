@@ -1,24 +1,24 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  computed,
+  effect,
   inject,
   input,
   signal,
+  untracked,
 } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { PortalCatalogServer } from '../api/generated';
 import { ReturnErrorCode, isConnectErrorCode } from '../core/api-error';
+import { ConnectionActions } from '../core/connection-actions.service';
+import { NotificationService } from '../core/notification.service';
 import { catalogSystemName, isSystemId } from './labels';
-import { Notice } from './notice';
 
 type OAuthReturn =
   | { kind: 'connected'; system: string | null }
   | { kind: 'failed'; code: ReturnErrorCode; system: string | null };
 
 const QUERY_KEYS = ['connected', 'connectError', 'system'];
-const SUCCESS_VISIBLE_MS = 10_000;
 
 /**
  * What the BFF appended to the return path after the provider redirect (CC-022, CC-086, CC-111): `connected=<system>`,
@@ -78,36 +78,24 @@ export function oauthReturnMessage(
   }
 }
 
-/** Banner for the return from an OAuth provider; shown once, then the parameters leave the URL. */
+/** Notification for the return from an OAuth provider; shown once, then the parameters leave the URL. */
 @Component({
   selector: 'app-oauth-return',
-  imports: [Notice],
-  template: `
-    @if (message(); as text) {
-      <app-notice [kind]="kind()" [dismissible]="true" (dismiss)="result.set(null)">{{
-        text
-      }}</app-notice>
-    }
-  `,
+  template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OAuthReturnBanner {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly notifications = inject(NotificationService);
+  private readonly connectionActions = inject(ConnectionActions);
 
-  /** Catalog rows: they confirm the connection and name the account (connection.backendUser). */
+  /** Catalog rows: they confirm the connection and name the account (connection.backendUser). Null while they load; empty when they could not be loaded. */
   readonly servers = input<readonly PortalCatalogServer[] | null>(null);
 
   protected readonly result = signal<OAuthReturn | null>(
     readOAuthReturn(this.route.snapshot.queryParamMap),
   );
-  protected readonly kind = computed(() =>
-    this.result()?.kind === 'connected' ? 'success' : 'error',
-  );
-  protected readonly message = computed(() => {
-    const result = this.result();
-    return result ? oauthReturnMessage(result, this.servers()) : null;
-  });
 
   constructor() {
     const result = this.result();
@@ -120,9 +108,44 @@ export class OAuthReturnBanner {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
-    if (result.kind === 'connected') {
-      const timer = setTimeout(() => this.result.set(null), SUCCESS_VISIBLE_MS);
-      inject(DestroyRef).onDestroy(() => clearTimeout(timer));
+    const returnPage = this.router.url.split(/[?#]/)[0];
+    effect(() => {
+      const shown = this.result();
+      const text = shown ? oauthReturnMessage(shown, this.servers()) : null;
+      // A failure names its system from the catalog, so it waits until the catalog has answered.
+      if (!shown || !text || (shown.system && this.servers() === null)) {
+        return;
+      }
+      untracked(() => {
+        this.result.set(null);
+        if (shown.kind === 'connected') {
+          this.notifications.success(text);
+          return;
+        }
+        const system = shown.system;
+        const retry =
+          shown.code === 'flow_invalid' &&
+          system &&
+          this.servers()?.some((s) => s.system === system);
+        this.notifications.error(
+          text,
+          retry
+            ? {
+                action: {
+                  label: $localize`:@@oauth.connectAgain:Connect again`,
+                  run: () => void this.connectAgain(system, returnPage),
+                },
+              }
+            : {},
+        );
+      });
+    });
+  }
+
+  private async connectAgain(system: string, returnPage: string): Promise<void> {
+    const failure = await this.connectionActions.startOAuth(system, returnPage);
+    if (failure) {
+      this.notifications.failure(failure);
     }
   }
 }

@@ -1,15 +1,6 @@
 <h1 class="visually-hidden" i18n="@@connections.title">System connections</h1>
 
-<app-oauth-return [servers]="servers()" />
-
-@if (actionDone(); as done) {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="actionDone.set(null)">{{
-    done
-  }}</app-notice>
-}
-@if (actionFailure(); as failure) {
-  <app-error-notice [failure]="failure" />
-}
+<app-oauth-return [servers]="returnServers()" />
 
 @if (invalidated(); as names) {
   <app-notice kind="warning">

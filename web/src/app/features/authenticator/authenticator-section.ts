@@ -13,13 +13,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthenticatorService, AuthenticatorStatus } from '../../api/generated';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
+import { NotificationService } from '../../core/notification.service';
 import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
-import { ErrorNotice } from '../../shared/error-notice';
 import { Notice } from '../../shared/notice';
 
 /** Path of the page that hosts this section; the return from the IdP lands here. */
@@ -33,13 +33,14 @@ export const MFA_RETURN_QUERY = 'mfa';
  */
 @Component({
   selector: 'app-authenticator-section',
-  imports: [DatePipe, MatButtonModule, RouterLink, ErrorNotice, Notice],
+  imports: [DatePipe, MatButtonModule, RouterLink, Notice],
   templateUrl: './authenticator-section.html',
   styleUrl: './authenticator-section.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthenticatorSection implements OnInit {
   private readonly api = inject(AuthenticatorService);
+  private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly navigation = inject(BrowserNavigation);
   private readonly resume = inject(ResumeIntentStore);
@@ -52,10 +53,6 @@ export class AuthenticatorSection implements OnInit {
   readonly changed = output();
 
   protected readonly busy = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
-  protected readonly removed = signal(false);
-  /** The removal was confirmed before the MFA and is carried out after the return without a second click. */
-  protected readonly resumed = signal(false);
   protected readonly today = new Date().toDateString();
 
   protected isToday(iso: string): boolean {
@@ -68,8 +65,17 @@ export class AuthenticatorSection implements OnInit {
       : null;
     const current = this.status();
     // Only the registration that was shown in the dialog is removed: a new one made meanwhile is not.
-    if (intent && current.state === 'active' && current.registeredAt === intent.registeredAt) {
-      this.resumed.set(true);
+    // The removal confirmed before the MFA is carried out after the return without a second click.
+    const resumed =
+      !!intent && current.state === 'active' && current.registeredAt === intent.registeredAt;
+    if (this.mfaConfirmed()) {
+      this.notifications.success(
+        resumed
+          ? $localize`:@@auth.mfaResumed:Identity confirmed. Removing the Authenticator.`
+          : $localize`:@@auth.mfaDone:Identity confirmed. You can now remove the Authenticator.`,
+      );
+    }
+    if (resumed) {
       void this.performRemoval();
     }
   }
@@ -101,11 +107,11 @@ export class AuthenticatorSection implements OnInit {
       return;
     }
     this.busy.set(true);
-    this.failure.set(null);
-    this.removed.set(false);
     try {
       await firstValueFrom(this.api.deleteMyAuthenticator());
-      this.removed.set(true);
+      this.notifications.success(
+        $localize`:@@auth.removed:Authenticator removed. The agent will not run irreversible operations until you register it again.`,
+      );
       this.changed.emit();
     } catch (error) {
       const failure = toApiFailure(error);
@@ -123,9 +129,8 @@ export class AuthenticatorSection implements OnInit {
         );
         return;
       }
-      this.failure.set(failure);
+      this.notifications.failure(failure);
     } finally {
-      this.resumed.set(false);
       this.busy.set(false);
     }
   }

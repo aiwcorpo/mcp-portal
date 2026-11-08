@@ -21,9 +21,6 @@
     </ol>
   }
 
-  @if (failure(); as problem) {
-    <app-error-notice [failure]="problem" />
-  }
   @if (clipboardAdvice() && step() !== 'scan') {
     <app-notice kind="warning" i18n="@@enroll.clipboard">
       The key was copied to the clipboard. Clear the clipboard, for example by copying other text:
@@ -57,11 +54,6 @@
     }
     @case ('info') {
       <h1 i18n="@@enroll.infoTitle">Register Authenticator</h1>
-      @if (mfaConfirmed()) {
-        <app-notice kind="info" i18n="@@enroll.mfaDone">
-          Identity confirmed. Continue the registration when you are ready.
-        </app-notice>
-      }
       <div class="text">
         <p class="lead" i18n="@@enroll.infoLead">
           When an agent wants to run an irreversible operation, for example deleting a page, you
@@ -72,8 +64,8 @@
           once.
         </p>
         <p class="muted" i18n="@@enroll.infoMfa">
-          "Next" will ask you to confirm your identity (MFA). It is needed only for registration
-          and removal.
+          "Next" will ask you to confirm your identity (MFA). It is needed only for registration and
+          removal.
         </p>
       </div>
       <div class="actions">

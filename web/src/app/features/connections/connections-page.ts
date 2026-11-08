@@ -20,11 +20,11 @@ import {
   CatalogService,
   PortalCatalogServer,
 } from '../../api/generated';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
+import { NotificationService } from '../../core/notification.service';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ErrorNotice } from '../../shared/error-notice';
 import {
   actionLabel,
   catalogStatusTone,
@@ -134,7 +134,6 @@ interface ConnectionsData {
     AuthenticatorSection,
     DatePipe,
     MatButtonModule,
-    ErrorNotice,
     LoadError,
     Loading,
     Notice,
@@ -146,6 +145,7 @@ interface ConnectionsData {
 })
 export class ConnectionsPage implements OnInit {
   private readonly catalogApi = inject(CatalogService);
+  private readonly notifications = inject(NotificationService);
   private readonly authenticatorApi = inject(AuthenticatorService);
   private readonly activityApi = inject(ActivityService);
   private readonly connectionActions = inject(ConnectionActions);
@@ -157,13 +157,15 @@ export class ConnectionsPage implements OnInit {
   protected readonly catalog = signal<LoadState<ConnectionsData>>(LOADING);
   protected readonly mfaConfirmed = signal(false);
   protected readonly busy = signal<string | null>(null);
-  protected readonly actionFailure = signal<ApiFailure | null>(null);
-  protected readonly actionDone = signal<string | null>(null);
 
   protected readonly servers = computed(() => {
     const state = this.catalog();
     return state.status === 'ready' ? state.value.servers : null;
   });
+  /** For the return from OAuth: null while loading, empty when the list could not be loaded. */
+  protected readonly returnServers = computed(() =>
+    this.catalog().status === 'loading' ? null : (this.servers() ?? []),
+  );
   protected readonly authenticator = computed(() => {
     const state = this.catalog();
     return state.status === 'ready' ? state.value.authenticator : null;
@@ -286,25 +288,25 @@ export class ConnectionsPage implements OnInit {
     if (this.busy()) {
       return;
     }
-    this.actionFailure.set(null);
-    this.actionDone.set(null);
     this.busy.set(server.serverId);
     try {
       switch (action) {
         case 'connect_oauth':
         case 'add_secret':
-        case 'reconnect':
-          this.actionFailure.set(
-            await this.connectionActions.connect(server, action, '/connections'),
-          );
+        case 'reconnect': {
+          const failure = await this.connectionActions.connect(server, action, '/connections');
+          if (failure) {
+            this.notifications.failure(failure);
+          }
           return;
+        }
         case 'request_access': {
           const result = await this.connectionActions.requestWithChoice(
             server.system,
             catalogSystemName(server),
           );
           if (result?.kind === 'created') {
-            this.actionDone.set(
+            this.notifications.success(
               $localize`:@@conn.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. You can check its status in the Requests tab.`,
             );
             await this.load();
@@ -320,10 +322,12 @@ export class ConnectionsPage implements OnInit {
             catalogSystemName(server),
           );
           if (result.kind === 'done') {
-            this.actionDone.set(disconnectedMessage(server.system, catalogSystemName(server)));
+            this.notifications.success(
+              disconnectedMessage(server.system, catalogSystemName(server)),
+            );
             await this.load();
           } else if (result.kind === 'failed') {
-            this.actionFailure.set(result.failure);
+            this.notifications.failure(result.failure);
           }
           return;
         }

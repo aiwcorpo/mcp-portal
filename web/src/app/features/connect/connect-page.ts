@@ -11,10 +11,10 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { CatalogService, Connection, PortalCatalogServer } from '../../api/generated';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ErrorNotice } from '../../shared/error-notice';
+import { NotificationService } from '../../core/notification.service';
 import { catalogSystemName, isSystemId, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
@@ -54,7 +54,7 @@ interface PageData {
 
 @Component({
   selector: 'app-connect-page',
-  imports: [MatButtonModule, SecretForm, Notice, ErrorNotice, Loading, LoadError],
+  imports: [MatButtonModule, SecretForm, Notice, Loading, LoadError],
   templateUrl: './connect-page.html',
   styleUrl: './connect-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +62,7 @@ interface PageData {
 export class ConnectPage {
   private readonly catalogApi = inject(CatalogService);
   private readonly connectionActions = inject(ConnectionActions);
+  private readonly notifications = inject(NotificationService);
 
   /** Route parameter and query (withComponentInputBinding). */
   readonly system = input.required<string>();
@@ -101,7 +102,6 @@ export class ConnectPage {
 
   protected readonly data = signal<LoadState<PageData | null>>(LOADING);
   protected readonly oauthBusy = signal(false);
-  protected readonly oauthFailure = signal<ApiFailure | null>(null);
 
   constructor() {
     // Runs again when the router reuses this component for another system.
@@ -140,8 +140,10 @@ export class ConnectPage {
       return;
     }
     this.oauthBusy.set(true);
-    this.oauthFailure.set(null);
-    this.oauthFailure.set(await this.connectionActions.startOAuth(system, '/connections'));
+    const failure = await this.connectionActions.startOAuth(system, '/connections');
+    if (failure) {
+      this.notifications.failure(failure);
+    }
     this.oauthBusy.set(false);
   }
 }

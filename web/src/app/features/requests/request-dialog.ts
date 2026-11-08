@@ -11,7 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { AccessRequestsService, CatalogService, RequestableEntitlement } from '../../api/generated';
 import { AccessRequestFlow, AccessRequestResult } from '../../core/access-request-flow';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
+import { NotificationService } from '../../core/notification.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ErrorNotice } from '../../shared/error-notice';
 import { catalogNames, isSystemId, systemName } from '../../shared/labels';
@@ -39,6 +40,7 @@ export interface RequestDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RequestDialog {
+  private readonly notifications = inject(NotificationService);
   private readonly accessRequestsApi = inject(AccessRequestsService);
   private readonly catalogApi = inject(CatalogService);
   private readonly flow = inject(AccessRequestFlow);
@@ -57,7 +59,6 @@ export class RequestDialog {
   protected readonly entitlements = signal<LoadState<RequestableEntitlement[]> | null>(null);
   protected readonly chosen = signal<string | null>(null);
   protected readonly sending = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
 
   protected readonly options = computed(() => {
     const state = this.entitlements();
@@ -99,13 +100,12 @@ export class RequestDialog {
       this.names.set(catalogNames(catalog.servers));
       this.systems.set([...new Set(catalog.servers.map((server) => server.system))].sort());
     } catch (error) {
-      this.failure.set(toApiFailure(error));
+      this.notifications.failure(toApiFailure(error));
     }
   }
 
   protected onSystem(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
-    this.failure.set(null);
     this.chosen.set(null);
     if (isSystemId(value)) {
       this.system.set(value);
@@ -142,11 +142,10 @@ export class RequestDialog {
       return;
     }
     this.sending.set(true);
-    this.failure.set(null);
     const result = await this.flow.createRequest(entitlement);
     this.sending.set(false);
     if (result.kind === 'failed') {
-      this.failure.set(result.failure);
+      this.notifications.failure(result.failure);
     } else {
       this.dialogRef.close(result);
     }

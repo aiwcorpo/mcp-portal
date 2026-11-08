@@ -84,7 +84,7 @@ test('unknown address shows the 404 state', async ({ page }) => {
   await expect(page).toHaveURL(/\/catalog$/);
 });
 
-test('dialog and snack bar work under the CSP: copy link and disconnect', async ({
+test('dialog and notification work under the CSP: copy link and disconnect', async ({
   page,
   context,
 }) => {

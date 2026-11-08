@@ -236,13 +236,19 @@ E2e tests run in English (`locale: 'en-US'`); there is one Polish smoke suite, `
 Error messages come only from codes (C10 and C12 codes from CC-012/CC-022, `src/app/core/error-messages.ts`);
 the `message` field of a BFF response is never displayed.
 
+The result of an action (saved, removed, failed, return from an OAuth provider) goes through `NotificationService`
+(`src/app/core/notification.service.ts`) to a stack in the bottom right corner (the bottom edge at 360 px): a success
+goes away after 6 s, an error stays until it is closed or its action is used, at most three at once. A state that
+lasts (a token about to expire, no Authenticator, a connection to renew) is not a notification: it stays in its row
+or section as `app-notice` or `app-status-badge`.
+
 ## Structure
 
 ```
 src/app/
   api/generated/        C12 client (generated)
-  core/                 session, error mapping, login URLs, admin guard, theme, interceptors (session, XSRF)
-  shared/               messages, labels, row state, OAuth return, loading and load error, dialog
+  core/                 session, error mapping, notifications, login URLs, admin guard, theme, interceptors (session, XSRF)
+  shared/               notification stack, inline notice, labels, row state, OAuth return, loading and load error, dialog
   features/login/       login screen and loginError errors
   features/catalog/     MCP servers (table with expandable rows)
   features/connect/     Connect account (OAuth, PAT token)

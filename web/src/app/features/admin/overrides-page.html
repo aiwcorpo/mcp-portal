@@ -2,26 +2,6 @@
 
 <app-admin-nav />
 
-@if (done(); as text) {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
-}
-@if (mfaNote() === 'draft') {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
-    <ng-container i18n="@@overrides.mfaDraft"
-      >Identity confirmed. Check the form and save again.</ng-container
-    >
-  </app-notice>
-} @else if (mfaNote() === 'repeat') {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaNote.set(null)">
-    <ng-container i18n="@@overrides.mfaRepeat"
-      >Identity confirmed. Repeat the operation.</ng-container
-    >
-  </app-notice>
-}
-@if (failure(); as problem) {
-  <app-error-notice [failure]="problem" />
-}
-
 @let current = state();
 @if (current.status === 'loading') {
   <app-loading />

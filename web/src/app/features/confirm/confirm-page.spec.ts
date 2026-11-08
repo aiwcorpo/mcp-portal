@@ -253,9 +253,7 @@ describe('ConfirmPage', () => {
         'Could not cancel: the operation may have been completed or expired.',
       ),
     );
-    expect(document.querySelector('a[href="/logs"]')?.textContent).toContain(
-      'Check the activity logs',
-    );
+    expect(button('Check the activity logs')).toBeTruthy();
     expect(text()).toContain('Cancel operation');
   });
 

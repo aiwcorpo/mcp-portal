@@ -239,7 +239,7 @@ describe('RequestsPage', () => {
       choose(dialogSelect('request-entitlement'), 'mcp-jira-destructive');
       button('Submit request', dialog()).click();
 
-      await until(() => expect(text(dialog())).toContain('An unexpected error occurred'));
+      await until(() => expect(text()).toContain('An unexpected error occurred'));
       expect(navigation.assign).not.toHaveBeenCalled();
     });
 

@@ -1,9 +1,5 @@
 <h1 class="visually-hidden" i18n="@@requests.title">Requests</h1>
 
-@if (done(); as text) {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
-}
-
 @let state = requests();
 @if (state.status === 'loading') {
   <app-loading />

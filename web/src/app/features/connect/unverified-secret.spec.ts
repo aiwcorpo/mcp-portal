@@ -34,7 +34,7 @@ describe('a token that the system does not verify', () => {
     expect(store.state.connections['notes']?.verified).toBe(false);
 
     await harness.navigateByUrl('/connections');
-    await until(() => expect(text()).toContain('Team notes'));
+    await until(() => expect(document.querySelector('tbody')).toBeTruthy());
     const row = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
       text(tr).includes('Team notes'),
     )!;

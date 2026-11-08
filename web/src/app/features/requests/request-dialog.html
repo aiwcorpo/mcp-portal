@@ -68,9 +68,6 @@
     }
   }
 
-  @if (failure(); as sendFailure) {
-    <app-error-notice [failure]="sendFailure" />
-  }
   <p class="muted small" i18n="@@request.note">
     If the entitlement system asks for a justification, you will provide it after the redirect.
   </p>

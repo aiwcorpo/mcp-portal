@@ -32,7 +32,13 @@
   --tone: var(--pm-link);
 }
 
+.icon {
+  padding-top: 3px;
+  color: var(--tone);
+}
+
 .body {
+  flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
 }

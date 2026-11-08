@@ -15,16 +15,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, PendingTool, Risk } from '../../api/generated';
 import { failureMessage } from '../../core/error-messages';
+import { NotificationService } from '../../core/notification.service';
 import { parseKeepingNumbers } from './raw-json';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
 import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -60,13 +60,14 @@ type Outcome =
  */
 @Component({
   selector: 'app-tool-diff',
-  imports: [SafeTextPipe, MatButtonModule, ErrorNotice, LoadError, Loading, Notice],
+  imports: [SafeTextPipe, MatButtonModule, LoadError, Loading, Notice],
   templateUrl: './tool-diff.html',
   styleUrl: './tool-diff.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToolDiff {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly http = inject(HttpClient);
   private readonly navigation = inject(BrowserNavigation);
   private readonly dialog = inject(MatDialog);
@@ -95,7 +96,6 @@ export class ToolDiff {
   protected readonly noVersion = $localize`:@@admin.noVersion:no version`;
   protected readonly pending = signal<LoadState<PendingTool>>(LOADING);
   protected readonly approving = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly changedMeanwhile = signal(false);
   /** The definition changed while the administrator was at the IdP; nothing was approved. */
   protected readonly resumeRefused = signal(false);
@@ -157,7 +157,6 @@ export class ToolDiff {
 
   protected async load(): Promise<void> {
     this.pending.set(LOADING);
-    this.failure.set(null);
     try {
       // Read as text: a number beyond 2^53 must reach the diff as written, not rounded by JSON.parse.
       const body = await firstValueFrom(
@@ -285,7 +284,6 @@ export class ToolDiff {
       return { kind: 'stopped' };
     }
     this.approving.set(true);
-    this.failure.set(null);
     this.changedMeanwhile.set(false);
     const approvedHash = state.value.pendingHash;
     try {
@@ -335,11 +333,11 @@ export class ToolDiff {
         return { kind: 'lowering-required' };
       } else if (failure.code === 'manifest_rejected') {
         this.refusedHash.set(approvedHash);
-        this.failure.set(failure);
+        this.notifications.failure(failure);
       } else if (failure.code === 'not_found_or_denied') {
         this.gone.emit();
       } else {
-        this.failure.set(failure);
+        this.notifications.failure(failure);
       }
       return { kind: 'stopped' };
     } finally {

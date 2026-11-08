@@ -23,12 +23,12 @@ import {
   SystemUserSecretScheme,
 } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
+import { NotificationService } from '../../core/notification.service';
 import { etagOf } from '../../core/admin-etag';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { credentialTypeLabel } from '../../shared/labels';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -186,22 +186,14 @@ export function systemRequest(form: SystemForm): SystemAdminRequest {
  */
 @Component({
   selector: 'app-systems-page',
-  imports: [
-    FormsModule,
-    MatButtonModule,
-    AdminNav,
-    ErrorNotice,
-    LoadError,
-    Loading,
-    Notice,
-    SafeTextPipe,
-  ],
+  imports: [FormsModule, MatButtonModule, AdminNav, LoadError, Loading, Notice, SafeTextPipe],
   templateUrl: './systems-page.html',
   styleUrls: ['./admin-common.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemsPage implements OnInit {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly stepUp = inject(AdminStepUp);
@@ -212,9 +204,6 @@ export class SystemsPage implements OnInit {
   protected readonly state = signal<LoadState<SystemAdminView[]>>(LOADING);
   protected readonly editing = signal<Editing | null>(null);
   protected readonly busy = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
-  protected readonly done = signal<string | null>(null);
-  protected readonly mfaNote = signal<'draft' | 'repeat' | null>(null);
   protected readonly touched = signal(false);
   /** The page was opened by the return from the IdP; a repeated step-up request is then an error, not a loop. */
   private returnedAt = 0;
@@ -387,9 +376,13 @@ export class SystemsPage implements OnInit {
           original,
           etag: etag ?? null,
         });
-        this.mfaNote.set('draft');
+        this.notifications.success(
+          $localize`:@@adminSystems.mfaDraft:Identity confirmed. Check the form, enter the client secret again and save.`,
+        );
       } else {
-        this.mfaNote.set('repeat');
+        this.notifications.success(
+          $localize`:@@adminSystems.mfaRepeat:Identity confirmed. Repeat the operation.`,
+        );
       }
     }
   }
@@ -454,7 +447,7 @@ export class SystemsPage implements OnInit {
         etag: etagOf(response),
       });
     } catch (error) {
-      this.failure.set(toApiFailure(error));
+      this.notifications.failure(toApiFailure(error));
     } finally {
       this.busy.set(false);
     }
@@ -463,13 +456,9 @@ export class SystemsPage implements OnInit {
   protected cancel(): void {
     this.editing.set(null);
     this.touched.set(false);
-    this.failure.set(null);
   }
 
   private reset(): void {
-    this.failure.set(null);
-    this.done.set(null);
-    this.mfaNote.set(null);
     this.touched.set(false);
   }
 
@@ -528,11 +517,10 @@ export class SystemsPage implements OnInit {
     const form = current.form;
     const replacing = form.mode === 'edit';
     if (replacing && !current.etag) {
-      this.failure.set({ code: 'precondition_required', status: 428 });
+      this.notifications.failure({ code: 'precondition_required', status: 428 });
       return;
     }
     this.busy.set(true);
-    this.failure.set(null);
     try {
       await firstValueFrom(
         this.adminApi.putAdminSystem(
@@ -543,7 +531,7 @@ export class SystemsPage implements OnInit {
         ),
       );
       const id = form.system.trim();
-      this.done.set(
+      this.notifications.success(
         replacing
           ? this.changed().length
             ? $localize`:@@adminSystems.savedInvalidated:Saved the system ${id}:system:. The connections of its users were deleted; they connect again.`
@@ -562,7 +550,7 @@ export class SystemsPage implements OnInit {
       ) {
         return;
       }
-      this.failure.set(failure);
+      this.notifications.failure(failure);
       if (failure.code === 'precondition_failed') {
         await this.read();
       }
@@ -598,16 +586,18 @@ export class SystemsPage implements OnInit {
         return;
       }
       if (!etag) {
-        this.failure.set({ code: 'precondition_required', status: 428 });
+        this.notifications.failure({ code: 'precondition_required', status: 428 });
         return;
       }
       await firstValueFrom(this.adminApi.deleteAdminSystem(etag, id));
-      this.done.set($localize`:@@adminSystems.removed:Removed the system ${id}:system:.`);
+      this.notifications.success(
+        $localize`:@@adminSystems.removed:Removed the system ${id}:system:.`,
+      );
       await this.read();
     } catch (error) {
       const failure = toApiFailure(error);
       if (!this.stepUp.redirectIfRequired(failure, PAGE, undefined, returned)) {
-        this.failure.set(failure);
+        this.notifications.failure(failure);
         if (failure.code === 'precondition_failed') {
           await this.read();
         }

@@ -14,17 +14,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, KillSwitch, RegistryServer } from '../../api/generated';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
+import { NotificationService } from '../../core/notification.service';
 import { stepUpUrlFor } from '../../core/auth-urls';
 import { BrowserNavigation } from '../../core/browser-navigation';
 import { LOADING, LoadState } from '../../core/load-state';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { SessionService } from '../../core/session.service';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { AdminNav } from './admin-nav';
@@ -58,23 +57,14 @@ const keyOf = (serverId: string, tool: string | null | undefined): string =>
  */
 @Component({
   selector: 'app-kill-switches-page',
-  imports: [
-    DatePipe,
-    FormsModule,
-    MatButtonModule,
-    AdminNav,
-    ErrorNotice,
-    LoadError,
-    Loading,
-    Notice,
-    SafeTextPipe,
-  ],
+  imports: [DatePipe, FormsModule, MatButtonModule, AdminNav, LoadError, Loading, SafeTextPipe],
   templateUrl: './kill-switches-page.html',
   styleUrl: './kill-switches-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KillSwitchesPage implements OnInit {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly navigation = inject(BrowserNavigation);
   private readonly resumeStore = inject(ResumeIntentStore);
@@ -88,13 +78,9 @@ export class KillSwitchesPage implements OnInit {
   protected readonly reasonMax = REASON_MAX;
   protected readonly state = signal<LoadState<Data>>(LOADING);
   protected readonly busy = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
-  protected readonly done = signal<string | null>(null);
-  protected readonly resumed = signal(false);
   /** True only while the resumed lift runs: a second step_up_required then is an error, not a loop (U12). */
   private resuming = false;
   /** The switch changed while the administrator was at the IdP; nothing was lifted. */
-  protected readonly resumeRefused = signal(false);
 
   protected readonly serverId = signal('');
   protected readonly tool = signal('');
@@ -191,8 +177,6 @@ export class KillSwitchesPage implements OnInit {
       return;
     }
     this.busy.set(true);
-    this.failure.set(null);
-    this.done.set(null);
     try {
       const body = { reason: this.reason().trim() };
       await firstValueFrom(
@@ -200,12 +184,14 @@ export class KillSwitchesPage implements OnInit {
           ? this.adminApi.putAdminToolKillSwitch(id, tool, body)
           : this.adminApi.putAdminServerKillSwitch(id, body),
       );
-      this.done.set($localize`:@@killSwitches.offDone:Switched off: ${target}:target:.`);
+      this.notifications.success(
+        $localize`:@@killSwitches.offDone:Switched off: ${target}:target:.`,
+      );
       this.reason.set('');
       this.tool.set('');
       await this.read();
     } catch (error) {
-      this.failure.set(toApiFailure(error));
+      this.notifications.failure(toApiFailure(error));
     } finally {
       this.busy.set(false);
     }
@@ -233,15 +219,15 @@ export class KillSwitchesPage implements OnInit {
     setAt: string,
   ): Promise<void> {
     this.busy.set(true);
-    this.failure.set(null);
-    this.done.set(null);
     try {
       await firstValueFrom(
         tool
           ? this.adminApi.deleteAdminToolKillSwitch(serverId, tool)
           : this.adminApi.deleteAdminServerKillSwitch(serverId),
       );
-      this.done.set($localize`:@@killSwitches.liftDone:Lifted switch: ${target}:target:.`);
+      this.notifications.success(
+        $localize`:@@killSwitches.liftDone:Lifted switch: ${target}:target:.`,
+      );
       await this.read();
     } catch (error) {
       const failure = toApiFailure(error);
@@ -255,7 +241,7 @@ export class KillSwitchesPage implements OnInit {
         );
         return;
       }
-      this.failure.set(failure);
+      this.notifications.failure(failure);
     } finally {
       this.busy.set(false);
     }
@@ -283,10 +269,14 @@ export class KillSwitchesPage implements OnInit {
     }
     // Only the switch the administrator saw: one lifted and put on again meanwhile is a new incident with its own reason.
     if (row.entry.setAt !== intent.setAt) {
-      this.resumeRefused.set(true);
+      this.notifications.error(
+        $localize`:@@killSwitches.resumeRefused:The switch changed before you confirmed your identity (someone lifted it and switched it on again), so nothing was lifted. Check the new reason and lift it again.`,
+      );
       return;
     }
-    this.resumed.set(true);
+    this.notifications.success(
+      $localize`:@@killSwitches.mfaResumed:Identity confirmed. Lifting the switch you picked before the confirmation.`,
+    );
     this.resuming = true;
     try {
       await this.performLift(row.entry.serverId, row.toolName, row.target, row.entry.setAt);

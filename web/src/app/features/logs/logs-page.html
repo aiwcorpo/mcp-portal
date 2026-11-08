@@ -49,8 +49,6 @@
         Load from the start
       </button>
     </app-notice>
-  } @else if (moreFailure(); as failure) {
-    <app-error-notice [failure]="failure" [retryable]="true" (retry)="more()" />
   }
   @if (rows().length) {
     <table class="table" role="table">

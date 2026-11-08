@@ -2,28 +2,6 @@
 
 <app-admin-nav />
 
-@if (done(); as text) {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
-}
-@if (resumeRefused()) {
-  <app-notice kind="warning" [dismissible]="true" (dismiss)="resumeRefused.set(false)">
-    <ng-container i18n="@@killSwitches.resumeRefused"
-      >The switch changed before you confirmed your identity (someone lifted it and switched it on
-      again), so nothing was lifted. Check the new reason and lift it again.</ng-container
-    >
-  </app-notice>
-}
-@if (resumed() && !failure()) {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="resumed.set(false)">
-    <ng-container i18n="@@killSwitches.mfaResumed"
-      >Identity confirmed. Lifting the switch you picked before the confirmation.</ng-container
-    >
-  </app-notice>
-}
-@if (failure(); as problem) {
-  <app-error-notice [failure]="problem" />
-}
-
 @let current = state();
 @if (current.status === 'loading') {
   <app-loading />

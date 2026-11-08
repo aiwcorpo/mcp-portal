@@ -1,36 +1,24 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { CatalogService, PortalCatalogServer } from '../../api/generated';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { AccessRequestResult } from '../../core/access-request-flow';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { ConnectionActions, disconnectedMessage } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ErrorNotice } from '../../shared/error-notice';
+import { NotificationService } from '../../core/notification.service';
 import { catalogSystemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
 import { OAuthReturnBanner } from '../../shared/oauth-return';
 import { AuthenticatorBanner } from '../authenticator/authenticator-banner';
 import { CatalogActionEvent, CatalogTable, ToolRequestEvent, matchesServer } from './catalog-table';
 
-type Banner = { kind: 'success'; text: string } | { kind: 'error'; failure: ApiFailure };
-
 @Component({
   selector: 'app-catalog-page',
-  imports: [
-    AuthenticatorBanner,
-    CatalogTable,
-    ErrorNotice,
-    LoadError,
-    Loading,
-    Notice,
-    OAuthReturnBanner,
-  ],
+  imports: [AuthenticatorBanner, CatalogTable, LoadError, Loading, OAuthReturnBanner],
   templateUrl: './catalog-page.html',
   styleUrl: './catalog-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,11 +27,10 @@ export class CatalogPage {
   private readonly catalogApi = inject(CatalogService);
   private readonly connectionActions = inject(ConnectionActions);
   private readonly clipboard = inject(Clipboard);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
 
   protected readonly catalog = signal<LoadState<PortalCatalogServer[]>>(LOADING);
-  protected readonly banner = signal<Banner | null>(null);
   protected readonly busyServer = signal<string | null>(null);
   protected readonly busyTool = signal<string | null>(null);
   protected readonly query = signal('');
@@ -51,6 +38,11 @@ export class CatalogPage {
   protected readonly loadedServers = computed(() => {
     const state = this.catalog();
     return state.status === 'ready' ? state.value : null;
+  });
+  /** For the return from OAuth: null while loading, empty when the list could not be loaded. */
+  protected readonly returnServers = computed(() => {
+    const state = this.catalog();
+    return state.status === 'loading' ? null : (this.loadedServers() ?? []);
   });
   /** Tools the user can use but only with a code from the Authenticator (mockup 23). */
   protected readonly needsAuthenticator = computed(() =>
@@ -111,13 +103,15 @@ export class CatalogPage {
 
   private copyLink(server: PortalCatalogServer): void {
     const copied = this.clipboard.copy(server.url);
-    this.snackBar.open(
-      copied
-        ? $localize`:@@catalog.linkCopied:Copied the address of the ${catalogSystemName(server)}:system: server.`
-        : $localize`:@@catalog.linkCopyFailed:Could not copy the address. Address: ${server.url}:url:`,
-      undefined,
-      { duration: 5000 },
-    );
+    if (copied) {
+      this.notifications.success(
+        $localize`:@@catalog.linkCopied:Copied the address of the ${catalogSystemName(server)}:system: server.`,
+      );
+    } else {
+      this.notifications.error(
+        $localize`:@@catalog.linkCopyFailed:Could not copy the address. Address: ${server.url}:url:`,
+      );
+    }
   }
 
   private async connect(
@@ -128,7 +122,7 @@ export class CatalogPage {
     const failure = await this.connectionActions.connect(server, action, '/catalog');
     this.busyServer.set(null);
     if (failure) {
-      this.banner.set({ kind: 'error', failure });
+      this.notifications.failure(failure);
     }
   }
 
@@ -157,17 +151,16 @@ export class CatalogPage {
   private async showRequestResult(result: AccessRequestResult): Promise<void> {
     switch (result.kind) {
       case 'created':
-        this.banner.set({
-          kind: 'success',
-          text: $localize`:@@catalog.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. Check its status in the Requests tab.`,
-        });
+        this.notifications.success(
+          $localize`:@@catalog.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. Check its status in the Requests tab.`,
+        );
         await this.load();
         return;
       case 'failed':
-        this.banner.set({ kind: 'error', failure: result.failure });
+        this.notifications.failure(result.failure);
         return;
       case 'unavailable':
-        this.banner.set({ kind: 'error', failure: { code: 'internal_error', status: 0 } });
+        this.notifications.failure({ code: 'internal_error', status: 0 });
         return;
       default:
         return;
@@ -183,13 +176,10 @@ export class CatalogPage {
     );
     this.busyServer.set(null);
     if (result.kind === 'done') {
-      this.banner.set({
-        kind: 'success',
-        text: disconnectedMessage(system, catalogSystemName(server)),
-      });
+      this.notifications.success(disconnectedMessage(system, catalogSystemName(server)));
       await this.load();
     } else if (result.kind === 'failed') {
-      this.banner.set({ kind: 'error', failure: result.failure });
+      this.notifications.failure(result.failure);
     }
   }
 }

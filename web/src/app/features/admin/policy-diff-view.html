@@ -126,10 +126,6 @@
       </section>
     </div>
 
-    @if (failure(); as problem) {
-      <app-error-notice [failure]="problem" />
-    }
-
     <div class="actions">
       <button mat-flat-button type="button" [disabled]="approving()" (click)="approve()">
         <ng-container i18n="@@policies.approve">Approve policies</ng-container>

@@ -22,12 +22,12 @@ import {
   ServerConfigPatch,
 } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
+import { NotificationService } from '../../core/notification.service';
 import { etagOf } from '../../core/admin-etag';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { credentialTypeLabel } from '../../shared/labels';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -118,7 +118,6 @@ export function serverPatch(original: ServerConfig, form: ServerForm): ServerCon
     RouterLink,
     AdminNav,
     ConnectionFacts,
-    ErrorNotice,
     LoadError,
     Loading,
     Notice,
@@ -130,6 +129,7 @@ export function serverPatch(original: ServerConfig, form: ServerForm): ServerCon
 })
 export class ServersPage implements OnInit {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly stepUp = inject(AdminStepUp);
@@ -145,9 +145,6 @@ export class ServersPage implements OnInit {
   protected readonly refreshing = signal(false);
   protected readonly plainWarning = PLAIN_HTTP_RISK;
   protected readonly busy = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
-  protected readonly done = signal<string | null>(null);
-  protected readonly mfaNote = signal<'draft' | 'repeat' | null>(null);
   protected readonly touched = signal(false);
   /** The page was opened by the return from the IdP; a repeated step-up request is then an error, not a loop. */
   private returnedAt = 0;
@@ -226,9 +223,13 @@ export class ServersPage implements OnInit {
             ? (state.value.find((server) => server.system === form.system) ?? null)
             : null;
         this.editing.set({ form: { ...EMPTY_FORM, ...form }, original, etag: etag ?? null });
-        this.mfaNote.set('draft');
+        this.notifications.success(
+          $localize`:@@adminServers.mfaDraft:Identity confirmed. Check the form and save again.`,
+        );
       } else {
-        this.mfaNote.set('repeat');
+        this.notifications.success(
+          $localize`:@@adminServers.mfaRepeat:Identity confirmed. Repeat the operation.`,
+        );
       }
     }
   }
@@ -312,13 +313,11 @@ export class ServersPage implements OnInit {
       return;
     }
     this.refreshing.set(true);
-    this.failure.set(null);
-    this.done.set(null);
     try {
       await firstValueFrom(this.adminApi.refreshAdminServer(server.serverId));
       await this.read();
     } catch (error) {
-      this.failure.set(toApiFailure(error));
+      this.notifications.failure(toApiFailure(error));
     } finally {
       this.refreshing.set(false);
     }
@@ -349,7 +348,7 @@ export class ServersPage implements OnInit {
         etag: etagOf(response),
       });
     } catch (error) {
-      this.failure.set(toApiFailure(error));
+      this.notifications.failure(toApiFailure(error));
     } finally {
       this.busy.set(false);
     }
@@ -358,13 +357,9 @@ export class ServersPage implements OnInit {
   protected cancel(): void {
     this.editing.set(null);
     this.touched.set(false);
-    this.failure.set(null);
   }
 
   private reset(): void {
-    this.failure.set(null);
-    this.done.set(null);
-    this.mfaNote.set(null);
     this.touched.set(false);
   }
 
@@ -397,7 +392,6 @@ export class ServersPage implements OnInit {
     }
     const form = current.form;
     this.busy.set(true);
-    this.failure.set(null);
     try {
       if (form.mode === 'create') {
         const expectedSystem = form.expectedSystem.trim();
@@ -408,24 +402,24 @@ export class ServersPage implements OnInit {
         };
         const added = await firstValueFrom(this.adminApi.createAdminServer(body));
         const id = added.serverId;
-        this.done.set(
+        this.notifications.success(
           $localize`:@@adminServers.added:Added the server ${id}:server:. It has no tools until you approve its connection, policies and tools on the Approvals screen.`,
         );
       } else if (current.original) {
         const patch = serverPatch(current.original, form);
         if (Object.keys(patch).length === 0) {
-          this.done.set($localize`:@@adminServers.noChange:Nothing changed.`);
+          this.notifications.success($localize`:@@adminServers.noChange:Nothing changed.`);
           this.editing.set(null);
           return;
         }
         if (!current.etag) {
-          this.failure.set({ code: 'precondition_required', status: 428 });
+          this.notifications.failure({ code: 'precondition_required', status: 428 });
           return;
         }
         await firstValueFrom(
           this.adminApi.updateAdminServer(current.etag, current.original.serverId, patch),
         );
-        this.done.set(
+        this.notifications.success(
           $localize`:@@adminServers.saved:Saved the settings of ${current.original.serverId}:server:.`,
         );
       }
@@ -439,7 +433,7 @@ export class ServersPage implements OnInit {
       ) {
         return;
       }
-      this.failure.set(failure);
+      this.notifications.failure(failure);
       if (failure.code === 'precondition_failed') {
         await this.read();
       }
@@ -464,18 +458,18 @@ export class ServersPage implements OnInit {
       const response = await firstValueFrom(this.adminApi.getAdminServer(id, 'response'));
       const etag = etagOf(response);
       if (!etag) {
-        this.failure.set({ code: 'precondition_required', status: 428 });
+        this.notifications.failure({ code: 'precondition_required', status: 428 });
         return;
       }
       await firstValueFrom(this.adminApi.updateAdminServer(etag, id, { enabled: false }));
-      this.done.set(
+      this.notifications.success(
         $localize`:@@adminServers.disabledDone:Disabled the server ${id}:server:. Its tools are out of service.`,
       );
       await this.read();
     } catch (error) {
       const failure = toApiFailure(error);
       if (!this.stepUp.redirectIfRequired(failure, PAGE, undefined, returned)) {
-        this.failure.set(failure);
+        this.notifications.failure(failure);
         if (failure.code === 'precondition_failed') {
           await this.read();
         }
@@ -510,12 +504,14 @@ export class ServersPage implements OnInit {
     this.reset();
     try {
       await firstValueFrom(this.adminApi.deleteAdminServer(id));
-      this.done.set($localize`:@@adminServers.removed:Removed the server ${id}:server:.`);
+      this.notifications.success(
+        $localize`:@@adminServers.removed:Removed the server ${id}:server:.`,
+      );
       await this.read();
     } catch (error) {
       const failure = toApiFailure(error);
       if (!this.stepUp.redirectIfRequired(failure, PAGE, undefined, returned)) {
-        this.failure.set(failure);
+        this.notifications.failure(failure);
       }
     } finally {
       this.busy.set(false);

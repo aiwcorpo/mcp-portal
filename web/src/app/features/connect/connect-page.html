@@ -30,9 +30,6 @@
           You will go to the {{ name() }} sign-in page and return to the portal after approving
           access. The portal never sees your password.
         </p>
-        @if (oauthFailure(); as failure) {
-          <app-error-notice [failure]="failure" />
-        }
         <button
           mat-flat-button
           type="button"

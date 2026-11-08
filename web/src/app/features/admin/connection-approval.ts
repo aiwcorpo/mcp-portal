@@ -12,8 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, PendingConnection, ServerConfig, TlsMode } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
-import { ErrorNotice } from '../../shared/error-notice';
+import { NotificationService } from '../../core/notification.service';
+import { toApiFailure } from '../../core/api-error';
 import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { ConnectionFacts } from './connection-facts';
@@ -35,13 +35,14 @@ export interface ConnectionApprovalIntent {
  */
 @Component({
   selector: 'app-connection-approval',
-  imports: [MatButtonModule, ConnectionFacts, ErrorNotice, Notice, SafeTextPipe],
+  imports: [MatButtonModule, ConnectionFacts, Notice, SafeTextPipe],
   templateUrl: './connection-approval.html',
   styleUrl: './connection-approval.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectionApproval implements OnInit {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly stepUp = inject(AdminStepUp);
 
   readonly server = input.required<ServerConfig>();
@@ -77,7 +78,6 @@ export class ConnectionApproval implements OnInit {
   });
   protected readonly modeLabel = tlsModeLabel;
   protected readonly approving = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly resumeRefused = signal(false);
   /** Set while the approval carried out after the return from the IdP runs; a repeated step-up request is then an error. */
   private resuming = false;
@@ -116,7 +116,6 @@ export class ConnectionApproval implements OnInit {
       return;
     }
     this.approving.set(true);
-    this.failure.set(null);
     const serverId = this.server().serverId;
     try {
       const updated = await firstValueFrom(
@@ -137,7 +136,7 @@ export class ConnectionApproval implements OnInit {
       if (this.stepUp.redirectIfRequired(failure, '/admin', intent, this.resuming)) {
         return;
       }
-      this.failure.set(failure);
+      this.notifications.failure(failure);
       if (failure.code === 'connection_changed' || failure.code === 'no_pending_connection') {
         this.stale.emit();
       }

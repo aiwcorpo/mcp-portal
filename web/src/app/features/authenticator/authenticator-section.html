@@ -1,32 +1,9 @@
 <section class="authenticator" aria-labelledby="authenticator-title">
   <h2 id="authenticator-title" i18n="@@auth.title">Authenticator</h2>
   <p class="muted" i18n="@@auth.intro">
-    The "MCP Platform" account in Microsoft Authenticator. You confirm irreversible agent
-    operations with a code from it.
+    The "MCP Platform" account in Microsoft Authenticator. You confirm irreversible agent operations
+    with a code from it.
   </p>
-
-  @if (mfaConfirmed() && !removed()) {
-    <app-notice kind="info">
-      @if (resumed()) {
-        <ng-container i18n="@@auth.mfaResumed"
-          >Identity confirmed. Removing the Authenticator.</ng-container
-        >
-      } @else {
-        <ng-container i18n="@@auth.mfaDone"
-          >Identity confirmed. You can now remove the Authenticator.</ng-container
-        >
-      }
-    </app-notice>
-  }
-  @if (removed()) {
-    <app-notice kind="success" i18n="@@auth.removed">
-      Authenticator removed. The agent will not run irreversible operations until you register
-      it again.
-    </app-notice>
-  }
-  @if (failure(); as problem) {
-    <app-error-notice [failure]="problem" />
-  }
 
   @let current = status();
   @if (current.state === 'disabled') {

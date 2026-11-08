@@ -9,13 +9,13 @@ import {
   CatalogService,
 } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
+import { NotificationService } from '../../core/notification.service';
 import { isAllowedRedirect } from '../../core/auth-urls';
 import { ConnectionActions } from '../../core/connection-actions.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { Tone, catalogNames } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { entitlementTitle } from './entitlement-labels';
@@ -43,20 +43,20 @@ interface RequestRow {
 /** "Wnioski" (mockup 17): the user's requests from the IGA and the way to file a new one. */
 @Component({
   selector: 'app-requests-page',
-  imports: [SafeTextPipe, DatePipe, MatButtonModule, LoadError, Loading, Notice],
+  imports: [SafeTextPipe, DatePipe, MatButtonModule, LoadError, Loading],
   templateUrl: './requests-page.html',
   styleUrl: './requests-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RequestsPage {
   private readonly api = inject(AccessRequestsService);
+  private readonly notifications = inject(NotificationService);
   private readonly actions = inject(ConnectionActions);
   private readonly catalogApi = inject(CatalogService);
   /** Names of the systems from the catalog, read after the list; without them the identifiers are shown. */
   private readonly names = signal<ReadonlyMap<string, string>>(new Map());
 
   protected readonly requests = signal<LoadState<AccessRequest[]>>(LOADING);
-  protected readonly done = signal<string | null>(null);
 
   protected readonly rows = computed<RequestRow[]>(() => {
     const state = this.requests();
@@ -101,10 +101,9 @@ export class RequestsPage {
   }
 
   protected async newRequest(): Promise<void> {
-    this.done.set(null);
     const result = await this.actions.requestWithChoice(null);
     if (result?.kind === 'created') {
-      this.done.set(
+      this.notifications.success(
         $localize`:@@requests.created:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. You can check its status here.`,
       );
       await this.load();

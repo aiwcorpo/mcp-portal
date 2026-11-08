@@ -858,6 +858,14 @@
         <source>Too many requests. Try again in <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
       </segment>
     </unit>
+    <unit id="common.retry2">
+      <notes>
+        <note category="location">src/app/core/notification.service.ts:85</note>
+      </notes>
+      <segment>
+        <source>Try again</source>
+      </segment>
+    </unit>
     <unit id="app.name">
       <notes>
         <note category="location">src/app/core/page-title.strategy.ts:5</note>
@@ -930,25 +938,9 @@
         <source>Administration</source>
       </segment>
     </unit>
-    <unit id="admin.mfaResumed">
-      <notes>
-        <note category="location">src/app/features/admin/admin-page.html:11,13</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Approving what you picked before the confirmation.</source>
-      </segment>
-    </unit>
-    <unit id="admin.mfaDone">
-      <notes>
-        <note category="location">src/app/features/admin/admin-page.html:15,17</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Open the differences and approve again.</source>
-      </segment>
-    </unit>
     <unit id="admin.ignoredEntries">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:24,27</note>
+        <note category="location">src/app/features/admin/admin-page.html:6,9</note>
       </notes>
       <segment>
         <source>The approval made these scope mapping entries invalid, and evaluation ignores them until you correct the mapping:</source>
@@ -956,7 +948,7 @@
     </unit>
     <unit id="admin.lead">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:42,46</note>
+        <note category="location">src/app/features/admin/admin-page.html:24,28</note>
       </notes>
       <segment>
         <source> New and changed tools are not made available to agents until you approve them, read tools included: the gateway approves nothing it pulls. The connection of a server, its policies and its resource type declarations are approved here too, and its tools stay blocked until then. </source>
@@ -964,7 +956,7 @@
     </unit>
     <unit id="admin.killSwitchesOn">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:49,50</note>
+        <note category="location">src/app/features/admin/admin-page.html:31,32</note>
       </notes>
       <segment>
         <source>on: <ph id="0" equiv="INTERPOLATION" disp="{{ switches().length }}"/></source>
@@ -972,7 +964,7 @@
     </unit>
     <unit id="admin.pendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:54,57</note>
+        <note category="location">src/app/features/admin/admin-page.html:36,39</note>
       </notes>
       <segment>
         <source> Pending approval: <ph id="0" equiv="INTERPOLATION" disp="{{ totalPending() }}"/> </source>
@@ -980,7 +972,7 @@
     </unit>
     <unit id="admin.connectionsPendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:59,61</note>
+        <note category="location">src/app/features/admin/admin-page.html:41,43</note>
       </notes>
       <segment>
         <source> Connections waiting for approval: <ph id="0" equiv="INTERPOLATION" disp="{{ pendingConnections().length }}"/> </source>
@@ -988,7 +980,7 @@
     </unit>
     <unit id="admin.policiesPendingTotal">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:74,77</note>
+        <note category="location">src/app/features/admin/admin-page.html:56,59</note>
       </notes>
       <segment>
         <source> Servers with policies pending approval: <ph id="0" equiv="INTERPOLATION" disp="{{ policiesPendingTotal() }}"/> </source>
@@ -996,7 +988,7 @@
     </unit>
     <unit id="admin.caption">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:80,82</note>
+        <note category="location">src/app/features/admin/admin-page.html:62,64</note>
       </notes>
       <segment>
         <source> MCP server registry </source>
@@ -1004,7 +996,7 @@
     </unit>
     <unit id="admin.colToggle">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:85,87</note>
+        <note category="location">src/app/features/admin/admin-page.html:67,69</note>
       </notes>
       <segment>
         <source>Tools</source>
@@ -1012,7 +1004,7 @@
     </unit>
     <unit id="admin.colServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:87,88</note>
+        <note category="location">src/app/features/admin/admin-page.html:69,70</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -1020,8 +1012,8 @@
     </unit>
     <unit id="admin.colVersion">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:88,89</note>
-        <note category="location">src/app/features/admin/admin-page.html:126</note>
+        <note category="location">src/app/features/admin/admin-page.html:70,71</note>
+        <note category="location">src/app/features/admin/admin-page.html:108</note>
       </notes>
       <segment>
         <source>Version</source>
@@ -1029,8 +1021,8 @@
     </unit>
     <unit id="admin.colChanges">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:89,90</note>
-        <note category="location">src/app/features/admin/admin-page.html:130</note>
+        <note category="location">src/app/features/admin/admin-page.html:71,72</note>
+        <note category="location">src/app/features/admin/admin-page.html:112</note>
       </notes>
       <segment>
         <source>Changes</source>
@@ -1038,8 +1030,8 @@
     </unit>
     <unit id="admin.colState">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:90,92</note>
-        <note category="location">src/app/features/admin/admin-page.html:141</note>
+        <note category="location">src/app/features/admin/admin-page.html:72,74</note>
+        <note category="location">src/app/features/admin/admin-page.html:123</note>
       </notes>
       <segment>
         <source>State</source>
@@ -1047,7 +1039,7 @@
     </unit>
     <unit id="admin.policiesWaiting">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:151,153</note>
+        <note category="location">src/app/features/admin/admin-page.html:133,135</note>
       </notes>
       <segment>
         <source>Policies and resource types waiting for approval</source>
@@ -1055,7 +1047,7 @@
     </unit>
     <unit id="admin.policiesBlocked">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:154,156</note>
+        <note category="location">src/app/features/admin/admin-page.html:136,138</note>
       </notes>
       <segment>
         <source>The tools of this server are blocked until you approve them.</source>
@@ -1063,7 +1055,7 @@
     </unit>
     <unit id="admin.hidePolicies">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:167,168</note>
+        <note category="location">src/app/features/admin/admin-page.html:149,150</note>
       </notes>
       <segment>
         <source>Hide differences</source>
@@ -1071,7 +1063,7 @@
     </unit>
     <unit id="admin.showPolicies">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:169,170</note>
+        <note category="location">src/app/features/admin/admin-page.html:151,152</note>
       </notes>
       <segment>
         <source>Show differences</source>
@@ -1079,7 +1071,7 @@
     </unit>
     <unit id="admin.policiesWord">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:173,174</note>
+        <note category="location">src/app/features/admin/admin-page.html:155,156</note>
       </notes>
       <segment>
         <source>policies</source>
@@ -1087,7 +1079,7 @@
     </unit>
     <unit id="admin.sourceServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:204,206</note>
+        <note category="location">src/app/features/admin/admin-page.html:186,188</note>
       </notes>
       <segment>
         <source>Source: server</source>
@@ -1095,7 +1087,7 @@
     </unit>
     <unit id="admin.sourceAdapter">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:208,210</note>
+        <note category="location">src/app/features/admin/admin-page.html:190,192</note>
       </notes>
       <segment>
         <source>Source: adapter</source>
@@ -1103,7 +1095,7 @@
     </unit>
     <unit id="admin.sourceManifest">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:211,213</note>
+        <note category="location">src/app/features/admin/admin-page.html:193,195</note>
       </notes>
       <segment>
         <source>Source: manifest</source>
@@ -1111,7 +1103,7 @@
     </unit>
     <unit id="admin.hideDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:229,230</note>
+        <note category="location">src/app/features/admin/admin-page.html:211,212</note>
       </notes>
       <segment>
         <source>Hide differences</source>
@@ -1119,7 +1111,7 @@
     </unit>
     <unit id="admin.showDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:231,232</note>
+        <note category="location">src/app/features/admin/admin-page.html:213,214</note>
       </notes>
       <segment>
         <source>Show differences</source>
@@ -1127,7 +1119,7 @@
     </unit>
     <unit id="admin.noTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:259,260</note>
+        <note category="location">src/app/features/admin/admin-page.html:241,242</note>
       </notes>
       <segment>
         <source> The server has no registered tools. </source>
@@ -1135,7 +1127,7 @@
     </unit>
     <unit id="admin.empty">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:268,271</note>
+        <note category="location">src/app/features/admin/admin-page.html:250,253</note>
       </notes>
       <segment>
         <source>The registry has no servers.</source>
@@ -1143,7 +1135,7 @@
     </unit>
     <unit id="admin.newCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:66</note>
+        <note category="location">src/app/features/admin/admin-page.ts:67</note>
       </notes>
       <segment>
         <source>new: <ph id="0" equiv="count" disp="created"/></source>
@@ -1151,7 +1143,7 @@
     </unit>
     <unit id="admin.changedCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:69</note>
+        <note category="location">src/app/features/admin/admin-page.ts:70</note>
       </notes>
       <segment>
         <source>changed: <ph id="0" equiv="count" disp="changed"/></source>
@@ -1159,7 +1151,7 @@
     </unit>
     <unit id="admin.toolApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:78</note>
+        <note category="location">src/app/features/admin/admin-page.ts:79</note>
       </notes>
       <segment>
         <source>Approved · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1167,7 +1159,7 @@
     </unit>
     <unit id="admin.toolRiskLowered">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:80</note>
+        <note category="location">src/app/features/admin/admin-page.ts:81</note>
       </notes>
       <segment>
         <source>Risk lowering · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1175,7 +1167,7 @@
     </unit>
     <unit id="admin.toolNew">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:82</note>
+        <note category="location">src/app/features/admin/admin-page.ts:83</note>
       </notes>
       <segment>
         <source>New · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1183,7 +1175,7 @@
     </unit>
     <unit id="admin.toolChanged">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:83</note>
+        <note category="location">src/app/features/admin/admin-page.ts:84</note>
       </notes>
       <segment>
         <source>Changed · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1191,7 +1183,7 @@
     </unit>
     <unit id="admin.toolSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:86</note>
+        <note category="location">src/app/features/admin/admin-page.ts:87</note>
       </notes>
       <segment>
         <source>Switched off · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1199,7 +1191,7 @@
     </unit>
     <unit id="admin.showTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:134</note>
+        <note category="location">src/app/features/admin/admin-page.ts:136</note>
       </notes>
       <segment>
         <source>Show tools</source>
@@ -1207,7 +1199,7 @@
     </unit>
     <unit id="admin.hideTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:135</note>
+        <note category="location">src/app/features/admin/admin-page.ts:137</note>
       </notes>
       <segment>
         <source>Hide tools</source>
@@ -1215,7 +1207,7 @@
     </unit>
     <unit id="admin.serverSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:186</note>
+        <note category="location">src/app/features/admin/admin-page.ts:187</note>
       </notes>
       <segment>
         <source>Switched off</source>
@@ -1223,7 +1215,7 @@
     </unit>
     <unit id="admin.serverDisabled">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:188</note>
+        <note category="location">src/app/features/admin/admin-page.ts:189</note>
       </notes>
       <segment>
         <source>Disabled</source>
@@ -1231,7 +1223,7 @@
     </unit>
     <unit id="admin.serverPending">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:190</note>
+        <note category="location">src/app/features/admin/admin-page.ts:191</note>
       </notes>
       <segment>
         <source>Pending approval</source>
@@ -1239,15 +1231,31 @@
     </unit>
     <unit id="admin.serverActive">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:191</note>
+        <note category="location">src/app/features/admin/admin-page.ts:192</note>
       </notes>
       <segment>
         <source>Active</source>
       </segment>
     </unit>
+    <unit id="admin.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:238</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Approving what you picked before the confirmation.</source>
+      </segment>
+    </unit>
+    <unit id="admin.mfaDone">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:239</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Open the differences and approve again.</source>
+      </segment>
+    </unit>
     <unit id="admin.connectionApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:294</note>
+        <note category="location">src/app/features/admin/admin-page.ts:300</note>
       </notes>
       <segment>
         <source>Approved the connection of <ph id="0" equiv="server" disp="name"/>. Its policies and tools still need approval.</source>
@@ -1255,7 +1263,7 @@
     </unit>
     <unit id="admin.policiesApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:310</note>
+        <note category="location">src/app/features/admin/admin-page.ts:317</note>
       </notes>
       <segment>
         <source>Approved the policies of <ph id="0" equiv="server" disp="name"/>.</source>
@@ -1263,7 +1271,7 @@
     </unit>
     <unit id="admin.approved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:377</note>
+        <note category="location">src/app/features/admin/admin-page.ts:386</note>
       </notes>
       <segment>
         <source>Approved the definition of <ph id="0" equiv="tool" disp="tool.name"/>.</source>
@@ -1495,7 +1503,7 @@
     </unit>
     <unit id="connectionApproval.scope">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:82,85</note>
+        <note category="location">src/app/features/admin/connection-approval.html:78,81</note>
       </notes>
       <segment>
         <source> Approving the connection approves neither the policies nor the tools of the server: they wait below. It needs a fresh MFA. </source>
@@ -1503,7 +1511,7 @@
     </unit>
     <unit id="connectionApproval.approve">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:87,88</note>
+        <note category="location">src/app/features/admin/connection-approval.html:83,84</note>
       </notes>
       <segment>
         <source>Approve connection</source>
@@ -1749,25 +1757,9 @@
         <source>Emergency switches</source>
       </segment>
     </unit>
-    <unit id="killSwitches.resumeRefused">
-      <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:11,14</note>
-      </notes>
-      <segment>
-        <source>The switch changed before you confirmed your identity (someone lifted it and switched it on again), so nothing was lifted. Check the new reason and lift it again.</source>
-      </segment>
-    </unit>
-    <unit id="killSwitches.mfaResumed">
-      <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:19,22</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Lifting the switch you picked before the confirmation.</source>
-      </segment>
-    </unit>
     <unit id="killSwitches.lead">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:34,39</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:12,17</note>
       </notes>
       <segment>
         <source> A switch cuts off a server or one tool for everyone: within 5 seconds at the latest on every gateway instance. Approving a definition does not lift it, and neither does a restart. Switching off needs no identity confirmation; lifting does. </source>
@@ -1775,7 +1767,7 @@
     </unit>
     <unit id="killSwitches.active">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:40,42</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:18,20</note>
       </notes>
       <segment>
         <source>Active switches</source>
@@ -1783,7 +1775,7 @@
     </unit>
     <unit id="killSwitches.caption">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:44,46</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:22,24</note>
       </notes>
       <segment>
         <source> Emergency switches that are on </source>
@@ -1791,8 +1783,8 @@
     </unit>
     <unit id="killSwitches.colScope">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:48,49</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:62</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:26,27</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:40</note>
       </notes>
       <segment>
         <source>Scope</source>
@@ -1800,7 +1792,7 @@
     </unit>
     <unit id="killSwitches.colTarget">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:50,52</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:28,30</note>
       </notes>
       <segment>
         <source> What is switched off </source>
@@ -1808,8 +1800,8 @@
     </unit>
     <unit id="killSwitches.colSince">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:52,53</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:78</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:30,31</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:56</note>
       </notes>
       <segment>
         <source>Since</source>
@@ -1817,8 +1809,8 @@
     </unit>
     <unit id="killSwitches.colReason">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:53,54</note>
-        <note category="location">src/app/features/admin/kill-switches-page.html:90</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:31,32</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:68</note>
       </notes>
       <segment>
         <source>Reason</source>
@@ -1826,7 +1818,7 @@
     </unit>
     <unit id="killSwitches.colActions">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:55,57</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:33,35</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -1834,7 +1826,7 @@
     </unit>
     <unit id="killSwitches.colTargetLabel">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:69,70</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:47,48</note>
       </notes>
       <segment>
         <source>What is switched off</source>
@@ -1842,7 +1834,7 @@
     </unit>
     <unit id="killSwitches.by">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:82,83</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:60,61</note>
       </notes>
       <segment>
         <source>set by</source>
@@ -1850,7 +1842,7 @@
     </unit>
     <unit id="killSwitches.lift">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:102,103</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:80,81</note>
       </notes>
       <segment>
         <source>Lift</source>
@@ -1858,7 +1850,7 @@
     </unit>
     <unit id="killSwitches.none">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:111,115</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:89,93</note>
       </notes>
       <segment>
         <source>No switch is on.</source>
@@ -1866,7 +1858,7 @@
     </unit>
     <unit id="killSwitches.offHeading">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:117,119</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:95,97</note>
       </notes>
       <segment>
         <source> Switch off a server or tool </source>
@@ -1874,7 +1866,7 @@
     </unit>
     <unit id="killSwitches.server">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:121,123</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:99,101</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -1882,7 +1874,7 @@
     </unit>
     <unit id="killSwitches.serverPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:128,129</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:106,107</note>
       </notes>
       <segment>
         <source>Choose a server</source>
@@ -1890,7 +1882,7 @@
     </unit>
     <unit id="killSwitches.tool">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:135,137</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:113,115</note>
       </notes>
       <segment>
         <source>Tool</source>
@@ -1898,7 +1890,7 @@
     </unit>
     <unit id="killSwitches.wholeServer">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:143,144</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:121,122</note>
       </notes>
       <segment>
         <source>Whole server</source>
@@ -1906,7 +1898,7 @@
     </unit>
     <unit id="killSwitches.reason">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:150,152</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:128,130</note>
       </notes>
       <segment>
         <source>Reason</source>
@@ -1914,7 +1906,7 @@
     </unit>
     <unit id="killSwitches.reasonHint">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:163,165</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:141,143</note>
       </notes>
       <segment>
         <source>Administrators see it on this list; it does not go to the audit logs. Characters left:</source>
@@ -1922,7 +1914,7 @@
     </unit>
     <unit id="killSwitches.submit">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.html:177,179</note>
+        <note category="location">src/app/features/admin/kill-switches-page.html:155,157</note>
       </notes>
       <segment>
         <source> Switch off </source>
@@ -1930,7 +1922,7 @@
     </unit>
     <unit id="killSwitches.scopeServer">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:117</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:103</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -1938,7 +1930,7 @@
     </unit>
     <unit id="killSwitches.scopeTool">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:118</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:104</note>
       </notes>
       <segment>
         <source>Tool</source>
@@ -1946,7 +1938,7 @@
     </unit>
     <unit id="killSwitches.offTitle">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:185</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:171</note>
       </notes>
       <segment>
         <source>Switch off now?</source>
@@ -1954,7 +1946,7 @@
     </unit>
     <unit id="killSwitches.offMessage">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:186</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:172</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="target" disp="target"/> will stop being available to all users and agents, on every gateway instance within 5 seconds at the latest. Calls that have already started are not interrupted. Switching off needs no identity confirmation; lifting does.</source>
@@ -1962,7 +1954,7 @@
     </unit>
     <unit id="killSwitches.offConfirm">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:187</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:173</note>
       </notes>
       <segment>
         <source>Switch off</source>
@@ -1970,7 +1962,7 @@
     </unit>
     <unit id="killSwitches.offDone">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:203</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:188</note>
       </notes>
       <segment>
         <source>Switched off: <ph id="0" equiv="target" disp="target"/>.</source>
@@ -1978,7 +1970,7 @@
     </unit>
     <unit id="killSwitches.liftTitle">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:220</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:206</note>
       </notes>
       <segment>
         <source>Lift the switch?</source>
@@ -1986,7 +1978,7 @@
     </unit>
     <unit id="killSwitches.liftMessage">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:221</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:207</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="target" disp="target"/> will be available again to users who have entitlements to it. Lifting requires fresh identity confirmation (MFA).</source>
@@ -1994,7 +1986,7 @@
     </unit>
     <unit id="killSwitches.liftConfirm">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:222</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:208</note>
       </notes>
       <segment>
         <source>Lift switch</source>
@@ -2002,10 +1994,26 @@
     </unit>
     <unit id="killSwitches.liftDone">
       <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:244</note>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:229</note>
       </notes>
       <segment>
         <source>Lifted switch: <ph id="0" equiv="target" disp="target"/>.</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.resumeRefused">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:273</note>
+      </notes>
+      <segment>
+        <source>The switch changed before you confirmed your identity (someone lifted it and switched it on again), so nothing was lifted. Check the new reason and lift it again.</source>
+      </segment>
+    </unit>
+    <unit id="killSwitches.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:278</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Lifting the switch you picked before the confirmation.</source>
       </segment>
     </unit>
     <unit id="overrides.title">
@@ -2016,25 +2024,9 @@
         <source>Overrides</source>
       </segment>
     </unit>
-    <unit id="overrides.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:11,13</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Check the form and save again.</source>
-      </segment>
-    </unit>
-    <unit id="overrides.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:17,19</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-      </segment>
-    </unit>
     <unit id="overrides.lead">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:32,37</note>
+        <note category="location">src/app/features/admin/overrides-page.html:12,17</note>
       </notes>
       <segment>
         <source> An override is one Cedar policy that only forbids. It is for an emergency: it applies to the gateway&apos;s decision on a call, to every server or to one server, and it is read by all instances within seconds. Adding one needs no second factor; removing one does. </source>
@@ -2042,7 +2034,7 @@
     </unit>
     <unit id="overrides.add">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:45,47</note>
+        <note category="location">src/app/features/admin/overrides-page.html:25,27</note>
       </notes>
       <segment>
         <source> Add override </source>
@@ -2050,7 +2042,7 @@
     </unit>
     <unit id="overrides.caption">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:52,54</note>
+        <note category="location">src/app/features/admin/overrides-page.html:32,34</note>
       </notes>
       <segment>
         <source> Emergency overrides </source>
@@ -2058,8 +2050,8 @@
     </unit>
     <unit id="overrides.colId">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:56,57</note>
-        <note category="location">src/app/features/admin/overrides-page.html:72,73</note>
+        <note category="location">src/app/features/admin/overrides-page.html:36,37</note>
+        <note category="location">src/app/features/admin/overrides-page.html:52,53</note>
       </notes>
       <segment>
         <source>Identifier</source>
@@ -2067,8 +2059,8 @@
     </unit>
     <unit id="overrides.colTarget">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:57,58</note>
-        <note category="location">src/app/features/admin/overrides-page.html:77</note>
+        <note category="location">src/app/features/admin/overrides-page.html:37,38</note>
+        <note category="location">src/app/features/admin/overrides-page.html:57</note>
       </notes>
       <segment>
         <source>Target</source>
@@ -2076,8 +2068,8 @@
     </unit>
     <unit id="overrides.colPolicy">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:58,59</note>
-        <note category="location">src/app/features/admin/overrides-page.html:80</note>
+        <note category="location">src/app/features/admin/overrides-page.html:38,39</note>
+        <note category="location">src/app/features/admin/overrides-page.html:60</note>
       </notes>
       <segment>
         <source>Policy</source>
@@ -2085,8 +2077,8 @@
     </unit>
     <unit id="overrides.colSet">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:60</note>
-        <note category="location">src/app/features/admin/overrides-page.html:83</note>
+        <note category="location">src/app/features/admin/overrides-page.html:40</note>
+        <note category="location">src/app/features/admin/overrides-page.html:63</note>
       </notes>
       <segment>
         <source>Set</source>
@@ -2094,7 +2086,7 @@
     </unit>
     <unit id="overrides.colActions">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:61,63</note>
+        <note category="location">src/app/features/admin/overrides-page.html:41,43</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -2102,7 +2094,7 @@
     </unit>
     <unit id="overrides.by">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:86,87</note>
+        <note category="location">src/app/features/admin/overrides-page.html:66,67</note>
       </notes>
       <segment>
         <source>set by</source>
@@ -2110,7 +2102,7 @@
     </unit>
     <unit id="overrides.edit">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:98,99</note>
+        <note category="location">src/app/features/admin/overrides-page.html:78,79</note>
       </notes>
       <segment>
         <source>Edit</source>
@@ -2118,7 +2110,7 @@
     </unit>
     <unit id="overrides.remove">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:108,109</note>
+        <note category="location">src/app/features/admin/overrides-page.html:88,89</note>
       </notes>
       <segment>
         <source>Remove</source>
@@ -2126,7 +2118,7 @@
     </unit>
     <unit id="overrides.none">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:117,120</note>
+        <note category="location">src/app/features/admin/overrides-page.html:97,100</note>
       </notes>
       <segment>
         <source>No override is set.</source>
@@ -2134,7 +2126,7 @@
     </unit>
     <unit id="overrides.formAdd">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:126,127</note>
+        <note category="location">src/app/features/admin/overrides-page.html:106,107</note>
       </notes>
       <segment>
         <source>Add override</source>
@@ -2142,7 +2134,7 @@
     </unit>
     <unit id="overrides.formEdit">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:128,130</note>
+        <note category="location">src/app/features/admin/overrides-page.html:108,110</note>
       </notes>
       <segment>
         <source>Edit override</source>
@@ -2150,7 +2142,7 @@
     </unit>
     <unit id="overrides.name">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:133,134</note>
+        <note category="location">src/app/features/admin/overrides-page.html:113,114</note>
       </notes>
       <segment>
         <source>Identifier</source>
@@ -2158,7 +2150,7 @@
     </unit>
     <unit id="overrides.target">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:158,160</note>
+        <note category="location">src/app/features/admin/overrides-page.html:138,140</note>
       </notes>
       <segment>
         <source>Target</source>
@@ -2166,7 +2158,7 @@
     </unit>
     <unit id="overrides.optGateway">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:166,167</note>
+        <note category="location">src/app/features/admin/overrides-page.html:146,147</note>
       </notes>
       <segment>
         <source> Gateway (the decision on a call) </source>
@@ -2174,7 +2166,7 @@
     </unit>
     <unit id="overrides.optAll">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:168,169</note>
+        <note category="location">src/app/features/admin/overrides-page.html:148,149</note>
       </notes>
       <segment>
         <source>All servers</source>
@@ -2182,7 +2174,7 @@
     </unit>
     <unit id="overrides.optServer">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:169,171</note>
+        <note category="location">src/app/features/admin/overrides-page.html:149,151</note>
       </notes>
       <segment>
         <source>One server</source>
@@ -2190,7 +2182,7 @@
     </unit>
     <unit id="overrides.server">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:174,176</note>
+        <note category="location">src/app/features/admin/overrides-page.html:154,156</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -2198,7 +2190,7 @@
     </unit>
     <unit id="overrides.serverPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:182,183</note>
+        <note category="location">src/app/features/admin/overrides-page.html:162,163</note>
       </notes>
       <segment>
         <source>Choose a server</source>
@@ -2206,7 +2198,7 @@
     </unit>
     <unit id="overrides.text">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:193,195</note>
+        <note category="location">src/app/features/admin/overrides-page.html:173,175</note>
       </notes>
       <segment>
         <source>Policy (Cedar, one forbid)</source>
@@ -2214,7 +2206,7 @@
     </unit>
     <unit id="overrides.textHint">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:205,207</note>
+        <note category="location">src/app/features/admin/overrides-page.html:185,187</note>
       </notes>
       <segment>
         <source> The @id annotation has to equal the identifier above. For the gateway the policy decides the call action on a tool; for a server it must not mention tools or the call action. </source>
@@ -2222,7 +2214,7 @@
     </unit>
     <unit id="overrides.template">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:220,221</note>
+        <note category="location">src/app/features/admin/overrides-page.html:200,201</note>
       </notes>
       <segment>
         <source> Start from a template </source>
@@ -2230,7 +2222,7 @@
     </unit>
     <unit id="overrides.save">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:226,227</note>
+        <note category="location">src/app/features/admin/overrides-page.html:206,207</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -2238,7 +2230,7 @@
     </unit>
     <unit id="overrides.cancel">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.html:235,236</note>
+        <note category="location">src/app/features/admin/overrides-page.html:215,216</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -2246,7 +2238,7 @@
     </unit>
     <unit id="overrides.errName">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:120</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:107</note>
       </notes>
       <segment>
         <source>Use lower case letters, digits and hyphens, starting with a letter or digit (up to 55 characters).</source>
@@ -2254,7 +2246,7 @@
     </unit>
     <unit id="overrides.errServer">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:123</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:110</note>
       </notes>
       <segment>
         <source>Choose a server.</source>
@@ -2262,7 +2254,7 @@
     </unit>
     <unit id="overrides.errText">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:126</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:113</note>
       </notes>
       <segment>
         <source>Enter the policy.</source>
@@ -2270,7 +2262,7 @@
     </unit>
     <unit id="overrides.errTextLong">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:129</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:116</note>
       </notes>
       <segment>
         <source>The policy is longer than <ph id="0" equiv="max" disp="OVERRIDE_TEXT_MAX"/> characters.</source>
@@ -2278,7 +2270,7 @@
     </unit>
     <unit id="overrides.targetGateway">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:141</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:128</note>
       </notes>
       <segment>
         <source>Gateway</source>
@@ -2286,15 +2278,31 @@
     </unit>
     <unit id="overrides.targetAll">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:143</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:130</note>
       </notes>
       <segment>
         <source>All servers</source>
       </segment>
     </unit>
+    <unit id="overrides.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:159</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form and save again.</source>
+      </segment>
+    </unit>
+    <unit id="overrides.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:163</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+      </segment>
+    </unit>
     <unit id="overrides.saved">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:291</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:277</note>
       </notes>
       <segment>
         <source>Saved the override <ph id="0" equiv="id" disp="id"/>.</source>
@@ -2302,7 +2310,7 @@
     </unit>
     <unit id="overrides.added">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:292</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:278</note>
       </notes>
       <segment>
         <source>Added the override <ph id="0" equiv="id" disp="id"/>. It takes effect within seconds.</source>
@@ -2310,7 +2318,7 @@
     </unit>
     <unit id="overrides.removeTitle">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:328</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:314</note>
       </notes>
       <segment>
         <source>Remove the override <ph id="0" equiv="id" disp="id"/>?</source>
@@ -2318,7 +2326,7 @@
     </unit>
     <unit id="overrides.removeMessage">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:329</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:315</note>
       </notes>
       <segment>
         <source>What it forbids becomes possible again as soon as every instance has read the change. Removing needs a fresh MFA.</source>
@@ -2326,7 +2334,7 @@
     </unit>
     <unit id="overrides.removeConfirm">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:330</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:316</note>
       </notes>
       <segment>
         <source>Remove override</source>
@@ -2334,7 +2342,7 @@
     </unit>
     <unit id="overrides.removed">
       <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:344</note>
+        <note category="location">src/app/features/admin/overrides-page.ts:330</note>
       </notes>
       <segment>
         <source>Removed the override <ph id="0" equiv="id" disp="id"/>.</source>
@@ -2542,7 +2550,7 @@
     </unit>
     <unit id="policies.approve">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:135,136</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:131,132</note>
       </notes>
       <segment>
         <source>Approve policies</source>
@@ -2550,7 +2558,7 @@
     </unit>
     <unit id="policies.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:139,142</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:135,138</note>
       </notes>
       <segment>
         <source> Not approving breaks nothing that works today: the tools of the server stay blocked. Needs a fresh MFA. </source>
@@ -2564,25 +2572,9 @@
         <source>Scope mapping</source>
       </segment>
     </unit>
-    <unit id="scopeMapping.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:11,14</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Your changes are back in the form; check them and save again.</source>
-      </segment>
-    </unit>
-    <unit id="scopeMapping.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:18,21</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-      </segment>
-    </unit>
     <unit id="scopeMapping.reloaded">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:26,31</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:8,13</note>
       </notes>
       <segment>
         <source> The current mapping is shown below; your edits were not kept. </source>
@@ -2590,7 +2582,7 @@
     </unit>
     <unit id="scopeMapping.lead">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:38,44</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:20,26</note>
       </notes>
       <segment>
         <source> A group grants the resource scopes listed next to it to everyone who is in it. A scope is <pc id="0" equivStart="START_TAG_CODE" equivEnd="CLOSE_TAG_CODE" type="other" dispStart="&lt;code&gt;" dispEnd="&lt;/code&gt;">&lt;Namespace&gt;::&lt;Type&gt;/&lt;id&gt;</pc>; the type has to be declared by a registered server and the part after the slash has to match its scope pattern. The whole document is saved at once. </source>
@@ -2598,7 +2590,7 @@
     </unit>
     <unit id="scopeMapping.groupsLabel">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:46</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:28</note>
       </notes>
       <segment>
         <source>Groups</source>
@@ -2606,7 +2598,7 @@
     </unit>
     <unit id="scopeMapping.group">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:52,54</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:34,36</note>
       </notes>
       <segment>
         <source>Group</source>
@@ -2614,7 +2606,7 @@
     </unit>
     <unit id="scopeMapping.scopes">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:69,71</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:51,53</note>
       </notes>
       <segment>
         <source>Scopes (one per line)</source>
@@ -2622,7 +2614,7 @@
     </unit>
     <unit id="scopeMapping.removeRow">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:89,90</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:71,72</note>
       </notes>
       <segment>
         <source>Remove</source>
@@ -2630,7 +2622,7 @@
     </unit>
     <unit id="scopeMapping.none">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:97,100</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:79,82</note>
       </notes>
       <segment>
         <source>No group is mapped to a scope.</source>
@@ -2638,7 +2630,7 @@
     </unit>
     <unit id="scopeMapping.add">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:102,104</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:84,86</note>
       </notes>
       <segment>
         <source> Add group </source>
@@ -2646,7 +2638,7 @@
     </unit>
     <unit id="scopeMapping.save">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:110,112</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:92,94</note>
       </notes>
       <segment>
         <source> Save mapping </source>
@@ -2654,7 +2646,7 @@
     </unit>
     <unit id="scopeMapping.discard">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:120,122</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:102,104</note>
       </notes>
       <segment>
         <source> Discard changes </source>
@@ -2662,7 +2654,7 @@
     </unit>
     <unit id="scopeMapping.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:125,130</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:107,112</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back with your edits. </source>
@@ -2670,7 +2662,7 @@
     </unit>
     <unit id="scopeMapping.declared">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:133,136</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:115,118</note>
       </notes>
       <segment>
         <source> Resource types declared by the registered servers </source>
@@ -2678,7 +2670,7 @@
     </unit>
     <unit id="scopeMapping.scopePattern">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:141,142</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:123,124</note>
       </notes>
       <segment>
         <source>scope pattern</source>
@@ -2686,7 +2678,7 @@
     </unit>
     <unit id="scopeMapping.notGrantable">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.html:144,147</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.html:126,129</note>
       </notes>
       <segment>
         <source>cannot be granted</source>
@@ -2694,7 +2686,7 @@
     </unit>
     <unit id="scopeMapping.errGroup">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:73</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:72</note>
       </notes>
       <segment>
         <source>A group name starts with mcp- and uses letters, digits, dots, underscores and hyphens.</source>
@@ -2702,7 +2694,7 @@
     </unit>
     <unit id="scopeMapping.errDuplicate">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:75</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:74</note>
       </notes>
       <segment>
         <source>This group appears twice.</source>
@@ -2710,7 +2702,7 @@
     </unit>
     <unit id="scopeMapping.errNoScopes">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:79</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:78</note>
       </notes>
       <segment>
         <source>Enter at least one scope, for example Type::Name/id.</source>
@@ -2718,7 +2710,7 @@
     </unit>
     <unit id="scopeMapping.errScope">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:84</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:83</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="scope" disp="bad"/> is not a scope id. Use &lt;Namespace&gt;::&lt;Type&gt;/&lt;id&gt;, ASCII only.</source>
@@ -2726,7 +2718,7 @@
     </unit>
     <unit id="scopeMapping.warnType">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:93</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:92</note>
       </notes>
       <segment>
         <source>No registered server declares <ph id="0" equiv="type" disp="type"/>; the gateway will refuse <ph id="1" equiv="scope" disp="scope"/>.</source>
@@ -2734,7 +2726,7 @@
     </unit>
     <unit id="scopeMapping.warnNotGrantable">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:98</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:97</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="type" disp="type"/> has no scope pattern, so it cannot be granted; the gateway will refuse <ph id="1" equiv="scope" disp="scope"/>.</source>
@@ -2742,15 +2734,31 @@
     </unit>
     <unit id="scopeMapping.warnPattern">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:103</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:102</note>
       </notes>
       <segment>
         <source><ph id="0" equiv="id" disp="local"/> does not match the scope pattern of <ph id="1" equiv="type" disp="type"/> (<ph id="2" equiv="pattern" disp="pattern"/>).</source>
       </segment>
     </unit>
+    <unit id="scopeMapping.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:188</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Your changes are back in the form; check them and save again.</source>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:192</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+      </segment>
+    </unit>
     <unit id="scopeMapping.saved">
       <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:301</note>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:293</note>
       </notes>
       <segment>
         <source>Saved the scope mapping. Servers pick it up within seconds.</source>
@@ -2924,25 +2932,9 @@
         <source>Servers</source>
       </segment>
     </unit>
-    <unit id="adminServers.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/servers-page.html:11,13</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Check the form and save again.</source>
-      </segment>
-    </unit>
-    <unit id="adminServers.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/servers-page.html:17,20</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-      </segment>
-    </unit>
     <unit id="adminServers.lead">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:32,38</note>
+        <note category="location">src/app/features/admin/servers-page.html:12,18</note>
       </notes>
       <segment>
         <source> The servers the gateway routes to. Add a server by its address: the gateway checks the certificate and pulls the manifest, and the server has no tools until you approve its connection, policies and tools on the Approvals screen. Removing one takes its tools away and refuses its calls. No restart is needed for either. </source>
@@ -2950,7 +2942,7 @@
     </unit>
     <unit id="adminServers.add">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:46,50</note>
+        <note category="location">src/app/features/admin/servers-page.html:26,30</note>
       </notes>
       <segment>
         <source> Add server </source>
@@ -2958,7 +2950,7 @@
     </unit>
     <unit id="adminServers.caption">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:53,55</note>
+        <note category="location">src/app/features/admin/servers-page.html:33,35</note>
       </notes>
       <segment>
         <source> Servers of the gateway </source>
@@ -2966,8 +2958,8 @@
     </unit>
     <unit id="adminServers.colServer">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:57,58</note>
-        <note category="location">src/app/features/admin/servers-page.html:75</note>
+        <note category="location">src/app/features/admin/servers-page.html:37,38</note>
+        <note category="location">src/app/features/admin/servers-page.html:55</note>
       </notes>
       <segment>
         <source>Server</source>
@@ -2975,8 +2967,8 @@
     </unit>
     <unit id="adminServers.colAddress">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:58,59</note>
-        <note category="location">src/app/features/admin/servers-page.html:84</note>
+        <note category="location">src/app/features/admin/servers-page.html:38,39</note>
+        <note category="location">src/app/features/admin/servers-page.html:64</note>
       </notes>
       <segment>
         <source>Address</source>
@@ -2984,8 +2976,8 @@
     </unit>
     <unit id="adminServers.colCredential">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:59,60</note>
-        <note category="location">src/app/features/admin/servers-page.html:88</note>
+        <note category="location">src/app/features/admin/servers-page.html:39,40</note>
+        <note category="location">src/app/features/admin/servers-page.html:68</note>
       </notes>
       <segment>
         <source>Credential</source>
@@ -2993,8 +2985,8 @@
     </unit>
     <unit id="adminServers.colConnection">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:60,61</note>
-        <note category="location">src/app/features/admin/servers-page.html:92</note>
+        <note category="location">src/app/features/admin/servers-page.html:40,41</note>
+        <note category="location">src/app/features/admin/servers-page.html:72</note>
       </notes>
       <segment>
         <source>Connection</source>
@@ -3002,8 +2994,8 @@
     </unit>
     <unit id="adminServers.colState">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:61,62</note>
-        <note category="location">src/app/features/admin/servers-page.html:98</note>
+        <note category="location">src/app/features/admin/servers-page.html:41,42</note>
+        <note category="location">src/app/features/admin/servers-page.html:78</note>
       </notes>
       <segment>
         <source>State</source>
@@ -3011,7 +3003,7 @@
     </unit>
     <unit id="adminServers.colActions">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:63,66</note>
+        <note category="location">src/app/features/admin/servers-page.html:43,46</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -3019,7 +3011,7 @@
     </unit>
     <unit id="adminServers.enabled">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:100,102</note>
+        <note category="location">src/app/features/admin/servers-page.html:80,82</note>
       </notes>
       <segment>
         <source>Enabled</source>
@@ -3027,7 +3019,7 @@
     </unit>
     <unit id="adminServers.disabled">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:102,104</note>
+        <note category="location">src/app/features/admin/servers-page.html:82,84</note>
       </notes>
       <segment>
         <source>Disabled</source>
@@ -3035,7 +3027,7 @@
     </unit>
     <unit id="adminServers.adapter">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:105,107</note>
+        <note category="location">src/app/features/admin/servers-page.html:85,87</note>
       </notes>
       <segment>
         <source>Adapter</source>
@@ -3043,7 +3035,7 @@
     </unit>
     <unit id="adminServers.details">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:116,117</note>
+        <note category="location">src/app/features/admin/servers-page.html:96,97</note>
       </notes>
       <segment>
         <source>Details</source>
@@ -3051,7 +3043,7 @@
     </unit>
     <unit id="adminServers.edit">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:126,127</note>
+        <note category="location">src/app/features/admin/servers-page.html:106,107</note>
       </notes>
       <segment>
         <source>Edit</source>
@@ -3059,7 +3051,7 @@
     </unit>
     <unit id="adminServers.disable">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:137,138</note>
+        <note category="location">src/app/features/admin/servers-page.html:117,118</note>
       </notes>
       <segment>
         <source>Disable</source>
@@ -3067,7 +3059,7 @@
     </unit>
     <unit id="adminServers.remove">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:148,149</note>
+        <note category="location">src/app/features/admin/servers-page.html:128,129</note>
       </notes>
       <segment>
         <source>Remove</source>
@@ -3075,7 +3067,7 @@
     </unit>
     <unit id="adminServers.none">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:157,160</note>
+        <note category="location">src/app/features/admin/servers-page.html:137,140</note>
       </notes>
       <segment>
         <source>The registry has no servers.</source>
@@ -3083,7 +3075,7 @@
     </unit>
     <unit id="adminServers.detailsTitle">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:163,164</note>
+        <note category="location">src/app/features/admin/servers-page.html:143,144</note>
       </notes>
       <segment>
         <source>Server <ph id="0" equiv="INTERPOLATION" disp="{{ d.name }}"/></source>
@@ -3091,7 +3083,7 @@
     </unit>
     <unit id="adminServers.plainTitle">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:168,169</note>
+        <note category="location">src/app/features/admin/servers-page.html:148,149</note>
       </notes>
       <segment>
         <source>Plain HTTP.</source>
@@ -3099,7 +3091,7 @@
     </unit>
     <unit id="adminServers.factAddress">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:173,175</note>
+        <note category="location">src/app/features/admin/servers-page.html:153,155</note>
       </notes>
       <segment>
         <source>Address</source>
@@ -3107,7 +3099,7 @@
     </unit>
     <unit id="adminServers.factStatus">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:179,180</note>
+        <note category="location">src/app/features/admin/servers-page.html:159,160</note>
       </notes>
       <segment>
         <source>Status</source>
@@ -3115,7 +3107,7 @@
     </unit>
     <unit id="adminServers.factChecked">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:183,185</note>
+        <note category="location">src/app/features/admin/servers-page.html:163,165</note>
       </notes>
       <segment>
         <source>Last check</source>
@@ -3123,7 +3115,7 @@
     </unit>
     <unit id="adminServers.neverChecked">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:188,191</note>
+        <note category="location">src/app/features/admin/servers-page.html:168,171</note>
       </notes>
       <segment>
         <source>Not checked yet</source>
@@ -3131,7 +3123,7 @@
     </unit>
     <unit id="adminServers.factError">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:194,195</note>
+        <note category="location">src/app/features/admin/servers-page.html:174,175</note>
       </notes>
       <segment>
         <source>Last error</source>
@@ -3139,7 +3131,7 @@
     </unit>
     <unit id="adminServers.connectionTitle">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:200,201</note>
+        <note category="location">src/app/features/admin/servers-page.html:180,181</note>
       </notes>
       <segment>
         <source>Approved connection</source>
@@ -3147,7 +3139,7 @@
     </unit>
     <unit id="adminServers.approvedBy">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:203,204</note>
+        <note category="location">src/app/features/admin/servers-page.html:183,184</note>
       </notes>
       <segment>
         <source>Approved</source>
@@ -3155,7 +3147,7 @@
     </unit>
     <unit id="adminServers.noConnection">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:208,211</note>
+        <note category="location">src/app/features/admin/servers-page.html:188,191</note>
       </notes>
       <segment>
         <source> The connection of this server was never approved. </source>
@@ -3163,7 +3155,7 @@
     </unit>
     <unit id="adminServers.pendingNote">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:214,216</note>
+        <note category="location">src/app/features/admin/servers-page.html:194,196</note>
       </notes>
       <segment>
         <source>A connection waits for your approval.</source>
@@ -3171,7 +3163,7 @@
     </unit>
     <unit id="adminServers.pendingLink">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:217,220</note>
+        <note category="location">src/app/features/admin/servers-page.html:197,200</note>
       </notes>
       <segment>
         <source>Review it on the Approvals screen</source>
@@ -3179,7 +3171,7 @@
     </unit>
     <unit id="adminServers.refresh">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:229,231</note>
+        <note category="location">src/app/features/admin/servers-page.html:209,211</note>
       </notes>
       <segment>
         <source> Refresh </source>
@@ -3187,7 +3179,7 @@
     </unit>
     <unit id="adminServers.closeDetails">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:238,240</note>
+        <note category="location">src/app/features/admin/servers-page.html:218,220</note>
       </notes>
       <segment>
         <source> Close </source>
@@ -3195,7 +3187,7 @@
     </unit>
     <unit id="adminServers.refreshHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:242,245</note>
+        <note category="location">src/app/features/admin/servers-page.html:222,225</note>
       </notes>
       <segment>
         <source> Refresh probes the server again and pulls its manifest. It approves nothing and needs no MFA. </source>
@@ -3203,7 +3195,7 @@
     </unit>
     <unit id="adminServers.formAdd">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:254,256</note>
+        <note category="location">src/app/features/admin/servers-page.html:234,236</note>
       </notes>
       <segment>
         <source>Add server</source>
@@ -3211,7 +3203,7 @@
     </unit>
     <unit id="adminServers.formEdit">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:256,258</note>
+        <note category="location">src/app/features/admin/servers-page.html:236,238</note>
       </notes>
       <segment>
         <source>Edit server</source>
@@ -3219,7 +3211,7 @@
     </unit>
     <unit id="adminServers.url">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:262,264</note>
+        <note category="location">src/app/features/admin/servers-page.html:242,244</note>
       </notes>
       <segment>
         <source>Address of the MCP endpoint</source>
@@ -3227,7 +3219,7 @@
     </unit>
     <unit id="adminServers.urlHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:274,276</note>
+        <note category="location">src/app/features/admin/servers-page.html:254,256</note>
       </notes>
       <segment>
         <source> Any host with any HTTPS certificate. The gateway reads the certificate and the manifest from this address and takes the server identifier and the system from the manifest. </source>
@@ -3235,7 +3227,7 @@
     </unit>
     <unit id="adminServers.expectedSystem">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:283,285</note>
+        <note category="location">src/app/features/admin/servers-page.html:263,265</note>
       </notes>
       <segment>
         <source>System (optional)</source>
@@ -3243,7 +3235,7 @@
     </unit>
     <unit id="adminServers.expectedSystemHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:295,297</note>
+        <note category="location">src/app/features/admin/servers-page.html:275,277</note>
       </notes>
       <segment>
         <source> If you fill it in, the gateway refuses a server that claims another system. </source>
@@ -3251,7 +3243,7 @@
     </unit>
     <unit id="adminServers.allowPlain">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:311,313</note>
+        <note category="location">src/app/features/admin/servers-page.html:291,293</note>
       </notes>
       <segment>
         <source>Allow plain HTTP</source>
@@ -3259,7 +3251,7 @@
     </unit>
     <unit id="adminServers.system">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:317,319</note>
+        <note category="location">src/app/features/admin/servers-page.html:297,299</note>
       </notes>
       <segment>
         <source>System</source>
@@ -3267,7 +3259,7 @@
     </unit>
     <unit id="adminServers.addressFixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:323,325</note>
+        <note category="location">src/app/features/admin/servers-page.html:303,305</note>
       </notes>
       <segment>
         <source>Address</source>
@@ -3275,7 +3267,7 @@
     </unit>
     <unit id="adminServers.addressFixedHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:328,330</note>
+        <note category="location">src/app/features/admin/servers-page.html:308,310</note>
       </notes>
       <segment>
         <source> The address cannot be changed. Remove the server and add it again to use another one; a new certificate under the same address is approved on the Approvals screen. </source>
@@ -3283,7 +3275,7 @@
     </unit>
     <unit id="adminServers.accepted">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:335,336</note>
+        <note category="location">src/app/features/admin/servers-page.html:315,316</note>
       </notes>
       <segment>
         <source>Accepted credential types</source>
@@ -3291,7 +3283,7 @@
     </unit>
     <unit id="adminServers.typeInUse">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:354,356</note>
+        <note category="location">src/app/features/admin/servers-page.html:334,336</note>
       </notes>
       <segment>
         <source>Type in use</source>
@@ -3299,7 +3291,7 @@
     </unit>
     <unit id="adminServers.options">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:371,372</note>
+        <note category="location">src/app/features/admin/servers-page.html:351,352</note>
       </notes>
       <segment>
         <source>Options</source>
@@ -3307,7 +3299,7 @@
     </unit>
     <unit id="adminServers.required">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:379,381</note>
+        <note category="location">src/app/features/admin/servers-page.html:359,361</note>
       </notes>
       <segment>
         <source>The server needs a credential of the user</source>
@@ -3315,7 +3307,7 @@
     </unit>
     <unit id="adminServers.enabledLabel">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:388,390</note>
+        <note category="location">src/app/features/admin/servers-page.html:368,370</note>
       </notes>
       <segment>
         <source>Enabled</source>
@@ -3323,7 +3315,7 @@
     </unit>
     <unit id="adminServers.adapterFixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:392,394</note>
+        <note category="location">src/app/features/admin/servers-page.html:372,374</note>
       </notes>
       <segment>
         <source> Served through an adapter. </source>
@@ -3331,7 +3323,7 @@
     </unit>
     <unit id="adminServers.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:398,401</note>
+        <note category="location">src/app/features/admin/servers-page.html:378,381</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA, except for disabling a server. If it is needed, you go to the identity provider and come back to this form. </source>
@@ -3339,7 +3331,7 @@
     </unit>
     <unit id="adminServers.save">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:403,405</note>
+        <note category="location">src/app/features/admin/servers-page.html:383,385</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -3347,7 +3339,7 @@
     </unit>
     <unit id="adminServers.cancel">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.html:412,414</note>
+        <note category="location">src/app/features/admin/servers-page.html:392,394</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -3355,7 +3347,7 @@
     </unit>
     <unit id="adminServers.errUrl">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:174</note>
+        <note category="location">src/app/features/admin/servers-page.ts:171</note>
       </notes>
       <segment>
         <source>Enter an address that starts with https:// or http://, for example https://mcp-notes.corp.local:8443/mcp.</source>
@@ -3363,7 +3355,7 @@
     </unit>
     <unit id="adminServers.errPlain">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:177</note>
+        <note category="location">src/app/features/admin/servers-page.ts:174</note>
       </notes>
       <segment>
         <source>An http address needs the &quot;Allow plain HTTP&quot; option.</source>
@@ -3371,7 +3363,7 @@
     </unit>
     <unit id="adminServers.errExpectedSystem">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:182</note>
+        <note category="location">src/app/features/admin/servers-page.ts:179</note>
       </notes>
       <segment>
         <source>Enter a system identifier: lower-case letters and digits, starting with a letter, 2 to 31 characters (for example jira).</source>
@@ -3379,7 +3371,7 @@
     </unit>
     <unit id="adminServers.errAccepted">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:188</note>
+        <note category="location">src/app/features/admin/servers-page.ts:185</note>
       </notes>
       <segment>
         <source>Choose at least one credential type.</source>
@@ -3387,7 +3379,7 @@
     </unit>
     <unit id="adminServers.errType">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:191</note>
+        <note category="location">src/app/features/admin/servers-page.ts:188</note>
       </notes>
       <segment>
         <source>The type in use has to be one of the accepted types.</source>
@@ -3395,15 +3387,31 @@
     </unit>
     <unit id="adminServers.errMixed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:197</note>
+        <note category="location">src/app/features/admin/servers-page.ts:194</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
       </segment>
     </unit>
+    <unit id="adminServers.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:227</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form and save again.</source>
+      </segment>
+    </unit>
+    <unit id="adminServers.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:231</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+      </segment>
+    </unit>
     <unit id="adminServers.added">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:412</note>
+        <note category="location">src/app/features/admin/servers-page.ts:406</note>
       </notes>
       <segment>
         <source>Added the server <ph id="0" equiv="server" disp="id"/>. It has no tools until you approve its connection, policies and tools on the Approvals screen.</source>
@@ -3411,7 +3419,7 @@
     </unit>
     <unit id="adminServers.noChange">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:417</note>
+        <note category="location">src/app/features/admin/servers-page.ts:411</note>
       </notes>
       <segment>
         <source>Nothing changed.</source>
@@ -3419,7 +3427,7 @@
     </unit>
     <unit id="adminServers.saved">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:429</note>
+        <note category="location">src/app/features/admin/servers-page.ts:423</note>
       </notes>
       <segment>
         <source>Saved the settings of <ph id="0" equiv="server" disp="current.original.serverId"/>.</source>
@@ -3427,7 +3435,7 @@
     </unit>
     <unit id="adminServers.disabledDone">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:472</note>
+        <note category="location">src/app/features/admin/servers-page.ts:466</note>
       </notes>
       <segment>
         <source>Disabled the server <ph id="0" equiv="server" disp="id"/>. Its tools are out of service.</source>
@@ -3435,7 +3443,7 @@
     </unit>
     <unit id="adminServers.removeTitle">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:498</note>
+        <note category="location">src/app/features/admin/servers-page.ts:492</note>
       </notes>
       <segment>
         <source>Remove the server <ph id="0" equiv="server" disp="id"/>?</source>
@@ -3443,7 +3451,7 @@
     </unit>
     <unit id="adminServers.removeMessage">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:499</note>
+        <note category="location">src/app/features/admin/servers-page.ts:493</note>
       </notes>
       <segment>
         <source>Its tools disappear from the catalog and tools/list, calls to it are refused, and the scope mapping entries of its resource types are removed. The system and the users&apos; connections stay. Removing needs a fresh MFA.</source>
@@ -3451,7 +3459,7 @@
     </unit>
     <unit id="adminServers.removeConfirm">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:500</note>
+        <note category="location">src/app/features/admin/servers-page.ts:494</note>
       </notes>
       <segment>
         <source>Remove server</source>
@@ -3459,7 +3467,7 @@
     </unit>
     <unit id="adminServers.removed">
       <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:513</note>
+        <note category="location">src/app/features/admin/servers-page.ts:508</note>
       </notes>
       <segment>
         <source>Removed the server <ph id="0" equiv="server" disp="id"/>.</source>
@@ -3473,25 +3481,9 @@
         <source>Systems</source>
       </segment>
     </unit>
-    <unit id="adminSystems.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/systems-page.html:11,13</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Check the form, enter the client secret again and save.</source>
-      </segment>
-    </unit>
-    <unit id="adminSystems.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/systems-page.html:17,20</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-      </segment>
-    </unit>
     <unit id="adminSystems.lead">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:32,36</note>
+        <note category="location">src/app/features/admin/systems-page.html:12,16</note>
       </notes>
       <segment>
         <source> The systems that users connect to and that the servers reach through the credential broker. The client secret of a system is stored in the broker&apos;s secret store and is never shown again. </source>
@@ -3499,7 +3491,7 @@
     </unit>
     <unit id="adminSystems.add">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:44,48</note>
+        <note category="location">src/app/features/admin/systems-page.html:24,28</note>
       </notes>
       <segment>
         <source> Add system </source>
@@ -3507,7 +3499,7 @@
     </unit>
     <unit id="adminSystems.caption">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:51,53</note>
+        <note category="location">src/app/features/admin/systems-page.html:31,33</note>
       </notes>
       <segment>
         <source> Systems of the credential broker </source>
@@ -3515,8 +3507,8 @@
     </unit>
     <unit id="adminSystems.colSystem">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:55,56</note>
-        <note category="location">src/app/features/admin/systems-page.html:72</note>
+        <note category="location">src/app/features/admin/systems-page.html:35,36</note>
+        <note category="location">src/app/features/admin/systems-page.html:52</note>
       </notes>
       <segment>
         <source>System</source>
@@ -3524,8 +3516,8 @@
     </unit>
     <unit id="adminSystems.colAddress">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:56,57</note>
-        <note category="location">src/app/features/admin/systems-page.html:80,81</note>
+        <note category="location">src/app/features/admin/systems-page.html:36,37</note>
+        <note category="location">src/app/features/admin/systems-page.html:60,61</note>
       </notes>
       <segment>
         <source>Base address</source>
@@ -3533,8 +3525,8 @@
     </unit>
     <unit id="adminSystems.colAdapter">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:57,58</note>
-        <note category="location">src/app/features/admin/systems-page.html:85</note>
+        <note category="location">src/app/features/admin/systems-page.html:37,38</note>
+        <note category="location">src/app/features/admin/systems-page.html:65</note>
       </notes>
       <segment>
         <source>Adapter</source>
@@ -3542,8 +3534,8 @@
     </unit>
     <unit id="adminSystems.colTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:58,59</note>
-        <note category="location">src/app/features/admin/systems-page.html:91</note>
+        <note category="location">src/app/features/admin/systems-page.html:38,39</note>
+        <note category="location">src/app/features/admin/systems-page.html:71</note>
       </notes>
       <segment>
         <source>Credential types</source>
@@ -3551,7 +3543,7 @@
     </unit>
     <unit id="adminSystems.colActions">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:60,63</note>
+        <note category="location">src/app/features/admin/systems-page.html:40,43</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -3559,7 +3551,7 @@
     </unit>
     <unit id="adminSystems.default">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:94,95</note>
+        <note category="location">src/app/features/admin/systems-page.html:74,75</note>
       </notes>
       <segment>
         <source>default</source>
@@ -3567,7 +3559,7 @@
     </unit>
     <unit id="adminSystems.edit">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:109,110</note>
+        <note category="location">src/app/features/admin/systems-page.html:89,90</note>
       </notes>
       <segment>
         <source>Edit</source>
@@ -3575,7 +3567,7 @@
     </unit>
     <unit id="adminSystems.remove">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:119,120</note>
+        <note category="location">src/app/features/admin/systems-page.html:99,100</note>
       </notes>
       <segment>
         <source>Remove</source>
@@ -3583,7 +3575,7 @@
     </unit>
     <unit id="adminSystems.none">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:128,131</note>
+        <note category="location">src/app/features/admin/systems-page.html:108,111</note>
       </notes>
       <segment>
         <source>The broker has no systems.</source>
@@ -3591,7 +3583,7 @@
     </unit>
     <unit id="adminSystems.formAdd">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:137,139</note>
+        <note category="location">src/app/features/admin/systems-page.html:117,119</note>
       </notes>
       <segment>
         <source>Add system</source>
@@ -3599,7 +3591,7 @@
     </unit>
     <unit id="adminSystems.formEdit">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:139,141</note>
+        <note category="location">src/app/features/admin/systems-page.html:119,121</note>
       </notes>
       <segment>
         <source>Edit system</source>
@@ -3607,7 +3599,7 @@
     </unit>
     <unit id="adminSystems.invalidates">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:145,148</note>
+        <note category="location">src/app/features/admin/systems-page.html:125,128</note>
       </notes>
       <segment>
         <source>A change of the base address, the authorization or token address, the client identifier or the revoke address deletes the connections of all users to this system when you save. They are asked to connect again; nothing is sent to the system. Changed now:</source>
@@ -3615,7 +3607,7 @@
     </unit>
     <unit id="adminSystems.id">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:155,156</note>
+        <note category="location">src/app/features/admin/systems-page.html:135,136</note>
       </notes>
       <segment>
         <source>System identifier</source>
@@ -3623,7 +3615,7 @@
     </unit>
     <unit id="adminSystems.displayName">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:176,178</note>
+        <note category="location">src/app/features/admin/systems-page.html:156,158</note>
       </notes>
       <segment>
         <source>Display name (optional)</source>
@@ -3631,7 +3623,7 @@
     </unit>
     <unit id="adminSystems.adapter">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:191,193</note>
+        <note category="location">src/app/features/admin/systems-page.html:171,173</note>
       </notes>
       <segment>
         <source>Adapter</source>
@@ -3639,7 +3631,7 @@
     </unit>
     <unit id="adminSystems.base">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:204,206</note>
+        <note category="location">src/app/features/admin/systems-page.html:184,186</note>
       </notes>
       <segment>
         <source>Base address</source>
@@ -3647,7 +3639,7 @@
     </unit>
     <unit id="adminSystems.product">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:220,222</note>
+        <note category="location">src/app/features/admin/systems-page.html:200,202</note>
       </notes>
       <segment>
         <source>Product</source>
@@ -3655,7 +3647,7 @@
     </unit>
     <unit id="adminSystems.productPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:228,229</note>
+        <note category="location">src/app/features/admin/systems-page.html:208,209</note>
       </notes>
       <segment>
         <source>Choose a product</source>
@@ -3663,7 +3655,7 @@
     </unit>
     <unit id="adminSystems.genericTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:239,240</note>
+        <note category="location">src/app/features/admin/systems-page.html:219,220</note>
       </notes>
       <segment>
         <source>Credential type of this system</source>
@@ -3671,7 +3663,7 @@
     </unit>
     <unit id="adminSystems.genericHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:254,256</note>
+        <note category="location">src/app/features/admin/systems-page.html:234,236</note>
       </notes>
       <segment>
         <source> A generic REST system takes either the tokens of its users or one service account, not both, and no OAuth. </source>
@@ -3679,7 +3671,7 @@
     </unit>
     <unit id="adminSystems.whoamiPath">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:261,263</note>
+        <note category="location">src/app/features/admin/systems-page.html:241,243</note>
       </notes>
       <segment>
         <source>Check path (optional)</source>
@@ -3687,7 +3679,7 @@
     </unit>
     <unit id="adminSystems.whoamiField">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:279,281</note>
+        <note category="location">src/app/features/admin/systems-page.html:259,261</note>
       </notes>
       <segment>
         <source>User name field of the answer</source>
@@ -3695,7 +3687,7 @@
     </unit>
     <unit id="adminSystems.whoamiHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:296,298</note>
+        <note category="location">src/app/features/admin/systems-page.html:276,278</note>
       </notes>
       <segment>
         <source> The broker calls this path on the base address with the token a user enters and reads the user name from the answer. Without it the token is stored without a check, and the connection shows no account. </source>
@@ -3703,7 +3695,7 @@
     </unit>
     <unit id="adminSystems.types">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:303,304</note>
+        <note category="location">src/app/features/admin/systems-page.html:283,284</note>
       </notes>
       <segment>
         <source>Supported credential types</source>
@@ -3711,7 +3703,7 @@
     </unit>
     <unit id="adminSystems.defaultType">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:323,325</note>
+        <note category="location">src/app/features/admin/systems-page.html:303,305</note>
       </notes>
       <segment>
         <source>Default type</source>
@@ -3719,7 +3711,7 @@
     </unit>
     <unit id="adminSystems.secretScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:341,344</note>
+        <note category="location">src/app/features/admin/systems-page.html:321,324</note>
       </notes>
       <segment>
         <source>Scheme of the secret handed to the gateway</source>
@@ -3727,7 +3719,7 @@
     </unit>
     <unit id="adminSystems.userScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:357,359</note>
+        <note category="location">src/app/features/admin/systems-page.html:337,339</note>
       </notes>
       <segment>
         <source>Scheme of the user&apos;s token</source>
@@ -3735,7 +3727,7 @@
     </unit>
     <unit id="adminSystems.userSchemeDefault">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:365,366</note>
+        <note category="location">src/app/features/admin/systems-page.html:345,346</note>
       </notes>
       <segment>
         <source>As the scheme above</source>
@@ -3743,7 +3735,7 @@
     </unit>
     <unit id="adminSystems.userSchemeHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:371,373</note>
+        <note category="location">src/app/features/admin/systems-page.html:351,353</note>
       </notes>
       <segment>
         <source> Basic makes the connection form ask for a login next to the token. </source>
@@ -3751,7 +3743,7 @@
     </unit>
     <unit id="adminSystems.audience">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:378,380</note>
+        <note category="location">src/app/features/admin/systems-page.html:358,360</note>
       </notes>
       <segment>
         <source>Audience of the exchanged token</source>
@@ -3759,7 +3751,7 @@
     </unit>
     <unit id="adminSystems.revoke">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:395,397</note>
+        <note category="location">src/app/features/admin/systems-page.html:375,377</note>
       </notes>
       <segment>
         <source>Revoke address (optional)</source>
@@ -3767,7 +3759,7 @@
     </unit>
     <unit id="adminSystems.timeout">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:410,412</note>
+        <note category="location">src/app/features/admin/systems-page.html:390,392</note>
       </notes>
       <segment>
         <source>Timeout of calls (optional)</source>
@@ -3775,7 +3767,7 @@
     </unit>
     <unit id="adminSystems.oauth">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:426,427</note>
+        <note category="location">src/app/features/admin/systems-page.html:406,407</note>
       </notes>
       <segment>
         <source>OAuth client</source>
@@ -3783,7 +3775,7 @@
     </unit>
     <unit id="adminSystems.clientId">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:428,430</note>
+        <note category="location">src/app/features/admin/systems-page.html:408,410</note>
       </notes>
       <segment>
         <source>Client identifier</source>
@@ -3791,7 +3783,7 @@
     </unit>
     <unit id="adminSystems.clientSecret">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:443,445</note>
+        <note category="location">src/app/features/admin/systems-page.html:423,425</note>
       </notes>
       <segment>
         <source>Client secret</source>
@@ -3799,7 +3791,7 @@
     </unit>
     <unit id="adminSystems.secretNeeded">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:458,460</note>
+        <note category="location">src/app/features/admin/systems-page.html:438,440</note>
       </notes>
       <segment>
         <source>Required now. The secret is stored in the broker and never shown again.</source>
@@ -3807,7 +3799,7 @@
     </unit>
     <unit id="adminSystems.secretKept">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:463,465</note>
+        <note category="location">src/app/features/admin/systems-page.html:443,445</note>
       </notes>
       <segment>
         <source>A secret is stored. Leave this empty to keep it.</source>
@@ -3815,7 +3807,7 @@
     </unit>
     <unit id="adminSystems.authorize">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:474,476</note>
+        <note category="location">src/app/features/admin/systems-page.html:454,456</note>
       </notes>
       <segment>
         <source>Authorization address</source>
@@ -3823,7 +3815,7 @@
     </unit>
     <unit id="adminSystems.tokenUrl">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:492,494</note>
+        <note category="location">src/app/features/admin/systems-page.html:472,474</note>
       </notes>
       <segment>
         <source>Token address</source>
@@ -3831,7 +3823,7 @@
     </unit>
     <unit id="adminSystems.scopes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:509,511</note>
+        <note category="location">src/app/features/admin/systems-page.html:489,491</note>
       </notes>
       <segment>
         <source>OAuth scopes (separated by spaces)</source>
@@ -3839,7 +3831,7 @@
     </unit>
     <unit id="adminSystems.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:526,529</note>
+        <note category="location">src/app/features/admin/systems-page.html:506,509</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this form; the client secret is not kept on the way, so you enter it again. </source>
@@ -3847,7 +3839,7 @@
     </unit>
     <unit id="adminSystems.save">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:531,533</note>
+        <note category="location">src/app/features/admin/systems-page.html:511,513</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -3855,7 +3847,7 @@
     </unit>
     <unit id="adminSystems.cancel">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:540,542</note>
+        <note category="location">src/app/features/admin/systems-page.html:520,522</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -3863,7 +3855,7 @@
     </unit>
     <unit id="adminSystems.errUrl">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:267</note>
+        <note category="location">src/app/features/admin/systems-page.ts:256</note>
       </notes>
       <segment>
         <source>Enter an https address.</source>
@@ -3871,7 +3863,7 @@
     </unit>
     <unit id="adminSystems.errSystem">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:270</note>
+        <note category="location">src/app/features/admin/systems-page.ts:259</note>
       </notes>
       <segment>
         <source>Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.</source>
@@ -3879,7 +3871,7 @@
     </unit>
     <unit id="adminSystems.errDisplayName">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:274</note>
+        <note category="location">src/app/features/admin/systems-page.ts:263</note>
       </notes>
       <segment>
         <source>Use 1 to 64 characters; control and invisible characters are not allowed.</source>
@@ -3887,7 +3879,7 @@
     </unit>
     <unit id="adminSystems.errWhoamiPath">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:285</note>
+        <note category="location">src/app/features/admin/systems-page.ts:274</note>
       </notes>
       <segment>
         <source>Enter a path that starts with a single slash, without a host, a query or &quot;..&quot;, for example /api/me.</source>
@@ -3895,7 +3887,7 @@
     </unit>
     <unit id="adminSystems.errWhoamiField">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:289</note>
+        <note category="location">src/app/features/admin/systems-page.ts:278</note>
       </notes>
       <segment>
         <source>Enter the field of the answer that holds the user name, or a JSON pointer such as /user/login.</source>
@@ -3903,7 +3895,7 @@
     </unit>
     <unit id="adminSystems.errProduct">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:293</note>
+        <note category="location">src/app/features/admin/systems-page.ts:282</note>
       </notes>
       <segment>
         <source>Choose Jira or Confluence.</source>
@@ -3911,7 +3903,7 @@
     </unit>
     <unit id="adminSystems.errTimeout">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:297</note>
+        <note category="location">src/app/features/admin/systems-page.ts:286</note>
       </notes>
       <segment>
         <source>Use an ISO 8601 duration of at most 10 minutes, for example PT30S.</source>
@@ -3919,7 +3911,7 @@
     </unit>
     <unit id="adminSystems.errTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:301</note>
+        <note category="location">src/app/features/admin/systems-page.ts:290</note>
       </notes>
       <segment>
         <source>Choose at least one credential type.</source>
@@ -3927,7 +3919,7 @@
     </unit>
     <unit id="adminSystems.errDefault">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:304</note>
+        <note category="location">src/app/features/admin/systems-page.ts:293</note>
       </notes>
       <segment>
         <source>The default type has to be one of the supported types.</source>
@@ -3935,7 +3927,7 @@
     </unit>
     <unit id="adminSystems.errMixed">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:310</note>
+        <note category="location">src/app/features/admin/systems-page.ts:299</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -3943,7 +3935,7 @@
     </unit>
     <unit id="adminSystems.errAudience">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:314</note>
+        <note category="location">src/app/features/admin/systems-page.ts:303</note>
       </notes>
       <segment>
         <source>A token exchange system needs the audience of the token.</source>
@@ -3951,7 +3943,7 @@
     </unit>
     <unit id="adminSystems.errClientId">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:318</note>
+        <note category="location">src/app/features/admin/systems-page.ts:307</note>
       </notes>
       <segment>
         <source>Enter the client identifier.</source>
@@ -3959,7 +3951,7 @@
     </unit>
     <unit id="adminSystems.errSecretAgain">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:322</note>
+        <note category="location">src/app/features/admin/systems-page.ts:311</note>
       </notes>
       <segment>
         <source>Enter the client secret again: an address or the client identifier changed.</source>
@@ -3967,7 +3959,7 @@
     </unit>
     <unit id="adminSystems.errSecret">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:323</note>
+        <note category="location">src/app/features/admin/systems-page.ts:312</note>
       </notes>
       <segment>
         <source>Enter the client secret.</source>
@@ -3975,7 +3967,7 @@
     </unit>
     <unit id="adminSystems.errScopes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:336</note>
+        <note category="location">src/app/features/admin/systems-page.ts:325</note>
       </notes>
       <segment>
         <source>A scope cannot contain spaces.</source>
@@ -3983,7 +3975,7 @@
     </unit>
     <unit id="adminSystems.secretSet">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:352</note>
+        <note category="location">src/app/features/admin/systems-page.ts:341</note>
       </notes>
       <segment>
         <source>Client secret stored</source>
@@ -3991,15 +3983,31 @@
     </unit>
     <unit id="adminSystems.secretMissing">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:353</note>
+        <note category="location">src/app/features/admin/systems-page.ts:342</note>
       </notes>
       <segment>
         <source>No client secret</source>
       </segment>
     </unit>
+    <unit id="adminSystems.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:380</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form, enter the client secret again and save.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:384</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+      </segment>
+    </unit>
     <unit id="adminSystems.savedInvalidated">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:549</note>
+        <note category="location">src/app/features/admin/systems-page.ts:537</note>
       </notes>
       <segment>
         <source>Saved the system <ph id="0" equiv="system" disp="id"/>. The connections of its users were deleted; they connect again.</source>
@@ -4007,7 +4015,7 @@
     </unit>
     <unit id="adminSystems.saved">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:550</note>
+        <note category="location">src/app/features/admin/systems-page.ts:538</note>
       </notes>
       <segment>
         <source>Saved the system <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4015,7 +4023,7 @@
     </unit>
     <unit id="adminSystems.added">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:551</note>
+        <note category="location">src/app/features/admin/systems-page.ts:539</note>
       </notes>
       <segment>
         <source>Added the system <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4023,7 +4031,7 @@
     </unit>
     <unit id="adminSystems.removeTitle">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:589</note>
+        <note category="location">src/app/features/admin/systems-page.ts:577</note>
       </notes>
       <segment>
         <source>Remove the system <ph id="0" equiv="system" disp="id"/>?</source>
@@ -4031,7 +4039,7 @@
     </unit>
     <unit id="adminSystems.removeMessage">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:590</note>
+        <note category="location">src/app/features/admin/systems-page.ts:578</note>
       </notes>
       <segment>
         <source>The broker deletes the settings, the client secret and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.</source>
@@ -4039,7 +4047,7 @@
     </unit>
     <unit id="adminSystems.removeConfirm">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:591</note>
+        <note category="location">src/app/features/admin/systems-page.ts:579</note>
       </notes>
       <segment>
         <source>Remove system</source>
@@ -4047,7 +4055,7 @@
     </unit>
     <unit id="adminSystems.removed">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:605</note>
+        <note category="location">src/app/features/admin/systems-page.ts:594</note>
       </notes>
       <segment>
         <source>Removed the system <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4103,7 +4111,7 @@
     </unit>
     <unit id="admin.manifestSource">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:47,49</note>
+        <note category="location">src/app/features/admin/tool-diff.html:47,48</note>
       </notes>
       <segment>
         <source>Source: manifest pulled by the gateway, version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>. Pulling approves nothing.</source>
@@ -4185,7 +4193,7 @@
     </unit>
     <unit id="admin.beforeNew">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:106,107</note>
+        <note category="location">src/app/features/admin/tool-diff.html:107,108</note>
       </notes>
       <segment>
         <source>Before (none, new tool)</source>
@@ -4193,7 +4201,7 @@
     </unit>
     <unit id="admin.before">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:109,110</note>
+        <note category="location">src/app/features/admin/tool-diff.html:110,111</note>
       </notes>
       <segment>
         <source>Before (<ph id="0" equiv="INTERPOLATION" disp="{{ (v.value.approvedInVersion | safeText) || noVersion }}"/>)</source>
@@ -4201,7 +4209,7 @@
     </unit>
     <unit id="admin.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:122,123</note>
+        <note category="location">src/app/features/admin/tool-diff.html:123,124</note>
       </notes>
       <segment>
         <source>Removed: </source>
@@ -4209,7 +4217,7 @@
     </unit>
     <unit id="admin.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:125,126</note>
+        <note category="location">src/app/features/admin/tool-diff.html:126,127</note>
       </notes>
       <segment>
         <source>No earlier definition.</source>
@@ -4217,7 +4225,7 @@
     </unit>
     <unit id="admin.after">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:131,132</note>
+        <note category="location">src/app/features/admin/tool-diff.html:132,133</note>
       </notes>
       <segment>
         <source>After (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -4225,7 +4233,7 @@
     </unit>
     <unit id="admin.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:143,144</note>
+        <note category="location">src/app/features/admin/tool-diff.html:144,145</note>
       </notes>
       <segment>
         <source>Added: </source>
@@ -4233,7 +4241,7 @@
     </unit>
     <unit id="admin.approveClassify">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:161,162</note>
+        <note category="location">src/app/features/admin/tool-diff.html:158,159</note>
       </notes>
       <segment>
         <source>Classify and approve</source>
@@ -4241,7 +4249,7 @@
     </unit>
     <unit id="admin.approveLowering">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:163,165</note>
+        <note category="location">src/app/features/admin/tool-diff.html:160,162</note>
       </notes>
       <segment>
         <source>Approve risk lowering</source>
@@ -4249,7 +4257,7 @@
     </unit>
     <unit id="admin.approve">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:165,167</note>
+        <note category="location">src/app/features/admin/tool-diff.html:162,164</note>
       </notes>
       <segment>
         <source>Approve definition</source>
@@ -4257,7 +4265,7 @@
     </unit>
     <unit id="admin.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:170,173</note>
+        <note category="location">src/app/features/admin/tool-diff.html:167,170</note>
       </notes>
       <segment>
         <source> Not approving breaks nothing: the tool stays hidden from agents. </source>
@@ -4265,7 +4273,7 @@
     </unit>
     <unit id="admin.noVersion">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:95</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:96</note>
       </notes>
       <segment>
         <source>no version</source>
@@ -4273,7 +4281,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.change">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:354</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:352</note>
       </notes>
       <segment>
         <source>from <ph id="0" equiv="from" disp="riskLabel(from)"/> to <ph id="1" equiv="to" disp="target"/></source>
@@ -4281,7 +4289,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.floor">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:355</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:353</note>
       </notes>
       <segment>
         <source>below the highest level reported so far (now <ph id="0" equiv="to" disp="target"/>)</source>
@@ -4289,7 +4297,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:360</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:358</note>
       </notes>
       <segment>
         <source>Approve risk lowering?</source>
@@ -4297,7 +4305,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:361</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:359</note>
       </notes>
       <segment>
         <source>The tool <ph id="0" equiv="tool" disp="name"/> lowers its risk <ph id="1" equiv="change" disp="change"/>. After approval the new level takes effect, and for tools that were irreversible a code from the Authenticator is no longer required. Approve only if the change is intended.</source>
@@ -4305,7 +4313,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:362</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:360</note>
       </notes>
       <segment>
         <source>Approve risk lowering</source>
@@ -4313,7 +4321,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:376</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:374</note>
       </notes>
       <segment>
         <source>Approve a change you cannot see?</source>
@@ -4321,7 +4329,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:377</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:375</note>
       </notes>
       <segment>
         <source>The definition hash is different, but no shown line changed. The change concerns an element outside the view, for example the server credential. Approve only if you know the reason.</source>
@@ -4329,7 +4337,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:378</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:376</note>
       </notes>
       <segment>
         <source>Approve anyway</source>
@@ -4337,7 +4345,7 @@
     </unit>
     <unit id="admin.serverConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:393</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:391</note>
       </notes>
       <segment>
         <source>Approve a definition reported by the server?</source>
@@ -4345,7 +4353,7 @@
     </unit>
     <unit id="admin.serverConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:394</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:392</note>
       </notes>
       <segment>
         <source>A running server presented the definition of <ph id="0" equiv="tool" disp="name"/>, not the CI pipeline. Nobody reviewed it in code. Approve it only if the description and schema match what you expect.</source>
@@ -4353,7 +4361,7 @@
     </unit>
     <unit id="admin.serverConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:395</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:393</note>
       </notes>
       <segment>
         <source>Approve</source>
@@ -4415,33 +4423,9 @@
         <source> The &quot;MCP Platform&quot; account in Microsoft Authenticator. You confirm irreversible agent operations with a code from it. </source>
       </segment>
     </unit>
-    <unit id="auth.mfaResumed">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:12,14</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Removing the Authenticator.</source>
-      </segment>
-    </unit>
-    <unit id="auth.mfaDone">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:16,18</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. You can now remove the Authenticator.</source>
-      </segment>
-    </unit>
-    <unit id="auth.removed">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:23,25</note>
-      </notes>
-      <segment>
-        <source> Authenticator removed. The agent will not run irreversible operations until you register it again. </source>
-      </segment>
-    </unit>
     <unit id="auth.disabledBanner">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:34,38</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:11,15</note>
       </notes>
       <segment>
         <source> The Authenticator was switched off after 20 wrong codes in one day. The agent will not run irreversible operations until you register it again. </source>
@@ -4449,7 +4433,7 @@
     </unit>
     <unit id="auth.stateNone">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:44,46</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:21,23</note>
       </notes>
       <segment>
         <source>Not registered</source>
@@ -4457,7 +4441,7 @@
     </unit>
     <unit id="auth.stateDisabled">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:47,48</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:24,25</note>
       </notes>
       <segment>
         <source>Switched off</source>
@@ -4465,7 +4449,7 @@
     </unit>
     <unit id="auth.stateLocked">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:55,56</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:32,33</note>
       </notes>
       <segment>
         <source>Locked until <ph id="0" equiv="INTERPOLATION" disp="{{ current.lockedUntil | date: &apos;HH:mm&apos; }}"/></source>
@@ -4473,7 +4457,7 @@
     </unit>
     <unit id="auth.lockReason">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:58,59</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:35,36</note>
       </notes>
       <segment>
         <source>5 wrong codes in 15 minutes</source>
@@ -4481,7 +4465,7 @@
     </unit>
     <unit id="auth.stateActive">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:60,61</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:37,38</note>
       </notes>
       <segment>
         <source>Active</source>
@@ -4489,7 +4473,7 @@
     </unit>
     <unit id="auth.since">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:64,65</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:41,42</note>
       </notes>
       <segment>
         <source>since <ph id="0" equiv="INTERPOLATION" disp="{{ current.registeredAt | date: &apos;dd.MM.yyyy&apos; }}"/></source>
@@ -4497,7 +4481,7 @@
     </unit>
     <unit id="auth.lastUsedToday">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:71,72</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:48,49</note>
       </notes>
       <segment>
         <source>last used today <ph id="0" equiv="INTERPOLATION" disp="{{ lastUsed | date: &apos;HH:mm&apos; }}"/></source>
@@ -4505,7 +4489,7 @@
     </unit>
     <unit id="auth.lastUsedOn">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:75,76</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:52,53</note>
       </notes>
       <segment>
         <source>last used <ph id="0" equiv="INTERPOLATION" disp="{{ lastUsed | date: &apos;dd.MM.yyyy&apos; }}"/></source>
@@ -4513,7 +4497,7 @@
     </unit>
     <unit id="auth.neverUsed">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:79,80</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:56,57</note>
       </notes>
       <segment>
         <source>never used</source>
@@ -4521,7 +4505,7 @@
     </unit>
     <unit id="auth.register">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:89,92</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:66,69</note>
       </notes>
       <segment>
         <source>Register</source>
@@ -4529,7 +4513,7 @@
     </unit>
     <unit id="auth.registerAgain">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:94,97</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:71,74</note>
       </notes>
       <segment>
         <source>Register again</source>
@@ -4537,7 +4521,7 @@
     </unit>
     <unit id="auth.remove">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:106,107</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:83,84</note>
       </notes>
       <segment>
         <source> Remove </source>
@@ -4545,15 +4529,31 @@
     </unit>
     <unit id="auth.lockHint">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:114,117</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:91,94</note>
       </notes>
       <segment>
         <source> A lock is lifted only by time. Removing and registering again does not shorten it. </source>
       </segment>
     </unit>
+    <unit id="auth.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:74</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Removing the Authenticator.</source>
+      </segment>
+    </unit>
+    <unit id="auth.mfaDone">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:75</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. You can now remove the Authenticator.</source>
+      </segment>
+    </unit>
     <unit id="authRemove.title">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.ts:85</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:91</note>
       </notes>
       <segment>
         <source>Remove the Authenticator?</source>
@@ -4561,7 +4561,7 @@
     </unit>
     <unit id="authRemove.message">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.ts:86</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:92</note>
       </notes>
       <segment>
         <source>Without the Authenticator the agent will not run irreversible operations. Removal requires identity confirmation (MFA).</source>
@@ -4569,10 +4569,18 @@
     </unit>
     <unit id="authRemove.confirm">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.ts:87</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:93</note>
       </notes>
       <segment>
         <source>Remove</source>
+      </segment>
+    </unit>
+    <unit id="auth.removed">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:113</note>
+      </notes>
+      <segment>
+        <source>Authenticator removed. The agent will not run irreversible operations until you register it again.</source>
       </segment>
     </unit>
     <unit id="qr.label">
@@ -4601,7 +4609,7 @@
     </unit>
     <unit id="enroll.clipboard">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:29,32</note>
+        <note category="location">src/app/features/authenticator/register-page.html:26,29</note>
       </notes>
       <segment>
         <source> The key was copied to the clipboard. Clear the clipboard, for example by copying other text: the key lets anyone generate codes. </source>
@@ -4609,7 +4617,7 @@
     </unit>
     <unit id="enroll.alreadyTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:36,37</note>
+        <note category="location">src/app/features/authenticator/register-page.html:33,34</note>
       </notes>
       <segment>
         <source>Authenticator is already registered</source>
@@ -4617,7 +4625,7 @@
     </unit>
     <unit id="enroll.alreadyText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:38,41</note>
+        <note category="location">src/app/features/authenticator/register-page.html:35,38</note>
       </notes>
       <segment>
         <source> To register it again, first remove the current registration in System connections. Removal requires identity confirmation (MFA). </source>
@@ -4625,7 +4633,7 @@
     </unit>
     <unit id="enroll.toConnections">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:43,45</note>
+        <note category="location">src/app/features/authenticator/register-page.html:40,42</note>
       </notes>
       <segment>
         <source> Back to connections </source>
@@ -4633,7 +4641,7 @@
     </unit>
     <unit id="enroll.failedTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:49,50</note>
+        <note category="location">src/app/features/authenticator/register-page.html:46,47</note>
       </notes>
       <segment>
         <source>The registration expired or 3 wrong codes were entered.</source>
@@ -4641,7 +4649,7 @@
     </unit>
     <unit id="enroll.failedText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:51,53</note>
+        <note category="location">src/app/features/authenticator/register-page.html:48,50</note>
       </notes>
       <segment>
         <source> Start over. Delete the &quot;MCP Platform&quot; account you just added in the app. </source>
@@ -4649,7 +4657,7 @@
     </unit>
     <unit id="enroll.restart">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:54,56</note>
+        <note category="location">src/app/features/authenticator/register-page.html:51,53</note>
       </notes>
       <segment>
         <source> Start over </source>
@@ -4657,23 +4665,15 @@
     </unit>
     <unit id="enroll.infoTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:59,60</note>
+        <note category="location">src/app/features/authenticator/register-page.html:56,58</note>
       </notes>
       <segment>
         <source>Register Authenticator</source>
       </segment>
     </unit>
-    <unit id="enroll.mfaDone">
-      <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:62,63</note>
-      </notes>
-      <segment>
-        <source> Identity confirmed. Continue the registration when you are ready. </source>
-      </segment>
-    </unit>
     <unit id="enroll.infoLead">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:67,69</note>
+        <note category="location">src/app/features/authenticator/register-page.html:59,61</note>
       </notes>
       <segment>
         <source> When an agent wants to run an irreversible operation, for example deleting a page, you enter a 6-digit code from the app in the agent session. </source>
@@ -4681,7 +4681,7 @@
     </unit>
     <unit id="enroll.infoApp">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:71,73</note>
+        <note category="location">src/app/features/authenticator/register-page.html:63,65</note>
       </notes>
       <segment>
         <source> You will add a separate &quot;MCP Platform&quot; account in Microsoft Authenticator. You do this once. </source>
@@ -4689,7 +4689,7 @@
     </unit>
     <unit id="enroll.infoMfa">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:75,77</note>
+        <note category="location">src/app/features/authenticator/register-page.html:67,69</note>
       </notes>
       <segment>
         <source> &quot;Next&quot; will ask you to confirm your identity (MFA). It is needed only for registration and removal. </source>
@@ -4697,7 +4697,7 @@
     </unit>
     <unit id="enroll.cancel">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:81,83</note>
+        <note category="location">src/app/features/authenticator/register-page.html:73,75</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -4705,7 +4705,7 @@
     </unit>
     <unit id="enroll.continue">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:85,86</note>
+        <note category="location">src/app/features/authenticator/register-page.html:77,78</note>
       </notes>
       <segment>
         <source>Continue registration</source>
@@ -4713,7 +4713,7 @@
     </unit>
     <unit id="enroll.next">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:87,88</note>
+        <note category="location">src/app/features/authenticator/register-page.html:79,80</note>
       </notes>
       <segment>
         <source>Next</source>
@@ -4721,7 +4721,7 @@
     </unit>
     <unit id="enroll.scanTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:97,99</note>
+        <note category="location">src/app/features/authenticator/register-page.html:89,91</note>
       </notes>
       <segment>
         <source>Add the account in the app</source>
@@ -4729,7 +4729,7 @@
     </unit>
     <unit id="enroll.how1">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:105,106</note>
+        <note category="location">src/app/features/authenticator/register-page.html:97,98</note>
       </notes>
       <segment>
         <source>Open Microsoft Authenticator.</source>
@@ -4737,7 +4737,7 @@
     </unit>
     <unit id="enroll.how2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:106,107</note>
+        <note category="location">src/app/features/authenticator/register-page.html:98,99</note>
       </notes>
       <segment>
         <source>Add an account, then Other account.</source>
@@ -4745,7 +4745,7 @@
     </unit>
     <unit id="enroll.how3">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:107,109</note>
+        <note category="location">src/app/features/authenticator/register-page.html:99,101</note>
       </notes>
       <segment>
         <source>Scan the QR code.</source>
@@ -4753,7 +4753,7 @@
     </unit>
     <unit id="enroll.manual">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:109,110</note>
+        <note category="location">src/app/features/authenticator/register-page.html:101,102</note>
       </notes>
       <segment>
         <source>Cannot scan it? Enter the key manually.</source>
@@ -4761,7 +4761,7 @@
     </unit>
     <unit id="enroll.copy">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:113,114</note>
+        <note category="location">src/app/features/authenticator/register-page.html:105,106</note>
       </notes>
       <segment>
         <source> Copy </source>
@@ -4769,7 +4769,7 @@
     </unit>
     <unit id="enroll.copied">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:119,120</note>
+        <note category="location">src/app/features/authenticator/register-page.html:111,112</note>
       </notes>
       <segment>
         <source>Key copied to the clipboard.</source>
@@ -4777,7 +4777,7 @@
     </unit>
     <unit id="enroll.copyFailed">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:123,124</note>
+        <note category="location">src/app/features/authenticator/register-page.html:115,116</note>
       </notes>
       <segment>
         <source>Could not copy. Select the key and copy it manually.</source>
@@ -4785,7 +4785,7 @@
     </unit>
     <unit id="enroll.once">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:129,133</note>
+        <note category="location">src/app/features/authenticator/register-page.html:121,125</note>
       </notes>
       <segment>
         <source> The QR code and key are shown only now. The registration is valid for another <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;mono timer&quot;&gt;" dispEnd="&lt;/span
@@ -4794,7 +4794,7 @@
     </unit>
     <unit id="enroll.cancel2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:138,140</note>
+        <note category="location">src/app/features/authenticator/register-page.html:130,132</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -4802,7 +4802,7 @@
     </unit>
     <unit id="enroll.next2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:141,142</note>
+        <note category="location">src/app/features/authenticator/register-page.html:133,134</note>
       </notes>
       <segment>
         <source> Next </source>
@@ -4810,7 +4810,7 @@
     </unit>
     <unit id="enroll.codeTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:146,147</note>
+        <note category="location">src/app/features/authenticator/register-page.html:138,139</note>
       </notes>
       <segment>
         <source>Enter the first code</source>
@@ -4818,7 +4818,7 @@
     </unit>
     <unit id="enroll.codeLabel">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:149,151</note>
+        <note category="location">src/app/features/authenticator/register-page.html:141,143</note>
       </notes>
       <segment>
         <source>Code from the app (6 digits)</source>
@@ -4826,7 +4826,7 @@
     </unit>
     <unit id="enroll.codeWrong">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:164,166</note>
+        <note category="location">src/app/features/authenticator/register-page.html:156,158</note>
       </notes>
       <segment>
         <source> Invalid code. </source>
@@ -4834,7 +4834,7 @@
     </unit>
     <unit id="enroll.codeFormat">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:168,170</note>
+        <note category="location">src/app/features/authenticator/register-page.html:160,162</note>
       </notes>
       <segment>
         <source> The code has 6 digits. </source>
@@ -4842,7 +4842,7 @@
     </unit>
     <unit id="enroll.codeHint">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:172,174</note>
+        <note category="location">src/app/features/authenticator/register-page.html:164,166</note>
       </notes>
       <segment>
         <source> Enter the code shown in the app for the &quot;MCP Platform&quot; account. </source>
@@ -4850,7 +4850,7 @@
     </unit>
     <unit id="enroll.back2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:177,178</note>
+        <note category="location">src/app/features/authenticator/register-page.html:169,170</note>
       </notes>
       <segment>
         <source> Back </source>
@@ -4858,7 +4858,7 @@
     </unit>
     <unit id="enroll.check">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:180,181</note>
+        <note category="location">src/app/features/authenticator/register-page.html:172,173</note>
       </notes>
       <segment>
         <source> Check </source>
@@ -4866,7 +4866,7 @@
     </unit>
     <unit id="enroll.doneTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:186,188</note>
+        <note category="location">src/app/features/authenticator/register-page.html:178,180</note>
       </notes>
       <segment>
         <source>Authenticator registered</source>
@@ -4874,7 +4874,7 @@
     </unit>
     <unit id="enroll.doneLead">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:189,191</note>
+        <note category="location">src/app/features/authenticator/register-page.html:181,183</note>
       </notes>
       <segment>
         <source> From now on you confirm irreversible operations with a code from the app. </source>
@@ -4882,7 +4882,7 @@
     </unit>
     <unit id="enroll.doneText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:192,194</note>
+        <note category="location">src/app/features/authenticator/register-page.html:184,186</note>
       </notes>
       <segment>
         <source> You enter the code in the agent session when it asks for it. </source>
@@ -4890,7 +4890,7 @@
     </unit>
     <unit id="enroll.toConnections2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:197,200</note>
+        <note category="location">src/app/features/authenticator/register-page.html:189,192</note>
       </notes>
       <segment>
         <source> Back to connections </source>
@@ -4928,6 +4928,14 @@
         <source>Done</source>
       </segment>
     </unit>
+    <unit id="enroll.mfaDone">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.ts:187</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Continue the registration when you are ready.</source>
+      </segment>
+    </unit>
     <unit id="catalog.title">
       <notes>
         <note category="location">src/app/features/catalog/catalog-page.html:1,3</note>
@@ -4938,7 +4946,7 @@
     </unit>
     <unit id="catalog.searchPlaceholder">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:28,29</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:18,19</note>
       </notes>
       <segment>
         <source>Search for a server or tool</source>
@@ -4946,7 +4954,7 @@
     </unit>
     <unit id="catalog.searchLabel">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:30,32</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:20,22</note>
       </notes>
       <segment>
         <source>Search for a server or tool</source>
@@ -4954,7 +4962,7 @@
     </unit>
     <unit id="catalog.noMatches">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:43,47</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:33,37</note>
       </notes>
       <segment>
         <source> No server or tool matches the search. </source>
@@ -4962,7 +4970,7 @@
     </unit>
     <unit id="catalog.emptyTitle">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:48,49</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:38,39</note>
       </notes>
       <segment>
         <source>You do not have access to any MCP server yet</source>
@@ -4970,7 +4978,7 @@
     </unit>
     <unit id="catalog.emptyText">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:50,54</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:40,43</note>
       </notes>
       <segment>
         <source> Access is granted by the entitlement system. Once a request is approved, the servers appear here. </source>
@@ -4978,7 +4986,7 @@
     </unit>
     <unit id="catalog.linkCopied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:116</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:108</note>
       </notes>
       <segment>
         <source>Copied the address of the <ph id="0" equiv="system" disp="catalogSystemName(server)"/> server.</source>
@@ -4986,7 +4994,7 @@
     </unit>
     <unit id="catalog.linkCopyFailed">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:117</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:112</note>
       </notes>
       <segment>
         <source>Could not copy the address. Address: <ph id="0" equiv="url" disp="server.url"/></source>
@@ -4994,7 +5002,7 @@
     </unit>
     <unit id="catalog.requestCreated">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:162</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:155</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. Check its status in the Requests tab.</source>
@@ -5216,25 +5224,9 @@
         <source> Could not check whether the operation is still current. Wait a moment. </source>
       </segment>
     </unit>
-    <unit id="confirm.cancelNotFound">
-      <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:58,59</note>
-      </notes>
-      <segment>
-        <source>Could not cancel: the operation may have been completed or expired.</source>
-      </segment>
-    </unit>
-    <unit id="confirm.toLogs">
-      <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:59,61</note>
-      </notes>
-      <segment>
-        <source>Check the activity logs</source>
-      </segment>
-    </unit>
     <unit id="confirm.neutralised">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:67,68</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:56,57</note>
       </notes>
       <segment>
         <source> Values contain control characters. They are shown as [U+XXXX] or &lt;U+XXXX&gt;. </source>
@@ -5242,7 +5234,7 @@
     </unit>
     <unit id="confirm.system">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:73,74</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:62,63</note>
       </notes>
       <segment>
         <source>System</source>
@@ -5250,7 +5242,7 @@
     </unit>
     <unit id="confirm.tool">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:77,79</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:66,68</note>
       </notes>
       <segment>
         <source>Tool</source>
@@ -5258,7 +5250,7 @@
     </unit>
     <unit id="confirm.resource">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:84,85</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:73,74</note>
       </notes>
       <segment>
         <source>Resource</source>
@@ -5266,7 +5258,7 @@
     </unit>
     <unit id="confirm.args">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:90,91</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:79,80</note>
       </notes>
       <segment>
         <source>Arguments</source>
@@ -5274,7 +5266,7 @@
     </unit>
     <unit id="confirm.truncated">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:102,104</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:91,93</note>
       </notes>
       <segment>
         <source>(truncated)</source>
@@ -5282,7 +5274,7 @@
     </unit>
     <unit id="confirm.noArgs">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:107,111</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:96,100</note>
       </notes>
       <segment>
         <source>The operation has no arguments.</source>
@@ -5290,7 +5282,7 @@
     </unit>
     <unit id="confirm.instruction">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:113,115</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:102,104</note>
       </notes>
       <segment>
         <source> If this is correct, enter the code from the MCP Platform app in the agent session. </source>
@@ -5298,7 +5290,7 @@
     </unit>
     <unit id="confirm.optional">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:116,118</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:105,107</note>
       </notes>
       <segment>
         <source> This preview is optional: the code also works without opening this page. </source>
@@ -5306,7 +5298,7 @@
     </unit>
     <unit id="confirm.notThis">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:119,121</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:108,110</note>
       </notes>
       <segment>
         <source> If this is not the right operation, do not enter a code and cancel it. </source>
@@ -5314,10 +5306,26 @@
     </unit>
     <unit id="confirm.cancel">
       <notes>
-        <note category="location">src/app/features/confirm/confirm-page.html:129,131</note>
+        <note category="location">src/app/features/confirm/confirm-page.html:118,120</note>
       </notes>
       <segment>
         <source> Cancel operation </source>
+      </segment>
+    </unit>
+    <unit id="confirm.cancelNotFound">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.ts:271</note>
+      </notes>
+      <segment>
+        <source>Could not cancel: the operation may have been completed or expired.</source>
+      </segment>
+    </unit>
+    <unit id="confirm.toLogs">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.ts:274</note>
+      </notes>
+      <segment>
+        <source>Check the activity logs</source>
       </segment>
     </unit>
     <unit id="connect.titleFor">
@@ -5362,7 +5370,7 @@
     </unit>
     <unit id="connect.oauthButton">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:43,45</note>
+        <note category="location">src/app/features/connect/connect-page.html:40,42</note>
       </notes>
       <segment>
         <source> Go to the system sign-in </source>
@@ -5370,7 +5378,7 @@
     </unit>
     <unit id="connect.tokenHeading">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:50,51</note>
+        <note category="location">src/app/features/connect/connect-page.html:47,48</note>
       </notes>
       <segment>
         <source>Add token</source>
@@ -5378,39 +5386,15 @@
     </unit>
     <unit id="connect.howTo">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:52,53</note>
+        <note category="location">src/app/features/connect/connect-page.html:49,50</note>
       </notes>
       <segment>
         <source>How to create the narrowest possible token</source>
       </segment>
     </unit>
-    <unit id="secret.saved">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.html:6,7</note>
-      </notes>
-      <segment>
-        <source>Connected to <ph id="0" equiv="INTERPOLATION" disp="{{ systemLabel() }}"/> as <ph id="1" equiv="INTERPOLATION_1" disp="{{ state.result.backendUser }}"/>.</source>
-      </segment>
-    </unit>
-    <unit id="secret.savedUnverified">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.html:10,12</note>
-      </notes>
-      <segment>
-        <source>Token stored for <ph id="0" equiv="INTERPOLATION" disp="{{ systemLabel() }}"/>. This system does not check tokens when they are stored, so the portal does not know which account it belongs to (not verified).</source>
-      </segment>
-    </unit>
-    <unit id="secret.savedExpires">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.html:17,18</note>
-      </notes>
-      <segment>
-        <source>Token valid until <ph id="0" equiv="INTERPOLATION" disp="{{ state.result.expiresAt | date: &apos;dd.MM.yyyy&apos; : &apos;UTC&apos; }}"/>.</source>
-      </segment>
-    </unit>
     <unit id="connect.toConnections">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:22,25</note>
+        <note category="location">src/app/features/connect/secret-form.html:4,7</note>
       </notes>
       <segment>
         <source>Go to system connections</source>
@@ -5418,7 +5402,7 @@
     </unit>
     <unit id="secret.unverifiedWarning">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:30,35</note>
+        <note category="location">src/app/features/connect/secret-form.html:9,14</note>
       </notes>
       <segment>
         <source> This system does not check tokens when they are stored. Whatever you enter is kept as it is, and a wrong or expired token shows up only when a tool uses it. </source>
@@ -5426,7 +5410,7 @@
     </unit>
     <unit id="secret.usernameLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:39,42</note>
+        <note category="location">src/app/features/connect/secret-form.html:18,21</note>
       </notes>
       <segment>
         <source>Login in the system (for example the account email address)</source>
@@ -5434,7 +5418,7 @@
     </unit>
     <unit id="secret.usernameRequired">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:62,64</note>
+        <note category="location">src/app/features/connect/secret-form.html:41,43</note>
       </notes>
       <segment>
         <source>Enter the login.</source>
@@ -5442,7 +5426,7 @@
     </unit>
     <unit id="secret.usernameInvalid">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:65,67</note>
+        <note category="location">src/app/features/connect/secret-form.html:44,46</note>
       </notes>
       <segment>
         <source>The login cannot contain a colon or control characters.</source>
@@ -5450,7 +5434,7 @@
     </unit>
     <unit id="secret.usernameHint">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:71,73</note>
+        <note category="location">src/app/features/connect/secret-form.html:50,52</note>
       </notes>
       <segment>
         <source> This system signs in with a login and password or an API token. The login is not written to the portal logs. </source>
@@ -5458,7 +5442,7 @@
     </unit>
     <unit id="secret.passwordLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:80,82</note>
+        <note category="location">src/app/features/connect/secret-form.html:59,61</note>
       </notes>
       <segment>
         <source>Password or API token</source>
@@ -5466,7 +5450,7 @@
     </unit>
     <unit id="secret.tokenLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:82,84</note>
+        <note category="location">src/app/features/connect/secret-form.html:61,63</note>
       </notes>
       <segment>
         <source>PAT token</source>
@@ -5474,7 +5458,7 @@
     </unit>
     <unit id="secret.tokenPlaceholder">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:93,95</note>
+        <note category="location">src/app/features/connect/secret-form.html:72,74</note>
       </notes>
       <segment>
         <source>Paste the token</source>
@@ -5482,7 +5466,7 @@
     </unit>
     <unit id="secret.tokenTooLong">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:113,115</note>
+        <note category="location">src/app/features/connect/secret-form.html:92,94</note>
       </notes>
       <segment>
         <source> The token is too long (at most <ph id="0" equiv="INTERPOLATION" disp="{{ maxLength }}"/> characters). </source>
@@ -5490,7 +5474,7 @@
     </unit>
     <unit id="secret.tokenRequired">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:117,119</note>
+        <note category="location">src/app/features/connect/secret-form.html:96,98</note>
       </notes>
       <segment>
         <source> Paste the token. </source>
@@ -5498,7 +5482,7 @@
     </unit>
     <unit id="secret.expiresLabel">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:124,126</note>
+        <note category="location">src/app/features/connect/secret-form.html:103,105</note>
       </notes>
       <segment>
         <source>Token expiry date (optional)</source>
@@ -5506,7 +5490,7 @@
     </unit>
     <unit id="secret.expiresHint">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:132,133</note>
+        <note category="location">src/app/features/connect/secret-form.html:111,112</note>
       </notes>
       <segment>
         <source>Set the shortest possible term.</source>
@@ -5514,7 +5498,7 @@
     </unit>
     <unit id="secret.expiresMark">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:135,136</note>
+        <note category="location">src/app/features/connect/secret-form.html:114,115</note>
       </notes>
       <segment>
         <source> We will mark the token as expiring 7 days before the date.</source>
@@ -5522,7 +5506,7 @@
     </unit>
     <unit id="secret.noRedisplay">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:142,145</note>
+        <note category="location">src/app/features/connect/secret-form.html:121,124</note>
       </notes>
       <segment>
         <source> After saving, the token is not shown anywhere again. </source>
@@ -5530,8 +5514,8 @@
     </unit>
     <unit id="common.cancel2">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:146,147</note>
-        <note category="location">src/app/features/requests/request-dialog.html:79,81</note>
+        <note category="location">src/app/features/connect/secret-form.html:125,126</note>
+        <note category="location">src/app/features/requests/request-dialog.html:76,78</note>
       </notes>
       <segment>
         <source>Cancel</source>
@@ -5539,10 +5523,34 @@
     </unit>
     <unit id="secret.save">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.html:148,150</note>
+        <note category="location">src/app/features/connect/secret-form.html:127,129</note>
       </notes>
       <segment>
         <source> Check and save </source>
+      </segment>
+    </unit>
+    <unit id="secret.saved">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.ts:169</note>
+      </notes>
+      <segment>
+        <source>Connected to <ph id="0" equiv="INTERPOLATION" disp="label"/> as <ph id="1" equiv="INTERPOLATION_1" disp="who"/>.</source>
+      </segment>
+    </unit>
+    <unit id="secret.savedUnverified">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.ts:170</note>
+      </notes>
+      <segment>
+        <source>Token stored for <ph id="0" equiv="INTERPOLATION" disp="label"/>. This system does not check tokens when they are stored, so the portal does not know which account it belongs to (not verified).</source>
+      </segment>
+    </unit>
+    <unit id="secret.savedExpires">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.ts:175</note>
+      </notes>
+      <segment>
+        <source>Token valid until <ph id="0" equiv="INTERPOLATION" disp="until"/>.</source>
       </segment>
     </unit>
     <unit id="token.generic.1">
@@ -5579,7 +5587,7 @@
     </unit>
     <unit id="connections.invalidated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:17,19</note>
+        <note category="location">src/app/features/connections/connections-page.html:8,10</note>
       </notes>
       <segment>
         <source>An administrator changed the settings of the system, so the stored connection was deleted. Connect the account again: <ph id="0" equiv="INTERPOLATION" disp="{{ names }}"/>.</source>
@@ -5587,7 +5595,7 @@
     </unit>
     <unit id="connections.caption">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:31,33</note>
+        <note category="location">src/app/features/connections/connections-page.html:22,24</note>
       </notes>
       <segment>
         <source> System connections </source>
@@ -5595,8 +5603,8 @@
     </unit>
     <unit id="connections.colSystem">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:35,36</note>
-        <note category="location">src/app/features/connections/connections-page.html:52</note>
+        <note category="location">src/app/features/connections/connections-page.html:26,27</note>
+        <note category="location">src/app/features/connections/connections-page.html:43</note>
       </notes>
       <segment>
         <source>System</source>
@@ -5604,8 +5612,8 @@
     </unit>
     <unit id="connections.colType">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:36,37</note>
-        <note category="location">src/app/features/connections/connections-page.html:56</note>
+        <note category="location">src/app/features/connections/connections-page.html:27,28</note>
+        <note category="location">src/app/features/connections/connections-page.html:47</note>
       </notes>
       <segment>
         <source>Type</source>
@@ -5613,8 +5621,8 @@
     </unit>
     <unit id="connections.colAccount">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:37,38</note>
-        <note category="location">src/app/features/connections/connections-page.html:62,63</note>
+        <note category="location">src/app/features/connections/connections-page.html:28,29</note>
+        <note category="location">src/app/features/connections/connections-page.html:53,54</note>
       </notes>
       <segment>
         <source>Account in system</source>
@@ -5622,8 +5630,8 @@
     </unit>
     <unit id="connections.colExpires">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:38,39</note>
-        <note category="location">src/app/features/connections/connections-page.html:76,77</note>
+        <note category="location">src/app/features/connections/connections-page.html:29,30</note>
+        <note category="location">src/app/features/connections/connections-page.html:67,68</note>
       </notes>
       <segment>
         <source>Valid until</source>
@@ -5631,8 +5639,8 @@
     </unit>
     <unit id="connections.colLastUsed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:39,40</note>
-        <note category="location">src/app/features/connections/connections-page.html:93,94</note>
+        <note category="location">src/app/features/connections/connections-page.html:30,31</note>
+        <note category="location">src/app/features/connections/connections-page.html:84,85</note>
       </notes>
       <segment>
         <source>Last used</source>
@@ -5640,7 +5648,7 @@
     </unit>
     <unit id="connections.colActions">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:41,44</note>
+        <note category="location">src/app/features/connections/connections-page.html:32,35</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -5648,7 +5656,7 @@
     </unit>
     <unit id="connections.notVerified">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:68,70</note>
+        <note category="location">src/app/features/connections/connections-page.html:59,61</note>
       </notes>
       <segment>
         <source>Not verified</source>
@@ -5656,7 +5664,7 @@
     </unit>
     <unit id="connections.today">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:98,99</note>
+        <note category="location">src/app/features/connections/connections-page.html:89,90</note>
       </notes>
       <segment>
         <source>today</source>
@@ -5664,7 +5672,7 @@
     </unit>
     <unit id="connections.emptyTitle">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:127,128</note>
+        <note category="location">src/app/features/connections/connections-page.html:118,119</note>
       </notes>
       <segment>
         <source>You have no connections yet</source>
@@ -5672,7 +5680,7 @@
     </unit>
     <unit id="connections.emptyText">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:129,134</note>
+        <note category="location">src/app/features/connections/connections-page.html:120,125</note>
       </notes>
       <segment>
         <source> Systems will appear here once you get access to an MCP server. </source>
@@ -5736,7 +5744,7 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:308</note>
+        <note category="location">src/app/features/connections/connections-page.ts:310</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. You can check its status in the Requests tab.</source>
@@ -6107,7 +6115,7 @@
     </unit>
     <unit id="ready.copied">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:57</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:56</note>
       </notes>
       <segment>
         <source>Copied: <ph id="0" equiv="what" disp="what"/>.</source>
@@ -6115,7 +6123,7 @@
     </unit>
     <unit id="ready.copyFailed">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:58</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:59</note>
       </notes>
       <segment>
         <source>Could not copy. Select the text and copy it manually.</source>
@@ -6531,7 +6539,7 @@
     </unit>
     <unit id="logs.caption">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:58,60</note>
+        <note category="location">src/app/features/logs/logs-page.html:56,58</note>
       </notes>
       <segment>
         <source> My tool calls, newest first </source>
@@ -6539,7 +6547,7 @@
     </unit>
     <unit id="logs.colDetails">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:63,65</note>
+        <note category="location">src/app/features/logs/logs-page.html:61,63</note>
       </notes>
       <segment>
         <source>Details</source>
@@ -6547,8 +6555,8 @@
     </unit>
     <unit id="logs.colTime">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:65,66</note>
-        <note category="location">src/app/features/logs/logs-page.html:102</note>
+        <note category="location">src/app/features/logs/logs-page.html:63,64</note>
+        <note category="location">src/app/features/logs/logs-page.html:100</note>
       </notes>
       <segment>
         <source>Time</source>
@@ -6556,8 +6564,8 @@
     </unit>
     <unit id="logs.colClient">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:66,67</note>
-        <note category="location">src/app/features/logs/logs-page.html:106</note>
+        <note category="location">src/app/features/logs/logs-page.html:64,65</note>
+        <note category="location">src/app/features/logs/logs-page.html:104</note>
       </notes>
       <segment>
         <source>Client</source>
@@ -6565,8 +6573,8 @@
     </unit>
     <unit id="logs.colTool">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:67,68</note>
-        <note category="location">src/app/features/logs/logs-page.html:109</note>
+        <note category="location">src/app/features/logs/logs-page.html:65,66</note>
+        <note category="location">src/app/features/logs/logs-page.html:107</note>
       </notes>
       <segment>
         <source>Tool</source>
@@ -6574,8 +6582,8 @@
     </unit>
     <unit id="logs.colResource">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:68,69</note>
-        <note category="location">src/app/features/logs/logs-page.html:115,116</note>
+        <note category="location">src/app/features/logs/logs-page.html:66,67</note>
+        <note category="location">src/app/features/logs/logs-page.html:113,114</note>
       </notes>
       <segment>
         <source>Resource</source>
@@ -6583,8 +6591,8 @@
     </unit>
     <unit id="logs.colFilter">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:69,70</note>
-        <note category="location">src/app/features/logs/logs-page.html:125</note>
+        <note category="location">src/app/features/logs/logs-page.html:67,68</note>
+        <note category="location">src/app/features/logs/logs-page.html:123</note>
       </notes>
       <segment>
         <source>Filter</source>
@@ -6592,8 +6600,8 @@
     </unit>
     <unit id="logs.colResult">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:70,72</note>
-        <note category="location">src/app/features/logs/logs-page.html:138</note>
+        <note category="location">src/app/features/logs/logs-page.html:68,70</note>
+        <note category="location">src/app/features/logs/logs-page.html:136</note>
       </notes>
       <segment>
         <source>Result</source>
@@ -6601,7 +6609,7 @@
     </unit>
     <unit id="logs.noFilter">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:131,133</note>
+        <note category="location">src/app/features/logs/logs-page.html:129,131</note>
       </notes>
       <segment>
         <source>no filter</source>
@@ -6609,7 +6617,7 @@
     </unit>
     <unit id="logs.wrongCodes">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:153,154</note>
+        <note category="location">src/app/features/logs/logs-page.html:151,152</note>
       </notes>
       <segment>
         <source>Wrong codes</source>
@@ -6617,7 +6625,7 @@
     </unit>
     <unit id="logs.risk">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:158,159</note>
+        <note category="location">src/app/features/logs/logs-page.html:156,157</note>
       </notes>
       <segment>
         <source>Risk</source>
@@ -6625,7 +6633,7 @@
     </unit>
     <unit id="logs.errorCode">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:163,164</note>
+        <note category="location">src/app/features/logs/logs-page.html:161,162</note>
       </notes>
       <segment>
         <source>Error code</source>
@@ -6633,7 +6641,7 @@
     </unit>
     <unit id="logs.rawResult">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:171,172</note>
+        <note category="location">src/app/features/logs/logs-page.html:169,170</note>
       </notes>
       <segment>
         <source>Result (value from the gateway)</source>
@@ -6641,7 +6649,7 @@
     </unit>
     <unit id="logs.requestId">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:178,179</note>
+        <note category="location">src/app/features/logs/logs-page.html:176,177</note>
       </notes>
       <segment>
         <source>Request ID</source>
@@ -6649,7 +6657,7 @@
     </unit>
     <unit id="logs.more">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:199,200</note>
+        <note category="location">src/app/features/logs/logs-page.html:197,198</note>
       </notes>
       <segment>
         <source> Show more </source>
@@ -6657,7 +6665,7 @@
     </unit>
     <unit id="logs.noMatches">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:206,207</note>
+        <note category="location">src/app/features/logs/logs-page.html:204,205</note>
       </notes>
       <segment>
         <source>No call matches the filters.</source>
@@ -6665,7 +6673,7 @@
     </unit>
     <unit id="logs.empty">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:208,210</note>
+        <note category="location">src/app/features/logs/logs-page.html:206,208</note>
       </notes>
       <segment>
         <source>No calls in the selected period.</source>
@@ -6673,7 +6681,7 @@
     </unit>
     <unit id="logs.note">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:212,214</note>
+        <note category="location">src/app/features/logs/logs-page.html:210,212</note>
       </notes>
       <segment>
         <source>Only your calls. Argument values are not shown here.</source>
@@ -6681,7 +6689,7 @@
     </unit>
     <unit id="logs.showDetails">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.ts:93</note>
+        <note category="location">src/app/features/logs/logs-page.ts:94</note>
       </notes>
       <segment>
         <source>Show details</source>
@@ -6689,7 +6697,7 @@
     </unit>
     <unit id="logs.hideDetails">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.ts:94</note>
+        <note category="location">src/app/features/logs/logs-page.ts:95</note>
       </notes>
       <segment>
         <source>Hide details</source>
@@ -6817,7 +6825,7 @@
     </unit>
     <unit id="request.note">
       <notes>
-        <note category="location">src/app/features/requests/request-dialog.html:75,77</note>
+        <note category="location">src/app/features/requests/request-dialog.html:72,74</note>
       </notes>
       <segment>
         <source> If the entitlement system asks for a justification, you will provide it after the redirect. </source>
@@ -6825,7 +6833,7 @@
     </unit>
     <unit id="request.submit">
       <notes>
-        <note category="location">src/app/features/requests/request-dialog.html:87,89</note>
+        <note category="location">src/app/features/requests/request-dialog.html:84,86</note>
       </notes>
       <segment>
         <source> Submit request </source>
@@ -6841,7 +6849,7 @@
     </unit>
     <unit id="requests.lead">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:14,15</note>
+        <note category="location">src/app/features/requests/requests-page.html:10,11</note>
       </notes>
       <segment>
         <source>Requests for entitlements to MCP servers.</source>
@@ -6849,7 +6857,7 @@
     </unit>
     <unit id="requests.new">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:16,18</note>
+        <note category="location">src/app/features/requests/requests-page.html:12,14</note>
       </notes>
       <segment>
         <source> Submit request </source>
@@ -6857,7 +6865,7 @@
     </unit>
     <unit id="requests.caption">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:22,24</note>
+        <note category="location">src/app/features/requests/requests-page.html:18,20</note>
       </notes>
       <segment>
         <source> My entitlement requests </source>
@@ -6865,8 +6873,8 @@
     </unit>
     <unit id="requests.colEntitlement">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:26,27</note>
-        <note category="location">src/app/features/requests/requests-page.html:41,42</note>
+        <note category="location">src/app/features/requests/requests-page.html:22,23</note>
+        <note category="location">src/app/features/requests/requests-page.html:37,38</note>
       </notes>
       <segment>
         <source>Entitlement</source>
@@ -6874,8 +6882,8 @@
     </unit>
     <unit id="requests.colCreated">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:27,28</note>
-        <note category="location">src/app/features/requests/requests-page.html:50</note>
+        <note category="location">src/app/features/requests/requests-page.html:23,24</note>
+        <note category="location">src/app/features/requests/requests-page.html:46</note>
       </notes>
       <segment>
         <source>Submitted</source>
@@ -6883,8 +6891,8 @@
     </unit>
     <unit id="requests.colStatus">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:28,29</note>
-        <note category="location">src/app/features/requests/requests-page.html:57</note>
+        <note category="location">src/app/features/requests/requests-page.html:24,25</note>
+        <note category="location">src/app/features/requests/requests-page.html:53</note>
       </notes>
       <segment>
         <source>Status</source>
@@ -6892,8 +6900,8 @@
     </unit>
     <unit id="requests.colDecided">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:29,30</note>
-        <note category="location">src/app/features/requests/requests-page.html:65</note>
+        <note category="location">src/app/features/requests/requests-page.html:25,26</note>
+        <note category="location">src/app/features/requests/requests-page.html:61</note>
       </notes>
       <segment>
         <source>Decided</source>
@@ -6901,7 +6909,7 @@
     </unit>
     <unit id="requests.colActions">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:31,33</note>
+        <note category="location">src/app/features/requests/requests-page.html:27,29</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -6909,7 +6917,7 @@
     </unit>
     <unit id="requests.open">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:76,77</note>
+        <note category="location">src/app/features/requests/requests-page.html:72,73</note>
       </notes>
       <segment>
         <source>Open in the entitlement system</source>
@@ -6917,7 +6925,7 @@
     </unit>
     <unit id="requests.newTab">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:78,79</note>
+        <note category="location">src/app/features/requests/requests-page.html:74,75</note>
       </notes>
       <segment>
         <source> (opens in a new tab)</source>
@@ -6925,7 +6933,7 @@
     </unit>
     <unit id="requests.emptyTitle">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:89,90</note>
+        <note category="location">src/app/features/requests/requests-page.html:85,86</note>
       </notes>
       <segment>
         <source>You have no requests.</source>
@@ -6933,7 +6941,7 @@
     </unit>
     <unit id="requests.emptyText">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:91,93</note>
+        <note category="location">src/app/features/requests/requests-page.html:87,89</note>
       </notes>
       <segment>
         <source> When you ask for an entitlement, the request will appear here with its status. </source>
@@ -6941,7 +6949,7 @@
     </unit>
     <unit id="requests.footnote">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:96,99</note>
+        <note category="location">src/app/features/requests/requests-page.html:92,95</note>
       </notes>
       <segment>
         <source> Requests are approved and cancelled in the entitlement system. </source>
@@ -6981,7 +6989,7 @@
     </unit>
     <unit id="requests.created">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:108</note>
+        <note category="location">src/app/features/requests/requests-page.ts:107</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. You can check its status here.</source>
@@ -7357,10 +7365,19 @@
     </unit>
     <unit id="notice.close">
       <notes>
-        <note category="location">src/app/shared/notice.ts:23,24</note>
+        <note category="location">src/app/shared/notice.ts:27,28</note>
+        <note category="location">src/app/shared/notification-host.ts:62,63</note>
       </notes>
       <segment>
         <source>Close message</source>
+      </segment>
+    </unit>
+    <unit id="common.requestRef3">
+      <notes>
+        <note category="location">src/app/shared/notification-host.ts:48,49</note>
+      </notes>
+      <segment>
+        <source>Reference for support:</source>
       </segment>
     </unit>
     <unit id="oauth.connectedAs">
@@ -7409,6 +7426,14 @@
       </notes>
       <segment>
         <source>The system did not respond correctly. Try again in a moment.</source>
+      </segment>
+    </unit>
+    <unit id="oauth.connectAgain">
+      <notes>
+        <note category="location">src/app/shared/oauth-return.ts:135</note>
+      </notes>
+      <segment>
+        <source>Connect again</source>
       </segment>
     </unit>
     <unit id="shell.theme">

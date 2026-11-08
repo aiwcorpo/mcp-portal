@@ -1,19 +1,23 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { StateIcon } from './state-icon';
 
 export type NoticeKind = 'success' | 'error' | 'info' | 'warning';
 
 /**
- * Inline message. Errors use role=alert so screen readers announce them at once; the rest use
+ * Message that stays where it is needed: a state that lasts, not the result of an action (that goes to
+ * NotificationService). Errors use role=alert so screen readers announce them at once; the rest use
  * role=status, which waits for the reader to finish.
  */
 @Component({
   selector: 'app-notice',
+  imports: [StateIcon],
   template: `
     <div
       class="notice"
       [class]="'notice-' + kind()"
       [attr.role]="kind() === 'error' ? 'alert' : 'status'"
     >
+      <app-state-icon class="icon" [kind]="kind()" />
       <div class="body"><ng-content /></div>
       @if (dismissible()) {
         <button

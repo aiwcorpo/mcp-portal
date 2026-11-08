@@ -12,9 +12,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { AdminService, ApprovePoliciesResult, PendingPolicies } from '../../api/generated';
 import { AdminStepUp } from '../../core/admin-step-up';
-import { ApiFailure, toApiFailure } from '../../core/api-error';
+import { NotificationService } from '../../core/notification.service';
+import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
-import { ErrorNotice } from '../../shared/error-notice';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { Notice } from '../../shared/notice';
@@ -34,13 +34,14 @@ export interface PolicyApprovalIntent {
  */
 @Component({
   selector: 'app-policy-diff',
-  imports: [MatButtonModule, ErrorNotice, LoadError, Loading, Notice, SafeTextPipe],
+  imports: [MatButtonModule, LoadError, Loading, Notice, SafeTextPipe],
   templateUrl: './policy-diff-view.html',
   styleUrls: ['./diff-code.scss', './policy-diff-view.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PolicyDiffView implements OnInit {
   private readonly adminApi = inject(AdminService);
+  private readonly notifications = inject(NotificationService);
   private readonly stepUp = inject(AdminStepUp);
 
   readonly serverId = input.required<string>();
@@ -52,7 +53,6 @@ export class PolicyDiffView implements OnInit {
 
   protected readonly pending = signal<LoadState<PendingPolicies>>(LOADING);
   protected readonly approving = signal(false);
-  protected readonly failure = signal<ApiFailure | null>(null);
   protected readonly changedMeanwhile = signal(false);
   protected readonly resumeRefused = signal(false);
   /** Set while the approval carried out after the return from the IdP runs; a repeated step-up request is then an error. */
@@ -107,7 +107,6 @@ export class PolicyDiffView implements OnInit {
     }
     const hash = view.value.pendingHash;
     this.approving.set(true);
-    this.failure.set(null);
     try {
       const result = await firstValueFrom(
         this.adminApi.approveAdminServerPolicies(this.serverId(), { policiesHash: hash }),
@@ -127,7 +126,7 @@ export class PolicyDiffView implements OnInit {
         this.changedMeanwhile.set(true);
         await this.load();
       } else {
-        this.failure.set(failure);
+        this.notifications.failure(failure);
       }
     } finally {
       this.approving.set(false);

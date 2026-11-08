@@ -1,23 +1,5 @@
 <h1 class="visually-hidden" i18n="@@admin.title">Administration</h1>
 
-@if (done(); as text) {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="done.set(null)">{{ text }}</app-notice>
-}
-
-@if (mfaReturned()) {
-  <app-notice kind="success" [dismissible]="true" (dismiss)="mfaReturned.set(false)">
-    @if (resumedFromMfa()) {
-      <ng-container i18n="@@admin.mfaResumed"
-        >Identity confirmed. Approving what you picked before the confirmation.</ng-container
-      >
-    } @else {
-      <ng-container i18n="@@admin.mfaDone"
-        >Identity confirmed. Open the differences and approve again.</ng-container
-      >
-    }
-  </app-notice>
-}
-
 @if (ignoredEntries().length) {
   <app-notice kind="warning" [dismissible]="true" (dismiss)="ignoredEntries.set([])">
     <ng-container i18n="@@admin.ignoredEntries"

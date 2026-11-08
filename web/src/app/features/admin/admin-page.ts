@@ -19,6 +19,7 @@ import {
   ServerConfig,
 } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
+import { NotificationService } from '../../core/notification.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { SessionService } from '../../core/session.service';
 import { HASH, ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
@@ -119,6 +120,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
 })
 export class AdminPage implements OnInit {
   private readonly router = inject(Router);
+  private readonly notifications = inject(NotificationService);
   /** `mfa=ok` in the URL after the IdP returned from the fresh MFA that lowering a risk needs. */
   readonly mfa = input<string | undefined>();
   protected readonly mfaReturned = signal(false);
@@ -134,7 +136,6 @@ export class AdminPage implements OnInit {
   protected readonly showLabel = $localize`:@@admin.showTools:Show tools`;
   protected readonly hideLabel = $localize`:@@admin.hideTools:Hide tools`;
   protected readonly registry = signal<LoadState<RegistryServer[]>>(LOADING);
-  protected readonly done = signal<string | null>(null);
   /** The emergency switches that are on; a failed read leaves the list empty, the registry is shown anyway. */
   protected readonly switches = signal<readonly KillSwitch[]>([]);
   protected readonly opened = signal<ReadonlySet<string>>(new Set());
@@ -232,6 +233,11 @@ export class AdminPage implements OnInit {
         this.resumeConnection.set(draft);
         this.resumedFromMfa.set(true);
       }
+      this.notifications.success(
+        this.resumedFromMfa()
+          ? $localize`:@@admin.mfaResumed:Identity confirmed. Approving what you picked before the confirmation.`
+          : $localize`:@@admin.mfaDone:Identity confirmed. Open the differences and approve again.`,
+      );
       void this.router.navigate([], { queryParams: { mfa: null }, replaceUrl: true });
     }
   }
@@ -290,7 +296,7 @@ export class AdminPage implements OnInit {
     this.mfaReturned.set(false);
     this.resumedFromMfa.set(false);
     const name = card.name;
-    this.done.set(
+    this.notifications.success(
       $localize`:@@admin.connectionApproved:Approved the connection of ${name}:server:. Its policies and tools still need approval.`,
     );
     await this.read();
@@ -307,7 +313,9 @@ export class AdminPage implements OnInit {
     this.resumedFromMfa.set(false);
     this.ignoredEntries.set(result.ignoredMappingEntries);
     const name = row.name;
-    this.done.set($localize`:@@admin.policiesApproved:Approved the policies of ${name}:server:.`);
+    this.notifications.success(
+      $localize`:@@admin.policiesApproved:Approved the policies of ${name}:server:.`,
+    );
     await this.read();
   }
 
@@ -374,7 +382,9 @@ export class AdminPage implements OnInit {
     this.diffOpen.update((set) => removeFrom(set, tool.key));
     this.mfaReturned.set(false);
     this.resumedFromMfa.set(false);
-    this.done.set($localize`:@@admin.approved:Approved the definition of ${tool.name}:tool:.`);
+    this.notifications.success(
+      $localize`:@@admin.approved:Approved the definition of ${tool.name}:tool:.`,
+    );
     await this.read();
   }
 
