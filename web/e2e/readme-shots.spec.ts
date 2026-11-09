@@ -265,16 +265,9 @@ for (const lang of ['en', 'pl'] as const) {
       await dialog.getByLabel(t('Entitlement')).selectOption({ index: 1 });
       await shot(page, '17b-requests-form');
 
-      await page.goto('/requests?mockIga=groups');
-      await page.getByRole('button', { name: t('Submit request') }).click();
-      const groups = page.getByRole('dialog', { name: t('Submit request') });
-      await groups.getByLabel(t('System')).selectOption('jira');
+      await page.goto('/catalog?mockIga=groups&mockScenario=mixed');
       await expect(
-        groups.getByText(
-          t(
-            'The entitlement system does not accept requests from the portal. Submit the request directly in the entitlement system.',
-          ),
-        ),
+        page.getByText(t('Access is granted by the platform administrator.')).first(),
       ).toBeVisible();
       await shot(page, '17c-requests-not-accepted');
     });
