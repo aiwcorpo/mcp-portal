@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import {
   AdminService,
@@ -19,10 +20,12 @@ import {
   ServerConfig,
 } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
+import { failureMessage } from '../../core/error-messages';
 import { NotificationService } from '../../core/notification.service';
 import { LOADING, LoadState } from '../../core/load-state';
 import { SessionService } from '../../core/session.service';
 import { HASH, ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
+import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { Tone, riskOrUnclassified } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
@@ -34,6 +37,7 @@ import { ConnectionApproval, ConnectionApprovalIntent } from './connection-appro
 import { AdminSystemNames } from './system-names';
 import { PolicyApprovalIntent, PolicyDiffView } from './policy-diff-view';
 import { ToolDiff } from './tool-diff';
+import { BatchExclusion, BatchItem, approveSequentially, batchExclusion } from './batch-approval';
 
 interface ToolRow {
   tool: RegistryTool;
@@ -44,6 +48,14 @@ interface ToolRow {
   pending: boolean;
   state: string;
   tone: Tone;
+  /** The hash the list showed; a batch sends it, so a definition that changed after the list was read is refused. */
+  hash: string;
+  readOnly: boolean;
+  /** Pending and not excluded from a batch. */
+  selectable: boolean;
+  /** One line under the tool when it cannot be selected. */
+  exclusionText: string | null;
+  selectLabel: string;
 }
 
 interface ServerRow {
@@ -57,6 +69,26 @@ interface ServerRow {
   tone: Tone;
   tools: ToolRow[];
 }
+
+/** Batch in progress: the server it runs for and how many of its calls are done. */
+interface BatchProgress {
+  serverId: string;
+  done: number;
+  total: number;
+}
+
+interface RowFailure {
+  text: string;
+  /** A definition that changed meanwhile is a call to look again, not an error of the call. */
+  tone: 'warning' | 'error';
+}
+
+const EXCLUSION_TEXTS: Record<BatchExclusion, () => string> = {
+  'risk-lowered': () =>
+    $localize`:@@admin.batchExcludedLowering:Lowers the risk: review and approve it on its own.`,
+  'needs-classification': () =>
+    $localize`:@@admin.batchExcludedClassify:Needs a classification: approve it on its own.`,
+};
 
 function changesText(created: number, changed: number): string {
   if (!created && !changed) {
@@ -86,14 +118,21 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
   const state = switchedOff
     ? $localize`:@@admin.toolSwitchedOff:Switched off · ${risk}:risk:`
     : waiting;
+  const name = neutraliseText(`${server.system}__${tool.name}`).text;
+  const exclusion = pending ? batchExclusion(tool) : null;
   return {
     tool,
     key: `${server.serverId}/${tool.name}`,
-    name: neutraliseText(`${server.system}__${tool.name}`).text,
+    name,
     title: neutraliseText(tool.definition.title).text,
     pending,
     state,
     tone: switchedOff || tool.riskLowered ? 'error' : pending ? 'warn' : 'neutral',
+    hash: tool.definitionHash,
+    readOnly: tool.risk === 'READ_ONLY',
+    selectable: pending && exclusion === null,
+    exclusionText: exclusion ? EXCLUSION_TEXTS[exclusion]() : null,
+    selectLabel: $localize`:@@admin.batchSelectTool:Select ${name}:tool: for approval`,
   };
 }
 
@@ -121,6 +160,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
 export class AdminPage implements OnInit {
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
   /** `mfa=ok` in the URL after the IdP returned from the fresh MFA that lowering a risk needs. */
   readonly mfa = input<string | undefined>();
   protected readonly mfaReturned = signal(false);
@@ -148,6 +188,11 @@ export class AdminPage implements OnInit {
   protected readonly servers = signal<readonly ServerConfig[]>([]);
   /** The connection approval started before the MFA; carried out by the card of that server. */
   protected readonly resumeConnection = signal<ConnectionApprovalIntent | null>(null);
+  /** Tools picked for a batch, by `<serverId>/<tool>`, with the hash of the list they were picked from. */
+  protected readonly selection = signal<ReadonlyMap<string, string>>(new Map());
+  protected readonly batch = signal<BatchProgress | null>(null);
+  /** Why a tool of the last batch was not approved, shown in its row until it is picked again. */
+  protected readonly batchFailures = signal<ReadonlyMap<string, RowFailure>>(new Map());
   protected readonly ignoredEntries = signal<ApprovePoliciesResult['ignoredMappingEntries']>([]);
 
   protected readonly rows = computed<ServerRow[]>(() => {
@@ -388,6 +433,163 @@ export class AdminPage implements OnInit {
     await this.read();
   }
 
+  /** Picked, and still the definition that was picked: a changed hash drops the pick, nobody chose that one. */
+  protected isSelected(tool: ToolRow): boolean {
+    return tool.selectable && this.selection().get(tool.key) === tool.hash;
+  }
+
+  protected selectedCount(row: ServerRow): number {
+    return row.tools.filter((tool) => this.isSelected(tool)).length;
+  }
+
+  protected hasReadOnly(row: ServerRow): boolean {
+    return row.tools.some((tool) => tool.selectable && tool.readOnly);
+  }
+
+  protected toggleSelected(tool: ToolRow): void {
+    this.selection.update((map) => {
+      const next = new Map(map);
+      if (this.isSelected(tool)) {
+        next.delete(tool.key);
+      } else {
+        next.set(tool.key, tool.hash);
+      }
+      return next;
+    });
+    this.batchFailures.update((map) => without(map, tool.key));
+  }
+
+  /** Replaces the picks of this server: all that a batch can approve, or only the reading ones. */
+  protected selectAll(row: ServerRow, readOnlyOnly: boolean): void {
+    const keys = new Set(row.tools.map((tool) => tool.key));
+    this.selection.update((map) => {
+      const next = new Map([...map].filter(([key]) => !keys.has(key)));
+      for (const tool of row.tools) {
+        if (tool.selectable && (!readOnlyOnly || tool.readOnly)) {
+          next.set(tool.key, tool.hash);
+        }
+      }
+      return next;
+    });
+    this.batchFailures.update((map) => new Map([...map].filter(([key]) => !keys.has(key))));
+  }
+
+  protected clearSelection(row: ServerRow): void {
+    const keys = new Set(row.tools.map((tool) => tool.key));
+    this.selection.update((map) => new Map([...map].filter(([key]) => !keys.has(key))));
+  }
+
+  protected batchLabel(row: ServerRow): string {
+    const progress = this.batch();
+    if (progress?.serverId === row.server.serverId) {
+      const { done, total } = progress;
+      return $localize`:@@admin.batchRunning:Approving ${done}:done:/${total}:total:`;
+    }
+    const count = this.selectedCount(row);
+    return $localize`:@@admin.batchApprove:Approve selected (${count}:count:)`;
+  }
+
+  protected async approveSelected(row: ServerRow): Promise<void> {
+    const picked = row.tools.filter((tool) => this.isSelected(tool));
+    if (!picked.length || this.batch()) {
+      return;
+    }
+    if (!(await this.confirmBatch(row, picked))) {
+      return;
+    }
+    const serverId = row.server.serverId;
+    const items: BatchItem[] = picked.map((tool) => ({
+      key: tool.key,
+      serverId,
+      tool: tool.tool.name,
+      hash: tool.hash,
+    }));
+    this.batchFailures.update(
+      (map) => new Map([...map].filter(([key]) => !row.tools.some((tool) => tool.key === key))),
+    );
+    this.batch.set({ serverId, done: 0, total: items.length });
+    const result = await approveSequentially(
+      items,
+      (item) =>
+        firstValueFrom(
+          this.adminApi.approveAdminTool(item.serverId, item.tool, {
+            definitionHash: item.hash,
+          }),
+        ),
+      toApiFailure,
+      (done, total) => this.batch.set({ serverId, done, total }),
+    );
+    const failures = new Map<string, RowFailure>();
+    for (const { key, failure } of result.failed) {
+      failures.set(
+        key,
+        failure.code === 'hash_mismatch'
+          ? {
+              text: $localize`:@@admin.batchChanged:The definition changed after you picked it, nothing was approved. Open the differences and review it again.`,
+              tone: 'warning',
+            }
+          : { text: failureMessage(failure), tone: 'error' },
+      );
+    }
+    this.batchFailures.update((map) => new Map([...map, ...failures]));
+    // The skipped ones stay picked, so the run can go on after the administrator has dealt with the confirmation.
+    const done = new Set([...result.approved, ...result.failed.map((entry) => entry.key)]);
+    this.selection.update((map) => new Map([...map].filter(([key]) => !done.has(key))));
+    this.announceBatch(row, items.length, result.approved.length, result.stoppedForStepUp);
+    await this.read();
+    this.batch.set(null);
+  }
+
+  private announceBatch(row: ServerRow, total: number, approved: number, stepUp: boolean): void {
+    const name = row.name;
+    if (stepUp) {
+      this.notifications.error(
+        $localize`:@@admin.batchStepUp:The gateway asks for a fresh identity confirmation, so the run stopped after ${approved}:approved: of ${total}:total: tools of ${name}:server:. Approve the rest one by one.`,
+      );
+    } else if (approved === total) {
+      this.notifications.success(
+        $localize`:@@admin.batchDone:Approved ${approved}:approved: of ${total}:total: tools of ${name}:server:.`,
+      );
+    } else {
+      this.notifications.error(
+        $localize`:@@admin.batchPartial:Approved ${approved}:approved: of ${total}:total: tools of ${name}:server:. The others are marked in the list.`,
+      );
+    }
+  }
+
+  private async confirmBatch(row: ServerRow, picked: readonly ToolRow[]): Promise<boolean> {
+    const count = picked.length;
+    const name = row.name;
+    const fromServer = picked.filter((tool) => tool.tool.source === 'server').length;
+    const changed = picked.filter((tool) => tool.tool.change === 'changed').length;
+    const parts = [
+      $localize`:@@admin.batchConfirm.message:The definitions of ${count}:count: tools of ${name}:server: are approved as the list shows them, without opening the differences. A definition that changes before its turn is refused.`,
+    ];
+    if (changed) {
+      parts.push(
+        $localize`:@@admin.batchConfirm.changed:Changed definitions: ${changed}:count:, their differences are not shown here.`,
+      );
+    }
+    if (fromServer) {
+      parts.push(
+        $localize`:@@admin.batchConfirm.server:Reported by the running server, not reviewed in code: ${fromServer}:count:.`,
+      );
+    }
+    const confirmed = await firstValueFrom(
+      this.dialog
+        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+          data: {
+            title: $localize`:@@admin.batchConfirm.title:Approve the selected tools?`,
+            message: parts.join(' '),
+            confirmLabel: $localize`:@@admin.batchConfirm.confirm:Approve ${count}:count:`,
+            destructive: true,
+          },
+        })
+        .afterClosed(),
+    );
+    return confirmed === true;
+  }
+
   protected async onGone(tool: ToolRow): Promise<void> {
     this.diffOpen.update((set) => removeFrom(set, tool.key));
     await this.read();
@@ -396,6 +598,12 @@ export class AdminPage implements OnInit {
 
 function addTo(set: ReadonlySet<string>, value: string): ReadonlySet<string> {
   return new Set(set).add(value);
+}
+
+function without<V>(map: ReadonlyMap<string, V>, key: string): ReadonlyMap<string, V> {
+  const next = new Map(map);
+  next.delete(key);
+  return next;
 }
 
 function removeFrom(set: ReadonlySet<string>, value: string): ReadonlySet<string> {

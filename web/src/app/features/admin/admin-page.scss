@@ -34,9 +34,28 @@ thead th {
   font-size: 13px;
 }
 
-.c-toggle {
+.c-toggle,
+.c-select {
   width: 32px;
   padding-inline: 0 4px;
+}
+
+.select {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0 4px;
+  accent-color: var(--pm-text);
+  cursor: pointer;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+}
+
+.batch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .toggle {
@@ -154,6 +173,7 @@ thead th {
   }
 
   .tool {
+    position: relative;
     padding: 8px 0 8px 32px;
     border-top: 1px solid var(--pm-border);
   }
@@ -166,6 +186,14 @@ thead th {
 
   .tool .c-toggle {
     display: none;
+  }
+
+  .tool .c-select {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 28px;
+    padding: 0;
   }
 
   .c-actions {

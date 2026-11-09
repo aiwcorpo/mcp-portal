@@ -10,6 +10,9 @@ Dynamic servers: no list of systems, servers or resource types is left in the po
 - Breaking: contracts 7.0.0. System, server, tool and resource type identifiers are patterns, not enumerations (the reserved
   system ids are refused); `needs_reconnect` is a new connection status, shown as `reconnect_required` in the catalog; the
   `/mcp` filter takes up to 20 systems.
+- Administration: batch approval of tool definitions. A server with two or more pending tools gets a checkbox per tool, "Select all
+read-only", "Select all" and "Approve selected (N)". It runs the single approval call per tool, one after another, with the hash
+the list showed; risk lowerings and tools that need a classification stay out and are approved one by one. No BFF or contract change.
 - BFF: C12 administration of the gateway and the broker, with `ETag`, `If-Match` and `If-None-Match` passed through: servers
   (list, add, change, remove), the scope mapping, the emergency overrides, the pending policies and resource types of a server
   and their approval, and the systems of the broker (list, add, replace, remove; the client secret is write only and never

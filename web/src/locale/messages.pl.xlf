@@ -21,24 +21,6 @@
         <target>Zalogowano jako </target>
       </segment>
     </unit>
-    <unit id="shell.themeLight">
-      <notes>
-        <note category="location">src/app/shared/theme-switch.ts:22,24</note>
-      </notes>
-      <segment>
-        <source>Light mode</source>
-        <target>Tryb jasny</target>
-      </segment>
-    </unit>
-    <unit id="shell.themeDark">
-      <notes>
-        <note category="location">src/app/shared/theme-switch.ts:32,34</note>
-      </notes>
-      <segment>
-        <source>Dark mode</source>
-        <target>Tryb ciemny</target>
-      </segment>
-    </unit>
     <unit id="shell.logout">
       <notes>
         <note category="location">src/app/app.html:23,24</note>
@@ -1074,24 +1056,6 @@
         <target>Administracja</target>
       </segment>
     </unit>
-    <unit id="admin.mfaResumed">
-      <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:238</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Approving what you picked before the confirmation.</source>
-        <target>Tożsamość potwierdzona. Zatwierdzam to, co wybrano przed potwierdzeniem.</target>
-      </segment>
-    </unit>
-    <unit id="admin.mfaDone">
-      <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:239</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Open the differences and approve again.</source>
-        <target>Tożsamość potwierdzona. Otwórz różnice i zatwierdź jeszcze raz.</target>
-      </segment>
-    </unit>
     <unit id="admin.ignoredEntries">
       <notes>
         <note category="location">src/app/features/admin/admin-page.html:6,9</note>
@@ -1248,9 +1212,36 @@
         <target>polityki</target>
       </segment>
     </unit>
+    <unit id="admin.batchSelectReadOnly">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:188,190</note>
+      </notes>
+      <segment>
+        <source>Select all read-only</source>
+        <target>Zaznacz wszystkie do odczytu</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchSelectAll">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:199,200</note>
+      </notes>
+      <segment>
+        <source>Select all</source>
+        <target>Zaznacz wszystkie</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchClear">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.html:209,210</note>
+      </notes>
+      <segment>
+        <source>Clear selection</source>
+        <target>Wyczyść zaznaczenie</target>
+      </segment>
+    </unit>
     <unit id="admin.sourceServer">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:186,188</note>
+        <note category="location">src/app/features/admin/admin-page.html:259,261</note>
       </notes>
       <segment>
         <source>Source: server</source>
@@ -1259,7 +1250,7 @@
     </unit>
     <unit id="admin.sourceAdapter">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:190,192</note>
+        <note category="location">src/app/features/admin/admin-page.html:263,265</note>
       </notes>
       <segment>
         <source>Source: adapter</source>
@@ -1268,7 +1259,7 @@
     </unit>
     <unit id="admin.sourceManifest">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:193,195</note>
+        <note category="location">src/app/features/admin/admin-page.html:266,268</note>
       </notes>
       <segment>
         <source>Source: manifest</source>
@@ -1277,7 +1268,7 @@
     </unit>
     <unit id="admin.hideDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:211,212</note>
+        <note category="location">src/app/features/admin/admin-page.html:284,285</note>
       </notes>
       <segment>
         <source>Hide differences</source>
@@ -1286,7 +1277,7 @@
     </unit>
     <unit id="admin.showDiff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:213,214</note>
+        <note category="location">src/app/features/admin/admin-page.html:286,287</note>
       </notes>
       <segment>
         <source>Show differences</source>
@@ -1295,7 +1286,7 @@
     </unit>
     <unit id="admin.noTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:241,242</note>
+        <note category="location">src/app/features/admin/admin-page.html:314,315</note>
       </notes>
       <segment>
         <source> The server has no registered tools. </source>
@@ -1304,16 +1295,34 @@
     </unit>
     <unit id="admin.empty">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.html:250,253</note>
+        <note category="location">src/app/features/admin/admin-page.html:323,326</note>
       </notes>
       <segment>
         <source>The registry has no servers.</source>
         <target>Rejestr nie zawiera żadnego serwera.</target>
       </segment>
     </unit>
+    <unit id="admin.batchExcludedLowering">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:88</note>
+      </notes>
+      <segment>
+        <source>Lowers the risk: review and approve it on its own.</source>
+        <target>Obniża ryzyko: sprawdź i zatwierdź je osobno.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchExcludedClassify">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:90</note>
+      </notes>
+      <segment>
+        <source>Needs a classification: approve it on its own.</source>
+        <target>Wymaga klasyfikacji: zatwierdź je osobno.</target>
+      </segment>
+    </unit>
     <unit id="admin.newCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:67</note>
+        <note category="location">src/app/features/admin/admin-page.ts:99</note>
       </notes>
       <segment>
         <source>new: <ph id="0" equiv="count" disp="created"/></source>
@@ -1322,7 +1331,7 @@
     </unit>
     <unit id="admin.changedCount">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:70</note>
+        <note category="location">src/app/features/admin/admin-page.ts:102</note>
       </notes>
       <segment>
         <source>changed: <ph id="0" equiv="count" disp="changed"/></source>
@@ -1331,7 +1340,7 @@
     </unit>
     <unit id="admin.toolApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:79</note>
+        <note category="location">src/app/features/admin/admin-page.ts:111</note>
       </notes>
       <segment>
         <source>Approved · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1340,7 +1349,7 @@
     </unit>
     <unit id="admin.toolRiskLowered">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:81</note>
+        <note category="location">src/app/features/admin/admin-page.ts:113</note>
       </notes>
       <segment>
         <source>Risk lowering · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1349,7 +1358,7 @@
     </unit>
     <unit id="admin.toolNew">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:83</note>
+        <note category="location">src/app/features/admin/admin-page.ts:115</note>
       </notes>
       <segment>
         <source>New · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1358,7 +1367,7 @@
     </unit>
     <unit id="admin.toolChanged">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:84</note>
+        <note category="location">src/app/features/admin/admin-page.ts:116</note>
       </notes>
       <segment>
         <source>Changed · <ph id="0" equiv="risk" disp="risk"/></source>
@@ -1367,16 +1376,25 @@
     </unit>
     <unit id="admin.toolSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:87</note>
+        <note category="location">src/app/features/admin/admin-page.ts:119</note>
       </notes>
       <segment>
         <source>Switched off · <ph id="0" equiv="risk" disp="risk"/></source>
         <target>Wyłączone awaryjnie · <ph id="0" equiv="risk" disp="risk"/></target>
       </segment>
     </unit>
+    <unit id="admin.batchSelectTool">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:135</note>
+      </notes>
+      <segment>
+        <source>Select <ph id="0" equiv="tool" disp="name"/> for approval</source>
+        <target>Zaznacz <ph id="0" equiv="tool" disp="name"/> do zatwierdzenia</target>
+      </segment>
+    </unit>
     <unit id="admin.showTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:136</note>
+        <note category="location">src/app/features/admin/admin-page.ts:176</note>
       </notes>
       <segment>
         <source>Show tools</source>
@@ -1385,7 +1403,7 @@
     </unit>
     <unit id="admin.hideTools">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:137</note>
+        <note category="location">src/app/features/admin/admin-page.ts:177</note>
       </notes>
       <segment>
         <source>Hide tools</source>
@@ -1394,7 +1412,7 @@
     </unit>
     <unit id="admin.serverSwitchedOff">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:187</note>
+        <note category="location">src/app/features/admin/admin-page.ts:232</note>
       </notes>
       <segment>
         <source>Switched off</source>
@@ -1403,7 +1421,7 @@
     </unit>
     <unit id="admin.serverDisabled">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:189</note>
+        <note category="location">src/app/features/admin/admin-page.ts:234</note>
       </notes>
       <segment>
         <source>Disabled</source>
@@ -1412,7 +1430,7 @@
     </unit>
     <unit id="admin.serverPending">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:191</note>
+        <note category="location">src/app/features/admin/admin-page.ts:236</note>
       </notes>
       <segment>
         <source>Pending approval</source>
@@ -1421,16 +1439,34 @@
     </unit>
     <unit id="admin.serverActive">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:192</note>
+        <note category="location">src/app/features/admin/admin-page.ts:237</note>
       </notes>
       <segment>
         <source>Active</source>
         <target>Aktywny</target>
       </segment>
     </unit>
+    <unit id="admin.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:283</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Approving what you picked before the confirmation.</source>
+        <target>Tożsamość potwierdzona. Zatwierdzam to, co wybrano przed potwierdzeniem.</target>
+      </segment>
+    </unit>
+    <unit id="admin.mfaDone">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:284</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Open the differences and approve again.</source>
+        <target>Tożsamość potwierdzona. Otwórz różnice i zatwierdź jeszcze raz.</target>
+      </segment>
+    </unit>
     <unit id="admin.connectionApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:300</note>
+        <note category="location">src/app/features/admin/admin-page.ts:345</note>
       </notes>
       <segment>
         <source>Approved the connection of <ph id="0" equiv="server" disp="name"/>. Its policies and tools still need approval.</source>
@@ -1439,7 +1475,7 @@
     </unit>
     <unit id="admin.policiesApproved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:317</note>
+        <note category="location">src/app/features/admin/admin-page.ts:362</note>
       </notes>
       <segment>
         <source>Approved the policies of <ph id="0" equiv="server" disp="name"/>.</source>
@@ -1448,11 +1484,110 @@
     </unit>
     <unit id="admin.approved">
       <notes>
-        <note category="location">src/app/features/admin/admin-page.ts:386</note>
+        <note category="location">src/app/features/admin/admin-page.ts:431</note>
       </notes>
       <segment>
         <source>Approved the definition of <ph id="0" equiv="tool" disp="tool.name"/>.</source>
         <target>Zatwierdzono definicję <ph id="0" equiv="tool" disp="tool.name"/>.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchRunning">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:486</note>
+      </notes>
+      <segment>
+        <source>Approving <ph id="0" equiv="done" disp="done"/>/<ph id="1" equiv="total" disp="total"/></source>
+        <target>Zatwierdzanie <ph id="0" equiv="done" disp="done"/>/<ph id="1" equiv="total" disp="total"/></target>
+      </segment>
+    </unit>
+    <unit id="admin.batchApprove">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:489</note>
+      </notes>
+      <segment>
+        <source>Approve selected (<ph id="0" equiv="count" disp="count"/>)</source>
+        <target>Zatwierdź zaznaczone (<ph id="0" equiv="count" disp="count"/>)</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchChanged">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:528</note>
+      </notes>
+      <segment>
+        <source>The definition changed after you picked it, nothing was approved. Open the differences and review it again.</source>
+        <target>Definicja zmieniła się po zaznaczeniu, nic nie zatwierdzono. Otwórz różnice i sprawdź ją ponownie.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchStepUp">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:547</note>
+      </notes>
+      <segment>
+        <source>The gateway asks for a fresh identity confirmation, so the run stopped after <ph id="0" equiv="approved" disp="approved"/> of <ph id="1" equiv="total" disp="total"/> tools of <ph id="2" equiv="server" disp="name"/>. Approve the rest one by one.</source>
+        <target>Gateway wymaga świeżego potwierdzenia tożsamości, więc zatwierdzanie zatrzymało się po <ph id="0" equiv="approved" disp="approved"/> z <ph id="1" equiv="total" disp="total"/> narzędzi serwera <ph id="2" equiv="server" disp="name"/>. Resztę zatwierdź pojedynczo.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchDone">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:551</note>
+      </notes>
+      <segment>
+        <source>Approved <ph id="0" equiv="approved" disp="approved"/> of <ph id="1" equiv="total" disp="total"/> tools of <ph id="2" equiv="server" disp="name"/>.</source>
+        <target>Zatwierdzono <ph id="0" equiv="approved" disp="approved"/> z <ph id="1" equiv="total" disp="total"/> narzędzi serwera <ph id="2" equiv="server" disp="name"/>.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchPartial">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:555</note>
+      </notes>
+      <segment>
+        <source>Approved <ph id="0" equiv="approved" disp="approved"/> of <ph id="1" equiv="total" disp="total"/> tools of <ph id="2" equiv="server" disp="name"/>. The others are marked in the list.</source>
+        <target>Zatwierdzono <ph id="0" equiv="approved" disp="approved"/> z <ph id="1" equiv="total" disp="total"/> narzędzi serwera <ph id="2" equiv="server" disp="name"/>. Pozostałe są oznaczone na liście.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchConfirm.message">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:566</note>
+      </notes>
+      <segment>
+        <source>The definitions of <ph id="0" equiv="count" disp="count"/> tools of <ph id="1" equiv="server" disp="name"/> are approved as the list shows them, without opening the differences. A definition that changes before its turn is refused.</source>
+        <target>Definicje <ph id="0" equiv="count" disp="count"/> narzędzi serwera <ph id="1" equiv="server" disp="name"/> zostaną zatwierdzone tak, jak pokazuje lista, bez otwierania różnic. Definicja, która zmieni się przed swoją kolejką, zostanie odrzucona.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchConfirm.changed">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:570</note>
+      </notes>
+      <segment>
+        <source>Changed definitions: <ph id="0" equiv="count" disp="changed"/>, their differences are not shown here.</source>
+        <target>Zmienione definicje: <ph id="0" equiv="count" disp="changed"/>, ich różnic tu nie widać.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchConfirm.server">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:575</note>
+      </notes>
+      <segment>
+        <source>Reported by the running server, not reviewed in code: <ph id="0" equiv="count" disp="fromServer"/>.</source>
+        <target>Zgłoszone przez działający serwer, niesprawdzone w kodzie: <ph id="0" equiv="count" disp="fromServer"/>.</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchConfirm.title">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:582</note>
+      </notes>
+      <segment>
+        <source>Approve the selected tools?</source>
+        <target>Zatwierdzić zaznaczone narzędzia?</target>
+      </segment>
+    </unit>
+    <unit id="admin.batchConfirm.confirm">
+      <notes>
+        <note category="location">src/app/features/admin/admin-page.ts:584</note>
+      </notes>
+      <segment>
+        <source>Approve <ph id="0" equiv="count" disp="count"/></source>
+        <target>Zatwierdź <ph id="0" equiv="count" disp="count"/></target>
       </segment>
     </unit>
     <unit id="route.admin">
@@ -1995,24 +2130,6 @@
         <target>Wyłączniki awaryjne</target>
       </segment>
     </unit>
-    <unit id="killSwitches.resumeRefused">
-      <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:273</note>
-      </notes>
-      <segment>
-        <source>The switch changed before you confirmed your identity (someone lifted it and switched it on again), so nothing was lifted. Check the new reason and lift it again.</source>
-        <target>Wyłącznik zmienił się, zanim potwierdziłeś tożsamość (ktoś go zdjął i włączył od nowa), więc niczego nie zdjęto. Sprawdź nowy powód i zdejmij go ponownie.</target>
-      </segment>
-    </unit>
-    <unit id="killSwitches.mfaResumed">
-      <notes>
-        <note category="location">src/app/features/admin/kill-switches-page.ts:278</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Lifting the switch you picked before the confirmation.</source>
-        <target>Tożsamość potwierdzona. Zdejmuję wyłącznik, który wybrano przed potwierdzeniem.</target>
-      </segment>
-    </unit>
     <unit id="killSwitches.lead">
       <notes>
         <note category="location">src/app/features/admin/kill-switches-page.html:12,17</note>
@@ -2286,6 +2403,24 @@
         <target>Zdjęto wyłącznik: <ph id="0" equiv="target" disp="target"/>.</target>
       </segment>
     </unit>
+    <unit id="killSwitches.resumeRefused">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:273</note>
+      </notes>
+      <segment>
+        <source>The switch changed before you confirmed your identity (someone lifted it and switched it on again), so nothing was lifted. Check the new reason and lift it again.</source>
+        <target>Wyłącznik zmienił się, zanim potwierdziłeś tożsamość (ktoś go zdjął i włączył od nowa), więc niczego nie zdjęto. Sprawdź nowy powód i zdejmij go ponownie.</target>
+      </segment>
+    </unit>
+    <unit id="killSwitches.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/admin/kill-switches-page.ts:278</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Lifting the switch you picked before the confirmation.</source>
+        <target>Tożsamość potwierdzona. Zdejmuję wyłącznik, który wybrano przed potwierdzeniem.</target>
+      </segment>
+    </unit>
     <unit id="overrides.title">
       <notes>
         <note category="location">src/app/features/admin/overrides-page.html:1,5</note>
@@ -2293,24 +2428,6 @@
       <segment>
         <source>Overrides</source>
         <target>Nadpisania</target>
-      </segment>
-    </unit>
-    <unit id="overrides.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:159</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Check the form and save again.</source>
-        <target>Tożsamość potwierdzona. Sprawdź formularz i zapisz jeszcze raz.</target>
-      </segment>
-    </unit>
-    <unit id="overrides.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/overrides-page.ts:163</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-        <target>Tożsamość potwierdzona. Powtórz operację.</target>
       </segment>
     </unit>
     <unit id="overrides.lead">
@@ -2603,6 +2720,24 @@
       <segment>
         <source>All servers</source>
         <target>Wszystkie serwery</target>
+      </segment>
+    </unit>
+    <unit id="overrides.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:159</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form and save again.</source>
+        <target>Tożsamość potwierdzona. Sprawdź formularz i zapisz jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="overrides.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/overrides-page.ts:163</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
       </segment>
     </unit>
     <unit id="overrides.saved">
@@ -2911,24 +3046,6 @@
         <target>Mapowanie zakresów</target>
       </segment>
     </unit>
-    <unit id="scopeMapping.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:188</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Your changes are back in the form; check them and save again.</source>
-        <target>Tożsamość potwierdzona. Twoje zmiany wróciły do formularza; sprawdź je i zapisz jeszcze raz.</target>
-      </segment>
-    </unit>
-    <unit id="scopeMapping.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/scope-mapping-page.ts:192</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-        <target>Tożsamość potwierdzona. Powtórz operację.</target>
-      </segment>
-    </unit>
     <unit id="scopeMapping.reloaded">
       <notes>
         <note category="location">src/app/features/admin/scope-mapping-page.html:8,13</note>
@@ -3116,6 +3233,24 @@
       <segment>
         <source><ph id="0" equiv="id" disp="local"/> does not match the scope pattern of <ph id="1" equiv="type" disp="type"/> (<ph id="2" equiv="pattern" disp="pattern"/>).</source>
         <target><ph id="0" equiv="id" disp="local"/> nie pasuje do wzorca zakresu typu <ph id="1" equiv="type" disp="type"/> (<ph id="2" equiv="pattern" disp="pattern"/>).</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:188</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Your changes are back in the form; check them and save again.</source>
+        <target>Tożsamość potwierdzona. Twoje zmiany wróciły do formularza; sprawdź je i zapisz jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="scopeMapping.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/scope-mapping-page.ts:192</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
       </segment>
     </unit>
     <unit id="scopeMapping.saved">
@@ -3314,24 +3449,6 @@
       <segment>
         <source>Servers</source>
         <target>Serwery</target>
-      </segment>
-    </unit>
-    <unit id="adminServers.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:227</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Check the form and save again.</source>
-        <target>Tożsamość potwierdzona. Sprawdź formularz i zapisz jeszcze raz.</target>
-      </segment>
-    </unit>
-    <unit id="adminServers.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/servers-page.ts:231</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-        <target>Tożsamość potwierdzona. Powtórz operację.</target>
       </segment>
     </unit>
     <unit id="adminServers.lead">
@@ -3852,6 +3969,24 @@
         <target>Konta serwisowego nie można łączyć z typem poświadczenia użytkownika.</target>
       </segment>
     </unit>
+    <unit id="adminServers.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:227</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form and save again.</source>
+        <target>Tożsamość potwierdzona. Sprawdź formularz i zapisz jeszcze raz.</target>
+      </segment>
+    </unit>
+    <unit id="adminServers.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/servers-page.ts:231</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
+      </segment>
+    </unit>
     <unit id="adminServers.added">
       <notes>
         <note category="location">src/app/features/admin/servers-page.ts:406</note>
@@ -3931,24 +4066,6 @@
       <segment>
         <source>Systems</source>
         <target>Systemy</target>
-      </segment>
-    </unit>
-    <unit id="adminSystems.mfaDraft">
-      <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:380</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Check the form, enter the client secret again and save.</source>
-        <target>Tożsamość potwierdzona. Sprawdź formularz, wpisz ponownie sekret klienta i zapisz.</target>
-      </segment>
-    </unit>
-    <unit id="adminSystems.mfaRepeat">
-      <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:384</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Repeat the operation.</source>
-        <target>Tożsamość potwierdzona. Powtórz operację.</target>
       </segment>
     </unit>
     <unit id="adminSystems.lead">
@@ -4522,6 +4639,24 @@
         <target>Brak sekretu klienta</target>
       </segment>
     </unit>
+    <unit id="adminSystems.mfaDraft">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:380</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Check the form, enter the client secret again and save.</source>
+        <target>Tożsamość potwierdzona. Sprawdź formularz, wpisz ponownie sekret klienta i zapisz.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.mfaRepeat">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:384</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Repeat the operation.</source>
+        <target>Tożsamość potwierdzona. Powtórz operację.</target>
+      </segment>
+    </unit>
     <unit id="adminSystems.savedInvalidated">
       <notes>
         <note category="location">src/app/features/admin/systems-page.ts:537</note>
@@ -4949,78 +5084,6 @@
         <target> Konto &quot;MCP Platform&quot; w Microsoft Authenticator. Kodem z niego potwierdzasz operacje nieodwracalne agentów. </target>
       </segment>
     </unit>
-    <unit id="auth.mfaResumed">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.ts:74</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. Removing the Authenticator.</source>
-        <target>Tożsamość potwierdzona. Usuwam Authenticator.</target>
-      </segment>
-    </unit>
-    <unit id="auth.mfaDone">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.ts:75</note>
-      </notes>
-      <segment>
-        <source>Identity confirmed. You can now remove the Authenticator.</source>
-        <target>Tożsamość potwierdzona. Możesz teraz usunąć Authenticator.</target>
-      </segment>
-    </unit>
-    <unit id="auth.removed">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.ts:113</note>
-      </notes>
-      <segment>
-        <source> Authenticator removed. The agent will not run irreversible operations until you register it again. </source>
-        <target> Authenticator usunięty. Agent nie wykona operacji nieodwracalnych, dopóki nie zarejestrujesz go ponownie. </target>
-      </segment>
-    </unit>
-    <unit id="authState.none">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-state.ts:31,32</note>
-      </notes>
-      <segment>
-        <source>You have no Authenticator</source>
-        <target>Nie masz Authenticatora</target>
-      </segment>
-    </unit>
-    <unit id="authState.register">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-state.ts:33,35</note>
-      </notes>
-      <segment>
-        <source>Register</source>
-        <target>Zarejestruj</target>
-      </segment>
-    </unit>
-    <unit id="authState.disabled">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-state.ts:38,40</note>
-      </notes>
-      <segment>
-        <source>Authenticator switched off after 20 wrong codes</source>
-        <target>Authenticator wyłączony po 20 błędnych kodach</target>
-      </segment>
-    </unit>
-    <unit id="authState.registerAgain">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-state.ts:41,43</note>
-      </notes>
-      <segment>
-        <source>Register again</source>
-        <target>Zarejestruj ponownie</target>
-      </segment>
-    </unit>
-    <unit id="authState.locked">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-state.ts:46,47</note>
-      </notes>
-      <segment>
-        <source>Locked until <ph id="0" equiv="INTERPOLATION" disp="{{ until | date: &apos;HH:mm&apos; }}"/></source>
-        <target>Zablokowany do <ph id="0" equiv="INTERPOLATION" disp="{{ until | date: &apos;HH:mm&apos; }}"/></target>
-      </segment>
-    </unit>
     <unit id="auth.disabledBanner">
       <notes>
         <note category="location">src/app/features/authenticator/authenticator-section.html:11,15</note>
@@ -5147,6 +5210,24 @@
         <target> Blokadę zdejmuje tylko upływ czasu. Usunięcie i ponowna rejestracja jej nie skracają. </target>
       </segment>
     </unit>
+    <unit id="auth.mfaResumed">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:74</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Removing the Authenticator.</source>
+        <target>Tożsamość potwierdzona. Usuwam Authenticator.</target>
+      </segment>
+    </unit>
+    <unit id="auth.mfaDone">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:75</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. You can now remove the Authenticator.</source>
+        <target>Tożsamość potwierdzona. Możesz teraz usunąć Authenticator.</target>
+      </segment>
+    </unit>
     <unit id="authRemove.title">
       <notes>
         <note category="location">src/app/features/authenticator/authenticator-section.ts:91</note>
@@ -5172,6 +5253,60 @@
       <segment>
         <source>Remove</source>
         <target>Usuń</target>
+      </segment>
+    </unit>
+    <unit id="auth.removed">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-section.ts:113</note>
+      </notes>
+      <segment>
+        <source> Authenticator removed. The agent will not run irreversible operations until you register it again. </source>
+        <target> Authenticator usunięty. Agent nie wykona operacji nieodwracalnych, dopóki nie zarejestrujesz go ponownie. </target>
+      </segment>
+    </unit>
+    <unit id="authState.none">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:31,32</note>
+      </notes>
+      <segment>
+        <source>You have no Authenticator</source>
+        <target>Nie masz Authenticatora</target>
+      </segment>
+    </unit>
+    <unit id="authState.register">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:33,35</note>
+      </notes>
+      <segment>
+        <source>Register</source>
+        <target>Zarejestruj</target>
+      </segment>
+    </unit>
+    <unit id="authState.disabled">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:38,40</note>
+      </notes>
+      <segment>
+        <source>Authenticator switched off after 20 wrong codes</source>
+        <target>Authenticator wyłączony po 20 błędnych kodach</target>
+      </segment>
+    </unit>
+    <unit id="authState.registerAgain">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:41,43</note>
+      </notes>
+      <segment>
+        <source>Register again</source>
+        <target>Zarejestruj ponownie</target>
+      </segment>
+    </unit>
+    <unit id="authState.locked">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:46,47</note>
+      </notes>
+      <segment>
+        <source>Locked until <ph id="0" equiv="INTERPOLATION" disp="{{ until | date: &apos;HH:mm&apos; }}"/></source>
+        <target>Zablokowany do <ph id="0" equiv="INTERPOLATION" disp="{{ until | date: &apos;HH:mm&apos; }}"/></target>
       </segment>
     </unit>
     <unit id="qr.label">
@@ -5271,15 +5406,6 @@
       <segment>
         <source>Register Authenticator</source>
         <target>Zarejestruj Authenticator</target>
-      </segment>
-    </unit>
-    <unit id="enroll.mfaDone">
-      <notes>
-        <note category="location">src/app/features/authenticator/register-page.ts:195</note>
-      </notes>
-      <segment>
-        <source> Identity confirmed. Continue the registration when you are ready. </source>
-        <target> Tożsamość potwierdzona. Kontynuuj rejestrację, gdy jesteś gotowy. </target>
       </segment>
     </unit>
     <unit id="enroll.infoLead">
@@ -5570,6 +5696,15 @@
       <segment>
         <source>Done</source>
         <target>Gotowe</target>
+      </segment>
+    </unit>
+    <unit id="enroll.mfaDone">
+      <notes>
+        <note category="location">src/app/features/authenticator/register-page.ts:195</note>
+      </notes>
+      <segment>
+        <source> Identity confirmed. Continue the registration when you are ready. </source>
+        <target> Tożsamość potwierdzona. Kontynuuj rejestrację, gdy jesteś gotowy. </target>
       </segment>
     </unit>
     <unit id="catalog.title">
@@ -5896,24 +6031,6 @@
         <target>Nie udało się sprawdzić, czy operacja jest aktualna: poczekaj chwilę.</target>
       </segment>
     </unit>
-    <unit id="confirm.cancelNotFound">
-      <notes>
-        <note category="location">src/app/features/confirm/confirm-page.ts:271</note>
-      </notes>
-      <segment>
-        <source>Could not cancel: the operation may have been completed or expired.</source>
-        <target>Nie udało się anulować: operacja mogła zostać wykonana albo wygasła.</target>
-      </segment>
-    </unit>
-    <unit id="confirm.toLogs">
-      <notes>
-        <note category="location">src/app/features/confirm/confirm-page.ts:274</note>
-      </notes>
-      <segment>
-        <source>Check the activity logs</source>
-        <target>Sprawdź w logach aktywności</target>
-      </segment>
-    </unit>
     <unit id="confirm.neutralised">
       <notes>
         <note category="location">src/app/features/confirm/confirm-page.html:56,57</note>
@@ -6013,6 +6130,24 @@
         <target> Anuluj operację </target>
       </segment>
     </unit>
+    <unit id="confirm.cancelNotFound">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.ts:271</note>
+      </notes>
+      <segment>
+        <source>Could not cancel: the operation may have been completed or expired.</source>
+        <target>Nie udało się anulować: operacja mogła zostać wykonana albo wygasła.</target>
+      </segment>
+    </unit>
+    <unit id="confirm.toLogs">
+      <notes>
+        <note category="location">src/app/features/confirm/confirm-page.ts:274</note>
+      </notes>
+      <segment>
+        <source>Check the activity logs</source>
+        <target>Sprawdź w logach aktywności</target>
+      </segment>
+    </unit>
     <unit id="connect.titleFor">
       <notes>
         <note category="location">src/app/features/connect/connect-page.html:5,6</note>
@@ -6092,15 +6227,6 @@
       <segment>
         <source>How to create the narrowest possible token</source>
         <target>Jak utworzyć możliwie wąski token</target>
-      </segment>
-    </unit>
-    <unit id="secret.saved">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.ts:163</note>
-      </notes>
-      <segment>
-        <source>Saved the <ph id="0" equiv="INTERPOLATION" disp="label"/> token.</source>
-        <target>Zapisano token <ph id="0" equiv="INTERPOLATION" disp="label"/>.</target>
       </segment>
     </unit>
     <unit id="connect.toConnections">
@@ -6255,6 +6381,15 @@
       <segment>
         <source> Check and save </source>
         <target> Sprawdź i zapisz </target>
+      </segment>
+    </unit>
+    <unit id="secret.saved">
+      <notes>
+        <note category="location">src/app/features/connect/secret-form.ts:163</note>
+      </notes>
+      <segment>
+        <source>Saved the <ph id="0" equiv="INTERPOLATION" disp="label"/> token.</source>
+        <target>Zapisano token <ph id="0" equiv="INTERPOLATION" disp="label"/>.</target>
       </segment>
     </unit>
     <unit id="token.generic.1">
@@ -6541,24 +6676,6 @@
         <target> Adres pojawi się, gdy wybór zmieści się w limicie. </target>
       </segment>
     </unit>
-    <unit id="endpoint.injection">
-      <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:79,81</note>
-      </notes>
-      <segment>
-        <source>One session reaches all selected systems: text from one can push the model to write to another</source>
-        <target>Jedna sesja sięga do wszystkich wybranych systemów: tekst z jednego może skłonić model do zapisu w innym</target>
-      </segment>
-    </unit>
-    <unit id="endpoint.readOnlyAction">
-      <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:89,91</note>
-      </notes>
-      <segment>
-        <source> Read-only </source>
-        <target>Tylko odczyt</target>
-      </segment>
-    </unit>
     <unit id="endpoint.filterTitle">
       <notes>
         <note category="location">src/app/features/endpoint/endpoint-page.html:47,48</note>
@@ -6602,6 +6719,24 @@
       <segment>
         <source>(<ph id="0" equiv="INTERPOLATION" disp="{{ option.count }}"/>)</source>
         <target>(<ph id="0" equiv="INTERPOLATION" disp="{{ option.count }}"/>)</target>
+      </segment>
+    </unit>
+    <unit id="endpoint.injection">
+      <notes>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:79,81</note>
+      </notes>
+      <segment>
+        <source>One session reaches all selected systems: text from one can push the model to write to another</source>
+        <target>Jedna sesja sięga do wszystkich wybranych systemów: tekst z jednego może skłonić model do zapisu w innym</target>
+      </segment>
+    </unit>
+    <unit id="endpoint.readOnlyAction">
+      <notes>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:89,91</note>
+      </notes>
+      <segment>
+        <source> Read-only </source>
+        <target>Tylko odczyt</target>
       </segment>
     </unit>
     <unit id="endpoint.access">
@@ -8317,15 +8452,6 @@
         <target>Ładowanie...</target>
       </segment>
     </unit>
-    <unit id="notice.close">
-      <notes>
-        <note category="location">src/app/shared/notification-host.ts:62,63</note>
-      </notes>
-      <segment>
-        <source>Close message</source>
-        <target>Zamknij komunikat</target>
-      </segment>
-    </unit>
     <unit id="common.requestRef3">
       <notes>
         <note category="location">src/app/shared/notification-host.ts:48,49</note>
@@ -8333,6 +8459,15 @@
       <segment>
         <source>Reference for support:</source>
         <target>Identyfikator do zgłoszenia:</target>
+      </segment>
+    </unit>
+    <unit id="notice.close">
+      <notes>
+        <note category="location">src/app/shared/notification-host.ts:62,63</note>
+      </notes>
+      <segment>
+        <source>Close message</source>
+        <target>Zamknij komunikat</target>
       </segment>
     </unit>
     <unit id="oauth.connectedAs">
@@ -8396,6 +8531,24 @@
       <segment>
         <source>Connect again</source>
         <target>Połącz ponownie</target>
+      </segment>
+    </unit>
+    <unit id="shell.themeLight">
+      <notes>
+        <note category="location">src/app/shared/theme-switch.ts:15,16</note>
+      </notes>
+      <segment>
+        <source>Light mode</source>
+        <target>Tryb jasny</target>
+      </segment>
+    </unit>
+    <unit id="shell.themeDark">
+      <notes>
+        <note category="location">src/app/shared/theme-switch.ts:17,19</note>
+      </notes>
+      <segment>
+        <source>Dark mode</source>
+        <target>Tryb ciemny</target>
       </segment>
     </unit>
   </file>

@@ -172,12 +172,85 @@
             }
           }
           @if (open) {
+            @if (row.pendingCount > 1) {
+              <tr role="row" class="tool batch-bar">
+                <td role="cell" class="c-toggle"></td>
+                <td role="cell" colspan="4">
+                  <div class="batch-actions">
+                    <button
+                      mat-flat-button
+                      type="button"
+                      class="quiet"
+                      [disabled]="batch() !== null || !hasReadOnly(row)"
+                      (click)="selectAll(row, true)"
+                    >
+                      <ng-container i18n="@@admin.batchSelectReadOnly"
+                        >Select all read-only</ng-container
+                      >
+                      <span class="visually-hidden"> ({{ row.name }})</span>
+                    </button>
+                    <button
+                      mat-flat-button
+                      type="button"
+                      class="quiet"
+                      [disabled]="batch() !== null"
+                      (click)="selectAll(row, false)"
+                    >
+                      <ng-container i18n="@@admin.batchSelectAll">Select all</ng-container>
+                      <span class="visually-hidden"> ({{ row.name }})</span>
+                    </button>
+                    @if (selectedCount(row) > 0 && batch() === null) {
+                      <button
+                        mat-flat-button
+                        type="button"
+                        class="quiet"
+                        (click)="clearSelection(row)"
+                      >
+                        <ng-container i18n="@@admin.batchClear">Clear selection</ng-container>
+                        <span class="visually-hidden"> ({{ row.name }})</span>
+                      </button>
+                    }
+                    <button
+                      mat-flat-button
+                      type="button"
+                      [disabled]="batch() !== null || selectedCount(row) === 0"
+                      (click)="approveSelected(row)"
+                    >
+                      {{ batchLabel(row) }}
+                      <span class="visually-hidden"> ({{ row.name }})</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
             @for (item of row.tools; track item.key; let first = $first) {
               <tr role="row" class="tool" [id]="first ? 'tools-' + row.server.serverId : null">
-                <td role="cell" class="c-toggle"></td>
+                <td role="cell" class="c-select">
+                  @if (item.pending && row.pendingCount > 1) {
+                    <input
+                      type="checkbox"
+                      class="select"
+                      [checked]="isSelected(item)"
+                      [disabled]="!item.selectable || batch() !== null"
+                      [attr.aria-label]="item.selectLabel"
+                      [attr.aria-describedby]="
+                        item.exclusionText ? 'why-' + item.key.replace('/', '-') : null
+                      "
+                      (change)="toggleSelected(item)"
+                    />
+                  }
+                </td>
                 <td role="cell" class="c-tool">
                   <code class="tool-name">{{ item.name }}</code>
                   <span class="note muted">{{ item.title }}</span>
+                  @if (item.exclusionText && row.pendingCount > 1) {
+                    <span class="note muted" [id]="'why-' + item.key.replace('/', '-')">{{
+                      item.exclusionText
+                    }}</span>
+                  }
+                  @if (batchFailures().get(item.key); as failure) {
+                    <app-state [kind]="failure.tone">{{ failure.text }}</app-state>
+                  }
                 </td>
                 <td role="cell" class="muted c-source">
                   @if (item.pending) {

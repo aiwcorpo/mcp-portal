@@ -30,6 +30,8 @@ export interface AdminState {
   killSwitches: KillSwitch[];
   /** The policies of Jira (changed) and of a new Notes server wait for approval (7.0.0). */
   policies: boolean;
+  /** GitLab was just added: six new tools wait for approval, the case of batch approval. */
+  batch: boolean;
   /** Servers whose pending policies the administrator approved in the mock. */
   policiesApproved: string[];
 }
@@ -43,6 +45,7 @@ export function initialAdminState(): AdminState {
     classified: {},
     killSwitches: [],
     policies: false,
+    batch: false,
     policiesApproved: [],
   };
 }
@@ -460,6 +463,35 @@ const ADAPTER_TOOLS: SeedTool[] = [
   },
 ];
 
+/** New tools of a server that was just added; the first three are READ_ONLY. */
+function newGitlabTool(name: string, title: string, risk: Risk, action: ToolAction): SeedTool {
+  return {
+    name,
+    pending: {
+      source: 'manifest',
+      version: '1.8.0',
+      entry: entry(
+        name,
+        title,
+        `${title} in GitLab.`,
+        risk,
+        action,
+        { project: { type: 'string', maxLength: 255 } },
+        ['project'],
+      ),
+    },
+  };
+}
+
+const GITLAB_NEW_TOOLS: SeedTool[] = [
+  newGitlabTool('list_projects', 'List projects', 'READ_ONLY', 'read'),
+  newGitlabTool('get_merge_request', 'Get merge request', 'READ_ONLY', 'read'),
+  newGitlabTool('list_pipelines', 'List pipelines', 'READ_ONLY', 'read'),
+  newGitlabTool('create_issue', 'Create issue', 'UPDATE', 'update'),
+  newGitlabTool('add_mr_comment', 'Comment on merge request', 'UPDATE', 'update'),
+  newGitlabTool('delete_branch', 'Delete branch', 'DESTRUCTIVE', 'delete'),
+];
+
 /** Pairs that fit each other (CC-207). An adapter accepts only READ_ONLY with read (CC-227). */
 const ALLOWED: Record<Risk, readonly ToolAction[]> = {
   READ_ONLY: ['read'],
@@ -468,12 +500,15 @@ const ALLOWED: Record<Risk, readonly ToolAction[]> = {
 };
 
 function seedOf(state: Readonly<AdminState>): SeedServer[] {
-  if (!state.adapter) {
-    return SEED;
-  }
-  return SEED.map((seed) =>
-    seed.serverId === 'mcp-jira' ? { ...seed, tools: [...seed.tools, ...ADAPTER_TOOLS] } : seed,
-  );
+  return SEED.map((seed) => {
+    if (seed.serverId === 'mcp-jira' && state.adapter) {
+      return { ...seed, tools: [...seed.tools, ...ADAPTER_TOOLS] };
+    }
+    if (seed.serverId === 'mcp-gitlab' && state.batch) {
+      return { ...seed, tools: [...seed.tools, ...GITLAB_NEW_TOOLS] };
+    }
+    return seed;
+  });
 }
 
 const RISK_ORDER: Record<Risk, number> = { READ_ONLY: 0, UPDATE: 1, DESTRUCTIVE: 2 };

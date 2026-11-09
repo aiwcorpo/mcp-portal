@@ -45,6 +45,7 @@ const PAGES = [
   { path: '/logs', ready: 'Audit logs' },
   { path: '/requests', ready: 'Requests' },
   { path: '/admin?mockAdmin=in', ready: 'Administration' },
+  { path: '/admin?mockAdmin=in&mockAdapter=in&mockBatch=in', ready: 'Administration' },
   { path: '/admin/kill-switches?mockAdmin=in', ready: 'Emergency switches' },
   { path: '/admin/servers?mockAdmin=in', ready: 'Servers' },
   { path: '/admin/systems?mockAdmin=in', ready: 'Systems' },
