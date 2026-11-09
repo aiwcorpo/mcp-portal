@@ -74,6 +74,12 @@ public final class FakeIdp implements AutoCloseable {
 
     private volatile boolean rotateRefreshTokens;
     private volatile boolean refuseNarrowedRefresh;
+    private volatile long narrowedRefreshDelayMillis;
+
+    /** A slow IdP, so that two requests of one session really overlap at the token endpoint. */
+    public void delayNarrowedRefresh(long millis) {
+        this.narrowedRefreshDelayMillis = millis;
+    }
 
     /** An IdP that does not narrow a refresh to one audience (invalid_grant), so the BFF has to fall back. */
     public void refuseNarrowedRefresh(boolean refuse) {
@@ -125,6 +131,7 @@ public final class FakeIdp implements AutoCloseable {
         server.createContext("/realms/test/token", this::token);
         server.createContext("/realms/test/userinfo", this::userinfo);
         server.createContext("/realms/test/logout", this::logout);
+        server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
         server.start();
     }
 
@@ -222,6 +229,13 @@ public final class FakeIdp implements AutoCloseable {
                 if (form.containsKey("scope")) {
                     // A refresh may only narrow what the login was granted (RFC 6749 section 6), like Keycloak.
                     Set<String> asked = scopesOf(form.get("scope"));
+                    if (narrowedRefreshDelayMillis > 0) {
+                        try {
+                            Thread.sleep(narrowedRefreshDelayMillis);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
                     if (refuseNarrowedRefresh) {
                         json(exchange, 400, Map.of("error", "invalid_grant"));
                         return;

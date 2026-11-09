@@ -46,6 +46,7 @@ class AdminRefreshTokensTest extends PortalHarness {
         IDP.tokenRequests().clear();
         IDP.rotateRefreshTokens(false);
         IDP.refuseNarrowedRefresh(false);
+        IDP.delayNarrowedRefresh(0);
         GATEWAY.stubFor(put(urlPathEqualTo(UPSTREAM_OVERRIDE)).willReturn(aResponse().withStatus(200)
                 .withHeader("Content-Type", "application/json").withHeader("ETag", "\"Zx8Tq2LmWk93vNpA\"")
                 .withBody(OVERRIDE_ANSWER)));
@@ -184,15 +185,40 @@ class AdminRefreshTokensTest extends PortalHarness {
     }
 
     @Test
-    void anIdpThatRefusesTheNarrowedRefreshFallsBackToTheExchange() {
+    void anIdpThatRefusesTheNarrowedRefreshIsAnUpstreamFailureAndNeverAnExchange() {
         IDP.refuseNarrowedRefresh(true);
         TestBrowser admin = stepUp(CAROL);
 
-        assertThat(createOverride(admin).statusCode()).isEqualTo(200);
+        assertThat(createOverride(admin).statusCode()).isEqualTo(503);
+        assertThat(admin.get("/api/v1/admin/systems").statusCode()).isEqualTo(503);
 
-        assertThat(GATEWAY.findAll(anyRequestedFor(urlPathEqualTo(UPSTREAM_OVERRIDE)))).singleElement()
-                .satisfies(request -> assertThat(authorization(request)).startsWith("Bearer xt-mcp-gateway-admin-"));
-        assertThat(grants("urn:ietf:params:oauth:grant-type:token-exchange")).hasSize(1);
+        assertThat(GATEWAY.findAll(anyRequestedFor(urlPathEqualTo(UPSTREAM_OVERRIDE)))).isEmpty();
+        assertThat(grants("urn:ietf:params:oauth:grant-type:token-exchange")).isEmpty();
+
+        IDP.refuseNarrowedRefresh(false);
+        assertThat(createOverride(admin).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void twoAudiencesAskedAtOnceRightAfterTheStepUpDoNotRaceOnARotatedRefreshToken() throws Exception {
+        IDP.rotateRefreshTokens(true);
+        IDP.delayNarrowedRefresh(150);
+        TestBrowser admin = stepUp(CAROL);
+
+        var pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            var gateway = pool.submit(() -> createOverride(admin).statusCode());
+            var broker = pool.submit(() -> admin.get("/api/v1/admin/systems").statusCode());
+            assertThat(broker.get()).isEqualTo(200);
+            assertThat(gateway.get()).isEqualTo(200);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        List<String> used = grants("refresh_token").stream().map(request -> request.get("refresh_token")).toList();
+        assertThat(used).hasSize(2).doesNotHaveDuplicates();
+        assertThat(grants("urn:ietf:params:oauth:grant-type:token-exchange")).isEmpty();
+        assertThat(BROKER.findAll(anyRequestedFor(urlPathEqualTo("/v1/admin/systems")))).singleElement();
     }
 
     @Test
@@ -213,9 +239,11 @@ class AdminRefreshTokensTest extends PortalHarness {
 
         admin.get("/api/v1/connections");
         admin.get("/api/v1/admin/registry");
-        admin.get("/api/v1/admin/systems");
+        assertThat(admin.get("/api/v1/admin/systems").statusCode()).isEqualTo(200);
 
         assertThat(grants("urn:ietf:params:oauth:grant-type:token-exchange")).isEmpty();
+        assertThat(BROKER.findAll(anyRequestedFor(urlPathEqualTo("/v1/admin/systems")))).singleElement()
+                .satisfies(request -> assertThat(authorization(request)).startsWith("Bearer na-mcp-credential-broker-"));
     }
 
     /** Keycloak resets the level of a session on every exchange; the page that opens after the step-up reads the registry first. */

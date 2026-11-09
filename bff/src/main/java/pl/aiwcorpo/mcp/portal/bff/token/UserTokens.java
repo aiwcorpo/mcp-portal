@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -57,9 +58,11 @@ public class UserTokens {
     /**
      * Token of an ordinary call (C4, C5 reads and the user's own calls): the exchange of the session's access token. Where
      * the session was granted the audience scope by a step-up login of an administrator, it is the narrowed refresh grant
-     * of {@link #refreshedToken} instead: on Keycloak every token exchange resets the {@code acr} that the user session
+     * instead, and never the exchange: on Keycloak every token exchange resets the {@code acr} that the user session
      * remembers, so one exchange after the step-up (a registry read of the page that opens after it is enough) makes every
-     * later refresh answer {@code acr=password} and the gateway refuses the write that needs fresh MFA.
+     * later refresh answer {@code acr=password} and the gateway refuses the write that needs fresh MFA. For the same reason a
+     * refresh that fails there ends the call with {@link TokenUnavailableException} (503) and does not fall back to the
+     * exchange: a transient failure of the IdP must not downgrade the session for good.
      */
     public BearerToken tokenFor(Audience audience, Authentication user, HttpServletRequest request,
                                 HttpServletResponse response) {
@@ -67,8 +70,13 @@ public class UserTokens {
         if (session == null) {
             throw ApiException.unauthenticated();
         }
-        BearerToken refreshed = refreshedToken(audience, user, request, response, session);
-        return refreshed != null ? refreshed : exchangedToken(audience, user, request, response, session);
+        if (stepUp.adminTokens() == PortalProperties.AdminTokens.REFRESH) {
+            BearerToken refreshed = refreshedToken(audience, user, request, response, session);
+            if (refreshed != null) {
+                return refreshed;
+            }
+        }
+        return exchangedToken(audience, user, request, response, session);
     }
 
     private BearerToken exchangedToken(Audience audience, Authentication user, HttpServletRequest request,
@@ -91,45 +99,60 @@ public class UserTokens {
     }
 
     /**
-     * The narrowed refresh grant for the audience, or null where the session cannot have one and the exchange is the way.
-     * Where the step-up login of the administrator asked for the admin audience scopes (they are in the scopes granted to
-     * the session), one refresh grant narrowed to the scope of the audience gives a token that keeps {@code acr} and
-     * {@code auth_time} of that login, which a write that needs fresh MFA requires. Without those scopes, or when the
-     * refresh fails, the exchange (enough for reads; the upstream asks for the step-up again where it needs one). The tokens
-     * stay in the memory of the session, one per audience, for {@code portal.step-up.admin-token-ttl} at most; the token of
-     * the login itself, which carries both audiences, is never sent anywhere.
+     * The narrowed refresh grant for the audience, or null where the session was not granted its scope (or has no refresh
+     * token) and the exchange is the way. A refresh grant narrowed to the scope of the audience gives a token that keeps
+     * {@code acr} and {@code auth_time} of the step-up login, which a write that needs fresh MFA requires. The tokens stay
+     * in the memory of the session, one per audience, for {@code portal.step-up.admin-token-ttl} at most; the token of the
+     * login itself, which carries both audiences, is never sent anywhere.
+     * <p>
+     * The refreshes of one session run one at a time: a page that opens asks for both audiences at once, and an IdP that
+     * revokes a refresh token when it is used would refuse the second request, which holds the old one.
      */
     private BearerToken refreshedToken(Audience audience, Authentication user, HttpServletRequest request,
                                        HttpServletResponse response, HttpSession session) {
-        if (stepUp.adminTokens() != PortalProperties.AdminTokens.REFRESH) {
-            return null;
-        }
         ExchangedTokens cache = exchangedTokens(session);
-        BearerToken cached = cache.adminTokens.get(audience);
         Duration skew = config.expirySkew();
+        BearerToken cached = cache.adminTokens.get(audience);
         if (cached != null && cached.usableAt(clock.instant(), skew)) {
             return cached;
         }
-        OAuth2AuthorizedClient client = sessionClient(user, request, response);
-        String scope = audience == Audience.BROKER ? config.brokerScope() : config.gatewayAdminScope();
-        if (client.getRefreshToken() == null || !client.getAccessToken().getScopes().contains(scope)) {
-            return null;
-        }
-        TokenExchangeClient.Refreshed refreshed;
+        cache.refreshLock.lock();
         try {
-            refreshed = exchange.refresh(client.getClientRegistration(), client.getRefreshToken().getTokenValue(), scope,
-                    stepUp.adminTokenTtl());
-        } catch (TokenUnavailableException e) {
-            return null;
+            cached = cache.adminTokens.get(audience);
+            if (cached != null && cached.usableAt(clock.instant(), skew)) {
+                return cached;
+            }
+            OAuth2AuthorizedClient client = sessionClient(user, request, response);
+            String scope = audience == Audience.BROKER ? config.brokerScope() : config.gatewayAdminScope();
+            if (client.getRefreshToken() == null || !client.getAccessToken().getScopes().contains(scope)) {
+                return null;
+            }
+            TokenExchangeClient.Refreshed refreshed = exchange.refresh(client.getClientRegistration(),
+                    client.getRefreshToken().getTokenValue(), scope, stepUp.adminTokenTtl());
+            if (refreshed.refreshToken() != null) {
+                saveRefreshToken(client, refreshed.refreshToken(), user, request, response);
+            }
+            cache.adminTokens.put(audience, refreshed.token());
+            return refreshed.token();
+        } finally {
+            cache.refreshLock.unlock();
         }
-        if (refreshed.refreshToken() != null && !refreshed.refreshToken().equals(client.getRefreshToken().getTokenValue())) {
-            // The IdP rotates refresh tokens: the session must hold the new one or its next refresh is refused.
-            authorizedClientRepository.saveAuthorizedClient(new OAuth2AuthorizedClient(client.getClientRegistration(),
-                    client.getPrincipalName(), client.getAccessToken(),
-                    new OAuth2RefreshToken(refreshed.refreshToken(), clock.instant())), user, request, response);
+    }
+
+    /** The IdP rotates refresh tokens: the session must hold the new one or its next refresh is refused. */
+    private void saveRefreshToken(OAuth2AuthorizedClient used, String refreshToken, Authentication user,
+                                  HttpServletRequest request, HttpServletResponse response) {
+        if (refreshToken.equals(used.getRefreshToken().getTokenValue())) {
+            return;
         }
-        cache.adminTokens.put(audience, refreshed.token());
-        return refreshed.token();
+        // Whatever the session holds now, not the snapshot taken before the call: the access token may have been renewed since.
+        OAuth2AuthorizedClient current = authorizedClientRepository.loadAuthorizedClient(registrationId, user, request);
+        if (current == null) {
+            current = used;
+        }
+        authorizedClientRepository.saveAuthorizedClient(new OAuth2AuthorizedClient(current.getClientRegistration(),
+                current.getPrincipalName(), current.getAccessToken(), new OAuth2RefreshToken(refreshToken, clock.instant())),
+                user, request, response);
     }
 
     private OAuth2AuthorizedClient sessionClient(Authentication user, HttpServletRequest request,
@@ -153,18 +176,24 @@ public class UserTokens {
     }
 
     private static ExchangedTokens exchangedTokens(HttpSession session) {
-        // Two parallel first requests may both exchange; the later token simply wins.
         if (session.getAttribute(SessionAttributes.EXCHANGED_TOKENS) instanceof ExchangedTokens existing) {
             return existing;
         }
-        ExchangedTokens created = new ExchangedTokens();
-        session.setAttribute(SessionAttributes.EXCHANGED_TOKENS, created);
-        return created;
+        // One cache per session, so that its lock really is one lock.
+        synchronized (ExchangedTokens.class) {
+            if (session.getAttribute(SessionAttributes.EXCHANGED_TOKENS) instanceof ExchangedTokens existing) {
+                return existing;
+            }
+            ExchangedTokens created = new ExchangedTokens();
+            session.setAttribute(SessionAttributes.EXCHANGED_TOKENS, created);
+            return created;
+        }
     }
 
     static final class ExchangedTokens implements Serializable {
         private final ConcurrentHashMap<Audience, BearerToken> tokens = new ConcurrentHashMap<>();
         private final ConcurrentHashMap<Audience, BearerToken> adminTokens = new ConcurrentHashMap<>();
+        private final ReentrantLock refreshLock = new ReentrantLock();
 
         @Override
         public String toString() {
