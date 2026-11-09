@@ -7,10 +7,9 @@
 
   @let current = status();
   @if (current.state === 'disabled') {
-    <app-notice kind="warning" i18n="@@auth.disabledBanner">
-      The Authenticator was switched off after 20 wrong codes in one day. The agent will not run
-      irreversible operations until you register it again.
-    </app-notice>
+    <app-state kind="warning" i18n="@@auth.disabledBanner">
+      The Authenticator was switched off after 20 wrong codes in one day.
+    </app-state>
   }
 
   <div class="row">

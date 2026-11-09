@@ -124,7 +124,8 @@ for (const scheme of ['dark', 'light'] as const) {
       await expectNoViolations(page);
     }
     await page.goto('/catalog?mockAuthenticator=none');
-    await expect(page.getByText('"Delete" tools need a code')).toBeVisible();
+    await page.getByRole('button', { name: /^Show tools \(Jira\)/ }).click();
+    await expect(page.getByText('You have no Authenticator').first()).toBeVisible();
     await expectNoViolations(page);
   });
 
@@ -157,7 +158,7 @@ for (const scheme of ['dark', 'light'] as const) {
     await expect(page.getByText('Operation cancelled.')).toBeVisible();
     await expectNoViolations(page);
     await page.goto('/confirm/cnf_Zb3Qm8TnR5vKd2Wy');
-    await expect(page.getByText('Values contain control characters.')).toBeVisible();
+    await expect(page.getByText('Values contain control characters')).toBeVisible();
     await expectNoViolations(page);
     await page.goto('/confirm/cnf_missing');
     await expect(page.getByText('This link is out of date.')).toBeVisible();

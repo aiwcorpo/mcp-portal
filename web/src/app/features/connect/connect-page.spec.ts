@@ -97,8 +97,7 @@ describe('ConnectPage', () => {
     type(dateInput(), '2027-01-31');
     button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Connected to Jira as jkowalski.'));
-    expect(text()).toContain('Token valid until 31.01.2027.');
+    await until(() => expect(text()).toContain('Saved the Jira token.'));
     expect(tokenInput()).toBeNull();
     expect(JSON.parse(bodies[0])).toEqual({
       secret: 'jira-pat-test-value-0001',
@@ -123,7 +122,7 @@ describe('ConnectPage', () => {
 
     type(tokenInput(), 'token-without-date');
     button('Check and save').click();
-    await until(() => expect(text()).toContain('Connected to Jira as jkowalski.'));
+    await until(() => expect(text()).toContain('Saved the Jira token.'));
     expect(JSON.parse(bodies[0])).toEqual({ secret: 'token-without-date' });
   });
 
@@ -227,7 +226,7 @@ describe('ConnectPage', () => {
 
     type(tokenInput(), '  glpat-trimmed-0003\n');
     button('Check and save').click();
-    await until(() => expect(text()).toContain('Connected to Jira as jkowalski.'));
+    await until(() => expect(text()).toContain('Saved the Jira token.'));
     expect(JSON.parse(bodies[0]).secret).toBe('glpat-trimmed-0003');
   });
 
@@ -372,7 +371,7 @@ describe('ConnectPage: a system whose user-secret is Basic (CC-222)', () => {
     type(tokenInput(), 'api-token-1');
     button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Connected to Jira as'));
+    await until(() => expect(text()).toContain('Saved the Jira token.'));
     expect(bodies).toEqual([{ secret: 'api-token-1', username: 'anna@firma.pl' }]);
     expect(text()).not.toContain('anna@firma.pl');
     expect(text()).not.toContain('api-token-1');

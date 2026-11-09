@@ -120,15 +120,13 @@
         }
       </h2>
       @if (changed().length) {
-        <app-notice kind="warning">
+        <app-state kind="warning">
           <ng-container i18n="@@adminSystems.invalidates"
-            >A change of the base address, the authorization or token address, the client identifier
-            or the revoke address deletes the connections of all users to this system when you save.
-            They are asked to connect again; nothing is sent to the system. Changed
-            now:</ng-container
+            >Saving deletes the connections of all users to this system, and they must connect
+            again. Changed now:</ng-container
           >
           {{ changed().join(', ') }}.
-        </app-notice>
+        </app-state>
       }
       <form class="form" (ngSubmit)="save()" novalidate>
         <div class="field">

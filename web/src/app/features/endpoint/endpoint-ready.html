@@ -37,7 +37,16 @@
   to sign in with your company account.
 </p>
 
-<p class="count" data-testid="tool-count" i18n="@@ready.count">
-  The list will have about <strong>{{ toolCount() }}</strong> tools. This is an estimate from the
-  catalog; the gateway returns the exact list.
-</p>
+@if (toolCount() === 0) {
+  <app-state kind="warning">
+    <span data-testid="tool-count" i18n="@@ready.countNone"
+      >You do not have access to any tool yet</span
+    >
+    <span aria-hidden="true"> &middot; </span>
+    <a routerLink="/catalog" i18n="@@ready.toCatalog">Catalog</a>
+  </app-state>
+} @else {
+  <p class="count" data-testid="tool-count" i18n="@@ready.count">
+    About <strong>{{ toolCount() }}</strong> tools
+  </p>
+}

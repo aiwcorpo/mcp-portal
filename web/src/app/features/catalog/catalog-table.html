@@ -96,9 +96,11 @@
                   >No entitlement for this tool.</span
                 >
               } @else if (tool.requiresConfirmation) {
-                <span class="note muted" i18n="@@catalog.toolConfirm"
-                  >Requires a code from the Authenticator.</span
-                >
+                <app-authenticator-state [status]="authenticator()">
+                  <span class="note muted" i18n="@@catalog.toolConfirm"
+                    >Requires a code from the Authenticator.</span
+                  >
+                </app-authenticator-state>
               }
             </td>
             <td role="cell" class="c-tool-meta">

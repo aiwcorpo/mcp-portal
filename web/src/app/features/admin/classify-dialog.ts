@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { Risk, ToolAction } from '../../api/generated';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { riskLabel } from '../../shared/labels';
 import { ALLOWED_ACTIONS, Classification, RISKS, allowedPair } from './classification';
 
@@ -31,7 +31,7 @@ const ACTION_LABELS: Record<ToolAction, () => string> = {
  */
 @Component({
   selector: 'app-classify-dialog',
-  imports: [MatDialogModule, MatButtonModule, Notice],
+  imports: [MatDialogModule, MatButtonModule, StateLine],
   templateUrl: './classify-dialog.html',
   styleUrl: './classify-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

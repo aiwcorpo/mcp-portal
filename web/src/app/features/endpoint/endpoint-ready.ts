@@ -3,6 +3,8 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { MatButtonModule } from '@angular/material/button';
 import { NotificationService } from '../../core/notification.service';
 import { MatTabsModule } from '@angular/material/tabs';
+import { RouterLink } from '@angular/router';
+import { StateLine } from '../../shared/state-line';
 import { ClientConfigs } from '../../api/generated';
 
 interface ConfigTab {
@@ -14,7 +16,7 @@ interface ConfigTab {
 /** Address of the aggregate endpoint with the client configuration snippets (mockup 14, without the saved link). */
 @Component({
   selector: 'app-endpoint-ready',
-  imports: [MatButtonModule, MatTabsModule],
+  imports: [MatButtonModule, MatTabsModule, RouterLink, StateLine],
   templateUrl: './endpoint-ready.html',
   styleUrl: './endpoint-ready.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

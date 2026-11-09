@@ -28,9 +28,7 @@ describe('a token that the system does not verify', () => {
     type(tokenInput(), 'notes-token-test-value-0001');
     button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Token stored for Team notes.'));
-    expect(text()).toContain('(not verified)');
-    expect(text()).not.toContain('Connected to Team notes as');
+    await until(() => expect(text()).toContain('Saved the Team notes token.'));
     expect(store.state.connections['notes']?.verified).toBe(false);
 
     await harness.navigateByUrl('/connections');
@@ -77,7 +75,7 @@ describe('a token that the system does not verify', () => {
     type(tokenInput(), 'jira-pat-test-value-0001');
     button('Check and save').click();
 
-    await until(() => expect(text()).toContain('Connected to Jira as jkowalski.'));
+    await until(() => expect(text()).toContain('Saved the Jira token.'));
     expect(text()).not.toContain('not verified');
   });
 });

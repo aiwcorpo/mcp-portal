@@ -30,7 +30,7 @@ import { credentialTypeLabel } from '../../shared/labels';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
 import { ConnectionFacts } from './connection-facts';
@@ -120,7 +120,7 @@ export function serverPatch(original: ServerConfig, form: ServerForm): ServerCon
     ConnectionFacts,
     LoadError,
     Loading,
-    Notice,
+    StateLine,
     SafeTextPipe,
   ],
   templateUrl: './servers-page.html',

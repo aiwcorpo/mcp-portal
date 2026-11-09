@@ -290,6 +290,23 @@ button {
   opacity: 1;
 }
 
+app-state a,
+app-state button.action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pm-link);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+app-state a:hover,
+app-state button.action:hover {
+  text-decoration: underline;
+}
+
 .state-danger {
   color: var(--pm-danger);
 }

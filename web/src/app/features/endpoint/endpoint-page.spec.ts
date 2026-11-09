@@ -66,7 +66,7 @@ describe('EndpointPage', () => {
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
     expect(text()).toContain('MCP address');
     expect(text()).not.toContain('Moje linki');
-    expect(text()).toContain(`The list will have about ${usableTools()} tools`);
+    expect(text()).toContain(`About ${usableTools()} tools`);
     expect(paths.some((path) => path.includes('virtual-servers'))).toBe(false);
   });
 
@@ -74,7 +74,7 @@ describe('EndpointPage', () => {
     configureTestApp();
     await openRoute('/endpoint');
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
-    expect(text()).toContain('One session reaches all selected systems.');
+    expect(text()).toContain('One session reaches all selected systems');
     expect(text()).toContain('Read-only');
   });
 
@@ -105,7 +105,7 @@ describe('EndpointPage', () => {
       .filter(
         (tool) => tool.access === 'granted' && !tool.disabled && tool.risk === 'READ_ONLY',
       ).length;
-    await until(() => expect(text()).toContain(`about ${readTools} tools`));
+    await until(() => expect(text()).toContain(`About ${readTools} tools`));
 
     radio('access', 'write').click();
     await whenAddress('https://mcp.aiwcorpo.pl/mcp?access=write');
@@ -171,6 +171,7 @@ describe('EndpointPage', () => {
   });
 
   it('explains the disabled, denied and not connected tools', async () => {
+    store.update({ authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' } });
     configureTestApp();
     await openRoute('/endpoint');
     await whenAddress('https://mcp.aiwcorpo.pl/mcp');
@@ -272,7 +273,7 @@ describe('EndpointPage', () => {
       await until(() =>
         expect(document.querySelector('[data-testid="size-warning"]')).toBeTruthy(),
       );
-      expect(text()).toContain('narrow the address to the systems you need, or to read-only tools');
+      expect(text()).toContain('narrow the address to the systems you need');
       expect(document.querySelector('[data-testid="paging-note"]')).toBeNull();
 
       radio('access', 'read').click();
@@ -301,7 +302,7 @@ describe('EndpointPage', () => {
       configureTestApp();
       await openRoute('/endpoint');
       await until(() => expect(document.querySelector('[data-testid="paging-note"]')).toBeTruthy());
-      expect(text()).toContain('The list has about 140 tools.');
+      expect(text()).toContain('About 140 tools');
       expect(text()).toContain('100 tools per page');
     });
   });

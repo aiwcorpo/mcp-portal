@@ -3,12 +3,12 @@
 <app-oauth-return [servers]="returnServers()" />
 
 @if (invalidated(); as names) {
-  <app-notice kind="warning">
+  <app-state kind="warning">
     <ng-container i18n="@@connections.invalidated"
-      >An administrator changed the settings of the system, so the stored connection was deleted.
-      Connect the account again: {{ names }}.</ng-container
+      >An administrator changed the system settings, so the connection was deleted: connect again
+      {{ names }}.</ng-container
     >
-  </app-notice>
+  </app-state>
 }
 
 @let state = catalog();

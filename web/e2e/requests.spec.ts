@@ -15,17 +15,16 @@ test('request an entitlement from a server row: choose it, see its description, 
   await expect(dialog.getByText('Description from the entitlement system')).toBeVisible();
   await dialog.getByRole('button', { name: 'Submit request' }).click();
 
-  await expect(page.getByText(/Request REQ-2026-\d{4} is in the entitlement system/)).toBeVisible();
+  await expect(page.getByText(/Request REQ-2026-\d{4} submitted/)).toBeVisible();
   await expect(page.getByRole('row', { name: /Confluence/ })).toContainText('Request pending');
   await page.getByRole('button', { name: 'View request (Confluence)' }).click();
 
   await expect(page).toHaveURL(/\/requests$/);
   const pending = page.getByRole('row', { name: /mcp-confluence-read/ });
   await expect(pending).toContainText('Pending');
-  await expect(pending.getByRole('link', { name: /Open in the entitlement system/ })).toHaveAttribute(
-    'href',
-    /^https:\/\/iga\.internal\/requests\/REQ-/,
-  );
+  await expect(
+    pending.getByRole('link', { name: /Open in the entitlement system/ }),
+  ).toHaveAttribute('href', /^https:\/\/iga\.internal\/requests\/REQ-/);
   await expect(page.getByRole('row', { name: /mcp-jira-write.*Approved/ })).toBeVisible();
   await expect(page.getByRole('row', { name: /mcp-gitlab-write/ })).toContainText('Rejected');
 });
@@ -41,7 +40,7 @@ test('a second request for the same entitlement does not create another one', as
     await dialog.getByLabel('System').selectOption('gitlab');
     await dialog.getByLabel('Entitlement').selectOption('mcp-gitlab-read');
     await dialog.getByRole('button', { name: 'Submit request' }).click();
-    await expect(page.getByText(/Request REQ-2026-\d{4} is in the entitlement system/)).toBeVisible();
+    await expect(page.getByText(/Request REQ-2026-\d{4} submitted/)).toBeVisible();
     await page.getByRole('button', { name: 'Close message' }).click();
   }
   await expect(page.getByRole('row')).toHaveCount(before + 1);
@@ -85,6 +84,6 @@ test('a denied tool of a connected server can be requested from its row', async 
   await page.getByRole('button', { name: 'Show tools (Jira)' }).click();
   await page.getByRole('button', { name: 'Submit request (jira__delete_issue)' }).click();
 
-  await expect(page.getByText(/Request REQ-2026-\d{4} is in the entitlement system/)).toBeVisible();
+  await expect(page.getByText(/Request REQ-2026-\d{4} submitted/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'View request (Jira)' })).toBeVisible();
 });

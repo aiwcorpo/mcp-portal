@@ -52,7 +52,7 @@ test('a definition that changes while it is open is refused (409) and shown agai
     .getByRole('button', { name: 'Approve definition (confluence__add_label)' })
     .click();
 
-  await expect(page.getByText('The definition changed since it was opened.')).toBeVisible();
+  await expect(page.getByText('The definition changed since it was opened')).toBeVisible();
   await expect(page.getByText(/Adds a label to a page\. Change 1\./).first()).toBeVisible();
   await page
     .getByRole('button', { name: 'Approve definition (confluence__add_label)' })

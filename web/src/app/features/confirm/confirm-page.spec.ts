@@ -113,13 +113,9 @@ describe('ConfirmPage', () => {
     );
     configureTestApp();
     await openRoute(path);
-    await until(() =>
-      expect(text()).toContain('The "first one wins" protection is not active now'),
-    );
+    await until(() => expect(text()).toContain('Could not record that the preview was opened'));
     failing = false;
-    await until(() =>
-      expect(text()).not.toContain('The "first one wins" protection is not active now'),
-    );
+    await until(() => expect(text()).not.toContain('Could not record that the preview was opened'));
     expect(store.state.confirmations[DEMO_CONFIRMATION_ID]?.viewed).toBe(true);
   });
 
@@ -160,7 +156,7 @@ describe('ConfirmPage', () => {
       ),
     );
     await until(() =>
-      expect(text()).toContain('Could not check whether the operation is still current.'),
+      expect(text()).toContain('Could not check whether the operation is still current'),
     );
     expect(text()).toContain('Cancel operation');
   });
@@ -294,7 +290,7 @@ describe('ConfirmPage', () => {
     for (const code of [0x202e, 0x2066, 0x07]) {
       expect(document.body.textContent).not.toContain(String.fromCodePoint(code));
     }
-    expect(text()).toContain('Values contain control characters.');
+    expect(text()).toContain('Values contain control characters');
     for (const node of document.querySelectorAll('.untrusted')) {
       expect(node.getAttribute('dir')).toBe('ltr');
     }

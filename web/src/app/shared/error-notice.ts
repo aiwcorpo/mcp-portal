@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { ApiFailure } from '../core/api-error';
 import { failureMessage } from '../core/error-messages';
-import { Notice } from './notice';
+import { StateLine } from './state-line';
 import { neutraliseText } from './untrusted-text';
 
 /** Renders an API failure through its code; the only backend text shown is the `message` of a rejected administrator write, neutralised. */
 @Component({
   selector: 'app-error-notice',
-  imports: [Notice, MatButtonModule],
+  imports: [StateLine],
   template: `
-    <app-notice kind="error">
-      <p class="message">{{ message() }}</p>
+    <app-state kind="error">
+      <span class="message">{{ message() }}</span>
       @if (detail(); as text) {
         <p class="detail">{{ text }}</p>
       }
@@ -22,11 +21,12 @@ import { neutraliseText } from './untrusted-text';
         </p>
       }
       @if (retryable()) {
-        <button mat-stroked-button type="button" (click)="retry.emit()" i18n="@@common.retry">
+        <span aria-hidden="true"> &middot; </span>
+        <button type="button" class="action" (click)="retry.emit()" i18n="@@common.retry">
           Try again
         </button>
       }
-    </app-notice>
+    </app-state>
   `,
   styles: `
     .message {
@@ -45,9 +45,6 @@ import { neutraliseText } from './untrusted-text';
     }
     .request-ref code {
       margin-left: 0.4em;
-    }
-    button {
-      margin-top: 10px;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

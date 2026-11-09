@@ -23,7 +23,7 @@ import { NotificationService } from '../../core/notification.service';
 import { systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { formatResource } from '../../shared/resource';
 import { neutraliseText } from '../../shared/untrusted-text';
 
@@ -61,7 +61,7 @@ export const CONFIRM_POLL_MS = new InjectionToken<number>('CONFIRM_POLL_MS', {
  */
 @Component({
   selector: 'app-confirm-page',
-  imports: [MatButtonModule, LoadError, Loading, Notice],
+  imports: [MatButtonModule, LoadError, Loading, StateLine],
   templateUrl: './confirm-page.html',
   styleUrl: './confirm-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

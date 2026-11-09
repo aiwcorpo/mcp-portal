@@ -72,7 +72,7 @@ test('systems, read-only and exclusions give a canonical address without saving 
 test('the warning about prompt injection is on the page, next to the address', async ({ page }) => {
   await page.goto('/endpoint');
   await expect(page.getByLabel('MCP address', { exact: true })).toHaveValue(BASE);
-  await expect(page.getByText('One session reaches all selected systems.')).toBeVisible();
+  await expect(page.getByText('One session reaches all selected systems')).toBeVisible();
 });
 
 test('the list of tools in the address stops at 512 bytes, with a hint instead of a request', async ({
@@ -81,7 +81,7 @@ test('the list of tools in the address stops at 512 bytes, with a hint instead o
   await page.goto('/endpoint?mockScenario=wide');
   const address = page.getByLabel('MCP address', { exact: true });
   await expect(address).toHaveValue(BASE);
-  await expect(page.getByTestId('size-warning')).toContainText('The list has about 53 tools.');
+  await expect(page.getByTestId('size-warning')).toContainText('About 53 tools');
 
   const requests: string[] = [];
   page.on('request', (request) => {

@@ -26,7 +26,7 @@ import { HASH, ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
 import { Tone, riskOrUnclassified } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
@@ -110,7 +110,7 @@ function toolRow(server: RegistryServer, tool: RegistryTool, switchedOff: boolea
     ConnectionApproval,
     LoadError,
     Loading,
-    Notice,
+    StateLine,
     PolicyDiffView,
     ToolDiff,
   ],

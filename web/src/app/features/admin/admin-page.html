@@ -1,7 +1,7 @@
 <h1 class="visually-hidden" i18n="@@admin.title">Administration</h1>
 
 @if (ignoredEntries().length) {
-  <app-notice kind="warning" [dismissible]="true" (dismiss)="ignoredEntries.set([])">
+  <app-state kind="warning">
     <ng-container i18n="@@admin.ignoredEntries"
       >The approval made these scope mapping entries invalid, and evaluation ignores them until you
       correct the mapping:</ng-container
@@ -11,7 +11,7 @@
         >{{ entry.group | safeText }} &rarr; {{ entry.scope | safeText }} ({{ entry.reason }})</code
       >
     }
-  </app-notice>
+  </app-state>
 }
 
 @let state = registry();

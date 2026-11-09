@@ -226,7 +226,7 @@ test('a connection invalidated by a change of the system is shown and can be mad
   await expect(page.getByText('The connections of its users were deleted')).toBeVisible();
 
   await page.goto('/connections');
-  await expect(page.getByText('An administrator changed the settings of the system')).toBeVisible();
+  await expect(page.getByText('An administrator changed the system settings')).toBeVisible();
   await expect(page.getByRole('row', { name: /Jira/ })).toContainText(
     'the administrator changed the system settings, connect the account again',
   );
@@ -249,8 +249,7 @@ test('a token that the system does not verify is stored without an account and s
   ).toBeVisible();
   await page.getByLabel('PAT token', { exact: true }).fill('notes-token-typed-by-the-user');
   await page.getByRole('button', { name: 'Check and save' }).click();
-  await expect(page.getByText('Token stored for Team notes.')).toBeVisible();
-  await expect(page.getByText('(not verified)')).toBeVisible();
+  await expect(page.getByText('Saved the Team notes token.')).toBeVisible();
 
   await page.goto('/connections');
   await expect(page.getByRole('row', { name: /Team notes/ })).toContainText('Not verified');

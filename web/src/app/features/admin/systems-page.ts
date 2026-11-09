@@ -31,7 +31,7 @@ import { credentialTypeLabel } from '../../shared/labels';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { AdminNav } from './admin-nav';
 import { AdminSystemNames } from './system-names';
@@ -186,7 +186,7 @@ export function systemRequest(form: SystemForm): SystemAdminRequest {
  */
 @Component({
   selector: 'app-systems-page',
-  imports: [FormsModule, MatButtonModule, AdminNav, LoadError, Loading, Notice, SafeTextPipe],
+  imports: [FormsModule, MatButtonModule, AdminNav, LoadError, Loading, StateLine, SafeTextPipe],
   templateUrl: './systems-page.html',
   styleUrls: ['./admin-common.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

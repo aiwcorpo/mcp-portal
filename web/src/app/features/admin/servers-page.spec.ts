@@ -411,7 +411,7 @@ describe('ServersPage', () => {
 
       const panel = document.querySelector('.editor')!;
       expect(text(panel.firstElementChild!)).toContain('mcp-gitlab');
-      expect(panel.querySelector('app-notice')?.textContent).toContain(
+      expect(panel.querySelector('app-state')?.textContent).toContain(
         "Plain HTTP sends users' credentials unencrypted.",
       );
       expect(text(panel)).toContain('http://mcp-gitlab:8080/mcp');
@@ -423,7 +423,7 @@ describe('ServersPage', () => {
       await details('mcp-servicedesk');
 
       const panel = document.querySelector('.editor')!;
-      expect(panel.querySelector('app-notice')).toBeNull();
+      expect(panel.querySelector('app-state')).toBeNull();
       expect(text(panel)).toContain('Trusted CA (chain and host name)');
       expect(panel.querySelector('.fingerprint code')?.textContent).toMatch(
         /^sha256:[0-9a-f]{64}$/,

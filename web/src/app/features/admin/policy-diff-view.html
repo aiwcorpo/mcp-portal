@@ -6,30 +6,29 @@
 } @else if (view(); as v) {
   <section class="panel" [attr.aria-label]="serverName()">
     @if (resumeRefused()) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <ng-container i18n="@@policies.resumeRefused"
-          >The policies changed before you confirmed your identity, so nothing was approved. Check
-          the differences and approve again.</ng-container
+          >The policies changed before you confirmed your identity: nothing was approved, check the
+          differences.</ng-container
         >
-      </app-notice>
+      </app-state>
     }
     @if (changedMeanwhile()) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <ng-container i18n="@@policies.changedMeanwhile"
-          >The policies changed since they were opened. Showing the current differences; check them
-          and approve again.</ng-container
+          >The policies changed since they were opened: showing the current
+          differences.</ng-container
         >
-      </app-notice>
+      </app-state>
     }
     @if (v.value.source === 'server') {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <strong i18n="@@policies.serverWarningTitle">Source: server.</strong>
         <ng-container i18n="@@policies.serverWarning">
-          A running server presented these policies, not the manifest the gateway pulled, and the
-          version ({{ v.value.pendingVersion | safeText }}) comes from the server. Read every policy
-          and every declaration before you approve.
+          The server gave the version {{ v.value.pendingVersion | safeText }}: read every policy and
+          declaration before you approve.
         </ng-container>
-      </app-notice>
+      </app-state>
     } @else {
       <p class="source muted">
         <ng-container i18n="@@policies.manifestSource"
@@ -39,21 +38,19 @@
       </p>
     }
     @if (v.diff.firstRegistration) {
-      <app-notice kind="info" i18n="@@policies.first">
-        First registration: nothing was approved before, and the tools of this server stay blocked
-        until you approve.
-      </app-notice>
+      <app-state kind="info" i18n="@@policies.first">
+        First registration: the tools are blocked until you approve the policies.
+      </app-state>
     }
     @if (v.diff.neutralised) {
-      <app-notice kind="info" i18n="@@policies.neutralised">
-        The text contained hidden characters. They were replaced with markers of the form [U+XXXX].
-      </app-notice>
+      <app-state kind="info" i18n="@@policies.neutralised">
+        Hidden characters in the text were replaced with [U+XXXX] markers.
+      </app-state>
     }
     @if (v.diff.truncated) {
-      <app-notice kind="warning" i18n="@@policies.truncated">
-        A very long text is cut in this view. The hash covers all of it, so approve only what you
-        can review elsewhere.
-      </app-notice>
+      <app-state kind="warning" i18n="@@policies.truncated">
+        A very long text is cut in this view, and the hash covers all of it.
+      </app-state>
     }
 
     <h3 class="group-title" i18n="@@policies.typesTitle">Resource types</h3>

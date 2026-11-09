@@ -158,9 +158,7 @@ describe('RequestsPage', () => {
       expect(text(dialog())).toContain('Description from the entitlement system');
 
       button('Submit request', dialog()).click();
-      await until(() =>
-        expect(text()).toMatch(/Request REQ-2026-\d{4} is in the entitlement system/),
-      );
+      await until(() => expect(text()).toMatch(/Request REQ-2026-\d{4} submitted/));
       expect(document.querySelector('mat-dialog-container')).toBeNull();
       await until(() => expect(text()).toContain('mcp-jira-destructive'));
       expect(text()).toContain('Pending');
@@ -348,9 +346,7 @@ describe('RequestsPage', () => {
       await until(() => expect(text()).toContain('jira__create_issue'));
       button('Submit request (jira__create_issue)').click();
 
-      await until(() =>
-        expect(text()).toMatch(/Request REQ-2026-\d{4} is in the entitlement system/),
-      );
+      await until(() => expect(text()).toMatch(/Request REQ-2026-\d{4} submitted/));
       const pending = store.state.requests!.find(
         (r) => r.entitlement === 'mcp-jira-write' && r.status === 'pending',
       );

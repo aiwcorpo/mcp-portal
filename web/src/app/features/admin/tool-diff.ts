@@ -27,7 +27,7 @@ import { ResumeIntentStore, ResumeOf } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { riskLabel, riskOrUnclassified } from '../../shared/labels';
 import { ADMIN_PATH } from './admin-path';
 import { Classification } from './classification';
@@ -60,7 +60,7 @@ type Outcome =
  */
 @Component({
   selector: 'app-tool-diff',
-  imports: [SafeTextPipe, MatButtonModule, LoadError, Loading, Notice],
+  imports: [SafeTextPipe, MatButtonModule, LoadError, Loading, StateLine],
   templateUrl: './tool-diff.html',
   styleUrl: './tool-diff.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

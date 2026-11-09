@@ -14,7 +14,7 @@ import { AdminService, PendingConnection, ServerConfig, TlsMode } from '../../ap
 import { AdminStepUp } from '../../core/admin-step-up';
 import { NotificationService } from '../../core/notification.service';
 import { toApiFailure } from '../../core/api-error';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { ConnectionFacts } from './connection-facts';
 import { PLAIN_HTTP_RISK, pendingReasonText, tlsModeLabel } from './server-connection';
@@ -35,7 +35,7 @@ export interface ConnectionApprovalIntent {
  */
 @Component({
   selector: 'app-connection-approval',
-  imports: [MatButtonModule, ConnectionFacts, Notice, SafeTextPipe],
+  imports: [MatButtonModule, ConnectionFacts, StateLine, SafeTextPipe],
   templateUrl: './connection-approval.html',
   styleUrl: './connection-approval.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

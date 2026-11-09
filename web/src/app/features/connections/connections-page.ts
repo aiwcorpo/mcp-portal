@@ -36,7 +36,7 @@ import {
 } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { OAuthReturnBanner } from '../../shared/oauth-return';
 import { AuthenticatorSection, MFA_RETURN_QUERY } from '../authenticator/authenticator-section';
 import { connectionRowActions, isEmphasised } from '../catalog/catalog-actions';
@@ -136,7 +136,7 @@ interface ConnectionsData {
     MatButtonModule,
     LoadError,
     Loading,
-    Notice,
+    StateLine,
     OAuthReturnBanner,
   ],
   templateUrl: './connections-page.html',
@@ -307,7 +307,7 @@ export class ConnectionsPage implements OnInit {
           );
           if (result?.kind === 'created') {
             this.notifications.success(
-              $localize`:@@conn.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. You can check its status in the Requests tab.`,
+              $localize`:@@conn.requestCreated:Request ${neutraliseText(result.requestId).text}:id: submitted.`,
             );
             await this.load();
           }

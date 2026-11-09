@@ -20,7 +20,7 @@ import { NotificationService } from '../../core/notification.service';
 import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 
 /** Path of the page that hosts this section; the return from the IdP lands here. */
 export const CONNECTIONS_PATH = '/connections';
@@ -33,7 +33,7 @@ export const MFA_RETURN_QUERY = 'mfa';
  */
 @Component({
   selector: 'app-authenticator-section',
-  imports: [DatePipe, MatButtonModule, RouterLink, Notice],
+  imports: [DatePipe, MatButtonModule, RouterLink, StateLine],
   templateUrl: './authenticator-section.html',
   styleUrl: './authenticator-section.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

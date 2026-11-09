@@ -18,10 +18,13 @@
       (retry)="load()"
     />
   } @else if (!state.value || !sys) {
-    <app-notice kind="info" i18n="@@connect.nothing">
-      This system does not need connecting, or you do not have access to it. You can see its status
-      in the catalog.
-    </app-notice>
+    <app-state kind="info">
+      <ng-container i18n="@@connect.nothing"
+        >This system does not need connecting, or you do not have access to it</ng-container
+      >
+      <span aria-hidden="true"> &middot; </span>
+      <a routerLink="/catalog" i18n="@@connect.toCatalog">Catalog</a>
+    </app-state>
   } @else {
     @if (state.value.options.oauth) {
       <section class="block" aria-labelledby="oauth-heading">

@@ -41,20 +41,20 @@
       </header>
 
       @if (viewedFailed()) {
-        <app-notice kind="warning" i18n="@@confirm.viewedFailed">
-          Could not record that the preview was opened. The "first one wins" protection is not
-          active now: another irreversible operation may replace this one.
-        </app-notice>
+        <app-state kind="warning" i18n="@@confirm.viewedFailed">
+          Could not record that the preview was opened: another irreversible operation may replace
+          this one.
+        </app-state>
       }
       @if (refreshFailed()) {
-        <app-notice kind="warning" i18n="@@confirm.refreshFailed">
-          Could not check whether the operation is still current. Wait a moment.
-        </app-notice>
+        <app-state kind="warning" i18n="@@confirm.refreshFailed">
+          Could not check whether the operation is still current: wait a moment.
+        </app-state>
       }
       @if (anyNeutralised()) {
-        <app-notice kind="warning" i18n="@@confirm.neutralised">
-          Values contain control characters. They are shown as [U+XXXX] or &lt;U+XXXX&gt;.
-        </app-notice>
+        <app-state kind="warning" i18n="@@confirm.neutralised">
+          Values contain control characters, shown as [U+XXXX] or &lt;U+XXXX&gt;.
+        </app-state>
       }
 
       <dl class="facts">

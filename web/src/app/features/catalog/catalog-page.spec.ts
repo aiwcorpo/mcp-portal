@@ -51,7 +51,7 @@ describe('CatalogPage', () => {
     expect(document.body.textContent).not.toContain('Disconnect');
   });
 
-  describe('Authenticator banner', () => {
+  describe('Authenticator at tools that need a code', () => {
     const destructive = serverFixture('jira', {
       tools: [
         toolFixture('jira__delete_issue', {
@@ -62,18 +62,23 @@ describe('CatalogPage', () => {
       ],
     });
 
-    it('asks to register when a tool needs a code and there is no registration', async () => {
-      server.use(serve([destructive]));
+    async function openTools(): Promise<void> {
       configureTestApp();
       await openRoute('/catalog');
-      await until(() => expect(text()).toContain('Register Authenticator'));
-      expect(text()).toContain(
-        '"Delete" tools need a code from the Authenticator, and you have not registered it yet.',
-      );
-      const link = Array.from(document.querySelectorAll('app-authenticator-banner a')).find(
-        (candidate) => candidate.textContent?.includes('Register Authenticator'),
+      await until(() => expect(text()).toContain('Jira'));
+      labelled('Show tools (Jira)', row('Jira')).click();
+      await until(() => expect(text()).toContain('jira__delete_issue'));
+    }
+
+    it('asks to register next to the tool when there is no registration', async () => {
+      server.use(serve([destructive]));
+      await openTools();
+      await until(() => expect(text()).toContain('You have no Authenticator'));
+      const link = Array.from(document.querySelectorAll('app-authenticator-state a')).find(
+        (candidate) => candidate.textContent?.includes('Register'),
       );
       expect(link?.getAttribute('href')).toBe('/authenticator/register');
+      expect(text()).not.toContain('Requires a code from the Authenticator.');
     });
 
     it('offers to register again when the daily limit switched it off', async () => {
@@ -86,10 +91,9 @@ describe('CatalogPage', () => {
         },
       });
       server.use(serve([destructive]));
-      configureTestApp();
-      await openRoute('/catalog');
+      await openTools();
       await until(() => expect(text()).toContain('Register again'));
-      expect(text()).toContain('switched off after 20 wrong codes in one day');
+      expect(text()).toContain('switched off after 20 wrong codes');
     });
 
     it('names the end of a block and offers no unlock', async () => {
@@ -101,30 +105,18 @@ describe('CatalogPage', () => {
         },
       });
       server.use(serve([destructive]));
-      configureTestApp();
-      await openRoute('/catalog');
-      await until(() => expect(text()).toMatch(/locked until \d{2}:\d{2} after 5 wrong codes/));
+      await openTools();
+      await until(() => expect(text()).toMatch(/Locked until \d{2}:\d{2}/));
       expect(text()).not.toContain('Register');
       expect(text()).not.toContain('Unlock');
     });
 
-    it('stays away when the registration is active or no tool needs a code', async () => {
+    it('keeps the plain note when the registration is active', async () => {
       store.update({ authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' } });
       server.use(serve([destructive]));
-      configureTestApp();
-      await openRoute('/catalog');
-      await until(() => expect(text()).toContain('Jira'));
+      await openTools();
       await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(text()).not.toContain('Authenticator jest');
-      expect(text()).not.toContain('Register');
-    });
-
-    it('stays away when no tool needs a code', async () => {
-      server.use(serve([serverFixture('jira')]));
-      configureTestApp();
-      await openRoute('/catalog');
-      await until(() => expect(text()).toContain('Jira'));
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(text()).toContain('Requires a code from the Authenticator.');
       expect(text()).not.toContain('Register');
     });
 
@@ -135,11 +127,9 @@ describe('CatalogPage', () => {
           HttpResponse.json({ error: 'upstream_unavailable' }, { status: 503 }),
         ),
       );
-      configureTestApp();
-      await openRoute('/catalog');
-      await until(() => expect(text()).toContain('Jira'));
+      await openTools();
       await new Promise((resolve) => setTimeout(resolve, 50));
-      expect(text()).not.toContain('Register');
+      expect(text()).toContain('Requires a code from the Authenticator.');
       expect(text()).not.toContain('Could not load the data');
     });
   });
@@ -289,6 +279,7 @@ describe('CatalogPage', () => {
         }),
       ]),
     );
+    store.update({ authenticator: { state: 'active', registeredAt: '2026-10-27T09:00:00Z' } });
     configureTestApp();
     const harness = await openRoute('/catalog');
     await until(() => expect(text()).toContain('Jira'));

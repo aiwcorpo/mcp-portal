@@ -22,10 +22,9 @@
   }
 
   @if (clipboardAdvice() && step() !== 'scan') {
-    <app-notice kind="warning" i18n="@@enroll.clipboard">
-      The key was copied to the clipboard. Clear the clipboard, for example by copying other text:
-      the key lets anyone generate codes.
-    </app-notice>
+    <app-state kind="warning" i18n="@@enroll.clipboard">
+      The key is in the clipboard: clear it, for example by copying other text.
+    </app-state>
   }
 
   @switch (step()) {

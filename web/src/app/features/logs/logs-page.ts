@@ -14,7 +14,7 @@ import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { NotificationService } from '../../core/notification.service';
 import { riskLabel } from '../../shared/labels';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { formatResource } from '../../shared/resource';
@@ -76,7 +76,7 @@ function toRow(call: ActivityCall): Row {
  */
 @Component({
   selector: 'app-logs-page',
-  imports: [DatePipe, MatButtonModule, LoadError, Loading, Notice],
+  imports: [DatePipe, MatButtonModule, LoadError, Loading, StateLine],
   templateUrl: './logs-page.html',
   styleUrl: './logs-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

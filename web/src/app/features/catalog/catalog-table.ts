@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { AuthenticatorStatus } from '../../api/generated';
+import { AuthenticatorState } from '../authenticator/authenticator-state';
 import { MatButtonModule } from '@angular/material/button';
 import { CatalogAction, CatalogTool, PortalCatalogServer } from '../../api/generated';
 import {
@@ -45,7 +47,7 @@ function toolMatches(tool: CatalogTool, needle: string): boolean {
 /** Expandable table of servers (mockups 01, 26); tools of a server are rows under it. */
 @Component({
   selector: 'app-catalog-table',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, AuthenticatorState],
   templateUrl: './catalog-table.html',
   styleUrl: './catalog-table.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +55,7 @@ function toolMatches(tool: CatalogTool, needle: string): boolean {
 export class CatalogTable {
   readonly servers = input.required<readonly PortalCatalogServer[]>();
   readonly query = input('');
+  readonly authenticator = input<AuthenticatorStatus | null>(null);
   readonly busy = input<string | null>(null);
   readonly busyTool = input<string | null>(null);
   readonly action = output<CatalogActionEvent>();

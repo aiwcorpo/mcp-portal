@@ -17,7 +17,7 @@ import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { PolicyDiff, diffPolicies } from './policy-diff';
 
@@ -34,7 +34,7 @@ export interface PolicyApprovalIntent {
  */
 @Component({
   selector: 'app-policy-diff',
-  imports: [MatButtonModule, LoadError, Loading, Notice, SafeTextPipe],
+  imports: [MatButtonModule, LoadError, Loading, StateLine, SafeTextPipe],
   templateUrl: './policy-diff-view.html',
   styleUrls: ['./diff-code.scss', './policy-diff-view.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

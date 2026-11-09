@@ -6,41 +6,38 @@
 } @else if (view(); as v) {
   <section class="panel" [attr.aria-label]="toolName()">
     @if (resumeRefused()) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <ng-container i18n="@@admin.resumeRefused"
-          >The definition changed before you confirmed your identity, so nothing was approved. Check
-          the differences and approve again.</ng-container
+          >The definition changed before you confirmed your identity: nothing was approved, check
+          the differences.</ng-container
         >
-      </app-notice>
+      </app-state>
     }
     @if (changedMeanwhile()) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <ng-container i18n="@@admin.changedMeanwhile"
-          >The definition changed since it was opened. Showing the current differences; check them
-          and approve again.</ng-container
+          >The definition changed since it was opened: showing the current
+          differences.</ng-container
         >
-      </app-notice>
+      </app-state>
     }
 
     @if (v.fromAdapter) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <strong i18n="@@admin.adapterWarningTitle">Source: foreign server adapter.</strong>
         <ng-container i18n="@@admin.adapterWarning">
-          The adapter presented this definition, not the manifest the gateway pulled. Nobody
-          reviewed it in code, and the version ({{ v.value.pendingVersion | safeText }}) comes from
-          the server. The tool has no risk or action: you assign them when approving, and until you
-          do, agents cannot see it.
+          The adapter gave the version {{ v.value.pendingVersion | safeText }}, nobody reviewed the
+          definition in code, and agents cannot see the tool until you assign a risk and an action.
         </ng-container>
-      </app-notice>
+      </app-state>
     } @else if (v.fromServer) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <strong i18n="@@admin.serverWarningTitle">Source: server.</strong>
         <ng-container i18n="@@admin.serverWarning">
-          A running server presented this definition, not the manifest the gateway pulled. Nobody
-          reviewed it in code, and the given version ({{ v.value.pendingVersion | safeText }}) comes
-          from the server. Read the description and schema carefully before you approve.
+          The server gave the version {{ v.value.pendingVersion | safeText }} and nobody reviewed
+          the definition in code: read the description and schema before you approve.
         </ng-container>
-      </app-notice>
+      </app-state>
     } @else {
       <p class="source muted">
         <ng-container i18n="@@admin.manifestSource"
@@ -51,22 +48,21 @@
     }
 
     @if (v.hiddenChange) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <strong i18n="@@admin.hiddenTitle">The hash changed, but the shown fields did not.</strong>
         <ng-container i18n="@@admin.hiddenText">
-          A part of the definition outside the view changed, for example the server credential.
-          Approving requires explicit confirmation.
+          A part outside the view changed, so approving needs explicit confirmation.
         </ng-container>
-      </app-notice>
+      </app-state>
     }
     @if (!v.hashConsistent) {
-      <app-notice kind="error" i18n="@@admin.hashInconsistent">
-        The hash given by the server does not match the hash of the shown definition. Do not
-        approve; report it to the platform administrators.
-      </app-notice>
+      <app-state kind="error" i18n="@@admin.hashInconsistent">
+        The hash given by the server does not match the shown definition: do not approve, report it
+        to the platform administrators.
+      </app-state>
     }
     @if (v.riskLowered) {
-      <app-notice kind="error">
+      <app-state kind="error">
         <strong i18n="@@admin.riskLoweredTitle">Risk lowering.</strong>&ngsp;
         @if (v.riskFrom && v.riskTo) {
           <ng-container i18n="@@admin.riskLoweredFromTo"
@@ -89,15 +85,14 @@
           and for a tool that was irreversible, the requirement for a code from the Authenticator
           goes away. Requires fresh identity confirmation (MFA).</ng-container
         >
-      </app-notice>
+      </app-state>
     } @else if (v.riskText) {
-      <app-notice kind="warning">{{ v.riskText }}</app-notice>
+      <app-state kind="warning">{{ v.riskText }}</app-state>
     }
     @if (v.diff.neutralised) {
-      <app-notice kind="info" i18n="@@admin.neutralised">
-        The definition contained hidden characters. They were replaced with markers of the form
-        [U+XXXX].
-      </app-notice>
+      <app-state kind="info" i18n="@@admin.neutralised">
+        Hidden characters in the definition were replaced with [U+XXXX] markers.
+      </app-state>
     }
 
     <div class="columns">

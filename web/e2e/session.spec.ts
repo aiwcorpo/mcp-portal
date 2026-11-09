@@ -111,5 +111,5 @@ test('the catalog filter finds a tool and opens its server', async ({ page }) =>
   await page.getByRole('searchbox', { name: 'Search for a server or tool' }).fill('delete_issue');
   await expect(page.getByText('jira__delete_issue')).toBeVisible();
   await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toHaveCount(0);
-  await expect(page.getByText('Requires a code from the Authenticator.')).toBeVisible();
+  await expect(page.getByText('You have no Authenticator')).toBeVisible();
 });

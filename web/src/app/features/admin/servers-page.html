@@ -144,9 +144,9 @@
         <code class="muted">{{ d.server.serverId | safeText }}</code>
       </h2>
       @if (d.plain) {
-        <app-notice kind="warning">
+        <app-state kind="warning">
           <strong i18n="@@adminServers.plainTitle">Plain HTTP.</strong>&ngsp;{{ plainWarning() }}
-        </app-notice>
+        </app-state>
       }
       <dl class="facts-list">
         <div class="fact-row">
@@ -189,14 +189,14 @@
         </p>
       }
       @if (d.server.pendingConnection) {
-        <app-notice kind="warning">
+        <app-state kind="warning">
           <ng-container i18n="@@adminServers.pendingNote"
             >A connection waits for your approval.</ng-container
           >&ngsp;
           <a routerLink="/admin" i18n="@@adminServers.pendingLink"
             >Review it on the Approvals screen</a
           >.
-        </app-notice>
+        </app-state>
       }
       <div class="actions">
         <button

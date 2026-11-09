@@ -27,7 +27,7 @@ import { SessionService } from '../../core/session.service';
 import { ResumeIntentStore } from '../../core/resume-intent';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { QrCode } from './qr-code';
 
 type Step = 'checking' | 'info' | 'starting' | 'scan' | 'code' | 'done' | 'failed' | 'already';
@@ -57,7 +57,15 @@ const MFA_RETURN = 'ok';
  */
 @Component({
   selector: 'app-authenticator-register-page',
-  imports: [ReactiveFormsModule, MatButtonModule, RouterLink, LoadError, Loading, Notice, QrCode],
+  imports: [
+    ReactiveFormsModule,
+    MatButtonModule,
+    RouterLink,
+    LoadError,
+    Loading,
+    StateLine,
+    QrCode,
+  ],
   templateUrl: './register-page.html',
   styleUrl: './register-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,9 +1,5 @@
 <h1 i18n="@@endpoint.title">MCP address</h1>
-<p class="lead" i18n="@@endpoint.lead">
-  One address covers all systems you have entitlements for. The client shows the model tools named
-  <code>system__tool</code>, and the platform routes each call to the right system. Nothing is saved
-  here: the choices below only change the address.
-</p>
+<p class="lead" i18n="@@endpoint.lead">One address covers all systems you have entitlements for.</p>
 
 <section class="result" aria-labelledby="endpoint-result-title" [attr.aria-busy]="refreshing()">
   <h2 id="endpoint-result-title" i18n="@@endpoint.resultTitle">Your address</h2>
@@ -14,27 +10,24 @@
       [toolCount]="result.toolCount"
     />
     @if (result.toolCount === 0 && result.filter) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <span data-testid="empty-filter" i18n="@@endpoint.emptyFilter"
-          >This filter leaves no tool that you can call. The client will see an empty list. Change
-          the selection or go back to the address without a filter.</span
+          >This filter leaves no tool that you can call, so the client will see an empty list.</span
         >
-      </app-notice>
+      </app-state>
     }
     @if (result.toolCount >= warningThreshold) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <span data-testid="size-warning" i18n="@@endpoint.sizeWarning"
-          >The list has about {{ result.toolCount }} tools. Tool descriptions take up model context
-          and make tool selection worse, so narrow the address to the systems you need, or to
-          read-only tools.</span
+          >About {{ result.toolCount }} tools take up model context: narrow the address to the
+          systems you need.</span
         >
         @if (result.toolCount > pageSize) {
           <span data-testid="paging-note" i18n="@@endpoint.pagingNote">
-            The gateway returns {{ pageSize }} tools per page; the client must fetch the next pages,
-            otherwise it will only see the first one.</span
+            The gateway returns {{ pageSize }} tools per page, the client must fetch the rest.</span
           >
         }
-      </app-notice>
+      </app-state>
     }
   } @else if (composed().problem) {
     <p class="muted" i18n="@@endpoint.noAddress">
@@ -48,14 +41,6 @@
       <app-loading />
     }
   }
-  <app-notice kind="warning">
-    <ng-container i18n="@@endpoint.injection"
-      >One session reaches all selected systems. Text from one of them, for example a Confluence
-      page with a planted instruction, can push the model to write to another. Entitlements do not
-      change, and irreversible operations still require a code from the Authenticator, but the reach
-      of such an attack grows. For read-only work, choose "Read-only".</ng-container
-    >
-  </app-notice>
 </section>
 
 <section class="narrow-down" aria-labelledby="endpoint-filter-title">
@@ -71,8 +56,6 @@
   } @else if (state.status === 'error') {
     <app-load-error [failure]="state.failure" (retry)="loadCatalog()" />
   } @else {
-    <app-authenticator-banner [needed]="needsAuthenticator()" />
-
     <fieldset class="choice">
       <legend i18n="@@endpoint.systems">Systems</legend>
       <p class="hint" id="systems-hint" i18n="@@endpoint.systemsHint">
@@ -90,6 +73,23 @@
           </li>
         }
       </ul>
+      @if (systems().size !== 1 && systemOptions().length > 1) {
+        <app-state kind="warning">
+          <ng-container i18n="@@endpoint.injection"
+            >One session reaches all selected systems: text from one can push the model to write to
+            another</ng-container
+          >
+          <span aria-hidden="true"> &middot; </span>
+          <button
+            type="button"
+            class="action"
+            (click)="setAccess('read')"
+            i18n="@@endpoint.readOnlyAction"
+          >
+            Read-only
+          </button>
+        </app-state>
+      }
     </fieldset>
 
     <fieldset class="choice">
@@ -206,9 +206,11 @@
                     }
                     @default {
                       @if (row.tool.requiresConfirmation) {
-                        <span class="note muted" i18n="@@endpoint.confirmNote"
-                          >Requires a code from the Authenticator.</span
-                        >
+                        <app-authenticator-state [status]="authenticator()">
+                          <span class="note muted" i18n="@@endpoint.confirmNote"
+                            >Requires a code from the Authenticator.</span
+                          >
+                        </app-authenticator-state>
                       }
                     }
                   }

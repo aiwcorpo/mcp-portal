@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  LOCALE_ID,
   computed,
   inject,
   input,
@@ -16,7 +15,6 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { formatDate } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -25,7 +23,7 @@ import { ApiFailure, toApiFailure } from '../../core/api-error';
 import { errorMessage } from '../../core/error-messages';
 import { NotificationService } from '../../core/notification.service';
 import { systemName } from '../../shared/labels';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 
 export const SECRET_MAX_LENGTH = 4096;
 export const USERNAME_MAX_LENGTH = 255;
@@ -60,7 +58,7 @@ function isFieldFailure(failure: ApiFailure): boolean {
 
 @Component({
   selector: 'app-secret-form',
-  imports: [ReactiveFormsModule, MatButtonModule, RouterLink, Notice],
+  imports: [ReactiveFormsModule, MatButtonModule, RouterLink, StateLine],
   templateUrl: './secret-form.html',
   styleUrl: './secret-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,7 +66,6 @@ function isFieldFailure(failure: ApiFailure): boolean {
 export class SecretForm {
   private readonly connectionsApi = inject(ConnectionsService);
   private readonly notifications = inject(NotificationService);
-  private readonly locale = inject(LOCALE_ID);
 
   readonly system = input.required<string>();
   /** Name of the system as shown on the page (the display name of the broker, CC-248). */
@@ -148,7 +145,7 @@ export class SecretForm {
       );
       this.form.reset();
       this.phase.set({ kind: 'saved', result });
-      this.notifications.success(this.savedMessage(result));
+      this.notifications.success(this.savedMessage());
       this.connected.emit(result);
     } catch (error) {
       const failure = toApiFailure(error);
@@ -161,17 +158,8 @@ export class SecretForm {
     }
   }
 
-  private savedMessage(result: PutSecretResponse): string {
+  private savedMessage(): string {
     const label = this.systemLabel();
-    const who = result.backendUser;
-    const stored =
-      result.verified && who
-        ? $localize`:@@secret.saved:Connected to ${label}:INTERPOLATION: as ${who}:INTERPOLATION_1:.`
-        : $localize`:@@secret.savedUnverified:Token stored for ${label}:INTERPOLATION:. This system does not check tokens when they are stored, so the portal does not know which account it belongs to (not verified).`;
-    if (!result.expiresAt) {
-      return stored;
-    }
-    const until = formatDate(result.expiresAt, 'dd.MM.yyyy', this.locale, 'UTC');
-    return `${stored} ${$localize`:@@secret.savedExpires:Token valid until ${until}:INTERPOLATION:.`}`;
+    return $localize`:@@secret.saved:Saved the ${label}:INTERPOLATION: token.`;
   }
 }

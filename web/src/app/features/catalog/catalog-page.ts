@@ -2,7 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Clipboard } from '@angular/cdk/clipboard';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
-import { CatalogService, PortalCatalogServer } from '../../api/generated';
+import {
+  AuthenticatorService,
+  AuthenticatorStatus,
+  CatalogService,
+  PortalCatalogServer,
+} from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
 import { AccessRequestResult } from '../../core/access-request-flow';
 import { neutraliseText } from '../../shared/untrusted-text';
@@ -13,18 +18,19 @@ import { catalogSystemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
 import { OAuthReturnBanner } from '../../shared/oauth-return';
-import { AuthenticatorBanner } from '../authenticator/authenticator-banner';
+import { readAuthenticatorStatus } from '../authenticator/authenticator-state';
 import { CatalogActionEvent, CatalogTable, ToolRequestEvent, matchesServer } from './catalog-table';
 
 @Component({
   selector: 'app-catalog-page',
-  imports: [AuthenticatorBanner, CatalogTable, LoadError, Loading, OAuthReturnBanner],
+  imports: [CatalogTable, LoadError, Loading, OAuthReturnBanner],
   templateUrl: './catalog-page.html',
   styleUrl: './catalog-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CatalogPage {
   private readonly catalogApi = inject(CatalogService);
+  private readonly authenticatorApi = inject(AuthenticatorService);
   private readonly connectionActions = inject(ConnectionActions);
   private readonly clipboard = inject(Clipboard);
   private readonly notifications = inject(NotificationService);
@@ -44,19 +50,16 @@ export class CatalogPage {
     const state = this.catalog();
     return state.status === 'loading' ? null : (this.loadedServers() ?? []);
   });
-  /** Tools the user can use but only with a code from the Authenticator (mockup 23). */
-  protected readonly needsAuthenticator = computed(() =>
-    (this.loadedServers() ?? []).some((server) =>
-      server.tools.some(
-        (tool) => tool.requiresConfirmation && !tool.disabled && tool.access === 'granted',
-      ),
-    ),
-  );
+  /** For the tool rows that need a code from the Authenticator; null until read or when it cannot be read. */
+  protected readonly authenticator = signal<AuthenticatorStatus | null>(null);
   protected readonly visibleServers = computed(() =>
     (this.loadedServers() ?? []).filter((server) => matchesServer(server, this.query())),
   );
 
   constructor() {
+    void readAuthenticatorStatus(this.authenticatorApi).then((status) =>
+      this.authenticator.set(status),
+    );
     void this.load();
   }
 
@@ -152,7 +155,7 @@ export class CatalogPage {
     switch (result.kind) {
       case 'created':
         this.notifications.success(
-          $localize`:@@catalog.requestCreated:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. Check its status in the Requests tab.`,
+          $localize`:@@catalog.requestCreated:Request ${neutraliseText(result.requestId).text}:id: submitted.`,
         );
         await this.load();
         return;

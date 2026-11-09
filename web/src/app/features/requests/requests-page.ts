@@ -104,7 +104,7 @@ export class RequestsPage {
     const result = await this.actions.requestWithChoice(null);
     if (result?.kind === 'created') {
       this.notifications.success(
-        $localize`:@@requests.created:Request ${neutraliseText(result.requestId).text}:id: is in the entitlement system. You can check its status here.`,
+        $localize`:@@requests.created:Request ${neutraliseText(result.requestId).text}:id: submitted.`,
       );
       await this.load();
     }

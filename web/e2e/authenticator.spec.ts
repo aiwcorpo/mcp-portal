@@ -21,10 +21,8 @@ test('register the Authenticator with a fresh MFA, then remove it with another o
 }) => {
   await page.goto('/catalog');
   await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
-  await page
-    .getByRole('link', { name: 'Register Authenticator' })
-    .filter({ hasText: 'Register Authenticator' })
-    .click();
+  await page.getByRole('button', { name: /^Show tools \(Jira\)/ }).click();
+  await page.getByRole('link', { name: 'Register', exact: true }).first().click();
   await expect(
     page.getByRole('heading', { level: 1, name: 'Register Authenticator' }),
   ).toBeVisible();
@@ -136,11 +134,11 @@ test('active, locked and switched-off states in My connections', async ({ page }
   await expect(page.getByRole('link', { name: 'Register again' })).toBeVisible();
 
   await page.goto('/catalog');
-  await expect(page.getByText('The Authenticator is switched off after 20 wrong codes')).toBeVisible();
+  await page.getByRole('button', { name: /^Show tools \(Jira\)/ }).click();
+  await expect(page.getByText('Authenticator switched off after 20 wrong codes').first()).toBeVisible();
 });
 
 test('the address page warns about tools that need a code', async ({ page }) => {
   await page.goto('/endpoint');
-  await expect(page.getByText('"Delete" tools need a code from the Authenticator')).toBeVisible();
-  await expect(page.getByText('Requires a code from the Authenticator.').first()).toBeVisible();
+  await expect(page.getByText('You have no Authenticator').first()).toBeVisible();
 });

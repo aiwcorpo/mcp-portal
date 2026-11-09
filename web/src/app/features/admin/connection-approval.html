@@ -9,19 +9,18 @@
     </h2>
 
     @if (plain()) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <strong i18n="@@connectionApproval.plainTitle">Plain HTTP.</strong>&ngsp;{{
           plainWarning()
         }}
-      </app-notice>
+      </app-state>
     }
     @if (resumeRefused()) {
-      <app-notice kind="warning">
+      <app-state kind="warning">
         <ng-container i18n="@@connectionApproval.resumeRefused"
-          >The connection changed while you confirmed your identity. Check it again and
-          approve.</ng-container
+          >The connection changed while you confirmed your identity: check it again.</ng-container
         >
-      </app-notice>
+      </app-state>
     }
 
     <p class="system">

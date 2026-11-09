@@ -39,16 +39,13 @@
   <app-load-error [failure]="state.failure" (retry)="load()" />
 } @else {
   @if (listStale()) {
-    <app-notice kind="warning">
-      <ng-container i18n="@@logs.stale">The list is out of date.</ng-container>&ngsp;<button
-        type="button"
-        class="linkish"
-        (click)="load()"
-        i18n="@@logs.reload"
-      >
+    <app-state kind="warning">
+      <ng-container i18n="@@logs.stale">The list is out of date</ng-container
+      ><span aria-hidden="true"> &middot; </span
+      ><button type="button" class="action" (click)="load()" i18n="@@logs.reload">
         Load from the start
       </button>
-    </app-notice>
+    </app-state>
   }
   @if (rows().length) {
     <table class="table" role="table">

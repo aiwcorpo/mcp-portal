@@ -131,8 +131,8 @@ describe('ConnectionsPage', () => {
     await openRoute('/connections');
 
     await until(() => expect(text()).toContain('Notes'));
-    expect(text()).toContain('An administrator changed the settings of the system');
-    expect(text()).toContain('Connect the account again: Notes.');
+    expect(text()).toContain('An administrator changed the system settings');
+    expect(text()).toContain('connect again Notes.');
     const notes = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
       text(tr).includes('Notes'),
     )!;
@@ -147,7 +147,7 @@ describe('ConnectionsPage', () => {
     await openRoute('/connections');
     await until(() => expect(text()).toContain('Jira'));
 
-    expect(text()).not.toContain('An administrator changed the settings of the system');
+    expect(text()).not.toContain('An administrator changed the system settings');
   });
 
   it('disconnects after confirmation and reloads', async () => {

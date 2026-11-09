@@ -11,6 +11,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
+  AuthenticatorService,
+  AuthenticatorStatus,
   CatalogService,
   CatalogTool,
   McpEndpoint,
@@ -31,8 +33,8 @@ import { ErrorNotice } from '../../shared/error-notice';
 import { catalogSystemName, riskLabel } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
-import { AuthenticatorBanner } from '../authenticator/authenticator-banner';
+import { StateLine } from '../../shared/state-line';
+import { AuthenticatorState, readAuthenticatorStatus } from '../authenticator/authenticator-state';
 import { EndpointReady } from './endpoint-ready';
 
 /** Why a tool cannot count towards the address; null when it can. */
@@ -93,12 +95,12 @@ interface SystemOption {
     MatButtonModule,
     MatCheckboxModule,
     RouterLink,
-    AuthenticatorBanner,
+    AuthenticatorState,
     EndpointReady,
     ErrorNotice,
     LoadError,
     Loading,
-    Notice,
+    StateLine,
   ],
   templateUrl: './endpoint-page.html',
   styleUrl: './endpoint-page.scss',
@@ -107,6 +109,7 @@ interface SystemOption {
 export class EndpointPage {
   private readonly catalogApi = inject(CatalogService);
   private readonly endpointApi = inject(McpEndpointService);
+  private readonly authenticatorApi = inject(AuthenticatorService);
   protected readonly warningThreshold = inject(TOOL_LIST_WARNING_THRESHOLD);
 
   protected readonly catalog = signal<LoadState<PortalCatalogServer[]>>(LOADING);
@@ -195,16 +198,15 @@ export class EndpointPage {
 
   protected readonly problemText = computed(() => problemMessage(this.composed().problem));
 
-  protected readonly needsAuthenticator = computed(() =>
-    this.servers().some((server) =>
-      server.tools.some((tool) => tool.requiresConfirmation && toolBlock(server, tool) === null),
-    ),
-  );
+  protected readonly authenticator = signal<AuthenticatorStatus | null>(null);
 
   private generation = 0;
   private firstRequest = true;
 
   constructor() {
+    void readAuthenticatorStatus(this.authenticatorApi).then((status) =>
+      this.authenticator.set(status),
+    );
     void this.loadCatalog();
     effect((onCleanup) => {
       const composed = this.composed();

@@ -286,10 +286,10 @@ describe('LogsPage', () => {
       ),
     );
     button('Show more').click();
-    await until(() => expect(text()).toContain('The list is out of date.'));
+    await until(() => expect(text()).toContain('The list is out of date'));
     expect(text()).not.toContain('Invalid input');
     button('Load from the start').click();
-    await until(() => expect(text()).not.toContain('The list is out of date.'));
+    await until(() => expect(text()).not.toContain('The list is out of date'));
     await until(() => expect(text()).toContain('Show more'));
     expect(cursors).toEqual(['c50', null]);
   });

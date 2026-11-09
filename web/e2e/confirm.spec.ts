@@ -119,7 +119,7 @@ test('a right-to-left override in an argument is shown as a marker and keeps the
   }
   expect(characters.bidi).toBe('isolate');
   expect(characters.whiteSpace).toBe('pre-wrap');
-  await expect(page.getByText('Values contain control characters.')).toBeVisible();
+  await expect(page.getByText('Values contain control characters')).toBeVisible();
 
   const lines = await value.evaluate((node) => {
     const range = document.createRange();

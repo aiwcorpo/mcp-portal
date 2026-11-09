@@ -9,6 +9,7 @@ import {
   untracked,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CatalogService, Connection, PortalCatalogServer } from '../../api/generated';
 import { toApiFailure } from '../../core/api-error';
@@ -18,7 +19,7 @@ import { NotificationService } from '../../core/notification.service';
 import { catalogSystemName, isSystemId, systemName } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
-import { Notice } from '../../shared/notice';
+import { StateLine } from '../../shared/state-line';
 import { hasUserCredential } from '../catalog/catalog-actions';
 import { SecretForm } from './secret-form';
 import { tokenInstructions } from './token-instructions';
@@ -54,7 +55,7 @@ interface PageData {
 
 @Component({
   selector: 'app-connect-page',
-  imports: [MatButtonModule, SecretForm, Notice, Loading, LoadError],
+  imports: [MatButtonModule, RouterLink, SecretForm, StateLine, Loading, LoadError],
   templateUrl: './connect-page.html',
   styleUrl: './connect-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

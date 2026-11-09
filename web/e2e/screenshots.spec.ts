@@ -103,7 +103,7 @@ test.describe('screenshots', () => {
 
     await page.goto('/catalog?mockScenario=default');
     await page.getByRole('button', { name: /^Show tools \(Jira\)/ }).click();
-    await expect(page.getByText('"Delete" tools need a code')).toBeVisible();
+    await expect(page.getByText('You have no Authenticator').first()).toBeVisible();
     await shot(page, project, '23-baner-zarejestruj-authenticator');
 
     for (const [state, name] of [
@@ -174,7 +174,7 @@ test.describe('screenshots', () => {
     await page.getByRole('button', { name: 'Cancel' }).click();
 
     await page.goto('/endpoint?mockScenario=default&mockAuthenticator=none');
-    await expect(page.getByText('"Delete" tools need a code')).toBeVisible();
+    await expect(page.getByText('You have no Authenticator').first()).toBeVisible();
     await shot(page, project, '12-adres-mcp-baner');
   });
 
@@ -195,7 +195,7 @@ test.describe('screenshots', () => {
     await shot(page, project, '15-podglad-nieaktualny');
 
     await page.goto(`/confirm/${BIDI_CONFIRMATION_ID}?mockSession=in`);
-    await expect(page.getByText('Values contain control characters.')).toBeVisible();
+    await expect(page.getByText('Values contain control characters')).toBeVisible();
     await shot(page, project, '14-podglad-znaki-sterujace');
   });
 

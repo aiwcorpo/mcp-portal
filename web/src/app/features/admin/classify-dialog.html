@@ -10,7 +10,7 @@
   </p>
 
   @if (data.retry; as retry) {
-    <app-notice kind="error">{{ retry.message }}</app-notice>
+    <app-state kind="error">{{ retry.message }}</app-state>
   }
 
   @if (data.hints.length) {

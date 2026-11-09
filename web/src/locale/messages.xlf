@@ -1450,12 +1450,12 @@
         <note category="location">src/app/features/admin/connection-approval.html:21,24</note>
       </notes>
       <segment>
-        <source>The connection changed while you confirmed your identity. Check it again and approve.</source>
+        <source>The connection changed while you confirmed your identity: check it again.</source>
       </segment>
     </unit>
     <unit id="connectionApproval.system">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:28,30</note>
+        <note category="location">src/app/features/admin/connection-approval.html:27,29</note>
       </notes>
       <segment>
         <source>System claimed by the server</source>
@@ -1463,7 +1463,7 @@
     </unit>
     <unit id="connectionApproval.systemHint">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:34,37</note>
+        <note category="location">src/app/features/admin/connection-approval.html:33,36</note>
       </notes>
       <segment>
         <source> The server names its own system in its manifest. Approve only if this is the system you meant to add: the gateway sends the users&apos; credentials for that system to this server. </source>
@@ -1471,7 +1471,7 @@
     </unit>
     <unit id="connectionApproval.address">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:39,40</note>
+        <note category="location">src/app/features/admin/connection-approval.html:38,39</note>
       </notes>
       <segment>
         <source>Address</source>
@@ -1479,7 +1479,7 @@
     </unit>
     <unit id="connectionApproval.previous">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:47,48</note>
+        <note category="location">src/app/features/admin/connection-approval.html:46,47</note>
       </notes>
       <segment>
         <source>Approved so far:</source>
@@ -1487,7 +1487,7 @@
     </unit>
     <unit id="connectionApproval.mode">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:57,58</note>
+        <note category="location">src/app/features/admin/connection-approval.html:56,57</note>
       </notes>
       <segment>
         <source>How the gateway should trust this server</source>
@@ -1495,7 +1495,7 @@
     </unit>
     <unit id="connectionApproval.modeHint">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:72,77</note>
+        <note category="location">src/app/features/admin/connection-approval.html:71,76</note>
       </notes>
       <segment>
         <source> With a trusted CA a renewed certificate needs no approval. Pinning accepts only this exact certificate, and a new one has to be approved here again. </source>
@@ -1503,7 +1503,7 @@
     </unit>
     <unit id="connectionApproval.scope">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:78,81</note>
+        <note category="location">src/app/features/admin/connection-approval.html:77,80</note>
       </notes>
       <segment>
         <source> Approving the connection approves neither the policies nor the tools of the server: they wait below. It needs a fresh MFA. </source>
@@ -1511,7 +1511,7 @@
     </unit>
     <unit id="connectionApproval.approve">
       <notes>
-        <note category="location">src/app/features/admin/connection-approval.html:83,84</note>
+        <note category="location">src/app/features/admin/connection-approval.html:82,83</note>
       </notes>
       <segment>
         <source>Approve connection</source>
@@ -2353,7 +2353,7 @@
         <note category="location">src/app/features/admin/policy-diff-view.html:11,14</note>
       </notes>
       <segment>
-        <source>The policies changed before you confirmed your identity, so nothing was approved. Check the differences and approve again.</source>
+        <source>The policies changed before you confirmed your identity: nothing was approved, check the differences.</source>
       </segment>
     </unit>
     <unit id="policies.changedMeanwhile">
@@ -2361,7 +2361,7 @@
         <note category="location">src/app/features/admin/policy-diff-view.html:19,22</note>
       </notes>
       <segment>
-        <source>The policies changed since they were opened. Showing the current differences; check them and approve again.</source>
+        <source>The policies changed since they were opened: showing the current differences.</source>
       </segment>
     </unit>
     <unit id="policies.serverWarningTitle">
@@ -2374,15 +2374,15 @@
     </unit>
     <unit id="policies.serverWarning">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:28,31</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:28,30</note>
       </notes>
       <segment>
-        <source> A running server presented these policies, not the manifest the gateway pulled, and the version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. Read every policy and every declaration before you approve. </source>
+        <source> The server gave the version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>: read every policy and declaration before you approve. </source>
       </segment>
     </unit>
     <unit id="policies.manifestSource">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:36,37</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:35,36</note>
       </notes>
       <segment>
         <source>Source: manifest pulled by the gateway, version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>. Pulling approves nothing.</source>
@@ -2390,31 +2390,31 @@
     </unit>
     <unit id="policies.first">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:43,45</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:42,44</note>
       </notes>
       <segment>
-        <source> First registration: nothing was approved before, and the tools of this server stay blocked until you approve. </source>
+        <source> First registration: the tools are blocked until you approve the policies. </source>
       </segment>
     </unit>
     <unit id="policies.neutralised">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:49,52</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:47,50</note>
       </notes>
       <segment>
-        <source> The text contained hidden characters. They were replaced with markers of the form [U+XXXX]. </source>
+        <source> Hidden characters in the text were replaced with [U+XXXX] markers. </source>
       </segment>
     </unit>
     <unit id="policies.truncated">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:54,56</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:52,55</note>
       </notes>
       <segment>
-        <source> A very long text is cut in this view. The hash covers all of it, so approve only what you can review elsewhere. </source>
+        <source> A very long text is cut in this view, and the hash covers all of it. </source>
       </segment>
     </unit>
     <unit id="policies.typesTitle">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:59,60</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:56,57</note>
       </notes>
       <segment>
         <source>Resource types</source>
@@ -2422,7 +2422,7 @@
     </unit>
     <unit id="policies.typesSame">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:61,63</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:58,60</note>
       </notes>
       <segment>
         <source>The declarations did not change.</source>
@@ -2430,7 +2430,7 @@
     </unit>
     <unit id="policies.beforeNone">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:67,68</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:64,65</note>
       </notes>
       <segment>
         <source>Before (none)</source>
@@ -2438,7 +2438,7 @@
     </unit>
     <unit id="policies.typesBefore">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:69,71</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:66,68</note>
       </notes>
       <segment>
         <source>Approved</source>
@@ -2446,7 +2446,7 @@
     </unit>
     <unit id="policies.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:76,77</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:73,74</note>
       </notes>
       <segment>
         <source>Removed: </source>
@@ -2454,7 +2454,7 @@
     </unit>
     <unit id="policies.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:77,78</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:74,75</note>
       </notes>
       <segment>
         <source>Nothing approved.</source>
@@ -2462,7 +2462,7 @@
     </unit>
     <unit id="policies.after">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:82,83</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:79,80</note>
       </notes>
       <segment>
         <source>Pending (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -2470,7 +2470,7 @@
     </unit>
     <unit id="policies.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:89,90</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:86,87</note>
       </notes>
       <segment>
         <source>Added: </source>
@@ -2478,7 +2478,7 @@
     </unit>
     <unit id="policies.noTypes">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:90,91</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:87,88</note>
       </notes>
       <segment>
         <source>No declarations.</source>
@@ -2486,7 +2486,7 @@
     </unit>
     <unit id="policies.policiesTitle">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:94,95</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:91,92</note>
       </notes>
       <segment>
         <source>Policies and schema</source>
@@ -2494,7 +2494,7 @@
     </unit>
     <unit id="policies.policiesSame">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:96,98</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:93,95</note>
       </notes>
       <segment>
         <source>The policies did not change.</source>
@@ -2502,7 +2502,7 @@
     </unit>
     <unit id="policies.beforeNone2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:102,103</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:99,100</note>
       </notes>
       <segment>
         <source>Before (none)</source>
@@ -2510,7 +2510,7 @@
     </unit>
     <unit id="policies.polBefore">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:104,106</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:101,103</note>
       </notes>
       <segment>
         <source>Approved</source>
@@ -2518,7 +2518,7 @@
     </unit>
     <unit id="policies.removedLine2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:111,112</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:108,109</note>
       </notes>
       <segment>
         <source>Removed: </source>
@@ -2526,7 +2526,7 @@
     </unit>
     <unit id="policies.nothingBefore2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:112,113</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:109,110</note>
       </notes>
       <segment>
         <source>Nothing approved.</source>
@@ -2534,7 +2534,7 @@
     </unit>
     <unit id="policies.after2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:117,118</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:114,115</note>
       </notes>
       <segment>
         <source>Pending (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -2542,7 +2542,7 @@
     </unit>
     <unit id="policies.addedLine2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:124,125</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:121,122</note>
       </notes>
       <segment>
         <source>Added: </source>
@@ -2550,7 +2550,7 @@
     </unit>
     <unit id="policies.approve">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:131,132</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:128,129</note>
       </notes>
       <segment>
         <source>Approve policies</source>
@@ -2558,7 +2558,7 @@
     </unit>
     <unit id="policies.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:135,138</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:132,135</note>
       </notes>
       <segment>
         <source> Not approving breaks nothing that works today: the tools of the server stay blocked. Needs a fresh MFA. </source>
@@ -3602,12 +3602,12 @@
         <note category="location">src/app/features/admin/systems-page.html:125,128</note>
       </notes>
       <segment>
-        <source>A change of the base address, the authorization or token address, the client identifier or the revoke address deletes the connections of all users to this system when you save. They are asked to connect again; nothing is sent to the system. Changed now:</source>
+        <source>Saving deletes the connections of all users to this system, and they must connect again. Changed now:</source>
       </segment>
     </unit>
     <unit id="adminSystems.id">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:135,136</note>
+        <note category="location">src/app/features/admin/systems-page.html:133,134</note>
       </notes>
       <segment>
         <source>System identifier</source>
@@ -3615,7 +3615,7 @@
     </unit>
     <unit id="adminSystems.displayName">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:156,158</note>
+        <note category="location">src/app/features/admin/systems-page.html:154,156</note>
       </notes>
       <segment>
         <source>Display name (optional)</source>
@@ -3623,7 +3623,7 @@
     </unit>
     <unit id="adminSystems.adapter">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:171,173</note>
+        <note category="location">src/app/features/admin/systems-page.html:169,171</note>
       </notes>
       <segment>
         <source>Adapter</source>
@@ -3631,7 +3631,7 @@
     </unit>
     <unit id="adminSystems.base">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:184,186</note>
+        <note category="location">src/app/features/admin/systems-page.html:182,184</note>
       </notes>
       <segment>
         <source>Base address</source>
@@ -3639,7 +3639,7 @@
     </unit>
     <unit id="adminSystems.product">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:200,202</note>
+        <note category="location">src/app/features/admin/systems-page.html:198,200</note>
       </notes>
       <segment>
         <source>Product</source>
@@ -3647,7 +3647,7 @@
     </unit>
     <unit id="adminSystems.productPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:208,209</note>
+        <note category="location">src/app/features/admin/systems-page.html:206,207</note>
       </notes>
       <segment>
         <source>Choose a product</source>
@@ -3655,7 +3655,7 @@
     </unit>
     <unit id="adminSystems.genericTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:219,220</note>
+        <note category="location">src/app/features/admin/systems-page.html:217,218</note>
       </notes>
       <segment>
         <source>Credential type of this system</source>
@@ -3663,7 +3663,7 @@
     </unit>
     <unit id="adminSystems.genericHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:234,236</note>
+        <note category="location">src/app/features/admin/systems-page.html:232,234</note>
       </notes>
       <segment>
         <source> A generic REST system takes either the tokens of its users or one service account, not both, and no OAuth. </source>
@@ -3671,7 +3671,7 @@
     </unit>
     <unit id="adminSystems.whoamiPath">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:241,243</note>
+        <note category="location">src/app/features/admin/systems-page.html:239,241</note>
       </notes>
       <segment>
         <source>Check path (optional)</source>
@@ -3679,7 +3679,7 @@
     </unit>
     <unit id="adminSystems.whoamiField">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:259,261</note>
+        <note category="location">src/app/features/admin/systems-page.html:257,259</note>
       </notes>
       <segment>
         <source>User name field of the answer</source>
@@ -3687,7 +3687,7 @@
     </unit>
     <unit id="adminSystems.whoamiHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:276,278</note>
+        <note category="location">src/app/features/admin/systems-page.html:274,276</note>
       </notes>
       <segment>
         <source> The broker calls this path on the base address with the token a user enters and reads the user name from the answer. Without it the token is stored without a check, and the connection shows no account. </source>
@@ -3695,7 +3695,7 @@
     </unit>
     <unit id="adminSystems.types">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:283,284</note>
+        <note category="location">src/app/features/admin/systems-page.html:281,282</note>
       </notes>
       <segment>
         <source>Supported credential types</source>
@@ -3703,7 +3703,7 @@
     </unit>
     <unit id="adminSystems.defaultType">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:303,305</note>
+        <note category="location">src/app/features/admin/systems-page.html:301,303</note>
       </notes>
       <segment>
         <source>Default type</source>
@@ -3711,7 +3711,7 @@
     </unit>
     <unit id="adminSystems.secretScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:321,324</note>
+        <note category="location">src/app/features/admin/systems-page.html:319,322</note>
       </notes>
       <segment>
         <source>Scheme of the secret handed to the gateway</source>
@@ -3719,7 +3719,7 @@
     </unit>
     <unit id="adminSystems.userScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:337,339</note>
+        <note category="location">src/app/features/admin/systems-page.html:335,337</note>
       </notes>
       <segment>
         <source>Scheme of the user&apos;s token</source>
@@ -3727,7 +3727,7 @@
     </unit>
     <unit id="adminSystems.userSchemeDefault">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:345,346</note>
+        <note category="location">src/app/features/admin/systems-page.html:343,344</note>
       </notes>
       <segment>
         <source>As the scheme above</source>
@@ -3735,7 +3735,7 @@
     </unit>
     <unit id="adminSystems.userSchemeHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:351,353</note>
+        <note category="location">src/app/features/admin/systems-page.html:349,351</note>
       </notes>
       <segment>
         <source> Basic makes the connection form ask for a login next to the token. </source>
@@ -3743,7 +3743,7 @@
     </unit>
     <unit id="adminSystems.audience">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:358,360</note>
+        <note category="location">src/app/features/admin/systems-page.html:356,358</note>
       </notes>
       <segment>
         <source>Audience of the exchanged token</source>
@@ -3751,7 +3751,7 @@
     </unit>
     <unit id="adminSystems.revoke">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:375,377</note>
+        <note category="location">src/app/features/admin/systems-page.html:373,375</note>
       </notes>
       <segment>
         <source>Revoke address (optional)</source>
@@ -3759,7 +3759,7 @@
     </unit>
     <unit id="adminSystems.timeout">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:390,392</note>
+        <note category="location">src/app/features/admin/systems-page.html:388,390</note>
       </notes>
       <segment>
         <source>Timeout of calls (optional)</source>
@@ -3767,7 +3767,7 @@
     </unit>
     <unit id="adminSystems.oauth">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:406,407</note>
+        <note category="location">src/app/features/admin/systems-page.html:404,405</note>
       </notes>
       <segment>
         <source>OAuth client</source>
@@ -3775,7 +3775,7 @@
     </unit>
     <unit id="adminSystems.clientId">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:408,410</note>
+        <note category="location">src/app/features/admin/systems-page.html:406,408</note>
       </notes>
       <segment>
         <source>Client identifier</source>
@@ -3783,7 +3783,7 @@
     </unit>
     <unit id="adminSystems.clientSecret">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:423,425</note>
+        <note category="location">src/app/features/admin/systems-page.html:421,423</note>
       </notes>
       <segment>
         <source>Client secret</source>
@@ -3791,7 +3791,7 @@
     </unit>
     <unit id="adminSystems.secretNeeded">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:438,440</note>
+        <note category="location">src/app/features/admin/systems-page.html:436,438</note>
       </notes>
       <segment>
         <source>Required now. The secret is stored in the broker and never shown again.</source>
@@ -3799,7 +3799,7 @@
     </unit>
     <unit id="adminSystems.secretKept">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:443,445</note>
+        <note category="location">src/app/features/admin/systems-page.html:441,443</note>
       </notes>
       <segment>
         <source>A secret is stored. Leave this empty to keep it.</source>
@@ -3807,7 +3807,7 @@
     </unit>
     <unit id="adminSystems.authorize">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:454,456</note>
+        <note category="location">src/app/features/admin/systems-page.html:452,454</note>
       </notes>
       <segment>
         <source>Authorization address</source>
@@ -3815,7 +3815,7 @@
     </unit>
     <unit id="adminSystems.tokenUrl">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:472,474</note>
+        <note category="location">src/app/features/admin/systems-page.html:470,472</note>
       </notes>
       <segment>
         <source>Token address</source>
@@ -3823,7 +3823,7 @@
     </unit>
     <unit id="adminSystems.scopes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:489,491</note>
+        <note category="location">src/app/features/admin/systems-page.html:487,489</note>
       </notes>
       <segment>
         <source>OAuth scopes (separated by spaces)</source>
@@ -3831,7 +3831,7 @@
     </unit>
     <unit id="adminSystems.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:506,509</note>
+        <note category="location">src/app/features/admin/systems-page.html:504,507</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this form; the client secret is not kept on the way, so you enter it again. </source>
@@ -3839,7 +3839,7 @@
     </unit>
     <unit id="adminSystems.save">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:511,513</note>
+        <note category="location">src/app/features/admin/systems-page.html:509,511</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -3847,7 +3847,7 @@
     </unit>
     <unit id="adminSystems.cancel">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:520,522</note>
+        <note category="location">src/app/features/admin/systems-page.html:518,520</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -4066,7 +4066,7 @@
         <note category="location">src/app/features/admin/tool-diff.html:11,13</note>
       </notes>
       <segment>
-        <source>The definition changed before you confirmed your identity, so nothing was approved. Check the differences and approve again.</source>
+        <source>The definition changed before you confirmed your identity: nothing was approved, check the differences.</source>
       </segment>
     </unit>
     <unit id="admin.changedMeanwhile">
@@ -4074,7 +4074,7 @@
         <note category="location">src/app/features/admin/tool-diff.html:19,22</note>
       </notes>
       <segment>
-        <source>The definition changed since it was opened. Showing the current differences; check them and approve again.</source>
+        <source>The definition changed since it was opened: showing the current differences.</source>
       </segment>
     </unit>
     <unit id="admin.adapterWarningTitle">
@@ -4087,15 +4087,15 @@
     </unit>
     <unit id="admin.adapterWarning">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:29,32</note>
+        <note category="location">src/app/features/admin/tool-diff.html:29,31</note>
       </notes>
       <segment>
-        <source> The adapter presented this definition, not the manifest the gateway pulled. Nobody reviewed it in code, and the version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. The tool has no risk or action: you assign them when approving, and until you do, agents cannot see it. </source>
+        <source> The adapter gave the version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>, nobody reviewed the definition in code, and agents cannot see the tool until you assign a risk and an action. </source>
       </segment>
     </unit>
     <unit id="admin.serverWarningTitle">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:37,38</note>
+        <note category="location">src/app/features/admin/tool-diff.html:35,36</note>
       </notes>
       <segment>
         <source>Source: server.</source>
@@ -4103,15 +4103,15 @@
     </unit>
     <unit id="admin.serverWarning">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:39,42</note>
+        <note category="location">src/app/features/admin/tool-diff.html:37,39</note>
       </notes>
       <segment>
-        <source> A running server presented this definition, not the manifest the gateway pulled. Nobody reviewed it in code, and the given version (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>) comes from the server. Read the description and schema carefully before you approve. </source>
+        <source> The server gave the version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/> and nobody reviewed the definition in code: read the description and schema before you approve. </source>
       </segment>
     </unit>
     <unit id="admin.manifestSource">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:47,48</note>
+        <note category="location">src/app/features/admin/tool-diff.html:44,45</note>
       </notes>
       <segment>
         <source>Source: manifest pulled by the gateway, version <ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>. Pulling approves nothing.</source>
@@ -4119,7 +4119,7 @@
     </unit>
     <unit id="admin.hiddenTitle">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:55,56</note>
+        <note category="location">src/app/features/admin/tool-diff.html:52,53</note>
       </notes>
       <segment>
         <source>The hash changed, but the shown fields did not.</source>
@@ -4127,23 +4127,23 @@
     </unit>
     <unit id="admin.hiddenText">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:57,59</note>
+        <note category="location">src/app/features/admin/tool-diff.html:54,55</note>
       </notes>
       <segment>
-        <source> A part of the definition outside the view changed, for example the server credential. Approving requires explicit confirmation. </source>
+        <source> A part outside the view changed, so approving needs explicit confirmation. </source>
       </segment>
     </unit>
     <unit id="admin.hashInconsistent">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:64,67</note>
+        <note category="location">src/app/features/admin/tool-diff.html:60,63</note>
       </notes>
       <segment>
-        <source> The hash given by the server does not match the hash of the shown definition. Do not approve; report it to the platform administrators. </source>
+        <source> The hash given by the server does not match the shown definition: do not approve, report it to the platform administrators. </source>
       </segment>
     </unit>
     <unit id="admin.riskLoweredTitle">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:70,71</note>
+        <note category="location">src/app/features/admin/tool-diff.html:66,67</note>
       </notes>
       <segment>
         <source>Risk lowering.</source>
@@ -4151,7 +4151,7 @@
     </unit>
     <unit id="admin.riskLoweredFromTo">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:73,75</note>
+        <note category="location">src/app/features/admin/tool-diff.html:69,71</note>
       </notes>
       <segment>
         <source>The tool risk drops from <ph id="0" equiv="INTERPOLATION" disp="{{ riskName(v.riskFrom) }}"/> to <ph id="1" equiv="INTERPOLATION_1" disp="{{ riskName(v.riskTo) }}"/>.</source>
@@ -4159,7 +4159,7 @@
     </unit>
     <unit id="admin.riskLoweredFloor">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:78,81</note>
+        <note category="location">src/app/features/admin/tool-diff.html:74,77</note>
       </notes>
       <segment>
         <source>The risk is lower than the highest reported so far (<ph id="0" equiv="INTERPOLATION" disp="{{
@@ -4169,7 +4169,7 @@
     </unit>
     <unit id="admin.riskLoweredUnclassified">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:84,87</note>
+        <note category="location">src/app/features/admin/tool-diff.html:80,83</note>
       </notes>
       <segment>
         <source>The risk is lower than the highest reported so far.</source>
@@ -4177,7 +4177,7 @@
     </unit>
     <unit id="admin.riskLoweredWarning">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:88,91</note>
+        <note category="location">src/app/features/admin/tool-diff.html:84,87</note>
       </notes>
       <segment>
         <source>The tool is hidden from agents until you decide. Approving lowers the effective level, and for a tool that was irreversible, the requirement for a code from the Authenticator goes away. Requires fresh identity confirmation (MFA).</source>
@@ -4185,15 +4185,15 @@
     </unit>
     <unit id="admin.neutralised">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:98,100</note>
+        <note category="location">src/app/features/admin/tool-diff.html:94,96</note>
       </notes>
       <segment>
-        <source> The definition contained hidden characters. They were replaced with markers of the form [U+XXXX]. </source>
+        <source> Hidden characters in the definition were replaced with [U+XXXX] markers. </source>
       </segment>
     </unit>
     <unit id="admin.beforeNew">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:107,108</note>
+        <note category="location">src/app/features/admin/tool-diff.html:102,103</note>
       </notes>
       <segment>
         <source>Before (none, new tool)</source>
@@ -4201,7 +4201,7 @@
     </unit>
     <unit id="admin.before">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:110,111</note>
+        <note category="location">src/app/features/admin/tool-diff.html:105,106</note>
       </notes>
       <segment>
         <source>Before (<ph id="0" equiv="INTERPOLATION" disp="{{ (v.value.approvedInVersion | safeText) || noVersion }}"/>)</source>
@@ -4209,7 +4209,7 @@
     </unit>
     <unit id="admin.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:123,124</note>
+        <note category="location">src/app/features/admin/tool-diff.html:118,119</note>
       </notes>
       <segment>
         <source>Removed: </source>
@@ -4217,7 +4217,7 @@
     </unit>
     <unit id="admin.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:126,127</note>
+        <note category="location">src/app/features/admin/tool-diff.html:121,122</note>
       </notes>
       <segment>
         <source>No earlier definition.</source>
@@ -4225,7 +4225,7 @@
     </unit>
     <unit id="admin.after">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:132,133</note>
+        <note category="location">src/app/features/admin/tool-diff.html:127,128</note>
       </notes>
       <segment>
         <source>After (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -4233,7 +4233,7 @@
     </unit>
     <unit id="admin.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:144,145</note>
+        <note category="location">src/app/features/admin/tool-diff.html:139,140</note>
       </notes>
       <segment>
         <source>Added: </source>
@@ -4241,7 +4241,7 @@
     </unit>
     <unit id="admin.approveClassify">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:158,159</note>
+        <note category="location">src/app/features/admin/tool-diff.html:153,154</note>
       </notes>
       <segment>
         <source>Classify and approve</source>
@@ -4249,7 +4249,7 @@
     </unit>
     <unit id="admin.approveLowering">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:160,162</note>
+        <note category="location">src/app/features/admin/tool-diff.html:155,157</note>
       </notes>
       <segment>
         <source>Approve risk lowering</source>
@@ -4257,7 +4257,7 @@
     </unit>
     <unit id="admin.approve">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:162,164</note>
+        <note category="location">src/app/features/admin/tool-diff.html:157,159</note>
       </notes>
       <segment>
         <source>Approve definition</source>
@@ -4265,7 +4265,7 @@
     </unit>
     <unit id="admin.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:167,170</note>
+        <note category="location">src/app/features/admin/tool-diff.html:162,165</note>
       </notes>
       <segment>
         <source> Not approving breaks nothing: the tool stays hidden from agents. </source>
@@ -4367,46 +4367,6 @@
         <source>Approve</source>
       </segment>
     </unit>
-    <unit id="authBanner.none">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-banner.ts:22,24</note>
-      </notes>
-      <segment>
-        <source>&quot;Delete&quot; tools need a code from the Authenticator, and you have not registered it yet.</source>
-      </segment>
-    </unit>
-    <unit id="authBanner.register">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-banner.ts:25,27</note>
-      </notes>
-      <segment>
-        <source>Register Authenticator</source>
-      </segment>
-    </unit>
-    <unit id="authBanner.disabled">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-banner.ts:31,33</note>
-      </notes>
-      <segment>
-        <source>The Authenticator is switched off after 20 wrong codes in one day, so &quot;Delete&quot; tools will not work.</source>
-      </segment>
-    </unit>
-    <unit id="authBanner.registerAgain">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-banner.ts:34,37</note>
-      </notes>
-      <segment>
-        <source>Register again</source>
-      </segment>
-    </unit>
-    <unit id="authBanner.locked">
-      <notes>
-        <note category="location">src/app/features/authenticator/authenticator-banner.ts:40,41</note>
-      </notes>
-      <segment>
-        <source>The Authenticator is locked until <ph id="0" equiv="INTERPOLATION" disp="{{ current.lockedUntil | date: &apos;HH:mm&apos; }}"/> after 5 wrong codes. &quot;Delete&quot; tools will work after that time.</source>
-      </segment>
-    </unit>
     <unit id="auth.title">
       <notes>
         <note category="location">src/app/features/authenticator/authenticator-section.html:2,3</note>
@@ -4428,12 +4388,12 @@
         <note category="location">src/app/features/authenticator/authenticator-section.html:11,15</note>
       </notes>
       <segment>
-        <source> The Authenticator was switched off after 20 wrong codes in one day. The agent will not run irreversible operations until you register it again. </source>
+        <source> The Authenticator was switched off after 20 wrong codes in one day. </source>
       </segment>
     </unit>
     <unit id="auth.stateNone">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:21,23</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:20,22</note>
       </notes>
       <segment>
         <source>Not registered</source>
@@ -4441,7 +4401,7 @@
     </unit>
     <unit id="auth.stateDisabled">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:24,25</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:23,24</note>
       </notes>
       <segment>
         <source>Switched off</source>
@@ -4449,7 +4409,7 @@
     </unit>
     <unit id="auth.stateLocked">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:32,33</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:31,32</note>
       </notes>
       <segment>
         <source>Locked until <ph id="0" equiv="INTERPOLATION" disp="{{ current.lockedUntil | date: &apos;HH:mm&apos; }}"/></source>
@@ -4457,7 +4417,7 @@
     </unit>
     <unit id="auth.lockReason">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:35,36</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:34,35</note>
       </notes>
       <segment>
         <source>5 wrong codes in 15 minutes</source>
@@ -4465,7 +4425,7 @@
     </unit>
     <unit id="auth.stateActive">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:37,38</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:36,37</note>
       </notes>
       <segment>
         <source>Active</source>
@@ -4473,7 +4433,7 @@
     </unit>
     <unit id="auth.since">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:41,42</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:40,41</note>
       </notes>
       <segment>
         <source>since <ph id="0" equiv="INTERPOLATION" disp="{{ current.registeredAt | date: &apos;dd.MM.yyyy&apos; }}"/></source>
@@ -4481,7 +4441,7 @@
     </unit>
     <unit id="auth.lastUsedToday">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:48,49</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:47,48</note>
       </notes>
       <segment>
         <source>last used today <ph id="0" equiv="INTERPOLATION" disp="{{ lastUsed | date: &apos;HH:mm&apos; }}"/></source>
@@ -4489,7 +4449,7 @@
     </unit>
     <unit id="auth.lastUsedOn">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:52,53</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:51,52</note>
       </notes>
       <segment>
         <source>last used <ph id="0" equiv="INTERPOLATION" disp="{{ lastUsed | date: &apos;dd.MM.yyyy&apos; }}"/></source>
@@ -4497,7 +4457,7 @@
     </unit>
     <unit id="auth.neverUsed">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:56,57</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:55,56</note>
       </notes>
       <segment>
         <source>never used</source>
@@ -4505,7 +4465,7 @@
     </unit>
     <unit id="auth.register">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:66,69</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:65,68</note>
       </notes>
       <segment>
         <source>Register</source>
@@ -4513,7 +4473,7 @@
     </unit>
     <unit id="auth.registerAgain">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:71,74</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:70,73</note>
       </notes>
       <segment>
         <source>Register again</source>
@@ -4521,7 +4481,7 @@
     </unit>
     <unit id="auth.remove">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:83,84</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:82,83</note>
       </notes>
       <segment>
         <source> Remove </source>
@@ -4529,7 +4489,7 @@
     </unit>
     <unit id="auth.lockHint">
       <notes>
-        <note category="location">src/app/features/authenticator/authenticator-section.html:91,94</note>
+        <note category="location">src/app/features/authenticator/authenticator-section.html:90,93</note>
       </notes>
       <segment>
         <source> A lock is lifted only by time. Removing and registering again does not shorten it. </source>
@@ -4583,6 +4543,46 @@
         <source>Authenticator removed. The agent will not run irreversible operations until you register it again.</source>
       </segment>
     </unit>
+    <unit id="authState.none">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:31,32</note>
+      </notes>
+      <segment>
+        <source>You have no Authenticator</source>
+      </segment>
+    </unit>
+    <unit id="authState.register">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:33,35</note>
+      </notes>
+      <segment>
+        <source>Register</source>
+      </segment>
+    </unit>
+    <unit id="authState.disabled">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:38,40</note>
+      </notes>
+      <segment>
+        <source>Authenticator switched off after 20 wrong codes</source>
+      </segment>
+    </unit>
+    <unit id="authState.registerAgain">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:41,43</note>
+      </notes>
+      <segment>
+        <source>Register again</source>
+      </segment>
+    </unit>
+    <unit id="authState.locked">
+      <notes>
+        <note category="location">src/app/features/authenticator/authenticator-state.ts:46,47</note>
+      </notes>
+      <segment>
+        <source>Locked until <ph id="0" equiv="INTERPOLATION" disp="{{ until | date: &apos;HH:mm&apos; }}"/></source>
+      </segment>
+    </unit>
     <unit id="qr.label">
       <notes>
         <note category="location">src/app/features/authenticator/qr-code.ts:19,20</note>
@@ -4609,15 +4609,15 @@
     </unit>
     <unit id="enroll.clipboard">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:26,29</note>
+        <note category="location">src/app/features/authenticator/register-page.html:26,30</note>
       </notes>
       <segment>
-        <source> The key was copied to the clipboard. Clear the clipboard, for example by copying other text: the key lets anyone generate codes. </source>
+        <source> The key is in the clipboard: clear it, for example by copying other text. </source>
       </segment>
     </unit>
     <unit id="enroll.alreadyTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:33,34</note>
+        <note category="location">src/app/features/authenticator/register-page.html:32,33</note>
       </notes>
       <segment>
         <source>Authenticator is already registered</source>
@@ -4625,7 +4625,7 @@
     </unit>
     <unit id="enroll.alreadyText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:35,38</note>
+        <note category="location">src/app/features/authenticator/register-page.html:34,37</note>
       </notes>
       <segment>
         <source> To register it again, first remove the current registration in System connections. Removal requires identity confirmation (MFA). </source>
@@ -4633,7 +4633,7 @@
     </unit>
     <unit id="enroll.toConnections">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:40,42</note>
+        <note category="location">src/app/features/authenticator/register-page.html:39,41</note>
       </notes>
       <segment>
         <source> Back to connections </source>
@@ -4641,7 +4641,7 @@
     </unit>
     <unit id="enroll.failedTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:46,47</note>
+        <note category="location">src/app/features/authenticator/register-page.html:45,46</note>
       </notes>
       <segment>
         <source>The registration expired or 3 wrong codes were entered.</source>
@@ -4649,7 +4649,7 @@
     </unit>
     <unit id="enroll.failedText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:48,50</note>
+        <note category="location">src/app/features/authenticator/register-page.html:47,49</note>
       </notes>
       <segment>
         <source> Start over. Delete the &quot;MCP Platform&quot; account you just added in the app. </source>
@@ -4657,7 +4657,7 @@
     </unit>
     <unit id="enroll.restart">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:51,53</note>
+        <note category="location">src/app/features/authenticator/register-page.html:50,52</note>
       </notes>
       <segment>
         <source> Start over </source>
@@ -4665,7 +4665,7 @@
     </unit>
     <unit id="enroll.infoTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:56,58</note>
+        <note category="location">src/app/features/authenticator/register-page.html:55,57</note>
       </notes>
       <segment>
         <source>Register Authenticator</source>
@@ -4673,7 +4673,7 @@
     </unit>
     <unit id="enroll.infoLead">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:59,61</note>
+        <note category="location">src/app/features/authenticator/register-page.html:58,60</note>
       </notes>
       <segment>
         <source> When an agent wants to run an irreversible operation, for example deleting a page, you enter a 6-digit code from the app in the agent session. </source>
@@ -4681,7 +4681,7 @@
     </unit>
     <unit id="enroll.infoApp">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:63,65</note>
+        <note category="location">src/app/features/authenticator/register-page.html:62,64</note>
       </notes>
       <segment>
         <source> You will add a separate &quot;MCP Platform&quot; account in Microsoft Authenticator. You do this once. </source>
@@ -4689,7 +4689,7 @@
     </unit>
     <unit id="enroll.infoMfa">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:67,69</note>
+        <note category="location">src/app/features/authenticator/register-page.html:66,68</note>
       </notes>
       <segment>
         <source> &quot;Next&quot; will ask you to confirm your identity (MFA). It is needed only for registration and removal. </source>
@@ -4697,7 +4697,7 @@
     </unit>
     <unit id="enroll.cancel">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:73,75</note>
+        <note category="location">src/app/features/authenticator/register-page.html:72,74</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -4705,7 +4705,7 @@
     </unit>
     <unit id="enroll.continue">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:77,78</note>
+        <note category="location">src/app/features/authenticator/register-page.html:76,77</note>
       </notes>
       <segment>
         <source>Continue registration</source>
@@ -4713,7 +4713,7 @@
     </unit>
     <unit id="enroll.next">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:79,80</note>
+        <note category="location">src/app/features/authenticator/register-page.html:78,79</note>
       </notes>
       <segment>
         <source>Next</source>
@@ -4721,7 +4721,7 @@
     </unit>
     <unit id="enroll.scanTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:89,91</note>
+        <note category="location">src/app/features/authenticator/register-page.html:88,90</note>
       </notes>
       <segment>
         <source>Add the account in the app</source>
@@ -4729,7 +4729,7 @@
     </unit>
     <unit id="enroll.how1">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:97,98</note>
+        <note category="location">src/app/features/authenticator/register-page.html:96,97</note>
       </notes>
       <segment>
         <source>Open Microsoft Authenticator.</source>
@@ -4737,7 +4737,7 @@
     </unit>
     <unit id="enroll.how2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:98,99</note>
+        <note category="location">src/app/features/authenticator/register-page.html:97,98</note>
       </notes>
       <segment>
         <source>Add an account, then Other account.</source>
@@ -4745,7 +4745,7 @@
     </unit>
     <unit id="enroll.how3">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:99,101</note>
+        <note category="location">src/app/features/authenticator/register-page.html:98,100</note>
       </notes>
       <segment>
         <source>Scan the QR code.</source>
@@ -4753,7 +4753,7 @@
     </unit>
     <unit id="enroll.manual">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:101,102</note>
+        <note category="location">src/app/features/authenticator/register-page.html:100,101</note>
       </notes>
       <segment>
         <source>Cannot scan it? Enter the key manually.</source>
@@ -4761,7 +4761,7 @@
     </unit>
     <unit id="enroll.copy">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:105,106</note>
+        <note category="location">src/app/features/authenticator/register-page.html:104,105</note>
       </notes>
       <segment>
         <source> Copy </source>
@@ -4769,7 +4769,7 @@
     </unit>
     <unit id="enroll.copied">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:111,112</note>
+        <note category="location">src/app/features/authenticator/register-page.html:110,111</note>
       </notes>
       <segment>
         <source>Key copied to the clipboard.</source>
@@ -4777,7 +4777,7 @@
     </unit>
     <unit id="enroll.copyFailed">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:115,116</note>
+        <note category="location">src/app/features/authenticator/register-page.html:114,115</note>
       </notes>
       <segment>
         <source>Could not copy. Select the key and copy it manually.</source>
@@ -4785,7 +4785,7 @@
     </unit>
     <unit id="enroll.once">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:121,125</note>
+        <note category="location">src/app/features/authenticator/register-page.html:120,124</note>
       </notes>
       <segment>
         <source> The QR code and key are shown only now. The registration is valid for another <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;mono timer&quot;&gt;" dispEnd="&lt;/span
@@ -4794,7 +4794,7 @@
     </unit>
     <unit id="enroll.cancel2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:130,132</note>
+        <note category="location">src/app/features/authenticator/register-page.html:129,131</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -4802,7 +4802,7 @@
     </unit>
     <unit id="enroll.next2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:133,134</note>
+        <note category="location">src/app/features/authenticator/register-page.html:132,133</note>
       </notes>
       <segment>
         <source> Next </source>
@@ -4810,7 +4810,7 @@
     </unit>
     <unit id="enroll.codeTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:138,139</note>
+        <note category="location">src/app/features/authenticator/register-page.html:137,138</note>
       </notes>
       <segment>
         <source>Enter the first code</source>
@@ -4818,7 +4818,7 @@
     </unit>
     <unit id="enroll.codeLabel">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:141,143</note>
+        <note category="location">src/app/features/authenticator/register-page.html:140,142</note>
       </notes>
       <segment>
         <source>Code from the app (6 digits)</source>
@@ -4826,7 +4826,7 @@
     </unit>
     <unit id="enroll.codeWrong">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:156,158</note>
+        <note category="location">src/app/features/authenticator/register-page.html:155,157</note>
       </notes>
       <segment>
         <source> Invalid code. </source>
@@ -4834,7 +4834,7 @@
     </unit>
     <unit id="enroll.codeFormat">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:160,162</note>
+        <note category="location">src/app/features/authenticator/register-page.html:159,161</note>
       </notes>
       <segment>
         <source> The code has 6 digits. </source>
@@ -4842,7 +4842,7 @@
     </unit>
     <unit id="enroll.codeHint">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:164,166</note>
+        <note category="location">src/app/features/authenticator/register-page.html:163,165</note>
       </notes>
       <segment>
         <source> Enter the code shown in the app for the &quot;MCP Platform&quot; account. </source>
@@ -4850,7 +4850,7 @@
     </unit>
     <unit id="enroll.back2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:169,170</note>
+        <note category="location">src/app/features/authenticator/register-page.html:168,169</note>
       </notes>
       <segment>
         <source> Back </source>
@@ -4858,7 +4858,7 @@
     </unit>
     <unit id="enroll.check">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:172,173</note>
+        <note category="location">src/app/features/authenticator/register-page.html:171,172</note>
       </notes>
       <segment>
         <source> Check </source>
@@ -4866,7 +4866,7 @@
     </unit>
     <unit id="enroll.doneTitle">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:178,180</note>
+        <note category="location">src/app/features/authenticator/register-page.html:177,179</note>
       </notes>
       <segment>
         <source>Authenticator registered</source>
@@ -4874,7 +4874,7 @@
     </unit>
     <unit id="enroll.doneLead">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:181,183</note>
+        <note category="location">src/app/features/authenticator/register-page.html:180,182</note>
       </notes>
       <segment>
         <source> From now on you confirm irreversible operations with a code from the app. </source>
@@ -4882,7 +4882,7 @@
     </unit>
     <unit id="enroll.doneText">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:184,186</note>
+        <note category="location">src/app/features/authenticator/register-page.html:183,185</note>
       </notes>
       <segment>
         <source> You enter the code in the agent session when it asks for it. </source>
@@ -4890,7 +4890,7 @@
     </unit>
     <unit id="enroll.toConnections2">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.html:189,192</note>
+        <note category="location">src/app/features/authenticator/register-page.html:188,191</note>
       </notes>
       <segment>
         <source> Back to connections </source>
@@ -4930,7 +4930,7 @@
     </unit>
     <unit id="enroll.mfaDone">
       <notes>
-        <note category="location">src/app/features/authenticator/register-page.ts:187</note>
+        <note category="location">src/app/features/authenticator/register-page.ts:195</note>
       </notes>
       <segment>
         <source>Identity confirmed. Continue the registration when you are ready.</source>
@@ -4946,7 +4946,7 @@
     </unit>
     <unit id="catalog.searchPlaceholder">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:18,19</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:17,18</note>
       </notes>
       <segment>
         <source>Search for a server or tool</source>
@@ -4954,7 +4954,7 @@
     </unit>
     <unit id="catalog.searchLabel">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.html:20,22</note>
+        <note category="location">src/app/features/catalog/catalog-page.html:19,21</note>
       </notes>
       <segment>
         <source>Search for a server or tool</source>
@@ -4986,7 +4986,7 @@
     </unit>
     <unit id="catalog.linkCopied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:108</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:111</note>
       </notes>
       <segment>
         <source>Copied the address of the <ph id="0" equiv="system" disp="catalogSystemName(server)"/> server.</source>
@@ -4994,7 +4994,7 @@
     </unit>
     <unit id="catalog.linkCopyFailed">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:112</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:115</note>
       </notes>
       <segment>
         <source>Could not copy the address. Address: <ph id="0" equiv="url" disp="server.url"/></source>
@@ -5002,10 +5002,10 @@
     </unit>
     <unit id="catalog.requestCreated">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-page.ts:155</note>
+        <note category="location">src/app/features/catalog/catalog-page.ts:158</note>
       </notes>
       <segment>
-        <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. Check its status in the Requests tab.</source>
+        <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> submitted.</source>
       </segment>
     </unit>
     <unit id="catalog.caption">
@@ -5106,7 +5106,7 @@
     </unit>
     <unit id="catalog.toolConfirm">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:100,102</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:101,103</note>
       </notes>
       <segment>
         <source>Requires a code from the Authenticator.</source>
@@ -5114,7 +5114,7 @@
     </unit>
     <unit id="catalog.requestTool">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:125,126</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:127,128</note>
       </notes>
       <segment>
         <source>Submit request</source>
@@ -5122,7 +5122,7 @@
     </unit>
     <unit id="catalog.noTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:136,137</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:138,139</note>
       </notes>
       <segment>
         <source> The server offers no tools. </source>
@@ -5130,7 +5130,7 @@
     </unit>
     <unit id="catalog.showTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.ts:75</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:78</note>
       </notes>
       <segment>
         <source>Show tools</source>
@@ -5138,7 +5138,7 @@
     </unit>
     <unit id="catalog.hideTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.ts:76</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:79</note>
       </notes>
       <segment>
         <source>Hide tools</source>
@@ -5213,7 +5213,7 @@
         <note category="location">src/app/features/confirm/confirm-page.html:45,47</note>
       </notes>
       <segment>
-        <source> Could not record that the preview was opened. The &quot;first one wins&quot; protection is not active now: another irreversible operation may replace this one. </source>
+        <source> Could not record that the preview was opened: another irreversible operation may replace this one. </source>
       </segment>
     </unit>
     <unit id="confirm.refreshFailed">
@@ -5221,7 +5221,7 @@
         <note category="location">src/app/features/confirm/confirm-page.html:51,53</note>
       </notes>
       <segment>
-        <source> Could not check whether the operation is still current. Wait a moment. </source>
+        <source> Could not check whether the operation is still current: wait a moment. </source>
       </segment>
     </unit>
     <unit id="confirm.neutralised">
@@ -5229,7 +5229,7 @@
         <note category="location">src/app/features/confirm/confirm-page.html:56,57</note>
       </notes>
       <segment>
-        <source> Values contain control characters. They are shown as [U+XXXX] or &lt;U+XXXX&gt;. </source>
+        <source> Values contain control characters, shown as [U+XXXX] or &lt;U+XXXX&gt;. </source>
       </segment>
     </unit>
     <unit id="confirm.system">
@@ -5346,15 +5346,23 @@
     </unit>
     <unit id="connect.nothing">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:22,25</note>
+        <note category="location">src/app/features/connect/connect-page.html:23,25</note>
       </notes>
       <segment>
-        <source> This system does not need connecting, or you do not have access to it. You can see its status in the catalog. </source>
+        <source>This system does not need connecting, or you do not have access to it</source>
+      </segment>
+    </unit>
+    <unit id="connect.toCatalog">
+      <notes>
+        <note category="location">src/app/features/connect/connect-page.html:26,28</note>
+      </notes>
+      <segment>
+        <source>Catalog</source>
       </segment>
     </unit>
     <unit id="connect.oauthHeading">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:28,29</note>
+        <note category="location">src/app/features/connect/connect-page.html:31,32</note>
       </notes>
       <segment>
         <source>Connect with OAuth</source>
@@ -5362,7 +5370,7 @@
     </unit>
     <unit id="connect.oauthText">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:30,32</note>
+        <note category="location">src/app/features/connect/connect-page.html:33,35</note>
       </notes>
       <segment>
         <source> You will go to the <ph id="0" equiv="INTERPOLATION" disp="{{ name() }}"/> sign-in page and return to the portal after approving access. The portal never sees your password. </source>
@@ -5370,7 +5378,7 @@
     </unit>
     <unit id="connect.oauthButton">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:40,42</note>
+        <note category="location">src/app/features/connect/connect-page.html:43,45</note>
       </notes>
       <segment>
         <source> Go to the system sign-in </source>
@@ -5378,7 +5386,7 @@
     </unit>
     <unit id="connect.tokenHeading">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:47,48</note>
+        <note category="location">src/app/features/connect/connect-page.html:50,51</note>
       </notes>
       <segment>
         <source>Add token</source>
@@ -5386,7 +5394,7 @@
     </unit>
     <unit id="connect.howTo">
       <notes>
-        <note category="location">src/app/features/connect/connect-page.html:49,50</note>
+        <note category="location">src/app/features/connect/connect-page.html:52,53</note>
       </notes>
       <segment>
         <source>How to create the narrowest possible token</source>
@@ -5531,26 +5539,10 @@
     </unit>
     <unit id="secret.saved">
       <notes>
-        <note category="location">src/app/features/connect/secret-form.ts:169</note>
+        <note category="location">src/app/features/connect/secret-form.ts:163</note>
       </notes>
       <segment>
-        <source>Connected to <ph id="0" equiv="INTERPOLATION" disp="label"/> as <ph id="1" equiv="INTERPOLATION_1" disp="who"/>.</source>
-      </segment>
-    </unit>
-    <unit id="secret.savedUnverified">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.ts:170</note>
-      </notes>
-      <segment>
-        <source>Token stored for <ph id="0" equiv="INTERPOLATION" disp="label"/>. This system does not check tokens when they are stored, so the portal does not know which account it belongs to (not verified).</source>
-      </segment>
-    </unit>
-    <unit id="secret.savedExpires">
-      <notes>
-        <note category="location">src/app/features/connect/secret-form.ts:175</note>
-      </notes>
-      <segment>
-        <source>Token valid until <ph id="0" equiv="INTERPOLATION" disp="until"/>.</source>
+        <source>Saved the <ph id="0" equiv="INTERPOLATION" disp="label"/> token.</source>
       </segment>
     </unit>
     <unit id="token.generic.1">
@@ -5590,7 +5582,7 @@
         <note category="location">src/app/features/connections/connections-page.html:8,10</note>
       </notes>
       <segment>
-        <source>An administrator changed the settings of the system, so the stored connection was deleted. Connect the account again: <ph id="0" equiv="INTERPOLATION" disp="{{ names }}"/>.</source>
+        <source>An administrator changed the system settings, so the connection was deleted: connect again <ph id="0" equiv="INTERPOLATION" disp="{{ names }}"/>.</source>
       </segment>
     </unit>
     <unit id="connections.caption">
@@ -5747,7 +5739,7 @@
         <note category="location">src/app/features/connections/connections-page.ts:310</note>
       </notes>
       <segment>
-        <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. You can check its status in the Requests tab.</source>
+        <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> submitted.</source>
       </segment>
     </unit>
     <unit id="endpoint.title">
@@ -5760,16 +5752,15 @@
     </unit>
     <unit id="endpoint.lead">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:3,8</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:2,4</note>
       </notes>
       <segment>
-        <source> One address covers all systems you have entitlements for. The client shows the model tools named <pc id="0" equivStart="START_TAG_CODE" equivEnd="CLOSE_TAG_CODE" type="other" dispStart="&lt;code&gt;" dispEnd="&lt;/code&gt;">system__tool</pc>, and the platform routes each call to the right system. Nothing is saved here: the choices below only change the address.
-</source>
+        <source>One address covers all systems you have entitlements for.</source>
       </segment>
     </unit>
     <unit id="endpoint.resultTitle">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:9,11</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:5,7</note>
       </notes>
       <segment>
         <source>Your address</source>
@@ -5777,47 +5768,39 @@
     </unit>
     <unit id="endpoint.emptyFilter">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:19,22</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:15,17</note>
       </notes>
       <segment>
-        <source>This filter leaves no tool that you can call. The client will see an empty list. Change the selection or go back to the address without a filter.</source>
+        <source>This filter leaves no tool that you can call, so the client will see an empty list.</source>
       </segment>
     </unit>
     <unit id="endpoint.sizeWarning">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:27,29</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:22,24</note>
       </notes>
       <segment>
-        <source>The list has about <ph id="0" equiv="INTERPOLATION" disp="{{ result.toolCount }}"/> tools. Tool descriptions take up model context and make tool selection worse, so narrow the address to the systems you need, or to read-only tools.</source>
+        <source>About <ph id="0" equiv="INTERPOLATION" disp="{{ result.toolCount }}"/> tools take up model context: narrow the address to the systems you need.</source>
       </segment>
     </unit>
     <unit id="endpoint.pagingNote">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:33,34</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:27,28</note>
       </notes>
       <segment>
-        <source> The gateway returns <ph id="0" equiv="INTERPOLATION" disp="{{ pageSize }}"/> tools per page; the client must fetch the next pages, otherwise it will only see the first one.</source>
+        <source> The gateway returns <ph id="0" equiv="INTERPOLATION" disp="{{ pageSize }}"/> tools per page, the client must fetch the rest.</source>
       </segment>
     </unit>
     <unit id="endpoint.noAddress">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:41,44</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:34,37</note>
       </notes>
       <segment>
         <source> The address will appear once the selection fits within the limit. </source>
       </segment>
     </unit>
-    <unit id="endpoint.injection">
-      <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:53,57</note>
-      </notes>
-      <segment>
-        <source>One session reaches all selected systems. Text from one of them, for example a Confluence page with a planted instruction, can push the model to write to another. Entitlements do not change, and irreversible operations still require a code from the Authenticator, but the reach of such an attack grows. For read-only work, choose &quot;Read-only&quot;.</source>
-      </segment>
-    </unit>
     <unit id="endpoint.filterTitle">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:62,63</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:47,48</note>
       </notes>
       <segment>
         <source>Narrow the tool list</source>
@@ -5825,7 +5808,7 @@
     </unit>
     <unit id="endpoint.filterLead">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:64,68</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:49,53</note>
       </notes>
       <segment>
         <source> A filter does not grant entitlements. It only narrows what the client sees, so it is not a substitute for access restrictions. </source>
@@ -5833,7 +5816,7 @@
     </unit>
     <unit id="endpoint.systems">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:77,78</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:60,61</note>
       </notes>
       <segment>
         <source>Systems</source>
@@ -5841,7 +5824,7 @@
     </unit>
     <unit id="endpoint.systemsHint">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:79,81</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:62,64</note>
       </notes>
       <segment>
         <source> With nothing selected, the address covers all systems. </source>
@@ -5849,10 +5832,26 @@
     </unit>
     <unit id="endpoint.systemCount">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:89,90</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:72,73</note>
       </notes>
       <segment>
         <source>(<ph id="0" equiv="INTERPOLATION" disp="{{ option.count }}"/>)</source>
+      </segment>
+    </unit>
+    <unit id="endpoint.injection">
+      <notes>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:79,81</note>
+      </notes>
+      <segment>
+        <source>One session reaches all selected systems: text from one can push the model to write to another</source>
+      </segment>
+    </unit>
+    <unit id="endpoint.readOnlyAction">
+      <notes>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:89,91</note>
+      </notes>
+      <segment>
+        <source> Read-only </source>
       </segment>
     </unit>
     <unit id="endpoint.access">
@@ -5961,7 +5960,7 @@
     </unit>
     <unit id="endpoint.confirmNote">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:210,212</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:211,213</note>
       </notes>
       <segment>
         <source>Requires a code from the Authenticator.</source>
@@ -5969,7 +5968,7 @@
     </unit>
     <unit id="endpoint.notConnected">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:219,220</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:221,222</note>
       </notes>
       <segment>
         <source>Account not connected, the call will ask you to connect.</source>
@@ -5977,7 +5976,7 @@
     </unit>
     <unit id="endpoint.reconnect">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:222,223</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:224,225</note>
       </notes>
       <segment>
         <source>Needs reconnecting.</source>
@@ -5985,7 +5984,7 @@
     </unit>
     <unit id="endpoint.connect">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:225,226</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:227,228</note>
       </notes>
       <segment>
         <source>Connect</source>
@@ -5993,7 +5992,7 @@
     </unit>
     <unit id="endpoint.noTools">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:243,247</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:245,249</note>
       </notes>
       <segment>
         <source>No tool matches the search.</source>
@@ -6001,7 +6000,7 @@
     </unit>
     <unit id="endpoint.bytes">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:249,251</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:251,253</note>
       </notes>
       <segment>
         <source> Filter in the address: <ph id="0" equiv="INTERPOLATION" disp="{{ composed().bytes }}"/> of <ph id="1" equiv="INTERPOLATION_1" disp="{{ maxBytes }}"/> bytes </source>
@@ -6009,7 +6008,7 @@
     </unit>
     <unit id="endpoint.clear">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.html:257,259</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.html:259,261</note>
       </notes>
       <segment>
         <source> No filter </source>
@@ -6017,7 +6016,7 @@
     </unit>
     <unit id="endpoint.problem.tooLong">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.ts:335</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.ts:337</note>
       </notes>
       <segment>
         <source>The address would be longer than <ph id="0" equiv="max" disp="MAX_QUERY_BYTES"/> bytes. Instead of many tools, choose whole systems or exclude a few tools.</source>
@@ -6025,7 +6024,7 @@
     </unit>
     <unit id="endpoint.problem.tooMany">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.ts:337</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.ts:339</note>
       </notes>
       <segment>
         <source>Too many entries in one parameter (up to 5 systems, up to 100 tools). Choose whole systems or exclude a few tools.</source>
@@ -6033,7 +6032,7 @@
     </unit>
     <unit id="endpoint.problem.other">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-page.ts:339</note>
+        <note category="location">src/app/features/endpoint/endpoint-page.ts:341</note>
       </notes>
       <segment>
         <source>This selection cannot be turned into an address. Change the selection.</source>
@@ -6080,18 +6079,33 @@
 </source>
       </segment>
     </unit>
-    <unit id="ready.count">
+    <unit id="ready.countNone">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.html:41,44</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.html:43,45</note>
       </notes>
       <segment>
-        <source> The list will have about <pc id="0" equivStart="START_TAG_STRONG" equivEnd="CLOSE_TAG_STRONG" type="other" dispStart="&lt;strong&gt;" dispEnd="&lt;/strong&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ toolCount() }}"/></pc> tools. This is an estimate from the catalog; the gateway returns the exact list.
-</source>
+        <source>You do not have access to any tool yet</source>
+      </segment>
+    </unit>
+    <unit id="ready.toCatalog">
+      <notes>
+        <note category="location">src/app/features/endpoint/endpoint-ready.html:46,49</note>
+      </notes>
+      <segment>
+        <source>Catalog</source>
+      </segment>
+    </unit>
+    <unit id="ready.count">
+      <notes>
+        <note category="location">src/app/features/endpoint/endpoint-ready.html:50,53</note>
+      </notes>
+      <segment>
+        <source> About <pc id="0" equivStart="START_TAG_STRONG" equivEnd="CLOSE_TAG_STRONG" type="other" dispStart="&lt;strong&gt;" dispEnd="&lt;/strong&gt;"><ph id="1" equiv="INTERPOLATION" disp="{{ toolCount() }}"/></pc> tools </source>
       </segment>
     </unit>
     <unit id="ready.hintClaude">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:35</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:37</note>
       </notes>
       <segment>
         <source>Run in a terminal</source>
@@ -6099,7 +6113,7 @@
     </unit>
     <unit id="ready.hintCopilot">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:40</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:42</note>
       </notes>
       <segment>
         <source>Paste into the .vscode/mcp.json file</source>
@@ -6107,7 +6121,7 @@
     </unit>
     <unit id="ready.hintCodex">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:45</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:47</note>
       </notes>
       <segment>
         <source>Add to the ~/.codex/config.toml file</source>
@@ -6115,7 +6129,7 @@
     </unit>
     <unit id="ready.copied">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:56</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:58</note>
       </notes>
       <segment>
         <source>Copied: <ph id="0" equiv="what" disp="what"/>.</source>
@@ -6123,7 +6137,7 @@
     </unit>
     <unit id="ready.copyFailed">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:59</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:61</note>
       </notes>
       <segment>
         <source>Could not copy. Select the text and copy it manually.</source>
@@ -6131,7 +6145,7 @@
     </unit>
     <unit id="ready.urlCopied">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:64</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:66</note>
       </notes>
       <segment>
         <source>MCP address</source>
@@ -6139,7 +6153,7 @@
     </unit>
     <unit id="ready.configCopied">
       <notes>
-        <note category="location">src/app/features/endpoint/endpoint-ready.ts:65</note>
+        <note category="location">src/app/features/endpoint/endpoint-ready.ts:67</note>
       </notes>
       <segment>
         <source>configuration</source>
@@ -6523,15 +6537,15 @@
     </unit>
     <unit id="logs.stale">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:43</note>
+        <note category="location">src/app/features/logs/logs-page.html:43,44</note>
       </notes>
       <segment>
-        <source>The list is out of date.</source>
+        <source>The list is out of date</source>
       </segment>
     </unit>
     <unit id="logs.reload">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:49,51</note>
+        <note category="location">src/app/features/logs/logs-page.html:46,48</note>
       </notes>
       <segment>
         <source> Load from the start </source>
@@ -6539,7 +6553,7 @@
     </unit>
     <unit id="logs.caption">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:56,58</note>
+        <note category="location">src/app/features/logs/logs-page.html:53,55</note>
       </notes>
       <segment>
         <source> My tool calls, newest first </source>
@@ -6547,7 +6561,7 @@
     </unit>
     <unit id="logs.colDetails">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:61,63</note>
+        <note category="location">src/app/features/logs/logs-page.html:58,60</note>
       </notes>
       <segment>
         <source>Details</source>
@@ -6555,8 +6569,8 @@
     </unit>
     <unit id="logs.colTime">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:63,64</note>
-        <note category="location">src/app/features/logs/logs-page.html:100</note>
+        <note category="location">src/app/features/logs/logs-page.html:60,61</note>
+        <note category="location">src/app/features/logs/logs-page.html:97</note>
       </notes>
       <segment>
         <source>Time</source>
@@ -6564,8 +6578,8 @@
     </unit>
     <unit id="logs.colClient">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:64,65</note>
-        <note category="location">src/app/features/logs/logs-page.html:104</note>
+        <note category="location">src/app/features/logs/logs-page.html:61,62</note>
+        <note category="location">src/app/features/logs/logs-page.html:101</note>
       </notes>
       <segment>
         <source>Client</source>
@@ -6573,8 +6587,8 @@
     </unit>
     <unit id="logs.colTool">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:65,66</note>
-        <note category="location">src/app/features/logs/logs-page.html:107</note>
+        <note category="location">src/app/features/logs/logs-page.html:62,63</note>
+        <note category="location">src/app/features/logs/logs-page.html:104</note>
       </notes>
       <segment>
         <source>Tool</source>
@@ -6582,8 +6596,8 @@
     </unit>
     <unit id="logs.colResource">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:66,67</note>
-        <note category="location">src/app/features/logs/logs-page.html:113,114</note>
+        <note category="location">src/app/features/logs/logs-page.html:63,64</note>
+        <note category="location">src/app/features/logs/logs-page.html:110,111</note>
       </notes>
       <segment>
         <source>Resource</source>
@@ -6591,8 +6605,8 @@
     </unit>
     <unit id="logs.colFilter">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:67,68</note>
-        <note category="location">src/app/features/logs/logs-page.html:123</note>
+        <note category="location">src/app/features/logs/logs-page.html:64,65</note>
+        <note category="location">src/app/features/logs/logs-page.html:120</note>
       </notes>
       <segment>
         <source>Filter</source>
@@ -6600,8 +6614,8 @@
     </unit>
     <unit id="logs.colResult">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:68,70</note>
-        <note category="location">src/app/features/logs/logs-page.html:136</note>
+        <note category="location">src/app/features/logs/logs-page.html:65,67</note>
+        <note category="location">src/app/features/logs/logs-page.html:133</note>
       </notes>
       <segment>
         <source>Result</source>
@@ -6609,7 +6623,7 @@
     </unit>
     <unit id="logs.noFilter">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:129,131</note>
+        <note category="location">src/app/features/logs/logs-page.html:126,128</note>
       </notes>
       <segment>
         <source>no filter</source>
@@ -6617,7 +6631,7 @@
     </unit>
     <unit id="logs.wrongCodes">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:151,152</note>
+        <note category="location">src/app/features/logs/logs-page.html:148,149</note>
       </notes>
       <segment>
         <source>Wrong codes</source>
@@ -6625,7 +6639,7 @@
     </unit>
     <unit id="logs.risk">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:156,157</note>
+        <note category="location">src/app/features/logs/logs-page.html:153,154</note>
       </notes>
       <segment>
         <source>Risk</source>
@@ -6633,7 +6647,7 @@
     </unit>
     <unit id="logs.errorCode">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:161,162</note>
+        <note category="location">src/app/features/logs/logs-page.html:158,159</note>
       </notes>
       <segment>
         <source>Error code</source>
@@ -6641,7 +6655,7 @@
     </unit>
     <unit id="logs.rawResult">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:169,170</note>
+        <note category="location">src/app/features/logs/logs-page.html:166,167</note>
       </notes>
       <segment>
         <source>Result (value from the gateway)</source>
@@ -6649,7 +6663,7 @@
     </unit>
     <unit id="logs.requestId">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:176,177</note>
+        <note category="location">src/app/features/logs/logs-page.html:173,174</note>
       </notes>
       <segment>
         <source>Request ID</source>
@@ -6657,7 +6671,7 @@
     </unit>
     <unit id="logs.more">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:197,198</note>
+        <note category="location">src/app/features/logs/logs-page.html:194,195</note>
       </notes>
       <segment>
         <source> Show more </source>
@@ -6665,7 +6679,7 @@
     </unit>
     <unit id="logs.noMatches">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:204,205</note>
+        <note category="location">src/app/features/logs/logs-page.html:201,202</note>
       </notes>
       <segment>
         <source>No call matches the filters.</source>
@@ -6673,7 +6687,7 @@
     </unit>
     <unit id="logs.empty">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:206,208</note>
+        <note category="location">src/app/features/logs/logs-page.html:203,205</note>
       </notes>
       <segment>
         <source>No calls in the selected period.</source>
@@ -6681,7 +6695,7 @@
     </unit>
     <unit id="logs.note">
       <notes>
-        <note category="location">src/app/features/logs/logs-page.html:210,212</note>
+        <note category="location">src/app/features/logs/logs-page.html:207,209</note>
       </notes>
       <segment>
         <source>Only your calls. Argument values are not shown here.</source>
@@ -6992,7 +7006,7 @@
         <note category="location">src/app/features/requests/requests-page.ts:107</note>
       </notes>
       <segment>
-        <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> is in the entitlement system. You can check its status here.</source>
+        <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> submitted.</source>
       </segment>
     </unit>
     <unit id="common.cancel">
@@ -7005,7 +7019,7 @@
     </unit>
     <unit id="common.requestRef">
       <notes>
-        <note category="location">src/app/shared/error-notice.ts:20,21</note>
+        <note category="location">src/app/shared/error-notice.ts:19,20</note>
       </notes>
       <segment>
         <source>Reference for support:</source>
@@ -7363,21 +7377,20 @@
         <source>Loading...</source>
       </segment>
     </unit>
-    <unit id="notice.close">
-      <notes>
-        <note category="location">src/app/shared/notice.ts:27,28</note>
-        <note category="location">src/app/shared/notification-host.ts:62,63</note>
-      </notes>
-      <segment>
-        <source>Close message</source>
-      </segment>
-    </unit>
     <unit id="common.requestRef3">
       <notes>
         <note category="location">src/app/shared/notification-host.ts:48,49</note>
       </notes>
       <segment>
         <source>Reference for support:</source>
+      </segment>
+    </unit>
+    <unit id="notice.close">
+      <notes>
+        <note category="location">src/app/shared/notification-host.ts:62,63</note>
+      </notes>
+      <segment>
+        <source>Close message</source>
       </segment>
     </unit>
     <unit id="oauth.connectedAs">

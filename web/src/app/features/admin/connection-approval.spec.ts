@@ -104,7 +104,7 @@ describe('AdminPage: approval of a connection', () => {
     expect(shown).toContain('01.03.2027');
     expect(shown).toContain('Yes, for the host of the address');
     expect(shown).toContain('First connection to this server.');
-    expect(card().querySelector('app-notice')).toBeNull();
+    expect(card().querySelector('app-state')).toBeNull();
     expect(text()).toContain('Connections waiting for approval: 1');
   });
 
@@ -136,7 +136,7 @@ describe('AdminPage: approval of a connection', () => {
 
     await until(() => expect(card()).toBeTruthy());
     const first = card().querySelector('.card')!.children[1];
-    expect(first.tagName).toBe('APP-NOTICE');
+    expect(first.tagName).toBe('APP-STATE');
     expect(text(first)).toContain("Plain HTTP sends users' credentials unencrypted.");
     expect(text(card())).toContain('None: the connection is not encrypted.');
     expect(card().querySelector('.fingerprint')).toBeNull();
@@ -238,7 +238,7 @@ describe('AdminPage: approval of a connection', () => {
     await harness.navigateByUrl('/admin?mfa=ok');
 
     await until(() =>
-      expect(text()).toContain('The connection changed while you confirmed your identity.'),
+      expect(text()).toContain('The connection changed while you confirmed your identity'),
     );
     expect(writes.length).toBe(1);
   });

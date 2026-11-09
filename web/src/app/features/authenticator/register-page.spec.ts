@@ -75,7 +75,9 @@ describe('AuthenticatorRegisterPage', () => {
     button('Check').click();
     await harness.fixture.whenStable();
     await until(() => expect(text()).toContain('Authenticator registered'));
-    expect(text()).toContain('From now on you confirm irreversible operations with a code from the app.');
+    expect(text()).toContain(
+      'From now on you confirm irreversible operations with a code from the app.',
+    );
     expect(store.state.authenticator.state).toBe('active');
     expectSeedNowhere();
   });
@@ -172,9 +174,7 @@ describe('AuthenticatorRegisterPage', () => {
     await openRoute('/authenticator/register?mfa=ok');
     await until(() => expect(text()).toContain('Continue registration'));
     button('Continue registration').click();
-    await until(() =>
-      expect(text()).toContain('This operation requires re-authentication (MFA).'),
-    );
+    await until(() => expect(text()).toContain('This operation requires re-authentication (MFA).'));
     expect(navigation.assign).not.toHaveBeenCalled();
     expect(text()).toContain('Register Authenticator');
   });
@@ -248,7 +248,9 @@ describe('AuthenticatorRegisterPage', () => {
     }
     typeCode('000000');
     button('Check').click();
-    await until(() => expect(text()).toContain('The registration expired or 3 wrong codes were entered.'));
+    await until(() =>
+      expect(text()).toContain('The registration expired or 3 wrong codes were entered.'),
+    );
     expect(text()).toContain('Delete the "MCP Platform" account you just added in the app.');
     expectSeedNowhere();
 
@@ -276,7 +278,9 @@ describe('AuthenticatorRegisterPage', () => {
     await until(() => expect(text()).toContain('Register Authenticator'));
     button('Next').click();
     await until(() => expect(text()).toContain('Add the account in the app'));
-    await until(() => expect(text()).toContain('The registration expired or 3 wrong codes were entered.'));
+    await until(() =>
+      expect(text()).toContain('The registration expired or 3 wrong codes were entered.'),
+    );
     expectSeedNowhere();
   });
 
@@ -344,9 +348,7 @@ describe('AuthenticatorRegisterPage', () => {
     it('asks the user to clear it when the browser does not let the page read it', async () => {
       const clipboard = clipboardWith(new Error('NotAllowedError'));
       await copyThenContinue();
-      await until(() =>
-        expect(text()).toContain('The key was copied to the clipboard. Clear the clipboard'),
-      );
+      await until(() => expect(text()).toContain('The key is in the clipboard: clear it'));
       expect(clipboard.writeText).not.toHaveBeenCalled();
     });
 
