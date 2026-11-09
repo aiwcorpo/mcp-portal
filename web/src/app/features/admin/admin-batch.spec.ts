@@ -181,8 +181,9 @@ describe('AdminPage: batch approval of tools', () => {
     await until(() => expect(text(toolRow('gitlab__list_projects'))).toContain('Approved'));
     expect(store.state.registryApproved).toHaveLength(4);
     // The failed rows are not picked again behind the administrator's back.
+    // The label reads "Approving 6/6" until the list was read again, so it is awaited like the rest.
+    await until(() => expect(gitlab(/^Approve selected \(0\)/)).toBeTruthy());
     expect(checkbox('gitlab__get_merge_request').checked).toBe(false);
-    expect(gitlab(/^Approve selected \(0\)/)).toBeTruthy();
 
     checkbox('gitlab__get_merge_request').click();
     await until(() =>
