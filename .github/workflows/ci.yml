@@ -35,7 +35,7 @@ jobs:
       CI: '1'
       # The tarball of @aiwcorpo/mcp-contracts 6.3.2 from npmjs, checked against the bytes of the release file.
       CONTRACTS_FROM_NPMJS: '1'
-      CONTRACTS_TARBALL_SHA256: f99e6d182a7197aedb448c99a4b439087c23c8e85d6b9f6cefd9433c6c6a74c3
+      CONTRACTS_TARBALL_SHA256: 001c77faeedf66c3cf0dabf06be166d968c52c6025282b7be5c05c502fd22b2d
     defaults:
       run:
         working-directory: web
