@@ -41,7 +41,7 @@ class CatalogController {
         this.gateway = gateway;
         this.broker = broker;
         this.iga = iga;
-        this.assembler = new CatalogAssembler(publicUrls);
+        this.assembler = new CatalogAssembler(publicUrls, iga.supportsRequests());
     }
 
     @GetMapping("/api/v1/catalog")

@@ -4,6 +4,7 @@ import {
   canRequestTool,
   catalogRowActions,
   connectionRowActions,
+  grantedByAdministrator,
   isEmphasised,
 } from './catalog-actions';
 
@@ -60,6 +61,18 @@ describe('canRequestTool', () => {
     expect(canRequestTool(withRequest, { ...denied, requiredEntitlements: [] })).toBe(false);
     expect(canRequestTool(withRequest, { ...denied, access: 'granted' })).toBe(false);
     expect(canRequestTool(withRequest, { ...denied, disabled: true })).toBe(false);
+  });
+});
+
+describe('grantedByAdministrator', () => {
+  it('is true for no_access with nothing to request or view', () => {
+    expect(grantedByAdministrator(offered('no_access', []))).toBe(true);
+  });
+
+  it('is false when the BFF offers a request, shows a pending one, or the server is not no_access', () => {
+    expect(grantedByAdministrator(offered('no_access', ['request_access']))).toBe(false);
+    expect(grantedByAdministrator(offered('request_pending', ['view_request']))).toBe(false);
+    expect(grantedByAdministrator(offered('connected', ['copy_link']))).toBe(false);
   });
 });
 

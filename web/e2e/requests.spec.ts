@@ -60,17 +60,18 @@ test('an IGA that answers with its own form sends the browser there and back to 
   await expect(page.getByRole('row', { name: /mcp-opensearch-read/ })).toContainText('Pending');
 });
 
-test('an IGA without a request flow and an IGA that is down are explained, not hidden', async ({
+test('an IGA without a request flow offers no request, an IGA that is down is explained', async ({
   page,
 }) => {
-  await page.goto('/requests?mockIga=groups');
-  await page.getByRole('button', { name: 'Submit request' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Submit request' });
-  await dialog.getByLabel('System').selectOption('jira');
+  await page.goto('/catalog?mockIga=groups&mockScenario=mixed');
   await expect(
-    dialog.getByText('The entitlement system does not accept requests from the portal.'),
+    page.getByText('Access is granted by the platform administrator.').first(),
   ).toBeVisible();
-  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.getByRole('button', { name: /^Submit request/ })).toHaveCount(0);
+
+  await page.goto('/requests?mockIga=groups');
+  await expect(page.getByText('Access is granted by the platform administrator.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Submit request' })).toHaveCount(0);
 
   await page.goto('/requests?mockIga=down');
   await expect(page.getByText('The service is temporarily unavailable.')).toBeVisible();

@@ -252,6 +252,23 @@ class CatalogAssemblerTest {
     }
 
     @Test
+    void anIgaWithoutRequestFlowNeverOffersARequest() {
+        CatalogAssembler withoutRequests = new CatalogAssembler(
+                new PublicUrls(java.net.URI.create("https://mcp.aiwcorpo.pl/"), new DevMode(false)), false);
+        Catalog c5 = new Catalog(List.of(
+                server("jira", tool("jira__get_issue", "denied", "mcp-jira-read")),
+                server("gitlab", tool("gitlab__read", "granted", "mcp-gitlab-read"),
+                        tool("gitlab__write", "denied", "mcp-gitlab-write"))));
+
+        PortalCatalog result = withoutRequests.assemble(c5, List.of(connection("gitlab", "connected")), SYSTEMS,
+                List.of());
+
+        assertThat(result.servers()).extracting(PortalCatalog.Server::status).containsExactly("no_access", "connected");
+        assertThat(result.servers().get(0).actions()).isEmpty();
+        assertThat(result.servers().get(1).actions()).containsExactly("copy_link", "disconnect");
+    }
+
+    @Test
     void oneNamedEntitlementAmongDeniedToolsIsEnoughToOfferTheRequest() {
         Catalog c5 = new Catalog(List.of(server("jira", tool("jira__get_issue", "denied"),
                 tool("jira__update_issue", "denied", "mcp-jira-write"))));

@@ -1,5 +1,5 @@
 import { HttpResponse, http } from 'msw';
-import { connectionFixture, serverFixture } from '../../../testing/fixtures';
+import { connectionFixture, serverFixture, toolFixture } from '../../../testing/fixtures';
 import { useMockApi } from '../../../testing/mock-api';
 import { button, configureTestApp, openRoute, text, until } from '../../../testing/test-app';
 import { PortalCatalogServer } from '../../api/generated';
@@ -71,9 +71,28 @@ describe('display names of systems on the user pages', () => {
   });
 
   it('are in the request dialog and in the title of an entitlement on the requests page', async () => {
+    server.use(
+      http.get('/api/v1/catalog', () =>
+        HttpResponse.json({
+          servers: [
+            ...NAMED,
+            serverFixture('opensearch', {
+              status: 'no_access',
+              actions: ['request_access'],
+              tools: [
+                toolFixture('opensearch__q', {
+                  access: 'denied',
+                  requiredEntitlements: ['mcp-opensearch-read'],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ),
+    );
     configureTestApp();
     await openRoute('/requests');
-    await until(() => expect(text()).toContain('Requests'));
+    await until(() => expect(button('Submit request')).toBeTruthy());
     button('Submit request').click();
     await until(() =>
       expect(document.querySelector('#request-system option[value="notes"]')).toBeTruthy(),

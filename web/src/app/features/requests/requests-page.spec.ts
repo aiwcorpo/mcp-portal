@@ -38,6 +38,10 @@ function dialogSelect(id: string): HTMLSelectElement {
   return dialog().querySelector<HTMLSelectElement>(`#${id}`)!;
 }
 
+function buttonLabels(root: ParentNode = document): string[] {
+  return Array.from(root.querySelectorAll('button')).map((candidate) => text(candidate).trim());
+}
+
 const DAY = 86_400_000;
 const iso = (ago: number) => new Date(Date.now() - ago).toISOString();
 
@@ -124,6 +128,26 @@ describe('RequestsPage', () => {
     await openRoute('/requests');
     await until(() => expect(text()).toContain('You have no requests.'));
     expect(button('Submit request')).toBeTruthy();
+  });
+
+  it('offers no new request, only who grants the access, when no server can be asked for', async () => {
+    store.update({ iga: 'groups' });
+    configureTestApp();
+    await openRoute('/requests');
+    await until(() => expect(text()).toContain('You have no requests.'));
+    expect(text()).toContain('Access is granted by the platform administrator.');
+
+    expect(buttonLabels()).not.toContain('Submit request');
+    expect(text()).not.toContain('Requests are approved and cancelled');
+  });
+
+  it('keeps the button when the catalog cannot be read', async () => {
+    server.use(
+      http.get('/api/v1/catalog', () => HttpResponse.json({ error: 'x' }, { status: 503 })),
+    );
+    configureTestApp();
+    await openRoute('/requests');
+    await until(() => expect(button('Submit request')).toBeTruthy());
   });
 
   it('shows a page error with the short request id when the IGA is down, and reloads', async () => {
@@ -241,11 +265,29 @@ describe('RequestsPage', () => {
       expect(navigation.assign).not.toHaveBeenCalled();
     });
 
-    it('explains a system whose IGA has no request flow (422 not_requestable)', async () => {
+    it('still explains 422 not_requestable when the catalog on screen was stale', async () => {
       store.update({ iga: 'groups' });
+      server.use(
+        http.get('/api/v1/catalog', () =>
+          HttpResponse.json({
+            servers: [
+              serverFixture('jira', {
+                status: 'no_access',
+                actions: ['request_access'],
+                tools: [
+                  toolFixture('jira__get', {
+                    access: 'denied',
+                    requiredEntitlements: ['mcp-jira-read'],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ),
+      );
       configureTestApp();
       await openRoute('/requests');
-      await until(() => expect(text()).toContain('mcp-jira-write'));
+      await until(() => expect(button('Submit request')).toBeTruthy());
 
       button('Submit request').click();
       await until(() => expect(dialogSelect('request-system')).toBeTruthy());

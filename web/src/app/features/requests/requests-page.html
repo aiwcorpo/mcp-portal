@@ -8,9 +8,15 @@
 } @else {
   <div class="page-head">
     <p class="muted" i18n="@@requests.lead">Requests for entitlements to MCP servers.</p>
-    <button mat-flat-button type="button" (click)="newRequest()" i18n="@@requests.new">
-      Submit request
-    </button>
+    @if (canSubmit()) {
+      <button mat-flat-button type="button" (click)="newRequest()" i18n="@@requests.new">
+        Submit request
+      </button>
+    } @else {
+      <app-state i18n="@@catalog.byAdministrator"
+        >Access is granted by the platform administrator.</app-state
+      >
+    }
   </div>
   @if (rows().length) {
     <table class="table" role="table">
@@ -83,12 +89,16 @@
   } @else {
     <section class="empty">
       <h2 i18n="@@requests.emptyTitle">You have no requests.</h2>
-      <p class="muted" i18n="@@requests.emptyText">
-        When you ask for an entitlement, the request will appear here with its status.
-      </p>
+      @if (canSubmit()) {
+        <p class="muted" i18n="@@requests.emptyText">
+          When you ask for an entitlement, the request will appear here with its status.
+        </p>
+      }
     </section>
   }
-  <p class="muted footnote" i18n="@@requests.footnote">
-    Requests are approved and cancelled in the entitlement system.
-  </p>
+  @if (canSubmit() || rows().length) {
+    <p class="muted footnote" i18n="@@requests.footnote">
+      Requests are approved and cancelled in the entitlement system.
+    </p>
+  }
 }

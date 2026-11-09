@@ -104,6 +104,19 @@ describe('mock catalog rows follow the contract vectors', () => {
   });
 });
 
+describe('an IGA without a request flow', () => {
+  it('offers neither request_access nor view_request, even with named entitlements', () => {
+    const server = serverFixture('jira', {
+      tools: [
+        toolFixture('jira__get', { access: 'denied', requiredEntitlements: ['mcp-jira-read'] }),
+      ],
+    });
+
+    expect(deriveRow(server, null, new Set(), false)).toEqual({ status: 'no_access', actions: [] });
+    expect(deriveRow(server, null, new Set(), true).actions).toEqual(['request_access']);
+  });
+});
+
 describe('completeMockOAuth', () => {
   it('sends an unknown flow to the root like the BFF does (C12 oauthCallback)', () => {
     expect(completeMockOAuth(new MockStore())).toBe('/?connectError=flow_invalid');

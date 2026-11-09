@@ -305,12 +305,17 @@ export function deriveRow(
   server: PortalCatalogServer,
   connection: Connection | null,
   pendingEntitlements: ReadonlySet<string>,
+  requestsSupported = true,
 ): { status: CatalogStatus; actions: CatalogAction[] } {
   const granted = server.tools.some((candidate) => candidate.access === 'granted');
   const someDenied = server.tools.some((candidate) => candidate.access === 'denied');
   // request_access needs entitlements to ask for; a pending request for one of them turns it into view_request.
+  // An IGA without a request flow (mockIga=groups) has nothing to ask for, like the BFF.
   const askable = server.tools.filter(
-    (candidate) => candidate.access === 'denied' && candidate.requiredEntitlements.length > 0,
+    (candidate) =>
+      requestsSupported &&
+      candidate.access === 'denied' &&
+      candidate.requiredEntitlements.length > 0,
   );
   const requestPending = askable.some((candidate) =>
     candidate.requiredEntitlements.some((entitlement) => pendingEntitlements.has(entitlement)),
@@ -368,7 +373,7 @@ export function mockCatalog(state: MockState, now: number = Date.now()): PortalC
         override === undefined
           ? (server.connection ?? null)
           : override && connectionOf(server.system, override, server.connection, now);
-      const row = deriveRow(server, connection, pending);
+      const row = deriveRow(server, connection, pending, state.iga !== 'groups');
       return { ...server, connection, ...row, tools: withKillSwitches(server, state.killSwitches) };
     },
   );
@@ -379,6 +384,9 @@ const IGA_BASE = 'https://iga.internal';
 
 /** Requests the user has in the IGA: a seed per scenario, then what the mock creates. */
 export function mockRequests(state: Readonly<MockState>, now: number = Date.now()): MockRequest[] {
+  if (state.iga === 'groups') {
+    return [];
+  }
   if (state.requests) {
     return state.requests;
   }

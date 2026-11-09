@@ -11,7 +11,13 @@ import {
   riskLabel,
   catalogSystemName,
 } from '../../shared/labels';
-import { canRequestTool, catalogRowActions, isEmphasised } from './catalog-actions';
+import { StateLine } from '../../shared/state-line';
+import {
+  canRequestTool,
+  catalogRowActions,
+  grantedByAdministrator,
+  isEmphasised,
+} from './catalog-actions';
 
 export interface CatalogActionEvent {
   server: PortalCatalogServer;
@@ -47,7 +53,7 @@ function toolMatches(tool: CatalogTool, needle: string): boolean {
 /** Expandable table of servers (mockups 01, 26); tools of a server are rows under it. */
 @Component({
   selector: 'app-catalog-table',
-  imports: [MatButtonModule, AuthenticatorState],
+  imports: [MatButtonModule, AuthenticatorState, StateLine],
   templateUrl: './catalog-table.html',
   styleUrl: './catalog-table.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,6 +77,7 @@ export class CatalogTable {
       status: catalogStatusText(server.status, server.connection),
       tone: catalogStatusTone(server.status),
       actions: catalogRowActions(server),
+      byAdministrator: grantedByAdministrator(server),
       tools: server.tools,
     })),
   );

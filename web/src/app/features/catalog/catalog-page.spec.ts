@@ -213,6 +213,28 @@ describe('CatalogPage', () => {
     });
   });
 
+  it('shows who grants the access where the request button would be, when the IGA takes no requests', async () => {
+    server.use(
+      serve([
+        serverFixture('jira', {
+          status: 'no_access',
+          actions: [],
+          tools: [
+            toolFixture('jira__get', { access: 'denied', requiredEntitlements: ['mcp-jira-read'] }),
+          ],
+        }),
+      ]),
+    );
+    configureTestApp();
+    await openRoute('/catalog');
+    await until(() =>
+      expect(text(row('Jira'))).toContain('Access is granted by the platform administrator.'),
+    );
+
+    expect(row('Jira').querySelectorAll('td.c-actions button')).toHaveLength(0);
+    expect(row('Jira').querySelector('[role="status"]')).toBeTruthy();
+  });
+
   it('says why a tool is off: an emergency switch, a definition waiting for approval, or plain disabled', async () => {
     server.use(
       serve([

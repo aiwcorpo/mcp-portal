@@ -16,6 +16,7 @@ import { LOADING, LoadState } from '../../core/load-state';
 import { Tone, catalogNames } from '../../shared/labels';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
+import { StateLine } from '../../shared/state-line';
 import { SafeTextPipe } from '../../shared/safe-text.pipe';
 import { neutraliseText } from '../../shared/untrusted-text';
 import { entitlementTitle } from './entitlement-labels';
@@ -43,7 +44,7 @@ interface RequestRow {
 /** "Wnioski" (mockup 17): the user's requests from the IGA and the way to file a new one. */
 @Component({
   selector: 'app-requests-page',
-  imports: [SafeTextPipe, DatePipe, MatButtonModule, LoadError, Loading],
+  imports: [SafeTextPipe, DatePipe, MatButtonModule, LoadError, Loading, StateLine],
   templateUrl: './requests-page.html',
   styleUrl: './requests-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +56,14 @@ export class RequestsPage {
   private readonly catalogApi = inject(CatalogService);
   /** Names of the systems from the catalog, read after the list; without them the identifiers are shown. */
   private readonly names = signal<ReadonlyMap<string, string>>(new Map());
+  /**
+   * Whether some server of the catalog can be asked for access. The dialog offers only systems of the catalog, and
+   * the BFF puts request_access there only when the IGA takes requests, so without one there is nothing to submit.
+   * A failed catalog read leaves the button: it must not hide on a guess.
+   */
+  protected readonly canSubmit = signal(true);
+  /** The list is shown only after this, so the button or the note about the administrator never swaps in late. */
+  private readonly catalogRead = this.loadNames();
 
   protected readonly requests = signal<LoadState<AccessRequest[]>>(LOADING);
 
@@ -77,13 +86,17 @@ export class RequestsPage {
 
   constructor() {
     void this.load();
-    void this.loadNames();
   }
 
   private async loadNames(): Promise<void> {
     try {
-      this.names.set(
-        catalogNames((await firstValueFrom(this.catalogApi.getPortalCatalog())).servers),
+      const servers = (await firstValueFrom(this.catalogApi.getPortalCatalog())).servers;
+      this.names.set(catalogNames(servers));
+      this.canSubmit.set(
+        servers.some(
+          (server) =>
+            server.actions.includes('request_access') || server.actions.includes('view_request'),
+        ),
       );
     } catch {
       // The names are an addition; the page shows the identifiers without them.
@@ -94,6 +107,7 @@ export class RequestsPage {
     this.requests.set(LOADING);
     try {
       const list = await firstValueFrom(this.api.listAccessRequests());
+      await this.catalogRead;
       this.requests.set({ status: 'ready', value: list });
     } catch (error) {
       this.requests.set({ status: 'error', failure: toApiFailure(error) });

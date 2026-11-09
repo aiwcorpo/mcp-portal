@@ -85,6 +85,25 @@ describe('ConnectionsPage', () => {
     expect(text()).toContain('Last used');
   });
 
+  it('shows who grants the access instead of a request button when the BFF offers none', async () => {
+    server.use(
+      serve([
+        serverFixture('opensearch', {
+          status: 'no_access',
+          actions: [],
+          tools: [toolFixture('opensearch__q', { access: 'denied' })],
+        }),
+      ]),
+    );
+    configureTestApp();
+    await openRoute('/connections');
+    await until(() =>
+      expect(text(row('Opensearch'))).toContain('Access is granted by the platform administrator.'),
+    );
+
+    expect(row('Opensearch').querySelectorAll('button')).toHaveLength(0);
+  });
+
   it('says the connection stopped working and asks to connect again when the secret is gone (error)', async () => {
     server.use(
       serve([

@@ -65,6 +65,18 @@ export function canRequestTool(server: PortalCatalogServer, tool: CatalogTool): 
   );
 }
 
+/**
+ * A server the user has no access to and cannot ask for: the BFF offers neither `request_access` nor `view_request`
+ * (the IGA has no request flow, or names no entitlement to ask for). The administrator grants the access.
+ */
+export function grantedByAdministrator(server: PortalCatalogServer): boolean {
+  return (
+    server.status === 'no_access' &&
+    !server.actions.includes('request_access') &&
+    !server.actions.includes('view_request')
+  );
+}
+
 /** Buttons of a catalog row: everything the BFF offers except disconnect (that is on Connections). */
 export function catalogRowActions(server: PortalCatalogServer): CatalogAction[] {
   return pick(server, CATALOG_ORDER);

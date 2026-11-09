@@ -43,9 +43,19 @@ public final class CatalogAssembler {
     private static final Set<String> NOTHING_TO_CONNECT = Set.of("service-account", "token-exchange");
 
     private final PublicUrls publicUrls;
+    private final boolean requestsSupported;
 
     public CatalogAssembler(PublicUrls publicUrls) {
+        this(publicUrls, true);
+    }
+
+    /**
+     * @param requestsSupported {@link pl.aiwcorpo.mcp.portal.bff.iga.AccessGovernance#supportsRequests()}; false
+     *                          means the IGA has nothing a user could ask for, so the catalog never offers a request
+     */
+    public CatalogAssembler(PublicUrls publicUrls, boolean requestsSupported) {
         this.publicUrls = publicUrls;
+        this.requestsSupported = requestsSupported;
     }
 
     public PortalCatalog assemble(Catalog catalog, List<Connection> connections, List<SystemInfo> systems,
@@ -83,7 +93,9 @@ public final class CatalogAssembler {
             boolean toolGranted = "granted".equals(tool.access());
             granted |= toolGranted;
             someDenied |= !toolGranted;
-            entitlementsKnown |= !toolGranted && !entitlements(tool).isEmpty();
+            // An IGA without a request flow answers every request with 422 not_requestable, so for the table of
+            // CC-113 its entitlements are not known to be askable: nothing to ask for, no request_access.
+            entitlementsKnown |= requestsSupported && !toolGranted && !entitlements(tool).isEmpty();
             // Any one of requiredEntitlements grants the tool, so one pending request covers it.
             pending |= !toolGranted && entitlements(tool).stream().anyMatch(pendingEntitlements::contains);
         }

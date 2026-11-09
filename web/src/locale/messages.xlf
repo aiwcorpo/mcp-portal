@@ -5208,9 +5208,19 @@
         <source><ph id="0" equiv="INTERPOLATION" disp="{{ srv.tools.length }}"/> tools</source>
       </segment>
     </unit>
+    <unit id="catalog.byAdministrator">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:66,68</note>
+        <note category="location">src/app/features/connections/connections-page.html:113,115</note>
+        <note category="location">src/app/features/requests/requests-page.html:17,21</note>
+      </notes>
+      <segment>
+        <source>Access is granted by the platform administrator.</source>
+      </segment>
+    </unit>
     <unit id="catalog.toolKillSwitch">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:84,86</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:88,90</note>
       </notes>
       <segment>
         <source>Switched off in an emergency by an administrator.</source>
@@ -5218,7 +5228,7 @@
     </unit>
     <unit id="catalog.toolApproval">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:88,90</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:92,94</note>
       </notes>
       <segment>
         <source>Waiting for approval by an administrator.</source>
@@ -5226,7 +5236,7 @@
     </unit>
     <unit id="catalog.toolDisabled">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:92,94</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:96,98</note>
       </notes>
       <segment>
         <source>Switched off by an administrator.</source>
@@ -5234,7 +5244,7 @@
     </unit>
     <unit id="catalog.toolDenied">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:96,98</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:100,102</note>
       </notes>
       <segment>
         <source>No entitlement for this tool.</source>
@@ -5242,7 +5252,7 @@
     </unit>
     <unit id="catalog.toolConfirm">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:101,103</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:105,107</note>
       </notes>
       <segment>
         <source>Requires a code from the Authenticator.</source>
@@ -5250,7 +5260,7 @@
     </unit>
     <unit id="catalog.requestTool">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:127,128</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:131,132</note>
       </notes>
       <segment>
         <source>Submit request</source>
@@ -5258,7 +5268,7 @@
     </unit>
     <unit id="catalog.noTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.html:138,139</note>
+        <note category="location">src/app/features/catalog/catalog-table.html:142,143</note>
       </notes>
       <segment>
         <source> The server offers no tools. </source>
@@ -5266,7 +5276,7 @@
     </unit>
     <unit id="catalog.showTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.ts:78</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:85</note>
       </notes>
       <segment>
         <source>Show tools</source>
@@ -5274,7 +5284,7 @@
     </unit>
     <unit id="catalog.hideTools">
       <notes>
-        <note category="location">src/app/features/catalog/catalog-table.ts:79</note>
+        <note category="location">src/app/features/catalog/catalog-table.ts:86</note>
       </notes>
       <segment>
         <source>Hide tools</source>
@@ -5800,7 +5810,7 @@
     </unit>
     <unit id="connections.emptyTitle">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:118,119</note>
+        <note category="location">src/app/features/connections/connections-page.html:123,124</note>
       </notes>
       <segment>
         <source>You have no connections yet</source>
@@ -5808,7 +5818,7 @@
     </unit>
     <unit id="connections.emptyText">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.html:120,125</note>
+        <note category="location">src/app/features/connections/connections-page.html:125,130</note>
       </notes>
       <segment>
         <source> Systems will appear here once you get access to an MCP server. </source>
@@ -5816,7 +5826,7 @@
     </unit>
     <unit id="conn.brokenReconnect">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:63</note>
+        <note category="location">src/app/features/connections/connections-page.ts:68</note>
       </notes>
       <segment>
         <source>stopped working, reconnect the account</source>
@@ -5824,7 +5834,7 @@
     </unit>
     <unit id="conn.invalidated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:65</note>
+        <note category="location">src/app/features/connections/connections-page.ts:70</note>
       </notes>
       <segment>
         <source>the administrator changed the system settings, connect the account again</source>
@@ -5832,7 +5842,7 @@
     </unit>
     <unit id="conn.reconnectNeeded">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:66</note>
+        <note category="location">src/app/features/connections/connections-page.ts:71</note>
       </notes>
       <segment>
         <source>needs reconnecting</source>
@@ -5840,7 +5850,7 @@
     </unit>
     <unit id="conn.pending">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:71</note>
+        <note category="location">src/app/features/connections/connections-page.ts:76</note>
       </notes>
       <segment>
         <source>request pending</source>
@@ -5848,7 +5858,7 @@
     </unit>
     <unit id="conn.noAccess">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:73</note>
+        <note category="location">src/app/features/connections/connections-page.ts:78</note>
       </notes>
       <segment>
         <source>no entitlement</source>
@@ -5856,7 +5866,7 @@
     </unit>
     <unit id="conn.autoRefreshed">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:90</note>
+        <note category="location">src/app/features/connections/connections-page.ts:95</note>
       </notes>
       <segment>
         <source>refreshed automatically</source>
@@ -5864,7 +5874,7 @@
     </unit>
     <unit id="conn.noExpiry">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:91</note>
+        <note category="location">src/app/features/connections/connections-page.ts:96</note>
       </notes>
       <segment>
         <source>no expiry</source>
@@ -5872,7 +5882,7 @@
     </unit>
     <unit id="conn.requestCreated">
       <notes>
-        <note category="location">src/app/features/connections/connections-page.ts:310</note>
+        <note category="location">src/app/features/connections/connections-page.ts:316</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> submitted.</source>
@@ -7007,7 +7017,7 @@
     </unit>
     <unit id="requests.new">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:12,14</note>
+        <note category="location">src/app/features/requests/requests-page.html:13,15</note>
       </notes>
       <segment>
         <source> Submit request </source>
@@ -7015,7 +7025,7 @@
     </unit>
     <unit id="requests.caption">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:18,20</note>
+        <note category="location">src/app/features/requests/requests-page.html:24,26</note>
       </notes>
       <segment>
         <source> My entitlement requests </source>
@@ -7023,8 +7033,8 @@
     </unit>
     <unit id="requests.colEntitlement">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:22,23</note>
-        <note category="location">src/app/features/requests/requests-page.html:37,38</note>
+        <note category="location">src/app/features/requests/requests-page.html:28,29</note>
+        <note category="location">src/app/features/requests/requests-page.html:43,44</note>
       </notes>
       <segment>
         <source>Entitlement</source>
@@ -7032,8 +7042,8 @@
     </unit>
     <unit id="requests.colCreated">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:23,24</note>
-        <note category="location">src/app/features/requests/requests-page.html:46</note>
+        <note category="location">src/app/features/requests/requests-page.html:29,30</note>
+        <note category="location">src/app/features/requests/requests-page.html:52</note>
       </notes>
       <segment>
         <source>Submitted</source>
@@ -7041,8 +7051,8 @@
     </unit>
     <unit id="requests.colStatus">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:24,25</note>
-        <note category="location">src/app/features/requests/requests-page.html:53</note>
+        <note category="location">src/app/features/requests/requests-page.html:30,31</note>
+        <note category="location">src/app/features/requests/requests-page.html:59</note>
       </notes>
       <segment>
         <source>Status</source>
@@ -7050,8 +7060,8 @@
     </unit>
     <unit id="requests.colDecided">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:25,26</note>
-        <note category="location">src/app/features/requests/requests-page.html:61</note>
+        <note category="location">src/app/features/requests/requests-page.html:31,32</note>
+        <note category="location">src/app/features/requests/requests-page.html:67</note>
       </notes>
       <segment>
         <source>Decided</source>
@@ -7059,7 +7069,7 @@
     </unit>
     <unit id="requests.colActions">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:27,29</note>
+        <note category="location">src/app/features/requests/requests-page.html:33,35</note>
       </notes>
       <segment>
         <source>Actions</source>
@@ -7067,7 +7077,7 @@
     </unit>
     <unit id="requests.open">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:72,73</note>
+        <note category="location">src/app/features/requests/requests-page.html:78,79</note>
       </notes>
       <segment>
         <source>Open in the entitlement system</source>
@@ -7075,7 +7085,7 @@
     </unit>
     <unit id="requests.newTab">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:74,75</note>
+        <note category="location">src/app/features/requests/requests-page.html:80,81</note>
       </notes>
       <segment>
         <source> (opens in a new tab)</source>
@@ -7083,7 +7093,7 @@
     </unit>
     <unit id="requests.emptyTitle">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:85,86</note>
+        <note category="location">src/app/features/requests/requests-page.html:91,93</note>
       </notes>
       <segment>
         <source>You have no requests.</source>
@@ -7091,7 +7101,7 @@
     </unit>
     <unit id="requests.emptyText">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:87,89</note>
+        <note category="location">src/app/features/requests/requests-page.html:94,97</note>
       </notes>
       <segment>
         <source> When you ask for an entitlement, the request will appear here with its status. </source>
@@ -7099,7 +7109,7 @@
     </unit>
     <unit id="requests.footnote">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.html:92,95</note>
+        <note category="location">src/app/features/requests/requests-page.html:101,105</note>
       </notes>
       <segment>
         <source> Requests are approved and cancelled in the entitlement system. </source>
@@ -7107,7 +7117,7 @@
     </unit>
     <unit id="request.status.pending">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:24</note>
+        <note category="location">src/app/features/requests/requests-page.ts:25</note>
       </notes>
       <segment>
         <source>Pending</source>
@@ -7115,7 +7125,7 @@
     </unit>
     <unit id="request.status.approved">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:25</note>
+        <note category="location">src/app/features/requests/requests-page.ts:26</note>
       </notes>
       <segment>
         <source>Approved</source>
@@ -7123,7 +7133,7 @@
     </unit>
     <unit id="request.status.rejected">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:26</note>
+        <note category="location">src/app/features/requests/requests-page.ts:27</note>
       </notes>
       <segment>
         <source>Rejected</source>
@@ -7131,7 +7141,7 @@
     </unit>
     <unit id="request.status.cancelled">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:27</note>
+        <note category="location">src/app/features/requests/requests-page.ts:28</note>
       </notes>
       <segment>
         <source>Cancelled</source>
@@ -7139,7 +7149,7 @@
     </unit>
     <unit id="requests.created">
       <notes>
-        <note category="location">src/app/features/requests/requests-page.ts:107</note>
+        <note category="location">src/app/features/requests/requests-page.ts:121</note>
       </notes>
       <segment>
         <source>Request <ph id="0" equiv="id" disp="neutraliseText(result.requestId).text"/> submitted.</source>

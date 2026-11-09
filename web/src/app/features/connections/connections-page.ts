@@ -39,7 +39,11 @@ import { Loading } from '../../shared/loading';
 import { StateLine } from '../../shared/state-line';
 import { OAuthReturnBanner } from '../../shared/oauth-return';
 import { AuthenticatorSection, MFA_RETURN_QUERY } from '../authenticator/authenticator-section';
-import { connectionRowActions, isEmphasised } from '../catalog/catalog-actions';
+import {
+  connectionRowActions,
+  grantedByAdministrator,
+  isEmphasised,
+} from '../catalog/catalog-actions';
 
 interface ConnectionRow {
   server: PortalCatalogServer;
@@ -51,6 +55,7 @@ interface ConnectionRow {
   validity: { text: string; date: string | null; tone: Tone };
   lastUsed: string | null;
   actions: CatalogAction[];
+  byAdministrator: boolean;
 }
 
 function validityOf(server: PortalCatalogServer): ConnectionRow['validity'] {
@@ -193,6 +198,7 @@ export class ConnectionsPage implements OnInit {
         validity: validityOf(server),
         lastUsed: server.connection?.lastUsedAt ?? this.lastCalls()[server.system] ?? null,
         actions: connectionRowActions(server),
+        byAdministrator: grantedByAdministrator(server),
       };
     }),
   );

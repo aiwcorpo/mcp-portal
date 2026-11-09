@@ -108,6 +108,11 @@
                 }}<span class="visually-hidden"> ({{ row.name }})</span>
               </button>
             }
+            @if (row.byAdministrator) {
+              <app-state i18n="@@catalog.byAdministrator"
+                >Access is granted by the platform administrator.</app-state
+              >
+            }
           </td>
         </tr>
       }

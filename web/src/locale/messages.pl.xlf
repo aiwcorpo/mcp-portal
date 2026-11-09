@@ -5887,6 +5887,17 @@
         <target>Wyłączone przez administratora.</target>
       </segment>
     </unit>
+    <unit id="catalog.byAdministrator">
+      <notes>
+        <note category="location">src/app/features/catalog/catalog-table.html:66,68</note>
+        <note category="location">src/app/features/connections/connections-page.html:113,115</note>
+        <note category="location">src/app/features/requests/requests-page.html:17,21</note>
+      </notes>
+      <segment>
+        <source>Access is granted by the platform administrator.</source>
+        <target>Dostęp nadaje administrator platformy.</target>
+      </segment>
+    </unit>
     <unit id="catalog.toolDenied">
       <notes>
         <note category="location">src/app/features/catalog/catalog-table.html:96,98</note>
