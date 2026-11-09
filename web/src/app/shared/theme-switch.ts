@@ -1,50 +1,30 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { ThemeMode, ThemeService } from '../core/theme.service';
+import { ThemeService } from '../core/theme.service';
 
 /**
- * Both themes are always on offer, so the way back is visible whichever one is active. A single toggle
- * labelled with one theme gave no hint that a second press undoes the first.
+ * Works like the language switch next to it: the button names the theme it switches to, so the way back is always
+ * written on it. A label naming the current theme gave no hint that a second press undoes the first.
  */
 @Component({
   selector: 'app-theme-switch',
   imports: [MatButtonModule],
   template: `
-    <div role="group" i18n-aria-label="@@shell.theme" aria-label="Theme">
-      <button
-        mat-button
-        type="button"
-        class="head-button"
-        [attr.aria-pressed]="theme.mode() === 'light'"
-        (click)="choose('light')"
-        i18n="@@shell.themeLight"
-      >
-        Light
-      </button>
-      <button
-        mat-button
-        type="button"
-        class="head-button"
-        [attr.aria-pressed]="theme.mode() === 'dark'"
-        (click)="choose('dark')"
-        i18n="@@shell.themeDark"
-      >
-        Dark
-      </button>
-    </div>
-  `,
-  styles: `
-    button[aria-pressed='true'] {
-      --mat-button-text-label-text-color: var(--pm-text);
-      font-weight: 500;
-    }
+    <button mat-button type="button" class="head-button" (click)="change()">
+      @if (target() === 'light') {
+        <ng-container i18n="@@shell.themeLight">Light mode</ng-container>
+      } @else {
+        <ng-container i18n="@@shell.themeDark">Dark mode</ng-container>
+      }
+    </button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemeSwitch {
-  protected readonly theme = inject(ThemeService);
+  private readonly theme = inject(ThemeService);
+  protected readonly target = computed(() => (this.theme.mode() === 'dark' ? 'light' : 'dark'));
 
-  protected choose(mode: ThemeMode): void {
-    this.theme.select(mode);
+  protected change(): void {
+    this.theme.select(this.target());
   }
 }

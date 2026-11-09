@@ -30,10 +30,11 @@ async function expectNoViolations(page: Page): Promise<void> {
 }
 
 /** The portal is dark by default (mockups); both themes are buttons in the header. */
+// The switch names the theme it switches to; the portal starts dark.
 async function useScheme(page: Page, scheme: 'light' | 'dark'): Promise<void> {
-  await page
-    .getByRole('button', { name: scheme === 'dark' ? 'Dark' : 'Light', exact: true })
-    .click();
+  if (scheme === 'light') {
+    await page.getByRole('button', { name: 'Light mode', exact: true }).click();
+  }
 }
 
 const PAGES = [
