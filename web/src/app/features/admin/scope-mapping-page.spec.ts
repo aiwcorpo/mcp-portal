@@ -168,10 +168,13 @@ describe('ScopeMappingPage', () => {
 
     await until(() => expect(text()).toContain('Someone changed this in the meantime'));
     await until(() => expect(text()).toContain('your edits were not kept'));
-    const reloaded = document.getElementById(
-      groupIds()[0].replace('group', 'scopes'),
-    ) as HTMLTextAreaElement;
-    expect(reloaded.value).toBe('Jira::Project/ABC');
+    // The message comes with the 412, the mapping only after the reload that follows it.
+    await until(() => {
+      const reloaded = document.getElementById(
+        groupIds()[0].replace('group', 'scopes'),
+      ) as HTMLTextAreaElement;
+      expect(reloaded.value).toBe('Jira::Project/ABC');
+    });
   });
 
   it('keeps the edits through the fresh MFA and gives them back', async () => {
