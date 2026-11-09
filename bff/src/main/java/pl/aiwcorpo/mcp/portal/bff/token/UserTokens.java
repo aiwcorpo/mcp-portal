@@ -54,12 +54,25 @@ public class UserTokens {
         this.clock = clock;
     }
 
+    /**
+     * Token of an ordinary call (C4, C5 reads and the user's own calls): the exchange of the session's access token. Where
+     * the session was granted the audience scope by a step-up login of an administrator, it is the narrowed refresh grant
+     * of {@link #refreshedToken} instead: on Keycloak every token exchange resets the {@code acr} that the user session
+     * remembers, so one exchange after the step-up (a registry read of the page that opens after it is enough) makes every
+     * later refresh answer {@code acr=password} and the gateway refuses the write that needs fresh MFA.
+     */
     public BearerToken tokenFor(Audience audience, Authentication user, HttpServletRequest request,
                                 HttpServletResponse response) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             throw ApiException.unauthenticated();
         }
+        BearerToken refreshed = refreshedToken(audience, user, request, response, session);
+        return refreshed != null ? refreshed : exchangedToken(audience, user, request, response, session);
+    }
+
+    private BearerToken exchangedToken(Audience audience, Authentication user, HttpServletRequest request,
+                                       HttpServletResponse response, HttpSession session) {
         ExchangedTokens cache = exchangedTokens(session);
         BearerToken cached = cache.tokens.get(audience);
         Duration skew = config.expirySkew();
@@ -78,22 +91,18 @@ public class UserTokens {
     }
 
     /**
-     * Token of an administration call. Where the step-up login of the administrator asked for the admin audience scopes
-     * (they are in the scopes granted to the session), one refresh grant narrowed to the scope of the audience gives a token
-     * that keeps {@code acr} and {@code auth_time} of that login; an exchange does not on Keycloak, so a write that needs fresh
-     * MFA could never pass. Without those scopes, or when the refresh fails, it is the ordinary exchange (enough for reads,
-     * and the upstream asks for the step-up again where it needs one). The tokens stay in the memory of the session,
-     * one per audience, for {@code portal.step-up.admin-token-ttl} at most; the token of the login itself, which carries
-     * both audiences, is never sent anywhere.
+     * The narrowed refresh grant for the audience, or null where the session cannot have one and the exchange is the way.
+     * Where the step-up login of the administrator asked for the admin audience scopes (they are in the scopes granted to
+     * the session), one refresh grant narrowed to the scope of the audience gives a token that keeps {@code acr} and
+     * {@code auth_time} of that login, which a write that needs fresh MFA requires. Without those scopes, or when the
+     * refresh fails, the exchange (enough for reads; the upstream asks for the step-up again where it needs one). The tokens
+     * stay in the memory of the session, one per audience, for {@code portal.step-up.admin-token-ttl} at most; the token of
+     * the login itself, which carries both audiences, is never sent anywhere.
      */
-    public BearerToken adminTokenFor(Audience audience, Authentication user, HttpServletRequest request,
-                                     HttpServletResponse response) {
+    private BearerToken refreshedToken(Audience audience, Authentication user, HttpServletRequest request,
+                                       HttpServletResponse response, HttpSession session) {
         if (stepUp.adminTokens() != PortalProperties.AdminTokens.REFRESH) {
-            return tokenFor(audience, user, request, response);
-        }
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            throw ApiException.unauthenticated();
+            return null;
         }
         ExchangedTokens cache = exchangedTokens(session);
         BearerToken cached = cache.adminTokens.get(audience);
@@ -104,14 +113,14 @@ public class UserTokens {
         OAuth2AuthorizedClient client = sessionClient(user, request, response);
         String scope = audience == Audience.BROKER ? config.brokerScope() : config.gatewayAdminScope();
         if (client.getRefreshToken() == null || !client.getAccessToken().getScopes().contains(scope)) {
-            return tokenFor(audience, user, request, response);
+            return null;
         }
         TokenExchangeClient.Refreshed refreshed;
         try {
             refreshed = exchange.refresh(client.getClientRegistration(), client.getRefreshToken().getTokenValue(), scope,
                     stepUp.adminTokenTtl());
         } catch (TokenUnavailableException e) {
-            return tokenFor(audience, user, request, response);
+            return null;
         }
         if (refreshed.refreshToken() != null && !refreshed.refreshToken().equals(client.getRefreshToken().getTokenValue())) {
             // The IdP rotates refresh tokens: the session must hold the new one or its next refresh is refused.

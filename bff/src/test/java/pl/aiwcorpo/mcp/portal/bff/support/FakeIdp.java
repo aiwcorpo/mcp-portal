@@ -66,6 +66,12 @@ public final class FakeIdp implements AutoCloseable {
                          Set<String> scopes) {
     }
 
+    /**
+     * Users whose session level was reset by a token exchange: Keycloak then answers every refresh of that session with
+     * {@code acr=password}, until the next login. Cleared by the authorization code grant.
+     */
+    private final Set<String> levelResetByExchange = ConcurrentHashMap.newKeySet();
+
     private volatile boolean rotateRefreshTokens;
     private volatile boolean refuseNarrowedRefresh;
 
@@ -77,6 +83,12 @@ public final class FakeIdp implements AutoCloseable {
     /** Keycloak can be set to revoke a refresh token when it is used; a narrowed refresh then returns the next one. */
     public void rotateRefreshTokens(boolean rotate) {
         this.rotateRefreshTokens = rotate;
+    }
+
+    /** The {@code acr} the IdP put into an access token it issued, or null for a token it did not issue. */
+    public String acrOf(String accessToken) {
+        Grant grant = accessTokens.get(accessToken);
+        return grant == null ? null : grant.acr();
     }
 
     private String rotate(String used, Grant grant) {
@@ -198,6 +210,7 @@ public final class FakeIdp implements AutoCloseable {
                     json(exchange, 400, Map.of("error", "invalid_grant"));
                     return;
                 }
+                levelResetByExchange.remove(grant.user().sub());
                 json(exchange, 200, tokens(grant, true));
             }
             case "refresh_token" -> {
@@ -220,7 +233,8 @@ public final class FakeIdp implements AutoCloseable {
                     String audience = asked.stream().filter(scope -> scope.endsWith("-audience")).findFirst()
                             .map(scope -> scope.substring(0, scope.length() - "-audience".length())).orElse(null);
                     String narrowed = random("na-" + audience);
-                    accessTokens.put(narrowed, new Grant(grant.user(), null, null, grant.authTime(), grant.acr(), audience, asked));
+                    accessTokens.put(narrowed, new Grant(grant.user(), null, null, grant.authTime(),
+                            levelResetByExchange.contains(grant.user().sub()) ? "password" : grant.acr(), audience, asked));
                     issued.add(narrowed);
                     Map<String, Object> body = new LinkedHashMap<>();
                     body.put("access_token", narrowed);
@@ -242,6 +256,7 @@ public final class FakeIdp implements AutoCloseable {
                     json(exchange, 400, Map.of("error", "invalid_request"));
                     return;
                 }
+                levelResetByExchange.add(subject.user().sub());
                 String token = random("xt-" + audience);
                 accessTokens.put(token, new Grant(subject.user(), null, null, subject.authTime(), subject.acr(), audience, Set.of()));
                 issued.add(token);

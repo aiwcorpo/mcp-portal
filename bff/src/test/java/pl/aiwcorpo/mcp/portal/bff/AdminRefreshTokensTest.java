@@ -208,12 +208,28 @@ class AdminRefreshTokensTest extends PortalHarness {
     }
 
     @Test
-    void theUserFlowsKeepTheExchangeAfterTheStepUp() {
+    void afterTheStepUpNothingIsExchangedSoTheLevelOfTheLoginSurvives() {
         TestBrowser admin = stepUp(CAROL);
 
         admin.get("/api/v1/connections");
+        admin.get("/api/v1/admin/registry");
+        admin.get("/api/v1/admin/systems");
 
-        assertThat(grants("urn:ietf:params:oauth:grant-type:token-exchange")).isNotEmpty();
-        assertThat(narrowedRefreshScopes()).isEmpty();
+        assertThat(grants("urn:ietf:params:oauth:grant-type:token-exchange")).isEmpty();
+    }
+
+    /** Keycloak resets the level of a session on every exchange; the page that opens after the step-up reads the registry first. */
+    @Test
+    void aReadByExchangeAfterTheStepUpCannotSpoilTheWriteThatNeedsTheLevel() {
+        GATEWAY.stubFor(get(urlPathEqualTo("/admin/v1/registry/servers")).willReturn(aResponse().withStatus(200)
+                .withHeader("Content-Type", "application/json").withBody("[]")));
+        TestBrowser admin = stepUp(CAROL);
+
+        admin.get("/api/v1/admin/registry");
+        clock.advance(Duration.ofMinutes(3));
+        assertThat(createOverride(admin).statusCode()).isEqualTo(200);
+
+        String sent = authorization(GATEWAY.findAll(anyRequestedFor(urlPathEqualTo(UPSTREAM_OVERRIDE))).getFirst());
+        assertThat(IDP.acrOf(sent.substring("Bearer ".length()))).isEqualTo("mfa");
     }
 }

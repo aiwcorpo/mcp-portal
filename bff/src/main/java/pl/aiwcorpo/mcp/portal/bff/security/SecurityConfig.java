@@ -160,7 +160,7 @@ public class SecurityConfig {
                     }
                 })));
         // The step-up of an administrator also asks for the admin audience scopes: the refresh grants narrowed to one of
-        // them give the admin calls tokens that keep the level of this login (UserTokens#adminTokenFor).
+        // them give the admin calls tokens that keep the level of this login (UserTokens#tokenFor).
         DefaultOAuth2AuthorizationRequestResolver stepUpAdminResolver = new DefaultOAuth2AuthorizationRequestResolver(
                 registrations, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
         stepUpAdminResolver.setAuthorizationRequestCustomizer(builder -> {
