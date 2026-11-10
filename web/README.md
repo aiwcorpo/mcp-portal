@@ -105,7 +105,7 @@ npm ci && npm run build
 ```
 
 Output: `mcp-portal/web/dist/portal/` (flat, no `browser/` subdirectory): `index.html`, `main-<hash>.js`,
-`polyfills-<hash>.js`, `chunk-<hash>.js`, `styles-<hash>.css`, `favicon.svg`, `3rdpartylicenses.txt`.
+`polyfills-<hash>.js`, `chunk-<hash>.js`, `styles-<hash>.css`, `favicon.png`, `apple-touch-icon.png`, `3rdpartylicenses.txt`.
 The production build contains neither MSW nor `mockServiceWorker.js`.
 
 What the BFF has to do when serving:
