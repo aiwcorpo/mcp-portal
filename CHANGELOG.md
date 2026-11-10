@@ -2,6 +2,11 @@
 
 Versions follow SemVer, newest first. Test images built before the first release are tagged `m<milestone>-<sha>`.
 
+## 2.0.1
+
+- The browser tab and the home screen icon show the AIWCORPO logo (`favicon.png`, `apple-touch-icon.png`) instead of the
+  letter M.
+
 ## 2.0.0
 
 Dynamic servers: no list of systems, servers or resource types is left in the portal. It needs `mcp-contracts` 7.0.0, a gateway

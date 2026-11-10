@@ -6,7 +6,7 @@
 # Closed network: MCP_REGISTRY in a .env file next to this one points the image to your registry.
 
 x-portal: &portal
-  image: ${MCP_REGISTRY:-ghcr.io/aiwcorpo}/mcp-portal:${MCP_PORTAL_VERSION:-2.0.0}
+  image: ${MCP_REGISTRY:-ghcr.io/aiwcorpo}/mcp-portal:${MCP_PORTAL_VERSION:-2.0.1}
   pull_policy: ${PULL_POLICY:-missing}
   read_only: true
   cap_drop: [ALL]

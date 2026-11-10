@@ -107,7 +107,7 @@ jar, `npm run build` in `web/` makes `dist/portal`). The unit runs the same `ini
 ```bash
 sudo useradd --system --no-create-home --shell /usr/sbin/nologin portal
 sudo install -d -o root -g portal -m 0750 /etc/mcp-portal /opt/mcp-portal
-sudo install -m 0644 bff/target/mcp-portal-bff-2.0.0.jar /opt/mcp-portal/portal.jar
+sudo install -m 0644 bff/target/mcp-portal-bff-2.0.1.jar /opt/mcp-portal/portal.jar
 sudo cp -r web/dist/portal /opt/mcp-portal/web
 sudo install -o root -g portal -m 0640 deploy/iga-catalog.yaml /etc/mcp-portal/iga-catalog.yaml
 sudo install -o root -g portal -m 0640 deploy/systemd/mcp-portal.env /etc/mcp-portal/mcp-portal.env   # then fill it in
