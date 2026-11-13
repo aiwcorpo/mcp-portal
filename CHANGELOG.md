@@ -2,6 +2,25 @@
 
 Versions follow SemVer, newest first. Test images built before the first release are tagged `m<milestone>-<sha>`.
 
+## Unreleased
+
+- Breaking for Compose installs: the image runs as uid 10001 and gid 10001 (`portal`). The Dockerfile of 2.0.1 left the ids to
+  the base image, which gives uid 100 and gid 101. Outside the `dev` profile the BFF refuses to start when
+  `PORTAL_TLS_KEYSTORE` is readable by all users of the host, as it already did for `PORTAL_PUBLIC_TLS_PRIVATE_KEY`. Before
+  pulling the new image, in the deploy directory:
+
+    ```bash
+    sudo chown 10001:10001 certs/keystore.p12 certs/truststore.p12
+    sudo chmod 0640 certs/keystore.p12
+    chmod 0600 portal.env
+    ```
+
+  The `certs` directory must stay searchable by uid 10001, and `iga-catalog.yaml` and any other file mounted into the container
+  (a JVM trust store, the public TLS certificate and key) readable by it: a file that only uid 100 could read is no longer
+  readable. `portal.env` is read by Docker Compose on the host, so 0600 for its owner is enough. `init` stops with "certificate
+  file ... cannot be read" when uid 10001 cannot read the keystore or trust store; the mode of the keystore is checked by the
+  portal itself when it starts.
+
 ## 2.1.0
 
 Built on `mcp-contracts` 7.1.0. Needs a credential broker 2.1.0 (CC-251).
