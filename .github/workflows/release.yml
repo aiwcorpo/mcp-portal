@@ -7,8 +7,8 @@
 # images that build saved as an artifact, loads them and pushes them. GITHUB_TOKEN with write access is read by the login
 # step only (through env, not through the text of the script). release has contents: write, no checkout and no build tool: it
 # creates the draft GitHub Release with the SBOMs from the artifact. Dependencies install with --ignore-scripts.
-# The mcp-contracts artifacts come from the public registries (Maven Central, npmjs), see env below; until 6.3.2 is released
-# there the verify job stops at the first download. No credential is needed for the reads.
+# The mcp-contracts artifacts come from the public registries (Maven Central, npmjs), see env below.
+# No credential is needed for the reads.
 name: release
 
 on:
@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 env:
-  # mcp-contracts 6.3.2 comes from the public registries: Maven Central (the default repository of Maven) and npmjs, the
+  # mcp-contracts 7.0.0 comes from the public registries: Maven Central (the default repository of Maven) and npmjs, the
   # tarball checked against the bytes of the release file. No credential is needed for the reads.
   CONTRACTS_FROM_NPMJS: '1'
   CONTRACTS_TARBALL_SHA256: 001c77faeedf66c3cf0dabf06be166d968c52c6025282b7be5c05c502fd22b2d

@@ -258,7 +258,7 @@ Contracts 4.0.0 (the M4 state; M5 is described below).
 | `RegistryAdminTest` | admin only, views checked against the schema, definition neutralization, C12 examples, approval with audit, `409`, `422`, status mapping |
 | `RateLimitsTest` | per-session limits (window, `Retry-After`, counting only requests that reach the broker), `429` from the broker and gateway |
 
-## M6: kill switch and adapter tool classification (contracts 6.3.2)
+## M6: kill switch and adapter tool classification
 
 - Kill switch (A9, CC-194), group `mcp-platform-admin`: `GET /api/v1/admin/kill-switches` (list checked against the schema, reason
   as untrusted text with hidden characters written out), `PUT` and `DELETE` under `.../registry/servers/{serverId}/kill-switch` and
@@ -424,7 +424,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   web/         JSON errors, returnPath, requestId
 ```
 
-## M5: single `/mcp` address (contracts 5.1.0)
+## M5: single `/mcp` address
 
 `GET /api/v1/me/mcp-endpoint?systems=&tools=&access=&exclude=` (CC-175, CC-182) returns a normalized address
 `<PORTAL_PUBLIC_BASE_URL>/mcp[?filter]`, `filter` (when present), `toolCount` and `clientConfigs`. Nothing is stored and nothing
