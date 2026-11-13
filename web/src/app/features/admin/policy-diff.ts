@@ -1,6 +1,6 @@
 import { PendingPolicies, ResourceTypeDeclaration } from '../../api/generated';
 import { neutraliseText } from '../../shared/untrusted-text';
-import { DiffLine } from './definition-diff';
+import { DiffLine, markLongBlankRuns } from './definition-diff';
 
 export interface PolicyDiff {
   resourceTypes: { before: DiffLine[]; after: DiffLine[]; changed: boolean };
@@ -98,7 +98,7 @@ export function diffPolicies(pending: PendingPolicies): PolicyDiff {
     lines.map((line) => {
       const result = neutraliseText(line);
       neutralised ||= result.neutralised;
-      return result.text;
+      return markLongBlankRuns(result.text);
     });
   const cut = (lines: string[]): string[] => lines.slice(0, MAX_LINES);
   const approvedTypes = (pending.approvedResourceTypes ?? []).flatMap(describeType);

@@ -89,6 +89,29 @@ describe('diffPolicies', () => {
     expect(diff.policies.after.map((line) => line.text)).not.toContain('file: evil.cedar');
   });
 
+  it('writes a long run of blanks in a policy line as a count, so the rest stays in view', () => {
+    const pending = pendingOf('mcp-notes');
+    pending.pendingPolicies = {
+      ...pending.pendingPolicies,
+      files: [
+        {
+          name: 'read.cedar',
+          text:
+            'forbid (principal, action, resource);' +
+            ' '.repeat(400) +
+            'permit (principal, action, resource);',
+        },
+      ],
+    };
+
+    const diff = diffPolicies(pending);
+
+    const line = diff.policies.after.find((entry) => entry.text.includes('forbid'))!;
+    expect(line.text).toBe(
+      '  forbid (principal, action, resource);[U+0020 x400]permit (principal, action, resource);',
+    );
+  });
+
   it('cuts a side that is too long and says so', () => {
     const pending = pendingOf('mcp-notes');
     pending.pendingPolicies = {

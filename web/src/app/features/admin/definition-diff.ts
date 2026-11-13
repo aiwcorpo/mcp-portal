@@ -57,6 +57,25 @@ function markers(extra: string): string {
   ).join('');
 }
 
+/** Shortest run of blanks, in columns (a tab counts 8), that is written as a count instead. */
+const LONG_BLANKS = 32;
+
+/**
+ * Writes a long run of spaces or tabs as a marker with its length. The diff lines do not wrap (a wrapped value would look
+ * like a line of its own), so without it text after the run lies beyond the visible width of the column.
+ */
+export function markLongBlankRuns(text: string): string {
+  return text.replace(/[ \t]{4,}/g, (run) => {
+    const spaces = run.replaceAll('\t', '').length;
+    const tabs = run.length - spaces;
+    if (spaces + 8 * tabs < LONG_BLANKS) {
+      return run;
+    }
+    const code = tabs === 0 ? 'U+0020' : spaces === 0 ? 'U+0009' : 'U+0020/U+0009';
+    return `[${code} x${run.length}]`;
+  });
+}
+
 /**
  * Untrusted text as one quoted token: hidden characters, line breaks, CR and tabs become visible [U+XXXX]
  * markers and the result is JSON-quoted, so a value can neither start a line of its own
@@ -64,7 +83,7 @@ function markers(extra: string): string {
  */
 function quoted(value: string): string {
   const { text } = neutraliseText(value);
-  const limited = text.replace(
+  const limited = markLongBlankRuns(text).replace(
     MARK_RUN,
     (_all, kept: string, extra: string) => kept + markers(extra),
   );
