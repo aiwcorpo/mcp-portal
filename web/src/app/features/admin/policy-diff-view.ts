@@ -102,7 +102,8 @@ export class PolicyDiffView implements OnInit {
 
   protected async approve(): Promise<void> {
     const view = this.view();
-    if (!view || this.approving()) {
+    // The hash covers lines the cut view never showed, so the administrator would approve text not seen.
+    if (!view || this.approving() || view.diff.truncated) {
       return;
     }
     const hash = view.value.pendingHash;

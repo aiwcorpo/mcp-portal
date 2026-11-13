@@ -9,7 +9,7 @@ export interface PolicyDiff {
   neutralised: boolean;
   /** Nothing was approved before: both sides of the diff start from nothing. */
   firstRegistration: boolean;
-  /** Lines were left out of the view because a side was longer than the limit; the hash still covers all of it. */
+  /** Lines were left out of the view because a side was longer than the limit; such policies cannot be approved here. */
   truncated: boolean;
 }
 
@@ -112,12 +112,12 @@ export function diffPolicies(pending: PendingPolicies): PolicyDiff {
   );
   const types = markLines(safe(cut(approvedTypes)), safe(cut(pendingTypes)));
   const policies = markLines(safe(cut(approvedPolicies)), safe(cut(pendingPolicies)));
-  const changed = (side: { before: DiffLine[]; after: DiffLine[] }): boolean =>
-    side.before.some((line) => line.mark !== 'same') ||
-    side.after.some((line) => line.mark !== 'same');
+  // Judged on the whole text, not the cut one: a change past the cut is still a change.
+  const changed = (before: string[], after: string[]): boolean =>
+    before.length !== after.length || before.some((line, index) => line !== after[index]);
   return {
-    resourceTypes: { ...types, changed: changed(types) },
-    policies: { ...policies, changed: changed(policies) },
+    resourceTypes: { ...types, changed: changed(approvedTypes, pendingTypes) },
+    policies: { ...policies, changed: changed(approvedPolicies, pendingPolicies) },
     neutralised,
     firstRegistration: pending.approvedHash === null,
     truncated,

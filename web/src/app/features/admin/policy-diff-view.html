@@ -49,7 +49,8 @@
     }
     @if (v.diff.truncated) {
       <app-state kind="warning" i18n="@@policies.truncated">
-        A very long text is cut in this view, and the hash covers all of it.
+        A very long text is cut in this view, so it cannot be approved here: the hash covers all of
+        it.
       </app-state>
     }
 
@@ -124,7 +125,12 @@
     </div>
 
     <div class="actions">
-      <button mat-flat-button type="button" [disabled]="approving()" (click)="approve()">
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="approving() || v.diff.truncated"
+        (click)="approve()"
+      >
         <ng-container i18n="@@policies.approve">Approve policies</ng-container>
         <span class="visually-hidden"> ({{ serverName() }})</span>
       </button>
