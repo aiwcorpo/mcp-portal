@@ -983,7 +983,7 @@
         <note category="location">src/app/features/admin/admin-page.html:6,9</note>
       </notes>
       <segment>
-        <source>The approval made these scope mapping entries invalid, and evaluation ignores them until you correct the mapping:</source>
+        <source>The approval removed these scope mapping entries, because the approved declarations no longer accept them:</source>
       </segment>
     </unit>
     <unit id="admin.lead">
