@@ -47,7 +47,9 @@ public final class BrokerData {
                 continue;
             }
             String status = CONNECTION_STATUSES.contains(c.status()) ? c.status() : "error";
-            result.add(new BrokerModel.Connection(c.system(), c.type(), status, c.backendUser(), c.verified(),
+            // The account name comes from the target system and is shown as "Connected as ...".
+            String backendUser = c.backendUser() == null ? null : TextHygiene.neutralize(c.backendUser());
+            result.add(new BrokerModel.Connection(c.system(), c.type(), status, backendUser, c.verified(),
                     c.expiresAt(), c.connectedAt(), c.lastUsedAt()));
         }
         return result;
@@ -104,10 +106,12 @@ public final class BrokerData {
                 log.warn("Dropping a C5 catalog tool outside the contract");
                 continue;
             }
-            result.add(new GatewayModel.CatalogTool(tool.name(), tool.description() == null ? "" : tool.description(),
+            // Title and description come from a server manifest; the gateway's approval check lets more through than the portal shows.
+            result.add(new GatewayModel.CatalogTool(tool.name(),
+                    tool.description() == null ? "" : TextHygiene.neutralize(tool.description()),
                     tool.risk(), tool.action(), "granted".equals(tool.access()) ? "granted" : "denied",
                     tool.requiredEntitlements() == null ? List.of() : tool.requiredEntitlements(),
-                    tool.title() == null || tool.title().isEmpty() ? null : tool.title(),
+                    tool.title() == null || tool.title().isEmpty() ? null : TextHygiene.neutralize(tool.title()),
                     Boolean.TRUE.equals(tool.disabled()) ? Boolean.TRUE : null,
                     // Present only for a disabled tool (CC-194); a value outside the enum is left out, not guessed.
                     Boolean.TRUE.equals(tool.disabled()) && tool.disabledBy() != null && DISABLED_BY.contains(tool.disabledBy())
