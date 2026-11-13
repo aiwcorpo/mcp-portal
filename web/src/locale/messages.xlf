@@ -2542,15 +2542,15 @@
     </unit>
     <unit id="policies.truncated">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:52,55</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:52,54</note>
       </notes>
       <segment>
-        <source> A very long text is cut in this view, and the hash covers all of it. </source>
+        <source> A very long text is cut in this view, so it cannot be approved here: the hash covers all of it. </source>
       </segment>
     </unit>
     <unit id="policies.typesTitle">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:56,57</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:57,58</note>
       </notes>
       <segment>
         <source>Resource types</source>
@@ -2558,7 +2558,7 @@
     </unit>
     <unit id="policies.typesSame">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:58,60</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:59,61</note>
       </notes>
       <segment>
         <source>The declarations did not change.</source>
@@ -2566,7 +2566,7 @@
     </unit>
     <unit id="policies.beforeNone">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:64,65</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:65,66</note>
       </notes>
       <segment>
         <source>Before (none)</source>
@@ -2574,7 +2574,7 @@
     </unit>
     <unit id="policies.typesBefore">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:66,68</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:67,69</note>
       </notes>
       <segment>
         <source>Approved</source>
@@ -2582,7 +2582,7 @@
     </unit>
     <unit id="policies.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:73,74</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:74,75</note>
       </notes>
       <segment>
         <source>Removed: </source>
@@ -2590,7 +2590,7 @@
     </unit>
     <unit id="policies.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:74,75</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:75,76</note>
       </notes>
       <segment>
         <source>Nothing approved.</source>
@@ -2598,7 +2598,7 @@
     </unit>
     <unit id="policies.after">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:79,80</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:80,81</note>
       </notes>
       <segment>
         <source>Pending (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -2606,7 +2606,7 @@
     </unit>
     <unit id="policies.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:86,87</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:87,88</note>
       </notes>
       <segment>
         <source>Added: </source>
@@ -2614,7 +2614,7 @@
     </unit>
     <unit id="policies.noTypes">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:87,88</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:88,89</note>
       </notes>
       <segment>
         <source>No declarations.</source>
@@ -2622,7 +2622,7 @@
     </unit>
     <unit id="policies.policiesTitle">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:91,92</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:92,93</note>
       </notes>
       <segment>
         <source>Policies and schema</source>
@@ -2630,7 +2630,7 @@
     </unit>
     <unit id="policies.policiesSame">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:93,95</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:94,96</note>
       </notes>
       <segment>
         <source>The policies did not change.</source>
@@ -2638,7 +2638,7 @@
     </unit>
     <unit id="policies.beforeNone2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:99,100</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:100,101</note>
       </notes>
       <segment>
         <source>Before (none)</source>
@@ -2646,7 +2646,7 @@
     </unit>
     <unit id="policies.polBefore">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:101,103</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:102,104</note>
       </notes>
       <segment>
         <source>Approved</source>
@@ -2654,7 +2654,7 @@
     </unit>
     <unit id="policies.removedLine2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:108,109</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:109,110</note>
       </notes>
       <segment>
         <source>Removed: </source>
@@ -2662,7 +2662,7 @@
     </unit>
     <unit id="policies.nothingBefore2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:109,110</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:110,111</note>
       </notes>
       <segment>
         <source>Nothing approved.</source>
@@ -2670,7 +2670,7 @@
     </unit>
     <unit id="policies.after2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:114,115</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:115,116</note>
       </notes>
       <segment>
         <source>Pending (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -2678,7 +2678,7 @@
     </unit>
     <unit id="policies.addedLine2">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:121,122</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:122,123</note>
       </notes>
       <segment>
         <source>Added: </source>
@@ -2686,7 +2686,7 @@
     </unit>
     <unit id="policies.approve">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:128,129</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:134,135</note>
       </notes>
       <segment>
         <source>Approve policies</source>
@@ -2694,7 +2694,7 @@
     </unit>
     <unit id="policies.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/policy-diff-view.html:132,135</note>
+        <note category="location">src/app/features/admin/policy-diff-view.html:138,141</note>
       </notes>
       <segment>
         <source> Not approving breaks nothing that works today: the tools of the server stay blocked. Needs a fresh MFA. </source>
