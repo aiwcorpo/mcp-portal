@@ -25,6 +25,7 @@ class LoginController {
     private final SecurityConfig.LoginResolvers resolvers;
     private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequests;
     private final String registrationId;
+    private final int loginTimeoutSeconds;
 
     LoginController(SecurityConfig.LoginResolvers resolvers,
                     AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequests,
@@ -32,6 +33,7 @@ class LoginController {
         this.resolvers = resolvers;
         this.authorizationRequests = authorizationRequests;
         this.registrationId = properties.registrationId();
+        this.loginTimeoutSeconds = Math.toIntExact(properties.session().loginTimeout().toSeconds());
     }
 
     @GetMapping("/api/v1/auth/login")
@@ -51,6 +53,10 @@ class LoginController {
             throw new IllegalStateException("Unknown client registration " + registrationId);
         }
         HttpSession session = request.getSession(true);
+        if (authentication == null || !(authentication.getPrincipal() instanceof OidcUser)) {
+            // Anyone can start a login; until it completes the session must not live as long as a signed-in one.
+            session.setMaxInactiveInterval(loginTimeoutSeconds);
+        }
         session.setAttribute(SessionAttributes.LOGIN_RETURN_PATH, target);
         if (stepUp && authentication != null && authentication.getPrincipal() instanceof OidcUser current) {
             session.setAttribute(SessionAttributes.STEP_UP_SUB, current.getSubject());
