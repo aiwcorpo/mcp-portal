@@ -1,7 +1,8 @@
 # No job has a token, a secret or write access: permissions are contents: read, the checkout keeps no credentials, and the
 # mcp-contracts artifacts come from public registries (Maven Central for the BFF, npmjs for the web part), so the same jobs
-# run for pull requests and for pushes to main. Until mcp-contracts 6.3.2 is on Central and npmjs the build jobs cannot
-# resolve it; they are expected to fail on a fork or a checkout that is ahead of that release. Nothing here publishes.
+# run for pull requests and for pushes to main. The version pinned in bff/pom.xml and web/package.json (mcp-contracts 7.0.0)
+# is on Central and npmjs; a checkout that pins a newer, unreleased version cannot resolve it and its build jobs fail. Nothing
+# here publishes.
 name: ci
 on:
   push:
@@ -33,7 +34,7 @@ jobs:
       contents: read
     env:
       CI: '1'
-      # The tarball of @aiwcorpo/mcp-contracts 6.3.2 from npmjs, checked against the bytes of the release file.
+      # The tarball of @aiwcorpo/mcp-contracts 7.0.0 from npmjs, checked against the bytes of the release file.
       CONTRACTS_FROM_NPMJS: '1'
       CONTRACTS_TARBALL_SHA256: 001c77faeedf66c3cf0dabf06be166d968c52c6025282b7be5c05c502fd22b2d
     defaults:
