@@ -1,5 +1,7 @@
 # mcp-portal
 
+Part of [MCP Platform](https://github.com/aiwcorpo/mcp-platform), a self-hosted MCP gateway for companies. Documentation: [mcp.aiwcorpo.pl](https://mcp.aiwcorpo.pl/).
+
 The portal of the MCP platform: the page where a user sees the MCP servers available to them, connects accounts in the
 systems, submits requests for entitlements and builds the `/mcp` address with a filter, and where an administrator manages the
 servers and systems of the platform at runtime, approves tool definitions and server policies, classifies the tools of foreign
