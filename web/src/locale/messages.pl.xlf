@@ -5152,6 +5152,15 @@
         <target>Zmieniła się część poza widokiem, więc zatwierdzenie wymaga wyraźnego potwierdzenia.</target>
       </segment>
     </unit>
+    <unit id="admin.diffTruncated">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:60,62</note>
+      </notes>
+      <segment>
+        <source> A very long definition is cut in this view, so it cannot be approved here: the hash covers all of it. </source>
+        <target>Bardzo długa definicja jest tu ucięta, więc nie można jej tu zatwierdzić: skrót obejmuje ją w całości.</target>
+      </segment>
+    </unit>
     <unit id="admin.hashInconsistent">
       <notes>
         <note category="location">src/app/features/admin/tool-diff.html:60,63</note>

@@ -55,6 +55,12 @@
         </ng-container>
       </app-state>
     }
+    @if (v.diff.truncated) {
+      <app-state kind="warning" i18n="@@admin.diffTruncated">
+        A very long definition is cut in this view, so it cannot be approved here: the hash covers
+        all of it.
+      </app-state>
+    }
     @if (!v.hashConsistent) {
       <app-state kind="error" i18n="@@admin.hashInconsistent">
         The hash given by the server does not match the shown definition: do not approve, report it
