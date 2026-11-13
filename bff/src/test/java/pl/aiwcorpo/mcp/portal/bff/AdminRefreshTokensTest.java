@@ -222,6 +222,34 @@ class AdminRefreshTokensTest extends PortalHarness {
     }
 
     @Test
+    void aRotatedRefreshTokenOfTheEarlierUserThatArrivesAfterAnotherLoginIsNotKeptForTheNewOne() throws Exception {
+        IDP.rotateRefreshTokens(true);
+        IDP.delayNarrowedRefresh(2000);
+        TestBrowser browser = stepUp(CAROL);
+        TestBrowser carolTab = browser();
+        carolTab.setCookie("__Host-session", browser.cookie("__Host-session").orElseThrow());
+        Thread carolsRequest = new Thread(() -> carolTab.get("/api/v1/admin/systems"));
+        carolsRequest.start();
+        long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+        while (narrowedRefreshScopes().isEmpty()) {
+            assertThat(System.nanoTime()).isLessThan(deadline);
+            Thread.onSpinWait();
+        }
+
+        IDP.expireNextLoginIn(30);
+        HttpResponse<String> start = browser.get("/api/v1/auth/login");
+        URI callback = IDP.approve(URI.create(start.headers().firstValue("Location").orElseThrow()), BOB, Instant.now(), "1");
+        browser.get(callback.toString());
+        carolsRequest.join(10_000);
+        IDP.delayNarrowedRefresh(0);
+
+        browser.get("/api/v1/connections");
+        List<Map<String, String>> plain = grants("refresh_token").stream().filter(form -> !form.containsKey("scope")).toList();
+        assertThat(plain).isNotEmpty();
+        assertThat(IDP.userOfRefreshToken(plain.getLast().get("refresh_token"))).isEqualTo("bob");
+    }
+
+    @Test
     void withoutTheScopesInTheLoginAdminCallsStayOnTheExchange() {
         TestBrowser admin = login(CAROL, Instant.now());
         admin.get("/api/v1/me");

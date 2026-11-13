@@ -75,6 +75,32 @@ public final class FakeIdp implements AutoCloseable {
     private volatile boolean rotateRefreshTokens;
     private volatile boolean refuseNarrowedRefresh;
     private volatile long narrowedRefreshDelayMillis;
+    private volatile Integer nextCodeGrantExpiresIn;
+    private volatile java.util.concurrent.CountDownLatch plainRefreshGate;
+
+    /** expires_in of the next authorization code grant only; inside Spring's refresh skew the first use refreshes. */
+    public void expireNextLoginIn(int seconds) {
+        this.nextCodeGrantExpiresIn = seconds;
+    }
+
+    /** Holds every refresh grant without a scope until the returned latch is counted down. */
+    public java.util.concurrent.CountDownLatch holdPlainRefresh() {
+        java.util.concurrent.CountDownLatch gate = new java.util.concurrent.CountDownLatch(1);
+        this.plainRefreshGate = gate;
+        return gate;
+    }
+
+    /** The username of the user a live refresh token belongs to, or null. */
+    public String userOfRefreshToken(String refreshToken) {
+        Grant grant = refreshTokens.get(refreshToken);
+        return grant == null ? null : grant.user().username();
+    }
+
+    /** The username of the user an access token was issued to, or null for a token the IdP did not issue. */
+    public String userOf(String accessToken) {
+        Grant grant = accessTokens.get(accessToken);
+        return grant == null ? null : grant.user().username();
+    }
 
     /** A slow IdP, so that two requests of one session really overlap at the token endpoint. */
     public void delayNarrowedRefresh(long millis) {
@@ -218,7 +244,13 @@ public final class FakeIdp implements AutoCloseable {
                     return;
                 }
                 levelResetByExchange.remove(grant.user().sub());
-                json(exchange, 200, tokens(grant, true));
+                Map<String, Object> body = tokens(grant, true);
+                Integer expiresIn = nextCodeGrantExpiresIn;
+                if (expiresIn != null) {
+                    nextCodeGrantExpiresIn = null;
+                    body.put("expires_in", expiresIn);
+                }
+                json(exchange, 200, body);
             }
             case "refresh_token" -> {
                 Grant grant = refreshTokens.get(form.getOrDefault("refresh_token", ""));
@@ -260,6 +292,15 @@ public final class FakeIdp implements AutoCloseable {
                     }
                     json(exchange, 200, body);
                     return;
+                }
+                java.util.concurrent.CountDownLatch gate = plainRefreshGate;
+                if (gate != null) {
+                    plainRefreshGate = null;
+                    try {
+                        gate.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
                 json(exchange, 200, tokens(grant, false));
             }

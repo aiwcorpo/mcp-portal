@@ -149,6 +149,9 @@ public class UserTokens {
         OAuth2AuthorizedClient current = authorizedClientRepository.loadAuthorizedClient(registrationId, user, request);
         if (current == null) {
             current = used;
+        } else if (!current.getPrincipalName().equals(used.getPrincipalName())) {
+            // Another user logged in to this session while the refresh ran; the rotated token is not theirs.
+            return;
         }
         authorizedClientRepository.saveAuthorizedClient(new OAuth2AuthorizedClient(current.getClientRegistration(),
                 current.getPrincipalName(), current.getAccessToken(), new OAuth2RefreshToken(refreshToken, clock.instant())),
@@ -170,6 +173,12 @@ public class UserTokens {
             throw ApiException.unauthenticated();
         }
         if (client == null || client.getAccessToken() == null) {
+            throw ApiException.unauthenticated();
+        }
+        // The session keeps one client per registration, and a refresh of an earlier login can store its client after
+        // another user logged in to the same session: its tokens must never act for the caller.
+        if (!client.getPrincipalName().equals(user.getName())) {
+            request.getSession().invalidate();
             throw ApiException.unauthenticated();
         }
         return client;
