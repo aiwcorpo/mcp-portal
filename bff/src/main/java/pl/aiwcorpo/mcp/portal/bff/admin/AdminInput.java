@@ -31,6 +31,9 @@ final class AdminInput {
     private static final Set<String> TLS_MODES = Set.of("ca", "pinned", "plain");
     private static final Pattern SERVER_URL = Pattern.compile("^https?://[!-~]+$");
     private static final Pattern INTERNAL_URL = Pattern.compile("^https://[!-~]{1,247}$");
+    private static final Pattern KEY_VALUE = Pattern.compile("^[!-~]+$");
+    private static final Pattern KEY_USERNAME = Pattern.compile(
+            "^[^:\\p{Cc}\\p{Cf}\\p{Cs}\\u2028\\u2029\\ufdd0-\\ufdef\\ufffe\\uffff\\u034f\\u115f\\u1160\\u3164\\uffa0\\u2800\\ufe00-\\ufe0f]+$");
     private static final Pattern SCOPE_CHARS = Pattern.compile("^[!#-\\[\\]-~]{1,128}$");
     private static final JsonMapper MAPPER = JsonMapper.builder()
             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
@@ -194,6 +197,28 @@ final class AdminInput {
             return null;
         }
         return !in.has("oauth") || oauth(in.get("oauth")) ? in : null;
+    }
+
+    /**
+     * {@code ServiceAccountKeyRequest} (CC-251): {@code value}, or {@code username} with {@code password}, and an optional
+     * {@code expiresAt}. Whether the system is Basic and whether the time is in the future are the broker's to say.
+     */
+    static JsonNode serviceAccountKeyRequest(byte[] raw) {
+        ObjectNode in = object(raw);
+        if (in == null || !only(in, "value", "username", "password", "expiresAt")) {
+            return null;
+        }
+        boolean single = in.has("value");
+        boolean login = in.has("username") || in.has("password");
+        if (single ? login : !(in.has("username") && in.has("password"))) {
+            return null;
+        }
+        if (single ? !KEY_VALUE.matcher(string(in, "value")).matches() || string(in, "value").length() > 4096
+                : !KEY_USERNAME.matcher(string(in, "username")).matches() || string(in, "username").length() > 255
+                        || !bounded(string(in, "password"), 4096)) {
+            return null;
+        }
+        return !in.has("expiresAt") || ContractValues.isTimestamp(string(in, "expiresAt")) ? in : null;
     }
 
     private static boolean oauth(JsonNode node) {
