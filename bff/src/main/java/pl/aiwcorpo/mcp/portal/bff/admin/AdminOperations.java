@@ -66,18 +66,18 @@ class AdminOperations {
      * @param sameOrigin  the call must come from the portal page itself (it widens access for everyone)
      * @param view        the check of the answer (null: no body expected)
      * @param audit       what an audit event of a refused attempt says about an emergency override (null for other calls)
-     * @param secrets     texts of the body that must not reach the browser: an upstream message that contains one of them
-     *                    is dropped from a 422 (the broker promises not to repeat them; this is the second lock)
+     * @param suppressUpstreamMessage never forward the free text of an upstream refusal, only its error and reason (the
+     *                    operations that carry a secret: no check on the text can know every form of the secret)
      */
     record Op(Upstream upstream, HttpMethod method, String uri, Object[] variables, JsonNode body,
               AdminPreconditions preconditions, boolean stepUp, boolean sameOrigin, UnaryOperator<JsonNode> view,
-              String rejection, String conflict, AuditRef audit, List<String> secrets) {
+              String rejection, String conflict, AuditRef audit, boolean suppressUpstreamMessage) {
 
         Op(Upstream upstream, HttpMethod method, String uri, Object[] variables, JsonNode body,
            AdminPreconditions preconditions, boolean stepUp, boolean sameOrigin, UnaryOperator<JsonNode> view,
            String rejection, String conflict, AuditRef audit) {
             this(upstream, method, uri, variables, body, preconditions, stepUp, sameOrigin, view, rejection, conflict, audit,
-                    List.of());
+                    false);
         }
 
         Op(Upstream upstream, HttpMethod method, String uri, Object[] variables, JsonNode body,
@@ -240,7 +240,7 @@ class AdminOperations {
                 return new ApiException(HttpStatus.PRECONDITION_FAILED, ApiError.of("precondition_failed"));
             case 422:
                 if (op.rejection() != null && op.rejection().equals(e.error())) {
-                    return new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, rejected(e, op.secrets()));
+                    return new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, rejected(e, op.suppressUpstreamMessage()));
                 }
                 return e;
             case 428:
@@ -257,11 +257,9 @@ class AdminOperations {
         }
     }
 
-    private static Rejected rejected(UpstreamException e, List<String> secrets) {
-        String upstream = e.upstreamMessage();
-        boolean quotesSecret = upstream != null && secrets.stream().anyMatch(upstream::contains);
-        String message = upstream == null || quotesSecret ? null
-                : TextHygiene.cutAtNotation(TextHygiene.neutralize(upstream), 500);
+    private static Rejected rejected(UpstreamException e, boolean suppressMessage) {
+        String message = e.upstreamMessage() == null || suppressMessage ? null
+                : TextHygiene.cutAtNotation(TextHygiene.neutralize(e.upstreamMessage()), 500);
         return new Rejected(e.error(), e.reason(), e.manifestReason(), message);
     }
 

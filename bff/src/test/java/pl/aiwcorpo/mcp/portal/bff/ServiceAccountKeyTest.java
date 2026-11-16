@@ -230,7 +230,39 @@ class ServiceAccountKeyTest extends PortalHarness {
                     + "\",\"message\":\"not accepted\"}");
             HttpResponse<String> response = admin.request("PUT", KEY_PATH, TOKEN_BODY, true, NO_HEADERS);
             assertThat(JSON.readTree(response.body()).get("reason").asString()).isEqualTo(reason);
-            assertThat(JSON.readTree(response.body()).get("message").asString()).isEqualTo("not accepted");
+            assertThat(JSON.readTree(response.body()).has("message")).isFalse();
+        }
+    }
+
+    @Test
+    void theFreeTextOfABrokerRefusalIsNeverForwardedInAnyForm() {
+        remember();
+        TestBrowser admin = admin();
+        String base64Basic = java.util.Base64.getEncoder().encodeToString((LOGIN + ":" + PASSWORD).getBytes());
+        List<String> texts = List.of("bad credential " + base64Basic, "fragment " + TOKEN_VALUE.substring(5, 20),
+                "unrelated text about the secret store", base64Basic.substring(3, 12));
+        for (String text : texts) {
+            for (int status : List.of(422, 400, 503)) {
+                String body = "{\"error\":\"" + (status == 422 ? "service_account_key_rejected" : "invalid_request")
+                        + "\",\"reason\":\"value_not_basic_credential\",\"message\":\"" + text + "\"}";
+                stub("PUT", UPSTREAM_PATH, status, body);
+                stub("DELETE", UPSTREAM_PATH, status, body);
+                stub("GET", UPSTREAM_PATH, status, body);
+
+                List<HttpResponse<String>> answers = List.of(
+                        admin.request("PUT", KEY_PATH, TOKEN_BODY, true, NO_HEADERS),
+                        admin.request("DELETE", KEY_PATH, null, true, NO_HEADERS), admin.get(KEY_PATH));
+
+                for (HttpResponse<String> answer : answers) {
+                    assertThat(answer.body()).as(status + " " + text).doesNotContain(text, "message");
+                }
+                if (status == 422) {
+                    JsonNode put = JSON.readTree(answers.getFirst().body());
+                    assertThat(put.get("error").asString()).isEqualTo("service_account_key_rejected");
+                    assertThat(put.get("reason").asString()).isEqualTo("value_not_basic_credential");
+                    assertThat(put.has("message")).isFalse();
+                }
+            }
         }
     }
 

@@ -1,8 +1,5 @@
 package pl.aiwcorpo.mcp.portal.bff.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -45,7 +42,8 @@ class AdminServiceAccountKeyController {
                                HttpServletResponse response) {
         return operations.read(authentication, request, response, () -> {
             requireSystemId(system);
-            return Op.read(Upstream.BROKER, KEY, AdminViews::serviceAccountKeyStatus, system);
+            return new Op(Upstream.BROKER, HttpMethod.GET, KEY, new Object[] {system}, null, AdminPreconditions.NONE,
+                    false, false, AdminViews::serviceAccountKeyStatus, null, null, null, true);
         });
     }
 
@@ -59,7 +57,7 @@ class AdminServiceAccountKeyController {
                 throw ApiException.badRequest();
             }
             return new Op(Upstream.BROKER, HttpMethod.PUT, KEY, new Object[] {system}, body, AdminPreconditions.NONE, true,
-                    false, AdminViews::serviceAccountKeyStatus, "service_account_key_rejected", null, null, secretsOf(body));
+                    false, AdminViews::serviceAccountKeyStatus, "service_account_key_rejected", null, null, true);
         });
     }
 
@@ -69,18 +67,8 @@ class AdminServiceAccountKeyController {
         return operations.write(null, authentication, request, response, () -> {
             requireSystemId(system);
             return new Op(Upstream.BROKER, HttpMethod.DELETE, KEY, new Object[] {system}, null, AdminPreconditions.NONE,
-                    true, false, null, null, null);
+                    true, false, null, null, null, null, true);
         });
-    }
-
-    private static List<String> secretsOf(JsonNode body) {
-        List<String> secrets = new ArrayList<>();
-        for (String field : List.of("value", "username", "password")) {
-            if (body.has(field)) {
-                secrets.add(body.get(field).asString());
-            }
-        }
-        return secrets;
     }
 
     /** An id that does not fit the pattern is a malformed request, never a missing resource (CC-243). */

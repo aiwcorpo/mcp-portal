@@ -338,7 +338,7 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
   the clock (`422 service_account_key_rejected` with the reason `system_not_service_account`, `basic_scheme_required`,
   `value_not_basic_credential` or `expires_at_in_past`). Last write wins, so there is no `If-Match`. The value, the login and the
   password are in no answer, log line or audit event of the portal; a broker answer with a field the schema does not list is refused
-  (`503`), and a `422` whose message contains one of the submitted texts loses its message. `GET` returns the status without a fresh
+  (`503`), and the free text (`message`) of a broker refusal is never forwarded on these three operations, only `error` and `reason`. `GET` returns the status without a fresh
   MFA; the view of a system carries `serviceAccountKey` (`state`, and `expiresAt` and `expired` only for `set`), which the BFF
   checks like the rest of the view. Removing a system also removes its key on the broker's side.
 - `whoami` (CC-247): a system of the adapter `generic-rest` may have one, `{path, usernameField}`, which the broker calls to check
