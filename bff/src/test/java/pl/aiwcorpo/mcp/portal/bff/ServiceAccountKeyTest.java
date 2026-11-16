@@ -332,6 +332,27 @@ class ServiceAccountKeyTest extends PortalHarness {
     }
 
     @Test
+    void lengthsAreCountedInCodePointsLikeTheContractDoes() {
+        TestBrowser admin = admin();
+        stub("PUT", UPSTREAM_PATH, 200, C12.responseExample("PUT", KEY, 200, "stored").toString());
+        String astral = "\uD83D\uDE00";
+        String login255 = astral.repeat(255);
+        String password4096 = astral.repeat(4096);
+
+        HttpResponse<String> fits = admin.request("PUT", KEY_PATH,
+                "{\"username\":\"" + login255 + "\",\"password\":\"" + password4096 + "\"}", true, NO_HEADERS);
+        HttpResponse<String> loginTooLong = admin.request("PUT", KEY_PATH,
+                "{\"username\":\"" + login255 + astral + "\",\"password\":\"p\"}", true, NO_HEADERS);
+        HttpResponse<String> passwordTooLong = admin.request("PUT", KEY_PATH,
+                "{\"username\":\"u\",\"password\":\"" + password4096 + astral + "\"}", true, NO_HEADERS);
+
+        assertThat(fits.statusCode()).isEqualTo(200);
+        assertThat(loginTooLong.statusCode()).isEqualTo(400);
+        assertThat(passwordTooLong.statusCode()).isEqualTo(400);
+        assertThat(keyRequests()).hasSize(1);
+    }
+
+    @Test
     void anAnswerThatCouldCarryTheKeyIsNotShown() {
         remember();
         TestBrowser admin = admin();

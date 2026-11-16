@@ -309,6 +309,15 @@ export class SystemsPage implements OnInit {
     const current = this.editing();
     return current?.original ? changedAddresses(current.original, current.form) : [];
   });
+  /** The broker removes the key when a system stops being a service-account system (CC-251). */
+  protected readonly dropsKey = computed(() => {
+    const current = this.editing();
+    return (
+      current?.original?.serviceAccountKey?.state === 'set' &&
+      current.original.supportedTypes.includes('service-account') &&
+      !current.form.supportedTypes.includes('service-account')
+    );
+  });
   /** The secret must be typed (again) when it was never stored here or when an address changed. */
   protected readonly secretRequired = computed(() => {
     const current = this.editing();
@@ -412,11 +421,14 @@ export class SystemsPage implements OnInit {
           $localize`:@@adminSystems.errKeyValue:Enter the key: visible characters only, no spaces, up to 4096.`;
       }
     } else {
-      if (!USERNAME_PATTERN.test(form.username) || form.username.length > USERNAME_MAX_LENGTH) {
+      if (
+        !USERNAME_PATTERN.test(form.username) ||
+        [...form.username].length > USERNAME_MAX_LENGTH
+      ) {
         found['username'] =
           $localize`:@@adminSystems.errKeyUsername:Enter the login: up to 255 characters, no colon, no control or invisible characters.`;
       }
-      if (form.password.length === 0 || form.password.length > SECRET_MAX_LENGTH) {
+      if (form.password.length === 0 || [...form.password].length > SECRET_MAX_LENGTH) {
         found['password'] =
           $localize`:@@adminSystems.errKeyPassword:Enter the password: up to 4096 characters.`;
       }

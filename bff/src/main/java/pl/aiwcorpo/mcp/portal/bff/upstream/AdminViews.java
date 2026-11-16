@@ -323,7 +323,8 @@ public final class AdminViews {
                 && (!node.has("expiresAt") || ContractValues.isTimestamp(RegistryData.text(node.get("expiresAt"))))
                 && (!node.has("expired") || node.get("expired").isBoolean())
                 && (!node.has("updatedAt") || ContractValues.isTimestamp(RegistryData.text(node.get("updatedAt"))))
-                && (!node.has("updatedBy") || boundedText(node.get("updatedBy"), 255));
+                && (!node.has("updatedBy") || !RegistryData.text(node.get("updatedBy")).isEmpty()
+                        && RegistryData.text(node.get("updatedBy")).codePointCount(0, RegistryData.text(node.get("updatedBy")).length()) <= 255);
         return fits ? RegistryData.neutralized(node) : null;
     }
 

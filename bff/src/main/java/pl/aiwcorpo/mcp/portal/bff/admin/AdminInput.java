@@ -213,9 +213,9 @@ final class AdminInput {
         if (single ? login : !(in.has("username") && in.has("password"))) {
             return null;
         }
-        if (single ? !KEY_VALUE.matcher(string(in, "value")).matches() || string(in, "value").length() > 4096
-                : !KEY_USERNAME.matcher(string(in, "username")).matches() || string(in, "username").length() > 255
-                        || !bounded(string(in, "password"), 4096)) {
+        if (single ? !KEY_VALUE.matcher(string(in, "value")).matches() || codePoints(string(in, "value")) > 4096
+                : !KEY_USERNAME.matcher(string(in, "username")).matches() || codePoints(string(in, "username")) > 255
+                        || codePoints(string(in, "password")) < 1 || codePoints(string(in, "password")) > 4096) {
             return null;
         }
         return !in.has("expiresAt") || ContractValues.isTimestamp(string(in, "expiresAt")) ? in : null;
@@ -240,6 +240,11 @@ final class AdminInput {
 
     private static boolean isUrl(String value) {
         return value.length() <= 255 && INTERNAL_URL.matcher(value).matches();
+    }
+
+    /** The contract counts characters (code points), not UTF-16 units: an astral character is one. */
+    private static int codePoints(String value) {
+        return value.codePointCount(0, value.length());
     }
 
     private static boolean bounded(String value, int max) {

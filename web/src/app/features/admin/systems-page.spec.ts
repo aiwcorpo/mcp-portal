@@ -705,6 +705,71 @@ describe('SystemsPage service account key', () => {
     expect(text()).not.toContain('Deleted the service account key');
   });
 
+  it('counts the login and the password in characters, not in UTF-16 units', async () => {
+    store.update({ mfaFresh: true });
+    listOf(basicSystem({ state: 'missing' }));
+    acceptKeysOf('billing');
+    await open();
+    button('Set key (billing)').click();
+    await until(() => expect(document.getElementById('key-username')).toBeTruthy());
+    const astral = '\u{1F600}';
+    fill('key-username', astral.repeat(255));
+    fill('key-password', astral.repeat(4096));
+    await settle();
+    button('Save key').click();
+    await until(() => expect(writes.length).toBe(1));
+
+    button('Set key (billing)').click();
+    await until(() => expect(document.getElementById('key-username')).toBeTruthy());
+    fill('key-username', astral.repeat(256));
+    fill('key-password', 'p');
+    await settle();
+    button('Save key').click();
+    await until(() => expect(text()).toContain('up to 255 characters'));
+    expect(writes.length).toBe(1);
+  });
+
+  it('warns when the type service account is unticked on a system whose key is set, and not otherwise', async () => {
+    listOf(
+      { ...basicSystem({ state: 'set' }), secretScheme: 'Bearer' },
+      { ...basicSystem({ state: 'missing' }), system: 'other' },
+    );
+    server.use(
+      http.get('/api/v1/admin/systems/billing', () =>
+        HttpResponse.json(
+          { ...basicSystem({ state: 'set' }), secretScheme: 'Bearer' },
+          { headers: { ETag: '"v1"' } },
+        ),
+      ),
+      http.get('/api/v1/admin/systems/other', () =>
+        HttpResponse.json(basicSystem({ state: 'missing' }), { headers: { ETag: '"v1"' } }),
+      ),
+    );
+    await open();
+    button('Edit (billing)').click();
+    await until(() => expect(document.getElementById('sys-base')).toBeTruthy());
+    expect(text()).not.toContain('the broker removes the service account key');
+
+    fill('sys-adapter', 'atlassian-dc');
+    await until(() => expect(document.getElementById('sys-product')).toBeTruthy());
+    toggle('type-user-secret');
+    toggle('type-service-account');
+    await until(() => expect(text()).toContain('the broker removes the service account key'));
+    expect(text()).toContain('needs a new key');
+    toggle('type-service-account');
+    await until(() => expect(text()).not.toContain('the broker removes the service account key'));
+
+    button('Cancel').click();
+    button('Edit (other)').click();
+    await until(() => expect(document.getElementById('sys-base')).toBeTruthy());
+    fill('sys-adapter', 'atlassian-dc');
+    await until(() => expect(document.getElementById('sys-product')).toBeTruthy());
+    toggle('type-user-secret');
+    toggle('type-service-account');
+    await settle();
+    expect(text()).not.toContain('the broker removes the service account key');
+  });
+
   it('tells in the confirmation of a system removal that the key goes with it', async () => {
     store.update({ mfaFresh: true });
     await open();

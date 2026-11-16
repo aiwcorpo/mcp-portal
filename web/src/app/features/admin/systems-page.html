@@ -159,6 +159,15 @@
           {{ changed().join(', ') }}.
         </app-state>
       }
+      @if (dropsKey()) {
+        <app-state kind="warning">
+          <ng-container i18n="@@adminSystems.keyDropped"
+            >Without the credential type service account the broker removes the service account key
+            of this system when you save. Setting the type again later needs a new
+            key.</ng-container
+          >
+        </app-state>
+      }
       <form class="form" (ngSubmit)="save()" novalidate>
         <div class="field">
           <label for="sys-id" i18n="@@adminSystems.id">System identifier</label>

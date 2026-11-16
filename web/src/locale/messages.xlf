@@ -3805,9 +3805,17 @@
         <source>Saving deletes the connections of all users to this system, and they must connect again. Changed now:</source>
       </segment>
     </unit>
+    <unit id="adminSystems.keyDropped">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:165,167</note>
+      </notes>
+      <segment>
+        <source>Without the credential type service account the broker removes the service account key of this system when you save. Setting the type again later needs a new key.</source>
+      </segment>
+    </unit>
     <unit id="adminSystems.id">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:164,165</note>
+        <note category="location">src/app/features/admin/systems-page.html:173,174</note>
       </notes>
       <segment>
         <source>System identifier</source>
@@ -3815,7 +3823,7 @@
     </unit>
     <unit id="adminSystems.displayName">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:185,187</note>
+        <note category="location">src/app/features/admin/systems-page.html:194,196</note>
       </notes>
       <segment>
         <source>Display name (optional)</source>
@@ -3823,7 +3831,7 @@
     </unit>
     <unit id="adminSystems.adapter">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:200,202</note>
+        <note category="location">src/app/features/admin/systems-page.html:209,211</note>
       </notes>
       <segment>
         <source>Adapter</source>
@@ -3831,7 +3839,7 @@
     </unit>
     <unit id="adminSystems.base">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:213,215</note>
+        <note category="location">src/app/features/admin/systems-page.html:222,224</note>
       </notes>
       <segment>
         <source>Base address</source>
@@ -3839,7 +3847,7 @@
     </unit>
     <unit id="adminSystems.product">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:229,231</note>
+        <note category="location">src/app/features/admin/systems-page.html:238,240</note>
       </notes>
       <segment>
         <source>Product</source>
@@ -3847,7 +3855,7 @@
     </unit>
     <unit id="adminSystems.productPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:237,238</note>
+        <note category="location">src/app/features/admin/systems-page.html:246,247</note>
       </notes>
       <segment>
         <source>Choose a product</source>
@@ -3855,7 +3863,7 @@
     </unit>
     <unit id="adminSystems.genericTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:248,249</note>
+        <note category="location">src/app/features/admin/systems-page.html:257,258</note>
       </notes>
       <segment>
         <source>Credential type of this system</source>
@@ -3863,7 +3871,7 @@
     </unit>
     <unit id="adminSystems.genericHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:263,265</note>
+        <note category="location">src/app/features/admin/systems-page.html:272,274</note>
       </notes>
       <segment>
         <source> A generic REST system takes either the tokens of its users or one service account, not both, and no OAuth. </source>
@@ -3871,7 +3879,7 @@
     </unit>
     <unit id="adminSystems.whoamiPath">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:270,272</note>
+        <note category="location">src/app/features/admin/systems-page.html:279,281</note>
       </notes>
       <segment>
         <source>Check path (optional)</source>
@@ -3879,7 +3887,7 @@
     </unit>
     <unit id="adminSystems.whoamiField">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:288,290</note>
+        <note category="location">src/app/features/admin/systems-page.html:297,299</note>
       </notes>
       <segment>
         <source>User name field of the answer</source>
@@ -3887,7 +3895,7 @@
     </unit>
     <unit id="adminSystems.whoamiHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:305,307</note>
+        <note category="location">src/app/features/admin/systems-page.html:314,316</note>
       </notes>
       <segment>
         <source> The broker calls this path on the base address with the token a user enters and reads the user name from the answer. Without it the token is stored without a check, and the connection shows no account. </source>
@@ -3895,7 +3903,7 @@
     </unit>
     <unit id="adminSystems.types">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:312,313</note>
+        <note category="location">src/app/features/admin/systems-page.html:321,322</note>
       </notes>
       <segment>
         <source>Supported credential types</source>
@@ -3903,7 +3911,7 @@
     </unit>
     <unit id="adminSystems.defaultType">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:332,334</note>
+        <note category="location">src/app/features/admin/systems-page.html:341,343</note>
       </notes>
       <segment>
         <source>Default type</source>
@@ -3911,7 +3919,7 @@
     </unit>
     <unit id="adminSystems.secretScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:350,353</note>
+        <note category="location">src/app/features/admin/systems-page.html:359,362</note>
       </notes>
       <segment>
         <source>Scheme of the secret handed to the gateway</source>
@@ -3919,7 +3927,7 @@
     </unit>
     <unit id="adminSystems.userScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:366,368</note>
+        <note category="location">src/app/features/admin/systems-page.html:375,377</note>
       </notes>
       <segment>
         <source>Scheme of the user&apos;s token</source>
@@ -3927,7 +3935,7 @@
     </unit>
     <unit id="adminSystems.userSchemeDefault">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:374,375</note>
+        <note category="location">src/app/features/admin/systems-page.html:383,384</note>
       </notes>
       <segment>
         <source>As the scheme above</source>
@@ -3935,7 +3943,7 @@
     </unit>
     <unit id="adminSystems.userSchemeHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:380,382</note>
+        <note category="location">src/app/features/admin/systems-page.html:389,391</note>
       </notes>
       <segment>
         <source> Basic makes the connection form ask for a login next to the token. </source>
@@ -3943,7 +3951,7 @@
     </unit>
     <unit id="adminSystems.audience">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:387,389</note>
+        <note category="location">src/app/features/admin/systems-page.html:396,398</note>
       </notes>
       <segment>
         <source>Audience of the exchanged token</source>
@@ -3951,7 +3959,7 @@
     </unit>
     <unit id="adminSystems.revoke">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:404,406</note>
+        <note category="location">src/app/features/admin/systems-page.html:413,415</note>
       </notes>
       <segment>
         <source>Revoke address (optional)</source>
@@ -3959,7 +3967,7 @@
     </unit>
     <unit id="adminSystems.timeout">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:419,421</note>
+        <note category="location">src/app/features/admin/systems-page.html:428,430</note>
       </notes>
       <segment>
         <source>Timeout of calls (optional)</source>
@@ -3967,7 +3975,7 @@
     </unit>
     <unit id="adminSystems.oauth">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:435,436</note>
+        <note category="location">src/app/features/admin/systems-page.html:444,445</note>
       </notes>
       <segment>
         <source>OAuth client</source>
@@ -3975,7 +3983,7 @@
     </unit>
     <unit id="adminSystems.clientId">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:437,439</note>
+        <note category="location">src/app/features/admin/systems-page.html:446,448</note>
       </notes>
       <segment>
         <source>Client identifier</source>
@@ -3983,7 +3991,7 @@
     </unit>
     <unit id="adminSystems.clientSecret">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:452,454</note>
+        <note category="location">src/app/features/admin/systems-page.html:461,463</note>
       </notes>
       <segment>
         <source>Client secret</source>
@@ -3991,7 +3999,7 @@
     </unit>
     <unit id="adminSystems.secretNeeded">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:467,469</note>
+        <note category="location">src/app/features/admin/systems-page.html:476,478</note>
       </notes>
       <segment>
         <source>Required now. The secret is stored in the broker and never shown again.</source>
@@ -3999,7 +4007,7 @@
     </unit>
     <unit id="adminSystems.secretKept">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:472,474</note>
+        <note category="location">src/app/features/admin/systems-page.html:481,483</note>
       </notes>
       <segment>
         <source>A secret is stored. Leave this empty to keep it.</source>
@@ -4007,7 +4015,7 @@
     </unit>
     <unit id="adminSystems.authorize">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:483,485</note>
+        <note category="location">src/app/features/admin/systems-page.html:492,494</note>
       </notes>
       <segment>
         <source>Authorization address</source>
@@ -4015,7 +4023,7 @@
     </unit>
     <unit id="adminSystems.tokenUrl">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:501,503</note>
+        <note category="location">src/app/features/admin/systems-page.html:510,512</note>
       </notes>
       <segment>
         <source>Token address</source>
@@ -4023,7 +4031,7 @@
     </unit>
     <unit id="adminSystems.scopes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:518,520</note>
+        <note category="location">src/app/features/admin/systems-page.html:527,529</note>
       </notes>
       <segment>
         <source>OAuth scopes (separated by spaces)</source>
@@ -4031,7 +4039,7 @@
     </unit>
     <unit id="adminSystems.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:535,538</note>
+        <note category="location">src/app/features/admin/systems-page.html:544,547</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this form; the client secret is not kept on the way, so you enter it again. </source>
@@ -4039,7 +4047,7 @@
     </unit>
     <unit id="adminSystems.save">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:540,542</note>
+        <note category="location">src/app/features/admin/systems-page.html:549,551</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -4047,7 +4055,7 @@
     </unit>
     <unit id="adminSystems.cancel">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:549,551</note>
+        <note category="location">src/app/features/admin/systems-page.html:558,560</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -4055,7 +4063,7 @@
     </unit>
     <unit id="adminSystems.keyFormReplace">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:564,566</note>
+        <note category="location">src/app/features/admin/systems-page.html:573,575</note>
       </notes>
       <segment>
         <source>Replace the service account key of</source>
@@ -4063,7 +4071,7 @@
     </unit>
     <unit id="adminSystems.keyFormSet">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:568,571</note>
+        <note category="location">src/app/features/admin/systems-page.html:577,580</note>
       </notes>
       <segment>
         <source>Set the service account key of</source>
@@ -4071,7 +4079,7 @@
     </unit>
     <unit id="adminSystems.keyLead">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:574,578</note>
+        <note category="location">src/app/features/admin/systems-page.html:583,587</note>
       </notes>
       <segment>
         <source> The platform uses this key to call the system without a user. It is stored in the broker&apos;s secret store and is never shown again, here or anywhere else. The last save wins: a new key replaces the old one together with its expiry. </source>
@@ -4079,7 +4087,7 @@
     </unit>
     <unit id="adminSystems.keyForm">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:581,582</note>
+        <note category="location">src/app/features/admin/systems-page.html:590,591</note>
       </notes>
       <segment>
         <source>Form of the key</source>
@@ -4087,7 +4095,7 @@
     </unit>
     <unit id="adminSystems.keyModePair">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:589,591</note>
+        <note category="location">src/app/features/admin/systems-page.html:598,600</note>
       </notes>
       <segment>
         <source>Login and password</source>
@@ -4095,7 +4103,7 @@
     </unit>
     <unit id="adminSystems.keyModeValue">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:598,600</note>
+        <note category="location">src/app/features/admin/systems-page.html:607,609</note>
       </notes>
       <segment>
         <source>One value (base64 of login:password)</source>
@@ -4103,7 +4111,7 @@
     </unit>
     <unit id="adminSystems.keyUsername">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:604,606</note>
+        <note category="location">src/app/features/admin/systems-page.html:613,615</note>
       </notes>
       <segment>
         <source>Login</source>
@@ -4111,7 +4119,7 @@
     </unit>
     <unit id="adminSystems.keyPassword">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:620,622</note>
+        <note category="location">src/app/features/admin/systems-page.html:629,631</note>
       </notes>
       <segment>
         <source>Password or API token</source>
@@ -4119,7 +4127,7 @@
     </unit>
     <unit id="adminSystems.keyValue">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:637,639</note>
+        <note category="location">src/app/features/admin/systems-page.html:646,648</note>
       </notes>
       <segment>
         <source>Key</source>
@@ -4127,7 +4135,7 @@
     </unit>
     <unit id="adminSystems.keyValueHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:649,651</note>
+        <note category="location">src/app/features/admin/systems-page.html:658,660</note>
       </notes>
       <segment>
         <source> The credential as it goes after the scheme in the Authorization header, for example the token itself. </source>
@@ -4135,7 +4143,7 @@
     </unit>
     <unit id="adminSystems.keyExpires">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:658,660</note>
+        <note category="location">src/app/features/admin/systems-page.html:667,669</note>
       </notes>
       <segment>
         <source>Expires (optional)</source>
@@ -4143,7 +4151,7 @@
     </unit>
     <unit id="adminSystems.keyExpiresHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:670,673</note>
+        <note category="location">src/app/features/admin/systems-page.html:679,682</note>
       </notes>
       <segment>
         <source> Your local time. After it the broker refuses calls to the system. Leave it empty for a key without a planned expiry. </source>
@@ -4151,7 +4159,7 @@
     </unit>
     <unit id="adminSystems.keyMfaHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:678,681</note>
+        <note category="location">src/app/features/admin/systems-page.html:687,690</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this page; the key is not kept on the way, so you enter it again. </source>
@@ -4159,7 +4167,7 @@
     </unit>
     <unit id="adminSystems.keySave">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:683,685</note>
+        <note category="location">src/app/features/admin/systems-page.html:692,694</note>
       </notes>
       <segment>
         <source> Save key </source>
@@ -4167,7 +4175,7 @@
     </unit>
     <unit id="adminSystems.keyCancel">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:692,694</note>
+        <note category="location">src/app/features/admin/systems-page.html:701,703</note>
       </notes>
       <segment>
         <source> Cancel </source>
@@ -4215,7 +4223,7 @@
     </unit>
     <unit id="adminSystems.errUrl">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:326</note>
+        <note category="location">src/app/features/admin/systems-page.ts:335</note>
       </notes>
       <segment>
         <source>Enter an https address.</source>
@@ -4223,7 +4231,7 @@
     </unit>
     <unit id="adminSystems.errSystem">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:329</note>
+        <note category="location">src/app/features/admin/systems-page.ts:338</note>
       </notes>
       <segment>
         <source>Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.</source>
@@ -4231,7 +4239,7 @@
     </unit>
     <unit id="adminSystems.errDisplayName">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:333</note>
+        <note category="location">src/app/features/admin/systems-page.ts:342</note>
       </notes>
       <segment>
         <source>Use 1 to 64 characters; control and invisible characters are not allowed.</source>
@@ -4239,7 +4247,7 @@
     </unit>
     <unit id="adminSystems.errWhoamiPath">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:344</note>
+        <note category="location">src/app/features/admin/systems-page.ts:353</note>
       </notes>
       <segment>
         <source>Enter a path that starts with a single slash, without a host, a query or &quot;..&quot;, for example /api/me.</source>
@@ -4247,7 +4255,7 @@
     </unit>
     <unit id="adminSystems.errWhoamiField">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:348</note>
+        <note category="location">src/app/features/admin/systems-page.ts:357</note>
       </notes>
       <segment>
         <source>Enter the field of the answer that holds the user name, or a JSON pointer such as /user/login.</source>
@@ -4255,7 +4263,7 @@
     </unit>
     <unit id="adminSystems.errProduct">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:352</note>
+        <note category="location">src/app/features/admin/systems-page.ts:361</note>
       </notes>
       <segment>
         <source>Choose Jira or Confluence.</source>
@@ -4263,7 +4271,7 @@
     </unit>
     <unit id="adminSystems.errTimeout">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:356</note>
+        <note category="location">src/app/features/admin/systems-page.ts:365</note>
       </notes>
       <segment>
         <source>Use an ISO 8601 duration of at most 10 minutes, for example PT30S.</source>
@@ -4271,7 +4279,7 @@
     </unit>
     <unit id="adminSystems.errTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:360</note>
+        <note category="location">src/app/features/admin/systems-page.ts:369</note>
       </notes>
       <segment>
         <source>Choose at least one credential type.</source>
@@ -4279,7 +4287,7 @@
     </unit>
     <unit id="adminSystems.errDefault">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:363</note>
+        <note category="location">src/app/features/admin/systems-page.ts:372</note>
       </notes>
       <segment>
         <source>The default type has to be one of the supported types.</source>
@@ -4287,7 +4295,7 @@
     </unit>
     <unit id="adminSystems.errMixed">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:369</note>
+        <note category="location">src/app/features/admin/systems-page.ts:378</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -4295,7 +4303,7 @@
     </unit>
     <unit id="adminSystems.errAudience">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:373</note>
+        <note category="location">src/app/features/admin/systems-page.ts:382</note>
       </notes>
       <segment>
         <source>A token exchange system needs the audience of the token.</source>
@@ -4303,7 +4311,7 @@
     </unit>
     <unit id="adminSystems.errClientId">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:377</note>
+        <note category="location">src/app/features/admin/systems-page.ts:386</note>
       </notes>
       <segment>
         <source>Enter the client identifier.</source>
@@ -4311,7 +4319,7 @@
     </unit>
     <unit id="adminSystems.errSecretAgain">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:381</note>
+        <note category="location">src/app/features/admin/systems-page.ts:390</note>
       </notes>
       <segment>
         <source>Enter the client secret again: an address or the client identifier changed.</source>
@@ -4319,7 +4327,7 @@
     </unit>
     <unit id="adminSystems.errSecret">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:382</note>
+        <note category="location">src/app/features/admin/systems-page.ts:391</note>
       </notes>
       <segment>
         <source>Enter the client secret.</source>
@@ -4327,7 +4335,7 @@
     </unit>
     <unit id="adminSystems.errScopes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:395</note>
+        <note category="location">src/app/features/admin/systems-page.ts:404</note>
       </notes>
       <segment>
         <source>A scope cannot contain spaces.</source>
@@ -4335,7 +4343,7 @@
     </unit>
     <unit id="adminSystems.errKeyValue">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:412</note>
+        <note category="location">src/app/features/admin/systems-page.ts:421</note>
       </notes>
       <segment>
         <source>Enter the key: visible characters only, no spaces, up to 4096.</source>
@@ -4343,7 +4351,7 @@
     </unit>
     <unit id="adminSystems.errKeyUsername">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:417</note>
+        <note category="location">src/app/features/admin/systems-page.ts:429</note>
       </notes>
       <segment>
         <source>Enter the login: up to 255 characters, no colon, no control or invisible characters.</source>
@@ -4351,7 +4359,7 @@
     </unit>
     <unit id="adminSystems.errKeyPassword">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:421</note>
+        <note category="location">src/app/features/admin/systems-page.ts:433</note>
       </notes>
       <segment>
         <source>Enter the password: up to 4096 characters.</source>
@@ -4359,7 +4367,7 @@
     </unit>
     <unit id="adminSystems.errKeyExpiry">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:428</note>
+        <note category="location">src/app/features/admin/systems-page.ts:440</note>
       </notes>
       <segment>
         <source>The expiry has to be a date and time in the future.</source>
@@ -4367,7 +4375,7 @@
     </unit>
     <unit id="adminSystems.secretSet">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:454</note>
+        <note category="location">src/app/features/admin/systems-page.ts:466</note>
       </notes>
       <segment>
         <source>Client secret stored</source>
@@ -4375,7 +4383,7 @@
     </unit>
     <unit id="adminSystems.secretMissing">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:455</note>
+        <note category="location">src/app/features/admin/systems-page.ts:467</note>
       </notes>
       <segment>
         <source>No client secret</source>
@@ -4383,7 +4391,7 @@
     </unit>
     <unit id="adminSystems.mfaKeyDraft">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:486</note>
+        <note category="location">src/app/features/admin/systems-page.ts:498</note>
       </notes>
       <segment>
         <source>Identity confirmed. Enter the key again and save; it is not kept on the way.</source>
@@ -4391,7 +4399,7 @@
     </unit>
     <unit id="adminSystems.mfaDraft">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:501</note>
+        <note category="location">src/app/features/admin/systems-page.ts:513</note>
       </notes>
       <segment>
         <source>Identity confirmed. Check the form, enter the client secret again and save.</source>
@@ -4399,7 +4407,7 @@
     </unit>
     <unit id="adminSystems.mfaRepeat">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:505</note>
+        <note category="location">src/app/features/admin/systems-page.ts:517</note>
       </notes>
       <segment>
         <source>Identity confirmed. Repeat the operation.</source>
@@ -4407,7 +4415,7 @@
     </unit>
     <unit id="adminSystems.keySaved">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:628</note>
+        <note category="location">src/app/features/admin/systems-page.ts:640</note>
       </notes>
       <segment>
         <source>Saved the service account key of <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4415,7 +4423,7 @@
     </unit>
     <unit id="adminSystems.keyRemoveTitle">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:652</note>
+        <note category="location">src/app/features/admin/systems-page.ts:664</note>
       </notes>
       <segment>
         <source>Delete the service account key of <ph id="0" equiv="system" disp="id"/>?</source>
@@ -4423,7 +4431,7 @@
     </unit>
     <unit id="adminSystems.keyRemoveMessage">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:653</note>
+        <note category="location">src/app/features/admin/systems-page.ts:665</note>
       </notes>
       <segment>
         <source>The broker deletes the key with all its versions. Calls that need the key are refused until a new one is set. Deleting needs a fresh MFA.</source>
@@ -4431,7 +4439,7 @@
     </unit>
     <unit id="adminSystems.keyRemoveConfirm">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:654</note>
+        <note category="location">src/app/features/admin/systems-page.ts:666</note>
       </notes>
       <segment>
         <source>Delete key</source>
@@ -4439,7 +4447,7 @@
     </unit>
     <unit id="adminSystems.keyRemoved">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:667</note>
+        <note category="location">src/app/features/admin/systems-page.ts:679</note>
       </notes>
       <segment>
         <source>Deleted the service account key of <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4447,7 +4455,7 @@
     </unit>
     <unit id="adminSystems.savedInvalidated">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:764</note>
+        <note category="location">src/app/features/admin/systems-page.ts:776</note>
       </notes>
       <segment>
         <source>Saved the system <ph id="0" equiv="system" disp="id"/>. The connections of its users were deleted; they connect again.</source>
@@ -4455,7 +4463,7 @@
     </unit>
     <unit id="adminSystems.saved">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:765</note>
+        <note category="location">src/app/features/admin/systems-page.ts:777</note>
       </notes>
       <segment>
         <source>Saved the system <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4463,7 +4471,7 @@
     </unit>
     <unit id="adminSystems.added">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:766</note>
+        <note category="location">src/app/features/admin/systems-page.ts:778</note>
       </notes>
       <segment>
         <source>Added the system <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4471,7 +4479,7 @@
     </unit>
     <unit id="adminSystems.removeTitle">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:804</note>
+        <note category="location">src/app/features/admin/systems-page.ts:816</note>
       </notes>
       <segment>
         <source>Remove the system <ph id="0" equiv="system" disp="id"/>?</source>
@@ -4479,7 +4487,7 @@
     </unit>
     <unit id="adminSystems.removeMessage">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:805</note>
+        <note category="location">src/app/features/admin/systems-page.ts:817</note>
       </notes>
       <segment>
         <source>The broker deletes the settings, the client secret, the service account key (if one is set) and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.</source>
@@ -4487,7 +4495,7 @@
     </unit>
     <unit id="adminSystems.removeConfirm">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:806</note>
+        <note category="location">src/app/features/admin/systems-page.ts:818</note>
       </notes>
       <segment>
         <source>Remove system</source>
@@ -4495,7 +4503,7 @@
     </unit>
     <unit id="adminSystems.removed">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:821</note>
+        <note category="location">src/app/features/admin/systems-page.ts:833</note>
       </notes>
       <segment>
         <source>Removed the system <ph id="0" equiv="system" disp="id"/>.</source>

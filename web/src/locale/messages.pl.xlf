@@ -4279,6 +4279,15 @@
         <target>Zapis usunie połączenia wszystkich użytkowników z tym systemem i będą musieli połączyć się ponownie. Zmienione teraz:</target>
       </segment>
     </unit>
+    <unit id="adminSystems.keyDropped">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:165,167</note>
+      </notes>
+      <segment>
+        <source>Without the credential type service account the broker removes the service account key of this system when you save. Setting the type again later needs a new key.</source>
+        <target>Jeśli odznaczysz typ poświadczenia konto serwisowe, broker usunie przy zapisie klucz konta serwisowego tego systemu. Ponowne dodanie typu będzie wymagało nowego klucza.</target>
+      </segment>
+    </unit>
     <unit id="adminSystems.id">
       <notes>
         <note category="location">src/app/features/admin/systems-page.html:133,134</note>
