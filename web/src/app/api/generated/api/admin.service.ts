@@ -59,6 +59,12 @@ import { ServerConfigPatch } from '../model/serverConfigPatch';
 // @ts-ignore
 import { ServerRejected } from '../model/serverRejected';
 // @ts-ignore
+import { ServiceAccountKeyRejected } from '../model/serviceAccountKeyRejected';
+// @ts-ignore
+import { ServiceAccountKeyRequest } from '../model/serviceAccountKeyRequest';
+// @ts-ignore
+import { ServiceAccountKeyStatus } from '../model/serviceAccountKeyStatus';
+// @ts-ignore
 import { SystemAdminRequest } from '../model/systemAdminRequest';
 // @ts-ignore
 import { SystemAdminView } from '../model/systemAdminView';
@@ -577,8 +583,70 @@ export class AdminService extends BaseService {
     }
 
     /**
+     * Remove the service account key of a system (proxy to C4); fresh MFA.
+     * Proxy to C4 &#x60;deleteServiceAccountKey&#x60; (CC-251): removes the entry with all its versions; calls for the system fail closed afterwards. &#x60;204&#x60; also when there was no key. Needs a fresh MFA (&#x60;step_up_required&#x60; otherwise), checked by the broker as well. 
+     * @endpoint delete /api/v1/admin/systems/{system}/service-account-key
+     * @param system 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public deleteAdminServiceAccountKey(system: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteAdminServiceAccountKey(system: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteAdminServiceAccountKey(system: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteAdminServiceAccountKey(system: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (system === null || system === undefined) {
+            throw new Error('Required parameter system was null or undefined when calling deleteAdminServiceAccountKey.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/systems/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/service-account-key`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Remove a system from the credential broker (proxy to C4), with its connections.
-     * Needs &#x60;If-Match&#x60; (the ETag of the system that was edited) and a fresh MFA (&#x60;auth_time&#x60; within 300 s and &#x60;acr&#x60; or &#x60;amr&#x60; proving MFA; &#x60;step_up_required&#x60; otherwise); the broker checks the MFA freshness of the token itself as well. Deleting an id that has no system is &#x60;204&#x60; and deletes no secret. Nothing is sent to the backend. 
+     * Needs &#x60;If-Match&#x60; (the ETag of the system that was edited) and a fresh MFA (&#x60;auth_time&#x60; within 300 s and &#x60;acr&#x60; or &#x60;amr&#x60; proving MFA; &#x60;step_up_required&#x60; otherwise); the broker checks the MFA freshness of the token itself as well. Deleting an id that has no system is &#x60;204&#x60; and deletes no secret. Nothing is sent to the backend. The service account key of the system is removed with it (all versions, CC-251); the broker audits that as &#x60;service_account_key_deleted&#x60; next to &#x60;system_deleted&#x60;. 
      * @endpoint delete /api/v1/admin/systems/{system}
      * @param ifMatch The ETag of the document the change is based on.
      * @param system 
@@ -1115,6 +1183,65 @@ export class AdminService extends BaseService {
     }
 
     /**
+     * Status of the service account key of a system, never the key (proxy to C4).
+     * Proxy to C4 &#x60;getServiceAccountKey&#x60; (CC-251): whether the key exists, its KV version, &#x60;expiresAt&#x60;, whether it has expired, the time of the last write and, for a key set from the portal, who set it. The value is never returned. The Systems tab calls it for a system whose credential type is &#x60;service-account&#x60;. A system that is not configured is &#x60;404&#x60;. 
+     * @endpoint get /api/v1/admin/systems/{system}/service-account-key
+     * @param system 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public getAdminServiceAccountKey(system: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServiceAccountKeyStatus>;
+    public getAdminServiceAccountKey(system: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServiceAccountKeyStatus>>;
+    public getAdminServiceAccountKey(system: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServiceAccountKeyStatus>>;
+    public getAdminServiceAccountKey(system: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (system === null || system === undefined) {
+            throw new Error('Required parameter system was null or undefined when calling getAdminServiceAccountKey.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/systems/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/service-account-key`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ServiceAccountKeyStatus>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * One system of the credential broker with its ETag, without secrets (proxy to C4).
      * @endpoint get /api/v1/admin/systems/{system}
      * @param system 
@@ -1616,6 +1743,82 @@ export class AdminService extends BaseService {
             {
                 context: localVarHttpContext,
                 body: killSwitchRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Set or replace the service account key of a system (proxy to C4); write-only, fresh MFA.
+     * Proxy to C4 &#x60;putServiceAccountKey&#x60; (CC-251), with the same body and the same validation: &#x60;{value}&#x60; or &#x60;{username, password}&#x60; (Basic systems only), optional &#x60;expiresAt&#x60; in the future. The body is never logged by the BFF and never returned; the response is the status of the new version. A fresh MFA is required (&#x60;auth_time&#x60; within 300 s and &#x60;acr&#x60; or &#x60;amr&#x60; proving MFA, &#x60;401 step_up_required&#x60; otherwise, as for the other admin writes of the Systems tab); the broker checks it on the token as well. Last write wins (no &#x60;If-Match&#x60;). The portal sends the value only to this operation, over the session with the CSRF token, and does not keep it after the call. 
+     * @endpoint put /api/v1/admin/systems/{system}/service-account-key
+     * @param system 
+     * @param serviceAccountKeyRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public putAdminServiceAccountKey(system: string, serviceAccountKeyRequest: ServiceAccountKeyRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ServiceAccountKeyStatus>;
+    public putAdminServiceAccountKey(system: string, serviceAccountKeyRequest: ServiceAccountKeyRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ServiceAccountKeyStatus>>;
+    public putAdminServiceAccountKey(system: string, serviceAccountKeyRequest: ServiceAccountKeyRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ServiceAccountKeyStatus>>;
+    public putAdminServiceAccountKey(system: string, serviceAccountKeyRequest: ServiceAccountKeyRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (system === null || system === undefined) {
+            throw new Error('Required parameter system was null or undefined when calling putAdminServiceAccountKey.');
+        }
+        if (serviceAccountKeyRequest === null || serviceAccountKeyRequest === undefined) {
+            throw new Error('Required parameter serviceAccountKeyRequest was null or undefined when calling putAdminServiceAccountKey.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (csrf) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('csrf', 'X-XSRF-TOKEN', localVarHeaders);
+
+        // authentication (session) required
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/v1/admin/systems/${this.configuration.encodeParam({name: "system", value: system, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/service-account-key`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<ServiceAccountKeyStatus>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: serviceAccountKeyRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

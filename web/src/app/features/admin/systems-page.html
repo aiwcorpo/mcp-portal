@@ -77,6 +77,37 @@
               @if (row.secret) {
                 <span class="muted block">{{ row.secret }}</span>
               }
+              @if (row.keyState) {
+                <span class="block key-status" [class.warn]="row.keyWarn">{{ row.keyText }}</span>
+                <span class="key-actions">
+                  <button
+                    mat-flat-button
+                    type="button"
+                    class="quiet"
+                    [disabled]="busy()"
+                    (click)="openKey(row.system)"
+                  >
+                    @if (row.keyState === 'set') {
+                      <ng-container i18n="@@adminSystems.keyReplace">Replace key</ng-container>
+                    } @else {
+                      <ng-container i18n="@@adminSystems.keySet">Set key</ng-container>
+                    }
+                    <span class="visually-hidden"> ({{ row.system.system }})</span>
+                  </button>
+                  @if (row.keyState !== 'missing') {
+                    <button
+                      mat-flat-button
+                      type="button"
+                      class="quiet"
+                      [disabled]="busy()"
+                      (click)="removeKey(row.system)"
+                    >
+                      <ng-container i18n="@@adminSystems.keyDelete">Delete key</ng-container
+                      ><span class="visually-hidden"> ({{ row.system.system }})</span>
+                    </button>
+                  }
+                </span>
+              }
             </td>
             <td role="cell" class="c-actions">
               <button
@@ -514,6 +545,149 @@
             class="quiet"
             (click)="cancel()"
             i18n="@@adminSystems.cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (keyForm(); as k) {
+    @let keyEdit = keyEditing()!;
+    @let keyErrs = keyErrors();
+    @let keyShow = keyTouched();
+    <section class="editor" aria-labelledby="key-form-title">
+      <h2 id="key-form-title">
+        @if (keyEdit.replacing) {
+          <ng-container i18n="@@adminSystems.keyFormReplace"
+            >Replace the service account key of</ng-container
+          >
+        } @else {
+          <ng-container i18n="@@adminSystems.keyFormSet"
+            >Set the service account key of</ng-container
+          >
+        }
+        {{ keyEdit.displayName | safeText }}
+      </h2>
+      <p class="muted hint" i18n="@@adminSystems.keyLead">
+        The platform uses this key to call the system without a user. It is stored in the broker's
+        secret store and is never shown again, here or anywhere else. The last save wins: a new key
+        replaces the old one together with its expiry.
+      </p>
+      <form class="form" (ngSubmit)="saveKey()" novalidate autocomplete="off">
+        @if (keyEdit.basic) {
+          <fieldset class="field wide">
+            <legend i18n="@@adminSystems.keyForm">Form of the key</legend>
+            <label class="choice">
+              <input
+                type="radio"
+                name="key-mode"
+                [checked]="k.mode === 'pair'"
+                (change)="changeKey({ mode: 'pair', value: '' })"
+              />
+              <span i18n="@@adminSystems.keyModePair">Login and password</span>
+            </label>
+            <label class="choice">
+              <input
+                type="radio"
+                name="key-mode"
+                [checked]="k.mode === 'value'"
+                (change)="changeKey({ mode: 'value', username: '', password: '' })"
+              />
+              <span i18n="@@adminSystems.keyModeValue">One value (base64 of login:password)</span>
+            </label>
+          </fieldset>
+        }
+        @if (k.mode === 'pair') {
+          <div class="field">
+            <label for="key-username" i18n="@@adminSystems.keyUsername">Login</label>
+            <input
+              id="key-username"
+              name="keyUsername"
+              type="text"
+              autocomplete="off"
+              [attr.aria-invalid]="keyShow && keyErrs['username'] ? 'true' : null"
+              [ngModel]="k.username"
+              (ngModelChange)="changeKey({ username: $event })"
+            />
+            @if (keyShow && keyErrs['username']) {
+              <p class="problem">{{ keyErrs['username'] }}</p>
+            }
+          </div>
+          <div class="field">
+            <label for="key-password" i18n="@@adminSystems.keyPassword"
+              >Password or API token</label
+            >
+            <input
+              id="key-password"
+              name="keyPassword"
+              type="password"
+              autocomplete="off"
+              [attr.aria-invalid]="keyShow && keyErrs['password'] ? 'true' : null"
+              [ngModel]="k.password"
+              (ngModelChange)="changeKey({ password: $event })"
+            />
+            @if (keyShow && keyErrs['password']) {
+              <p class="problem">{{ keyErrs['password'] }}</p>
+            }
+          </div>
+        } @else {
+          <div class="field wide">
+            <label for="key-value" i18n="@@adminSystems.keyValue">Key</label>
+            <input
+              id="key-value"
+              name="keyValue"
+              type="password"
+              autocomplete="off"
+              aria-describedby="key-value-hint"
+              [attr.aria-invalid]="keyShow && keyErrs['value'] ? 'true' : null"
+              [ngModel]="k.value"
+              (ngModelChange)="changeKey({ value: $event })"
+            />
+            <p id="key-value-hint" class="muted hint" i18n="@@adminSystems.keyValueHint">
+              The credential as it goes after the scheme in the Authorization header, for example
+              the token itself.
+            </p>
+            @if (keyShow && keyErrs['value']) {
+              <p class="problem">{{ keyErrs['value'] }}</p>
+            }
+          </div>
+        }
+        <div class="field">
+          <label for="key-expires" i18n="@@adminSystems.keyExpires">Expires (optional)</label>
+          <input
+            id="key-expires"
+            name="keyExpires"
+            type="datetime-local"
+            autocomplete="off"
+            aria-describedby="key-expires-hint"
+            [attr.aria-invalid]="keyShow && keyErrs['expiresAt'] ? 'true' : null"
+            [ngModel]="k.expiresAt"
+            (ngModelChange)="changeKey({ expiresAt: $event })"
+          />
+          <p id="key-expires-hint" class="muted hint" i18n="@@adminSystems.keyExpiresHint">
+            Your local time. After it the broker refuses calls to the system. Leave it empty for a
+            key without a planned expiry.
+          </p>
+          @if (keyShow && keyErrs['expiresAt']) {
+            <p class="problem">{{ keyErrs['expiresAt'] }}</p>
+          }
+        </div>
+        <p class="muted hint wide" i18n="@@adminSystems.keyMfaHint">
+          Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back
+          to this page; the key is not kept on the way, so you enter it again.
+        </p>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()" i18n="@@adminSystems.keySave">
+            Save key
+          </button>
+          <button
+            mat-flat-button
+            type="button"
+            class="quiet"
+            (click)="closeKey()"
+            i18n="@@adminSystems.keyCancel"
           >
             Cancel
           </button>

@@ -17,6 +17,7 @@ import {
   AdminService,
   CredentialScheme,
   CredentialType,
+  ServiceAccountKeyRequest,
   SystemAdapter,
   SystemAdminRequest,
   SystemAdminView,
@@ -28,6 +29,7 @@ import { etagOf } from '../../core/admin-etag';
 import { toApiFailure } from '../../core/api-error';
 import { LOADING, LoadState } from '../../core/load-state';
 import { credentialTypeLabel } from '../../shared/labels';
+import { SECRET_MAX_LENGTH, USERNAME_MAX_LENGTH, USERNAME_PATTERN } from '../connect/secret-form';
 import { ConfirmDialog, ConfirmDialogData } from '../../shared/confirm-dialog';
 import { LoadError } from '../../shared/load-error';
 import { Loading } from '../../shared/loading';
@@ -38,6 +40,7 @@ import { AdminSystemNames } from './system-names';
 import {
   DISPLAY_NAME,
   DURATION,
+  KEY_VALUE,
   OAUTH_SCOPE,
   WHOAMI_FIELD,
   WHOAMI_PATH,
@@ -73,6 +76,28 @@ export interface SystemForm {
   authorizeUrl: string;
   tokenUrl: string;
   scopes: string;
+}
+
+/**
+ * The form of a service account key (CC-251). Everything secret in it (`value`, `password`) is emptied the moment the
+ * form is submitted, whatever the answer is, and none of it is ever put into a draft that waits for the IdP.
+ */
+export interface KeyForm {
+  mode: 'value' | 'pair';
+  value: string;
+  username: string;
+  password: string;
+  /** Local date and time as a `datetime-local` field gives it; empty means no planned expiry. */
+  expiresAt: string;
+}
+
+interface KeyEditing {
+  system: string;
+  displayName: string;
+  /** Only a system in the Basic scheme takes a login and a password (the broker answers `basic_scheme_required`). */
+  basic: boolean;
+  replacing: boolean;
+  form: KeyForm;
 }
 
 interface Editing {
@@ -143,6 +168,49 @@ export function changedAddresses(original: SystemAdminView, form: SystemForm): s
   return changed;
 }
 
+/** The Systems tab offers the key only where the broker takes one: the system declares the type `service-account`. */
+export function takesKey(system: SystemAdminView): boolean {
+  return system.supportedTypes.includes('service-account');
+}
+
+/** The time of a `datetime-local` field as the UTC timestamp of the contract, or null when it is empty or not a time. */
+export function expiryOf(local: string): string | null {
+  const time = local.trim() === '' ? NaN : new Date(local).getTime();
+  return Number.isNaN(time) ? null : new Date(time).toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/** UTC with minutes, from a timestamp of the contract: the broker's clock, not the browser's, decides `expired`. */
+function utcMinutes(timestamp: string): string {
+  return `${timestamp.slice(0, 10)} ${timestamp.slice(11, 16)} UTC`;
+}
+
+export function keyStatusText(system: SystemAdminView): string {
+  const summary = system.serviceAccountKey;
+  if (summary?.state === 'missing') {
+    return $localize`:@@adminSystems.keyMissing:Service account key: not set. Calls to this system are refused.`;
+  }
+  if (summary?.state === 'set') {
+    if (!summary.expiresAt) {
+      return $localize`:@@adminSystems.keySetNoExpiry:Service account key: set, no planned expiry.`;
+    }
+    const when = utcMinutes(summary.expiresAt);
+    return summary.expired
+      ? $localize`:@@adminSystems.keyExpired:Service account key: set, expired ${when}:time:. Calls to this system are refused.`
+      : $localize`:@@adminSystems.keySetExpires:Service account key: set, expires ${when}:time:.`;
+  }
+  return $localize`:@@adminSystems.keyUnknown:Service account key: status unknown, the broker could not read its secret store.`;
+}
+
+export function keyRequest(form: KeyForm): ServiceAccountKeyRequest {
+  const expiresAt = expiryOf(form.expiresAt);
+  return {
+    ...(form.mode === 'pair'
+      ? { username: form.username, password: form.password }
+      : { value: form.value }),
+    ...(expiresAt ? { expiresAt } : {}),
+  };
+}
+
 export function systemRequest(form: SystemForm): SystemAdminRequest {
   const oauth = needsOauth(form.supportedTypes);
   const tokenExchange = form.supportedTypes.includes('token-exchange');
@@ -205,6 +273,8 @@ export class SystemsPage implements OnInit {
   protected readonly editing = signal<Editing | null>(null);
   protected readonly busy = signal(false);
   protected readonly touched = signal(false);
+  protected readonly keyEditing = signal<KeyEditing | null>(null);
+  protected readonly keyTouched = signal(false);
   /** The page was opened by the return from the IdP; a repeated step-up request is then an error, not a loop. */
   private returnedAt = 0;
 
@@ -329,6 +399,43 @@ export class SystemsPage implements OnInit {
   });
   protected readonly valid = computed(() => Object.keys(this.errors()).length === 0);
 
+  protected readonly keyForm = computed(() => this.keyEditing()?.form ?? null);
+  protected readonly keyErrors = computed(() => {
+    const form = this.keyForm();
+    const found: Record<string, string> = {};
+    if (!form) {
+      return found;
+    }
+    if (form.mode === 'value') {
+      if (!KEY_VALUE.test(form.value)) {
+        found['value'] =
+          $localize`:@@adminSystems.errKeyValue:Enter the key: visible characters only, no spaces, up to 4096.`;
+      }
+    } else {
+      if (!USERNAME_PATTERN.test(form.username) || form.username.length > USERNAME_MAX_LENGTH) {
+        found['username'] =
+          $localize`:@@adminSystems.errKeyUsername:Enter the login: up to 255 characters, no colon, no control or invisible characters.`;
+      }
+      if (form.password.length === 0 || form.password.length > SECRET_MAX_LENGTH) {
+        found['password'] =
+          $localize`:@@adminSystems.errKeyPassword:Enter the password: up to 4096 characters.`;
+      }
+    }
+    if (form.expiresAt.trim() !== '') {
+      const expires = expiryOf(form.expiresAt);
+      if (expires === null || new Date(expires).getTime() <= Date.now()) {
+        found['expiresAt'] =
+          $localize`:@@adminSystems.errKeyExpiry:The expiry has to be a date and time in the future.`;
+      }
+    }
+    return found;
+  });
+
+  private readonly systemList = computed(() => {
+    const state = this.state();
+    return state.status === 'ready' ? state.value : [];
+  });
+
   protected readonly rows = computed(() => {
     const state = this.state();
     return state.status === 'ready'
@@ -336,6 +443,12 @@ export class SystemsPage implements OnInit {
           system,
           types: system.supportedTypes.map((type) => credentialTypeLabel(type)).join(', '),
           defaultType: credentialTypeLabel(system.defaultType),
+          takesKey: takesKey(system),
+          keyState: takesKey(system) ? (system.serviceAccountKey?.state ?? 'unknown') : null,
+          keyText: takesKey(system) ? keyStatusText(system) : '',
+          keyWarn:
+            takesKey(system) &&
+            !(system.serviceAccountKey?.state === 'set' && !system.serviceAccountKey.expired),
           secret: system.oauth
             ? system.oauth.clientSecretSet
               ? $localize`:@@adminSystems.secretSet:Client secret stored`
@@ -361,10 +474,18 @@ export class SystemsPage implements OnInit {
     if (this.mfa() === 'ok') {
       this.returnedAt = Date.now();
       const draft = this.stepUp.takeDraft<
-        Omit<SystemForm, 'clientSecret'> & { etag: string | null }
+        (Omit<SystemForm, 'clientSecret'> & { etag: string | null }) | { keyFor: string }
       >(PAGE);
       void this.router.navigate([], { queryParams: { mfa: null }, replaceUrl: true });
-      if (draft && typeof draft === 'object' && Array.isArray(draft.supportedTypes)) {
+      if (draft && typeof draft === 'object' && 'keyFor' in draft) {
+        const target = this.systemList().find((system) => system.system === draft.keyFor);
+        if (target && takesKey(target)) {
+          this.openKey(target);
+        }
+        this.notifications.success(
+          $localize`:@@adminSystems.mfaKeyDraft:Identity confirmed. Enter the key again and save; it is not kept on the way.`,
+        );
+      } else if (draft && typeof draft === 'object' && Array.isArray(draft.supportedTypes)) {
         const { etag, ...form } = draft;
         const state = this.state();
         const original =
@@ -404,6 +525,7 @@ export class SystemsPage implements OnInit {
   }
 
   protected openCreate(): void {
+    this.closeKey();
     this.reset();
     this.editing.set({
       form: { ...EMPTY_FORM, supportedTypes: [...EMPTY_FORM.supportedTypes] },
@@ -413,6 +535,7 @@ export class SystemsPage implements OnInit {
   }
 
   protected async openEdit(system: SystemAdminView): Promise<void> {
+    this.closeKey();
     this.reset();
     this.busy.set(true);
     try {
@@ -448,6 +571,110 @@ export class SystemsPage implements OnInit {
       });
     } catch (error) {
       this.notifications.failure(toApiFailure(error));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected openKey(system: SystemAdminView): void {
+    this.editing.set(null);
+    this.touched.set(false);
+    this.keyTouched.set(false);
+    const basic = system.secretScheme === 'Basic';
+    this.keyEditing.set({
+      system: system.system,
+      displayName: system.displayName,
+      basic,
+      replacing: system.serviceAccountKey?.state === 'set',
+      form: {
+        mode: basic ? 'pair' : 'value',
+        value: '',
+        username: '',
+        password: '',
+        expiresAt: '',
+      },
+    });
+  }
+
+  protected closeKey(): void {
+    this.keyEditing.set(null);
+    this.keyTouched.set(false);
+  }
+
+  protected changeKey(change: Partial<KeyForm>): void {
+    this.keyEditing.update((current) =>
+      current ? { ...current, form: { ...current.form, ...change } } : current,
+    );
+  }
+
+  /**
+   * Sends the key and empties the secret fields at once, before the answer, so that a failure leaves the date and the
+   * choice of form but never the key. A step-up request keeps only the id of the system.
+   */
+  protected async saveKey(): Promise<void> {
+    const returned = this.takeReturn();
+    const current = this.keyEditing();
+    this.keyTouched.set(true);
+    if (!current || Object.keys(this.keyErrors()).length > 0 || this.busy()) {
+      return;
+    }
+    const id = current.system;
+    const request = keyRequest(current.form);
+    this.changeKey({ value: '', password: '' });
+    this.busy.set(true);
+    try {
+      await firstValueFrom(this.adminApi.putAdminServiceAccountKey(id, request));
+      this.notifications.success(
+        $localize`:@@adminSystems.keySaved:Saved the service account key of ${id}:system:.`,
+      );
+      this.closeKey();
+      await this.read();
+    } catch (error) {
+      const failure = toApiFailure(error);
+      if (!this.stepUp.redirectIfRequired(failure, PAGE, { keyFor: id }, returned)) {
+        this.notifications.failure(failure);
+      }
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected async removeKey(system: SystemAdminView): Promise<void> {
+    const returned = this.takeReturn();
+    if (this.busy()) {
+      return;
+    }
+    const id = system.system;
+    const confirmed = await firstValueFrom(
+      this.dialog
+        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+          data: {
+            title: $localize`:@@adminSystems.keyRemoveTitle:Delete the service account key of ${id}:system:?`,
+            message: $localize`:@@adminSystems.keyRemoveMessage:The broker deletes the key with all its versions. Calls that need the key are refused until a new one is set. Deleting needs a fresh MFA.`,
+            confirmLabel: $localize`:@@adminSystems.keyRemoveConfirm:Delete key`,
+            destructive: true,
+          },
+        })
+        .afterClosed(),
+    );
+    if (confirmed !== true) {
+      return;
+    }
+    this.busy.set(true);
+    try {
+      await firstValueFrom(this.adminApi.deleteAdminServiceAccountKey(id));
+      this.notifications.success(
+        $localize`:@@adminSystems.keyRemoved:Deleted the service account key of ${id}:system:.`,
+      );
+      if (this.keyEditing()?.system === id) {
+        this.closeKey();
+      }
+      await this.read();
+    } catch (error) {
+      const failure = toApiFailure(error);
+      if (!this.stepUp.redirectIfRequired(failure, PAGE, undefined, returned)) {
+        this.notifications.failure(failure);
+      }
     } finally {
       this.busy.set(false);
     }
@@ -575,7 +802,7 @@ export class SystemsPage implements OnInit {
           .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
             data: {
               title: $localize`:@@adminSystems.removeTitle:Remove the system ${id}:system:?`,
-              message: $localize`:@@adminSystems.removeMessage:The broker deletes the settings, the client secret and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.`,
+              message: $localize`:@@adminSystems.removeMessage:The broker deletes the settings, the client secret, the service account key (if one is set) and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.`,
               confirmLabel: $localize`:@@adminSystems.removeConfirm:Remove system`,
               destructive: true,
             },

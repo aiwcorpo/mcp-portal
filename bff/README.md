@@ -307,6 +307,7 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
 | `GET .../policy/overrides`, `GET`, `PUT`, `DELETE .../overrides/{id}` | C5 | `DELETE` and a `PUT` that replaces (`If-Match`); a create (`If-None-Match: *`) needs none, since an override can only forbid (CC-243) |
 | `GET .../registry/servers/{serverId}/policies` (approved), `GET .../policies/pending`, `POST .../policies/approve` | C5 | approve (also needs `Sec-Fetch-Site: same-origin`) |
 | `GET /api/v1/admin/systems`, `GET`, `PUT`, `DELETE .../systems/{system}` | C4 `/v1/admin/systems` | `PUT` and `DELETE` |
+| `GET`, `PUT`, `DELETE .../systems/{system}/service-account-key` | C4 `/v1/admin/systems/{system}/service-account-key` | `PUT` and `DELETE` |
 
 - Fresh MFA is `StepUpPolicy.requireFresh`, the mechanism and window of lifting a kill switch, with `returnPath` from the page that sent
   the request. An upstream `401 step_up_required` (C4 and C5 check `auth_time` of the exchanged token within 300 s on their own) becomes
@@ -332,6 +333,14 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
   travels in the `PUT` body to the broker and is in no answer, log or audit event; a broker answer with a `clientSecret` field is
   refused by the closed schema. The broker asks for it again when an address changes (`422 system_rejected`, reason
   `client_secret_required`).
+- Service account key (CC-251): write only. `PUT` takes `{value}` or `{username, password}` and an optional `expiresAt` (a UTC
+  timestamp), checked against the schema of C4 before the call (`400` otherwise); the broker decides what depends on the system and
+  the clock (`422 service_account_key_rejected` with the reason `system_not_service_account`, `basic_scheme_required`,
+  `value_not_basic_credential` or `expires_at_in_past`). Last write wins, so there is no `If-Match`. The value, the login and the
+  password are in no answer, log line or audit event of the portal; a broker answer with a field the schema does not list is refused
+  (`503`), and a `422` whose message contains one of the submitted texts loses its message. `GET` returns the status without a fresh
+  MFA; the view of a system carries `serviceAccountKey` (`state`, and `expiresAt` and `expired` only for `set`), which the BFF
+  checks like the rest of the view. Removing a system also removes its key on the broker's side.
 - `whoami` (CC-247): a system of the adapter `generic-rest` may have one, `{path, usernameField}`, which the broker calls to check
   a user secret when it is stored. The BFF checks it with the patterns of the contract (`path` starts with one `/`, no scheme or host,
   no `..`, no query, at most 512 characters; `usernameField` is a field name or an RFC 6901 pointer), as a closed object, and refuses

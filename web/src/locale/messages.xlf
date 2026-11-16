@@ -418,9 +418,17 @@
         <source>The credential broker did not accept the system settings.</source>
       </segment>
     </unit>
-    <unit id="error.server_exists">
+    <unit id="error.service_account_key_rejected">
       <notes>
         <note category="location">src/app/core/error-messages.ts:55</note>
+      </notes>
+      <segment>
+        <source>The credential broker did not accept the service account key. Nothing was saved.</source>
+      </segment>
+    </unit>
+    <unit id="error.server_exists">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:57</note>
       </notes>
       <segment>
         <source>A server with this identifier already exists.</source>
@@ -428,7 +436,7 @@
     </unit>
     <unit id="error.connection_changed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:57</note>
+        <note category="location">src/app/core/error-messages.ts:59</note>
       </notes>
       <segment>
         <source>The certificate presented by the server changed since you opened the card. Check the new one and approve again.</source>
@@ -436,7 +444,7 @@
     </unit>
     <unit id="error.no_pending_connection">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:59</note>
+        <note category="location">src/app/core/error-messages.ts:61</note>
       </notes>
       <segment>
         <source>No connection of this server is waiting for approval. Refresh the view.</source>
@@ -444,7 +452,7 @@
     </unit>
     <unit id="error.refresh_too_frequent">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:61</note>
+        <note category="location">src/app/core/error-messages.ts:63</note>
       </notes>
       <segment>
         <source>The server was checked a moment ago. Wait a few seconds and try again.</source>
@@ -452,7 +460,7 @@
     </unit>
     <unit id="error.precondition_failed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:63</note>
+        <note category="location">src/app/core/error-messages.ts:65</note>
       </notes>
       <segment>
         <source>Someone changed this in the meantime. Reload the data and make your change again.</source>
@@ -460,7 +468,7 @@
     </unit>
     <unit id="error.precondition_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:65</note>
+        <note category="location">src/app/core/error-messages.ts:67</note>
       </notes>
       <segment>
         <source>The data has to be loaded before it can be changed. Reload the page.</source>
@@ -468,7 +476,7 @@
     </unit>
     <unit id="error.flow_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:67</note>
+        <note category="location">src/app/core/error-messages.ts:69</note>
       </notes>
       <segment>
         <source>The connection link expired or was already used. Start again.</source>
@@ -476,7 +484,7 @@
     </unit>
     <unit id="error.provider_error">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:69</note>
+        <note category="location">src/app/core/error-messages.ts:71</note>
       </notes>
       <segment>
         <source>The system did not respond correctly. Try again in a moment.</source>
@@ -484,7 +492,7 @@
     </unit>
     <unit id="error.cancelled">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:70</note>
+        <note category="location">src/app/core/error-messages.ts:72</note>
       </notes>
       <segment>
         <source>Connection cancelled.</source>
@@ -492,7 +500,7 @@
     </unit>
     <unit id="error.risk_lowered">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:80</note>
+        <note category="location">src/app/core/error-messages.ts:82</note>
       </notes>
       <segment>
         <source>The new definition lowers the tool&apos;s risk level, so it will not be approved. Fix the risk in the manifest and redeploy the server.</source>
@@ -500,7 +508,7 @@
     </unit>
     <unit id="error.environment_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:82</note>
+        <note category="location">src/app/core/error-messages.ts:84</note>
       </notes>
       <segment>
         <source>The manifest is meant for a different environment and was rejected.</source>
@@ -508,7 +516,7 @@
     </unit>
     <unit id="error.credential_type_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:84</note>
+        <note category="location">src/app/core/error-messages.ts:86</note>
       </notes>
       <segment>
         <source>The manifest does not match the credential type configured for the system and was rejected.</source>
@@ -516,7 +524,7 @@
     </unit>
     <unit id="error.classification_inconsistent">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:86</note>
+        <note category="location">src/app/core/error-messages.ts:88</note>
       </notes>
       <segment>
         <source>Risk and action do not match. Read pairs with the read action, write with update or admin, delete with delete or admin.</source>
@@ -524,7 +532,7 @@
     </unit>
     <unit id="error.classification_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:88</note>
+        <note category="location">src/app/core/error-messages.ts:90</note>
       </notes>
       <segment>
         <source>This tool comes from an adapter and needs classification: choose a risk and an action.</source>
@@ -532,7 +540,7 @@
     </unit>
     <unit id="error.classification_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:90</note>
+        <note category="location">src/app/core/error-messages.ts:92</note>
       </notes>
       <segment>
         <source>The gateway does not accept this classification. The adapter is read-only: its tool can only be approved as Read (read), and definitions from other sources are not classified.</source>
@@ -540,7 +548,7 @@
     </unit>
     <unit id="error.adapter_mode_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:92</note>
+        <note category="location">src/app/core/error-messages.ts:94</note>
       </notes>
       <segment>
         <source>The server mode in the gateway does not match the manifest source. Check the adapter configuration.</source>
@@ -548,7 +556,7 @@
     </unit>
     <unit id="error.manifest_invalid_environment">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:101</note>
+        <note category="location">src/app/core/error-messages.ts:103</note>
       </notes>
       <segment>
         <source>The manifest of the server is meant for a different environment and was rejected.</source>
@@ -556,7 +564,7 @@
     </unit>
     <unit id="error.manifest_invalid_credential">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:103</note>
+        <note category="location">src/app/core/error-messages.ts:105</note>
       </notes>
       <segment>
         <source>The manifest does not match the credential type of the system and was rejected.</source>
@@ -564,7 +572,7 @@
     </unit>
     <unit id="error.manifest_invalid_policies">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:105</note>
+        <note category="location">src/app/core/error-messages.ts:107</note>
       </notes>
       <segment>
         <source>The policies in the manifest of the server are not valid.</source>
@@ -572,7 +580,7 @@
     </unit>
     <unit id="error.manifest_invalid_types">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:107</note>
+        <note category="location">src/app/core/error-messages.ts:109</note>
       </notes>
       <segment>
         <source>The resource type declarations in the manifest of the server are not valid.</source>
@@ -580,7 +588,7 @@
     </unit>
     <unit id="error.manifest_invalid_adapter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:109</note>
+        <note category="location">src/app/core/error-messages.ts:111</note>
       </notes>
       <segment>
         <source>The manifest source differs from the one the server was added with.</source>
@@ -588,7 +596,7 @@
     </unit>
     <unit id="error.manifest_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:111</note>
+        <note category="location">src/app/core/error-messages.ts:113</note>
       </notes>
       <segment>
         <source>The manifest of the server failed the checks of the gateway.</source>
@@ -596,7 +604,7 @@
     </unit>
     <unit id="error.address_refused">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:118</note>
+        <note category="location">src/app/core/error-messages.ts:120</note>
       </notes>
       <segment>
         <source>The gateway does not connect to this address: it resolves to a loopback, link-local, unspecified or multicast address.</source>
@@ -604,7 +612,7 @@
     </unit>
     <unit id="error.plain_http_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:120</note>
+        <note category="location">src/app/core/error-messages.ts:122</note>
       </notes>
       <segment>
         <source>An http address needs the &quot;Allow plain HTTP&quot; option.</source>
@@ -612,7 +620,7 @@
     </unit>
     <unit id="error.tls_handshake_failed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:122</note>
+        <note category="location">src/app/core/error-messages.ts:124</note>
       </notes>
       <segment>
         <source>The gateway could not complete a TLS handshake with this address. Check the host, the port and that the server speaks HTTPS.</source>
@@ -620,7 +628,7 @@
     </unit>
     <unit id="error.manifest_unreachable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:124</note>
+        <note category="location">src/app/core/error-messages.ts:126</note>
       </notes>
       <segment>
         <source>The gateway reached the server but could not read its manifest at /.well-known/mcp-manifest. Check that the server runs the current starter and trusts the gateway keys.</source>
@@ -628,7 +636,7 @@
     </unit>
     <unit id="error.namespace_conflict">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:128</note>
+        <note category="location">src/app/core/error-messages.ts:130</note>
       </notes>
       <segment>
         <source>Another server already owns the policy namespace of this server.</source>
@@ -636,7 +644,7 @@
     </unit>
     <unit id="error.tls_mode_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:130</note>
+        <note category="location">src/app/core/error-messages.ts:132</note>
       </notes>
       <segment>
         <source>The certificate does not allow this trust mode. Choose pinned, or fix the certificate for the host.</source>
@@ -644,7 +652,7 @@
     </unit>
     <unit id="error.system_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:132</note>
+        <note category="location">src/app/core/error-messages.ts:134</note>
       </notes>
       <segment>
         <source>The server claims another system than the one you entered, so it was not added. Check the address, or clear the System field.</source>
@@ -652,7 +660,7 @@
     </unit>
     <unit id="error.system_reserved">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:134</note>
+        <note category="location">src/app/core/error-messages.ts:136</note>
       </notes>
       <segment>
         <source>This system identifier is reserved for a component of the platform.</source>
@@ -660,7 +668,7 @@
     </unit>
     <unit id="error.credential_types_mixed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:136</note>
+        <note category="location">src/app/core/error-messages.ts:138</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -668,7 +676,7 @@
     </unit>
     <unit id="error.credential_type_not_accepted">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:138</note>
+        <note category="location">src/app/core/error-messages.ts:140</note>
       </notes>
       <segment>
         <source>The credential type in use has to be one of the accepted types.</source>
@@ -676,7 +684,7 @@
     </unit>
     <unit id="error.unknown_resource_type">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:147</note>
+        <note category="location">src/app/core/error-messages.ts:149</note>
       </notes>
       <segment>
         <source>No registered server declares the resource type of one of the scopes. Nothing was saved.</source>
@@ -684,7 +692,7 @@
     </unit>
     <unit id="error.scope_not_grantable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:149</note>
+        <note category="location">src/app/core/error-messages.ts:151</note>
       </notes>
       <segment>
         <source>The server declares no scope pattern for the type of one of the scopes, so it cannot be granted. Nothing was saved.</source>
@@ -692,7 +700,7 @@
     </unit>
     <unit id="error.scope_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:151</note>
+        <note category="location">src/app/core/error-messages.ts:153</note>
       </notes>
       <segment>
         <source>The part after the slash does not match the scope pattern of its type. Nothing was saved.</source>
@@ -700,7 +708,7 @@
     </unit>
     <unit id="error.group_duplicate">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:153</note>
+        <note category="location">src/app/core/error-messages.ts:155</note>
       </notes>
       <segment>
         <source>A group appears twice. Nothing was saved.</source>
@@ -708,7 +716,7 @@
     </unit>
     <unit id="error.not_forbid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:162</note>
+        <note category="location">src/app/core/error-messages.ts:164</note>
       </notes>
       <segment>
         <source>An override can only forbid. Use a forbid policy.</source>
@@ -716,7 +724,7 @@
     </unit>
     <unit id="error.not_one_policy">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:164</note>
+        <note category="location">src/app/core/error-messages.ts:166</note>
       </notes>
       <segment>
         <source>The text has to hold exactly one policy.</source>
@@ -724,7 +732,7 @@
     </unit>
     <unit id="error.id_invalid">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:166</note>
+        <note category="location">src/app/core/error-messages.ts:168</note>
       </notes>
       <segment>
         <source>The identifier has to look like override- followed by a name.</source>
@@ -732,7 +740,7 @@
     </unit>
     <unit id="error.target_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:168</note>
+        <note category="location">src/app/core/error-messages.ts:170</note>
       </notes>
       <segment>
         <source>The policy does not fit the target: for the gateway it has to decide the call action on a tool, for a server it must not mention the tool or the call action.</source>
@@ -740,7 +748,7 @@
     </unit>
     <unit id="error.invalid_policy">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:170</note>
+        <note category="location">src/app/core/error-messages.ts:172</note>
       </notes>
       <segment>
         <source>The policy does not parse or does not validate against the schema of its target.</source>
@@ -748,7 +756,7 @@
     </unit>
     <unit id="error.id_mismatch">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:172</note>
+        <note category="location">src/app/core/error-messages.ts:174</note>
       </notes>
       <segment>
         <source>The @id annotation in the text has to equal the identifier of the override.</source>
@@ -756,7 +764,7 @@
     </unit>
     <unit id="error.target_unknown">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:174</note>
+        <note category="location">src/app/core/error-messages.ts:176</note>
       </notes>
       <segment>
         <source>There is no server with this identifier in the registry.</source>
@@ -764,7 +772,7 @@
     </unit>
     <unit id="error.client_secret_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:183</note>
+        <note category="location">src/app/core/error-messages.ts:185</note>
       </notes>
       <segment>
         <source>The client secret has to be entered again when the base address, the authorization or token address or the client identifier changes.</source>
@@ -772,7 +780,7 @@
     </unit>
     <unit id="error.token_url_not_settable">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:185</note>
+        <note category="location">src/app/core/error-messages.ts:187</note>
       </notes>
       <segment>
         <source>A token exchange system takes no token address: the broker uses the one of its identity provider.</source>
@@ -780,7 +788,7 @@
     </unit>
     <unit id="error.credential_type_not_supported_by_adapter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:187</note>
+        <note category="location">src/app/core/error-messages.ts:189</note>
       </notes>
       <segment>
         <source>A generic REST system takes user secrets or a service account, not both, and no OAuth.</source>
@@ -788,7 +796,7 @@
     </unit>
     <unit id="error.audience_not_allowed">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:189</note>
+        <note category="location">src/app/core/error-messages.ts:191</note>
       </notes>
       <segment>
         <source>This audience is not on the list of audiences that the operator allowed in the broker configuration.</source>
@@ -796,7 +804,7 @@
     </unit>
     <unit id="error.product_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:191</note>
+        <note category="location">src/app/core/error-messages.ts:193</note>
       </notes>
       <segment>
         <source>This adapter needs the product (Jira or Confluence).</source>
@@ -804,7 +812,7 @@
     </unit>
     <unit id="error.exchange_audience_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:193</note>
+        <note category="location">src/app/core/error-messages.ts:195</note>
       </notes>
       <segment>
         <source>A token exchange system needs the audience of the token.</source>
@@ -812,7 +820,7 @@
     </unit>
     <unit id="error.system_reserved_system">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:195</note>
+        <note category="location">src/app/core/error-messages.ts:197</note>
       </notes>
       <segment>
         <source>This system identifier is reserved for a component of the platform.</source>
@@ -820,7 +828,7 @@
     </unit>
     <unit id="error.default_type_not_supported">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:197</note>
+        <note category="location">src/app/core/error-messages.ts:199</note>
       </notes>
       <segment>
         <source>The default credential type has to be one of the supported types.</source>
@@ -828,7 +836,7 @@
     </unit>
     <unit id="error.credential_types_mixed_system">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:199</note>
+        <note category="location">src/app/core/error-messages.ts:201</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -836,15 +844,47 @@
     </unit>
     <unit id="error.oauth_required">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:201</note>
+        <note category="location">src/app/core/error-messages.ts:203</note>
       </notes>
       <segment>
         <source>OAuth needs the client settings: identifier, secret and the authorization and token addresses.</source>
       </segment>
     </unit>
+    <unit id="error.system_not_service_account">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:212</note>
+      </notes>
+      <segment>
+        <source>This system does not take a service account. Add the credential type service account to it first.</source>
+      </segment>
+    </unit>
+    <unit id="error.basic_scheme_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:214</note>
+      </notes>
+      <segment>
+        <source>A login and password can only be saved for a system in the Basic scheme. Enter the key as a single value instead.</source>
+      </segment>
+    </unit>
+    <unit id="error.value_not_basic_credential">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:216</note>
+      </notes>
+      <segment>
+        <source>A value for a system in the Basic scheme has to be the base64 of login:password. Enter the login and the password instead.</source>
+      </segment>
+    </unit>
+    <unit id="error.expires_at_in_past">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:218</note>
+      </notes>
+      <segment>
+        <source>The expiry has to be in the future.</source>
+      </segment>
+    </unit>
     <unit id="error.invalid_filter">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:224</note>
+        <note category="location">src/app/core/error-messages.ts:244</note>
       </notes>
       <segment>
         <source>This filter cannot be saved in the address. Change the selection.</source>
@@ -852,7 +892,7 @@
     </unit>
     <unit id="error.rate_limited_retry">
       <notes>
-        <note category="location">src/app/core/error-messages.ts:227</note>
+        <note category="location">src/app/core/error-messages.ts:247</note>
       </notes>
       <segment>
         <source>Too many requests. Try again in <ph id="0" equiv="seconds" disp="failure.retryAfterSeconds"/> s.</source>
@@ -3693,9 +3733,33 @@
         <source>default</source>
       </segment>
     </unit>
+    <unit id="adminSystems.keyReplace">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:91,92</note>
+      </notes>
+      <segment>
+        <source>Replace key</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySet">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:93,94</note>
+      </notes>
+      <segment>
+        <source>Set key</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyDelete">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:105,106</note>
+      </notes>
+      <segment>
+        <source>Delete key</source>
+      </segment>
+    </unit>
     <unit id="adminSystems.edit">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:89,90</note>
+        <note category="location">src/app/features/admin/systems-page.html:120,121</note>
       </notes>
       <segment>
         <source>Edit</source>
@@ -3703,7 +3767,7 @@
     </unit>
     <unit id="adminSystems.remove">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:99,100</note>
+        <note category="location">src/app/features/admin/systems-page.html:130,131</note>
       </notes>
       <segment>
         <source>Remove</source>
@@ -3711,7 +3775,7 @@
     </unit>
     <unit id="adminSystems.none">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:108,111</note>
+        <note category="location">src/app/features/admin/systems-page.html:139,142</note>
       </notes>
       <segment>
         <source>The broker has no systems.</source>
@@ -3719,7 +3783,7 @@
     </unit>
     <unit id="adminSystems.formAdd">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:117,119</note>
+        <note category="location">src/app/features/admin/systems-page.html:148,150</note>
       </notes>
       <segment>
         <source>Add system</source>
@@ -3727,7 +3791,7 @@
     </unit>
     <unit id="adminSystems.formEdit">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:119,121</note>
+        <note category="location">src/app/features/admin/systems-page.html:150,152</note>
       </notes>
       <segment>
         <source>Edit system</source>
@@ -3735,7 +3799,7 @@
     </unit>
     <unit id="adminSystems.invalidates">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:125,128</note>
+        <note category="location">src/app/features/admin/systems-page.html:156,159</note>
       </notes>
       <segment>
         <source>Saving deletes the connections of all users to this system, and they must connect again. Changed now:</source>
@@ -3743,7 +3807,7 @@
     </unit>
     <unit id="adminSystems.id">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:133,134</note>
+        <note category="location">src/app/features/admin/systems-page.html:164,165</note>
       </notes>
       <segment>
         <source>System identifier</source>
@@ -3751,7 +3815,7 @@
     </unit>
     <unit id="adminSystems.displayName">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:154,156</note>
+        <note category="location">src/app/features/admin/systems-page.html:185,187</note>
       </notes>
       <segment>
         <source>Display name (optional)</source>
@@ -3759,7 +3823,7 @@
     </unit>
     <unit id="adminSystems.adapter">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:169,171</note>
+        <note category="location">src/app/features/admin/systems-page.html:200,202</note>
       </notes>
       <segment>
         <source>Adapter</source>
@@ -3767,7 +3831,7 @@
     </unit>
     <unit id="adminSystems.base">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:182,184</note>
+        <note category="location">src/app/features/admin/systems-page.html:213,215</note>
       </notes>
       <segment>
         <source>Base address</source>
@@ -3775,7 +3839,7 @@
     </unit>
     <unit id="adminSystems.product">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:198,200</note>
+        <note category="location">src/app/features/admin/systems-page.html:229,231</note>
       </notes>
       <segment>
         <source>Product</source>
@@ -3783,7 +3847,7 @@
     </unit>
     <unit id="adminSystems.productPlaceholder">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:206,207</note>
+        <note category="location">src/app/features/admin/systems-page.html:237,238</note>
       </notes>
       <segment>
         <source>Choose a product</source>
@@ -3791,7 +3855,7 @@
     </unit>
     <unit id="adminSystems.genericTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:217,218</note>
+        <note category="location">src/app/features/admin/systems-page.html:248,249</note>
       </notes>
       <segment>
         <source>Credential type of this system</source>
@@ -3799,7 +3863,7 @@
     </unit>
     <unit id="adminSystems.genericHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:232,234</note>
+        <note category="location">src/app/features/admin/systems-page.html:263,265</note>
       </notes>
       <segment>
         <source> A generic REST system takes either the tokens of its users or one service account, not both, and no OAuth. </source>
@@ -3807,7 +3871,7 @@
     </unit>
     <unit id="adminSystems.whoamiPath">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:239,241</note>
+        <note category="location">src/app/features/admin/systems-page.html:270,272</note>
       </notes>
       <segment>
         <source>Check path (optional)</source>
@@ -3815,7 +3879,7 @@
     </unit>
     <unit id="adminSystems.whoamiField">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:257,259</note>
+        <note category="location">src/app/features/admin/systems-page.html:288,290</note>
       </notes>
       <segment>
         <source>User name field of the answer</source>
@@ -3823,7 +3887,7 @@
     </unit>
     <unit id="adminSystems.whoamiHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:274,276</note>
+        <note category="location">src/app/features/admin/systems-page.html:305,307</note>
       </notes>
       <segment>
         <source> The broker calls this path on the base address with the token a user enters and reads the user name from the answer. Without it the token is stored without a check, and the connection shows no account. </source>
@@ -3831,7 +3895,7 @@
     </unit>
     <unit id="adminSystems.types">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:281,282</note>
+        <note category="location">src/app/features/admin/systems-page.html:312,313</note>
       </notes>
       <segment>
         <source>Supported credential types</source>
@@ -3839,7 +3903,7 @@
     </unit>
     <unit id="adminSystems.defaultType">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:301,303</note>
+        <note category="location">src/app/features/admin/systems-page.html:332,334</note>
       </notes>
       <segment>
         <source>Default type</source>
@@ -3847,7 +3911,7 @@
     </unit>
     <unit id="adminSystems.secretScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:319,322</note>
+        <note category="location">src/app/features/admin/systems-page.html:350,353</note>
       </notes>
       <segment>
         <source>Scheme of the secret handed to the gateway</source>
@@ -3855,7 +3919,7 @@
     </unit>
     <unit id="adminSystems.userScheme">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:335,337</note>
+        <note category="location">src/app/features/admin/systems-page.html:366,368</note>
       </notes>
       <segment>
         <source>Scheme of the user&apos;s token</source>
@@ -3863,7 +3927,7 @@
     </unit>
     <unit id="adminSystems.userSchemeDefault">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:343,344</note>
+        <note category="location">src/app/features/admin/systems-page.html:374,375</note>
       </notes>
       <segment>
         <source>As the scheme above</source>
@@ -3871,7 +3935,7 @@
     </unit>
     <unit id="adminSystems.userSchemeHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:349,351</note>
+        <note category="location">src/app/features/admin/systems-page.html:380,382</note>
       </notes>
       <segment>
         <source> Basic makes the connection form ask for a login next to the token. </source>
@@ -3879,7 +3943,7 @@
     </unit>
     <unit id="adminSystems.audience">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:356,358</note>
+        <note category="location">src/app/features/admin/systems-page.html:387,389</note>
       </notes>
       <segment>
         <source>Audience of the exchanged token</source>
@@ -3887,7 +3951,7 @@
     </unit>
     <unit id="adminSystems.revoke">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:373,375</note>
+        <note category="location">src/app/features/admin/systems-page.html:404,406</note>
       </notes>
       <segment>
         <source>Revoke address (optional)</source>
@@ -3895,7 +3959,7 @@
     </unit>
     <unit id="adminSystems.timeout">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:388,390</note>
+        <note category="location">src/app/features/admin/systems-page.html:419,421</note>
       </notes>
       <segment>
         <source>Timeout of calls (optional)</source>
@@ -3903,7 +3967,7 @@
     </unit>
     <unit id="adminSystems.oauth">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:404,405</note>
+        <note category="location">src/app/features/admin/systems-page.html:435,436</note>
       </notes>
       <segment>
         <source>OAuth client</source>
@@ -3911,7 +3975,7 @@
     </unit>
     <unit id="adminSystems.clientId">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:406,408</note>
+        <note category="location">src/app/features/admin/systems-page.html:437,439</note>
       </notes>
       <segment>
         <source>Client identifier</source>
@@ -3919,7 +3983,7 @@
     </unit>
     <unit id="adminSystems.clientSecret">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:421,423</note>
+        <note category="location">src/app/features/admin/systems-page.html:452,454</note>
       </notes>
       <segment>
         <source>Client secret</source>
@@ -3927,7 +3991,7 @@
     </unit>
     <unit id="adminSystems.secretNeeded">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:436,438</note>
+        <note category="location">src/app/features/admin/systems-page.html:467,469</note>
       </notes>
       <segment>
         <source>Required now. The secret is stored in the broker and never shown again.</source>
@@ -3935,7 +3999,7 @@
     </unit>
     <unit id="adminSystems.secretKept">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:441,443</note>
+        <note category="location">src/app/features/admin/systems-page.html:472,474</note>
       </notes>
       <segment>
         <source>A secret is stored. Leave this empty to keep it.</source>
@@ -3943,7 +4007,7 @@
     </unit>
     <unit id="adminSystems.authorize">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:452,454</note>
+        <note category="location">src/app/features/admin/systems-page.html:483,485</note>
       </notes>
       <segment>
         <source>Authorization address</source>
@@ -3951,7 +4015,7 @@
     </unit>
     <unit id="adminSystems.tokenUrl">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:470,472</note>
+        <note category="location">src/app/features/admin/systems-page.html:501,503</note>
       </notes>
       <segment>
         <source>Token address</source>
@@ -3959,7 +4023,7 @@
     </unit>
     <unit id="adminSystems.scopes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:487,489</note>
+        <note category="location">src/app/features/admin/systems-page.html:518,520</note>
       </notes>
       <segment>
         <source>OAuth scopes (separated by spaces)</source>
@@ -3967,7 +4031,7 @@
     </unit>
     <unit id="adminSystems.mfaHint">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:504,507</note>
+        <note category="location">src/app/features/admin/systems-page.html:535,538</note>
       </notes>
       <segment>
         <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this form; the client secret is not kept on the way, so you enter it again. </source>
@@ -3975,7 +4039,7 @@
     </unit>
     <unit id="adminSystems.save">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:509,511</note>
+        <note category="location">src/app/features/admin/systems-page.html:540,542</note>
       </notes>
       <segment>
         <source> Save </source>
@@ -3983,15 +4047,175 @@
     </unit>
     <unit id="adminSystems.cancel">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.html:518,520</note>
+        <note category="location">src/app/features/admin/systems-page.html:549,551</note>
       </notes>
       <segment>
         <source> Cancel </source>
       </segment>
     </unit>
+    <unit id="adminSystems.keyFormReplace">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:564,566</note>
+      </notes>
+      <segment>
+        <source>Replace the service account key of</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyFormSet">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:568,571</note>
+      </notes>
+      <segment>
+        <source>Set the service account key of</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyLead">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:574,578</note>
+      </notes>
+      <segment>
+        <source> The platform uses this key to call the system without a user. It is stored in the broker&apos;s secret store and is never shown again, here or anywhere else. The last save wins: a new key replaces the old one together with its expiry. </source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyForm">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:581,582</note>
+      </notes>
+      <segment>
+        <source>Form of the key</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyModePair">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:589,591</note>
+      </notes>
+      <segment>
+        <source>Login and password</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyModeValue">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:598,600</note>
+      </notes>
+      <segment>
+        <source>One value (base64 of login:password)</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyUsername">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:604,606</note>
+      </notes>
+      <segment>
+        <source>Login</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyPassword">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:620,622</note>
+      </notes>
+      <segment>
+        <source>Password or API token</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyValue">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:637,639</note>
+      </notes>
+      <segment>
+        <source>Key</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyValueHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:649,651</note>
+      </notes>
+      <segment>
+        <source> The credential as it goes after the scheme in the Authorization header, for example the token itself. </source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyExpires">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:658,660</note>
+      </notes>
+      <segment>
+        <source>Expires (optional)</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyExpiresHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:670,673</note>
+      </notes>
+      <segment>
+        <source> Your local time. After it the broker refuses calls to the system. Leave it empty for a key without a planned expiry. </source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyMfaHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:678,681</note>
+      </notes>
+      <segment>
+        <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this page; the key is not kept on the way, so you enter it again. </source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySave">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:683,685</note>
+      </notes>
+      <segment>
+        <source> Save key </source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyCancel">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:692,694</note>
+      </notes>
+      <segment>
+        <source> Cancel </source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyMissing">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:190</note>
+      </notes>
+      <segment>
+        <source>Service account key: not set. Calls to this system are refused.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySetNoExpiry">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:194</note>
+      </notes>
+      <segment>
+        <source>Service account key: set, no planned expiry.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyExpired">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:198</note>
+      </notes>
+      <segment>
+        <source>Service account key: set, expired <ph id="0" equiv="time" disp="when"/>. Calls to this system are refused.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySetExpires">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:199</note>
+      </notes>
+      <segment>
+        <source>Service account key: set, expires <ph id="0" equiv="time" disp="when"/>.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyUnknown">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:201</note>
+      </notes>
+      <segment>
+        <source>Service account key: status unknown, the broker could not read its secret store.</source>
+      </segment>
+    </unit>
     <unit id="adminSystems.errUrl">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:256</note>
+        <note category="location">src/app/features/admin/systems-page.ts:326</note>
       </notes>
       <segment>
         <source>Enter an https address.</source>
@@ -3999,7 +4223,7 @@
     </unit>
     <unit id="adminSystems.errSystem">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:259</note>
+        <note category="location">src/app/features/admin/systems-page.ts:329</note>
       </notes>
       <segment>
         <source>Use 2 to 31 lower case letters and digits, starting with a letter. The identifiers gateway, offboarding, portal, broker, prometheus, platform, admin, registry, adapter, internal and ci are reserved.</source>
@@ -4007,7 +4231,7 @@
     </unit>
     <unit id="adminSystems.errDisplayName">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:263</note>
+        <note category="location">src/app/features/admin/systems-page.ts:333</note>
       </notes>
       <segment>
         <source>Use 1 to 64 characters; control and invisible characters are not allowed.</source>
@@ -4015,7 +4239,7 @@
     </unit>
     <unit id="adminSystems.errWhoamiPath">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:274</note>
+        <note category="location">src/app/features/admin/systems-page.ts:344</note>
       </notes>
       <segment>
         <source>Enter a path that starts with a single slash, without a host, a query or &quot;..&quot;, for example /api/me.</source>
@@ -4023,7 +4247,7 @@
     </unit>
     <unit id="adminSystems.errWhoamiField">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:278</note>
+        <note category="location">src/app/features/admin/systems-page.ts:348</note>
       </notes>
       <segment>
         <source>Enter the field of the answer that holds the user name, or a JSON pointer such as /user/login.</source>
@@ -4031,7 +4255,7 @@
     </unit>
     <unit id="adminSystems.errProduct">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:282</note>
+        <note category="location">src/app/features/admin/systems-page.ts:352</note>
       </notes>
       <segment>
         <source>Choose Jira or Confluence.</source>
@@ -4039,7 +4263,7 @@
     </unit>
     <unit id="adminSystems.errTimeout">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:286</note>
+        <note category="location">src/app/features/admin/systems-page.ts:356</note>
       </notes>
       <segment>
         <source>Use an ISO 8601 duration of at most 10 minutes, for example PT30S.</source>
@@ -4047,7 +4271,7 @@
     </unit>
     <unit id="adminSystems.errTypes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:290</note>
+        <note category="location">src/app/features/admin/systems-page.ts:360</note>
       </notes>
       <segment>
         <source>Choose at least one credential type.</source>
@@ -4055,7 +4279,7 @@
     </unit>
     <unit id="adminSystems.errDefault">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:293</note>
+        <note category="location">src/app/features/admin/systems-page.ts:363</note>
       </notes>
       <segment>
         <source>The default type has to be one of the supported types.</source>
@@ -4063,7 +4287,7 @@
     </unit>
     <unit id="adminSystems.errMixed">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:299</note>
+        <note category="location">src/app/features/admin/systems-page.ts:369</note>
       </notes>
       <segment>
         <source>A service account cannot be combined with a user credential type.</source>
@@ -4071,7 +4295,7 @@
     </unit>
     <unit id="adminSystems.errAudience">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:303</note>
+        <note category="location">src/app/features/admin/systems-page.ts:373</note>
       </notes>
       <segment>
         <source>A token exchange system needs the audience of the token.</source>
@@ -4079,7 +4303,7 @@
     </unit>
     <unit id="adminSystems.errClientId">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:307</note>
+        <note category="location">src/app/features/admin/systems-page.ts:377</note>
       </notes>
       <segment>
         <source>Enter the client identifier.</source>
@@ -4087,7 +4311,7 @@
     </unit>
     <unit id="adminSystems.errSecretAgain">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:311</note>
+        <note category="location">src/app/features/admin/systems-page.ts:381</note>
       </notes>
       <segment>
         <source>Enter the client secret again: an address or the client identifier changed.</source>
@@ -4095,7 +4319,7 @@
     </unit>
     <unit id="adminSystems.errSecret">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:312</note>
+        <note category="location">src/app/features/admin/systems-page.ts:382</note>
       </notes>
       <segment>
         <source>Enter the client secret.</source>
@@ -4103,15 +4327,47 @@
     </unit>
     <unit id="adminSystems.errScopes">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:325</note>
+        <note category="location">src/app/features/admin/systems-page.ts:395</note>
       </notes>
       <segment>
         <source>A scope cannot contain spaces.</source>
       </segment>
     </unit>
+    <unit id="adminSystems.errKeyValue">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:412</note>
+      </notes>
+      <segment>
+        <source>Enter the key: visible characters only, no spaces, up to 4096.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errKeyUsername">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:417</note>
+      </notes>
+      <segment>
+        <source>Enter the login: up to 255 characters, no colon, no control or invisible characters.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errKeyPassword">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:421</note>
+      </notes>
+      <segment>
+        <source>Enter the password: up to 4096 characters.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errKeyExpiry">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:428</note>
+      </notes>
+      <segment>
+        <source>The expiry has to be a date and time in the future.</source>
+      </segment>
+    </unit>
     <unit id="adminSystems.secretSet">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:341</note>
+        <note category="location">src/app/features/admin/systems-page.ts:454</note>
       </notes>
       <segment>
         <source>Client secret stored</source>
@@ -4119,15 +4375,23 @@
     </unit>
     <unit id="adminSystems.secretMissing">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:342</note>
+        <note category="location">src/app/features/admin/systems-page.ts:455</note>
       </notes>
       <segment>
         <source>No client secret</source>
       </segment>
     </unit>
+    <unit id="adminSystems.mfaKeyDraft">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:486</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Enter the key again and save; it is not kept on the way.</source>
+      </segment>
+    </unit>
     <unit id="adminSystems.mfaDraft">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:380</note>
+        <note category="location">src/app/features/admin/systems-page.ts:501</note>
       </notes>
       <segment>
         <source>Identity confirmed. Check the form, enter the client secret again and save.</source>
@@ -4135,15 +4399,55 @@
     </unit>
     <unit id="adminSystems.mfaRepeat">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:384</note>
+        <note category="location">src/app/features/admin/systems-page.ts:505</note>
       </notes>
       <segment>
         <source>Identity confirmed. Repeat the operation.</source>
       </segment>
     </unit>
+    <unit id="adminSystems.keySaved">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:628</note>
+      </notes>
+      <segment>
+        <source>Saved the service account key of <ph id="0" equiv="system" disp="id"/>.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoveTitle">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:652</note>
+      </notes>
+      <segment>
+        <source>Delete the service account key of <ph id="0" equiv="system" disp="id"/>?</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoveMessage">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:653</note>
+      </notes>
+      <segment>
+        <source>The broker deletes the key with all its versions. Calls that need the key are refused until a new one is set. Deleting needs a fresh MFA.</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoveConfirm">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:654</note>
+      </notes>
+      <segment>
+        <source>Delete key</source>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoved">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:667</note>
+      </notes>
+      <segment>
+        <source>Deleted the service account key of <ph id="0" equiv="system" disp="id"/>.</source>
+      </segment>
+    </unit>
     <unit id="adminSystems.savedInvalidated">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:537</note>
+        <note category="location">src/app/features/admin/systems-page.ts:764</note>
       </notes>
       <segment>
         <source>Saved the system <ph id="0" equiv="system" disp="id"/>. The connections of its users were deleted; they connect again.</source>
@@ -4151,7 +4455,7 @@
     </unit>
     <unit id="adminSystems.saved">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:538</note>
+        <note category="location">src/app/features/admin/systems-page.ts:765</note>
       </notes>
       <segment>
         <source>Saved the system <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4159,7 +4463,7 @@
     </unit>
     <unit id="adminSystems.added">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:539</note>
+        <note category="location">src/app/features/admin/systems-page.ts:766</note>
       </notes>
       <segment>
         <source>Added the system <ph id="0" equiv="system" disp="id"/>.</source>
@@ -4167,7 +4471,7 @@
     </unit>
     <unit id="adminSystems.removeTitle">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:577</note>
+        <note category="location">src/app/features/admin/systems-page.ts:804</note>
       </notes>
       <segment>
         <source>Remove the system <ph id="0" equiv="system" disp="id"/>?</source>
@@ -4175,15 +4479,15 @@
     </unit>
     <unit id="adminSystems.removeMessage">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:578</note>
+        <note category="location">src/app/features/admin/systems-page.ts:805</note>
       </notes>
       <segment>
-        <source>The broker deletes the settings, the client secret and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.</source>
+        <source>The broker deletes the settings, the client secret, the service account key (if one is set) and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.</source>
       </segment>
     </unit>
     <unit id="adminSystems.removeConfirm">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:579</note>
+        <note category="location">src/app/features/admin/systems-page.ts:806</note>
       </notes>
       <segment>
         <source>Remove system</source>
@@ -4191,7 +4495,7 @@
     </unit>
     <unit id="adminSystems.removed">
       <notes>
-        <note category="location">src/app/features/admin/systems-page.ts:594</note>
+        <note category="location">src/app/features/admin/systems-page.ts:821</note>
       </notes>
       <segment>
         <source>Removed the system <ph id="0" equiv="system" disp="id"/>.</source>

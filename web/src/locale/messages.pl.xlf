@@ -471,6 +471,15 @@
         <target>Broker poświadczeń nie przyjął ustawień systemu.</target>
       </segment>
     </unit>
+    <unit id="error.service_account_key_rejected">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:55</note>
+      </notes>
+      <segment>
+        <source>The credential broker did not accept the service account key. Nothing was saved.</source>
+        <target>Broker poświadczeń nie przyjął klucza konta serwisowego. Nic nie zapisano.</target>
+      </segment>
+    </unit>
     <unit id="error.server_exists">
       <notes>
         <note category="location">src/app/core/error-messages.ts:55</note>
@@ -946,6 +955,42 @@
       <segment>
         <source>OAuth needs the client settings: identifier, secret and the authorization and token addresses.</source>
         <target>OAuth wymaga ustawień klienta: identyfikatora, sekretu oraz adresów autoryzacji i tokenu.</target>
+      </segment>
+    </unit>
+    <unit id="error.system_not_service_account">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:212</note>
+      </notes>
+      <segment>
+        <source>This system does not take a service account. Add the credential type service account to it first.</source>
+        <target>Ten system nie przyjmuje konta serwisowego. Najpierw dodaj do niego typ poświadczenia: konto serwisowe.</target>
+      </segment>
+    </unit>
+    <unit id="error.basic_scheme_required">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:214</note>
+      </notes>
+      <segment>
+        <source>A login and password can only be saved for a system in the Basic scheme. Enter the key as a single value instead.</source>
+        <target>Login i hasło można zapisać tylko dla systemu ze schematem Basic. Wpisz klucz jako pojedynczą wartość.</target>
+      </segment>
+    </unit>
+    <unit id="error.value_not_basic_credential">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:216</note>
+      </notes>
+      <segment>
+        <source>A value for a system in the Basic scheme has to be the base64 of login:password. Enter the login and the password instead.</source>
+        <target>Wartość dla systemu ze schematem Basic musi być zapisem base64 napisu login:hasło. Podaj zamiast tego login i hasło.</target>
+      </segment>
+    </unit>
+    <unit id="error.expires_at_in_past">
+      <notes>
+        <note category="location">src/app/core/error-messages.ts:218</note>
+      </notes>
+      <segment>
+        <source>The expiry has to be in the future.</source>
+        <target>Termin ważności musi być w przyszłości.</target>
       </segment>
     </unit>
     <unit id="error.invalid_filter">
@@ -4153,6 +4198,33 @@
         <target>domyślny</target>
       </segment>
     </unit>
+    <unit id="adminSystems.keyReplace">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:91,92</note>
+      </notes>
+      <segment>
+        <source>Replace key</source>
+        <target>Zmień klucz</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySet">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:93,94</note>
+      </notes>
+      <segment>
+        <source>Set key</source>
+        <target>Ustaw klucz</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyDelete">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:105,106</note>
+      </notes>
+      <segment>
+        <source>Delete key</source>
+        <target>Usuń klucz</target>
+      </segment>
+    </unit>
     <unit id="adminSystems.edit">
       <notes>
         <note category="location">src/app/features/admin/systems-page.html:89,90</note>
@@ -4486,6 +4558,186 @@
         <target> Anuluj </target>
       </segment>
     </unit>
+    <unit id="adminSystems.keyFormReplace">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:564,566</note>
+      </notes>
+      <segment>
+        <source>Replace the service account key of</source>
+        <target>Zmiana klucza konta serwisowego systemu</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyFormSet">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:568,571</note>
+      </notes>
+      <segment>
+        <source>Set the service account key of</source>
+        <target>Ustawienie klucza konta serwisowego systemu</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyLead">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:574,578</note>
+      </notes>
+      <segment>
+        <source> The platform uses this key to call the system without a user. It is stored in the broker&apos;s secret store and is never shown again, here or anywhere else. The last save wins: a new key replaces the old one together with its expiry. </source>
+        <target> Platforma używa tego klucza do wywołań systemu bez udziału użytkownika. Klucz trafia do magazynu sekretów brokera i nigdy więcej nie jest pokazywany, ani tu, ani gdzie indziej. Wygrywa ostatni zapis: nowy klucz zastępuje stary razem z terminem ważności. </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyForm">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:581,582</note>
+      </notes>
+      <segment>
+        <source>Form of the key</source>
+        <target>Postać klucza</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyModePair">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:589,591</note>
+      </notes>
+      <segment>
+        <source>Login and password</source>
+        <target>Login i hasło</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyModeValue">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:598,600</note>
+      </notes>
+      <segment>
+        <source>One value (base64 of login:password)</source>
+        <target>Jedna wartość (base64 z login:hasło)</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyUsername">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:604,606</note>
+      </notes>
+      <segment>
+        <source>Login</source>
+        <target>Login</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyPassword">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:620,622</note>
+      </notes>
+      <segment>
+        <source>Password or API token</source>
+        <target>Hasło lub token API</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyValue">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:637,639</note>
+      </notes>
+      <segment>
+        <source>Key</source>
+        <target>Klucz</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyValueHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:649,651</note>
+      </notes>
+      <segment>
+        <source> The credential as it goes after the scheme in the Authorization header, for example the token itself. </source>
+        <target> Poświadczenie w takiej postaci, w jakiej idzie po nazwie schematu w nagłówku Authorization, na przykład sam token. </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyExpires">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:658,660</note>
+      </notes>
+      <segment>
+        <source>Expires (optional)</source>
+        <target>Ważny do (opcjonalnie)</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyExpiresHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:670,673</note>
+      </notes>
+      <segment>
+        <source> Your local time. After it the broker refuses calls to the system. Leave it empty for a key without a planned expiry. </source>
+        <target> Czas lokalny. Po tym terminie broker odmawia wywołań systemu. Zostaw puste dla klucza bez planowanego terminu. </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyMfaHint">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:678,681</note>
+      </notes>
+      <segment>
+        <source> Saving needs a fresh MFA. If it is needed, you go to the identity provider and come back to this page; the key is not kept on the way, so you enter it again. </source>
+        <target> Zapis wymaga świeżego MFA. Jeśli jest potrzebne, przechodzisz do dostawcy tożsamości i wracasz na tę stronę; klucz nie jest zachowywany po drodze, więc wpisujesz go ponownie. </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySave">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:683,685</note>
+      </notes>
+      <segment>
+        <source> Save key </source>
+        <target> Zapisz klucz </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyCancel">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.html:692,694</note>
+      </notes>
+      <segment>
+        <source> Cancel </source>
+        <target> Anuluj </target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyMissing">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:190</note>
+      </notes>
+      <segment>
+        <source>Service account key: not set. Calls to this system are refused.</source>
+        <target>Klucz konta serwisowego: nie ustawiono. Wywołania tego systemu są odrzucane.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySetNoExpiry">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:194</note>
+      </notes>
+      <segment>
+        <source>Service account key: set, no planned expiry.</source>
+        <target>Klucz konta serwisowego: ustawiony, bez planowanego terminu.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyExpired">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:198</note>
+      </notes>
+      <segment>
+        <source>Service account key: set, expired <ph id="0" equiv="time" disp="when"/>. Calls to this system are refused.</source>
+        <target>Klucz konta serwisowego: ustawiony, wygasł <ph id="0" equiv="time" disp="when"/>. Wywołania tego systemu są odrzucane.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySetExpires">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:199</note>
+      </notes>
+      <segment>
+        <source>Service account key: set, expires <ph id="0" equiv="time" disp="when"/>.</source>
+        <target>Klucz konta serwisowego: ustawiony, ważny do <ph id="0" equiv="time" disp="when"/>.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyUnknown">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:201</note>
+      </notes>
+      <segment>
+        <source>Service account key: status unknown, the broker could not read its secret store.</source>
+        <target>Klucz konta serwisowego: stan nieznany, broker nie mógł odczytać magazynu sekretów.</target>
+      </segment>
+    </unit>
     <unit id="adminSystems.errUrl">
       <notes>
         <note category="location">src/app/features/admin/systems-page.ts:256</note>
@@ -4621,6 +4873,42 @@
         <target>Zakres nie może zawierać spacji.</target>
       </segment>
     </unit>
+    <unit id="adminSystems.errKeyValue">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:412</note>
+      </notes>
+      <segment>
+        <source>Enter the key: visible characters only, no spaces, up to 4096.</source>
+        <target>Wpisz klucz: tylko widoczne znaki, bez spacji, do 4096.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errKeyUsername">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:417</note>
+      </notes>
+      <segment>
+        <source>Enter the login: up to 255 characters, no colon, no control or invisible characters.</source>
+        <target>Wpisz login: do 255 znaków, bez dwukropka, bez znaków sterujących i niewidocznych.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errKeyPassword">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:421</note>
+      </notes>
+      <segment>
+        <source>Enter the password: up to 4096 characters.</source>
+        <target>Wpisz hasło: do 4096 znaków.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.errKeyExpiry">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:428</note>
+      </notes>
+      <segment>
+        <source>The expiry has to be a date and time in the future.</source>
+        <target>Termin ważności musi być datą i godziną w przyszłości.</target>
+      </segment>
+    </unit>
     <unit id="adminSystems.secretSet">
       <notes>
         <note category="location">src/app/features/admin/systems-page.ts:341</note>
@@ -4639,6 +4927,15 @@
         <target>Brak sekretu klienta</target>
       </segment>
     </unit>
+    <unit id="adminSystems.mfaKeyDraft">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:486</note>
+      </notes>
+      <segment>
+        <source>Identity confirmed. Enter the key again and save; it is not kept on the way.</source>
+        <target>Tożsamość potwierdzona. Wpisz klucz ponownie i zapisz; po drodze nie jest zachowywany.</target>
+      </segment>
+    </unit>
     <unit id="adminSystems.mfaDraft">
       <notes>
         <note category="location">src/app/features/admin/systems-page.ts:380</note>
@@ -4655,6 +4952,51 @@
       <segment>
         <source>Identity confirmed. Repeat the operation.</source>
         <target>Tożsamość potwierdzona. Powtórz operację.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keySaved">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:628</note>
+      </notes>
+      <segment>
+        <source>Saved the service account key of <ph id="0" equiv="system" disp="id"/>.</source>
+        <target>Zapisano klucz konta serwisowego systemu <ph id="0" equiv="system" disp="id"/>.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoveTitle">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:652</note>
+      </notes>
+      <segment>
+        <source>Delete the service account key of <ph id="0" equiv="system" disp="id"/>?</source>
+        <target>Usunąć klucz konta serwisowego systemu <ph id="0" equiv="system" disp="id"/>?</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoveMessage">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:653</note>
+      </notes>
+      <segment>
+        <source>The broker deletes the key with all its versions. Calls that need the key are refused until a new one is set. Deleting needs a fresh MFA.</source>
+        <target>Broker usuwa klucz ze wszystkimi wersjami. Wywołania, które go wymagają, są odrzucane, dopóki nie zostanie ustawiony nowy. Usunięcie wymaga świeżego MFA.</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoveConfirm">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:654</note>
+      </notes>
+      <segment>
+        <source>Delete key</source>
+        <target>Usuń klucz</target>
+      </segment>
+    </unit>
+    <unit id="adminSystems.keyRemoved">
+      <notes>
+        <note category="location">src/app/features/admin/systems-page.ts:667</note>
+      </notes>
+      <segment>
+        <source>Deleted the service account key of <ph id="0" equiv="system" disp="id"/>.</source>
+        <target>Usunięto klucz konta serwisowego systemu <ph id="0" equiv="system" disp="id"/>.</target>
       </segment>
     </unit>
     <unit id="adminSystems.savedInvalidated">
@@ -4698,8 +5040,8 @@
         <note category="location">src/app/features/admin/systems-page.ts:578</note>
       </notes>
       <segment>
-        <source>The broker deletes the settings, the client secret and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.</source>
-        <target>Broker usuwa ustawienia, sekret klienta i połączenia wszystkich użytkowników z tym systemem. Do samego systemu nic nie jest wysyłane. Usunięcie wymaga świeżego MFA.</target>
+        <source>The broker deletes the settings, the client secret, the service account key (if one is set) and the connections of all users to this system. Nothing is sent to the system itself. Removing needs a fresh MFA.</source>
+        <target>Broker usuwa ustawienia, sekret klienta, klucz konta serwisowego (jeśli jest ustawiony) i połączenia wszystkich użytkowników z tym systemem. Do samego systemu nic nie jest wysyłane. Usunięcie wymaga świeżego MFA.</target>
       </segment>
     </unit>
     <unit id="adminSystems.removeConfirm">
