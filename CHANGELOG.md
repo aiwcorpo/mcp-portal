@@ -2,9 +2,9 @@
 
 Versions follow SemVer, newest first. Test images built before the first release are tagged `m<milestone>-<sha>`.
 
-## Unreleased
+## 2.1.0
 
-Needs `mcp-contracts` with CC-251 (accepted, not released yet) and a credential broker that implements it.
+Built on `mcp-contracts` 7.1.0. Needs a credential broker 2.1.0 (CC-251).
 
 - Service account key (CC-251): the Systems tab shows the state of the key of a system with the credential type `service-account`
   (not set, set, expired, unknown) and lets an administrator set, replace and delete it. The key is write only: it is never returned,
