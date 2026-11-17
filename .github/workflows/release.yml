@@ -19,10 +19,10 @@ permissions:
   contents: read
 
 env:
-  # mcp-contracts 7.0.0 comes from the public registries: Maven Central (the default repository of Maven) and npmjs, the
+  # mcp-contracts 7.1.0 comes from the public registries: Maven Central (the default repository of Maven) and npmjs, the
   # tarball checked against the bytes of the release file. No credential is needed for the reads.
   CONTRACTS_FROM_NPMJS: '1'
-  CONTRACTS_TARBALL_SHA256: 001c77faeedf66c3cf0dabf06be166d968c52c6025282b7be5c05c502fd22b2d
+  CONTRACTS_TARBALL_SHA256: 678f8fe93776e1f6767b348f29b670eb964ebf43efd3709425061cc72cb1e746
 
 jobs:
   verify:
