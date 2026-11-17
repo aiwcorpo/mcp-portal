@@ -16,6 +16,8 @@ export const DISPLAY_NAME = /^(?!.*[\p{Cc}\p{Cf}]).{1,64}$/su;
 export const WHOAMI_PATH = /^\/(?!\/)(?!.*\.\.)[A-Za-z0-9._~!$&'()*+,;=:@%/-]{0,511}$/;
 /** `SystemWhoami.usernameField`: a top-level field of the JSON answer or an RFC 6901 pointer to one. */
 export const WHOAMI_FIELD = /^(?:[A-Za-z_][A-Za-z0-9_-]{0,63}|(?:\/[A-Za-z0-9_~-]{1,64}){1,8})$/;
+/** `ServiceAccountKeyRequest.value` (CC-251): visible ASCII without spaces, as the alphabet of an Authorization header token. */
+export const KEY_VALUE = /^[\x21-\x7e]{1,4096}$/;
 export const OVERRIDE_NAME = /^[a-z0-9][a-z0-9-]{0,54}$/;
 export const OVERRIDE_TEXT_MAX = 8000;
 export const TLS_NAME = /^[A-Za-z0-9.-]{1,253}$/;

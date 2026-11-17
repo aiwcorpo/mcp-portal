@@ -36,7 +36,11 @@ public final class AdminViews {
     private static final Set<String> RESOURCE_TYPE_FIELDS = Set.of("type", "attributes", "parent", "parentAttribute",
             "idPattern", "scopePattern", "earlyScopeCheck", "classification");
     private static final Set<String> SYSTEM_FIELDS = Set.of("system", "displayName", "baseUrl", "adapter", "product", "revokeUrl",
-            "timeout", "exchangeAudience", "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth", "whoami");
+            "timeout", "exchangeAudience", "userSecretScheme", "supportedTypes", "defaultType", "secretScheme", "oauth", "whoami", "serviceAccountKey");
+    private static final Set<String> KEY_SUMMARY_FIELDS = Set.of("state", "expiresAt", "expired");
+    private static final Set<String> KEY_STATES = Set.of("set", "missing", "unknown");
+    private static final Set<String> KEY_STATUS_FIELDS = Set.of("system", "set", "kvVersion", "expiresAt", "expired",
+            "updatedAt", "updatedBy");
     private static final Set<String> OAUTH_VIEW_FIELDS = Set.of("clientId", "authorizeUrl", "tokenUrl", "scopes",
             "clientSecretSet");
     private static final Set<String> USER_SECRET_SCHEMES = Set.of("Bearer", "Basic");
@@ -286,9 +290,41 @@ public final class AdminViews {
                 && BrokerData.CREDENTIAL_TYPES.contains(RegistryData.text(node.get("defaultType")))
                 && CREDENTIAL_SCHEMES.contains(RegistryData.text(node.get("secretScheme")))
                 && (!node.has("oauth") || oauthView(node.get("oauth")))
+                && (!node.has("serviceAccountKey") || keySummary(node.get("serviceAccountKey")))
                 // Only a generic-rest system has one: the other adapters have their own check of a user secret (CC-247).
                 && (!node.has("whoami") || "generic-rest".equals(RegistryData.text(node.get("adapter")))
                         && ContractValues.isWhoami(node.get("whoami")));
+        return fits ? RegistryData.neutralized(node) : null;
+    }
+
+    /**
+     * {@code ServiceAccountKeySummary} (CC-251): the state, and the expiry only for a key that exists. Nothing in it can
+     * carry the key; a field the contract does not list makes the whole view unusable, as for the other fields.
+     */
+    private static boolean keySummary(JsonNode node) {
+        if (!node.isObject() || !RegistryData.onlyFields(node, KEY_SUMMARY_FIELDS)
+                || !KEY_STATES.contains(RegistryData.text(node.get("state")))) {
+            return false;
+        }
+        boolean set = "set".equals(node.get("state").asString());
+        return (!node.has("expiresAt") || set && ContractValues.isTimestamp(RegistryData.text(node.get("expiresAt"))))
+                && (!node.has("expired") || set && node.get("expired").isBoolean());
+    }
+
+    /**
+     * {@code ServiceAccountKeyStatus} (CC-251): what is known about the key, never the key. Only {@code system} and
+     * {@code set} when there is no entry.
+     */
+    public static JsonNode serviceAccountKeyStatus(JsonNode node) {
+        boolean fits = node != null && node.isObject() && RegistryData.onlyFields(node, KEY_STATUS_FIELDS)
+                && ContractValues.isSystemId(RegistryData.text(node.get("system")))
+                && node.has("set") && node.get("set").isBoolean()
+                && (!node.has("kvVersion") || node.get("kvVersion").isIntegralNumber() && node.get("kvVersion").asLong() >= 1)
+                && (!node.has("expiresAt") || ContractValues.isTimestamp(RegistryData.text(node.get("expiresAt"))))
+                && (!node.has("expired") || node.get("expired").isBoolean())
+                && (!node.has("updatedAt") || ContractValues.isTimestamp(RegistryData.text(node.get("updatedAt"))))
+                && (!node.has("updatedBy") || !RegistryData.text(node.get("updatedBy")).isEmpty()
+                        && RegistryData.text(node.get("updatedBy")).codePointCount(0, RegistryData.text(node.get("updatedBy")).length()) <= 255);
         return fits ? RegistryData.neutralized(node) : null;
     }
 

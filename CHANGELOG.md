@@ -2,6 +2,17 @@
 
 Versions follow SemVer, newest first. Test images built before the first release are tagged `m<milestone>-<sha>`.
 
+## Unreleased
+
+Needs `mcp-contracts` with CC-251 (accepted, not released yet) and a credential broker that implements it.
+
+- Service account key (CC-251): the Systems tab shows the state of the key of a system with the credential type `service-account`
+  (not set, set, expired, unknown) and lets an administrator set, replace and delete it. The key is write only: it is never returned,
+  logged, kept in a draft or shown again, and the secret fields are emptied when the form is sent. A Basic system takes a login and
+  a password or one base64 value; the expiry is optional. Setting and deleting need a fresh MFA.
+- BFF: `GET`, `PUT`, `DELETE /api/v1/admin/systems/{system}/service-account-key` proxy the broker; `SystemAdminView` carries the
+  `serviceAccountKey` summary. The confirmation of removing a system says that its key is deleted with it.
+
 ## 2.0.1
 
 - The browser tab and the home screen icon show the AIWCORPO logo (`favicon.png`, `apple-touch-icon.png`) instead of the

@@ -69,6 +69,22 @@ for (const scheme of ['dark', 'light'] as const) {
     });
   }
 
+  test(`the service account key form and its delete confirmation have no violations (${scheme})`, async ({
+    page,
+  }) => {
+    await page.goto('/admin/systems?mockAdmin=in');
+    await useScheme(page, scheme);
+    await expect(page.getByRole('row', { name: /servicedesk/ })).toContainText(
+      'Service account key: not set',
+    );
+    await expectNoViolations(page);
+    await page.getByRole('button', { name: 'Set key (servicedesk)' }).click();
+    await expect(page.getByLabel('Key', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Save key' }).click();
+    await expect(page.getByText('Enter the key: visible characters only')).toBeVisible();
+    await expectNoViolations(page);
+  });
+
   test(`the classification dialog, the kill switch with entries and the error state have no violations (${scheme})`, async ({
     page,
   }) => {
@@ -77,9 +93,7 @@ for (const scheme of ['dark', 'light'] as const) {
     await page.getByRole('button', { name: 'Show differences (jira__edit_comment)' }).click();
     await expect(page.getByText('Source: foreign server adapter.')).toBeVisible();
     await expectNoViolations(page);
-    await page
-      .getByRole('button', { name: 'Classify and approve (jira__edit_comment)' })
-      .click();
+    await page.getByRole('button', { name: 'Classify and approve (jira__edit_comment)' }).click();
     const dialog = page.getByRole('dialog', { name: 'Tool classification' });
     await dialog.getByLabel('Read READ_ONLY').check();
     await expect(dialog.getByLabel('read: reads data')).toBeVisible();
@@ -99,7 +113,9 @@ for (const scheme of ['dark', 'light'] as const) {
     await expectNoViolations(page);
 
     await page.goto('/connect/jira?mockBasic=in');
-    await expect(page.getByLabel('Login in the system (for example the account email address)')).toBeVisible();
+    await expect(
+      page.getByLabel('Login in the system (for example the account email address)'),
+    ).toBeVisible();
     await expectNoViolations(page);
 
     await page.goto('/connections?mockSecretMissing=in');
@@ -322,9 +338,7 @@ test('focus moves to the main content after an in-app navigation', async ({ page
   await page.goto('/catalog');
   await expect(page.getByRole('rowheader', { name: 'Gitlab' })).toBeVisible();
   await page.getByRole('link', { name: 'System connections' }).click();
-  await expect(
-    page.getByRole('heading', { level: 1, name: 'System connections' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'System connections' })).toBeVisible();
   await expect(page.locator('#main')).toBeFocused();
 });
 
@@ -333,8 +347,6 @@ test('focus moves to the main content even when the click comes before the first
 }) => {
   await page.goto('/catalog');
   await page.getByRole('link', { name: 'System connections' }).click();
-  await expect(
-    page.getByRole('heading', { level: 1, name: 'System connections' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'System connections' })).toBeVisible();
   await expect(page.locator('#main')).toBeFocused();
 });
