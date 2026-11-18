@@ -1130,7 +1130,8 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
           return mfa;
         }
         store.update({ policiesApproved: [...store.state.policiesApproved, id] });
-        // A declaration with a narrower scope pattern makes the mapping entries that no longer fit invalid (CC-237 A7).
+        // A declaration with a narrower scope pattern makes the mapping entries that no longer fit invalid (CC-237 A7);
+        // the gateway deletes them in the same step (CC-252).
         const pattern = fixture.pendingTypes.find((type) => type.scopePattern)?.scopePattern;
         const type = fixture.pendingTypes.find((candidate) => candidate.scopePattern)?.type;
         const ignored =
@@ -1145,6 +1146,16 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
                   .map((scope) => ({ group: entry.group, scope, reason: 'invalid_scope' })),
               )
             : [];
+        if (ignored.length) {
+          const removed = new Set(ignored.map((entry) => `${entry.group} ${entry.scope}`));
+          data.mapping.value = data.mapping.value
+            .map((entry) => ({
+              ...entry,
+              scopes: entry.scopes.filter((scope) => !removed.has(`${entry.group} ${scope}`)),
+            }))
+            .filter((entry) => entry.scopes.length > 0);
+          data.mapping.version += 1;
+        }
         return json({ ignoredMappingEntries: ignored }, 200);
       },
     ),

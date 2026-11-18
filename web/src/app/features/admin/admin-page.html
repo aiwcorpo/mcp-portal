@@ -3,8 +3,8 @@
 @if (ignoredEntries().length) {
   <app-state kind="warning">
     <ng-container i18n="@@admin.ignoredEntries"
-      >The approval made these scope mapping entries invalid, and evaluation ignores them until you
-      correct the mapping:</ng-container
+      >The approval removed these scope mapping entries, because the approved declarations no longer
+      accept them:</ng-container
     >
     @for (entry of ignoredEntries(); track $index) {
       <code class="ignored"

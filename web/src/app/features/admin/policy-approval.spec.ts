@@ -255,16 +255,14 @@ describe('AdminPage: approval of policies', () => {
     }
   });
 
-  it('lists the mapping entries that the approval makes invalid', async () => {
+  it('lists the mapping entries that the approval removed', async () => {
     store.update({ mfaFresh: true });
     await openAdmin();
     button('Show differences (Jira, policies)').click();
     await until(() => expect(button('Approve policies (Jira)')).toBeTruthy());
     button('Approve policies (Jira)').click();
 
-    await until(() =>
-      expect(text()).toContain('The approval made these scope mapping entries invalid'),
-    );
+    await until(() => expect(text()).toContain('The approval removed these scope mapping entries'));
     expect(text()).toContain('mcp-team-platform');
   });
 

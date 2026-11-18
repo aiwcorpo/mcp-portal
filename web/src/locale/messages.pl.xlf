@@ -1106,8 +1106,8 @@
         <note category="location">src/app/features/admin/admin-page.html:6,9</note>
       </notes>
       <segment>
-        <source>The approval made these scope mapping entries invalid, and evaluation ignores them until you correct the mapping:</source>
-        <target>Zatwierdzenie unieważniło te wpisy mapowania zakresów, a ocena je pomija, dopóki nie poprawisz mapowania:</target>
+        <source>The approval removed these scope mapping entries, because the approved declarations no longer accept them:</source>
+        <target>Zatwierdzenie usunęło te wpisy mapowania zakresów, bo zatwierdzone deklaracje już ich nie przyjmują:</target>
       </segment>
     </unit>
     <unit id="admin.lead">
