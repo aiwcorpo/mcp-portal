@@ -10,6 +10,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.net.URI;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
@@ -25,7 +26,7 @@ import pl.aiwcorpo.mcp.portal.bff.support.ContractSchemas;
 import pl.aiwcorpo.mcp.portal.bff.support.TestBrowser;
 import tools.jackson.databind.JsonNode;
 
-/** Limits per session (CC-156): the BFF's own for a token write and the authenticator, and the limits of C4/C5 passed on. */
+/** Limits per user (CC-156): the BFF's own for a token write and the authenticator, and the limits of C4/C5 passed on. */
 @TestPropertySource(properties = {
     "portal.limits.secret-write.max=3",
     "portal.limits.secret-write.window=60s",
@@ -98,7 +99,7 @@ class RateLimitsTest extends PortalHarness {
     }
 
     @Test
-    void theLimitBelongsToTheSessionNotToTheUserAndRequestsThatNeverReachTheBrokerAreNotCounted() {
+    void theLimitBelongsToTheUserNotToTheSessionAndRequestsThatNeverReachTheBrokerAreNotCounted() {
         TestBrowser first = fresh();
         for (String body : new String[] {"", "{}", "{\"secret\":5}", "not json", "{\"secret\":\"x\",\"y\":1}"}) {
             assertThat(first.put(SECRET, body, true).statusCode()).isEqualTo(400);
@@ -109,7 +110,24 @@ class RateLimitsTest extends PortalHarness {
         assertThat(first.put(SECRET, SECRET_BODY, true).statusCode()).isEqualTo(429);
 
         TestBrowser second = fresh();
-        assertThat(second.put(SECRET, SECRET_BODY, true).statusCode()).isEqualTo(200);
+        assertThat(second.put(SECRET, SECRET_BODY, true).statusCode()).isEqualTo(429);
+    }
+
+    @Test
+    void aNewLoginInTheSameBrowserKeepsTheWindow() {
+        TestBrowser browser = fresh();
+        int before = brokerCalls("/v1/connections/jira/secret");
+        for (int i = 0; i < 3; i++) {
+            assertThat(browser.put(SECRET, SECRET_BODY, true).statusCode()).isEqualTo(200);
+        }
+        assertThat(browser.put(SECRET, SECRET_BODY, true).statusCode()).isEqualTo(429);
+
+        HttpResponse<String> start = browser.get("/api/v1/auth/login?returnPath=/catalog");
+        URI callback = IDP.approve(URI.create(start.headers().firstValue("Location").orElseThrow()), ALICE, Instant.now(), "1");
+        assertThat(browser.get(callback.toString()).statusCode()).isEqualTo(302);
+
+        assertThat(browser.put(SECRET, SECRET_BODY, true).statusCode()).isEqualTo(429);
+        assertThat(brokerCalls("/v1/connections/jira/secret") - before).isEqualTo(3);
     }
 
     @Test
@@ -169,13 +187,15 @@ class RateLimitsTest extends PortalHarness {
 
     @Test
     void aLimitWithoutAUsableRetryAfterGetsTheDefaultAndAGatewayLimitIsAnOrdinaryOutage() {
-        // A new session per request: the BFF's own limit of three writes must not answer in place of the broker's.
+        // A new window per request: the BFF's own limit of three writes must not answer in place of the broker's.
         for (String header : new String[] {null, "soon", "Wed, 21 Oct 2026 07:28:00 GMT", "-5", "99999999999"}) {
+            clock.advance(Duration.ofSeconds(61));
             stub(put(urlPathEqualTo("/v1/connections/jira/secret")), 429, "{\"error\":\"rate_limited\"}", header);
             HttpResponse<String> response = fresh().put(SECRET, SECRET_BODY, true);
             assertThat(response.statusCode()).isEqualTo(429);
             assertThat(response.headers().firstValue("Retry-After")).as(String.valueOf(header)).hasValue("60");
         }
+        clock.advance(Duration.ofSeconds(61));
         stub(put(urlPathEqualTo("/v1/connections/jira/secret")), 429, "{\"error\":\"rate_limited\"}", "0");
         assertThat(fresh().put(SECRET, SECRET_BODY, true).headers().firstValue("Retry-After")).hasValue("1");
 

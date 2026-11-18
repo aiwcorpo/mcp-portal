@@ -94,7 +94,7 @@ class AuthenticatorController {
         String requestId = RequestIds.of(request);
         long started = clock.millis();
         requireFreshMfa(user, request, requestId, started);
-        limit(request, user, requestId, started);
+        limit(user, requestId, started);
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
             broker.deleteAuthenticator(token, requestId);
@@ -115,7 +115,7 @@ class AuthenticatorController {
         String requestId = RequestIds.of(request);
         long started = clock.millis();
         requireFreshMfa(user, request, requestId, started);
-        limit(request, user, requestId, started);
+        limit(user, requestId, started);
         BrokerModel.AuthenticatorEnrollment enrollment;
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
@@ -168,7 +168,7 @@ class AuthenticatorController {
                     clock.millis() - started);
             throw new ApiException(HttpStatus.NOT_FOUND, ApiError.of(ApiError.NOT_FOUND_OR_DENIED));
         }
-        limit(request, user, requestId, started);
+        limit(user, requestId, started);
         BrokerModel.AuthenticatorStatus registered;
         try {
             BearerToken token = tokens.tokenFor(UserTokens.Audience.BROKER, authentication, request, response);
@@ -197,10 +197,10 @@ class AuthenticatorController {
     record EnrollmentError(String error) {
     }
 
-    /** The portal's limit per session; a refused request is audited and never reaches the broker. */
-    private void limit(HttpServletRequest request, PortalUser user, String requestId, long started) {
+    /** The portal's limit per user; a refused request is audited and never reaches the broker. */
+    private void limit(PortalUser user, String requestId, long started) {
         try {
-            limiter.acquire(request, SessionRateLimiter.Kind.AUTHENTICATOR);
+            limiter.acquire(user, SessionRateLimiter.Kind.AUTHENTICATOR);
         } catch (ApiException e) {
             audit.authenticatorEvent(requestId, user, AuditLog.Outcome.denied("rate_limited", RATE_LIMITED),
                     clock.millis() - started);

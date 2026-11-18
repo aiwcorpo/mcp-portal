@@ -10,6 +10,7 @@ import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -34,7 +35,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import pl.aiwcorpo.mcp.portal.bff.limits.SessionRateLimiter;
 import pl.aiwcorpo.mcp.portal.bff.support.ContractSchemas;
 import pl.aiwcorpo.mcp.portal.bff.support.FakeIdp;
 import pl.aiwcorpo.mcp.portal.bff.support.MutableClock;
@@ -117,9 +120,14 @@ abstract class PortalHarness {
     @Autowired
     MutableClock clock;
 
+    @Autowired
+    SessionRateLimiter limiter;
+
     @BeforeEach
     void setUp() {
         clock.reset();
+        // The windows are kept per sub for the life of the context, which test classes share.
+        ((Map<?, ?>) ReflectionTestUtils.getField(limiter, "windows")).clear();
         Logger root = ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger(Logger.ROOT_LOGGER_NAME);
         Logger audit = ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("pl.aiwcorpo.mcp.audit");
         if (!LOGS.isStarted()) {

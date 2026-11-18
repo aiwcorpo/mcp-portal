@@ -99,7 +99,7 @@ class ConnectionsController {
         }
         // Each attempt is a check of the token at the target system, so the limit counts attempts that reach the broker.
         try {
-            limiter.acquire(request, SessionRateLimiter.Kind.SECRET_WRITE);
+            limiter.acquire(user, SessionRateLimiter.Kind.SECRET_WRITE);
         } catch (ApiException e) {
             audit.connectionChange(requestId, user, system, AuditLog.Outcome.rateLimited(), clock.millis() - started);
             throw e;

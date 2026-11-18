@@ -104,7 +104,7 @@ portal:
     absolute-timeout: 8h
     login-timeout: ${PORTAL_SESSION_LOGIN_TIMEOUT:5m}
     max-active: ${PORTAL_SESSION_MAX_ACTIVE:10000}
-  # Per session; over a limit the BFF answers 429 with Retry-After (CC-156).
+  # Per user (sub); over a limit the BFF answers 429 with Retry-After (CC-156).
   limits:
     secret-write:
       max: ${PORTAL_LIMIT_SECRET_WRITE_MAX:10}

@@ -268,7 +268,7 @@ public class AuditLog {
             return new Outcome("deny", "not_found_or_denied", "denied", "not_found_or_denied");
         }
 
-        /** The portal's own limit per session, or one of the broker or the gateway (CC-156). */
+        /** The portal's own limit per user, or one of the broker or the gateway (CC-156). */
         public static Outcome rateLimited() {
             return new Outcome("deny", "rate_limited", "denied", "rate_limited");
         }
