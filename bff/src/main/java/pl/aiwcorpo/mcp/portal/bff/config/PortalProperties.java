@@ -116,7 +116,7 @@ public record PortalProperties(
     }
 
     /**
-     * Limits per session (CC-156); values are configuration, not contract. Counted per kind of operation over a sliding
+     * Limits per user (CC-156); values are configuration, not contract. Counted per kind of operation over a sliding
      * window; the answer to a request over the limit is {@code 429 rate_limited} with {@code Retry-After}.
      *
      * @param secretWrite   {@code PUT /connections/{system}/secret}: each attempt is a validity check of a token at the

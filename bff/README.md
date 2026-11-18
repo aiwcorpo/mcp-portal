@@ -77,8 +77,8 @@ Everything is set through environment variables (`application.yml`):
 | `PORTAL_WEB_DIST` | directory with the built frontend's `index.html` | `../web/dist/portal` |
 | `PORTAL_WEB_LOGIN_RETURN_ORIGIN` | dev only: origin of the `ng serve` frontend the BFF returns to after login (`scheme://host:port`, from configuration, never from the request) | empty; with `npm start` in `web/`: `http://localhost:4200` |
 | `SPRING_PROFILES_ACTIVE` | `dev` only for the dev stack; without it the BFF will not start with the `mock` IGA adapter, step-up without `acr`, `PORTAL_WEB_LOGIN_RETURN_ORIGIN` or `portal.tls.insecure-plain-http-for-tests` | `dev` (set by `LocalPortalApplication`) |
-| `PORTAL_LIMIT_SECRET_WRITE_MAX`, `PORTAL_LIMIT_SECRET_WRITE_WINDOW` | token write (`PUT .../secret`): at most this many requests per session in the window, then `429` with `Retry-After` (CC-156) | `10`, `1m` |
-| `PORTAL_LIMIT_AUTHENTICATOR_MAX`, `PORTAL_LIMIT_AUTHENTICATOR_WINDOW` | Authenticator writes (start, removal, confirmation) per session | `10`, `10m` |
+| `PORTAL_LIMIT_SECRET_WRITE_MAX`, `PORTAL_LIMIT_SECRET_WRITE_WINDOW` | token write (`PUT .../secret`): at most this many requests per user in the window, then `429` with `Retry-After` (CC-156) | `10`, `1m` |
+| `PORTAL_LIMIT_AUTHENTICATOR_MAX`, `PORTAL_LIMIT_AUTHENTICATOR_WINDOW` | Authenticator writes (start, removal, confirmation) per user | `10`, `10m` |
 | `PORTAL_IGA_ADAPTER` | C13 adapter: `keycloak-groups` or `mock` (`dev` only); unset is a startup error | `mock` (profile `dev`) |
 | `PORTAL_IGA_CATALOG_FILE` | entitlement catalog for the `keycloak-groups` adapter (same YAML format as the mock: `entitlements`, optionally `descriptions`); the adapter has no request workflow | none |
 | `PORTAL_IGA_MOCK_FILE` | data for the `mock` adapter (outside the jar): a plain filesystem path, no `file:` | `dev/iga-mock.yaml` |
