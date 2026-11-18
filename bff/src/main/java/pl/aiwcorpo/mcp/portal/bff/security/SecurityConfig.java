@@ -4,14 +4,21 @@ import java.time.Clock;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.RestClientRefreshTokenTokenResponseClient;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
@@ -21,6 +28,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
@@ -28,8 +36,11 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
 import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
+import pl.aiwcorpo.mcp.portal.bff.config.IdpClientConfig;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
 
 @Configuration(proxyBeanMethods = false)
@@ -61,7 +72,10 @@ public class SecurityConfig {
                                        CookieCsrfTokenRepository csrfTokens,
                                        PortalProperties properties,
                                        LoginRedirects redirects,
-                                       Clock clock) throws Exception {
+                                       Clock clock,
+                                       @Qualifier(IdpClientConfig.IDP_REST_CLIENT) RestClient idp) throws Exception {
+        RestClientAuthorizationCodeTokenResponseClient codeExchange = new RestClientAuthorizationCodeTokenResponseClient();
+        codeExchange.setRestClient(tokenEndpointClient(idp));
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/login").permitAll()
@@ -78,6 +92,8 @@ public class SecurityConfig {
                                 .authorizationRequestResolver(NO_FILTER_ENTRY)
                                 .authorizationRequestRepository(authorizationRequests))
                         .redirectionEndpoint(endpoint -> endpoint.baseUri(OIDC_CALLBACK))
+                        .tokenEndpoint(endpoint -> endpoint.accessTokenResponseClient(codeExchange))
+                        .userInfoEndpoint(endpoint -> endpoint.oidcUserService(oidcUserService()))
                         .authorizedClientRepository(authorizedClients)
                         .successHandler(new LoginSuccessHandler(redirects))
                         .failureHandler(new LoginFailureHandler(redirects)))
@@ -133,13 +149,39 @@ public class SecurityConfig {
 
     @Bean
     OAuth2AuthorizedClientManager authorizedClientManager(ClientRegistrationRepository registrations,
-                                                          OAuth2AuthorizedClientRepository authorizedClients) {
+                                                          OAuth2AuthorizedClientRepository authorizedClients,
+                                                          @Qualifier(IdpClientConfig.IDP_REST_CLIENT) RestClient idp) {
+        RestClientRefreshTokenTokenResponseClient refresh = new RestClientRefreshTokenTokenResponseClient();
+        refresh.setRestClient(tokenEndpointClient(idp));
         DefaultOAuth2AuthorizedClientManager manager = new DefaultOAuth2AuthorizedClientManager(registrations, authorizedClients);
         manager.setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder()
                 .authorizationCode()
-                .refreshToken()
+                .refreshToken(provider -> provider.accessTokenResponseClient(refresh))
                 .build());
         return manager;
+    }
+
+    // Spring Security's own clients for the login and the refresh wait for the IdP without a deadline, on a request
+    // thread; these use the bounded client of IdpClientConfig with the converters and error handler Spring expects.
+    private static RestClient tokenEndpointClient(RestClient idp) {
+        return idp.mutate()
+                .messageConverters(converters -> {
+                    converters.clear();
+                    converters.add(new FormHttpMessageConverter());
+                    converters.add(new OAuth2AccessTokenResponseHttpMessageConverter());
+                })
+                .defaultStatusHandler(new OAuth2ErrorResponseErrorHandler())
+                .build();
+    }
+
+    private static OidcUserService oidcUserService() {
+        RestTemplate userInfo = new RestTemplate(IdpClientConfig.requestFactory());
+        userInfo.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+        DefaultOAuth2UserService users = new DefaultOAuth2UserService();
+        users.setRestOperations(userInfo);
+        OidcUserService oidc = new OidcUserService();
+        oidc.setOauth2UserService(users);
+        return oidc;
     }
 
     @Bean

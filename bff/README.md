@@ -67,7 +67,7 @@ Everything is set through environment variables (`application.yml`):
 | Variable | Meaning | dev |
 | --- | --- | --- |
 | `PORTAL_PORT` | HTTP port | `18720` |
-| `PORTAL_OIDC_ISSUER_URI` | OIDC issuer (discovery) | `http://localhost:18080/realms/corp` |
+| `PORTAL_OIDC_ISSUER_URI` | OIDC issuer (discovery); it and the endpoints it names must be https outside profile `dev` | `http://localhost:18080/realms/corp` |
 | `PORTAL_OIDC_CLIENT_ID`, `PORTAL_OIDC_CLIENT_SECRET` | confidential client | `mcp-portal-bff`, `KC_CLIENT_MCP_PORTAL_BFF_SECRET` |
 | `PORTAL_BROKER_URL`, `PORTAL_BROKER_TLS_NAME` | C4 and the name in the broker certificate | `https://localhost:18443`, `MCP_BROKER_TLS_NAME` |
 | `PORTAL_GATEWAY_ADMIN_URL`, `PORTAL_GATEWAY_ADMIN_TLS_NAME` | C5 and the name in its certificate | `https://localhost:18444`, `MCP_GATEWAY_INTERNAL_TLS_NAME` |

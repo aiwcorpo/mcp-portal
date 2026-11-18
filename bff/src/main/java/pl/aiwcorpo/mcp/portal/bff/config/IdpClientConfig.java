@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
-/** HTTP client for the BFF's own calls to the IdP (token exchange, back-channel logout). */
+/** HTTP client for the BFF's calls to the IdP: login code exchange, userinfo, refresh, token exchange, back-channel logout. */
 @Configuration(proxyBeanMethods = false)
 public class IdpClientConfig {
 
@@ -18,6 +18,11 @@ public class IdpClientConfig {
     @Bean
     @Qualifier(IDP_REST_CLIENT)
     RestClient idpRestClient() {
+        return RestClient.builder().requestFactory(requestFactory()).build();
+    }
+
+    /** 5 s to connect and 10 s to answer: a stalled IdP must not hold a request thread for longer. */
+    public static JdkClientHttpRequestFactory requestFactory() {
         HttpClient http = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 // A redirect from the token endpoint would resend credentials to wherever it points.
@@ -26,6 +31,6 @@ public class IdpClientConfig {
                 .build();
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(http);
         requestFactory.setReadTimeout(Duration.ofSeconds(10));
-        return RestClient.builder().requestFactory(requestFactory).build();
+        return requestFactory;
     }
 }

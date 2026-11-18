@@ -171,6 +171,9 @@ public final class PortalSetup {
             return;
         }
         String issuer = env.get("PORTAL_OIDC_ISSUER_URI");
+        if (!issuer.startsWith("https://")) {
+            fail("PORTAL_OIDC_ISSUER_URI " + issuer + " must be an https address: the client secret and the tokens go to the addresses it names");
+        }
         String url = issuer.replaceAll("/$", "") + "/.well-known/openid-configuration";
         HttpResponse<String> response = get("identity provider", url, http, true);
         if (response == null) {
@@ -185,6 +188,13 @@ public final class PortalSetup {
                         + ", PORTAL_OIDC_ISSUER_URI says " + issuer + "; they must be equal");
             } else {
                 ok("identity provider " + url);
+                for (String endpoint : List.of("authorization_endpoint", "token_endpoint", "jwks_uri", "userinfo_endpoint",
+                        "end_session_endpoint")) {
+                    String address = document.path(endpoint).asString("");
+                    if (!address.isEmpty() && !address.startsWith("https://")) {
+                        fail("identity provider " + url + ": " + endpoint + " " + address + " must be an https address");
+                    }
+                }
             }
         } catch (JacksonException e) {
             fail("identity provider " + url + ": not a discovery document; check PORTAL_OIDC_ISSUER_URI");

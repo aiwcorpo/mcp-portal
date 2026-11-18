@@ -99,7 +99,7 @@ class OidcRegistrationConfig {
     }
 
     // Client secret and tokens travel here: https, or http with the dev profile on an internal network name.
-    private static void backChannel(String uri, String name, DevMode devMode) {
+    static void backChannel(String uri, String name, DevMode devMode) {
         URI parsed = absolute(uri, name);
         if (!"https".equalsIgnoreCase(parsed.getScheme())) {
             if (!"http".equalsIgnoreCase(parsed.getScheme())) {

@@ -4,6 +4,7 @@ import {
   annotationHints,
   describeEntry,
   diffDefinitions,
+  MAX_DEFINITION_LINES,
   riskChange,
   riskChangeText,
 } from './definition-diff';
@@ -71,6 +72,32 @@ describe('describeEntry', () => {
 });
 
 describe('diffDefinitions', () => {
+  function withOutputItems(count: number): ToolEntry {
+    const base = entry();
+    return {
+      ...base,
+      definition: {
+        ...base.definition,
+        outputSchema: { items: Array.from({ length: count }, () => ({})) },
+      },
+    };
+  }
+
+  it('cuts a side longer than the limit, says so, and still sees a change past the cut', () => {
+    for (const n of [500, 1000]) {
+      const diff = diffDefinitions(withOutputItems(n), withOutputItems(n + 1));
+
+      expect(diff.after.length).toBeGreaterThan(n);
+      expect(diff.truncated).toBe(false);
+    }
+    const long = diffDefinitions(withOutputItems(2000), withOutputItems(2001));
+
+    expect(long.truncated).toBe(true);
+    expect(long.before.length).toBe(MAX_DEFINITION_LINES);
+    expect(long.after.length).toBe(MAX_DEFINITION_LINES);
+    expect(long.changed).toBe(true);
+  });
+
   it('marks only what changed: description, a new parameter, a looser limit', () => {
     const next = entry({}, 'Updates a page and its parent.');
     next.definition = {
