@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
@@ -475,6 +476,35 @@ class PortalApiTest extends PortalHarness {
         browser.get("/api/v1/connections");
         // The broker token cached for alice was dropped with the rest of her session state, so bob's is exchanged anew.
         assertThat(countExchanges()).isGreaterThan(exchangesForAlice);
+    }
+
+    @Test
+    void aRefreshOfTheEarlierUserThatEndsAfterAnotherLoginIsNeverUsedForTheNewOne() throws Exception {
+        IDP.expireNextLoginIn(30);
+        TestBrowser browser = login(ALICE, Instant.now());
+        CountDownLatch gate = IDP.holdPlainRefresh();
+        TestBrowser aliceTab = browser();
+        aliceTab.setCookie("__Host-session", browser.cookie("__Host-session").orElseThrow());
+        int requestsBefore = IDP.tokenRequests().size();
+        Thread alicesRequest = new Thread(() -> aliceTab.get("/api/v1/connections"));
+        alicesRequest.start();
+        long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+        while (IDP.tokenRequests().stream().skip(requestsBefore)
+                .noneMatch(form -> "refresh_token".equals(form.get("grant_type")) && !form.containsKey("scope"))) {
+            assertThat(System.nanoTime()).isLessThan(deadline);
+            Thread.onSpinWait();
+        }
+
+        HttpResponse<String> start = browser.get("/api/v1/auth/login");
+        URI callback = IDP.approve(URI.create(start.headers().firstValue("Location").orElseThrow()), BOB, Instant.now(), "1");
+        browser.get(callback.toString());
+        gate.countDown();
+        alicesRequest.join(10_000);
+
+        assertThat(JSON.readTree(browser.get("/api/v1/me").body()).get("username").asString()).isEqualTo("bob");
+        long exchanges = countExchanges();
+        assertThat(browser.get("/api/v1/connections").statusCode()).isEqualTo(401);
+        assertThat(countExchanges()).isEqualTo(exchanges);
     }
 
     @Test
