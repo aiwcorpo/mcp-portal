@@ -15,7 +15,8 @@ ARG NGINX_IMAGE=nginx:stable-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a4
 FROM ${JRE_IMAGE} AS bff
 LABEL org.opencontainers.image.source="https://github.com/aiwcorpo/mcp-portal" \
       org.opencontainers.image.licenses="Apache-2.0"
-RUN addgroup -S portal && adduser -S -G portal -H -h /app portal
+# A fixed uid, so that an operator can give the mounted keystore to the portal without making it readable by all.
+RUN addgroup -S -g 10001 portal && adduser -S -u 10001 -G portal -H -h /app portal
 WORKDIR /app
 COPY --chown=root:root bff/target/mcp-portal-bff-*.jar /app/app.jar
 COPY --chown=root:root bff/docker/entrypoint.sh /app/entrypoint.sh

@@ -114,6 +114,12 @@ class ServerTlsStartTest {
                 "-groupname", "secp256r1", "-validity", "2");
         keytool("-exportcert", "-alias", "portal", "-keystore", keystore.toString(), "-file", certificate.toString(), "-rfc");
         keytool("-importcert", "-noprompt", "-alias", "ca", "-file", certificate.toString(), "-keystore", truststore.toString());
+        Files.setPosixFilePermissions(keystore, PosixFilePermissions.fromString("rw-------"));
+        return startWithStores(dir, keystore, truststore);
+    }
+
+    /** A start without the dev profile, with the given mTLS stores and upstreams that are never called. */
+    private ConfigurableApplicationContext startWithStores(Path dir, Path keystore, Path truststore) throws Exception {
         Path catalog = Files.writeString(dir.resolve("catalog.yaml"), "entitlements:\n  jira: [mcp-jira-read]\n");
         List<String> properties = List.of("server.port=0",
                 "spring.security.oauth2.client.provider.keycloak.issuer-uri=" + IDP.issuer(),
@@ -133,5 +139,26 @@ class ServerTlsStartTest {
     void anHttpIssuerRefusesToStartOutsideDevInDiscoveryMode(@TempDir Path dir) {
         assertThatThrownBy(() -> startProduction(dir))
                 .hasMessageContaining("OIDC issuer-uri " + IDP.issuer() + " over http is allowed only with the Spring profile 'dev'");
+    }
+
+    @Test
+    void anMtlsKeystoreReadableByOthersRefusesToStartOutsideDev(@TempDir Path dir) throws Exception {
+        new TestPki(dir);
+        Path keystore = dir.resolve("server.p12");
+        Files.setPosixFilePermissions(keystore, PosixFilePermissions.fromString("rw-r--r--"));
+        assertThatThrownBy(() -> startWithStores(dir, keystore, dir.resolve("ca.p12")))
+                .hasStackTraceContaining("portal.tls.keystore readable by all users of the host");
+
+        // The fake IdP speaks http, so a start without dev still stops, but on the issuer and no longer on the keystore.
+        Files.setPosixFilePermissions(keystore, PosixFilePermissions.fromString("rw-r-----"));
+        assertThatThrownBy(() -> startWithStores(dir, keystore, dir.resolve("ca.p12")))
+                .hasStackTraceContaining("over http is allowed only with the Spring profile 'dev'")
+                .satisfies(e -> assertThat(stackTrace(e)).doesNotContain("portal.tls.keystore readable"));
+    }
+
+    private static String stackTrace(Throwable e) {
+        java.io.StringWriter out = new java.io.StringWriter();
+        e.printStackTrace(new java.io.PrintWriter(out));
+        return out.toString();
     }
 }

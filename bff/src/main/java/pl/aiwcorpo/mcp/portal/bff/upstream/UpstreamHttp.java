@@ -20,6 +20,7 @@ import org.springframework.web.client.RestClient;
 
 import pl.aiwcorpo.mcp.portal.bff.config.DevMode;
 import pl.aiwcorpo.mcp.portal.bff.config.PortalProperties;
+import pl.aiwcorpo.mcp.portal.bff.config.PublicTlsEnvironment;
 
 /** HTTP clients for C4 and C5: client certificate {@code CN=mcp-portal-bff}, internal CA, pinned server name. */
 final class UpstreamHttp {
@@ -44,6 +45,10 @@ final class UpstreamHttp {
             devMode.require(true, "portal.tls.insecure-plain-http-for-tests");
         } else if (!isSet(tls.keystore()) || !isSet(tls.truststore())) {
             throw new IllegalStateException("mTLS to the " + name + " needs portal.tls.keystore and portal.tls.truststore");
+        } else {
+            // The keystore holds the portal's client key, the same rule as for PORTAL_PUBLIC_TLS_PRIVATE_KEY.
+            devMode.require(PublicTlsEnvironment.readableByOthers(tls.keystore().toString()),
+                    "portal.tls.keystore readable by all users of the host (" + tls.keystore() + ", chmod o-rwx)");
         }
         HttpClient.Builder http = HttpClient.newBuilder()
                 .connectTimeout(upstream.connectTimeout())

@@ -33,7 +33,16 @@ components (identity provider, gateway, credential broker) run elsewhere; you gi
     keytool -importcert -noprompt -alias ca -file ca.crt -keystore certs/truststore.p12 -storetype PKCS12
     ```
 
-3. Fill in the empty values in `portal.env`, and the systems of your installation in `iga-catalog.yaml`.
+    The keystore holds the portal's private key: the portal refuses to start when it is readable by all users of the host.
+    The container runs as uid and gid 10001:
+
+    ```bash
+    sudo chown 10001:10001 certs/keystore.p12 certs/truststore.p12
+    sudo chmod 0640 certs/keystore.p12
+    ```
+
+3. Fill in the empty values in `portal.env`, and the systems of your installation in `iga-catalog.yaml`. `portal.env` holds the
+   client secret and the store passwords; Docker Compose reads it on the host, so `chmod 0600 portal.env` is enough.
 4. Start:
 
     ```bash

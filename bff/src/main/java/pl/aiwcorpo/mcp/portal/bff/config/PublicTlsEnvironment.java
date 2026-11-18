@@ -51,7 +51,7 @@ public class PublicTlsEnvironment implements EnvironmentPostProcessor {
         return "file:" + path;
     }
 
-    static boolean readableByOthers(String file) {
+    public static boolean readableByOthers(String file) {
         if (file.isBlank()) {
             return false;
         }
