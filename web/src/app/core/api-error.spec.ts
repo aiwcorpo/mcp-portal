@@ -87,6 +87,23 @@ describe('toApiFailure of the administrator writes', () => {
     expect(failureMessage(failure)).toContain('does not match the scope pattern');
   });
 
+  it('keeps the reason of a rejected service account key and never its message, which could echo the key', () => {
+    const failure = toApiFailure(
+      httpError(422, {
+        error: 'service_account_key_rejected',
+        reason: 'value_not_basic_credential',
+        message: 'cannot decode test-only-service-token-0000000000',
+      }),
+    );
+
+    expect(failure).toEqual({
+      code: 'service_account_key_rejected',
+      status: 422,
+      reason: 'value_not_basic_credential',
+    });
+    expect(JSON.stringify(failure)).not.toContain('test-only');
+  });
+
   it('drops a reason that is not a plain code and a message that is too long', () => {
     const failure = toApiFailure(
       httpError(422, {
@@ -184,6 +201,12 @@ describe('toApiFailure of the administrator writes', () => {
         'default_type_not_supported',
         'credential_types_mixed',
         'oauth_required',
+      ],
+      service_account_key_rejected: [
+        'system_not_service_account',
+        'basic_scheme_required',
+        'value_not_basic_credential',
+        'expires_at_in_past',
       ],
     } as const;
     for (const [code, list] of Object.entries(reasons)) {

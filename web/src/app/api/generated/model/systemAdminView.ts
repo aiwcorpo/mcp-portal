@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { CredentialScheme } from './credentialScheme';
+import { ServiceAccountKeySummary } from './serviceAccountKeySummary';
 import { SystemOauthClientView } from './systemOauthClientView';
 import { SystemUserSecretScheme } from './systemUserSecretScheme';
 import { CredentialType } from './credentialType';
@@ -40,6 +41,7 @@ export interface SystemAdminView {
     defaultType: CredentialType;
     secretScheme: CredentialScheme;
     oauth?: SystemOauthClientView;
+    serviceAccountKey?: ServiceAccountKeySummary;
 }
 export namespace SystemAdminView {
 }

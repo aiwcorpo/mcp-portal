@@ -23,6 +23,7 @@ const C12_ERROR_CODES = [
   'scope_mapping_rejected',
   'override_rejected',
   'system_rejected',
+  'service_account_key_rejected',
   'server_exists',
   'connection_changed',
   'no_pending_connection',
@@ -77,7 +78,10 @@ const ADMIN_REJECTION_CODES: ReadonlySet<string> = new Set([
   'system_rejected',
 ]);
 
-/** Codes that carry a closed `reason` (the page maps it to its own text). */
+/**
+ * Codes that carry a closed `reason` (the page maps it to its own text). `service_account_key_rejected` is here but not
+ * in the list above on purpose: its free `message` is dropped, so nothing that echoes a submitted key can reach the page.
+ */
 const REJECTION_CODES: ReadonlySet<string> = new Set([
   'manifest_rejected',
   'invalid_request',
@@ -85,6 +89,7 @@ const REJECTION_CODES: ReadonlySet<string> = new Set([
   'scope_mapping_rejected',
   'override_rejected',
   'system_rejected',
+  'service_account_key_rejected',
 ]);
 
 const KNOWN_CODES: ReadonlySet<string> = new Set(PORTAL_ERROR_CODES);

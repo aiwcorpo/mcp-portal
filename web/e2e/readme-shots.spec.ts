@@ -305,6 +305,11 @@ for (const lang of ['en', 'pl'] as const) {
       await expect(page.getByLabel(t('Client secret'))).toBeVisible();
       await shot(page, '22-system-address-changed');
 
+      await page.goto('/admin/systems?mockAdmin=in');
+      await page.getByRole('button', { name: `${t('Set key')} (servicedesk)` }).click();
+      await expect(page.getByLabel(t('Key'), { exact: true })).toBeVisible();
+      await shot(page, '29-service-account-key', true);
+
       await page.goto('/admin/scope-mapping?mockAdmin=in');
       await page.getByRole('button', { name: t('Add group') }).click();
       await expect(page.getByLabel(t('Group'), { exact: true })).toHaveCount(3);
