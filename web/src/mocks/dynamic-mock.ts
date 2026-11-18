@@ -7,6 +7,7 @@ import type {
   ScopeMappingEntry,
   ServerConfig,
   ServerConnection,
+  ServiceAccountKeyStatus,
   SystemAdminView,
   TlsMode,
 } from '../app/api/generated';
@@ -34,6 +35,15 @@ export const RESERVED_SYSTEMS = [
   'ci',
 ];
 
+/** What the broker checks for a Basic system: the base64 of a text with a colon in it. */
+function isBasicCredential(value: string): boolean {
+  try {
+    return atob(value).includes(':');
+  } catch {
+    return false;
+  }
+}
+
 const STORAGE_KEY = 'mcp-portal-mock-registry';
 /** The gateway probes a server at most once in 5 s (C5). */
 const REFRESH_INTERVAL_MS = 5000;
@@ -47,6 +57,8 @@ interface Versioned<T> {
 interface Data {
   servers: Versioned<ServerConfig>[];
   systems: Versioned<SystemAdminView>[];
+  /** What is known about the key of a service-account system. The key itself is never stored, not even in the mock. */
+  keys: Record<string, ServiceAccountKeyStatus>;
   mapping: Versioned<ScopeMappingEntry[]>;
   overrides: Versioned<Override>[];
 }
@@ -280,6 +292,7 @@ function seedData(): Data {
           supportedTypes: ['service-account'],
           defaultType: 'service-account',
           secretScheme: 'Bearer',
+          serviceAccountKey: { state: 'missing' },
         },
         {
           system: 'opensearch',
@@ -294,6 +307,7 @@ function seedData(): Data {
         },
       ] satisfies SystemAdminView[]
     ).map((value) => ({ value, version: 1 })),
+    keys: {},
     mapping: {
       value: [
         { group: 'mcp-jira-proj-ABC', scopes: ['Jira::Project/ABC'] },
@@ -325,7 +339,9 @@ function load(): Data {
   try {
     const raw = typeof sessionStorage === 'undefined' ? null : sessionStorage.getItem(STORAGE_KEY);
     if (raw) {
-      return JSON.parse(raw) as Data;
+      const stored = JSON.parse(raw) as Data;
+      stored.keys ??= {};
+      return stored;
     }
   } catch {
     // Storage blocked or damaged: start from the seed.
@@ -577,7 +593,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
     const path = new URL(request.url).pathname;
     const checks: [RegExp, RegExp][] = [
       [/\/admin\/servers\/([^/]+)(?:\/connection\/approve|\/refresh)?$/, SERVER_PATTERN],
-      [/\/admin\/systems\/([^/]+)$/, SYSTEM_PATTERN],
+      [/\/admin\/systems\/([^/]+)(?:\/service-account-key)?$/, SYSTEM_PATTERN],
       [/\/admin\/policy\/overrides\/([^/]+)$/, OVERRIDE_PATTERN],
       [/\/admin\/registry\/servers\/([^/]+)\/policies(?:\/pending|\/approve)?$/, SERVER_PATTERN],
     ];
@@ -1246,10 +1262,16 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         return mfa;
       }
       const { clientSecret, ...oauth } = request_.oauth ?? { clientId: '' };
+      const takesKey = (body['supportedTypes'] as string[] | undefined)?.includes(
+        'service-account',
+      );
       const value = {
         ...(body as object),
         system: id,
         displayName: request_.displayName ?? id,
+        ...(takesKey
+          ? { serviceAccountKey: before?.serviceAccountKey ?? { state: 'missing' } }
+          : {}),
         ...(request_.oauth
           ? {
               oauth: {
@@ -1284,6 +1306,119 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
       commit();
       return json(value, 200, (existing ?? systemOf(id))!.version);
     }),
+    http.get(
+      at('/api/v1/admin/systems/:system/service-account-key'),
+      ({ request, cookies, params }) => {
+        const denied = guard(request, cookies, false);
+        const id = String(params['system']);
+        const entry = systemOf(id);
+        if (denied) {
+          return denied;
+        }
+        if (!entry) {
+          return ctx.failure('not_found_or_denied', 404);
+        }
+        return json(data.keys[id] ?? { system: id, set: false }, 200);
+      },
+    ),
+    http.put(
+      at('/api/v1/admin/systems/:system/service-account-key'),
+      async ({ request, cookies, params }) => {
+        const denied = guard(request, cookies, true);
+        if (denied) {
+          return denied;
+        }
+        const id = String(params['system']);
+        const entry = systemOf(id);
+        const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+        const fields = body ? Object.keys(body) : [];
+        const single = body !== null && typeof body['value'] === 'string';
+        const pair =
+          body !== null &&
+          typeof body['username'] === 'string' &&
+          typeof body['password'] === 'string';
+        const text = (field: string): string => String(body?.[field] ?? '');
+        if (
+          !body ||
+          fields.some((field) => !['value', 'username', 'password', 'expiresAt'].includes(field)) ||
+          single === pair ||
+          (single && fields.some((field) => field === 'username' || field === 'password')) ||
+          (single && !/^[\x21-\x7e]{1,4096}$/.test(text('value'))) ||
+          (pair &&
+            (text('username').includes(':') ||
+              text('username') === '' ||
+              text('password') === '')) ||
+          (body['expiresAt'] !== undefined && !/Z$/.test(text('expiresAt')))
+        ) {
+          return ctx.failure('invalid_request', 400);
+        }
+        if (!entry) {
+          return ctx.failure('not_found_or_denied', 404);
+        }
+        const mfa = needsMfa('/admin/systems');
+        if (mfa) {
+          return mfa;
+        }
+        const system = entry.value;
+        const rejectKey = (reason: string): Response =>
+          HttpResponse.json(
+            { error: 'service_account_key_rejected', reason, message: reason.replaceAll('_', ' ') },
+            { status: 422, headers: baseHeaders },
+          );
+        if (!system.supportedTypes.includes('service-account')) {
+          return rejectKey('system_not_service_account');
+        }
+        if (pair && system.secretScheme !== 'Basic') {
+          return rejectKey('basic_scheme_required');
+        }
+        if (single && system.secretScheme === 'Basic' && !isBasicCredential(text('value'))) {
+          return rejectKey('value_not_basic_credential');
+        }
+        const expiresAt = body['expiresAt'] === undefined ? undefined : text('expiresAt');
+        if (expiresAt !== undefined && Date.parse(expiresAt) <= Date.now()) {
+          return rejectKey('expires_at_in_past');
+        }
+        const status: ServiceAccountKeyStatus = {
+          system: id,
+          set: true,
+          kvVersion: (data.keys[id]?.kvVersion ?? 0) + 1,
+          ...(expiresAt ? { expiresAt, expired: false } : {}),
+          updatedAt: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+          updatedBy: 'mock.admin',
+        };
+        data.keys[id] = status;
+        system.serviceAccountKey = {
+          state: 'set',
+          ...(expiresAt ? { expiresAt, expired: false } : {}),
+        };
+        commit();
+        return json(status, 200);
+      },
+    ),
+    http.delete(
+      at('/api/v1/admin/systems/:system/service-account-key'),
+      ({ request, cookies, params }) => {
+        const denied = guard(request, cookies, true);
+        if (denied) {
+          return denied;
+        }
+        const id = String(params['system']);
+        const entry = systemOf(id);
+        if (!entry) {
+          return ctx.failure('not_found_or_denied', 404);
+        }
+        const mfa = needsMfa('/admin/systems');
+        if (mfa) {
+          return mfa;
+        }
+        delete data.keys[id];
+        if (entry.value.serviceAccountKey) {
+          entry.value.serviceAccountKey = { state: 'missing' };
+        }
+        commit();
+        return new HttpResponse(null, { status: 204, headers: baseHeaders });
+      },
+    ),
     http.delete(at('/api/v1/admin/systems/:system'), ({ request, cookies, params }) => {
       const denied = guard(request, cookies, true);
       if (denied) {
@@ -1303,6 +1438,7 @@ export function createDynamicAdminHandlers(store: MockStore, ctx: MockContext): 
         return mfa;
       }
       data.systems = data.systems.filter((candidate) => candidate !== entry);
+      delete data.keys[id];
       commit();
       return new HttpResponse(null, { status: 204, headers: baseHeaders });
     }),

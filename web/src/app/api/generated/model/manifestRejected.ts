@@ -10,7 +10,7 @@
 
 
 /**
- * 422 of an approval of a tool or of policies (CC-133). reason is a known value or absent.
+ * 422 of an approval of a tool or of policies (CC-133). reason is a known value or absent; it is absent when the definition of a tool holds a hidden character (CC-250).
  */
 export interface ManifestRejected { 
     error: any | null;

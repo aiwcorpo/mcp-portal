@@ -51,6 +51,8 @@ const MESSAGES: Record<PortalErrorCode, () => string> = {
     $localize`:@@error.override_rejected:The gateway did not accept the override.`,
   system_rejected: () =>
     $localize`:@@error.system_rejected:The credential broker did not accept the system settings.`,
+  service_account_key_rejected: () =>
+    $localize`:@@error.service_account_key_rejected:The credential broker did not accept the service account key. Nothing was saved.`,
   server_exists: () =>
     $localize`:@@error.server_exists:A server with this identifier already exists.`,
   connection_changed: () =>
@@ -204,7 +206,25 @@ function systemRejectedMessage(reason: string | undefined): string {
   }
 }
 
+function serviceAccountKeyRejectedMessage(reason: string | undefined): string {
+  switch (reason) {
+    case 'system_not_service_account':
+      return $localize`:@@error.system_not_service_account:This system does not take a service account. Add the credential type service account to it first.`;
+    case 'basic_scheme_required':
+      return $localize`:@@error.basic_scheme_required:A login and password can only be saved for a system in the Basic scheme. Enter the key as a single value instead.`;
+    case 'value_not_basic_credential':
+      return $localize`:@@error.value_not_basic_credential:A value for a system in the Basic scheme has to be the base64 of login:password. Enter the login and the password instead.`;
+    case 'expires_at_in_past':
+      return $localize`:@@error.expires_at_in_past:The expiry has to be in the future.`;
+    default:
+      return errorMessage('service_account_key_rejected');
+  }
+}
+
 export function failureMessage(failure: ApiFailure): string {
+  if (failure.code === 'service_account_key_rejected') {
+    return serviceAccountKeyRejectedMessage(failure.reason);
+  }
   if (failure.code === 'server_rejected') {
     return serverRejectedMessage(failure.reason, failure.manifestReason);
   }

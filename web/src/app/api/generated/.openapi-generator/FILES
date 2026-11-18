@@ -102,6 +102,10 @@ model/serverConnection.ts
 model/serverCredentialConfig.ts
 model/serverRejected.ts
 model/serverStatus.ts
+model/serviceAccountKeyRejected.ts
+model/serviceAccountKeyRequest.ts
+model/serviceAccountKeyStatus.ts
+model/serviceAccountKeySummary.ts
 model/stepUpRequired.ts
 model/systemAdapter.ts
 model/systemAdminRequest.ts
