@@ -114,6 +114,7 @@ class ServerTlsStartTest {
                 "-groupname", "secp256r1", "-validity", "2");
         keytool("-exportcert", "-alias", "portal", "-keystore", keystore.toString(), "-file", certificate.toString(), "-rfc");
         keytool("-importcert", "-noprompt", "-alias", "ca", "-file", certificate.toString(), "-keystore", truststore.toString());
+        Files.setPosixFilePermissions(keystore, PosixFilePermissions.fromString("rw-------"));
         return startWithStores(dir, keystore, truststore);
     }
 
