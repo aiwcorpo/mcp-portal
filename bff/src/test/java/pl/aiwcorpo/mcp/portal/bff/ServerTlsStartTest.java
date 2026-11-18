@@ -3,6 +3,7 @@ package pl.aiwcorpo.mcp.portal.bff;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -93,5 +94,44 @@ class ServerTlsStartTest {
         try (ConfigurableApplicationContext context = start(true, "PORTAL_PUBLIC_TLS_PRIVATE_KEY=" + key)) {
             assertThat(context.isRunning()).isTrue();
         }
+    }
+
+    private static void keytool(String... args) throws Exception {
+        List<String> command = new ArrayList<>(List.of(Path.of(System.getProperty("java.home"), "bin", "keytool").toString()));
+        command.addAll(List.of(args));
+        command.addAll(List.of("-storetype", "PKCS12", "-storepass", "changeit"));
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String log = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertThat(process.waitFor()).as(log).isZero();
+    }
+
+    /** Everything a start without the dev profile needs, with mTLS stores and upstreams that are never called. */
+    private ConfigurableApplicationContext startProduction(Path dir) throws Exception {
+        Path keystore = dir.resolve("keystore.p12");
+        Path certificate = dir.resolve("localhost.crt");
+        Path truststore = dir.resolve("truststore.p12");
+        keytool("-genkeypair", "-alias", "portal", "-keystore", keystore.toString(), "-dname", "CN=localhost", "-keyalg", "EC",
+                "-groupname", "secp256r1", "-validity", "2");
+        keytool("-exportcert", "-alias", "portal", "-keystore", keystore.toString(), "-file", certificate.toString(), "-rfc");
+        keytool("-importcert", "-noprompt", "-alias", "ca", "-file", certificate.toString(), "-keystore", truststore.toString());
+        Path catalog = Files.writeString(dir.resolve("catalog.yaml"), "entitlements:\n  jira: [mcp-jira-read]\n");
+        List<String> properties = List.of("server.port=0",
+                "spring.security.oauth2.client.provider.keycloak.issuer-uri=" + IDP.issuer(),
+                "spring.security.oauth2.client.registration.keycloak.client-id=" + FakeIdp.CLIENT_ID,
+                "portal.public-base-url=https://mcp.aiwcorpo.pl",
+                "portal.web.dist-path=src/test/resources/spa-fixture",
+                "portal.step-up.acr-values=mfa",
+                "portal.iga.adapter=keycloak-groups", "portal.iga.catalog-file=" + catalog,
+                "portal.broker.base-url=https://localhost:1", "portal.gateway-admin.base-url=https://localhost:1",
+                "portal.tls.keystore=" + keystore, "portal.tls.keystore-password=changeit",
+                "portal.tls.truststore=" + truststore, "portal.tls.truststore-password=changeit");
+        return new SpringApplicationBuilder(PortalBffApplication.class).web(WebApplicationType.SERVLET)
+                .run(properties.stream().map(p -> "--" + p).toArray(String[]::new));
+    }
+
+    @Test
+    void anHttpIssuerRefusesToStartOutsideDevInDiscoveryMode(@TempDir Path dir) {
+        assertThatThrownBy(() -> startProduction(dir))
+                .hasMessageContaining("OIDC issuer-uri " + IDP.issuer() + " over http is allowed only with the Spring profile 'dev'");
     }
 }
