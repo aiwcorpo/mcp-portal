@@ -138,8 +138,16 @@ public record PortalProperties(
         }
     }
 
-    /** Idle timeout is server.servlet.session.timeout; this is the hard limit from login. */
-    public record Session(@DefaultValue("8h") Duration absoluteTimeout) {
+    /**
+     * Idle timeout is server.servlet.session.timeout; this is the hard limit from login.
+     *
+     * @param loginTimeout idle timeout of a session that has only started a login and holds no user yet
+     * @param maxActive    most sessions kept at once; at the bound the oldest login start without a user makes room
+     */
+    public record Session(
+            @DefaultValue("8h") Duration absoluteTimeout,
+            @DefaultValue("5m") Duration loginTimeout,
+            @DefaultValue("10000") int maxActive) {
     }
 
     /**

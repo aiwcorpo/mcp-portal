@@ -56,6 +56,8 @@ class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 redirects.redirectToError(request, response, LoginRedirects.STEP_UP_FAILED);
                 return;
             }
+            // Back from the short lifetime LoginController gives a session that only started a login.
+            session.setMaxInactiveInterval(request.getServletContext().getSessionTimeout() * 60);
             List<String> names = Collections.list(session.getAttributeNames());
             for (String name : names) {
                 if (!KEEP.contains(name)) {

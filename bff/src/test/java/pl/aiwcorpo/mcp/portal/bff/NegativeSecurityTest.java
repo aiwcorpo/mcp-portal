@@ -25,7 +25,13 @@ import java.util.regex.Pattern;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
 import org.junit.jupiter.api.AfterEach;
+import org.apache.catalina.Context;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.ManagerBase;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.tomcat.TomcatWebServer;
+import org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -62,6 +68,35 @@ class NegativeSecurityTest extends PortalHarness {
     }
 
     // Request id (CC-087)
+
+    @Autowired
+    ServletWebServerApplicationContext webContext;
+
+    private Manager sessionManager() {
+        TomcatWebServer server = (TomcatWebServer) webContext.getWebServer();
+        return ((Context) server.getTomcat().getHost().findChildren()[0]).getManager();
+    }
+
+    @Test
+    void anonymousLoginStartsGetAShortLifetimeAndTheSessionCountIsBounded() throws IOException {
+        ManagerBase manager = (ManagerBase) sessionManager();
+        List<String> sessionCookies = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            TestBrowser anonymous = browser();
+            HttpResponse<String> start = anonymous.get("/api/v1/auth/login?returnPath=/catalog");
+            assertThat(start.statusCode()).isEqualTo(302);
+            sessionCookies.add(anonymous.cookie("__Host-session").orElseThrow());
+        }
+        assertThat(sessionCookies).doesNotHaveDuplicates();
+        for (String id : sessionCookies) {
+            assertThat(manager.findSession(id).getMaxInactiveInterval()).isEqualTo(300);
+        }
+        assertThat(manager.getMaxActiveSessions()).isEqualTo(10000);
+
+        TestBrowser signedIn = login(ALICE, Instant.now());
+        String id = signedIn.cookie("__Host-session").orElseThrow();
+        assertThat(manager.findSession(id).getMaxInactiveInterval()).isEqualTo(1800);
+    }
 
     @Test
     void everyApiResponseCarriesAFreshRequestId() {
