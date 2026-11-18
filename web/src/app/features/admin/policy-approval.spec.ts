@@ -22,6 +22,21 @@ function pendingOf(serverId: string): PendingPolicies {
   };
 }
 
+function longSchemaPending(): PendingPolicies {
+  const pending = pendingOf('mcp-jira');
+  const schema = Array.from({ length: 1600 }, (_, index) => `// ${index}`).join('\n');
+  return {
+    ...pending,
+    approvedResourceTypes: pending.pendingResourceTypes,
+    approvedPolicies: { ...pending.pendingPolicies, schema, files: [] },
+    pendingPolicies: {
+      ...pending.pendingPolicies,
+      schema,
+      files: [{ name: 'all.cedar', text: 'permit (principal, action, resource);' }],
+    },
+  };
+}
+
 describe('diffPolicies', () => {
   it('marks the changed declaration and the added policy file of a changed server', () => {
     const diff = diffPolicies(pendingOf('mcp-jira'));
@@ -90,6 +105,13 @@ describe('diffPolicies', () => {
 
     expect(diff.truncated).toBe(true);
     expect(diff.policies.after.length).toBe(1500);
+  });
+
+  it('reports a change that lies beyond the cut as a change', () => {
+    const diff = diffPolicies(longSchemaPending());
+
+    expect(diff.truncated).toBe(true);
+    expect(diff.policies.changed).toBe(true);
   });
 });
 
@@ -235,6 +257,26 @@ describe('AdminPage: approval of policies', () => {
     button('Approve policies (Notes)').click();
 
     await until(() => expect(text()).toContain('The policies changed since they were opened'));
+  });
+
+  it('does not offer the approval of policies that the cut view does not show in full', async () => {
+    server.use(
+      http.get('/api/v1/admin/registry/servers/mcp-jira/policies/pending', () =>
+        HttpResponse.json(longSchemaPending()),
+      ),
+    );
+    store.update({ mfaFresh: true });
+    await openAdmin();
+    button('Show differences (Jira, policies)').click();
+    await until(() => expect(button('Approve policies (Jira)')).toBeTruthy());
+
+    expect(text()).not.toContain('The policies did not change.');
+    expect(text()).toContain('so it cannot be approved here');
+    // disabledInteractive (app.config): the button stays clickable and says it with aria-disabled.
+    expect(button('Approve policies (Jira)').getAttribute('aria-disabled')).toBe('true');
+    button('Approve policies (Jira)').click();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(writes).toEqual([]);
   });
 
   it('does not offer an approval for a server whose policies are approved', async () => {
