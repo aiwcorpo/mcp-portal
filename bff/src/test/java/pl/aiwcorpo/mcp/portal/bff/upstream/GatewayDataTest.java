@@ -129,6 +129,23 @@ class GatewayDataTest {
     }
 
     @Test
+    void aToolNameOver80CharactersInsideTheContractLimitIsKept() {
+        String tool = "servicedeskproduction01__read_" + "x".repeat(55);
+        assertThat(tool).hasSize(85);
+        JsonNode row = JsonMapper.builder().build().readTree("{\"requestId\":\"0197c3a2-5b7e-7c3a-9d1e-2f4a6b8c0d1e\","
+                + "\"ts\":\"2026-10-31T09:00:00Z\",\"tool\":\"" + tool + "\",\"result\":\"ok\"}");
+        assertThat(GatewayData.validActivityCalls(List.of(row))).singleElement()
+                .satisfies(call -> assertThat(call.tool()).isEqualTo(tool));
+
+        GatewayModel.ConfirmationView view = new GatewayModel.ConfirmationView("cnf_4k9Qe2LxW7tB3mZp", tool,
+                "servicedeskproduction01", null, List.of(), "2026-10-26T20:02:00Z");
+        assertThat(GatewayData.validConfirmation(view, "cnf_4k9Qe2LxW7tB3mZp")).isNotNull();
+        String tooLong = "servicedeskproduction01__read_" + "x".repeat(71);
+        assertThat(GatewayData.validConfirmation(new GatewayModel.ConfirmationView("cnf_4k9Qe2LxW7tB3mZp", tooLong,
+                "servicedeskproduction01", null, List.of(), "2026-10-26T20:02:00Z"), "cnf_4k9Qe2LxW7tB3mZp")).isNull();
+    }
+
+    @Test
     void aRowWrittenBeforeTheUpdateKeepsItsMeaningUnderTheCurrentResultName() {
         var rows = GatewayData.validActivityCalls(List.of(row("", "denied_link_scope"), row("", "denied_filter_scope"),
                 row("", "denied_not_granted")));
