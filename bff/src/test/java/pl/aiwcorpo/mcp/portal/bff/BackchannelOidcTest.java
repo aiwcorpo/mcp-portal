@@ -4,8 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.net.URI;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -30,6 +33,25 @@ class BackchannelOidcTest extends PortalHarness {
         registry.add("portal.oidc.jwk-set-uri", () -> IDP.issuer() + "/jwks");
         registry.add("portal.oidc.user-info-uri", () -> IDP.issuer() + "/userinfo");
         registry.add("portal.oidc.end-session-uri", () -> IDP.issuer() + "/logout");
+    }
+
+    @Test
+    void aCallbackGivesUpOnAStalledTokenEndpointAfterTheReadTimeout() {
+        TestBrowser anonymous = browser();
+        HttpResponse<String> start = anonymous.get("/api/v1/auth/login");
+        String state = FakeIdp.parse(URI.create(start.headers().firstValue("Location").orElseThrow()).getRawQuery()).get("state");
+        IDP.delayTokenEndpoint(30_000);
+        try {
+            HttpRequest.Builder callback = HttpRequest.newBuilder(
+                    anonymous.origin().resolve("/api/v1/auth/callback?code=dummy&state=" + state)).GET().timeout(Duration.ofSeconds(15));
+            long started = System.nanoTime();
+            HttpResponse<String> answer = anonymous.send(callback, Map.of());
+            assertThat(Duration.ofNanos(System.nanoTime() - started)).isLessThan(Duration.ofSeconds(14));
+            assertThat(answer.statusCode()).isEqualTo(302);
+            assertThat(answer.headers().firstValue("Location").orElseThrow()).endsWith("/?loginError=idp_error");
+        } finally {
+            IDP.delayTokenEndpoint(0);
+        }
     }
 
     @Test

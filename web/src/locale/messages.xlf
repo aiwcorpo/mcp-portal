@@ -1815,7 +1815,7 @@
     </unit>
     <unit id="admin.diff.entryName">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:144</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:149</note>
       </notes>
       <segment>
         <source>entry: <ph id="0" equiv="name" disp="quoted(entry.name)"/></source>
@@ -1823,7 +1823,7 @@
     </unit>
     <unit id="admin.diff.defName">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:145</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:150</note>
       </notes>
       <segment>
         <source>name: <ph id="0" equiv="name" disp="quoted(entry.definition.name)"/></source>
@@ -1831,7 +1831,7 @@
     </unit>
     <unit id="admin.diff.title">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:146</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:151</note>
       </notes>
       <segment>
         <source>title: <ph id="0" equiv="title" disp="quoted(entry.definition.title)"/></source>
@@ -1839,7 +1839,7 @@
     </unit>
     <unit id="admin.diff.description">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:147</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:152</note>
       </notes>
       <segment>
         <source>description: <ph id="0" equiv="description" disp="quoted(entry.definition.description)"/></source>
@@ -1847,7 +1847,7 @@
     </unit>
     <unit id="admin.diff.risk">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:150</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:155</note>
       </notes>
       <segment>
         <source>risk: <ph id="0" equiv="label" disp="riskLabel(entry.risk)"/> (<ph id="1" equiv="risk" disp="quoted(entry.risk)"/>)</source>
@@ -1855,7 +1855,7 @@
     </unit>
     <unit id="admin.diff.action">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:151</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:156</note>
       </notes>
       <segment>
         <source>action: <ph id="0" equiv="action" disp="quoted(entry.action)"/></source>
@@ -1863,7 +1863,7 @@
     </unit>
     <unit id="admin.diff.unclassified">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:153</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:158</note>
       </notes>
       <segment>
         <source>risk and action: to be assigned by an administrator</source>
@@ -1871,7 +1871,7 @@
     </unit>
     <unit id="admin.diff.additionalGroup">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:156</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:161</note>
       </notes>
       <segment>
         <source>additional group: <ph id="0" equiv="group" disp="quoted(entry.additionalGroup)"/></source>
@@ -1879,7 +1879,7 @@
     </unit>
     <unit id="admin.diff.resource">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:161</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:166</note>
       </notes>
       <segment>
         <source>resource: argument <ph id="0" equiv="argument" disp="quoted(ref.argument)"/> (<ph id="1" equiv="type" disp="quoted(ref.type)"/>)</source>
@@ -1887,7 +1887,7 @@
     </unit>
     <unit id="admin.diff.schema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:166</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:171</note>
       </notes>
       <segment>
         <source>schema.<ph id="0" equiv="line" disp="line"/></source>
@@ -1895,7 +1895,7 @@
     </unit>
     <unit id="admin.diff.outputSchema">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:171</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:176</note>
       </notes>
       <segment>
         <source>output schema.<ph id="0" equiv="line" disp="line"/></source>
@@ -1903,7 +1903,7 @@
     </unit>
     <unit id="admin.diff.annotations">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:178</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:183</note>
       </notes>
       <segment>
         <source>hints.<ph id="0" equiv="line" disp="line"/></source>
@@ -1911,7 +1911,7 @@
     </unit>
     <unit id="admin.riskRaised">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:262</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:274</note>
       </notes>
       <segment>
         <source>Risk goes up: <ph id="0" equiv="from" disp="from"/> to <ph id="1" equiv="to" disp="to"/>.</source>
@@ -1919,7 +1919,7 @@
     </unit>
     <unit id="admin.riskLowered">
       <notes>
-        <note category="location">src/app/features/admin/definition-diff.ts:263</note>
+        <note category="location">src/app/features/admin/definition-diff.ts:275</note>
       </notes>
       <segment>
         <source>Risk goes down: <ph id="0" equiv="from" disp="from"/> to <ph id="1" equiv="to" disp="to"/>. The gateway does not approve risk lowering.</source>
@@ -4581,9 +4581,17 @@
         <source> A part outside the view changed, so approving needs explicit confirmation. </source>
       </segment>
     </unit>
+    <unit id="admin.diffTruncated">
+      <notes>
+        <note category="location">src/app/features/admin/tool-diff.html:60,62</note>
+      </notes>
+      <segment>
+        <source> A very long definition is cut in this view, so it cannot be approved here: the hash covers all of it. </source>
+      </segment>
+    </unit>
     <unit id="admin.hashInconsistent">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:60,63</note>
+        <note category="location">src/app/features/admin/tool-diff.html:66,69</note>
       </notes>
       <segment>
         <source> The hash given by the server does not match the shown definition: do not approve, report it to the platform administrators. </source>
@@ -4591,7 +4599,7 @@
     </unit>
     <unit id="admin.riskLoweredTitle">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:66,67</note>
+        <note category="location">src/app/features/admin/tool-diff.html:72,73</note>
       </notes>
       <segment>
         <source>Risk lowering.</source>
@@ -4599,7 +4607,7 @@
     </unit>
     <unit id="admin.riskLoweredFromTo">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:69,71</note>
+        <note category="location">src/app/features/admin/tool-diff.html:75,77</note>
       </notes>
       <segment>
         <source>The tool risk drops from <ph id="0" equiv="INTERPOLATION" disp="{{ riskName(v.riskFrom) }}"/> to <ph id="1" equiv="INTERPOLATION_1" disp="{{ riskName(v.riskTo) }}"/>.</source>
@@ -4607,7 +4615,7 @@
     </unit>
     <unit id="admin.riskLoweredFloor">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:74,77</note>
+        <note category="location">src/app/features/admin/tool-diff.html:80,83</note>
       </notes>
       <segment>
         <source>The risk is lower than the highest reported so far (<ph id="0" equiv="INTERPOLATION" disp="{{
@@ -4617,7 +4625,7 @@
     </unit>
     <unit id="admin.riskLoweredUnclassified">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:80,83</note>
+        <note category="location">src/app/features/admin/tool-diff.html:86,89</note>
       </notes>
       <segment>
         <source>The risk is lower than the highest reported so far.</source>
@@ -4625,7 +4633,7 @@
     </unit>
     <unit id="admin.riskLoweredWarning">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:84,87</note>
+        <note category="location">src/app/features/admin/tool-diff.html:90,93</note>
       </notes>
       <segment>
         <source>The tool is hidden from agents until you decide. Approving lowers the effective level, and for a tool that was irreversible, the requirement for a code from the Authenticator goes away. Requires fresh identity confirmation (MFA).</source>
@@ -4633,7 +4641,7 @@
     </unit>
     <unit id="admin.neutralised">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:94,96</note>
+        <note category="location">src/app/features/admin/tool-diff.html:100,102</note>
       </notes>
       <segment>
         <source> Hidden characters in the definition were replaced with [U+XXXX] markers. </source>
@@ -4641,7 +4649,7 @@
     </unit>
     <unit id="admin.beforeNew">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:102,103</note>
+        <note category="location">src/app/features/admin/tool-diff.html:108,109</note>
       </notes>
       <segment>
         <source>Before (none, new tool)</source>
@@ -4649,7 +4657,7 @@
     </unit>
     <unit id="admin.before">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:105,106</note>
+        <note category="location">src/app/features/admin/tool-diff.html:111,112</note>
       </notes>
       <segment>
         <source>Before (<ph id="0" equiv="INTERPOLATION" disp="{{ (v.value.approvedInVersion | safeText) || noVersion }}"/>)</source>
@@ -4657,7 +4665,7 @@
     </unit>
     <unit id="admin.removedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:118,119</note>
+        <note category="location">src/app/features/admin/tool-diff.html:124,125</note>
       </notes>
       <segment>
         <source>Removed: </source>
@@ -4665,7 +4673,7 @@
     </unit>
     <unit id="admin.nothingBefore">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:121,122</note>
+        <note category="location">src/app/features/admin/tool-diff.html:127,128</note>
       </notes>
       <segment>
         <source>No earlier definition.</source>
@@ -4673,7 +4681,7 @@
     </unit>
     <unit id="admin.after">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:127,128</note>
+        <note category="location">src/app/features/admin/tool-diff.html:133,134</note>
       </notes>
       <segment>
         <source>After (<ph id="0" equiv="INTERPOLATION" disp="{{ v.value.pendingVersion | safeText }}"/>)</source>
@@ -4681,7 +4689,7 @@
     </unit>
     <unit id="admin.addedLine">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:139,140</note>
+        <note category="location">src/app/features/admin/tool-diff.html:145,146</note>
       </notes>
       <segment>
         <source>Added: </source>
@@ -4689,7 +4697,7 @@
     </unit>
     <unit id="admin.approveClassify">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:153,154</note>
+        <note category="location">src/app/features/admin/tool-diff.html:159,160</note>
       </notes>
       <segment>
         <source>Classify and approve</source>
@@ -4697,7 +4705,7 @@
     </unit>
     <unit id="admin.approveLowering">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:155,157</note>
+        <note category="location">src/app/features/admin/tool-diff.html:161,163</note>
       </notes>
       <segment>
         <source>Approve risk lowering</source>
@@ -4705,7 +4713,7 @@
     </unit>
     <unit id="admin.approve">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:157,159</note>
+        <note category="location">src/app/features/admin/tool-diff.html:163,165</note>
       </notes>
       <segment>
         <source>Approve definition</source>
@@ -4713,7 +4721,7 @@
     </unit>
     <unit id="admin.approveHint">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.html:162,165</note>
+        <note category="location">src/app/features/admin/tool-diff.html:168,171</note>
       </notes>
       <segment>
         <source> Not approving breaks nothing: the tool stays hidden from agents. </source>
@@ -4729,7 +4737,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.change">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:352</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:355</note>
       </notes>
       <segment>
         <source>from <ph id="0" equiv="from" disp="riskLabel(from)"/> to <ph id="1" equiv="to" disp="target"/></source>
@@ -4737,7 +4745,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.floor">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:353</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:356</note>
       </notes>
       <segment>
         <source>below the highest level reported so far (now <ph id="0" equiv="to" disp="target"/>)</source>
@@ -4745,7 +4753,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:358</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:361</note>
       </notes>
       <segment>
         <source>Approve risk lowering?</source>
@@ -4753,7 +4761,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:359</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:362</note>
       </notes>
       <segment>
         <source>The tool <ph id="0" equiv="tool" disp="name"/> lowers its risk <ph id="1" equiv="change" disp="change"/>. After approval the new level takes effect, and for tools that were irreversible a code from the Authenticator is no longer required. Approve only if the change is intended.</source>
@@ -4761,7 +4769,7 @@
     </unit>
     <unit id="admin.riskLoweringConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:360</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:363</note>
       </notes>
       <segment>
         <source>Approve risk lowering</source>
@@ -4769,7 +4777,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:374</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:377</note>
       </notes>
       <segment>
         <source>Approve a change you cannot see?</source>
@@ -4777,7 +4785,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:375</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:378</note>
       </notes>
       <segment>
         <source>The definition hash is different, but no shown line changed. The change concerns an element outside the view, for example the server credential. Approve only if you know the reason.</source>
@@ -4785,7 +4793,7 @@
     </unit>
     <unit id="admin.hiddenConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:376</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:379</note>
       </notes>
       <segment>
         <source>Approve anyway</source>
@@ -4793,7 +4801,7 @@
     </unit>
     <unit id="admin.serverConfirm.title">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:391</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:394</note>
       </notes>
       <segment>
         <source>Approve a definition reported by the server?</source>
@@ -4801,7 +4809,7 @@
     </unit>
     <unit id="admin.serverConfirm.message">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:392</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:395</note>
       </notes>
       <segment>
         <source>A running server presented the definition of <ph id="0" equiv="tool" disp="name"/>, not the CI pipeline. Nobody reviewed it in code. Approve it only if the description and schema match what you expect.</source>
@@ -4809,7 +4817,7 @@
     </unit>
     <unit id="admin.serverConfirm.confirm">
       <notes>
-        <note category="location">src/app/features/admin/tool-diff.ts:393</note>
+        <note category="location">src/app/features/admin/tool-diff.ts:396</note>
       </notes>
       <segment>
         <source>Approve</source>

@@ -15,9 +15,14 @@ export interface DefinitionDiff {
   after: DiffLine[];
   /** True when any shown text carried a hidden character that was replaced by a [U+XXXX] marker. */
   neutralised: boolean;
-  /** False when no shown line differs; for an approved tool whose hash differs that means the change is outside the view. */
+  /** False when no line differs; for an approved tool whose hash differs that means the change is outside the view. */
   changed: boolean;
+  /** Lines were left out because a side was longer than the limit; such a definition cannot be approved here. */
+  truncated: boolean;
 }
+
+/** Longest side compared and shown: the comparison takes time and memory in the product of both lengths. */
+export const MAX_DEFINITION_LINES = 1500;
 
 /** The pending entry of an adapter tool has no risk and action until an administrator classifies it (CC-193). */
 export type EntryLike = ToolEntry | AdapterToolEntry;
@@ -233,17 +238,24 @@ export function diffDefinitions(approved: ToolEntry | null, pending: EntryLike):
   const before = approved ? describeEntry(approved) : [];
   const after = describeEntry(pending);
   const neutralised = [...before, ...after].some((line) => MARKER.test(line));
-  const pairs = commonLines(before, after);
+  const shownBefore = before.slice(0, MAX_DEFINITION_LINES);
+  const shownAfter = after.slice(0, MAX_DEFINITION_LINES);
+  const pairs = commonLines(shownBefore, shownAfter);
   const keptBefore = new Set(pairs.map(([index]) => index));
   const keptAfter = new Set(pairs.map(([, index]) => index));
   return {
-    before: before.map((text, index) => ({
+    before: shownBefore.map((text, index) => ({
       text,
       mark: keptBefore.has(index) ? 'same' : 'removed',
     })),
-    after: after.map((text, index) => ({ text, mark: keptAfter.has(index) ? 'same' : 'added' })),
+    after: shownAfter.map((text, index) => ({
+      text,
+      mark: keptAfter.has(index) ? 'same' : 'added',
+    })),
     neutralised,
-    changed: keptBefore.size !== before.length || keptAfter.size !== after.length,
+    // Judged on the whole text, not the cut one: a change past the cut is still a change.
+    changed: before.length !== after.length || before.some((line, index) => line !== after[index]),
+    truncated: before.length > MAX_DEFINITION_LINES || after.length > MAX_DEFINITION_LINES,
   };
 }
 
