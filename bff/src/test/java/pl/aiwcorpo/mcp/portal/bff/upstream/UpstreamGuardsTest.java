@@ -71,6 +71,24 @@ class UpstreamGuardsTest {
     }
 
     @Test
+    void hiddenCharactersInCatalogTextAndTheAccountNameAreWrittenOut() {
+        GatewayModel.Catalog catalog = BrokerData.validCatalog(new GatewayModel.Catalog(List.of(
+                new GatewayModel.CatalogServer("mcp-jira", "jira", "1.0.0", List.of(
+                        new GatewayModel.CatalogTool("jira__get_issue", "Read\u200fissue", "READ_ONLY", "read", "granted",
+                                List.of("mcp-jira-read"), "Get\u200dissue", null, null, null),
+                        new GatewayModel.CatalogTool("jira__find_issue", "Find\u202eissue", "READ_ONLY", "read", "granted",
+                                List.of("mcp-jira-read"), null, null, null, null))))));
+        List<GatewayModel.CatalogTool> tools = catalog.servers().getFirst().tools();
+        assertThat(tools.get(0).description()).isEqualTo("Read<U+200F>issue");
+        assertThat(tools.get(0).title()).isEqualTo("Get<U+200D>issue");
+        assertThat(tools.get(1).description()).isEqualTo("Find<U+202E>issue");
+
+        List<BrokerModel.Connection> connections = BrokerData.validConnections(List.of(new BrokerModel.Connection(
+                "jira", "user-secret", "connected", "al\u202eice", true, null, "2026-10-01T08:00:00Z", null)));
+        assertThat(connections.getFirst().backendUser()).isEqualTo("al<U+202E>ice");
+    }
+
+    @Test
     void disabledByIsKeptOnlyForADisabledToolAndOnlyWithAKnownValue() {
         GatewayModel.Catalog catalog = BrokerData.validCatalog(new GatewayModel.Catalog(List.of(
                 new GatewayModel.CatalogServer("mcp-jira", "jira", "1.0.0", List.of(

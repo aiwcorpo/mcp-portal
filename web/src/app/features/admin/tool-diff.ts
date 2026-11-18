@@ -143,7 +143,10 @@ export class ToolDiff {
     return (
       state.status === 'ready' &&
       view !== null &&
-      (state.value.pendingHash === this.refusedHash() || !view.hashConsistent)
+      (state.value.pendingHash === this.refusedHash() ||
+        !view.hashConsistent ||
+        // The hash covers lines the cut view never showed.
+        view.diff.truncated)
     );
   });
 

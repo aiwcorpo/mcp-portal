@@ -75,6 +75,7 @@ public final class FakeIdp implements AutoCloseable {
     private volatile boolean rotateRefreshTokens;
     private volatile boolean refuseNarrowedRefresh;
     private volatile long narrowedRefreshDelayMillis;
+    private volatile long tokenDelayMillis;
     private volatile Integer nextCodeGrantExpiresIn;
     private volatile java.util.concurrent.CountDownLatch plainRefreshGate;
 
@@ -100,6 +101,11 @@ public final class FakeIdp implements AutoCloseable {
     public String userOf(String accessToken) {
         Grant grant = accessTokens.get(accessToken);
         return grant == null ? null : grant.user().username();
+    }
+
+    /** A stalled IdP: every answer of the token endpoint waits this long. */
+    public void delayTokenEndpoint(long millis) {
+        this.tokenDelayMillis = millis;
     }
 
     /** A slow IdP, so that two requests of one session really overlap at the token endpoint. */
@@ -229,6 +235,13 @@ public final class FakeIdp implements AutoCloseable {
 
     private void token(HttpExchange exchange) throws IOException {
         Map<String, String> form = parse(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+        if (tokenDelayMillis > 0) {
+            try {
+                Thread.sleep(tokenDelayMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
         Map<String, String> recorded = new HashMap<>(form);
         recorded.put("_authorization", exchange.getRequestHeaders().getFirst("Authorization"));
         tokenRequests.add(recorded);

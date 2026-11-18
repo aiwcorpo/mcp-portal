@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -62,6 +63,10 @@ class PortalSetupTest {
 
     private String printed() {
         return output.toString(StandardCharsets.UTF_8);
+    }
+
+    private List<String> failures() {
+        return printed().lines().filter(line -> line.startsWith("FAIL")).toList();
     }
 
     @Test
@@ -135,7 +140,7 @@ class PortalSetupTest {
     }
 
     @Test
-    void discoveryThatMatchesTheIssuerPasses() throws Exception {
+    void discoveryOverHttpFailsEvenWhenItMatchesTheIssuer() throws Exception {
         String base = startServer();
         server.createContext(DISCOVERY_PATH, ok(discovery(base + "/realms/mcp")));
         Map<String, String> env = valid(base);
@@ -147,8 +152,11 @@ class PortalSetupTest {
 
         int exit = check(env);
 
-        assertThat(printed()).contains("ok    identity provider " + base + DISCOVERY_PATH);
-        assertThat(exit).isZero();
+        assertThat(printed())
+                .contains("ok    identity provider " + base + DISCOVERY_PATH)
+                .contains("FAIL  PORTAL_OIDC_ISSUER_URI " + base + "/realms/mcp must be an https address")
+                .contains("token_endpoint " + base + "/realms/mcp/token must be an https address");
+        assertThat(exit).isEqualTo(1);
     }
 
     @Test
@@ -236,19 +244,19 @@ class PortalSetupTest {
         env.put("PORTAL_GATEWAY_ADMIN_URL", "https://localhost:1");
         env.put("PORTAL_GATEWAY_ADMIN_TLS_NAME", "localhost");
 
-        int exit = check(env);
+        check(env);
 
         assertThat(printed())
                 .contains("ok    credential broker " + broker)
-                .contains("warn  gateway admin API https://localhost:1: connection refused")
-                .contains("Ready to start.");
-        assertThat(exit).isZero();
+                .contains("warn  gateway admin API https://localhost:1: connection refused");
+        // The identity provider stand-in is plain http, which fails on its own; nothing else may.
+        assertThat(failures()).allMatch(line -> line.contains("must be an https address"));
 
         output.reset();
         env.put("PORTAL_BROKER_TLS_NAME", "mcp-credential-broker.internal");
-        exit = check(env);
+        check(env);
         assertThat(printed()).contains("warn  credential broker " + broker + ": its certificate does not name mcp-credential-broker.internal");
-        assertThat(exit).isZero();
+        assertThat(failures()).allMatch(line -> line.contains("must be an https address"));
     }
 
     @Test

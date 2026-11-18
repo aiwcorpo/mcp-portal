@@ -41,7 +41,8 @@ public final class GatewayData {
     // Closed objects: a field the schema does not know is a contract breach, not something to drop quietly.
     private static final JsonMapper CLOSED = StrictJson.builder()
             .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
-    private static final int MAX_TOOL = 80;
+    // maxLength of QualifiedToolName (C9), which C5 and C12 use for tool; 80 is the limit of a filter entry, not of a name.
+    private static final int MAX_TOOL = 100;
 
     private GatewayData() {
     }
