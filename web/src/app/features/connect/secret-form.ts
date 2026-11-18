@@ -33,7 +33,7 @@ export const USERNAME_MAX_LENGTH = 255;
  * no line or paragraph separators, no invisible fillers. The broker checks it again; this only saves a round trip.
  */
 /* eslint-disable no-misleading-character-class -- the set is the contract's, combining marks included on purpose */
-const USERNAME_PATTERN =
+export const USERNAME_PATTERN =
   /^[^:\p{Cc}\p{Cf}\p{Cs}\u2028\u2029\ufdd0-\ufdef\ufffe\uffff\u034f\u115f\u1160\u3164\uffa0\u2800\ufe00-\ufe0f]+$/u;
 /* eslint-enable no-misleading-character-class */
 
