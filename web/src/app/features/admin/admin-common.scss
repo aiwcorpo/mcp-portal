@@ -109,6 +109,7 @@ fieldset {
 .field select,
 .field input[type='text'],
 .field input[type='password'],
+.field input[type='datetime-local'],
 .field textarea {
   box-sizing: border-box;
   width: 100%;
@@ -122,7 +123,8 @@ fieldset {
 
 .field select,
 .field input[type='text'],
-.field input[type='password'] {
+.field input[type='password'],
+.field input[type='datetime-local'] {
   height: 40px;
 }
 
@@ -278,4 +280,20 @@ fieldset {
     text-align: left;
     white-space: normal;
   }
+}
+
+.key-status {
+  max-width: 34ch;
+  margin-top: 6px;
+}
+
+.key-status.warn {
+  color: var(--pm-warn);
+}
+
+.key-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
 }

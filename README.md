@@ -16,7 +16,7 @@ holds no list of systems, servers or resource types: they come from the gateway 
 
 Who it is for: operators and users of the platform. It is deployed as container images, it is not a library. Installation
 and everyday operation of the whole platform: the `mcp-docs` repository (in preparation); this file covers what is needed to set
-up and maintain the portal itself. Contracts: `mcp-contracts` 7.0.0. Licence: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
+up and maintain the portal itself. Contracts: `mcp-contracts` 7.1.0. Licence: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
 reporting vulnerabilities: [SECURITY.md](SECURITY.md); changes: [CHANGELOG.md](CHANGELOG.md); working on the code:
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -101,14 +101,14 @@ or `PORTAL_TRUSTED_PROXIES` (a regular expression of addresses), otherwise `X-Fo
 ### From source
 
 Linux and macOS with bash 3.2 or newer; Windows only through WSL2. Needed: git, docker, JDK 25 (`JAVA_HOME`
-for `scripts/build-images.sh`), Node 24 and the `mcp-contracts` 7.0.0 artifacts.
+for `scripts/build-images.sh`), Node 24 and the `mcp-contracts` 7.1.0 artifacts.
 
 The contract artifacts come in two ways, and neither needs a file in the git of this repository:
 
 - The BFF reads the `mcp-contracts` and `mcp-manifest` jars from `~/.m2` or from Maven Central.
 - The web part reads the npm package from `web/.contracts/` (outside git), which `web/scripts/contracts.sh` fills: from a
   file (`CONTRACTS_TARBALL`; the release file is in `mcp-contracts/release/`), from an address (`CONTRACTS_TARBALL_URL`,
-  `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v7.0.0`
+  `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v7.1.0`
   (`CONTRACTS_SOURCE_DIR`, runs `npm pack`). After the release to npmjs, moving to the registry is one change in
   `web/package.json`, described in [web/README.md](web/README.md#contracts-package).
 
@@ -153,14 +153,20 @@ in the commit, not what lies in the working directory. It pushes nothing to a re
   refuses its calls. The client secret of a system is write only; it has to be entered again when the base address, the
   authorization or token address, the client identifier or the revoke address changes, and such a change also deletes every
   user's connection to the system (the row in "System connections" then says to connect the account again).
+- **Service account key (CC-251).** A system with the credential type `service-account` shows the state of its key in "Systems"
+  (not set, set with or without an expiry, expired, unknown when the broker cannot read its secret store) with "Set key" or
+  "Replace key" and "Delete key". The key is write only: it goes from the form to the broker in one call and is never shown again, put
+  in a draft, logged or returned; the secret fields are emptied when the form is sent, even when the broker refuses it. A system in
+  the `Basic` scheme takes a login and a password, or one base64 value. Setting and deleting need a fresh MFA (after the return from
+  the IdP the key is typed again). The last save wins and replaces the old key with its expiry. Removing a system deletes its key too.
 - **Scope mapping and overrides (2.0.0).** "Scope mapping" replaces the whole document that maps groups to resource scopes, with
   the ETag it was read with (`If-Match`); the gateway refuses scopes of undeclared types or ids that do not fit the scope pattern
   and the page shows its reason. "Overrides" are single `forbid` Cedar policies for the gateway's decision, for every server or
   for one server; adding one needs no second factor.
 - **Fresh MFA (2.0.0).** The same step-up as for lifting a kill switch is required for adding, changing (except a body that only
-  disables the server) and removing a server, saving the scope mapping, removing an override, approving policies, and saving or
-  removing a system. The form is kept through the trip to the identity provider (never the client secret) and the approval of
-  policies carries itself out afterwards. The gateway and the broker check `auth_time` and the proof of MFA (`acr` or `amr`) of
+  disables the server) and removing a server, saving the scope mapping, removing an override, approving policies, saving or
+  removing a system, and setting or deleting the service account key. The form is kept through the trip to the identity provider
+  (never the client secret or the key) and the approval of policies carries itself out afterwards. The gateway and the broker check `auth_time` and the proof of MFA (`acr` or `amr`) of
   the token again; what the identity provider has to put into the exchanged tokens is in
   [bff/README.md](bff/README.md#fresh-mfa-for-the-administration-operations-identity-provider-settings).
 - **Display names.** An administrator can give a system a display name (1 to 64 characters, no control or invisible characters) in

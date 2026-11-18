@@ -260,7 +260,7 @@ Contracts 4.0.0 (the M4 state; M5 is described below).
 | `RegistryAdminTest` | admin only, views checked against the schema, definition neutralization, C12 examples, approval with audit, `409`, `422`, status mapping |
 | `RateLimitsTest` | per-session limits (window, `Retry-After`, counting only requests that reach the broker), `429` from the broker and gateway |
 
-## M6: kill switch and adapter tool classification (contracts 6.3.2)
+## M6: kill switch and adapter tool classification
 
 - Kill switch (A9, CC-194), group `mcp-platform-admin`: `GET /api/v1/admin/kill-switches` (list checked against the schema, reason
   as untrusted text with hidden characters written out), `PUT` and `DELETE` under `.../registry/servers/{serverId}/kill-switch` and
@@ -309,6 +309,7 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
 | `GET .../policy/overrides`, `GET`, `PUT`, `DELETE .../overrides/{id}` | C5 | `DELETE` and a `PUT` that replaces (`If-Match`); a create (`If-None-Match: *`) needs none, since an override can only forbid (CC-243) |
 | `GET .../registry/servers/{serverId}/policies` (approved), `GET .../policies/pending`, `POST .../policies/approve` | C5 | approve (also needs `Sec-Fetch-Site: same-origin`) |
 | `GET /api/v1/admin/systems`, `GET`, `PUT`, `DELETE .../systems/{system}` | C4 `/v1/admin/systems` | `PUT` and `DELETE` |
+| `GET`, `PUT`, `DELETE .../systems/{system}/service-account-key` | C4 `/v1/admin/systems/{system}/service-account-key` | `PUT` and `DELETE` |
 
 - Fresh MFA is `StepUpPolicy.requireFresh`, the mechanism and window of lifting a kill switch, with `returnPath` from the page that sent
   the request. An upstream `401 step_up_required` (C4 and C5 check `auth_time` of the exchanged token within 300 s on their own) becomes
@@ -334,6 +335,14 @@ operation lists, `412`, `422` with `reason` and a neutralized `message`, `428`; 
   travels in the `PUT` body to the broker and is in no answer, log or audit event; a broker answer with a `clientSecret` field is
   refused by the closed schema. The broker asks for it again when an address changes (`422 system_rejected`, reason
   `client_secret_required`).
+- Service account key (CC-251): write only. `PUT` takes `{value}` or `{username, password}` and an optional `expiresAt` (a UTC
+  timestamp), checked against the schema of C4 before the call (`400` otherwise); the broker decides what depends on the system and
+  the clock (`422 service_account_key_rejected` with the reason `system_not_service_account`, `basic_scheme_required`,
+  `value_not_basic_credential` or `expires_at_in_past`). Last write wins, so there is no `If-Match`. The value, the login and the
+  password are in no answer, log line or audit event of the portal; a broker answer with a field the schema does not list is refused
+  (`503`), and the free text (`message`) of a broker refusal is never forwarded on these three operations, only `error` and `reason`. `GET` returns the status without a fresh
+  MFA; the view of a system carries `serviceAccountKey` (`state`, and `expiresAt` and `expired` only for `set`), which the BFF
+  checks like the rest of the view. Removing a system also removes its key on the broker's side.
 - `whoami` (CC-247): a system of the adapter `generic-rest` may have one, `{path, usernameField}`, which the broker calls to check
   a user secret when it is stored. The BFF checks it with the patterns of the contract (`path` starts with one `/`, no scheme or host,
   no `..`, no query, at most 512 characters; `usernameField` is a field name or an RFC 6901 pointer), as a closed object, and refuses
@@ -426,7 +435,7 @@ src/main/java/pl/aiwcorpo/mcp/portal/bff/
   web/         JSON errors, returnPath, requestId
 ```
 
-## M5: single `/mcp` address (contracts 5.1.0)
+## M5: single `/mcp` address
 
 `GET /api/v1/me/mcp-endpoint?systems=&tools=&access=&exclude=` (CC-175, CC-182) returns a normalized address
 `<PORTAL_PUBLIC_BASE_URL>/mcp[?filter]`, `filter` (when present), `toolCount` and `clientConfigs`. Nothing is stored and nothing
