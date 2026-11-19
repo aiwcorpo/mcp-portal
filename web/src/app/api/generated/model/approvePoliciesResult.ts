@@ -11,6 +11,9 @@ import { ApprovePoliciesResultIgnoredMappingEntriesInner } from './approvePolici
 
 
 export interface ApprovePoliciesResult { 
+    /**
+     * The scopes the approval removed from the stored scope mapping because they no longer fit the approved declarations (CC-252; the name is kept from 7.0.0, when such entries were only skipped). Empty when nothing was removed.
+     */
     ignoredMappingEntries: Array<ApprovePoliciesResultIgnoredMappingEntriesInner>;
 }
 

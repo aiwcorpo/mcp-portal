@@ -2,12 +2,12 @@
 
 Frontend of the MCP platform portal (workstream ws-08): Angular 22.2 (standalone, signals, zoneless), Angular
 Material 22.2, texts through `$localize`. It talks only to the BFF through the C12 API (`/api/v1`, contract
-`portal-bff.v1.yaml` from `mcp-contracts` 7.0.0). The BFF (`../bff`, ws-07) serves the built files from the same origin.
+`portal-bff.v1.yaml` from `mcp-contracts` 7.2.0). The BFF (`../bff`, ws-07) serves the built files from the same origin.
 
 ## Requirements
 
 - Node 24, npm 11.
-- The `@aiwcorpo/mcp-contracts` 7.0.0 package (OpenAPI, MSW handlers, vectors) as a dev dependency. It lives in
+- The `@aiwcorpo/mcp-contracts` 7.2.0 package (OpenAPI, MSW handlers, vectors) as a dev dependency. It lives in
   `web/.contracts/` (git-ignored), where npm reads it from. `scripts/contracts.sh` fills that directory, see
   "Contracts package" below.
 - Java 25, only to regenerate the API client (`npm run generate:api`).
@@ -19,15 +19,15 @@ scripts/contracts.sh && npm ci
 
 ### Contracts package
 
-`package.json` points at a file: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-7.0.0.tgz"`.
+`package.json` points at a file: `"@aiwcorpo/mcp-contracts": "file:.contracts/aiwcorpo-mcp-contracts-7.2.0.tgz"`.
 `.contracts/` is in `.gitignore`, so the repository holds no tarball. `scripts/contracts.sh` puts the package there from the
 first available source: a file already in place (checked against `CONTRACTS_TARBALL_SHA256` when set),
-`CONTRACTS_TARBALL=<file>`, `CONTRACTS_TARBALL_URL=<url>`, `CONTRACTS_SOURCE_DIR=<mcp-contracts checkout at tag v7.0.0>`
+`CONTRACTS_TARBALL=<file>`, `CONTRACTS_TARBALL_URL=<url>`, `CONTRACTS_SOURCE_DIR=<mcp-contracts checkout at tag v7.2.0>`
 (runs `npm pack` there; a package from the same tag has the same bytes) or `CONTRACTS_FROM_NPMJS=1` (`npm pack` of the published
 package from npmjs, no token; set `CONTRACTS_TARBALL_SHA256` to pin the bytes, as the GitHub workflows do). A release file from `mcp-contracts/release/`
 also works as `CONTRACTS_TARBALL`.
 
-Once `mcp-contracts` is published on npmjs, change the entry in `package.json` to `"@aiwcorpo/mcp-contracts": "7.0.0"` and run
+Once `mcp-contracts` is published on npmjs, change the entry in `package.json` to `"@aiwcorpo/mcp-contracts": "7.2.0"` and run
 `npm install`, which updates `package-lock.json` (registry URL and checksum instead of a file). No token or `.npmrc` is
 needed. With such a dependency `scripts/contracts.sh` does nothing.
 

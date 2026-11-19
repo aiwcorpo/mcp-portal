@@ -16,7 +16,7 @@ holds no list of systems, servers or resource types: they come from the gateway 
 
 Who it is for: operators and users of the platform. It is deployed as container images, it is not a library. Installation
 and everyday operation of the whole platform: the `mcp-docs` repository (in preparation); this file covers what is needed to set
-up and maintain the portal itself. Contracts: `mcp-contracts` 7.1.0. Licence: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
+up and maintain the portal itself. Contracts: `mcp-contracts` 7.2.0. Licence: Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE));
 reporting vulnerabilities: [SECURITY.md](SECURITY.md); changes: [CHANGELOG.md](CHANGELOG.md); working on the code:
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -101,14 +101,14 @@ or `PORTAL_TRUSTED_PROXIES` (a regular expression of addresses), otherwise `X-Fo
 ### From source
 
 Linux and macOS with bash 3.2 or newer; Windows only through WSL2. Needed: git, docker, JDK 25 (`JAVA_HOME`
-for `scripts/build-images.sh`), Node 24 and the `mcp-contracts` 7.1.0 artifacts.
+for `scripts/build-images.sh`), Node 24 and the `mcp-contracts` 7.2.0 artifacts.
 
 The contract artifacts come in two ways, and neither needs a file in the git of this repository:
 
 - The BFF reads the `mcp-contracts` and `mcp-manifest` jars from `~/.m2` or from Maven Central.
 - The web part reads the npm package from `web/.contracts/` (outside git), which `web/scripts/contracts.sh` fills: from a
   file (`CONTRACTS_TARBALL`; the release file is in `mcp-contracts/release/`), from an address (`CONTRACTS_TARBALL_URL`,
-  `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v7.1.0`
+  `CONTRACTS_TARBALL_SHA256` checks the sum), from npmjs (`CONTRACTS_FROM_NPMJS=1`, no token) or from a local checkout of `mcp-contracts` at the tag `v7.2.0`
   (`CONTRACTS_SOURCE_DIR`, runs `npm pack`). After the release to npmjs, moving to the registry is one change in
   `web/package.json`, described in [web/README.md](web/README.md#contracts-package).
 
