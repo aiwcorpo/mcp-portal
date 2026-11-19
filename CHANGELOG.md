@@ -2,7 +2,10 @@
 
 Versions follow SemVer, newest first. Test images built before the first release are tagged `m<milestone>-<sha>`.
 
-## Unreleased
+## 2.2.0 - 2026-11-19
+
+Built on `mcp-contracts` 7.2.0. The image now runs as uid and gid 10001: read the upgrade steps in the first entry before pulling it.
+The release also carries the contract updates of 7.2.0 (the 429 of a secret write, the removed scope mapping entries of an approval).
 
 - Breaking for Compose installs: the image runs as uid 10001 and gid 10001 (`portal`). The Dockerfile of 2.0.1 left the ids to
   the base image, which gives uid 100 and gid 101. Outside the `dev` profile the BFF refuses to start when

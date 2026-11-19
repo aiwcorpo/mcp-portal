@@ -4,12 +4,12 @@ Backend of the MCP portal (workstream ws-07): OIDC login and server-side session
 and aggregation of C5 (gateway admin), C4 (credential broker) and C13 (IGA). The browser never receives tokens or
 secrets. The BFF also serves the built Angular frontend (`../web`) from the same origin.
 
-Stack: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Contracts: `mcp-contracts` 7.0.0 (the `mcp-contracts`, `mcp-manifest` and `test-vectors` jars, from `~/.m2` or from Maven Central).
+Stack: Java 25, Spring Boot 4.1.0 (Spring Security 7.1), Maven wrapper. Contracts: `mcp-contracts` 7.2.0 (the `mcp-contracts`, `mcp-manifest` and `test-vectors` jars, from `~/.m2` or from Maven Central).
 Image: `Dockerfile` in the repository root (targets `bff`, `web`, `portal`), `scripts/build-images.sh`; described in [../README.md](../README.md).
 
 ## Running locally
 
-Requires JDK 25 and `mcp-contracts` 7.0.0 in `~/.m2` or in the registry. Open `bff/` in IntelliJ as a Maven project and start
+Requires JDK 25 and `mcp-contracts` 7.2.0 in `~/.m2` or in the registry. Open `bff/` in IntelliJ as a Maven project and start
 the shared run configuration `LocalPortal` (`bff/.run/`): the BFF on http://localhost:18720 with profile `dev`. It runs
 `LocalPortalApplication` from the test sources, which also starts the WireMock stubs of C4 (credential broker, :18721) and C5
 (gateway admin, :18722) from the `mcp-contracts` jar and a stub on :18723 that serves only the OIDC discovery document. From the

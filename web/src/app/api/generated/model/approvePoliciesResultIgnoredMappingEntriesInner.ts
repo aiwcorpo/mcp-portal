@@ -13,7 +13,7 @@ export interface ApprovePoliciesResultIgnoredMappingEntriesInner {
     group: string;
     scope: string;
     /**
-     * undeclared_type, invalid_scope, group_missing or group_duplicate.
+     * undeclared_type or invalid_scope (group_missing and group_duplicate are not caused by an approval and do not occur here).
      */
     reason: string;
 }

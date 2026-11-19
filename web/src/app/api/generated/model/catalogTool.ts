@@ -39,7 +39,7 @@ export interface CatalogTool {
     disabled?: boolean;
     disabledBy?: DisabledBy;
     /**
-     * True when every call needs a confirmation (C11), risk DESTRUCTIVE or a policy requires it. Computed by the gateway (CC-081).
+     * True when every call needs a confirmation (C11): risk UPDATE or DESTRUCTIVE (CC-257). Computed by the gateway (CC-081).
      */
     requiresConfirmation?: boolean;
 }
